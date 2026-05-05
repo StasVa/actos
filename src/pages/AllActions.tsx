@@ -11,6 +11,7 @@ import {
   statusColorVar,
 } from "@/lib/actionsData";
 import { formatTime } from "@/lib/format";
+import { FilterDropdown, FilterOption } from "@/components/FilterDropdown";
 
 /* ===== Sidebar ===== */
 const NAV: { label: string; href: string }[] = [

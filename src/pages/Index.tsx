@@ -159,7 +159,10 @@ const MeasureBar: React.FC<{
   color: string;
   opacity?: number;
 }> = ({ label, percentage, color, opacity = 1 }) => (
-  <div className="grid grid-cols-[60px_minmax(0,1fr)_36px] items-center gap-2 min-w-0">
+  <div
+    className="grid w-full min-w-0 items-center gap-2"
+    style={{ gridTemplateColumns: "60px minmax(0, 1fr) 36px" }}
+  >
     <div className="w-[60px] shrink-0 whitespace-nowrap font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary leading-none">
       {label}
     </div>

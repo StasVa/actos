@@ -633,18 +633,7 @@ const Ideas: React.FC = () => {
                 </FilterGroup>
               </div>
             </div>
-            {/* Search */}
-            <div style={{ padding: "0 16px 16px 32px" }}>
-              <div className="flex items-center gap-2 bg-surface-raised border border-border-subtle rounded-[4px] px-3 py-2 w-full">
-                <span className="text-[12px] text-text-tertiary">⌕</span>
-                <input
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search ideas..."
-                  className="flex-1 bg-transparent outline-none text-[13px] text-text-primary placeholder:text-text-tertiary"
-                />
-              </div>
-            </div>
+            {/* Search removed — global ⌘K palette handles search. */}
             {/* Capture input */}
             <div className="pl-8 pr-4 pb-3 border-b border-border-subtle shrink-0">
               <CaptureInput defaultGoalTitle={defaultGoal?.title} />

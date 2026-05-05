@@ -659,6 +659,42 @@ export const useStore = create<StoreState>()(
         }
       },
 
+      startDayPlan: ({
+        date,
+        dayType,
+        mainTaskActionId,
+        morningEnergyScore,
+        morningIntentNote,
+        plannedActionIds,
+        plannedRitualIds,
+        skippedRitualIds,
+      }) => {
+        const state = get();
+        const existing = state.dayEntries.find((d) => d.date === date);
+        const at = nowISO();
+        const next: DayEntry = {
+          ...(existing ?? { date }),
+          dayType,
+          mainTaskActionId,
+          morningEnergyScore,
+          morningIntentNote,
+          plannedActionIds,
+          plannedRitualIds,
+          skippedRitualIds,
+          isPlanned: true,
+          startedAt: existing?.startedAt ?? at,
+        };
+        set({
+          dayEntries: existing
+            ? state.dayEntries.map((d) => (d.date === date ? next : d))
+            : [...state.dayEntries, next],
+        });
+        // Persist skip decisions to ritual completion history.
+        for (const rid of skippedRitualIds) {
+          state.skipRitualInstance(rid, date);
+        }
+      },
+
       closeDay: (date, eveningEnergyScore, reflectionText) => {
         const at = nowISO();
         const state = get();
@@ -666,15 +702,22 @@ export const useStore = create<StoreState>()(
         if (existing) {
           set({
             dayEntries: state.dayEntries.map((d) =>
-              d.date === date ? { ...d, eveningEnergyScore, reflectionText, closedAt: at } : d,
+              d.date === date
+                ? { ...d, eveningEnergyScore, reflectionText, closedAt: at, isClosed: true }
+                : d,
             ),
           });
         } else {
           set({
-            dayEntries: [...state.dayEntries, { date, eveningEnergyScore, reflectionText, closedAt: at }],
+            dayEntries: [
+              ...state.dayEntries,
+              { date, eveningEnergyScore, reflectionText, closedAt: at, isClosed: true },
+            ],
           });
         }
       },
+
+      getDayEntry: (date) => get().dayEntries.find((d) => d.date === date),
 
       // ───────── Settings ─────────
       toggleLayer: (layerName, enabled) => {

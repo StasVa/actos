@@ -49,10 +49,42 @@ export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
     if (
       confirm("Reset everything to seed data? This wipes all your changes.")
     ) {
-      localStorage.removeItem("actos-store");
+      localStorage.removeItem(STORAGE_KEY);
       resetToSeed();
       toast.success("Reset to seed data");
       onOpenChange(false);
+    }
+  };
+
+  const handleExport = () => {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const payload = raw ? JSON.parse(raw) : { state: useStore.getState() };
+    const stamp = new Date().toISOString().slice(0, 10);
+    downloadJSON(`actos-backup-${stamp}.json`, payload);
+    toast.success("Backup downloaded");
+  };
+
+  const fileRef = React.useRef<HTMLInputElement>(null);
+  const handleImportPick = () => fileRef.current?.click();
+  const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (!confirm(`Import "${file.name}"? This replaces all current data.`)) return;
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      // Accept either a raw zustand-persist envelope { state, version } or a bare state object.
+      const envelope = parsed?.state ? parsed : { state: parsed, version: 0 };
+      if (!envelope.state || typeof envelope.state !== "object") {
+        throw new Error("Missing state field");
+      }
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(envelope));
+      toast.success("Import complete — reloading…");
+      setTimeout(() => window.location.reload(), 600);
+    } catch (err) {
+      console.error(err);
+      toast.error("Import failed — invalid JSON");
     }
   };
 

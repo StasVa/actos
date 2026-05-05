@@ -69,6 +69,157 @@ const ActionRow: React.FC<{ a: Action; color: string }> = ({ a, color }) => {
   );
 };
 
+const uid = () =>
+  typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID()
+    : `ref-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+
+const ReferencesSection: React.FC<{
+  project: Project;
+  onAdd: (r: ProjectReference) => void;
+  onRemove: (id: string) => void;
+  onUpdate: (id: string, partial: Partial<ProjectReference>) => void;
+}> = ({ project, onAdd, onRemove, onUpdate }) => {
+  const [adding, setAdding] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [url, setUrl] = useState("");
+  const [title, setTitle] = useState("");
+
+  const startAdd = () => {
+    setEditingId(null);
+    setUrl("");
+    setTitle("");
+    setAdding(true);
+  };
+
+  const startEdit = (r: ProjectReference) => {
+    setAdding(false);
+    setUrl(r.url);
+    setTitle(r.title ?? "");
+    setEditingId(r.id);
+  };
+
+  const cancel = () => {
+    setAdding(false);
+    setEditingId(null);
+    setUrl("");
+    setTitle("");
+  };
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const u = url.trim();
+    if (!u) return;
+    if (editingId) {
+      onUpdate(editingId, { url: u, title: title.trim() || undefined });
+    } else {
+      onAdd({ id: uid(), url: u, title: title.trim() || undefined });
+    }
+    cancel();
+  };
+
+  const formOpen = adding || editingId !== null;
+
+  return (
+    <section>
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
+          REFERENCES · {project.references.length}
+        </h2>
+        {!formOpen && (
+          <button
+            type="button"
+            onClick={startAdd}
+            className="text-[12px] text-accent hover:text-accent-hover"
+          >
+            + Add reference
+          </button>
+        )}
+      </div>
+
+      {formOpen && (
+        <form
+          onSubmit={submit}
+          className="mb-3 bg-surface-raised border border-border-subtle rounded-[6px] p-3 flex flex-col gap-2"
+        >
+          <input
+            autoFocus
+            type="url"
+            placeholder="https://..."
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            required
+            className="bg-surface-base border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-accent"
+          />
+          <input
+            type="text"
+            placeholder="Title (optional)"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="bg-surface-base border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-accent"
+          />
+          <div className="flex items-center gap-2 justify-end">
+            <button
+              type="button"
+              onClick={cancel}
+              className="text-[12px] text-text-tertiary hover:text-text-secondary px-2 py-1"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="text-[12px] bg-accent hover:bg-accent-hover text-white px-3 py-1 rounded-[4px]"
+            >
+              {editingId ? "Save" : "Add"}
+            </button>
+          </div>
+        </form>
+      )}
+
+      {project.references.length === 0 && !formOpen ? (
+        <div className="text-[13px] text-text-tertiary">
+          No references yet. Click + Add reference to add docs, links, materials.
+        </div>
+      ) : (
+        <div className="flex flex-col">
+          {project.references.map((r) => (
+            <div
+              key={r.id}
+              className="group flex items-start gap-2 px-2 py-2 rounded-[4px] hover:bg-surface-hover transition-colors"
+            >
+              <span className="text-text-tertiary text-[12px] mt-0.5 shrink-0">↗</span>
+              <a
+                href={r.url}
+                target="_blank"
+                rel="noreferrer"
+                className="flex-1 min-w-0"
+              >
+                <div className="text-[13px] text-text-primary hover:text-accent truncate">
+                  {r.title || r.url}
+                </div>
+                {r.title && (
+                  <div className="font-mono text-[11px] text-text-tertiary truncate">
+                    {r.url}
+                  </div>
+                )}
+              </a>
+              <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                <CardMenu
+                  ariaLabel="Reference menu"
+                  items={[
+                    { label: "Edit", onSelect: () => startEdit(r) },
+                    { label: "Remove", destructive: true, onSelect: () => onRemove(r.id) },
+                  ]}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+};
+
 const ProjectDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const project = useStore((s) => s.projects.find((p) => p.id === id));

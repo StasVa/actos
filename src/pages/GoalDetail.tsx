@@ -310,72 +310,6 @@ const RecentActivity: React.FC = () => (
   </section>
 );
 
-/* ===== Heatmap ===== */
-const generateHeatmap = (): number[][] => {
-  // 26 weeks x 7 days. 0 = empty, 1-4 = intensity
-  const weeks: number[][] = [];
-  for (let w = 0; w < 26; w++) {
-    const week: number[] = [];
-    for (let d = 0; d < 7; d++) {
-      const isWeekend = d === 0 || d === 6;
-      const buildFactor = w / 26; // increases over time
-      const r = Math.random();
-      if (isWeekend) {
-        week.push(r < 0.15 + buildFactor * 0.2 ? Math.ceil(Math.random() * 2) : 0);
-      } else {
-        const active = r < 0.3 + buildFactor * 0.5;
-        if (!active) week.push(0);
-        else {
-          const lvl = Math.min(4, Math.ceil(Math.random() * 3 + buildFactor * 1.5));
-          week.push(lvl);
-        }
-      }
-    }
-    weeks.push(week);
-  }
-  return weeks;
-};
-
-const HEATMAP = generateHeatmap();
-const OPACITY: Record<number, number> = { 1: 0.3, 2: 0.55, 3: 0.8, 4: 1 };
-
-const HeatCell: React.FC<{ v: number }> = ({ v }) => {
-  if (v === 0) {
-    return <span className="w-3 h-3 bg-surface-raised border border-border-subtle" />;
-  }
-  return <span className="w-3 h-3" style={{ background: G1, opacity: OPACITY[v] }} />;
-};
-
-const Heatmap: React.FC = () => (
-  <section>
-    <SectionHeader meta="8 ACTIVE WEEKS · 3 QUIET WEEKS">Activity · All time</SectionHeader>
-    <div className="overflow-x-auto">
-      <div className="flex gap-[3px]">
-        {HEATMAP.map((week, wi) => (
-          <div key={wi} className="flex flex-col gap-[3px]">
-            {week.map((v, di) => (
-              <HeatCell key={di} v={v} />
-            ))}
-          </div>
-        ))}
-      </div>
-    </div>
-    <div className="mt-3 flex items-center justify-between font-mono text-[11px] text-text-tertiary">
-      <div className="flex items-center gap-2">
-        <span>Less</span>
-        {[1, 2, 3, 4].map((l) => (
-          <span key={l} className="w-3 h-3" style={{ background: G1, opacity: OPACITY[l] }} />
-        ))}
-        <span>More</span>
-      </div>
-      <div className="flex items-center gap-1.5">
-        <span className="w-2 h-2 rounded-full" style={{ background: G1 }} />
-        <span>Launch YouTube channel</span>
-      </div>
-    </div>
-  </section>
-);
-
 /* ===== Ideas (collapsible) ===== */
 const IDEAS = [
   "Series on creator tooling comparisons",
@@ -476,8 +410,6 @@ const GoalDetail: React.FC = () => {
           <div className="h-14" />
           <RecentActivity />
 
-          <div className="h-14" />
-          <Heatmap />
 
           <div className="h-14" />
           <IdeasSection />

@@ -356,6 +356,7 @@ const ActionDetail: React.FC<{ action: Action }> = ({ action }) => {
           ···
         </button>
       </div>
+      </div>
     </div>
   );
 };

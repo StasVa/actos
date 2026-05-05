@@ -287,11 +287,11 @@ const FrequencyChart: React.FC<{ data: number[]; max: number; color: string; uni
   return (
     <div className="w-full flex items-end gap-[3px]" style={{ height: 44 }}>
       {data.map((v, i) => {
-        const weeksFromNow = data.length - 1 - i;
+        const stepsFromNow = data.length - 1 - i;
         const h = max === 0 ? 0 : Math.round((v / max) * 44);
         const tip = (
           <div className="text-[12px] text-text-primary" style={{ fontFamily: "Inter, sans-serif" }}>
-            {weekLabel(weeksFromNow)} ·{" "}
+            {unit === "month" ? monthLabel(stepsFromNow) : weekLabel(stepsFromNow)} ·{" "}
             <span className="font-mono text-text-secondary">
               {v === 0 ? "No completions" : `${v} done`}
             </span>

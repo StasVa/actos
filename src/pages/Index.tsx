@@ -175,8 +175,17 @@ const GoalColumn: React.FC<{
     </div>
 
     <div className="font-mono text-[11px] text-text-secondary leading-relaxed">{recent}</div>
-  </div>
-);
+    </div>
+  );
+  if (href) {
+    return (
+      <Link to={href} className="block cursor-pointer">
+        {inner}
+      </Link>
+    );
+  }
+  return inner;
+};
 
 const PlaceholderSlot: React.FC = () => (
   <div className="px-6 first:pl-0 last:pr-0">

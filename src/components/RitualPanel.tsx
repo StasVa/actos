@@ -70,14 +70,17 @@ const RitualPanel: React.FC<Props> = ({ open, onClose, mode = "edit" }) => {
     if (open) {
       setMounted(true);
       // Next frame, trigger transition
-      const id = window.requestAnimationFrame(() => setVisible(true));
+      const id = window.requestAnimationFrame(() => {
+        setVisible(true);
+        if (isNew) titleRef.current?.focus();
+      });
       return () => window.cancelAnimationFrame(id);
     } else if (mounted) {
       setVisible(false);
       const t = window.setTimeout(() => setMounted(false), 220);
       return () => window.clearTimeout(t);
     }
-  }, [open, mounted]);
+  }, [open, mounted, isNew]);
 
   // Escape key
   useEffect(() => {

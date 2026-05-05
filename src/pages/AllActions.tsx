@@ -406,6 +406,18 @@ const StatusPill: React.FC<{ status: ActionStatus }> = ({ status }) => (
 );
 
 const ActionDetail: React.FC<{ action: Action }> = ({ action }) => {
+  const openPanel = useStore((s) => s.openPanel);
+  const changeActionStatus = useStore((s) => s.changeActionStatus);
+  const handleEdit = () =>
+    openPanel({ kind: "action", mode: "edit", id: action.id });
+  const handleMarkDone = () => {
+    changeActionStatus(action.id, "done");
+    toast.success("Action completed");
+  };
+  const handleReopen = () => {
+    changeActionStatus(action.id, "planned");
+    toast.success("Action re-opened");
+  };
   const goal = GOALS[action.goal];
   const isOverdue =
     action.status === "delegated" &&

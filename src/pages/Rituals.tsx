@@ -283,7 +283,7 @@ const MonthlyConsistency: React.FC<{ data: number[]; color: string }> = ({ data,
   );
 };
 
-const FrequencyChart: React.FC<{ data: number[]; max: number; color: string }> = ({ data, max, color }) => {
+const FrequencyChart: React.FC<{ data: number[]; max: number; color: string; unit?: "week" | "month" }> = ({ data, max, color, unit = "week" }) => {
   return (
     <div className="w-full flex items-end gap-[3px]" style={{ height: 44 }}>
       {data.map((v, i) => {

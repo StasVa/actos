@@ -574,8 +574,16 @@ const AllActions: React.FC = () => {
   const [dateFilter, setDateFilter] = useState<DateFilter>("all");
   const [sortKey, setSortKey] = useState<SortKey>("recent");
   const [query, setQuery] = useState("");
-  const [selectedId, setSelectedId] = useState<string>("a-research-thumb");
   const [terminalCollapsed, setTerminalCollapsed] = useState(false);
+
+  // Live store data → legacy renderer shape (rendering JSX is unchanged).
+  const storeActions = useStore((s) => s.actions);
+  const storeProjects = useStore((s) => s.projects);
+  const openPanel = useStore((s) => s.openPanel);
+  const ACTIONS = useMemo(
+    () => toLegacyActions(storeActions, storeProjects),
+    [storeActions, storeProjects],
+  );
 
   const filtered = useMemo(() => {
     return ACTIONS.filter((a) => {
@@ -588,7 +596,7 @@ const AllActions: React.FC = () => {
       if (query.trim() && !a.title.toLowerCase().includes(query.trim().toLowerCase())) return false;
       return true;
     });
-  }, [statusFilter, goalFilter, dateFilter, query]);
+  }, [ACTIONS, statusFilter, goalFilter, dateFilter, query]);
 
   const meta = useMemo(() => {
     const total = ACTIONS.length;
@@ -596,7 +604,7 @@ const AllActions: React.FC = () => {
     const done = ACTIONS.filter((a) => a.status === "done").length;
     const delegated = ACTIONS.filter((a) => a.status === "delegated").length;
     return `${total} ACTIONS · ${active} ACTIVE · ${done} DONE · ${delegated} DELEGATED`;
-  }, []);
+  }, [ACTIONS]);
 
   const sortFn = useMemo(() => {
     return (a: Action, b: Action) => {

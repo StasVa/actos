@@ -144,6 +144,10 @@ const GoalCard: React.FC<{ m: GoalMeta; logTimeOn: boolean }> = ({ m, logTimeOn 
   const showTime = logTimeOn && time.hasData;
   const showCriteria = criteria.total > 0;
 
+  const isReadyToClose = !archived && progress >= 75;
+  const isFullyReady =
+    !archived && progress >= 100 && projects.active === 0 && projects.closed > 0;
+
   const projectsValue = (() => {
     const parts = [`${projects.active} active`, `${projects.closed} closed`];
     if (projects.dropped > 0) parts.push(`${projects.dropped} dropped`);

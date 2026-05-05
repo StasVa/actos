@@ -414,6 +414,39 @@ const AllProjects: React.FC = () => {
   const [sortKey, setSortKey] = useState<SortKey>("recent");
   const [archivedCollapsed, setArchivedCollapsed] = useState(false);
 
+  const storeProjects = useStore((s) => s.projects);
+  const storeGoals = useStore((s) => s.goals);
+  const openPanel = useStore((s) => s.openPanel);
+
+  // Bridge static visual project rows to real store records by title.
+  const handleOpenProject = (p: Project) => {
+    const match = storeProjects.find(
+      (sp) => sp.title.toLowerCase() === p.title.toLowerCase(),
+    );
+    if (match) {
+      openPanel({ kind: "project", mode: "edit", id: match.id });
+    } else {
+      // Fallback: open new with the title prefilled.
+      openPanel({
+        kind: "project",
+        mode: "new",
+        prefill: { title: p.title, goalId: storeGoals[0]?.id },
+      });
+    }
+  };
+
+  const handleNewProject = () => {
+    openPanel({
+      kind: "project",
+      mode: "new",
+      prefill: { goalId: storeGoals.find((g) => g.status === "active")?.id },
+    });
+  };
+
+  const handleNewGoal = () => {
+    openPanel({ kind: "goal", mode: "new" });
+  };
+
   const counts = useMemo(() => {
     const total = PROJECTS.length;
     const active = PROJECTS.filter((p) => p.state === "active").length;

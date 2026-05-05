@@ -7,6 +7,7 @@ const G1 = "hsl(var(--goal-1))";
 type Props = {
   open: boolean;
   onClose: () => void;
+  mode?: "edit" | "new";
 };
 
 const SCHEDULE_OPTIONS = ["Daily", "Weekdays", "Weekly", "Custom"] as const;

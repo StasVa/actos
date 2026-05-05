@@ -162,12 +162,8 @@ const RITUALS: RitualRow[] = [
     pendingToday: false,
     notDueToday: true,
     lastDoneLabel: "Apr 1",
-    consistency: (() => {
-      const arr = new Array(90).fill(0);
-      arr[55] = 1; // Apr 1 = ~35 days ago, position 90-35 = 55 from oldest
-      return arr;
-    })(),
-    frequency: [0,0,0,0,0,0,0,0,0,1,1,1],
+    consistency: new Array(30).fill(0),
+    frequency: [1,0,0,1,0,0,0,1,0,0,0,0],
     freqMax: 1,
   },
 ];

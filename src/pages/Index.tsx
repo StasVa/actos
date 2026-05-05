@@ -1235,10 +1235,38 @@ const UtilityRow: React.FC = () => (
 /* ===== Page ===== */
 const Index: React.FC = () => {
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [planOpen, setPlanOpen] = useState(false);
+  const [closeOpen, setCloseOpen] = useState(false);
+  const [combinedOpen, setCombinedOpen] = useState(false);
+
+  const settings = useStore((s) => s.settings);
+  const todayEntry = useStore((s) => s.dayEntries.find((d) => d.date === TODAY_ISO));
+  const yesterdayEntry = useStore((s) => s.dayEntries.find((d) => d.date === YESTERDAY_ISO));
+
+  // Auto-open Plan or Combined modal once per day on first visit.
+  useEffect(() => {
+    if (!settings.layers.planAndReview) return;
+    const flagKey = `actos-day-prompt-${TODAY_ISO}`;
+    if (sessionStorage.getItem(flagKey)) return;
+    if (todayEntry?.isPlanned) return;
+    sessionStorage.setItem(flagKey, "1");
+    // Combined modal if yesterday started but not closed.
+    if (yesterdayEntry && !yesterdayEntry.isClosed && (yesterdayEntry.isPlanned || yesterdayEntry.startedAt)) {
+      setCombinedOpen(true);
+    } else {
+      setPlanOpen(true);
+    }
+    // Run only on initial mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div className="min-h-screen bg-surface-base text-text-primary">
       <Sidebar onOpenSettings={() => setSettingsOpen(true)} />
       <SettingsPanel open={settingsOpen} onOpenChange={setSettingsOpen} />
+      <PlanTodayModal open={planOpen} onClose={() => setPlanOpen(false)} />
+      <CloseDayModal open={closeOpen} onClose={() => setCloseOpen(false)} />
+      <ClosePlanModal open={combinedOpen} onClose={() => setCombinedOpen(false)} />
       <main className="ml-[220px] px-8 py-6">
         <header className="mb-6">
           <h1 className="text-[20px] font-medium text-text-primary">Tuesday, May 5</h1>
@@ -1252,10 +1280,10 @@ const Index: React.FC = () => {
         <div className="h-8 border-b border-border-subtle" />
 
         <div className="h-8" />
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6">
-          <Today />
-          <DayStartPanel />
-        </div>
+        <Today
+          onPlanClick={() => setPlanOpen(true)}
+          onCloseClick={() => setCloseOpen(true)}
+        />
 
         <div className="my-6 border-t border-border-subtle" />
         <HeavyLift />

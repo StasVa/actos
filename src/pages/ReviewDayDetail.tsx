@@ -194,15 +194,27 @@ const ReviewDayDetail: React.FC = () => {
     })
     .sort((a, b) => a.at.localeCompare(b.at));
 
-  // Time per goal
+  // Time per goal (with per-project breakdown)
   const perGoal = goals
     .filter((g) => g.status === "active")
     .map((g) => {
-      const min = doneToday
-        .filter((a) => a.goalId === g.id)
-        .reduce((s, a) => s + (a.timeEstimateMinutes ?? 0), 0);
-      return { g, min };
-    });
+      const goalDone = doneToday.filter((a) => a.goalId === g.id);
+      const min = goalDone.reduce((s, a) => s + (a.timeEstimateMinutes ?? 0), 0);
+      // Aggregate by project (skip null projectId — those are goal-level backlog).
+      const byProject = new Map<string, number>();
+      for (const a of goalDone) {
+        if (!a.projectId) continue;
+        const t = a.timeEstimateMinutes ?? 0;
+        if (t <= 0) continue;
+        byProject.set(a.projectId, (byProject.get(a.projectId) ?? 0) + t);
+      }
+      const projectRows = Array.from(byProject.entries())
+        .map(([pid, m]) => ({ project: projects.find((p) => p.id === pid), min: m }))
+        .filter((row) => !!row.project)
+        .sort((a, b) => b.min - a.min) as { project: Project; min: number }[];
+      return { g, min, projectRows };
+    })
+    .sort((a, b) => b.min - a.min);
   const totalMin = perGoal.reduce((s, x) => s + x.min, 0);
   const yMax = Math.max(1, ...perGoal.map((x) => x.min));
 

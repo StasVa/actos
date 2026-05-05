@@ -33,8 +33,8 @@ const App = () => (
         <CommandPalette />
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/goals/launch-youtube-channel" element={<GoalDetail />} />
-          <Route path="/projects/shoot-video-1" element={<ProjectDetail />} />
+          <Route path="/goals/:id" element={<GoalDetail />} />
+          <Route path="/projects/:id" element={<ProjectDetail />} />
           <Route path="/ideas" element={<Ideas />} />
           <Route path="/rituals" element={<Rituals />} />
           <Route path="/all-actions" element={<AllActions />} />

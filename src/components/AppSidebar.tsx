@@ -1,6 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { LifetimeCounters } from "@/components/LifetimeCounters";
+import { emitAppEvent } from "@/lib/appEvents";
 
 type NavItem = { label: string; href: string };
 
@@ -70,6 +71,7 @@ const Divider: React.FC = () => (
 
 export const AppSidebar: React.FC<{ onOpenSettings?: () => void }> = ({ onOpenSettings }) => {
   const { pathname } = useLocation();
+  const handleSettings = onOpenSettings ?? (() => emitAppEvent("open-settings"));
   return (
     <aside className="fixed left-0 top-0 bottom-0 w-[220px] bg-surface-raised border-r border-border-subtle p-4 flex flex-col">
       <Link to="/today" className="px-1 py-1 text-[17px] font-semibold text-text-primary tracking-tight">
@@ -85,16 +87,24 @@ export const AppSidebar: React.FC<{ onOpenSettings?: () => void }> = ({ onOpenSe
 
       <div className="flex-1" />
 
-      {onOpenSettings && (
-        <button
-          type="button"
-          onClick={onOpenSettings}
-          className="text-left px-2.5 py-1.5 rounded-[4px] text-[13px] text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-colors mb-2"
-        >
-          Settings
-        </button>
-      )}
-      <div className="font-mono text-[11px] text-text-tertiary px-1">⌘K  Quick add</div>
+      <button
+        type="button"
+        onClick={handleSettings}
+        className="text-left px-2.5 py-1.5 rounded-[4px] text-[13px] text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-colors mb-2"
+      >
+        Settings
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          // Dispatch a synthetic ⌘K so the global palette opens.
+          const ev = new KeyboardEvent("keydown", { key: "k", metaKey: true, bubbles: true });
+          document.dispatchEvent(ev);
+        }}
+        className="text-left font-mono text-[11px] text-text-tertiary px-1 hover:text-text-primary transition-colors"
+      >
+        ⌘K  Search
+      </button>
       <div className="font-mono text-[11px] text-text-tertiary px-1">?   Shortcuts</div>
       <div className="mt-4 font-mono text-[11px] text-text-secondary px-1 leading-[1.7]">
         <LifetimeCounters />

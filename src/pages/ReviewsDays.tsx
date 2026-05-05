@@ -264,13 +264,7 @@ const ReviewsDays: React.FC = () => {
           <FilterDD label="Date range" value={range} onChange={setRange} options={RANGE_OPTIONS.map(({ value, label }) => ({ value, label }))} />
         </div>
 
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search reflections or notes..."
-          className="w-full max-w-[720px] bg-surface-hover rounded-[4px] px-3 py-2 text-[13px] text-text-primary outline-none border border-transparent focus:border-border-default placeholder:text-text-tertiary"
-        />
+        {/* Search removed — global ⌘K palette handles search. */}
 
         <div className="h-6" />
         <div className="border-t border-border-subtle" />

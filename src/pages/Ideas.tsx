@@ -5,6 +5,7 @@ import type { Idea, IdeaStatus, ID } from "@/types";
 import { toast } from "sonner";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { AppSidebar } from "@/components/AppSidebar";
+import { subscribeAppEvent } from "@/lib/appEvents";
 
  function relativeAgo(iso: string): { label: string; full: string; sort: number } {
   const d = new Date(iso);
@@ -103,6 +104,7 @@ const CaptureInput: React.FC<{ subHint?: string; defaultGoalTitle?: string }> = 
           +
         </span>
         <input
+          id="ideas-capture-input"
           value={value}
           onChange={(e) => setValue(e.target.value)}
           onFocus={() => setFocused(true)}
@@ -525,7 +527,16 @@ const Ideas: React.FC = () => {
     initialGoalParam && goals.some((g) => g.id === initialGoalParam) ? initialGoalParam : "all",
   );
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("captured");
-  const [query, setQuery] = useState("");
+
+  // Focus the inline capture input when triggered from the ⌘K palette.
+  useEffect(() => {
+    return subscribeAppEvent("focus-idea-capture", () => {
+      requestAnimationFrame(() => {
+        const el = document.getElementById("ideas-capture-input") as HTMLInputElement | null;
+        el?.focus();
+      });
+    });
+  }, []);
 
   const matchesStatus = (s: IdeaStatus): boolean => {
     if (statusFilter === "captured") return s === "captured";
@@ -538,12 +549,10 @@ const Ideas: React.FC = () => {
       .filter((i) => {
         if (goalFilter !== "all" && i.goalId !== goalFilter) return false;
         if (!matchesStatus(i.status)) return false;
-        if (query.trim() && !i.title.toLowerCase().includes(query.trim().toLowerCase()))
-          return false;
         return true;
       })
       .sort((a, b) => new Date(b.capturedAt).getTime() - new Date(a.capturedAt).getTime());
-  }, [ideas, goalFilter, statusFilter, query]);
+  }, [ideas, goalFilter, statusFilter]);
 
   const selected =
     filtered.find((i) => i.id === selectedIdeaId) ?? filtered[0] ?? null;
@@ -565,7 +574,6 @@ const Ideas: React.FC = () => {
   const clearFilters = () => {
     setGoalFilter("all");
     setStatusFilter("captured");
-    setQuery("");
   };
 
   return (
@@ -625,18 +633,7 @@ const Ideas: React.FC = () => {
                 </FilterGroup>
               </div>
             </div>
-            {/* Search */}
-            <div style={{ padding: "0 16px 16px 32px" }}>
-              <div className="flex items-center gap-2 bg-surface-raised border border-border-subtle rounded-[4px] px-3 py-2 w-full">
-                <span className="text-[12px] text-text-tertiary">⌕</span>
-                <input
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search ideas..."
-                  className="flex-1 bg-transparent outline-none text-[13px] text-text-primary placeholder:text-text-tertiary"
-                />
-              </div>
-            </div>
+            {/* Search removed — global ⌘K palette handles search. */}
             {/* Capture input */}
             <div className="pl-8 pr-4 pb-3 border-b border-border-subtle shrink-0">
               <CaptureInput defaultGoalTitle={defaultGoal?.title} />

@@ -109,7 +109,7 @@ export function KeyboardShortcuts() {
         </DialogHeader>
         <div className="mt-2 space-y-4 text-[13px] text-text-secondary">
           <Section title="GLOBAL">
-            <Row keys={["⌘", "K"]} label="Quick add / command palette" />
+            <Row keys={["⌘", "K"]} label="Search / command palette" />
             <Row keys={["?"]} label="Toggle this help" />
             <Row keys={["n"]} label="New action" />
             <Row keys={["Esc"]} label="Close panels & overlays" />

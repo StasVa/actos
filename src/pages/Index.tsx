@@ -12,6 +12,7 @@ import { ConfirmModal } from "@/components/ConfirmModal";
 import { PlanTodayModal, CloseDayModal, ClosePlanModal } from "@/components/PlanCloseModals";
 import { ActionRow as SharedActionRow } from "@/components/ActionRow";
 import { toast } from "sonner";
+import { subscribeAppEvent } from "@/lib/appEvents";
 
 export const TODAY_ISO = new Date().toISOString().slice(0, 10);
 export const YESTERDAY_ISO = (() => {
@@ -1269,6 +1270,16 @@ const Index: React.FC = () => {
       setPlanOpen(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Listen for global Command Palette events (open Plan/Close/Settings).
+  useEffect(() => {
+    const unsubs = [
+      subscribeAppEvent("open-plan-today", () => setPlanOpen(true)),
+      subscribeAppEvent("open-close-day", () => setCloseOpen(true)),
+      subscribeAppEvent("open-settings", () => setSettingsOpen(true)),
+    ];
+    return () => unsubs.forEach((u) => u());
   }, []);
 
   const isPlanned = !!todayEntry?.isPlanned;

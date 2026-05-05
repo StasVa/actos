@@ -23,6 +23,7 @@ import { GoalEditor } from "./components/GoalEditor";
 import { RitualEditor } from "./components/RitualEditor";
 import { CommandPalette } from "./components/CommandPalette";
 import { KeyboardShortcuts } from "./components/KeyboardShortcuts";
+import { GlobalSettingsHost } from "./components/GlobalSettingsHost";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +36,7 @@ const App = () => (
       <ProjectEditor />
       <GoalEditor />
       <RitualEditor />
+      <GlobalSettingsHost />
       <BrowserRouter>
         <CommandPalette />
         <KeyboardShortcuts />

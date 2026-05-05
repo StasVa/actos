@@ -532,18 +532,7 @@ const AllDelegated: React.FC = () => {
             />
           </div>
 
-          {/* Search */}
-          <div className="mt-3 max-w-[720px]">
-            <div className="flex items-center gap-2 bg-surface-raised border border-border-subtle rounded-[4px] px-3 py-2 w-full">
-              <span className="text-[12px] text-text-tertiary">⌕</span>
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search delegations..."
-                className="flex-1 bg-transparent outline-none text-[13px] text-text-primary placeholder:text-text-tertiary"
-              />
-            </div>
-          </div>
+          {/* Search removed — global ⌘K palette handles search. */}
         </div>
 
         <div className="border-t border-border-subtle" />

@@ -232,17 +232,6 @@ const GoalColumn: React.FC<{
   return inner;
 };
 
-const PlaceholderSlot: React.FC = () => (
-  <div className="px-6 first:pl-0 last:pr-0">
-    <div className="group h-full p-2 cursor-pointer">
-      <div className="h-full min-h-[280px] rounded-[6px] border border-dashed border-border-default group-hover:border-solid group-hover:border-accent flex flex-col items-center justify-center transition-colors">
-        <div className="text-[13px] text-text-secondary group-hover:text-text-primary transition-colors">+ Add goal</div>
-        <div className="mt-1 font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">2 of 3 active</div>
-      </div>
-    </div>
-  </div>
-);
-
 const SPARK_1_TIPS = buildYouTubeTooltips(SPARK_1);
 const SPARK_2_TIPS = buildFitnessTooltips(SPARK_2);
 const SPARK_3_TIPS = buildReadingTooltips(SPARK_3);

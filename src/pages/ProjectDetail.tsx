@@ -142,9 +142,13 @@ const ProjectDetail: React.FC = () => {
   const updateProject = useStore((s) => s.updateProject);
   const markComplete = useStore((s) => s.markProjectComplete);
   const dropProject = useStore((s) => s.dropProject);
-  const progress = useStore((s) =>
-    project ? selectors.projectProgress(s, project.id) : { outcome: 0, effort: 0 },
+  const progressOutcome = useStore((s) =>
+    project ? selectors.projectProgress(s, project.id).outcome : 0,
   );
+  const progressEffort = useStore((s) =>
+    project ? selectors.projectProgress(s, project.id).effort : 0,
+  );
+  const progress = { outcome: progressOutcome, effort: progressEffort };
   const stateInd = useStore((s) =>
     project ? selectors.stateIndicator(s, "project", project.id) : "active",
   );

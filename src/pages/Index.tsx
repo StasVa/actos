@@ -357,7 +357,7 @@ const Hero: React.FC = () => {
           .slice(0, 3)
           .map((a) => a.title);
 
-        const spark = SPARKS_BY_GOAL_COLOR[g.color] ?? { data: SPARK_3, tips: SPARK_3_TIPS };
+        const spark = buildSparkFromActions(goalActions, 30);
 
         return (
           <GoalColumn

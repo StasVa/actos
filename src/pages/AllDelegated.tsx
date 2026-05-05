@@ -150,36 +150,88 @@ const DelegationRow: React.FC<{ action: Action; selected: boolean; onSelect: () 
 }) => {
   const goal = GOALS[action.goal];
   const ret = returnLabelFor(action);
+  const overdueDays =
+    action.expectedReturnDelta !== undefined && action.expectedReturnDelta < 0
+      ? Math.abs(action.expectedReturnDelta)
+      : 0;
+  // Right side label for top row
+  let topRight: React.ReactNode = null;
+  if (overdueDays > 0) {
+    topRight = (
+      <span
+        className="font-mono uppercase tracking-[0.06em]"
+        style={{ fontSize: 10, color: "hsl(var(--text-warning))" }}
+      >
+        {overdueDays}d OVERDUE
+      </span>
+    );
+  } else if (ret) {
+    topRight = (
+      <span
+        className="font-mono uppercase tracking-[0.06em] text-text-secondary bg-surface-hover"
+        style={{ fontSize: 10, padding: "2px 6px", borderRadius: 2 }}
+      >
+        {ret.text}
+      </span>
+    );
+  }
+
+  const bottomBits: React.ReactNode[] = [
+    <span key="goal">{goal.short}</span>,
+    <span key="proj">{action.project}</span>,
+    <span key="del">→ {(action.delegate ?? "").toUpperCase()}</span>,
+  ];
+  if (action.impact) bottomBits.push(<span key="imp">I{action.impact}</span>);
+  if (action.timeMinutes) bottomBits.push(<span key="time">{formatTime(action.timeMinutes)}</span>);
+
   return (
     <div
       onClick={onSelect}
-      className={`relative flex items-center gap-2 h-8 px-3 cursor-pointer border-b border-border-subtle transition-colors ${
+      className={`relative flex items-stretch cursor-pointer border-b border-border-subtle transition-colors ${
         selected ? "bg-surface-elevated" : "hover:bg-surface-hover"
       }`}
+      style={{ minHeight: 56 }}
     >
       <span
         className="absolute left-0 top-0 bottom-0"
-        style={{ background: selected ? "hsl(var(--accent))" : goal.color, width: selected ? 2 : 3 }}
-      />
-      <span
-        className="ml-1 inline-block rounded-[2px] border shrink-0"
         style={{
-          width: 14,
-          height: 14,
-          borderColor: "hsl(var(--text-tertiary))",
+          background: selected ? "hsl(var(--accent))" : goal.color,
+          width: selected ? 2 : 3,
         }}
       />
-      <span className="text-[13px] font-medium text-text-primary truncate">{action.title}</span>
-      <span className="font-mono text-[11px] text-text-tertiary shrink-0">→ {action.delegate}</span>
-      <div className="flex-1" />
-      {ret && (
-        <span
-          className="font-mono text-[11px] tabular-nums shrink-0"
-          style={{ color: ret.color }}
-        >
-          {ret.text}
-        </span>
-      )}
+      <div
+        className="flex flex-col gap-1 py-3 pr-4 w-full"
+        style={{ paddingLeft: 16 + (selected ? 2 : 3) }}
+      >
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <span
+              className="inline-block rounded-[2px] border shrink-0"
+              style={{
+                width: 16,
+                height: 16,
+                borderColor: "hsl(var(--text-tertiary))",
+              }}
+            />
+            <span className="text-[14px] font-medium text-text-primary truncate">
+              {action.title}
+            </span>
+          </div>
+          <div className="shrink-0">{topRight}</div>
+        </div>
+        <div className="flex items-center font-mono text-[11px] text-text-tertiary tabular-nums">
+          <span
+            className="inline-block w-1.5 h-1.5 rounded-full mr-1.5 shrink-0"
+            style={{ background: goal.color }}
+          />
+          {bottomBits.map((b, i) => (
+            <React.Fragment key={i}>
+              {i > 0 && <span className="mx-1.5">·</span>}
+              {b}
+            </React.Fragment>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };
@@ -249,23 +301,23 @@ const DelegationDetail: React.FC<{ action: Action }> = ({ action }) => {
         </span>
       </div>
 
-      <div className="h-2" />
+      <div className="h-3" />
       <StatusPill status={action.status} />
 
-      <div className="h-3" />
+      <div className="h-4" />
       <h1 className="text-[22px] font-medium text-text-primary leading-tight">{action.title}</h1>
 
-      <div className="h-6" />
-      <div className="font-mono text-[12px] text-text-tertiary tabular-nums">
+      <div className="h-8" />
+      <div className="font-mono text-[13px] text-text-tertiary tabular-nums">
         IMPACT {action.impact} · {formatTime(action.timeMinutes)} · CREATED{" "}
         {action.createdLabel.toUpperCase()}
       </div>
 
-      <div className="h-6" />
+      <div className="h-8" />
       <div className="font-mono text-[11px] uppercase tracking-[0.08em] text-text-secondary">
         DELEGATION
       </div>
-      <div className="h-2" />
+      <div className="h-3" />
       <div className="border-t border-border-subtle">
         <InfoRow label="DELEGATE">{action.delegate}</InfoRow>
         <InfoRow label="EXPECTED RETURN">
@@ -307,28 +359,14 @@ const DelegationDetail: React.FC<{ action: Action }> = ({ action }) => {
 
       {action.notes && (
         <>
-          <div className="h-6" />
+          <div className="h-8" />
           <div className="font-mono text-[11px] uppercase tracking-[0.08em] text-text-secondary">
             NOTES
           </div>
-          <div className="h-2" />
+          <div className="h-3" />
           <p className="text-[14px] text-text-primary leading-[1.6]">{action.notes}</p>
         </>
       )}
-
-      <div className="h-6" />
-      <div className="font-mono text-[11px] uppercase tracking-[0.08em] text-text-secondary">
-        TIMELINE
-      </div>
-      <div className="h-2" />
-      <div className="flex flex-col gap-1">
-        {action.timeline.map((t, i) => (
-          <div key={i} className="font-mono text-[12px] text-text-secondary tabular-nums">
-            {t.date} — {t.text}
-          </div>
-        ))}
-        <div className="font-mono text-[12px] text-text-tertiary">—</div>
-      </div>
 
       <div className="h-12" />
       <div className="flex items-center justify-between">
@@ -440,78 +478,22 @@ const AllDelegated: React.FC = () => {
             </div>
           </div>
           <div className="h-3" />
+          {/* Filter row 1: RETURN + search */}
           <div className="flex items-center justify-between gap-4 flex-wrap">
-            <div className="flex items-center gap-6 flex-wrap">
-              <FilterGroup label="RETURN">
-                <Chip active={dateFilter === "all"} onClick={() => setDateFilter("all")}>
-                  All
-                </Chip>
-                <Chip
-                  active={dateFilter === "overdue"}
-                  onClick={() => setDateFilter("overdue")}
-                >
-                  Overdue
-                </Chip>
-                <Chip
-                  active={dateFilter === "upcoming"}
-                  onClick={() => setDateFilter("upcoming")}
-                >
-                  Upcoming
-                </Chip>
-                <Chip
-                  active={dateFilter === "nodate"}
-                  onClick={() => setDateFilter("nodate")}
-                >
-                  No date
-                </Chip>
-              </FilterGroup>
-              <FilterGroup label="DELEGATE">
-                <Chip
-                  active={delegateFilter === "all"}
-                  onClick={() => setDelegateFilter("all")}
-                >
-                  All
-                </Chip>
-                <Chip
-                  active={delegateFilter === "Maria"}
-                  onClick={() => setDelegateFilter("Maria")}
-                >
-                  Maria
-                </Chip>
-                <Chip
-                  active={delegateFilter === "AI"}
-                  onClick={() => setDelegateFilter("AI")}
-                >
-                  AI
-                </Chip>
-              </FilterGroup>
-              <FilterGroup label="GOAL">
-                <Chip active={goalFilter === "all"} onClick={() => setGoalFilter("all")}>
-                  All
-                </Chip>
-                <Chip
-                  active={goalFilter === "g1"}
-                  onClick={() => setGoalFilter("g1")}
-                  dot={GOALS.g1.color}
-                >
-                  Launch YouTube
-                </Chip>
-                <Chip
-                  active={goalFilter === "g2"}
-                  onClick={() => setGoalFilter("g2")}
-                  dot={GOALS.g2.color}
-                >
-                  Lose 5 kg
-                </Chip>
-                <Chip
-                  active={goalFilter === "g3"}
-                  onClick={() => setGoalFilter("g3")}
-                  dot={GOALS.g3.color}
-                >
-                  Read 24 books
-                </Chip>
-              </FilterGroup>
-            </div>
+            <FilterGroup label="RETURN">
+              <Chip active={dateFilter === "all"} onClick={() => setDateFilter("all")}>
+                All
+              </Chip>
+              <Chip active={dateFilter === "overdue"} onClick={() => setDateFilter("overdue")}>
+                Overdue
+              </Chip>
+              <Chip active={dateFilter === "upcoming"} onClick={() => setDateFilter("upcoming")}>
+                Upcoming
+              </Chip>
+              <Chip active={dateFilter === "nodate"} onClick={() => setDateFilter("nodate")}>
+                No date
+              </Chip>
+            </FilterGroup>
             <div className="flex items-center gap-2 bg-surface-raised border border-border-subtle rounded-[4px] px-2.5 py-1.5 w-[240px]">
               <span className="text-[12px] text-text-tertiary">⌕</span>
               <input
@@ -521,6 +503,50 @@ const AllDelegated: React.FC = () => {
                 className="flex-1 bg-transparent outline-none text-[13px] text-text-primary placeholder:text-text-tertiary"
               />
             </div>
+          </div>
+          <div className="h-2" />
+          {/* Filter row 2: GOAL + DELEGATE */}
+          <div className="flex items-center gap-8 flex-wrap">
+            <FilterGroup label="GOAL">
+              <Chip active={goalFilter === "all"} onClick={() => setGoalFilter("all")}>
+                All
+              </Chip>
+              <Chip
+                active={goalFilter === "g1"}
+                onClick={() => setGoalFilter("g1")}
+                dot={GOALS.g1.color}
+              >
+                Launch YouTube
+              </Chip>
+              <Chip
+                active={goalFilter === "g2"}
+                onClick={() => setGoalFilter("g2")}
+                dot={GOALS.g2.color}
+              >
+                Lose 5 kg
+              </Chip>
+              <Chip
+                active={goalFilter === "g3"}
+                onClick={() => setGoalFilter("g3")}
+                dot={GOALS.g3.color}
+              >
+                Read 24 books
+              </Chip>
+            </FilterGroup>
+            <FilterGroup label="DELEGATE">
+              <Chip active={delegateFilter === "all"} onClick={() => setDelegateFilter("all")}>
+                All
+              </Chip>
+              <Chip
+                active={delegateFilter === "Maria"}
+                onClick={() => setDelegateFilter("Maria")}
+              >
+                Maria
+              </Chip>
+              <Chip active={delegateFilter === "AI"} onClick={() => setDelegateFilter("AI")}>
+                AI
+              </Chip>
+            </FilterGroup>
           </div>
         </div>
 

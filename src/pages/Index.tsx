@@ -12,6 +12,7 @@ import { ConfirmModal } from "@/components/ConfirmModal";
 import { PlanTodayModal, CloseDayModal, ClosePlanModal } from "@/components/PlanCloseModals";
 import { ActionRow as SharedActionRow } from "@/components/ActionRow";
 import { toast } from "sonner";
+import { subscribeAppEvent } from "@/lib/appEvents";
 
 export const TODAY_ISO = new Date().toISOString().slice(0, 10);
 export const YESTERDAY_ISO = (() => {

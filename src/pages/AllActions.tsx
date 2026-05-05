@@ -501,7 +501,7 @@ const AllActions: React.FC = () => {
     <div className="min-h-screen bg-surface-base text-text-primary">
       <Sidebar />
       <main className="ml-[220px] flex flex-col h-screen">
-        {/* Header */}
+        {/* Page header */}
         <div className="px-8 py-6 border-b border-border-subtle shrink-0">
           <div className="flex items-baseline justify-between">
             <h1 className="text-[24px] font-medium text-text-primary">All actions</h1>
@@ -509,63 +509,68 @@ const AllActions: React.FC = () => {
               {meta}
             </div>
           </div>
-          <div className="h-4" />
-          {/* Filters row */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <FilterDropdown
-              label="STATUS"
-              value={statusFilter}
-              defaultValue="all"
-              options={STATUS_OPTIONS}
-              onChange={(v) => setStatusFilter(v)}
-            />
-            <FilterDropdown
-              label="GOAL"
-              value={goalFilter}
-              defaultValue="all"
-              options={GOAL_OPTIONS}
-              onChange={(v) => setGoalFilter(v)}
-            />
-            <FilterDropdown
-              label="DATE"
-              value={dateFilter}
-              defaultValue="all"
-              options={DATE_OPTIONS}
-              onChange={(v) => setDateFilter(v)}
-            />
-            <FilterDropdown
-              label="SORT"
-              value={sortKey}
-              defaultValue="recent"
-              options={SORT_OPTIONS}
-              onChange={(v) => setSortKey(v)}
-            />
-            {anyApplied && (
-              <button
-                onClick={clearFilters}
-                className="ml-auto text-[12px] text-text-tertiary hover:text-text-secondary transition-colors"
-              >
-                Clear filters
-              </button>
-            )}
-          </div>
-          <div className="h-4" />
-          {/* Search row */}
-          <div className="flex items-center gap-2 bg-surface-raised border border-border-subtle rounded-[4px] px-3 py-2 max-w-[480px]">
-            <span className="text-[12px] text-text-tertiary">⌕</span>
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search actions..."
-              className="flex-1 bg-transparent outline-none text-[13px] text-text-primary placeholder:text-text-tertiary"
-            />
-          </div>
         </div>
 
         {/* Body */}
         <div className="flex-1 flex min-h-0">
           {/* Left column */}
           <div className="w-[42%] border-r border-border-subtle flex flex-col min-h-0">
+            {/* Filter dropdowns */}
+            <div style={{ padding: "16px 16px 12px 16px" }}>
+              <div className="flex items-center gap-2 flex-wrap">
+                <FilterDropdown
+                  label="STATUS"
+                  value={statusFilter}
+                  defaultValue="all"
+                  options={STATUS_OPTIONS}
+                  onChange={(v) => setStatusFilter(v)}
+                />
+                <FilterDropdown
+                  label="GOAL"
+                  value={goalFilter}
+                  defaultValue="all"
+                  options={GOAL_OPTIONS}
+                  onChange={(v) => setGoalFilter(v)}
+                />
+                <FilterDropdown
+                  label="DATE"
+                  value={dateFilter}
+                  defaultValue="all"
+                  options={DATE_OPTIONS}
+                  onChange={(v) => setDateFilter(v)}
+                />
+              </div>
+            </div>
+            {/* Search */}
+            <div style={{ padding: "0 16px 16px 16px" }}>
+              <div className="flex items-center gap-2 bg-surface-raised border border-border-subtle rounded-[4px] px-3 py-2 w-full">
+                <span className="text-[12px] text-text-tertiary">⌕</span>
+                <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search actions..."
+                  className="flex-1 bg-transparent outline-none text-[13px] text-text-primary placeholder:text-text-tertiary"
+                />
+              </div>
+            </div>
+            {/* Sort + clear row */}
+            <div className="flex items-center justify-between px-4 pb-2">
+              {anyApplied ? (
+                <button
+                  onClick={clearFilters}
+                  className="text-[12px] text-text-tertiary hover:text-text-secondary transition-colors"
+                >
+                  Clear filters
+                </button>
+              ) : (
+                <span />
+              )}
+              <SortDropdown
+                value={sortKey}
+                options={SORT_OPTIONS}
+                onChange={(v) => setSortKey(v)}
+              />
+            </div>
             <div className="flex-1 overflow-y-auto">
               {filtered.length === 0 ? (
                 <div className="p-8 text-center font-mono text-[11px] text-text-tertiary">

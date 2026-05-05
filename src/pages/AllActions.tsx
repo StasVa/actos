@@ -221,12 +221,12 @@ const ActionRow: React.FC<{ action: Action; selected: boolean; onSelect: () => v
   const goal = GOALS[action.goal];
   const isTerminal = !isActive(action.status);
   const bottomBits: React.ReactNode[] = [];
-  bottomBits.push(<span key="goal">{goal.short}</span>);
+  bottomBits.push(<span key="goal">{goal.name}</span>);
   bottomBits.push(<span key="proj">{action.project}</span>);
-  if (action.impact) bottomBits.push(<span key="imp">I{action.impact}</span>);
-  if (action.timeMinutes) bottomBits.push(<span key="time">{formatTime(action.timeMinutes)}</span>);
+  if (action.impact) bottomBits.push(<span key="imp" className="tabular-nums">I{action.impact}</span>);
+  if (action.timeMinutes) bottomBits.push(<span key="time" className="tabular-nums">{formatTime(action.timeMinutes)}</span>);
   if (action.status === "delegated" && action.delegate)
-    bottomBits.push(<span key="del">→ {action.delegate.toUpperCase()}</span>);
+    bottomBits.push(<span key="del">→ {action.delegate}</span>);
 
   return (
     <div
@@ -263,7 +263,7 @@ const ActionRow: React.FC<{ action: Action; selected: boolean; onSelect: () => v
               {action.status === "done" ? "✓" : ""}
             </span>
             <span
-              className={`text-[14px] font-medium truncate ${
+              className={`text-[15px] font-medium truncate ${
                 isTerminal ? "text-text-secondary line-through" : "text-text-primary"
               }`}
             >
@@ -274,7 +274,7 @@ const ActionRow: React.FC<{ action: Action; selected: boolean; onSelect: () => v
             {action.status === "planned" && action.scheduledLabel && (
               <span
                 className="font-mono uppercase tracking-[0.06em] text-text-secondary bg-surface-hover"
-                style={{ fontSize: 10, padding: "2px 6px", borderRadius: 2 }}
+                style={{ fontSize: 11, padding: "2px 8px", borderRadius: 2 }}
               >
                 {action.scheduledLabel}
               </span>
@@ -282,7 +282,7 @@ const ActionRow: React.FC<{ action: Action; selected: boolean; onSelect: () => v
             {action.status === "done" && (
               <span
                 className="font-mono"
-                style={{ color: "hsl(var(--status-done))", fontSize: 12 }}
+                style={{ color: "hsl(var(--state-active))", fontSize: 12 }}
               >
                 ✓
               </span>
@@ -290,17 +290,23 @@ const ActionRow: React.FC<{ action: Action; selected: boolean; onSelect: () => v
           </div>
         </div>
         {/* Bottom row */}
-        <div className="flex items-center font-mono text-[11px] text-text-tertiary tabular-nums">
+        <div
+          className={`flex items-center font-mono text-[12px] tabular-nums truncate ${
+            isTerminal ? "text-text-tertiary" : "text-text-secondary"
+          }`}
+        >
           <span
             className="inline-block w-1.5 h-1.5 rounded-full mr-1.5 shrink-0"
             style={{ background: goal.color }}
           />
-          {bottomBits.map((b, i) => (
-            <React.Fragment key={i}>
-              {i > 0 && <span className="mx-1.5">·</span>}
-              {b}
-            </React.Fragment>
-          ))}
+          <span className="truncate">
+            {bottomBits.map((b, i) => (
+              <React.Fragment key={i}>
+                {i > 0 && <span className="mx-1.5 text-text-tertiary">·</span>}
+                {b}
+              </React.Fragment>
+            ))}
+          </span>
         </div>
       </div>
     </div>

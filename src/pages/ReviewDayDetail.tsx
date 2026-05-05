@@ -7,6 +7,7 @@ import { useStore } from "@/store/useStore";
 import { formatHM } from "@/lib/timeStats";
 import type { Action, Goal, Project, Ritual } from "@/types";
 import { DAY_TYPE_LABELS } from "./Index";
+import { ActionRow as SharedActionRow } from "@/components/ActionRow";
 
 const longDate = (iso: string) =>
   new Date(iso + "T00:00:00").toLocaleDateString("en-US", {
@@ -40,24 +41,20 @@ const ActionLine: React.FC<{
   parent: string;
   showTime: boolean;
   onClick: () => void;
-}> = ({ a, icon, iconClass = "text-text-tertiary", goalColor, parent, showTime, onClick }) => (
-  <button
-    type="button"
-    onClick={onClick}
-    className="w-full flex items-center gap-2.5 py-1.5 px-2 -mx-2 rounded-[4px] hover:bg-surface-hover transition-colors text-left"
-  >
-    <span className={`font-mono text-[12px] ${iconClass}`}>{icon}</span>
-    <span className="w-2 h-2 rounded-full shrink-0" style={{ background: goalColor }} />
-    <span className="text-[13px] text-text-primary truncate">{a.title}</span>
-    {parent && <span className="font-mono text-[11px] text-text-tertiary truncate">· {parent}</span>}
-    <div className="flex-1" />
-    {showTime && a.timeEstimateMinutes != null && a.timeEstimateMinutes > 0 && (
-      <span className="font-mono text-[11px] text-text-tertiary tabular-nums">
-        {formatHM(a.timeEstimateMinutes)}
-      </span>
-    )}
-  </button>
-);
+}> = ({ a, icon, onClick }) => {
+  // Sub-group icon ("✓" Done, "○" Skipped, "·" Not completed) determines visual state.
+  const isDone = icon === "✓";
+  const isSkipped = icon === "○";
+  return (
+    <SharedActionRow
+      action={a}
+      onClick={onClick}
+      hideCheckbox
+      terminal={isDone || isSkipped}
+      rightPill={isDone ? { kind: "done" } : null}
+    />
+  );
+};
 
 const RitualLine: React.FC<{ r: Ritual; icon: string; iconClass?: string; goalColor: string; mult: number }> = ({
   r,

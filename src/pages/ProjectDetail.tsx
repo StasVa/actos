@@ -4,6 +4,7 @@ import { Tooltip, StateDotTooltip } from "@/components/Tooltip";
 import { useStore, selectors } from "@/store/useStore";
 import type { Action, ActionStatus, GoalColorVar, Project } from "@/types";
 import { AppSidebar } from "@/components/AppSidebar";
+import { ActionRow as SharedActionRow } from "@/components/ActionRow";
 
 const COLOR_VAR: Record<GoalColorVar, string> = {
   "goal-1": "hsl(var(--goal-1))",
@@ -55,39 +56,14 @@ const ActionRow: React.FC<{ a: Action; color: string }> = ({ a, color }) => {
   const openPanel = useStore((s) => s.openPanel);
   const changeStatus = useStore((s) => s.changeActionStatus);
   return (
-    <div className="group flex items-center gap-3 h-9 px-3 border-b border-border-subtle hover:bg-surface-hover transition-colors">
-      <Check
-        color={color}
-        done={a.status === "done"}
-        onClick={() => changeStatus(a.id, a.status === "done" ? "backlog" : "done")}
-      />
-      {a.status === "planned" && a.scheduledDate && (
-        <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-secondary bg-surface-hover px-1.5 py-0.5 rounded-[2px]">
-          {a.scheduledDate}
-        </span>
-      )}
-      <span
-        className={`text-[13px] font-medium truncate ${
-          a.status === "done" ? "text-text-secondary line-through" : "text-text-primary"
-        }`}
-      >
-        {a.title}
-      </span>
-      <div className="flex-1" />
-      {a.impact > 0 && <span className="font-mono text-[11px] text-text-secondary">I{a.impact}</span>}
-      {a.timeEstimateMinutes && (
-        <span className="font-mono text-[11px] text-text-secondary">
-          {Math.floor(a.timeEstimateMinutes / 60) > 0 && `${Math.floor(a.timeEstimateMinutes / 60)}h `}
-          {a.timeEstimateMinutes % 60 > 0 && `${a.timeEstimateMinutes % 60}m`}
-        </span>
-      )}
-      <button
-        onClick={() => openPanel({ kind: "action", mode: "edit", id: a.id })}
-        className="opacity-0 group-hover:opacity-100 transition-opacity font-mono text-[11px] text-text-tertiary hover:text-text-secondary cursor-pointer"
-      >
-        Edit
-      </button>
-    </div>
+    <SharedActionRow
+      action={a}
+      goalColor={color}
+      onClick={() => openPanel({ kind: "action", mode: "edit", id: a.id })}
+      onToggleDone={() =>
+        changeStatus(a.id, a.status === "done" ? "backlog" : "done")
+      }
+    />
   );
 };
 
@@ -278,22 +254,7 @@ const ProjectDetail: React.FC = () => {
                   </div>
                   <div className="border-t border-border-subtle">
                     {grouped.delegated.map((a) => (
-                      <div
-                        key={a.id}
-                        className="group flex items-center gap-3 h-9 px-3 border-b border-border-subtle hover:bg-surface-hover transition-colors"
-                      >
-                        <Check color={color} />
-                        <span className="text-[13px] font-medium text-text-primary truncate">{a.title}</span>
-                        {a.delegateName && (
-                          <span className="font-mono text-[11px] text-text-tertiary">→ {a.delegateName}</span>
-                        )}
-                        <div className="flex-1" />
-                        {a.expectedReturnDate && (
-                          <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">
-                            EXPECTED {a.expectedReturnDate}
-                          </span>
-                        )}
-                      </div>
+                      <ActionRow key={a.id} a={a} color={color} />
                     ))}
                   </div>
                 </div>

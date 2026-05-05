@@ -10,6 +10,7 @@ import { X } from "lucide-react";
 import { toast } from "sonner";
 import { useStore } from "@/store/useStore";
 import type { Action, DayType, ID, Ritual } from "@/types";
+import { formatTime as formatTimeMin } from "@/lib/format";
 
 /* ───────── helpers ───────── */
 const todayISO = () => new Date().toISOString().slice(0, 10);
@@ -350,30 +351,42 @@ const PlanForm: React.FC<{
 
   const renderRow = (a: Action, opts: { showImpactBadge?: boolean } = {}) => {
     const checked = state.selectedActionIds.has(a.id);
+    const g = goals.find((gg) => gg.id === a.goalId);
+    const p = a.projectId ? projects.find((pp) => pp.id === a.projectId) : undefined;
+    const color = g ? `hsl(var(--${g.color}))` : "hsl(var(--text-tertiary))";
     return (
       <label
         key={a.id}
-        className="flex items-center gap-2.5 px-2 py-1.5 rounded-[3px] hover:bg-surface-hover cursor-pointer"
+        className="relative flex items-stretch hover:bg-surface-hover cursor-pointer transition-colors"
+        style={{ minHeight: 56 }}
       >
-        <input
-          type="checkbox"
-          checked={checked}
-          onChange={() => toggleAction(a.id)}
-          className="accent-[hsl(var(--accent))]"
+        <span
+          className="absolute left-0 top-0 bottom-0"
+          style={{ background: color, width: 3 }}
         />
-        {opts.showImpactBadge && (
-          <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary w-[26px] shrink-0 tabular-nums">
-            I{a.impact ?? 0}
-          </span>
-        )}
-        <span className="text-[13px] text-text-primary truncate">{a.title}</span>
-        <span className="text-[12px] text-text-secondary truncate">
-          · {breadcrumb(a)}
-        </span>
-        <div className="flex-1" />
-        <span className="font-mono text-[11px] text-text-tertiary whitespace-nowrap">
-          {a.timeEstimateMinutes ? `${a.timeEstimateMinutes}m` : "—"}
-        </span>
+        <div className="flex items-center gap-3 py-3 pr-3 w-full min-w-0" style={{ paddingLeft: 19 }}>
+          <input
+            type="checkbox"
+            checked={checked}
+            onChange={() => toggleAction(a.id)}
+            className="accent-[hsl(var(--accent))] shrink-0"
+            style={{ width: 16, height: 16 }}
+          />
+          {opts.showImpactBadge && (
+            <span className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary w-[26px] shrink-0 tabular-nums">
+              I{a.impact ?? 0}
+            </span>
+          )}
+          <div className="flex flex-col gap-1 min-w-0 flex-1">
+            <span className="text-[15px] font-medium text-text-primary truncate">{a.title}</span>
+            <span className="font-mono text-[12px] text-text-secondary tabular-nums truncate">
+              {g?.title ?? ""}
+              {p ? ` · ${p.title}` : ""}
+              {a.impact ? ` · I${a.impact}` : ""}
+              {a.timeEstimateMinutes ? ` · ${formatTimeMin(a.timeEstimateMinutes)}` : ""}
+            </span>
+          </div>
+        </div>
       </label>
     );
   };

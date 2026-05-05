@@ -10,6 +10,7 @@ import { ritualMultiplier } from "@/store/useStore";
 import { CardMenu } from "@/components/CardMenu";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { PlanTodayModal, CloseDayModal, ClosePlanModal } from "@/components/PlanCloseModals";
+import { ActionRow as SharedActionRow } from "@/components/ActionRow";
 import { toast } from "sonner";
 
 export const TODAY_ISO = new Date().toISOString().slice(0, 10);
@@ -807,38 +808,17 @@ export const TodayZone: React.FC<{
               No actions for today.
             </div>
           ) : (
-            <div className="space-y-1">
-              {others.map((a) => {
-                const time = fmtTime(a.timeEstimateMinutes);
-                const done = a.status === "done";
-                return (
-                  <div
-                    key={a.id}
-                    onClick={() => openPanel({ kind: "action", mode: "edit", id: a.id })}
-                    className={`flex items-center gap-3 pr-3 h-8 rounded-[2px] hover:bg-surface-hover transition-colors overflow-hidden cursor-pointer ${done ? "opacity-60" : ""}`}
-                  >
-                    <Strip color={colorVar(a.goalId)} />
-                    <button
-                      onClick={(e) => { e.stopPropagation(); if (!done) handleToggleDone(a.id); }}
-                      className="ml-1 inline-block rounded-[2px] border border-text-tertiary hover:border-accent shrink-0"
-                      style={{
-                        width: 14,
-                        height: 14,
-                        background: done ? "hsl(var(--accent))" : "transparent",
-                      }}
-                      aria-label="Mark done"
-                    />
-                    <span className={`text-[13px] truncate ${done ? "text-text-tertiary line-through" : "text-text-primary"}`}>{a.title}</span>
-                    <span className="text-[12px] text-text-secondary truncate">{breadcrumb(a.goalId, a.projectId)}</span>
-                    <div className="flex-1" />
-                    {a.delegateName && (
-                      <span className="font-mono text-[11px] text-text-tertiary">→ {a.delegateName}</span>
-                    )}
-                    {time && <TimePill>{time}</TimePill>}
-                    <span className="font-mono text-[11px] text-text-tertiary tabular-nums">I{a.impact ?? 0}</span>
-                  </div>
-                );
-              })}
+            <div>
+              {others.map((a) => (
+                <SharedActionRow
+                  key={a.id}
+                  action={a}
+                  onClick={() => openPanel({ kind: "action", mode: "edit", id: a.id })}
+                  onToggleDone={() => {
+                    if (a.status !== "done") handleToggleDone(a.id);
+                  }}
+                />
+              ))}
             </div>
           )}
         </div>

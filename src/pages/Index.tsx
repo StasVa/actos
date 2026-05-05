@@ -250,15 +250,33 @@ const SPARK_1_TIPS = buildYouTubeTooltips(SPARK_1);
 const SPARK_2_TIPS = buildFitnessTooltips(SPARK_2);
 const SPARK_3_TIPS = buildReadingTooltips(SPARK_3);
 
-/* ===== Hero (live store-wired) =====
- * Sparklines stay on canned demo data because we don't have 30 days of seeded
- * activity history — but headline progress, project counts, action counts,
- * outcome/effort, and state indicator are all derived from the store. */
-const SPARKS_BY_GOAL_COLOR: Record<string, { data: number[]; tips: import("@/components/Tooltip").DayInfo[] }> = {
-  "goal-1": { data: SPARK_1, tips: SPARK_1_TIPS },
-  "goal-2": { data: SPARK_2, tips: SPARK_2_TIPS },
-  "goal-3": { data: SPARK_3, tips: SPARK_3_TIPS },
-};
+/* ===== Hero (live store-wired) ===== */
+function buildSparkFromActions(
+  actions: import("@/types").Action[],
+  days = 30,
+): { data: number[]; tips: import("@/components/Tooltip").DayInfo[] } {
+  const data: number[] = new Array(days).fill(0);
+  const titles: string[][] = Array.from({ length: days }, () => []);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  for (const a of actions) {
+    const ts = a.completedAt ?? a.delegatedAt;
+    if (!ts) continue;
+    const d = new Date(ts);
+    d.setHours(0, 0, 0, 0);
+    const daysAgo = Math.round((today.getTime() - d.getTime()) / 86400000);
+    if (daysAgo < 0 || daysAgo >= days) continue;
+    const idx = days - 1 - daysAgo;
+    data[idx] += 1;
+    titles[idx].push(a.title);
+  }
+  const tips = data.map((count, i) => ({
+    daysFromToday: days - 1 - i,
+    count,
+    actions: titles[i],
+  }));
+  return { data, tips };
+}
 
 function relativeDayLabel(iso?: string): string {
   if (!iso) return "no activity yet";

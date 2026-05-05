@@ -95,9 +95,13 @@ export interface RitualScheduleConfig {
   timeOfDay?: string; // "07:00"
 }
 
+export type RitualCompletionStatus = "pending" | "done" | "skipped" | "missed";
+
 export interface RitualCompletion {
   date: ISODate;
   at: ISODateTime;
+  // Optional for backwards compat — legacy entries without status are treated as "done".
+  status?: RitualCompletionStatus;
 }
 
 export interface Ritual {
@@ -152,7 +156,7 @@ export interface Idea {
 }
 
 // ───────── Day entries ─────────
-export type DayType = "deep" | "light" | "admin" | "rest" | "creative";
+export type DayType = "execution" | "recovery" | "day-off" | "sick";
 
 export interface DayEntry {
   date: ISODate;
@@ -164,6 +168,12 @@ export interface DayEntry {
   reflectionText?: string;
   startedAt?: ISODateTime;
   closedAt?: ISODateTime;
+  // New plan-flow fields
+  plannedActionIds?: ID[];
+  plannedRitualIds?: ID[];
+  skippedRitualIds?: ID[];
+  isPlanned?: boolean;
+  isClosed?: boolean;
 }
 
 // ───────── Settings ─────────

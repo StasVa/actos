@@ -306,14 +306,14 @@ const Goals: React.FC = () => {
         </header>
 
         <div className="flex flex-wrap items-center gap-2 mb-4">
-          <FilterDropdown
+          <FilterDropdown<StateFilter>
             label="STATE"
             value={stateFilter}
             defaultValue="all"
             options={STATE_OPTIONS}
             onChange={setStateFilter}
           />
-          <FilterDropdown
+          <FilterDropdown<TypeFilter>
             label="TYPE"
             value={typeFilter}
             defaultValue="all"
@@ -321,7 +321,7 @@ const Goals: React.FC = () => {
             onChange={setTypeFilter}
           />
           <div className="flex-1" />
-          <SortDropdown value={sortKey} options={SORT_OPTIONS} onChange={setSortKey} />
+          <SortDropdown<SortKey> value={sortKey} options={SORT_OPTIONS} onChange={setSortKey} />
         </div>
 
         <input

@@ -6,16 +6,6 @@ import { toast } from "sonner";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { AppSidebar } from "@/components/AppSidebar";
 
-const NAV = [
-  { label: "Home", href: "/" },
-  { label: "Weekly", href: "#" },
-  { label: "Ideas", href: "/ideas" },
-  { label: "Rituals", href: "/rituals" },
-  { label: "All actions", href: "/actions" },
-  { label: "All projects", href: "/projects" },
-  { label: "All delegated", href: "/delegated" },
-];
-
  full: string; sort: number } {
   const d = new Date(iso);
   const now = new Date();

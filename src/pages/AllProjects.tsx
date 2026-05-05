@@ -606,7 +606,7 @@ const AllProjects: React.FC = () => {
               />
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {groups.near.map((p) => (
-                  <ProjectCard key={p.id} p={p} onOpen={handleOpenProject} />
+                  <ProjectCard key={p.id} p={p} />
                 ))}
               </div>
             </section>
@@ -617,7 +617,7 @@ const AllProjects: React.FC = () => {
               <SectionHeader label="ACTIVE" count={groups.active.length} meta="MOVING THIS WEEK" />
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {groups.active.map((p) => (
-                  <ProjectCard key={p.id} p={p} onOpen={handleOpenProject} />
+                  <ProjectCard key={p.id} p={p} />
                 ))}
               </div>
             </section>
@@ -633,7 +633,7 @@ const AllProjects: React.FC = () => {
               />
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {groups.stalled.map((p) => (
-                  <ProjectCard key={p.id} p={p} onOpen={handleOpenProject} />
+                  <ProjectCard key={p.id} p={p} />
                 ))}
               </div>
             </section>
@@ -652,7 +652,7 @@ const AllProjects: React.FC = () => {
               {!archivedCollapsed && (
                 <div className="border-t border-border-subtle">
                   {groups.closed.map((p) => (
-                    <ClosedRow key={p.id} p={p} onOpen={handleOpenProject} />
+                    <ClosedRow key={p.id} p={p} />
                   ))}
                 </div>
               )}

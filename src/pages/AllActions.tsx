@@ -283,14 +283,14 @@ const ActionDetail: React.FC<{ action: Action }> = ({ action }) => {
         </span>
       </div>
 
-      <div className="h-2" />
+      <div className="h-3" />
       <StatusPill status={action.status} />
 
-      <div className="h-3" />
+      <div className="h-4" />
       <h1 className="text-[22px] font-medium text-text-primary leading-tight">{action.title}</h1>
 
-      <div className="h-6" />
-      <div className="font-mono text-[12px] text-text-tertiary tabular-nums">
+      <div className="h-8" />
+      <div className="font-mono text-[13px] text-text-tertiary tabular-nums">
         {quickInfoBits.map((b, i) => (
           <React.Fragment key={i}>
             {i > 0 && <span> · </span>}
@@ -315,28 +315,14 @@ const ActionDetail: React.FC<{ action: Action }> = ({ action }) => {
 
       {action.notes && (
         <>
-          <div className="h-6" />
+          <div className="h-8" />
           <div className="font-mono text-[11px] uppercase tracking-[0.08em] text-text-secondary">
             NOTES
           </div>
-          <div className="h-2" />
+          <div className="h-3" />
           <p className="text-[14px] text-text-primary leading-[1.6]">{action.notes}</p>
         </>
       )}
-
-      <div className="h-6" />
-      <div className="font-mono text-[11px] uppercase tracking-[0.08em] text-text-secondary">
-        TIMELINE
-      </div>
-      <div className="h-2" />
-      <div className="flex flex-col gap-1">
-        {action.timeline.map((t, i) => (
-          <div key={i} className="font-mono text-[12px] text-text-secondary tabular-nums">
-            {t.date} — {t.text}
-          </div>
-        ))}
-        <div className="font-mono text-[12px] text-text-tertiary">—</div>
-      </div>
 
       <div className="h-12" />
       <div className="flex items-center justify-between">

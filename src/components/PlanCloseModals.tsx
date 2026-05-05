@@ -388,6 +388,79 @@ const PlanForm: React.FC<{
     suggestions.scheduled.length === 0 &&
     suggestions.heavyLift.length === 0 &&
     suggestions.quickMoves.length === 0;
+
+  return (
+    <div className="space-y-6">
+      {/* DAY TYPE */}
+      <section>
+        <SectionHead>DAY TYPE</SectionHead>
+        <div className="flex flex-wrap gap-1.5">
+          {DAY_TYPE_OPTIONS.map((opt) => (
+            <Pill
+              key={opt.value}
+              active={state.dayType === opt.value}
+              onClick={() => setState((s) => ({ ...s, dayType: opt.value }))}
+            >
+              {opt.label}
+            </Pill>
+          ))}
+        </div>
+      </section>
+
+      {/* MORNING ENERGY */}
+      {settings.layers.logEnergy && (
+        <section>
+          <SectionHead>MORNING ENERGY</SectionHead>
+          <EnergyPicker
+            value={state.morningEnergy}
+            onChange={(v) => setState((s) => ({ ...s, morningEnergy: v }))}
+          />
+        </section>
+      )}
+
+      {/* ACTIONS */}
+      <section>
+        <SectionHead sub="Pick what you'll work on today. Suggestions help you find what's worth doing.">
+          ACTIONS FOR TODAY
+        </SectionHead>
+
+        {noneAtAll ? (
+          <div className="font-mono text-[11px] text-text-tertiary py-2">
+            No suggestions yet. Add an action to start your day.
+          </div>
+        ) : (
+          <>
+            {suggestions.scheduled.length > 0 && (
+              <>
+                <SubHeading>SCHEDULED FOR TODAY · {suggestions.scheduled.length}</SubHeading>
+                <div className="space-y-1">
+                  {suggestions.scheduled.map((a) => renderRow(a))}
+                </div>
+              </>
+            )}
+            {suggestions.heavyLift.length > 0 && (
+              <>
+                <SubHeading>
+                  HEAVY LIFT TODAY · <span className="text-text-tertiary/70">HIGH IMPACT · HIGH EFFORT</span>
+                </SubHeading>
+                <div className="space-y-1">
+                  {suggestions.heavyLift.map((a) => renderRow(a, { showImpactBadge: true }))}
+                </div>
+              </>
+            )}
+            {suggestions.quickMoves.length > 0 && (
+              <>
+                <SubHeading>
+                  QUICK MOVES · <span className="text-text-tertiary/70">HIGH IMPACT · LOW EFFORT</span>
+                </SubHeading>
+                <div className="space-y-1">
+                  {suggestions.quickMoves.map((a) => renderRow(a, { showImpactBadge: true }))}
+                </div>
+              </>
+            )}
+          </>
+        )}
+
         {showAdd ? (
           <div className="mt-2 flex items-center gap-2 p-2 bg-surface-raised rounded-[4px] border border-border-subtle">
             <input

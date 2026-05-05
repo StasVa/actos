@@ -388,14 +388,14 @@ const DelegationDetail: React.FC<{ action: Action }> = ({ action }) => {
       <div className="h-12" />
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <GhostButton accent onClick={fakeAction("Mark delegated done")}>
+          <GhostButton accent onClick={handleMarkDone}>
             Mark done
           </GhostButton>
-          <GhostButton onClick={fakeAction("Re-open delegation")}>Re-open</GhostButton>
-          <TertiaryLink onClick={fakeAction("Edit delegated action")}>Edit action</TertiaryLink>
+          <GhostButton onClick={handleReopen}>Re-open</GhostButton>
+          <TertiaryLink onClick={handleEdit}>Edit action</TertiaryLink>
         </div>
         <button
-          onClick={fakeAction("Open menu")}
+          onClick={handleEdit}
           className="w-6 h-6 inline-flex items-center justify-center rounded-[4px] text-text-tertiary hover:bg-surface-hover hover:text-text-secondary transition-colors"
         >
           ···

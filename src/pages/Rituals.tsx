@@ -62,112 +62,26 @@ const Sidebar: React.FC = () => {
   );
 };
 
-/* ===== Mock data ===== */
+/* ===== Visual row shape (rendering layer; built from the store) ===== */
 type RitualRow = {
   id: string;
   title: string;
   goalName: string;
   goalColor: string;
-  scheduleLabel: string; // uppercase mono
-  scheduleShort: string; // for pending list (e.g. "daily")
-  multiplier: string; // "×1.10"
+  scheduleLabel: string;
+  scheduleShort: string;
+  multiplier: string;
   totalCompletions: number;
   pendingToday: boolean;
-  notDueToday?: boolean; // if not pending and not done — schedule doesn't include today
-  lastDoneLabel: string; // "yesterday", "Apr 1"
+  notDueToday?: boolean;
+  lastDoneLabel: string;
   consistency: number[]; // 30 entries (0/1)
   frequency: number[]; // 12 entries
-  freqMax: number; // y-axis max
-  hasPanel?: boolean; // if true, opens RitualPanel
+  freqMax: number;
+  isMonthly: boolean;
+  archived?: boolean;
+  archivedAgoLabel?: string;
 };
-
-/* Helper to build Mondays-only 30-day pattern: positions 2, 9, 16, 23 (0-indexed from oldest) */
-function buildWeeklyMondays(): number[] {
-  const arr = new Array(30).fill(0);
-  [2, 9, 16, 23].forEach((i) => (arr[i] = 1));
-  return arr;
-}
-
-const RITUALS: RitualRow[] = [
-  {
-    id: "morning-run",
-    title: "Morning run",
-    goalName: "Lose 5 kg",
-    goalColor: G2,
-    scheduleLabel: "DAILY",
-    scheduleShort: "daily",
-    multiplier: "×1.10",
-    totalCompletions: 24,
-    pendingToday: true,
-    lastDoneLabel: "yesterday",
-    consistency: [0,1,1,1,0,0,1, 1,1,0,1,1,1,0, 1,1,1,1,1,0,0, 1,1,1,1,1,1,0, 1,1],
-    frequency: [5,6,4,7,5,6,7,5,6,5,6,5],
-    freqMax: 7,
-  },
-  {
-    id: "weekly-project-audit",
-    title: "Weekly project audit",
-    goalName: "Launch YouTube channel",
-    goalColor: G1,
-    scheduleLabel: "WEEKLY · MONDAYS",
-    scheduleShort: "weekly · Mondays",
-    multiplier: "×1.10",
-    totalCompletions: 12,
-    pendingToday: false,
-    notDueToday: true,
-    lastDoneLabel: "yesterday",
-    consistency: buildWeeklyMondays(),
-    frequency: [1,1,1,1,1,0,0,1,1,1,1,1],
-    freqMax: 1,
-    hasPanel: true,
-  },
-  {
-    id: "evening-weight-log",
-    title: "Evening weight log",
-    goalName: "Lose 5 kg",
-    goalColor: G2,
-    scheduleLabel: "DAILY",
-    scheduleShort: "daily",
-    multiplier: "×1.05",
-    totalCompletions: 8,
-    pendingToday: true,
-    lastDoneLabel: "yesterday",
-    consistency: [0,0,0,0,0,0,0, 0,0,0,0,0,0,0, 0,0,0,0,1,0,1, 1,0,1,1,1,0,1, 1,1],
-    frequency: [0,0,0,0,0,0,0,0,0,0,3,5],
-    freqMax: 7,
-  },
-  {
-    id: "daily-reading",
-    title: "Daily reading 30min",
-    goalName: "Read 24 books this year",
-    goalColor: G3,
-    scheduleLabel: "DAILY",
-    scheduleShort: "daily",
-    multiplier: "×1.25",
-    totalCompletions: 47,
-    pendingToday: true,
-    lastDoneLabel: "yesterday",
-    consistency: [1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1],
-    frequency: [6,7,7,6,7,7,6,7,6,7,7,6],
-    freqMax: 7,
-  },
-  {
-    id: "monthly-book-review",
-    title: "Monthly book review",
-    goalName: "Read 24 books this year",
-    goalColor: G3,
-    scheduleLabel: "MONTHLY · 1ST OF MONTH",
-    scheduleShort: "monthly · 1st",
-    multiplier: "×1.00",
-    totalCompletions: 3,
-    pendingToday: false,
-    notDueToday: true,
-    lastDoneLabel: "Apr 1",
-    consistency: new Array(30).fill(0),
-    frequency: [1,0,0,1,0,0,0,1,0,0,0,0],
-    freqMax: 1,
-  },
-];
 
 /* Date helpers for tooltips */
 const MONTH_SHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -179,12 +93,10 @@ function dayLabel(daysFromToday: number): string {
   return `${MONTH_SHORT[d.getMonth()]} ${d.getDate()}`;
 }
 function weekLabel(weeksFromNow: number): string {
-  // weeksFromNow: 0 = this week (most recent), 11 = oldest
   const d = new Date();
   d.setDate(d.getDate() - weeksFromNow * 7);
-  // approximate "Week of <Mon date>"
   const day = d.getDay();
-  const diff = (day + 6) % 7; // Mon = 0
+  const diff = (day + 6) % 7;
   d.setDate(d.getDate() - diff);
   return `Week of ${MONTH_SHORT[d.getMonth()]} ${d.getDate()}`;
 }
@@ -194,6 +106,7 @@ function monthLabel(monthsFromNow: number): string {
   d.setMonth(d.getMonth() - monthsFromNow);
   return `${MONTH_SHORT[d.getMonth()]} ${d.getFullYear()}`;
 }
+
 
 /* ===== Charts ===== */
 const ConsistencyCalendar: React.FC<{ data: number[]; color: string; cellSize?: number }> = ({

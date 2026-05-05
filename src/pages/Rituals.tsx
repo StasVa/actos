@@ -189,7 +189,11 @@ function weekLabel(weeksFromNow: number): string {
 }
 
 /* ===== Charts ===== */
-const ConsistencyCalendar: React.FC<{ data: number[]; color: string }> = ({ data, color }) => {
+const ConsistencyCalendar: React.FC<{ data: number[]; color: string; cellSize?: number }> = ({
+  data,
+  color,
+  cellSize = 12,
+}) => {
   const last = data.length - 1;
   return (
     <div className="flex items-center gap-[2px]">
@@ -211,9 +215,9 @@ const ConsistencyCalendar: React.FC<{ data: number[]; color: string }> = ({ data
             <span
               className="inline-block hover:brightness-[1.15]"
               style={{
-                width: 8,
-                height: 8,
-                borderRadius: 1,
+                width: cellSize,
+                height: cellSize,
+                borderRadius: 2,
                 background: v === 1 ? color : "hsl(var(--surface-hover))",
                 border: v === 1 ? "none" : "1px solid hsl(var(--border-subtle))",
                 boxSizing: "border-box",
@@ -223,6 +227,52 @@ const ConsistencyCalendar: React.FC<{ data: number[]; color: string }> = ({ data
           </Tooltip>
         );
       })}
+    </div>
+  );
+};
+
+/* 90-day calendar in 3 rows of 30 (for monthly rituals) */
+const MonthlyConsistency: React.FC<{ data: number[]; color: string }> = ({ data, color }) => {
+  const last = data.length - 1;
+  const rows = [data.slice(0, 30), data.slice(30, 60), data.slice(60, 90)];
+  return (
+    <div className="flex flex-col" style={{ gap: 4 }}>
+      {rows.map((row, rIdx) => (
+        <div key={rIdx} className="flex items-center gap-[2px]">
+          {row.map((v, i) => {
+            const idx = rIdx * 30 + i;
+            const daysFromToday = last - idx;
+            const status =
+              daysFromToday === 0 && v === 0
+                ? "Pending"
+                : v === 1
+                ? "Done"
+                : "Missed";
+            const tip = (
+              <div className="text-[12px] text-text-primary" style={{ fontFamily: "Inter, sans-serif" }}>
+                {dayLabel(daysFromToday)} ·{" "}
+                <span className="font-mono text-text-secondary">{status}</span>
+              </div>
+            );
+            return (
+              <Tooltip key={i} content={tip}>
+                <span
+                  className="inline-block hover:brightness-[1.15]"
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: 1,
+                    background: v === 1 ? color : "hsl(var(--surface-hover))",
+                    border: v === 1 ? "none" : "1px solid hsl(var(--border-subtle))",
+                    boxSizing: "border-box",
+                    transition: "filter 80ms ease",
+                  }}
+                />
+              </Tooltip>
+            );
+          })}
+        </div>
+      ))}
     </div>
   );
 };

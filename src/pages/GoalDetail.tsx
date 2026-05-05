@@ -284,9 +284,7 @@ const ActiveProjectsSection: React.FC = () => {
           <ProjectCard key={i} p={p} />
         ))}
       </div>
-      <a href="#" className="inline-block mt-4 text-[13px] text-text-tertiary hover:text-text-secondary transition-colors">
-        + Add project to this goal
-      </a>
+      <GhostAddButton>+ Add project to this goal</GhostAddButton>
     </section>
   );
 };
@@ -320,9 +318,7 @@ const RitualsSection: React.FC = () => (
         ))}
       </div>
     </div>
-    <a href="#" className="inline-block mt-4 text-[13px] text-text-tertiary hover:text-text-secondary transition-colors">
-      + Add ritual to this goal
-    </a>
+    <GhostAddButton>+ Add ritual to this goal</GhostAddButton>
   </section>
 );
 
@@ -362,7 +358,7 @@ const RecentActivity: React.FC = () => (
         </div>
       ))}
     </div>
-    <a href="#" className="inline-block mt-3 text-[12px] text-accent hover:text-text-primary transition-colors">
+    <a href="#" className="inline-block mt-3 text-[12px] text-text-secondary hover:text-text-primary hover:underline transition-colors">
       View all activity →
     </a>
   </section>
@@ -397,7 +393,7 @@ const IdeasSection: React.FC = () => {
               <span>{idea}</span>
             </div>
           ))}
-          <a href="#" className="inline-block mt-2 text-[13px] text-text-tertiary hover:text-text-secondary transition-colors">
+          <a href="#" className="inline-block mt-2 text-[12px] text-text-secondary hover:text-text-primary hover:underline transition-colors">
             + Capture idea
           </a>
         </div>

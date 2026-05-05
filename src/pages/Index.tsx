@@ -183,7 +183,7 @@ const GoalColumn: React.FC<{
 
     <div>
       <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-1.5">
-        Activity · Last 12 weeks
+        Activity · Last 30 days
       </div>
       <Sparkline data={spark} color={color} />
     </div>

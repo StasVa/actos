@@ -12,6 +12,7 @@ import AllActions from "./pages/AllActions.tsx";
 import AllDelegated from "./pages/AllDelegated.tsx";
 import AllProjects from "./pages/AllProjects.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import { ActionEditor } from "./components/ActionEditor";
 
 const queryClient = new QueryClient();
 
@@ -19,7 +20,8 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
-      <Sonner />
+      <Sonner position="bottom-right" />
+      <ActionEditor />
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />

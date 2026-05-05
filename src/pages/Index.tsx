@@ -91,21 +91,23 @@ const SPARK_2 = [
   0, 0,
 ];
 
-const Sparkline: React.FC<{ data: number[]; color: string }> = ({ data, color }) => {
+const Sparkline: React.FC<{ data: number[]; color: string; tips: import("@/components/Tooltip").DayInfo[] }> = ({ data, color, tips }) => {
   const max = 5;
   return (
     <div className="w-full h-7 flex items-end gap-[1px]">
       {data.map((v, i) => {
         const h = v === 0 ? 2 : Math.max(2, Math.round((v / max) * 28));
         return (
-          <div
-            key={i}
-            className="flex-1"
-            style={{
-              height: h,
-              background: v === 0 ? "hsl(var(--border-subtle))" : color,
-            }}
-          />
+          <Tooltip key={i} content={<SparkTooltipContent info={tips[i]} />} className="flex-1 h-full flex items-end">
+            <div
+              className="w-full hover:brightness-[1.15]"
+              style={{
+                height: h,
+                background: v === 0 ? "hsl(var(--border-subtle))" : color,
+                transition: "filter 80ms ease",
+              }}
+            />
+          </Tooltip>
         );
       })}
     </div>

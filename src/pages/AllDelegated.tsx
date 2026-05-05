@@ -122,10 +122,6 @@ const TertiaryLink: React.FC<{ children: React.ReactNode; onClick?: () => void }
   </button>
 );
 
-const fakeAction = (label: string) => () => {
-  // eslint-disable-next-line no-console
-  console.log(`[ActOS prototype] ${label} — full interactivity coming next`);
-};
 
 /* ===== Bucket logic ===== */
 type Bucket = "overdue" | "upcoming" | "nodate";
@@ -285,6 +281,18 @@ const InfoRow: React.FC<{ label: string; children: React.ReactNode }> = ({ label
 );
 
 const DelegationDetail: React.FC<{ action: Action }> = ({ action }) => {
+  const openPanel = useStore((s) => s.openPanel);
+  const changeActionStatus = useStore((s) => s.changeActionStatus);
+  const handleEdit = () =>
+    openPanel({ kind: "action", mode: "edit", id: action.id });
+  const handleMarkDone = () => {
+    changeActionStatus(action.id, "done");
+    toast.success("Marked done");
+  };
+  const handleReopen = () => {
+    changeActionStatus(action.id, "planned");
+    toast.success("Re-opened");
+  };
   const goal = GOALS[action.goal];
   const overdueDays =
     action.expectedReturnDelta !== undefined && action.expectedReturnDelta < 0
@@ -376,14 +384,14 @@ const DelegationDetail: React.FC<{ action: Action }> = ({ action }) => {
       <div className="h-12" />
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <GhostButton accent onClick={fakeAction("Mark delegated done")}>
+          <GhostButton accent onClick={handleMarkDone}>
             Mark done
           </GhostButton>
-          <GhostButton onClick={fakeAction("Re-open delegation")}>Re-open</GhostButton>
-          <TertiaryLink onClick={fakeAction("Edit delegated action")}>Edit action</TertiaryLink>
+          <GhostButton onClick={handleReopen}>Re-open</GhostButton>
+          <TertiaryLink onClick={handleEdit}>Edit action</TertiaryLink>
         </div>
         <button
-          onClick={fakeAction("Open menu")}
+          onClick={handleEdit}
           className="w-6 h-6 inline-flex items-center justify-center rounded-[4px] text-text-tertiary hover:bg-surface-hover hover:text-text-secondary transition-colors"
         >
           ···

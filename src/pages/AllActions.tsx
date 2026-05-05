@@ -11,6 +11,7 @@ import {
   statusColorVar,
 } from "@/lib/actionsData";
 import { formatTime } from "@/lib/format";
+import { FilterDropdown, FilterOption } from "@/components/FilterDropdown";
 
 /* ===== Sidebar ===== */
 const NAV: { label: string; href: string }[] = [
@@ -381,28 +382,44 @@ const EmptyFiltered: React.FC<{ onClear: () => void }> = ({ onClear }) => (
 type StatusFilter = "all" | ActionStatus;
 type GoalFilter = "all" | GoalKey;
 type DateFilter = "all" | "today" | "week" | "month";
+type SortKey = "recent" | "oldest" | "impact" | "scheduled";
 
-const STATUS_FILTERS: { key: StatusFilter; label: string }[] = [
-  { key: "all", label: "All" },
-  { key: "backlog", label: "Backlog" },
-  { key: "planned", label: "Planned" },
-  { key: "done", label: "Done" },
-  { key: "delegated", label: "Delegated" },
-  { key: "dropped", label: "Dropped" },
-  { key: "cancelled", label: "Cancelled" },
+const STATUS_OPTIONS: FilterOption<StatusFilter>[] = [
+  { value: "all", label: "All" },
+  { value: "backlog", label: "Backlog" },
+  { value: "planned", label: "Planned" },
+  { value: "done", label: "Done" },
+  { value: "delegated", label: "Delegated" },
+  { value: "dropped", label: "Dropped" },
+  { value: "cancelled", label: "Cancelled" },
 ];
 
-const DATE_FILTERS: { key: DateFilter; label: string }[] = [
-  { key: "all", label: "All time" },
-  { key: "today", label: "Today" },
-  { key: "week", label: "This week" },
-  { key: "month", label: "This month" },
+const DATE_OPTIONS: FilterOption<DateFilter>[] = [
+  { value: "all", label: "All time" },
+  { value: "today", label: "Today" },
+  { value: "week", label: "This week" },
+  { value: "month", label: "This month" },
+];
+
+const GOAL_OPTIONS: FilterOption<GoalFilter>[] = [
+  { value: "all", label: "All" },
+  { value: "g1", label: "Launch YouTube", dot: GOALS.g1.color },
+  { value: "g2", label: "Lose 5 kg", dot: GOALS.g2.color },
+  { value: "g3", label: "Read 24 books", dot: GOALS.g3.color },
+];
+
+const SORT_OPTIONS: FilterOption<SortKey>[] = [
+  { value: "recent", label: "Recent first" },
+  { value: "oldest", label: "Oldest first" },
+  { value: "impact", label: "By impact" },
+  { value: "scheduled", label: "By scheduled date" },
 ];
 
 const AllActions: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [goalFilter, setGoalFilter] = useState<GoalFilter>("all");
   const [dateFilter, setDateFilter] = useState<DateFilter>("all");
+  const [sortKey, setSortKey] = useState<SortKey>("recent");
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string>("a-research-thumb");
   const [terminalCollapsed, setTerminalCollapsed] = useState(false);
@@ -428,25 +445,33 @@ const AllActions: React.FC = () => {
     return `${total} ACTIONS · ${active} ACTIVE · ${done} DONE · ${delegated} DELEGATED`;
   }, []);
 
+  const sortFn = useMemo(() => {
+    return (a: Action, b: Action) => {
+      switch (sortKey) {
+        case "oldest":
+          return a.changedSort - b.changedSort;
+        case "impact":
+          return (b.impact ?? 0) - (a.impact ?? 0);
+        case "scheduled": {
+          const sa = a.scheduledSort ?? Number.POSITIVE_INFINITY;
+          const sb = b.scheduledSort ?? Number.POSITIVE_INFINITY;
+          return sa - sb;
+        }
+        case "recent":
+        default:
+          return b.changedSort - a.changedSort;
+      }
+    };
+  }, [sortKey]);
+
   const grouped = useMemo(() => {
     if (statusFilter !== "all") {
-      return {
-        single: [...filtered].sort((a, b) => b.changedSort - a.changedSort),
-      };
+      return { single: [...filtered].sort(sortFn) };
     }
-    const active = filtered
-      .filter((a) => isActive(a.status))
-      .sort((a, b) => {
-        const sa = a.scheduledSort ?? Number.POSITIVE_INFINITY;
-        const sb = b.scheduledSort ?? Number.POSITIVE_INFINITY;
-        if (sa !== sb) return sa - sb;
-        return b.impact - a.impact;
-      });
-    const terminal = filtered
-      .filter((a) => !isActive(a.status))
-      .sort((a, b) => b.changedSort - a.changedSort);
+    const active = filtered.filter((a) => isActive(a.status)).sort(sortFn);
+    const terminal = filtered.filter((a) => !isActive(a.status)).sort(sortFn);
     return { active, terminal };
-  }, [filtered, statusFilter]);
+  }, [filtered, statusFilter, sortFn]);
 
   const selected = filtered.find((a) => a.id === selectedId) ?? filtered[0];
 
@@ -454,10 +479,18 @@ const AllActions: React.FC = () => {
     if (selected && selected.id !== selectedId) setSelectedId(selected.id);
   }, [selected, selectedId]);
 
+  const anyApplied =
+    statusFilter !== "all" ||
+    goalFilter !== "all" ||
+    dateFilter !== "all" ||
+    sortKey !== "recent" ||
+    query.trim() !== "";
+
   const clearFilters = () => {
     setStatusFilter("all");
     setGoalFilter("all");
     setDateFilter("all");
+    setSortKey("recent");
     setQuery("");
   };
 
@@ -473,70 +506,56 @@ const AllActions: React.FC = () => {
               {meta}
             </div>
           </div>
-          <div className="h-3" />
-          {/* Filter row 1: STATUS + search */}
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <FilterGroup label="STATUS">
-              {STATUS_FILTERS.map((f) => (
-                <Chip
-                  key={f.key}
-                  active={statusFilter === f.key}
-                  onClick={() => setStatusFilter(f.key)}
-                >
-                  {f.label}
-                </Chip>
-              ))}
-            </FilterGroup>
-            <div className="flex items-center gap-2 bg-surface-raised border border-border-subtle rounded-[4px] px-2.5 py-1.5 w-[240px]">
-              <span className="text-[12px] text-text-tertiary">⌕</span>
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search actions..."
-                className="flex-1 bg-transparent outline-none text-[13px] text-text-primary placeholder:text-text-tertiary"
-              />
-            </div>
+          <div className="h-4" />
+          {/* Filters row */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <FilterDropdown
+              label="STATUS"
+              value={statusFilter}
+              defaultValue="all"
+              options={STATUS_OPTIONS}
+              onChange={(v) => setStatusFilter(v)}
+            />
+            <FilterDropdown
+              label="GOAL"
+              value={goalFilter}
+              defaultValue="all"
+              options={GOAL_OPTIONS}
+              onChange={(v) => setGoalFilter(v)}
+            />
+            <FilterDropdown
+              label="DATE"
+              value={dateFilter}
+              defaultValue="all"
+              options={DATE_OPTIONS}
+              onChange={(v) => setDateFilter(v)}
+            />
+            <FilterDropdown
+              label="SORT"
+              value={sortKey}
+              defaultValue="recent"
+              options={SORT_OPTIONS}
+              onChange={(v) => setSortKey(v)}
+            />
+            {anyApplied && (
+              <button
+                onClick={clearFilters}
+                className="ml-auto text-[12px] text-text-tertiary hover:text-text-secondary transition-colors"
+              >
+                Clear filters
+              </button>
+            )}
           </div>
-          <div className="h-2" />
-          {/* Filter row 2: GOAL + DATE */}
-          <div className="flex items-center gap-8 flex-wrap">
-            <FilterGroup label="GOAL">
-              <Chip active={goalFilter === "all"} onClick={() => setGoalFilter("all")}>
-                All
-              </Chip>
-              <Chip
-                active={goalFilter === "g1"}
-                onClick={() => setGoalFilter("g1")}
-                dot={GOALS.g1.color}
-              >
-                Launch YouTube
-              </Chip>
-              <Chip
-                active={goalFilter === "g2"}
-                onClick={() => setGoalFilter("g2")}
-                dot={GOALS.g2.color}
-              >
-                Lose 5 kg
-              </Chip>
-              <Chip
-                active={goalFilter === "g3"}
-                onClick={() => setGoalFilter("g3")}
-                dot={GOALS.g3.color}
-              >
-                Read 24 books
-              </Chip>
-            </FilterGroup>
-            <FilterGroup label="DATE">
-              {DATE_FILTERS.map((f) => (
-                <Chip
-                  key={f.key}
-                  active={dateFilter === f.key}
-                  onClick={() => setDateFilter(f.key)}
-                >
-                  {f.label}
-                </Chip>
-              ))}
-            </FilterGroup>
+          <div className="h-4" />
+          {/* Search row */}
+          <div className="flex items-center gap-2 bg-surface-raised border border-border-subtle rounded-[4px] px-3 py-2 max-w-[480px]">
+            <span className="text-[12px] text-text-tertiary">⌕</span>
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search actions..."
+              className="flex-1 bg-transparent outline-none text-[13px] text-text-primary placeholder:text-text-tertiary"
+            />
           </div>
         </div>
 

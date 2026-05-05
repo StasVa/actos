@@ -10,6 +10,7 @@ import {
   statusColorVar,
 } from "@/lib/actionsData";
 import { formatTime } from "@/lib/format";
+import { FilterDropdown, FilterOption } from "@/components/FilterDropdown";
 
 /* ===== Sidebar ===== */
 const NAV: { label: string; href: string }[] = [
@@ -405,11 +406,39 @@ const EmptyFiltered: React.FC<{ onClear: () => void }> = ({ onClear }) => (
 type DateFilter = "all" | "overdue" | "upcoming" | "nodate";
 type DelegateFilter = "all" | Delegate;
 type GoalFilter = "all" | GoalKey;
+type SortKey = "overdue" | "recent" | "delegate";
+
+const RETURN_OPTIONS: FilterOption<DateFilter>[] = [
+  { value: "all", label: "All" },
+  { value: "overdue", label: "Overdue" },
+  { value: "upcoming", label: "Upcoming" },
+  { value: "nodate", label: "No date" },
+];
+
+const GOAL_OPTIONS: FilterOption<GoalFilter>[] = [
+  { value: "all", label: "All" },
+  { value: "g1", label: "Launch YouTube", dot: GOALS.g1.color },
+  { value: "g2", label: "Lose 5 kg", dot: GOALS.g2.color },
+  { value: "g3", label: "Read 24 books", dot: GOALS.g3.color },
+];
+
+const DELEGATE_OPTIONS: FilterOption<DelegateFilter>[] = [
+  { value: "all", label: "All" },
+  { value: "Maria", label: "Maria" },
+  { value: "AI", label: "AI" },
+];
+
+const SORT_OPTIONS: FilterOption<SortKey>[] = [
+  { value: "overdue", label: "Most overdue first" },
+  { value: "recent", label: "Most recent" },
+  { value: "delegate", label: "By delegate" },
+];
 
 const AllDelegated: React.FC = () => {
   const [dateFilter, setDateFilter] = useState<DateFilter>("all");
   const [delegateFilter, setDelegateFilter] = useState<DelegateFilter>("all");
   const [goalFilter, setGoalFilter] = useState<GoalFilter>("all");
+  const [sortKey, setSortKey] = useState<SortKey>("overdue");
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string>("d-grocery");
 
@@ -431,18 +460,26 @@ const AllDelegated: React.FC = () => {
     });
   }, [allDelegated, dateFilter, delegateFilter, goalFilter, query]);
 
+  const sortFn = useMemo(() => {
+    return (a: Action, b: Action) => {
+      switch (sortKey) {
+        case "recent":
+          return b.changedSort - a.changedSort;
+        case "delegate":
+          return (a.delegate ?? "").localeCompare(b.delegate ?? "");
+        case "overdue":
+        default:
+          return (a.expectedReturnDelta ?? Number.POSITIVE_INFINITY) - (b.expectedReturnDelta ?? Number.POSITIVE_INFINITY);
+      }
+    };
+  }, [sortKey]);
+
   const groups = useMemo(() => {
-    const overdue = filtered
-      .filter((a) => bucketFor(a) === "overdue")
-      .sort((a, b) => (a.expectedReturnDelta ?? 0) - (b.expectedReturnDelta ?? 0));
-    const upcoming = filtered
-      .filter((a) => bucketFor(a) === "upcoming")
-      .sort((a, b) => (a.expectedReturnDelta ?? 0) - (b.expectedReturnDelta ?? 0));
-    const nodate = filtered
-      .filter((a) => bucketFor(a) === "nodate")
-      .sort((a, b) => b.changedSort - a.changedSort);
+    const overdue = filtered.filter((a) => bucketFor(a) === "overdue").sort(sortFn);
+    const upcoming = filtered.filter((a) => bucketFor(a) === "upcoming").sort(sortFn);
+    const nodate = filtered.filter((a) => bucketFor(a) === "nodate").sort(sortFn);
     return { overdue, upcoming, nodate };
-  }, [filtered]);
+  }, [filtered, sortFn]);
 
   const meta = useMemo(() => {
     const total = allDelegated.length;
@@ -458,10 +495,18 @@ const AllDelegated: React.FC = () => {
     if (selected && selected.id !== selectedId) setSelectedId(selected.id);
   }, [selected, selectedId]);
 
+  const anyApplied =
+    dateFilter !== "all" ||
+    delegateFilter !== "all" ||
+    goalFilter !== "all" ||
+    sortKey !== "overdue" ||
+    query.trim() !== "";
+
   const clearFilters = () => {
     setDateFilter("all");
     setDelegateFilter("all");
     setGoalFilter("all");
+    setSortKey("overdue");
     setQuery("");
   };
 
@@ -477,76 +522,56 @@ const AllDelegated: React.FC = () => {
               {meta}
             </div>
           </div>
-          <div className="h-3" />
-          {/* Filter row 1: RETURN + search */}
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <FilterGroup label="RETURN">
-              <Chip active={dateFilter === "all"} onClick={() => setDateFilter("all")}>
-                All
-              </Chip>
-              <Chip active={dateFilter === "overdue"} onClick={() => setDateFilter("overdue")}>
-                Overdue
-              </Chip>
-              <Chip active={dateFilter === "upcoming"} onClick={() => setDateFilter("upcoming")}>
-                Upcoming
-              </Chip>
-              <Chip active={dateFilter === "nodate"} onClick={() => setDateFilter("nodate")}>
-                No date
-              </Chip>
-            </FilterGroup>
-            <div className="flex items-center gap-2 bg-surface-raised border border-border-subtle rounded-[4px] px-2.5 py-1.5 w-[240px]">
-              <span className="text-[12px] text-text-tertiary">⌕</span>
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search delegations..."
-                className="flex-1 bg-transparent outline-none text-[13px] text-text-primary placeholder:text-text-tertiary"
-              />
-            </div>
+          <div className="h-4" />
+          {/* Filters row */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <FilterDropdown
+              label="RETURN"
+              value={dateFilter}
+              defaultValue="all"
+              options={RETURN_OPTIONS}
+              onChange={(v) => setDateFilter(v)}
+            />
+            <FilterDropdown
+              label="GOAL"
+              value={goalFilter}
+              defaultValue="all"
+              options={GOAL_OPTIONS}
+              onChange={(v) => setGoalFilter(v)}
+            />
+            <FilterDropdown
+              label="DELEGATE"
+              value={delegateFilter}
+              defaultValue="all"
+              options={DELEGATE_OPTIONS}
+              onChange={(v) => setDelegateFilter(v)}
+            />
+            <FilterDropdown
+              label="SORT"
+              value={sortKey}
+              defaultValue="overdue"
+              options={SORT_OPTIONS}
+              onChange={(v) => setSortKey(v)}
+            />
+            {anyApplied && (
+              <button
+                onClick={clearFilters}
+                className="ml-auto text-[12px] text-text-tertiary hover:text-text-secondary transition-colors"
+              >
+                Clear filters
+              </button>
+            )}
           </div>
-          <div className="h-2" />
-          {/* Filter row 2: GOAL + DELEGATE */}
-          <div className="flex items-center gap-8 flex-wrap">
-            <FilterGroup label="GOAL">
-              <Chip active={goalFilter === "all"} onClick={() => setGoalFilter("all")}>
-                All
-              </Chip>
-              <Chip
-                active={goalFilter === "g1"}
-                onClick={() => setGoalFilter("g1")}
-                dot={GOALS.g1.color}
-              >
-                Launch YouTube
-              </Chip>
-              <Chip
-                active={goalFilter === "g2"}
-                onClick={() => setGoalFilter("g2")}
-                dot={GOALS.g2.color}
-              >
-                Lose 5 kg
-              </Chip>
-              <Chip
-                active={goalFilter === "g3"}
-                onClick={() => setGoalFilter("g3")}
-                dot={GOALS.g3.color}
-              >
-                Read 24 books
-              </Chip>
-            </FilterGroup>
-            <FilterGroup label="DELEGATE">
-              <Chip active={delegateFilter === "all"} onClick={() => setDelegateFilter("all")}>
-                All
-              </Chip>
-              <Chip
-                active={delegateFilter === "Maria"}
-                onClick={() => setDelegateFilter("Maria")}
-              >
-                Maria
-              </Chip>
-              <Chip active={delegateFilter === "AI"} onClick={() => setDelegateFilter("AI")}>
-                AI
-              </Chip>
-            </FilterGroup>
+          <div className="h-4" />
+          {/* Search row */}
+          <div className="flex items-center gap-2 bg-surface-raised border border-border-subtle rounded-[4px] px-3 py-2 max-w-[480px]">
+            <span className="text-[12px] text-text-tertiary">⌕</span>
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search delegations..."
+              className="flex-1 bg-transparent outline-none text-[13px] text-text-primary placeholder:text-text-tertiary"
+            />
           </div>
         </div>
 

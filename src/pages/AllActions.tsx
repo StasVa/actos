@@ -111,14 +111,6 @@ const GhostButton: React.FC<{
   </button>
 );
 
-const TertiaryLink: React.FC<{ children: React.ReactNode; onClick?: () => void }> = ({ children, onClick }) => (
-  <button
-    onClick={onClick}
-    className="h-9 px-2 text-[13px] text-text-tertiary hover:text-text-secondary transition-colors"
-  >
-    {children}
-  </button>
-);
 
 const fakeAction = (label: string) => () => {
   // Placeholder for future interactivity.

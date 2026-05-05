@@ -549,12 +549,10 @@ const Ideas: React.FC = () => {
       .filter((i) => {
         if (goalFilter !== "all" && i.goalId !== goalFilter) return false;
         if (!matchesStatus(i.status)) return false;
-        if (query.trim() && !i.title.toLowerCase().includes(query.trim().toLowerCase()))
-          return false;
         return true;
       })
       .sort((a, b) => new Date(b.capturedAt).getTime() - new Date(a.capturedAt).getTime());
-  }, [ideas, goalFilter, statusFilter, query]);
+  }, [ideas, goalFilter, statusFilter]);
 
   const selected =
     filtered.find((i) => i.id === selectedIdeaId) ?? filtered[0] ?? null;
@@ -576,7 +574,6 @@ const Ideas: React.FC = () => {
   const clearFilters = () => {
     setGoalFilter("all");
     setStatusFilter("captured");
-    setQuery("");
   };
 
   return (

@@ -461,7 +461,7 @@ const IdeaDetail: React.FC<{ idea: Idea }> = ({ idea }) => {
   }, [idea.id]);
 
   return (
-    <div className="px-10 py-8 max-w-[760px]">
+    <div className="px-10 py-8">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 cursor-pointer group">
           <span className="w-2 h-2 rounded-full" style={{ background: goal.color }} />

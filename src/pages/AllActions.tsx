@@ -271,7 +271,7 @@ const ActionDetail: React.FC<{ action: Action }> = ({ action }) => {
   quickInfoBits.push(`CREATED ${action.createdLabel.toUpperCase()}`);
 
   return (
-    <div className="px-10 py-8 max-w-[760px]">
+    <div className="px-10 py-8">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
         <span className="w-2 h-2 rounded-full" style={{ background: goal.color }} />

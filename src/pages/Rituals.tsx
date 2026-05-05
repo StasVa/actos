@@ -62,112 +62,26 @@ const Sidebar: React.FC = () => {
   );
 };
 
-/* ===== Mock data ===== */
+/* ===== Visual row shape (rendering layer; built from the store) ===== */
 type RitualRow = {
   id: string;
   title: string;
   goalName: string;
   goalColor: string;
-  scheduleLabel: string; // uppercase mono
-  scheduleShort: string; // for pending list (e.g. "daily")
-  multiplier: string; // "×1.10"
+  scheduleLabel: string;
+  scheduleShort: string;
+  multiplier: string;
   totalCompletions: number;
   pendingToday: boolean;
-  notDueToday?: boolean; // if not pending and not done — schedule doesn't include today
-  lastDoneLabel: string; // "yesterday", "Apr 1"
+  notDueToday?: boolean;
+  lastDoneLabel: string;
   consistency: number[]; // 30 entries (0/1)
   frequency: number[]; // 12 entries
-  freqMax: number; // y-axis max
-  hasPanel?: boolean; // if true, opens RitualPanel
+  freqMax: number;
+  isMonthly: boolean;
+  archived?: boolean;
+  archivedAgoLabel?: string;
 };
-
-/* Helper to build Mondays-only 30-day pattern: positions 2, 9, 16, 23 (0-indexed from oldest) */
-function buildWeeklyMondays(): number[] {
-  const arr = new Array(30).fill(0);
-  [2, 9, 16, 23].forEach((i) => (arr[i] = 1));
-  return arr;
-}
-
-const RITUALS: RitualRow[] = [
-  {
-    id: "morning-run",
-    title: "Morning run",
-    goalName: "Lose 5 kg",
-    goalColor: G2,
-    scheduleLabel: "DAILY",
-    scheduleShort: "daily",
-    multiplier: "×1.10",
-    totalCompletions: 24,
-    pendingToday: true,
-    lastDoneLabel: "yesterday",
-    consistency: [0,1,1,1,0,0,1, 1,1,0,1,1,1,0, 1,1,1,1,1,0,0, 1,1,1,1,1,1,0, 1,1],
-    frequency: [5,6,4,7,5,6,7,5,6,5,6,5],
-    freqMax: 7,
-  },
-  {
-    id: "weekly-project-audit",
-    title: "Weekly project audit",
-    goalName: "Launch YouTube channel",
-    goalColor: G1,
-    scheduleLabel: "WEEKLY · MONDAYS",
-    scheduleShort: "weekly · Mondays",
-    multiplier: "×1.10",
-    totalCompletions: 12,
-    pendingToday: false,
-    notDueToday: true,
-    lastDoneLabel: "yesterday",
-    consistency: buildWeeklyMondays(),
-    frequency: [1,1,1,1,1,0,0,1,1,1,1,1],
-    freqMax: 1,
-    hasPanel: true,
-  },
-  {
-    id: "evening-weight-log",
-    title: "Evening weight log",
-    goalName: "Lose 5 kg",
-    goalColor: G2,
-    scheduleLabel: "DAILY",
-    scheduleShort: "daily",
-    multiplier: "×1.05",
-    totalCompletions: 8,
-    pendingToday: true,
-    lastDoneLabel: "yesterday",
-    consistency: [0,0,0,0,0,0,0, 0,0,0,0,0,0,0, 0,0,0,0,1,0,1, 1,0,1,1,1,0,1, 1,1],
-    frequency: [0,0,0,0,0,0,0,0,0,0,3,5],
-    freqMax: 7,
-  },
-  {
-    id: "daily-reading",
-    title: "Daily reading 30min",
-    goalName: "Read 24 books this year",
-    goalColor: G3,
-    scheduleLabel: "DAILY",
-    scheduleShort: "daily",
-    multiplier: "×1.25",
-    totalCompletions: 47,
-    pendingToday: true,
-    lastDoneLabel: "yesterday",
-    consistency: [1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1],
-    frequency: [6,7,7,6,7,7,6,7,6,7,7,6],
-    freqMax: 7,
-  },
-  {
-    id: "monthly-book-review",
-    title: "Monthly book review",
-    goalName: "Read 24 books this year",
-    goalColor: G3,
-    scheduleLabel: "MONTHLY · 1ST OF MONTH",
-    scheduleShort: "monthly · 1st",
-    multiplier: "×1.00",
-    totalCompletions: 3,
-    pendingToday: false,
-    notDueToday: true,
-    lastDoneLabel: "Apr 1",
-    consistency: new Array(30).fill(0),
-    frequency: [1,0,0,1,0,0,0,1,0,0,0,0],
-    freqMax: 1,
-  },
-];
 
 /* Date helpers for tooltips */
 const MONTH_SHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -179,12 +93,10 @@ function dayLabel(daysFromToday: number): string {
   return `${MONTH_SHORT[d.getMonth()]} ${d.getDate()}`;
 }
 function weekLabel(weeksFromNow: number): string {
-  // weeksFromNow: 0 = this week (most recent), 11 = oldest
   const d = new Date();
   d.setDate(d.getDate() - weeksFromNow * 7);
-  // approximate "Week of <Mon date>"
   const day = d.getDay();
-  const diff = (day + 6) % 7; // Mon = 0
+  const diff = (day + 6) % 7;
   d.setDate(d.getDate() - diff);
   return `Week of ${MONTH_SHORT[d.getMonth()]} ${d.getDate()}`;
 }
@@ -194,6 +106,7 @@ function monthLabel(monthsFromNow: number): string {
   d.setMonth(d.getMonth() - monthsFromNow);
   return `${MONTH_SHORT[d.getMonth()]} ${d.getFullYear()}`;
 }
+
 
 /* ===== Charts ===== */
 const ConsistencyCalendar: React.FC<{ data: number[]; color: string; cellSize?: number }> = ({
@@ -319,7 +232,7 @@ const FrequencyChart: React.FC<{ data: number[]; max: number; color: string; uni
 
 /* ===== Ritual card ===== */
 const RitualCard: React.FC<{ r: RitualRow; onOpen: (r: RitualRow) => void; onMarkDone: (r: RitualRow) => void }> = ({ r, onOpen, onMarkDone }) => {
-  const isMonthly = r.scheduleLabel.startsWith("MONTHLY");
+  const isMonthly = r.isMonthly;
   return (
     <div
       onClick={() => onOpen(r)}
@@ -396,10 +309,9 @@ const RitualCard: React.FC<{ r: RitualRow; onOpen: (r: RitualRow) => void; onMar
         )}
       </div>
 
-      {isMonthly && (
+      {isMonthly && r.pendingToday && (
         <div className="mt-1 font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary tabular-nums">
-          DUE: MAY 1 ·{" "}
-          <span style={{ color: "hsl(var(--text-warning))" }}>4 DAYS OVERDUE</span>
+          DUE THIS MONTH
         </div>
       )}
     </div>
@@ -449,13 +361,17 @@ const PendingToday: React.FC<{ items: RitualRow[]; onMarkDone: (r: RitualRow) =>
   </section>
 );
 
-/* ===== Top stats ===== */
-const TopStats: React.FC = () => {
+/* ===== Top stats (live) ===== */
+const TopStats: React.FC<{ rows: RitualRow[]; allTime: number; activeCount: number; pendingCount: number; dueCount: number }> = ({ rows, allTime, activeCount, pendingCount, dueCount }) => {
+  // Week consistency: across all active daily/weekly rituals, fraction of "due" days hit in last 7.
+  const weekDone = rows.reduce((sum, r) => sum + r.consistency.slice(-7).reduce((a, b) => a + b, 0), 0);
+  const weekDue = rows.length * 7;
+  const weekPct = weekDue > 0 ? Math.round((weekDone / weekDue) * 100) : 0;
   const stats = [
-    { label: "ACTIVE", value: "5", sub: "rituals" },
-    { label: "PENDING TODAY", value: "3", sub: "of 4 due" },
-    { label: "WEEK CONSISTENCY", value: "86%", sub: "12 of 14" },
-    { label: "ALL TIME", value: "94", sub: "completions" },
+    { label: "ACTIVE", value: `${activeCount}`, sub: activeCount === 1 ? "ritual" : "rituals" },
+    { label: "PENDING TODAY", value: `${pendingCount}`, sub: `of ${dueCount} due` },
+    { label: "WEEK CONSISTENCY", value: `${weekPct}%`, sub: `${weekDone} of ${weekDue}` },
+    { label: "ALL TIME", value: `${allTime}`, sub: "completions" },
   ];
   return (
     <div
@@ -479,9 +395,10 @@ const TopStats: React.FC = () => {
   );
 };
 
-/* ===== Archived ===== */
-const ArchivedSection: React.FC = () => {
+/* ===== Archived (live) ===== */
+const ArchivedSection: React.FC<{ rows: RitualRow[]; onRestore: (id: string) => void }> = ({ rows, onRestore }) => {
   const [open, setOpen] = useState(false);
+  if (rows.length === 0) return null;
   return (
     <section>
       <button
@@ -489,36 +406,180 @@ const ArchivedSection: React.FC = () => {
         onClick={() => setOpen((v) => !v)}
         className="text-[12px] font-medium uppercase tracking-[0.08em] text-text-tertiary hover:text-text-secondary cursor-pointer"
       >
-        {open ? "▾" : "▸"} ARCHIVED · 1
+        {open ? "▾" : "▸"} ARCHIVED · {rows.length}
       </button>
       {open && (
         <div className="mt-3 rounded-[4px] overflow-hidden border border-border-subtle">
-          <div
-            className="flex items-center gap-3 pr-3 hover:bg-surface-hover transition-colors"
-            style={{ height: 36, padding: "8px 12px" }}
-          >
-            <span
-              className="self-stretch shrink-0 -ml-3"
-              style={{ width: 3, background: "hsl(var(--state-stalled))" }}
-            />
-            <span className="text-[13px] text-text-tertiary">Daily meditation</span>
-            <span className="font-mono text-[11px] text-text-tertiary">
-              · DAILY · 9 completions · archived 2 weeks ago
-            </span>
-            <div className="flex-1" />
-            <a
-              href="#"
-              onClick={(e) => e.preventDefault()}
-              className="text-[12px] text-text-tertiary hover:text-text-secondary"
+          {rows.map((r, i) => (
+            <div
+              key={r.id}
+              className={`flex items-center gap-3 pr-3 hover:bg-surface-hover transition-colors ${i > 0 ? "border-t border-border-subtle" : ""}`}
+              style={{ height: 36, padding: "8px 12px" }}
             >
-              Restore
-            </a>
-          </div>
+              <span
+                className="self-stretch shrink-0 -ml-3"
+                style={{ width: 3, background: "hsl(var(--state-stalled))" }}
+              />
+              <span className="text-[13px] text-text-tertiary">{r.title}</span>
+              <span className="font-mono text-[11px] text-text-tertiary">
+                · {r.scheduleLabel} · {r.totalCompletions} completions{r.archivedAgoLabel ? ` · archived ${r.archivedAgoLabel}` : ""}
+              </span>
+              <div className="flex-1" />
+              <button
+                type="button"
+                onClick={() => onRestore(r.id)}
+                className="text-[12px] text-text-tertiary hover:text-text-secondary"
+              >
+                Restore
+              </button>
+            </div>
+          ))}
         </div>
       )}
     </section>
   );
 };
+
+/* ===== Helpers: derive RitualRow from store ===== */
+const TODAY_ISO = new Date().toISOString().slice(0, 10);
+
+function isMonthlyRitual(schedule: string): boolean {
+  return schedule === "monthly";
+}
+
+function ritualDueToday(schedule: string, scheduleConfig?: import("@/types").RitualScheduleConfig): boolean {
+  const dow = new Date().getDay(); // 0=Sun
+  switch (schedule) {
+    case "daily": return true;
+    case "weekdays": return dow >= 1 && dow <= 5;
+    case "weekly": {
+      const target = scheduleConfig?.weekday;
+      return target === undefined ? true : target === dow;
+    }
+    case "monthly": {
+      const target = scheduleConfig?.monthDay ?? 1;
+      return new Date().getDate() === target;
+    }
+    case "custom": {
+      const days = scheduleConfig?.customDays;
+      return days && days.length > 0 ? days.includes(dow) : true;
+    }
+    default: return true;
+  }
+}
+
+function multLabel(total: number): string {
+  if (total < 3) return "×1.00";
+  if (total < 7) return "×1.10";
+  if (total < 14) return "×1.25";
+  if (total < 30) return "×1.50";
+  if (total < 60) return "×1.75";
+  if (total < 100) return "×2.00";
+  return "×2.50";
+}
+
+function buildConsistency(history: { date: string }[], days = 30): number[] {
+  const set = new Set(history.map((h) => h.date));
+  const arr: number[] = [];
+  const base = new Date();
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(base);
+    d.setDate(base.getDate() - i);
+    arr.push(set.has(d.toISOString().slice(0, 10)) ? 1 : 0);
+  }
+  return arr;
+}
+
+function buildFrequency(history: { date: string }[], unit: "week" | "month", buckets: number): number[] {
+  const arr = new Array(buckets).fill(0);
+  const now = new Date();
+  for (const h of history) {
+    const d = new Date(h.date);
+    let stepsAgo: number;
+    if (unit === "week") {
+      stepsAgo = Math.floor((now.getTime() - d.getTime()) / (7 * 86400000));
+    } else {
+      stepsAgo = (now.getFullYear() - d.getFullYear()) * 12 + (now.getMonth() - d.getMonth());
+    }
+    if (stepsAgo >= 0 && stepsAgo < buckets) {
+      arr[buckets - 1 - stepsAgo] += 1;
+    }
+  }
+  return arr;
+}
+
+function lastDoneLabel(history: { date: string }[]): string {
+  if (history.length === 0) return "never";
+  const sorted = [...history].sort((a, b) => b.date.localeCompare(a.date));
+  const last = sorted[0].date;
+  if (last === TODAY_ISO) return "today";
+  const yest = new Date();
+  yest.setDate(yest.getDate() - 1);
+  if (last === yest.toISOString().slice(0, 10)) return "yesterday";
+  const d = new Date(last);
+  return `${MONTH_SHORT[d.getMonth()]} ${d.getDate()}`;
+}
+
+function archivedAgoLabel(iso?: string): string | undefined {
+  if (!iso) return undefined;
+  const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+  if (days < 7) return `${days}d ago`;
+  if (days < 30) return `${Math.round(days / 7)}w ago`;
+  return `${Math.round(days / 30)}mo ago`;
+}
+
+function buildRitualRow(
+  r: import("@/types").Ritual,
+  goalsById: Record<string, import("@/types").Goal>,
+): RitualRow {
+  const goal = goalsById[r.goalId];
+  const goalColor = goal ? `hsl(var(--${goal.color}))` : "hsl(var(--text-tertiary))";
+  const goalName = goal?.title ?? "—";
+  const monthly = isMonthlyRitual(r.schedule);
+  const consistency = monthly
+    ? new Array(30).fill(0).concat()
+    : buildConsistency(r.completionHistory, 30);
+  const frequency = monthly
+    ? buildFrequency(r.completionHistory, "month", 12)
+    : buildFrequency(r.completionHistory, "week", 12);
+  const freqMax = Math.max(1, ...frequency);
+  const doneToday = r.completionHistory.some((c) => c.date === TODAY_ISO);
+  const dueToday = ritualDueToday(r.schedule, r.scheduleConfig);
+  const scheduleLabel = (() => {
+    const base = r.schedule.toUpperCase();
+    const names = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+    if (r.schedule === "weekly" && r.scheduleConfig?.weekday !== undefined) {
+      return `${base} · ${names[r.scheduleConfig.weekday]}`;
+    }
+    if (r.schedule === "custom" && r.scheduleConfig?.customDays?.length) {
+      return `${base} · ${r.scheduleConfig.customDays.map((d) => names[d]).join(" ")}`;
+    }
+    if (r.schedule === "monthly") {
+      const day = r.scheduleConfig?.monthDay ?? 1;
+      return `MONTHLY · DAY ${day}`;
+    }
+    return base;
+  })();
+  return {
+    id: r.id,
+    title: r.title,
+    goalName,
+    goalColor,
+    scheduleLabel,
+    scheduleShort: r.schedule,
+    multiplier: multLabel(r.totalCompletions),
+    totalCompletions: r.totalCompletions,
+    pendingToday: dueToday && !doneToday,
+    notDueToday: !dueToday,
+    lastDoneLabel: lastDoneLabel(r.completionHistory),
+    consistency,
+    frequency,
+    freqMax,
+    isMonthly: monthly,
+    archived: r.status === "archived",
+    archivedAgoLabel: archivedAgoLabel(r.archivedAt),
+  };
+}
 
 /* ===== Page ===== */
 const Rituals: React.FC = () => {
@@ -526,27 +587,35 @@ const Rituals: React.FC = () => {
   const storeGoals = useStore((s) => s.goals);
   const openPanel = useStore((s) => s.openPanel);
   const markRitualInstanceDone = useStore((s) => s.markRitualInstanceDone);
+  const restoreRitual = useStore((s) => s.restoreRitual);
 
-  const pending = RITUALS.filter((r) => r.pendingToday);
+  const goalsById = React.useMemo(() => {
+    const m: Record<string, import("@/types").Goal> = {};
+    for (const g of storeGoals) m[g.id] = g;
+    return m;
+  }, [storeGoals]);
 
-  // Bridge static visual rows → real store records by title.
-  const findStoreRitual = (r: RitualRow) =>
-    storeRituals.find((sr) => sr.title.toLowerCase() === r.title.toLowerCase());
+  const activeRows = React.useMemo(
+    () =>
+      storeRituals
+        .filter((r) => r.status === "active")
+        .map((r) => buildRitualRow(r, goalsById)),
+    [storeRituals, goalsById],
+  );
+  const archivedRows = React.useMemo(
+    () =>
+      storeRituals
+        .filter((r) => r.status === "archived")
+        .map((r) => buildRitualRow(r, goalsById)),
+    [storeRituals, goalsById],
+  );
+
+  const pending = activeRows.filter((r) => r.pendingToday);
+  const dueCount = activeRows.filter((r) => !r.notDueToday).length;
+  const allTime = storeRituals.reduce((s, r) => s + r.totalCompletions, 0);
 
   const handleOpen = (r: RitualRow) => {
-    const match = findStoreRitual(r);
-    if (match) {
-      openPanel({ kind: "ritual", mode: "edit", id: match.id });
-    } else {
-      openPanel({
-        kind: "ritual",
-        mode: "new",
-        prefill: {
-          title: r.title,
-          goalId: storeGoals.find((g) => g.status === "active")?.id,
-        },
-      });
-    }
+    openPanel({ kind: "ritual", mode: "edit", id: r.id });
   };
 
   const handleAddRitual = () => {
@@ -558,37 +627,46 @@ const Rituals: React.FC = () => {
   };
 
   const handleMarkDone = (r: RitualRow) => {
-    const match = findStoreRitual(r);
-    if (!match) {
-      toast.error("Ritual not found in store");
-      return;
-    }
-    const today = new Date().toISOString().slice(0, 10);
-    if (match.completionHistory.some((c) => c.date === today)) {
+    const match = storeRituals.find((sr) => sr.id === r.id);
+    if (!match) return;
+    if (match.completionHistory.some((c) => c.date === TODAY_ISO)) {
       toast("Already logged today");
       return;
     }
     markRitualInstanceDone(match.id);
-    toast(`Logged · ${match.totalCompletions + 1} completion${match.totalCompletions + 1 === 1 ? "" : "s"}`);
+    toast.success(`Logged · ${match.totalCompletions + 1} completion${match.totalCompletions + 1 === 1 ? "" : "s"}`);
   };
+
+  const handleRestore = (id: string) => {
+    restoreRitual(id);
+    toast.success("Ritual restored");
+  };
+
+  const headerMeta =
+    `${activeRows.length} ACTIVE · ${pending.length} PENDING TODAY · ${allTime} TOTAL DONE`;
 
   return (
     <div className="min-h-screen bg-surface-base text-text-primary">
       <Sidebar />
       <main className="ml-[220px]" style={{ padding: "32px 40px" }}>
         <div className="mx-auto" style={{ maxWidth: 1100 }}>
-          {/* Header */}
           <div className="flex items-baseline justify-between">
             <h1 className="text-[24px] font-medium text-text-primary" style={{ fontWeight: 500 }}>
               Rituals
             </h1>
             <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary tabular-nums">
-              5 ACTIVE · 3 PENDING TODAY · 86% WEEK CONSISTENCY
+              {headerMeta}
             </div>
           </div>
 
           <div style={{ height: 24 }} />
-          <TopStats />
+          <TopStats
+            rows={activeRows}
+            allTime={allTime}
+            activeCount={activeRows.length}
+            pendingCount={pending.length}
+            dueCount={dueCount}
+          />
 
           <div style={{ height: 24 }} />
           {pending.length > 0 && (
@@ -597,16 +675,14 @@ const Rituals: React.FC = () => {
 
           <div style={{ height: 32 }} />
 
-          {/* Active rituals grid */}
           <section>
             <div className="flex items-center justify-between mb-3">
               <div className="text-[12px] font-medium uppercase tracking-[0.08em] text-text-secondary">
-                Active rituals · 5
+                Active rituals · {activeRows.length}
               </div>
-              <div className="font-mono text-[11px] text-text-secondary">Sort: by consistency</div>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {RITUALS.map((r) => (
+              {activeRows.map((r) => (
                 <RitualCard key={r.id} r={r} onOpen={handleOpen} onMarkDone={handleMarkDone} />
               ))}
               <button
@@ -630,10 +706,15 @@ const Rituals: React.FC = () => {
                 </span>
               </button>
             </div>
+            {activeRows.length === 0 && (
+              <div className="mt-4 font-mono text-[11px] text-text-tertiary text-center">
+                No active rituals. Use the “+ Add ritual” button or ⌘K.
+              </div>
+            )}
           </section>
 
           <div style={{ height: 24 }} />
-          <ArchivedSection />
+          <ArchivedSection rows={archivedRows} onRestore={handleRestore} />
 
           <div style={{ height: 32 }} />
         </div>
@@ -643,3 +724,4 @@ const Rituals: React.FC = () => {
 };
 
 export default Rituals;
+

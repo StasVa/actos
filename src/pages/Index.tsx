@@ -250,15 +250,33 @@ const SPARK_1_TIPS = buildYouTubeTooltips(SPARK_1);
 const SPARK_2_TIPS = buildFitnessTooltips(SPARK_2);
 const SPARK_3_TIPS = buildReadingTooltips(SPARK_3);
 
-/* ===== Hero (live store-wired) =====
- * Sparklines stay on canned demo data because we don't have 30 days of seeded
- * activity history — but headline progress, project counts, action counts,
- * outcome/effort, and state indicator are all derived from the store. */
-const SPARKS_BY_GOAL_COLOR: Record<string, { data: number[]; tips: import("@/components/Tooltip").DayInfo[] }> = {
-  "goal-1": { data: SPARK_1, tips: SPARK_1_TIPS },
-  "goal-2": { data: SPARK_2, tips: SPARK_2_TIPS },
-  "goal-3": { data: SPARK_3, tips: SPARK_3_TIPS },
-};
+/* ===== Hero (live store-wired) ===== */
+function buildSparkFromActions(
+  actions: import("@/types").Action[],
+  days = 30,
+): { data: number[]; tips: import("@/components/Tooltip").DayInfo[] } {
+  const data: number[] = new Array(days).fill(0);
+  const titles: string[][] = Array.from({ length: days }, () => []);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  for (const a of actions) {
+    const ts = a.completedAt ?? a.delegatedAt;
+    if (!ts) continue;
+    const d = new Date(ts);
+    d.setHours(0, 0, 0, 0);
+    const daysAgo = Math.round((today.getTime() - d.getTime()) / 86400000);
+    if (daysAgo < 0 || daysAgo >= days) continue;
+    const idx = days - 1 - daysAgo;
+    data[idx] += 1;
+    titles[idx].push(a.title);
+  }
+  const tips = data.map((count, i) => ({
+    daysFromToday: days - 1 - i,
+    count,
+    actions: titles[i],
+  }));
+  return { data, tips };
+}
 
 function relativeDayLabel(iso?: string): string {
   if (!iso) return "no activity yet";
@@ -339,7 +357,7 @@ const Hero: React.FC = () => {
           .slice(0, 3)
           .map((a) => a.title);
 
-        const spark = SPARKS_BY_GOAL_COLOR[g.color] ?? { data: SPARK_3, tips: SPARK_3_TIPS };
+        const spark = buildSparkFromActions(goalActions, 30);
 
         return (
           <GoalColumn
@@ -663,84 +681,128 @@ const Today: React.FC = () => {
 };
 
 
-/* ===== Heavy Lift ===== */
-const HEAVY = [
-  { c: G1, impact: 8, title: "Edit first video draft", crumb: "YouTube · Shoot video #1", time: "2h 30m" },
-  { c: G1, impact: 7, title: "Outline video #2 series structure", crumb: "YouTube · Shoot video #1", time: "2h" },
-  { c: G2, impact: 6, title: "Cook batch meals for the week", crumb: "Lose 5 kg · Nutrition plan", time: "1h 30m" },
-];
+/* ===== Heavy Lift (live) ===== */
+const HeavyLift: React.FC = () => {
+  const actions = useStore((s) => s.actions);
+  const goals = useStore((s) => s.goals);
+  const projects = useStore((s) => s.projects);
+  const openPanel = useStore((s) => s.openPanel);
+  const changeStatus = useStore((s) => s.changeActionStatus);
 
-const HeavyLift: React.FC = () => (
-  <section>
-    <SectionLabel meta="HIGH IMPACT · HIGH EFFORT">Heavy lift today</SectionLabel>
-    <div className="space-y-1">
-      {HEAVY.map((r, i) => (
-        <div
-          key={i}
-          className="group flex items-center gap-3 pr-3 min-h-9 rounded-[2px] hover:bg-surface-hover transition-colors overflow-hidden"
-        >
-          <Strip color={r.c} />
-          <div className="w-[52px] pl-2">
-            <div className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary leading-none">
-              IMPACT
-            </div>
-            <div className="font-mono text-[16px] text-text-primary leading-tight">{r.impact}</div>
-          </div>
-          <div className="min-w-0 flex-1 py-1.5">
-            <div className="text-[13px] font-medium text-text-primary truncate">{r.title}</div>
-            <div className="text-[11px] text-text-secondary truncate">{r.crumb}</div>
-          </div>
-          <span className="font-mono text-[12px] text-text-secondary whitespace-nowrap">{r.time}</span>
-          <a
-            href="#"
-            className="text-[12px] text-accent hover:text-accent-hover whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-100"
-          >
-            Mark done
-          </a>
-          <a
-            href="#"
-            className="text-[12px] text-text-secondary hover:text-text-primary whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-100"
-          >
-            Open
-          </a>
+  const items = actions
+    .filter((a) => (a.status === "planned" || a.status === "backlog"))
+    .filter((a) => (a.impact ?? 0) >= 6 && (a.timeEstimateMinutes ?? 0) >= 60)
+    .sort((a, b) => (b.impact ?? 0) - (a.impact ?? 0))
+    .slice(0, 3);
+
+  return (
+    <section>
+      <SectionLabel meta="HIGH IMPACT · HIGH EFFORT">Heavy lift today</SectionLabel>
+      {items.length === 0 ? (
+        <div className="font-mono text-[11px] text-text-tertiary px-3 py-2">
+          No heavy-lift candidates. Add actions with impact ≥ 6 and time ≥ 1h.
         </div>
-      ))}
-    </div>
-  </section>
-);
-
-/* ===== Quick Moves ===== */
-const QUICK = [
-  { c: G1, title: "Send brief to thumbnail designer", crumb: "YouTube · Shoot video #1", del: "→ AI", meta: "I6 · 20m" },
-  { c: G2, title: "Order resistance bands", crumb: "Lose 5 kg · Nutrition plan", meta: "I5 · 15m" },
-  { c: G1, title: "Update channel description", crumb: "YouTube · Set up workspace", meta: "I5 · 30m" },
-  { c: G2, title: "Schedule weekly meal prep day", crumb: "Lose 5 kg · Nutrition plan", meta: "I4 · 20m" },
-  { c: G1, title: "Test new recording mic", crumb: "YouTube · Shoot video #1", meta: "I4 · 30m" },
-];
-
-const QuickMoves: React.FC = () => (
-  <section>
-    <SectionLabel meta="HIGH IMPACT · LOW EFFORT">Quick moves</SectionLabel>
-    <div className="space-y-0.5">
-      {QUICK.map((r, i) => (
-        <div
-          key={i}
-          className="flex items-center gap-3 pr-3 h-7 rounded-[2px] hover:bg-surface-hover transition-colors overflow-hidden"
-        >
-          <Strip color={r.c} />
-          <div className="pl-1">
-            <Checkbox />
-          </div>
-          <span className="text-[13px] text-text-primary truncate">{r.title}</span>
-          <span className="text-[12px] text-text-secondary truncate">· {r.crumb}</span>
-          <div className="flex-1" />
-          {r.del && <span className="font-mono text-[11px] text-text-tertiary">{r.del}</span>}
-          <span className="font-mono text-[11px] text-text-secondary whitespace-nowrap">{r.meta}</span>
+      ) : (
+        <div className="space-y-1">
+          {items.map((a) => {
+            const g = goals.find((gg) => gg.id === a.goalId);
+            const p = a.projectId ? projects.find((pp) => pp.id === a.projectId) : undefined;
+            const c = g ? `hsl(var(--${g.color}))` : "hsl(var(--text-tertiary))";
+            const time = fmtTime(a.timeEstimateMinutes);
+            const crumb = `${g?.title ?? ""}${p ? ` · ${p.title}` : ""}`;
+            return (
+              <div
+                key={a.id}
+                className="group flex items-center gap-3 pr-3 min-h-9 rounded-[2px] hover:bg-surface-hover transition-colors overflow-hidden"
+              >
+                <Strip color={c} />
+                <div className="w-[52px] pl-2">
+                  <div className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary leading-none">IMPACT</div>
+                  <div className="font-mono text-[16px] text-text-primary leading-tight">{a.impact}</div>
+                </div>
+                <div className="min-w-0 flex-1 py-1.5">
+                  <div className="text-[13px] font-medium text-text-primary truncate">{a.title}</div>
+                  <div className="text-[11px] text-text-secondary truncate">{crumb}</div>
+                </div>
+                {time && <span className="font-mono text-[12px] text-text-secondary whitespace-nowrap">{time}</span>}
+                <button
+                  onClick={() => { changeStatus(a.id, "done"); toast.success("Action completed"); }}
+                  className="text-[12px] text-accent hover:text-accent-hover whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  Mark done
+                </button>
+                <button
+                  onClick={() => openPanel({ kind: "action", mode: "edit", id: a.id })}
+                  className="text-[12px] text-text-secondary hover:text-text-primary whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  Open
+                </button>
+              </div>
+            );
+          })}
         </div>
-      ))}
-    </div>
-  </section>
-);
+      )}
+    </section>
+  );
+};
+
+/* ===== Quick Moves (live) ===== */
+const QuickMoves: React.FC = () => {
+  const actions = useStore((s) => s.actions);
+  const goals = useStore((s) => s.goals);
+  const projects = useStore((s) => s.projects);
+  const openPanel = useStore((s) => s.openPanel);
+  const changeStatus = useStore((s) => s.changeActionStatus);
+
+  const items = actions
+    .filter((a) => a.status === "planned" || a.status === "backlog")
+    .filter((a) => (a.impact ?? 0) >= 4 && (a.timeEstimateMinutes ?? 31) <= 30)
+    .sort((a, b) => (b.impact ?? 0) - (a.impact ?? 0))
+    .slice(0, 5);
+
+  return (
+    <section>
+      <SectionLabel meta="HIGH IMPACT · LOW EFFORT">Quick moves</SectionLabel>
+      {items.length === 0 ? (
+        <div className="font-mono text-[11px] text-text-tertiary px-3 py-2">
+          No quick wins available. Add actions with impact ≥ 4 and time ≤ 30m.
+        </div>
+      ) : (
+        <div className="space-y-0.5">
+          {items.map((a) => {
+            const g = goals.find((gg) => gg.id === a.goalId);
+            const p = a.projectId ? projects.find((pp) => pp.id === a.projectId) : undefined;
+            const c = g ? `hsl(var(--${g.color}))` : "hsl(var(--text-tertiary))";
+            const time = fmtTime(a.timeEstimateMinutes) ?? "";
+            const meta = `I${a.impact}${time ? ` · ${time}` : ""}`;
+            return (
+              <div
+                key={a.id}
+                onClick={() => openPanel({ kind: "action", mode: "edit", id: a.id })}
+                className="flex items-center gap-3 pr-3 h-7 rounded-[2px] hover:bg-surface-hover transition-colors overflow-hidden cursor-pointer"
+              >
+                <Strip color={c} />
+                <button
+                  onClick={(e) => { e.stopPropagation(); changeStatus(a.id, "done"); toast.success("Action completed"); }}
+                  className="ml-1 inline-block rounded-[2px] border border-text-tertiary hover:border-accent shrink-0"
+                  style={{ width: 14, height: 14 }}
+                  aria-label="Mark done"
+                />
+                <span className="text-[13px] text-text-primary truncate">{a.title}</span>
+                <span className="text-[12px] text-text-secondary truncate">· {g?.title}{p ? ` · ${p.title}` : ""}</span>
+                <div className="flex-1" />
+                {a.delegateName && (
+                  <span className="font-mono text-[11px] text-text-tertiary">→ {a.delegateName}</span>
+                )}
+                <span className="font-mono text-[11px] text-text-secondary whitespace-nowrap">{meta}</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </section>
+  );
+};
 
 /* ===== Bottom Utility Row ===== */
 const TinyHeader: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -748,17 +810,31 @@ const TinyHeader: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 );
 
 const RecentlyClosed: React.FC = () => {
-  const items = [
-    { c: G1, name: "Set up workspace", date: "Apr 28" },
-    { c: G1, name: "Define content pillars", date: "Apr 22" },
-    { c: G2, name: "First grocery overhaul", date: "Apr 18" },
-  ];
+  const projects = useStore((s) => s.projects);
+  const goals = useStore((s) => s.goals);
+  const items = projects
+    .filter((p) => p.status === "completed" && p.completedAt)
+    .sort((a, b) => (b.completedAt ?? "").localeCompare(a.completedAt ?? ""))
+    .slice(0, 3)
+    .map((p) => {
+      const g = goals.find((gg) => gg.id === p.goalId);
+      const d = new Date(p.completedAt!);
+      return {
+        id: p.id,
+        c: g ? `hsl(var(--${g.color}))` : "hsl(var(--text-tertiary))",
+        name: p.title,
+        date: d.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+      };
+    });
   return (
     <div className="p-4">
-      <TinyHeader>RECENTLY CLOSED · 3</TinyHeader>
+      <TinyHeader>RECENTLY CLOSED · {items.length}</TinyHeader>
       <div className="mt-3 space-y-1.5">
-        {items.map((it, i) => (
-          <div key={i} className="flex items-center gap-2">
+        {items.length === 0 && (
+          <div className="font-mono text-[11px] text-text-tertiary">No closed projects yet.</div>
+        )}
+        {items.map((it) => (
+          <div key={it.id} className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full shrink-0" style={{ background: it.c }} />
             <span className="text-[12px] text-text-primary truncate">{it.name}</span>
             <span className="font-mono text-[11px] text-text-tertiary whitespace-nowrap">· {it.date}</span>
@@ -770,34 +846,47 @@ const RecentlyClosed: React.FC = () => {
 };
 
 const Delegated: React.FC = () => {
-  const items = [
-    { name: "Buy ring light", to: "→ Maria" },
-    { name: "Send brief to thumbnail designer", to: "→ AI" },
-  ];
+  const actions = useStore((s) => s.actions);
+  const items = actions.filter((a) => a.status === "delegated").slice(0, 4);
   return (
     <div className="p-4">
-      <TinyHeader>DELEGATED · 2 ACTIVE</TinyHeader>
+      <TinyHeader>DELEGATED · {items.length} ACTIVE</TinyHeader>
       <div className="mt-3 space-y-1.5">
-        {items.map((it, i) => (
-          <div key={i} className="flex items-baseline gap-1 min-w-0">
-            <span className="text-[12px] text-text-primary truncate">{it.name}</span>
-            <span className="font-mono text-[11px] text-text-tertiary whitespace-nowrap">· {it.to}</span>
+        {items.length === 0 && (
+          <div className="font-mono text-[11px] text-text-tertiary">No delegations.</div>
+        )}
+        {items.map((a) => (
+          <div key={a.id} className="flex items-baseline gap-1 min-w-0">
+            <span className="text-[12px] text-text-primary truncate">{a.title}</span>
+            {a.delegateName && (
+              <span className="font-mono text-[11px] text-text-tertiary whitespace-nowrap">· → {a.delegateName}</span>
+            )}
           </div>
         ))}
       </div>
-      <a href="#" className="inline-block mt-2 text-[12px] text-accent hover:text-accent-hover">
+      <Link to="/all-delegated" className="inline-block mt-2 text-[12px] text-accent hover:text-accent-hover">
         View all →
-      </a>
+      </Link>
     </div>
   );
 };
 
 const ThisWeek: React.FC = () => {
+  const actions = useStore((s) => s.actions);
+  const projects = useStore((s) => s.projects);
+  const cutoff = Date.now() - 7 * 86400000;
+  const inWeek = (iso?: string) => !!iso && new Date(iso).getTime() >= cutoff;
+  const done = actions.filter((a) => a.status === "done" && inWeek(a.completedAt)).length;
+  const delegated = actions.filter((a) => a.status === "delegated" && inWeek(a.delegatedAt)).length;
+  const dropped = actions.filter(
+    (a) => (a.status === "dropped" || a.status === "cancelled") && inWeek(a.droppedAt ?? a.cancelledAt),
+  ).length;
+  const projClosed = projects.filter((p) => p.status === "completed" && inWeek(p.completedAt)).length;
   const stats = [
-    { n: "12", label: "actions done" },
-    { n: "3", label: "delegated" },
-    { n: "1", label: "dropped" },
-    { n: "0", label: "projects closed" },
+    { n: `${done}`, label: "actions done" },
+    { n: `${delegated}`, label: "delegated" },
+    { n: `${dropped}`, label: "dropped" },
+    { n: `${projClosed}`, label: "projects closed" },
   ];
   return (
     <div className="p-4">

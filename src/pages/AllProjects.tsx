@@ -63,7 +63,7 @@ const Sidebar: React.FC = () => {
   );
 };
 
-/* ===== Data ===== */
+/* ===== Data shape (visual rendering only) ===== */
 type GoalKey = "g1" | "g2" | "g3";
 type ProjectState = "near" | "active" | "stalled" | "completed" | "dropped";
 
@@ -75,132 +75,32 @@ type Project = {
   title: string;
   done: number;
   total: number;
-  /** friendly last activity, e.g. "today", "2d ago", "11d ago" */
   last: string;
-  /** numeric days since last activity for sorting */
   lastDays: number;
   state: ProjectState;
-  /** for completed/dropped — closing label */
   closedLabel?: string;
-  closedSort?: number; // higher = more recent close
-  href?: string;
+  closedSort?: number;
 };
 
-const PROJECTS: Project[] = [
-  // Active / near
-  {
-    id: "shoot-video-1",
-    goal: "g1",
-    goalLabel: "YOUTUBE CHANNEL",
-    goalColor: G1,
-    title: "Shoot video #1",
-    done: 3,
-    total: 7,
-    last: "today",
-    lastDays: 0,
-    state: "active",
-    href: "/projects/shoot-video-1",
-  },
-  {
-    id: "set-up-workspace",
-    goal: "g1",
-    goalLabel: "YOUTUBE CHANNEL",
-    goalColor: G1,
-    title: "Set up workspace",
-    done: 4,
-    total: 5,
-    last: "2d ago",
-    lastDays: 2,
-    state: "near",
-  },
-  {
-    id: "nutrition-plan",
-    goal: "g2",
-    goalLabel: "LOSE 5 KG",
-    goalColor: G2,
-    title: "Nutrition plan",
-    done: 3,
-    total: 4,
-    last: "today",
-    lastDays: 0,
-    state: "near",
-  },
-  {
-    id: "build-cardio",
-    goal: "g2",
-    goalLabel: "LOSE 5 KG",
-    goalColor: G2,
-    title: "Build cardio routine",
-    done: 1,
-    total: 6,
-    last: "11d ago",
-    lastDays: 11,
-    state: "stalled",
-  },
-  {
-    id: "daily-reading",
-    goal: "g3",
-    goalLabel: "READ 24 BOOKS",
-    goalColor: G3,
-    title: "Build daily reading habit",
-    done: 8,
-    total: 24,
-    last: "today",
-    lastDays: 0,
-    state: "active",
-  },
-  // Closed / dropped
-  {
-    id: "content-pillars",
-    goal: "g1",
-    goalLabel: "YOUTUBE CHANNEL",
-    goalColor: G1,
-    title: "Define content pillars",
-    done: 4,
-    total: 4,
-    last: "Apr 22",
-    lastDays: 13,
-    state: "completed",
-    closedLabel: "Apr 22",
-    closedSort: 422,
-  },
-  {
-    id: "grocery-overhaul",
-    goal: "g2",
-    goalLabel: "LOSE 5 KG",
-    goalColor: G2,
-    title: "First grocery overhaul",
-    done: 6,
-    total: 6,
-    last: "Apr 18",
-    lastDays: 17,
-    state: "completed",
-    closedLabel: "Apr 18",
-    closedSort: 418,
-  },
-  {
-    id: "morning-runs",
-    goal: "g2",
-    goalLabel: "LOSE 5 KG",
-    goalColor: G2,
-    title: "Morning runs experiment",
-    done: 2,
-    total: 8,
-    last: "Apr 10",
-    lastDays: 25,
-    state: "dropped",
-    closedLabel: "Apr 10",
-    closedSort: 410,
-  },
-];
-
-const GOAL_NAMES: Record<GoalKey, string> = {
-  g1: "Launch YouTube channel",
-  g2: "Lose 5 kg",
-  g3: "Read 24 books",
+const GOAL_COLOR_VARS: Record<string, GoalKey> = {
+  "goal-1": "g1",
+  "goal-2": "g2",
+  "goal-3": "g3",
 };
 
-const GOAL_COLOR: Record<GoalKey, string> = { g1: G1, g2: G2, g3: G3 };
+function fmtAgo(iso?: string): { label: string; days: number } {
+  if (!iso) return { label: "—", days: 999 };
+  const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+  if (days <= 0) return { label: "today", days: 0 };
+  if (days === 1) return { label: "1d ago", days: 1 };
+  if (days < 30) return { label: `${days}d ago`, days };
+  const d = new Date(iso);
+  return {
+    label: d.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+    days,
+  };
+}
+
 
 /* ===== Tooltip content ===== */
 const StateTooltip: React.FC<{ p: Project }> = ({ p }) => (
@@ -416,23 +316,77 @@ const AllProjects: React.FC = () => {
 
   const storeProjects = useStore((s) => s.projects);
   const storeGoals = useStore((s) => s.goals);
+  const storeActions = useStore((s) => s.actions);
   const openPanel = useStore((s) => s.openPanel);
 
-  // Bridge static visual project rows to real store records by title.
+  // Derive the visual project rows from the live store (preserves the existing
+  // renderer shape so the rest of the page stays unchanged).
+  const goalKeyFor = (goalId: string): GoalKey => {
+    const g = storeGoals.find((gg) => gg.id === goalId);
+    return (g ? GOAL_COLOR_VARS[g.color] ?? "g1" : "g1");
+  };
+  const goalColorFor = (goalId: string): string => {
+    const g = storeGoals.find((gg) => gg.id === goalId);
+    return g ? `hsl(var(--${g.color}))` : "hsl(var(--text-tertiary))";
+  };
+  const goalLabelFor = (goalId: string): string => {
+    const g = storeGoals.find((gg) => gg.id === goalId);
+    return (g?.title ?? "—").toUpperCase();
+  };
+
+  const livePROJECTS: Project[] = useMemo(() => {
+    return storeProjects.map((p) => {
+      const acts = storeActions.filter(
+        (a) => a.projectId === p.id && a.status !== "dropped" && a.status !== "cancelled",
+      );
+      const total = acts.length;
+      const done = acts.filter((a) => a.status === "done" || a.status === "delegated").length;
+      const lastIso = storeActions
+        .filter((a) => a.projectId === p.id)
+        .map((a) => a.completedAt ?? a.delegatedAt ?? a.updatedAt ?? a.createdAt)
+        .filter(Boolean)
+        .sort()
+        .at(-1);
+      const ago = fmtAgo(lastIso ?? undefined);
+
+      let state: ProjectState;
+      let closedLabel: string | undefined;
+      let closedSort: number | undefined;
+      if (p.status === "completed") {
+        state = "completed";
+        closedLabel = p.completedAt ? fmtAgo(p.completedAt).label : undefined;
+        closedSort = p.completedAt ? new Date(p.completedAt).getTime() : 0;
+      } else if (p.status === "dropped") {
+        state = "dropped";
+        closedLabel = p.droppedAt ? fmtAgo(p.droppedAt).label : undefined;
+        closedSort = p.droppedAt ? new Date(p.droppedAt).getTime() : 0;
+      } else {
+        const pct = total > 0 ? done / total : 0;
+        if (ago.days > 7) state = "stalled";
+        else if (pct >= 0.75 && total > 0) state = "near";
+        else state = "active";
+      }
+
+      return {
+        id: p.id,
+        goal: goalKeyFor(p.goalId),
+        goalLabel: goalLabelFor(p.goalId),
+        goalColor: goalColorFor(p.goalId),
+        title: p.title,
+        done,
+        total: Math.max(total, 1),
+        last: ago.label,
+        lastDays: ago.days,
+        state,
+        closedLabel,
+        closedSort,
+      };
+    });
+  }, [storeProjects, storeActions, storeGoals]);
+
+  // Bridge clicks to the real store record.
   const handleOpenProject = (p: Project) => {
-    const match = storeProjects.find(
-      (sp) => sp.title.toLowerCase() === p.title.toLowerCase(),
-    );
-    if (match) {
-      openPanel({ kind: "project", mode: "edit", id: match.id });
-    } else {
-      // Fallback: open new with the title prefilled.
-      openPanel({
-        kind: "project",
-        mode: "new",
-        prefill: { title: p.title, goalId: storeGoals[0]?.id },
-      });
-    }
+    openPanel({ kind: "project", mode: "edit", id: p.id });
   };
 
   const handleNewProject = () => {
@@ -448,16 +402,16 @@ const AllProjects: React.FC = () => {
   };
 
   const counts = useMemo(() => {
-    const total = PROJECTS.length;
-    const active = PROJECTS.filter((p) => p.state === "active").length;
-    const near = PROJECTS.filter((p) => p.state === "near").length;
-    const stalled = PROJECTS.filter((p) => p.state === "stalled").length;
-    const closed = PROJECTS.filter((p) => p.state === "completed" || p.state === "dropped").length;
+    const total = livePROJECTS.length;
+    const active = livePROJECTS.filter((p) => p.state === "active").length;
+    const near = livePROJECTS.filter((p) => p.state === "near").length;
+    const stalled = livePROJECTS.filter((p) => p.state === "stalled").length;
+    const closed = livePROJECTS.filter((p) => p.state === "completed" || p.state === "dropped").length;
     return { total, active, near, stalled, closed };
-  }, []);
+  }, [livePROJECTS]);
 
   const filtered = useMemo(() => {
-    return PROJECTS.filter((p) => {
+    return livePROJECTS.filter((p) => {
       if (goalFilter !== "all" && p.goal !== goalFilter) return false;
       if (stateFilter === "open" && !isOpen(p)) return false;
       if (stateFilter === "near" && p.state !== "near") return false;
@@ -468,7 +422,8 @@ const AllProjects: React.FC = () => {
         return false;
       return true;
     });
-  }, [goalFilter, stateFilter, query]);
+  }, [livePROJECTS, goalFilter, stateFilter, query]);
+
 
   const sortFn = useMemo(() => {
     return (a: Project, b: Project) => {

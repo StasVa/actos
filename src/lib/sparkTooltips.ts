@@ -71,3 +71,23 @@ export function buildFitnessTooltips(data: number[]): DayInfo[] {
     return { daysFromToday, count, actions };
   });
 }
+
+const POOL_READ = [
+  "Read 30 minutes",
+  "Finished a chapter",
+  "Wrote book notes",
+  "Logged today's read",
+  "Started new book",
+  "Reviewed highlights",
+];
+
+export function buildReadingTooltips(data: number[]): DayInfo[] {
+  const last = data.length - 1;
+  let pool = 0;
+  return data.map((count, i) => {
+    const daysFromToday = last - i;
+    const actions: string[] = [];
+    for (let k = 0; k < count; k++) actions.push(POOL_READ[pool++ % POOL_READ.length]);
+    return { daysFromToday, count, actions };
+  });
+}

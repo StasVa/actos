@@ -1271,6 +1271,16 @@ const Index: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Listen for global Command Palette events (open Plan/Close/Settings).
+  useEffect(() => {
+    const unsubs = [
+      subscribeAppEvent("open-plan-today", () => setPlanOpen(true)),
+      subscribeAppEvent("open-close-day", () => setCloseOpen(true)),
+      subscribeAppEvent("open-settings", () => setSettingsOpen(true)),
+    ];
+    return () => unsubs.forEach((u) => u());
+  }, []);
+
   const isPlanned = !!todayEntry?.isPlanned;
   const isClosed = !!todayEntry?.isClosed;
   const planAndReview = settings.layers.planAndReview;

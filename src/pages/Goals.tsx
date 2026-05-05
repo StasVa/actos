@@ -1,15 +1,15 @@
 import React, { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useStore } from "@/store/useStore";
+import { useStore, ritualMultiplier } from "@/store/useStore";
 import { AppSidebar } from "@/components/AppSidebar";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { CardMenu } from "@/components/CardMenu";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { FilterDropdown, FilterOption } from "@/components/FilterDropdown";
 import { SortDropdown } from "@/components/SortDropdown";
-import { Tooltip } from "@/components/Tooltip";
+import { Tooltip, SparkTooltipContent, StateDotTooltip, type DayInfo } from "@/components/Tooltip";
 import { toast } from "sonner";
-import type { Goal } from "@/types";
+import type { Goal, Action, Project, Ritual } from "@/types";
 
 type StateFilter = "all" | "active" | "completed" | "dropped";
 type TypeFilter = "all" | "short-term" | "mid-term";

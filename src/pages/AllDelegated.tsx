@@ -445,9 +445,20 @@ const AllDelegated: React.FC = () => {
   const [goalFilter, setGoalFilter] = useState<GoalFilter>("all");
   const [sortKey, setSortKey] = useState<SortKey>("overdue");
   const [query, setQuery] = useState("");
-  const [selectedId, setSelectedId] = useState<string>("d-grocery");
 
-  const allDelegated = useMemo(() => ACTIONS.filter((a) => a.status === "delegated"), []);
+  // Live store data → legacy renderer shape.
+  const storeActions = useStore((s) => s.actions);
+  const storeProjects = useStore((s) => s.projects);
+  const openPanel = useStore((s) => s.openPanel);
+  const ACTIONS = useMemo(
+    () => toLegacyActions(storeActions, storeProjects),
+    [storeActions, storeProjects],
+  );
+
+  const allDelegated = useMemo(
+    () => ACTIONS.filter((a) => a.status === "delegated"),
+    [ACTIONS],
+  );
 
   const filtered = useMemo(() => {
     return allDelegated.filter((a) => {
@@ -509,7 +520,7 @@ const AllDelegated: React.FC = () => {
     setQuery("");
   };
 
-  const noop = () => {};
+  const openAction = (id: string) => openPanel({ kind: "action", mode: "edit", id });
 
   return (
     <div className="min-h-screen bg-surface-base text-text-primary">

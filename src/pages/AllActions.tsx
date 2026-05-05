@@ -733,13 +733,13 @@ const AllActions: React.FC = () => {
             </div>
           ) : "single" in grouped ? (
             grouped.single!.map((a) => (
-              <ActionRow key={a.id} action={a} selected={false} onSelect={noop} />
+              <ActionRow key={a.id} action={a} selected={false} onSelect={() => openAction(a.id)} />
             ))
           ) : (
             <>
               {grouped.active!.length > 0 &&
                 grouped.active!.map((a) => (
-                  <ActionRow key={a.id} action={a} selected={false} onSelect={noop} />
+                  <ActionRow key={a.id} action={a} selected={false} onSelect={() => openAction(a.id)} />
                 ))}
               {grouped.terminal!.length > 0 && (
                 <>
@@ -752,7 +752,7 @@ const AllActions: React.FC = () => {
                   />
                   {!terminalCollapsed &&
                     grouped.terminal!.map((a) => (
-                      <ActionRow key={a.id} action={a} selected={false} onSelect={noop} />
+                      <ActionRow key={a.id} action={a} selected={false} onSelect={() => openAction(a.id)} />
                     ))}
                 </>
               )}

@@ -731,7 +731,10 @@ const Index: React.FC = () => {
         <div className="h-8 border-b border-border-subtle" />
 
         <div className="h-8" />
-        <Today />
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6">
+          <Today />
+          <DayStartPanel />
+        </div>
 
         <div className="my-6 border-t border-border-subtle" />
         <HeavyLift />

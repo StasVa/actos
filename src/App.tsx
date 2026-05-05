@@ -36,6 +36,7 @@ const App = () => (
       <ProjectEditor />
       <GoalEditor />
       <RitualEditor />
+      <GlobalSettingsHost />
       <BrowserRouter>
         <CommandPalette />
         <KeyboardShortcuts />

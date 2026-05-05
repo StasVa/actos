@@ -153,26 +153,32 @@ const Sparkline: React.FC<{ data: number[]; color: string; tips: import("@/compo
   );
 };
 
+const MeasureBar: React.FC<{
+  label: string;
+  pct: number;
+  color: string;
+  opacity?: number;
+}> = ({ label, pct, color, opacity = 1 }) => (
+  <div className="flex items-center gap-2">
+    <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary w-[60px] shrink-0">
+      {label}
+    </span>
+    <div className="flex-1 h-[7px] bg-surface-hover rounded-[2px] overflow-hidden">
+      <div
+        className="h-full rounded-[2px]"
+        style={{ width: `${Math.max(0, Math.min(100, pct))}%`, background: color, opacity }}
+      />
+    </div>
+    <span className="font-mono text-[11px] tabular-nums text-text-secondary w-[36px] text-right shrink-0">
+      {pct}%
+    </span>
+  </div>
+);
+
 const DualBars: React.FC<{ outcome: number; effort: number; color: string }> = ({ outcome, effort, color }) => (
-  <div className="space-y-3">
-    <div>
-      <div className="flex justify-between font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-1">
-        <span>Outcome</span>
-        <span>{outcome}%</span>
-      </div>
-      <div className="h-2 w-full bg-surface-hover rounded-[1px] overflow-hidden">
-        <div className="h-full" style={{ width: `${outcome}%`, background: color }} />
-      </div>
-    </div>
-    <div>
-      <div className="flex justify-between font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-1">
-        <span>Effort</span>
-        <span>{effort}%</span>
-      </div>
-      <div className="h-2 w-full bg-surface-hover rounded-[1px] overflow-hidden">
-        <div className="h-full" style={{ width: `${effort}%`, background: color, opacity: 0.6 }} />
-      </div>
-    </div>
+  <div className="space-y-2">
+    <MeasureBar label="OUTCOME" pct={outcome} color={color} />
+    <MeasureBar label="EFFORT" pct={effort} color={color} opacity={0.6} />
   </div>
 );
 

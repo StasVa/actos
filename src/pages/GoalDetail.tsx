@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { Tooltip, SparkTooltipContent, StateDotTooltip } from "@/components/Tooltip";
+import { buildYouTubeTooltips } from "@/lib/sparkTooltips";
 
 const G1 = "hsl(var(--goal-1))";
 

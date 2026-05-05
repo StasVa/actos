@@ -514,28 +514,28 @@ const AllActions: React.FC = () => {
               value={statusFilter}
               defaultValue="all"
               options={STATUS_OPTIONS}
-              onChange={setStatusFilter}
+              onChange={(v) => setStatusFilter(v)}
             />
             <FilterDropdown
               label="GOAL"
               value={goalFilter}
               defaultValue="all"
               options={GOAL_OPTIONS}
-              onChange={setGoalFilter}
+              onChange={(v) => setGoalFilter(v)}
             />
             <FilterDropdown
               label="DATE"
               value={dateFilter}
               defaultValue="all"
               options={DATE_OPTIONS}
-              onChange={setDateFilter}
+              onChange={(v) => setDateFilter(v)}
             />
             <FilterDropdown
               label="SORT"
               value={sortKey}
               defaultValue="recent"
               options={SORT_OPTIONS}
-              onChange={setSortKey}
+              onChange={(v) => setSortKey(v)}
             />
             {anyApplied && (
               <button

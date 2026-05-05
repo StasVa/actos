@@ -45,6 +45,16 @@ const SectionHeader: React.FC<{ children: React.ReactNode; meta?: React.ReactNod
   </div>
 );
 
+/* ===== Tier B: Ghost add button ===== */
+const GhostAddButton: React.FC<{ children: React.ReactNode; onClick?: () => void }> = ({ children, onClick }) => (
+  <button
+    onClick={onClick}
+    className="block w-full h-9 px-4 py-2 mt-4 text-[13px] text-text-secondary text-center bg-transparent border border-dashed border-border-default rounded-[4px] cursor-pointer transition-[border-color,color] duration-100 hover:border-solid hover:border-accent-muted hover:text-text-primary"
+  >
+    {children}
+  </button>
+);
+
 /* ===== Success Criteria ===== */
 const CRITERIA = [
   { text: "Define content pillars and audience", done: true },
@@ -86,7 +96,14 @@ const SuccessCriteria: React.FC = () => (
 );
 
 /* ===== Hero state block ===== */
-const SPARK = [1, 2, 3, 2, 4, 3, 5, 4, 3, 2, 1, 0, 2, 4, 3, 5, 6, 4, 3, 5, 2, 4, 3, 4, 5, 4];
+/* 30 days, weekday-heavy, sustained recent movement */
+const SPARK = [
+  2, 3, 0, 0, 3, 4, 2,
+  3, 4, 1, 0, 2, 3, 4,
+  2, 3, 0, 1, 3, 4, 2,
+  4, 5, 1, 0, 3, 4, 2,
+  3, 5,
+];
 
 const Pillar: React.FC<{ label: string; value: string; sub: string }> = ({ label, value, sub }) => (
   <div className="flex flex-col">
@@ -96,14 +113,23 @@ const Pillar: React.FC<{ label: string; value: string; sub: string }> = ({ label
   </div>
 );
 
-const DualBar: React.FC<{ label: string; pct: number; opacity?: number }> = ({ label, pct, opacity = 1 }) => (
-  <div>
-    <div className="flex items-center justify-between mb-1.5">
-      <span className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">{label}</span>
-      <span className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-primary tabular-nums">{pct}%</span>
-    </div>
-    <div className="h-[14px] w-full bg-surface-hover rounded-[4px] overflow-hidden">
-      <div className="h-full rounded-[4px]" style={{ width: `${pct}%`, background: G1, opacity }} />
+/* Unified state row: label / value / mini-bar */
+const StateRow: React.FC<{
+  label: string;
+  value: React.ReactNode;
+  pct: number;
+  opacity?: number;
+  isLast?: boolean;
+}> = ({ label, value, pct, opacity = 1, isLast }) => (
+  <div
+    className={`h-8 flex items-center gap-4 py-1.5 ${isLast ? "" : "border-b border-border-subtle"}`}
+  >
+    <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary w-[70px] shrink-0">
+      {label}
+    </span>
+    <span className="flex-1 min-w-0">{value}</span>
+    <div className="w-[80px] h-[5px] bg-surface-hover rounded-[2px] overflow-hidden shrink-0">
+      <div className="h-full rounded-[2px]" style={{ width: `${pct}%`, background: G1, opacity }} />
     </div>
   </div>
 );
@@ -126,16 +152,45 @@ const HeroState: React.FC = () => {
         </div>
       </div>
 
-      {/* Dual bars */}
-      <div className="mt-8 space-y-1.5">
-        <DualBar label="OUTCOME" pct={47} />
-        <DualBar label="EFFORT" pct={32} opacity={0.6} />
+      {/* State block */}
+      <div className="mt-8">
+        <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-2">
+          STATE
+        </div>
+        <div>
+          <StateRow
+            label="OUTCOME"
+            value={<span className="font-mono text-[14px] text-text-primary tabular-nums">47%</span>}
+            pct={47}
+          />
+          <StateRow
+            label="EFFORT"
+            value={<span className="font-mono text-[14px] text-text-primary tabular-nums">32%</span>}
+            pct={32}
+            opacity={0.6}
+          />
+          <StateRow
+            label="TIME"
+            value={
+              <span className="font-mono tabular-nums">
+                <span className="text-[14px] text-text-primary">32h</span>
+                <span className="text-text-tertiary"> / </span>
+                <span className="text-[12px] text-text-secondary">75h</span>
+              </span>
+            }
+            pct={43}
+            isLast
+          />
+        </div>
+        <div className="mt-2 font-mono text-[11px] text-text-tertiary">
+          Effort discounts delegated work to 20%.
+        </div>
       </div>
 
       {/* Sparkline */}
-      <div className="mt-8">
+      <div className="mt-6">
         <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-2">
-          ACTIVITY · LAST 26 WEEKS
+          ACTIVITY · LAST 30 DAYS
         </div>
         <div className="w-full h-20 flex items-end gap-[2px]">
           {SPARK.map((v, i) => {
@@ -229,9 +284,7 @@ const ActiveProjectsSection: React.FC = () => {
           <ProjectCard key={i} p={p} />
         ))}
       </div>
-      <a href="#" className="inline-block mt-4 text-[13px] text-text-tertiary hover:text-text-secondary transition-colors">
-        + Add project to this goal
-      </a>
+      <GhostAddButton>+ Add project to this goal</GhostAddButton>
     </section>
   );
 };
@@ -265,9 +318,7 @@ const RitualsSection: React.FC = () => (
         ))}
       </div>
     </div>
-    <a href="#" className="inline-block mt-4 text-[13px] text-text-tertiary hover:text-text-secondary transition-colors">
-      + Add ritual to this goal
-    </a>
+    <GhostAddButton>+ Add ritual to this goal</GhostAddButton>
   </section>
 );
 
@@ -307,7 +358,7 @@ const RecentActivity: React.FC = () => (
         </div>
       ))}
     </div>
-    <a href="#" className="inline-block mt-3 text-[12px] text-accent hover:text-text-primary transition-colors">
+    <a href="#" className="inline-block mt-3 text-[12px] text-text-secondary hover:text-text-primary hover:underline transition-colors">
       View all activity →
     </a>
   </section>
@@ -342,7 +393,7 @@ const IdeasSection: React.FC = () => {
               <span>{idea}</span>
             </div>
           ))}
-          <a href="#" className="inline-block mt-2 text-[13px] text-text-tertiary hover:text-text-secondary transition-colors">
+          <a href="#" className="inline-block mt-2 text-[12px] text-text-secondary hover:text-text-primary hover:underline transition-colors">
             + Capture idea
           </a>
         </div>

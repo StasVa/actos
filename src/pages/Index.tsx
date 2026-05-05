@@ -72,8 +72,22 @@ const Sidebar: React.FC = () => (
 );
 
 /* ===== Hero: Active Goals ===== */
-const SPARK_1 = [2, 3, 1, 4, 2, 5, 3, 4, 0, 2, 3, 4];
-const SPARK_2 = [3, 4, 2, 3, 5, 4, 3, 2, 1, 0, 0, 0];
+/* 30 days, weekday-heavy, building toward today (right edge) */
+const SPARK_1 = [
+  2, 3, 0, 0, 3, 4, 2,
+  3, 4, 1, 0, 2, 3, 4,
+  2, 3, 0, 1, 3, 4, 2,
+  4, 5, 1, 0, 3, 4, 2,
+  3, 5,
+];
+/* Active first ~21 days, then 9 days of zero (stalled) */
+const SPARK_2 = [
+  2, 3, 4, 0, 1, 3, 2,
+  3, 4, 2, 0, 0, 3, 4,
+  3, 2, 4, 0, 1, 3, 2,
+  0, 0, 0, 0, 0, 0, 0,
+  0, 0,
+];
 
 const Sparkline: React.FC<{ data: number[]; color: string }> = ({ data, color }) => {
   const max = 5;
@@ -169,7 +183,7 @@ const GoalColumn: React.FC<{
 
     <div>
       <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-1.5">
-        Activity · Last 12 weeks
+        Activity · Last 30 days
       </div>
       <Sparkline data={spark} color={color} />
     </div>
@@ -321,7 +335,7 @@ const Today: React.FC = () => (
         <span className="text-[13px] font-medium text-text-primary">Write script for video #1</span>
         <span className="text-[12px] text-text-secondary">· YouTube channel · Shoot video #1</span>
         <div className="flex-1" />
-        <TimePill>~90 min</TimePill>
+        <TimePill>1h 30m</TimePill>
         <Checkbox />
       </div>
 
@@ -372,9 +386,9 @@ const Today: React.FC = () => (
 
 /* ===== Heavy Lift ===== */
 const HEAVY = [
-  { c: G1, impact: 8, title: "Edit first video draft", crumb: "YouTube · Shoot video #1", time: "~150 min" },
-  { c: G1, impact: 7, title: "Outline video #2 series structure", crumb: "YouTube · Shoot video #1", time: "~120 min" },
-  { c: G2, impact: 6, title: "Cook batch meals for the week", crumb: "Lose 5 kg · Nutrition plan", time: "~90 min" },
+  { c: G1, impact: 8, title: "Edit first video draft", crumb: "YouTube · Shoot video #1", time: "2h 30m" },
+  { c: G1, impact: 7, title: "Outline video #2 series structure", crumb: "YouTube · Shoot video #1", time: "2h" },
+  { c: G2, impact: 6, title: "Cook batch meals for the week", crumb: "Lose 5 kg · Nutrition plan", time: "1h 30m" },
 ];
 
 const HeavyLift: React.FC = () => (

@@ -63,8 +63,8 @@ type ActiveAction = {
 
 const ACTIVE: ActiveAction[] = [
   { kind: "planned", title: "Record talking-head intro", date: "TOMORROW" },
-  { kind: "backlog", title: "Edit first video draft", impact: 8, time: "~150 min" },
-  { kind: "backlog", title: "Outline video #2 series structure", impact: 7, time: "~120 min" },
+  { kind: "backlog", title: "Edit first video draft", impact: 8, time: "2h 30m" },
+  { kind: "backlog", title: "Outline video #2 series structure", impact: 7, time: "2h" },
 ];
 
 const ActionRow: React.FC<{ a: ActiveAction }> = ({ a }) => (
@@ -125,31 +125,59 @@ const StatusBlock: React.FC = () => {
   );
 };
 
-const OutcomeEffort: React.FC = () => (
+/* Unified state row */
+const StateRow: React.FC<{
+  label: string;
+  value: React.ReactNode;
+  pct: number;
+  opacity?: number;
+  isLast?: boolean;
+}> = ({ label, value, pct, opacity = 1, isLast }) => (
+  <div
+    className={`h-8 flex items-center gap-3 py-1.5 ${isLast ? "" : "border-b border-border-subtle"}`}
+  >
+    <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary w-[70px] shrink-0">
+      {label}
+    </span>
+    <span className="flex-1 min-w-0">{value}</span>
+    <div className="w-[80px] h-[5px] bg-surface-hover rounded-[2px] overflow-hidden shrink-0">
+      <div className="h-full rounded-[2px]" style={{ width: `${pct}%`, background: G1, opacity }} />
+    </div>
+  </div>
+);
+
+const StateBlock: React.FC = () => (
   <div>
-    <h3 className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-secondary">
-      Outcome · Effort
+    <h3 className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-secondary mb-3">
+      State
     </h3>
-    <div className="mt-2">
-      <div className="flex items-center justify-between">
-        <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">Outcome</span>
-        <span className="font-mono text-[14px] text-text-primary">43%</span>
-      </div>
-      <div className="mt-1 h-1.5 w-full bg-surface-hover rounded-[2px] overflow-hidden">
-        <div className="h-full" style={{ width: "43%", background: G1 }} />
-      </div>
+    <div>
+      <StateRow
+        label="OUTCOME"
+        value={<span className="font-mono text-[14px] text-text-primary tabular-nums">43%</span>}
+        pct={43}
+      />
+      <StateRow
+        label="EFFORT"
+        value={<span className="font-mono text-[14px] text-text-primary tabular-nums">38%</span>}
+        pct={38}
+        opacity={0.6}
+      />
+      <StateRow
+        label="TIME"
+        value={
+          <span className="font-mono tabular-nums">
+            <span className="text-[14px] text-text-primary">6h</span>
+            <span className="text-text-tertiary"> / </span>
+            <span className="text-[12px] text-text-secondary">11h 30m</span>
+          </span>
+        }
+        pct={52}
+        isLast
+      />
     </div>
-    <div className="mt-3">
-      <div className="flex items-center justify-between">
-        <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">Effort</span>
-        <span className="font-mono text-[14px] text-text-primary">38%</span>
-      </div>
-      <div className="mt-1 h-1.5 w-full bg-surface-hover rounded-[2px] overflow-hidden">
-        <div className="h-full" style={{ width: "38%", background: G1, opacity: 0.6 }} />
-      </div>
-    </div>
-    <p className="mt-2 font-mono text-[11px] text-text-tertiary leading-[1.4]">
-      Effort tracks personal workload. Delegated actions count toward outcome at full impact, but only 20% toward effort.
+    <p className="mt-2 font-mono text-[11px] text-text-tertiary">
+      Effort discounts delegated work to 20%.
     </p>
   </div>
 );
@@ -166,7 +194,7 @@ const References: React.FC = () => {
         <h3 className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-secondary">
           References · 3
         </h3>
-        <a className="text-[11px] text-text-tertiary hover:text-text-secondary cursor-pointer">+ Add</a>
+        <a className="text-[12px] text-text-secondary hover:text-text-primary hover:underline cursor-pointer">+ Add</a>
       </div>
       <div className="mt-2">
         {refs.map((r, i) => (
@@ -187,18 +215,6 @@ const References: React.FC = () => {
     </div>
   );
 };
-
-const TimeBlock: React.FC = () => (
-  <div>
-    <h3 className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-secondary">
-      Time · Estimated
-    </h3>
-    <div className="mt-2 font-mono text-[16px] text-text-primary">5h 30m</div>
-    <div className="mt-2 font-mono text-[11px] text-text-tertiary">
-      across 3 active actions · ~110 min average
-    </div>
-  </div>
-);
 
 /* ===== Page ===== */
 const ProjectDetail: React.FC = () => {
@@ -358,9 +374,8 @@ const ProjectDetail: React.FC = () => {
           </div>
           <div className="p-6 space-y-6">
             <StatusBlock />
-            <OutcomeEffort />
+            <StateBlock />
             <References />
-            <TimeBlock />
           </div>
         </aside>
       </div>

@@ -16,6 +16,7 @@ import { ActionEditor } from "./components/ActionEditor";
 import { ProjectEditor } from "./components/ProjectEditor";
 import { GoalEditor } from "./components/GoalEditor";
 import { RitualEditor } from "./components/RitualEditor";
+import { CommandPalette } from "./components/CommandPalette";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,7 @@ const App = () => (
       <GoalEditor />
       <RitualEditor />
       <BrowserRouter>
+        <CommandPalette />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/goals/launch-youtube-channel" element={<GoalDetail />} />

@@ -5,6 +5,7 @@ import { LifetimeCounters } from "@/components/LifetimeCounters";
 import { buildYouTubeTooltips, buildFitnessTooltips, buildReadingTooltips } from "@/lib/sparkTooltips";
 import { useStore } from "@/store/useStore";
 import { DayStartPanel } from "@/components/DayStartPanel";
+import { SettingsPanel } from "@/components/SettingsPanel";
 import { ritualMultiplier } from "@/store/useStore";
 import { toast } from "sonner";
 
@@ -51,7 +52,7 @@ const NAV: { label: string; href: string }[] = [
   { label: "All delegated", href: "/all-delegated" },
 ];
 
-const Sidebar: React.FC = () => {
+const Sidebar: React.FC<{ onOpenSettings: () => void }> = ({ onOpenSettings }) => {
   const { pathname } = useLocation();
   return (
   <aside className="fixed left-0 top-0 bottom-0 w-[220px] bg-surface-raised border-r border-border-subtle p-4 flex flex-col">
@@ -79,6 +80,13 @@ const Sidebar: React.FC = () => {
 
     <div className="flex-1" />
 
+    <button
+      type="button"
+      onClick={onOpenSettings}
+      className="text-left px-2.5 py-1.5 rounded-[4px] text-[13px] text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-colors mb-2"
+    >
+      Settings
+    </button>
     <div className="font-mono text-[11px] text-text-tertiary px-1">⌘K  Quick add</div>
     <div className="mt-4 font-mono text-[11px] text-text-secondary px-1 leading-[1.7]">
       <LifetimeCounters />
@@ -242,139 +250,240 @@ const SPARK_1_TIPS = buildYouTubeTooltips(SPARK_1);
 const SPARK_2_TIPS = buildFitnessTooltips(SPARK_2);
 const SPARK_3_TIPS = buildReadingTooltips(SPARK_3);
 
-const Hero: React.FC = () => (
-  <div className="bg-surface-elevated border border-border-subtle rounded-[6px] p-6 grid grid-cols-3 divide-x divide-border-subtle">
-    <GoalColumn
-      href="/goals/launch-youtube-channel"
-      title="Launch YouTube channel"
-      state="active"
-      type="MID-TERM"
-      progress={47}
-      meta={["2 of 3 projects closed", "12 actions done", "Last activity: today"]}
-      outcome={47}
-      effort={32}
-      spark={SPARK_1}
-      sparkTips={SPARK_1_TIPS}
-      lastActivity="today"
-      color={G1}
-      recent={<>Recent: ✓ Outline structure · ✓ Set up workspace · ✓ Define content pillars</>}
-    />
-    <GoalColumn
-      title="Lose 5 kg"
-      state="stalled"
-      type="MID-TERM"
-      target="TARGET MAY 30"
-      progress={33}
-      meta={["1 of 3 projects closed", "8 actions done", "Last activity: 9 days ago"]}
-      outcome={33}
-      effort={28}
-      spark={SPARK_2}
-      sparkTips={SPARK_2_TIPS}
-      stalledFor="9 days"
-      color={G2}
-      recent={
-        <>
-          Last action <span className="text-text-primary font-medium">9 days ago</span>: Cook batch meals
-        </>
-      }
-    />
-    <GoalColumn
-      title="Read 24 books this year"
-      state="active"
-      type="MID-TERM"
-      target="TARGET DEC 31"
-      progress={38}
-      meta={["1 of 1 projects active", "32 actions done", "Last activity: today"]}
-      outcome={38}
-      effort={42}
-      spark={SPARK_3}
-      sparkTips={SPARK_3_TIPS}
-      lastActivity="today"
-      color={G3}
-      recent={<>Recent: ✓ Finished book 9 of 24 today · ✓ Read 30 minutes · ✓ Logged today's read</>}
-    />
-  </div>
-);
-
-/* ===== Active Projects ===== */
-type Project = {
-  goalLabel: string;
-  goalColor: string;
-  title: string;
-  done: number;
-  total: number;
-  last: string;
-  state: "active" | "stalled";
-  warnLast?: boolean;
-  href?: string;
+/* ===== Hero (live store-wired) =====
+ * Sparklines stay on canned demo data because we don't have 30 days of seeded
+ * activity history — but headline progress, project counts, action counts,
+ * outcome/effort, and state indicator are all derived from the store. */
+const SPARKS_BY_GOAL_COLOR: Record<string, { data: number[]; tips: import("@/components/Tooltip").DayInfo[] }> = {
+  "goal-1": { data: SPARK_1, tips: SPARK_1_TIPS },
+  "goal-2": { data: SPARK_2, tips: SPARK_2_TIPS },
+  "goal-3": { data: SPARK_3, tips: SPARK_3_TIPS },
 };
 
-const PROJECTS: Project[] = [
-  { goalLabel: "YOUTUBE CHANNEL", goalColor: G1, title: "Shoot video #1", done: 3, total: 7, last: "today", state: "active", href: "/projects/shoot-video-1" },
-  { goalLabel: "YOUTUBE CHANNEL", goalColor: G1, title: "Set up workspace", done: 4, total: 5, last: "2d ago", state: "active" },
-  { goalLabel: "LOSE 5 KG", goalColor: G2, title: "Nutrition plan", done: 3, total: 4, last: "today", state: "active" },
-  { goalLabel: "LOSE 5 KG", goalColor: G2, title: "Build cardio routine", done: 1, total: 6, last: "11d ago", state: "stalled", warnLast: true },
-  { goalLabel: "READ 24 BOOKS", goalColor: G3, title: "Build daily reading habit", done: 8, total: 24, last: "today", state: "active" },
-];
+function relativeDayLabel(iso?: string): string {
+  if (!iso) return "no activity yet";
+  const t = new Date(iso).getTime();
+  const days = Math.floor((Date.now() - t) / 86400000);
+  if (days <= 0) return "today";
+  if (days === 1) return "yesterday";
+  return `${days} days ago`;
+}
 
-const ProjectCard: React.FC<{ p: Project }> = ({ p }) => {
-  const pct = Math.round((p.done / p.total) * 100);
-  const inner = (
+const Hero: React.FC = () => {
+  const goals = useStore((s) => s.goals);
+  const projects = useStore((s) => s.projects);
+  const actions = useStore((s) => s.actions);
+
+  const activeGoals = goals.filter((g) => g.status === "active");
+  if (activeGoals.length === 0) {
+    return (
+      <div className="bg-surface-elevated border border-border-subtle rounded-[6px] p-10 text-center">
+        <div className="text-[14px] text-text-secondary">No active goals.</div>
+        <div className="font-mono text-[11px] text-text-tertiary mt-1">
+          Press ⌘K → “New goal” to start.
+        </div>
+      </div>
+    );
+  }
+
+  return (
     <div
-      className="group h-[120px] p-3 flex flex-col gap-2 rounded-[6px] bg-surface-raised border border-border-subtle hover:bg-surface-hover hover:border-accent cursor-pointer transition-colors duration-100"
+      className="bg-surface-elevated border border-border-subtle rounded-[6px] p-6 grid divide-x divide-border-subtle"
+      style={{ gridTemplateColumns: `repeat(${activeGoals.length}, minmax(0, 1fr))` }}
     >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5 min-w-0">
-          <span className="w-2 h-2 rounded-full shrink-0" style={{ background: p.goalColor }} />
-          <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary truncate">
-            {p.goalLabel}
-          </span>
-        </div>
-        <Tooltip content={<StateDotTooltip state={p.state} lastActivity={p.last} stalledFor={p.last} />}>
-          <span
-            className="w-2 h-2 rounded-full shrink-0"
-            style={{ background: p.state === "active" ? "hsl(var(--state-active))" : "hsl(var(--state-stalled))" }}
+      {activeGoals.map((g) => {
+        const goalProjects = projects.filter((p) => p.goalId === g.id);
+        const projectsClosed = goalProjects.filter((p) => p.status === "completed").length;
+        const projectsTotal = goalProjects.length;
+        const goalActions = actions.filter((a) => a.goalId === g.id);
+        const actionsDone = goalActions.filter((a) => a.status === "done").length;
+
+        const lastActivityIso = goalActions
+          .map((a) => a.completedAt ?? a.delegatedAt ?? a.updatedAt ?? a.createdAt)
+          .filter(Boolean)
+          .sort()
+          .at(-1);
+        const lastLabel = relativeDayLabel(lastActivityIso ?? undefined);
+        const days = lastActivityIso
+          ? Math.floor((Date.now() - new Date(lastActivityIso).getTime()) / 86400000)
+          : 999;
+        const state: "active" | "stalled" = days <= 7 ? "active" : "stalled";
+
+        // Outcome / Effort
+        const activeProjs = goalProjects.filter((p) => p.status === "active");
+        let totalCost = 0, doneCost = 0, doneOrDelegatedCost = 0;
+        for (const p of activeProjs) {
+          const acts = actions.filter(
+            (a) => a.projectId === p.id && a.status !== "dropped" && a.status !== "cancelled",
+          );
+          for (const a of acts) {
+            const c = a.impact ?? 0;
+            totalCost += c;
+            if (a.status === "done") doneCost += c;
+            if (a.status === "done" || a.status === "delegated") doneOrDelegatedCost += c;
+          }
+        }
+        const outcome = totalCost > 0 ? Math.round((doneOrDelegatedCost / totalCost) * 100) : 0;
+        const effort = totalCost > 0 ? Math.round((doneCost / totalCost) * 100) : 0;
+        const progress = outcome;
+
+        const targetLabel = g.targetDate
+          ? `TARGET ${new Date(g.targetDate)
+              .toLocaleDateString("en-US", { month: "short", day: "numeric" })
+              .toUpperCase()}`
+          : undefined;
+
+        const recentDone = goalActions
+          .filter((a) => a.status === "done")
+          .sort((a, b) => (b.completedAt ?? "").localeCompare(a.completedAt ?? ""))
+          .slice(0, 3)
+          .map((a) => a.title);
+
+        const spark = SPARKS_BY_GOAL_COLOR[g.color] ?? { data: SPARK_3, tips: SPARK_3_TIPS };
+
+        return (
+          <GoalColumn
+            key={g.id}
+            href={`/goals/${g.id}`}
+            title={g.title}
+            state={state}
+            type={g.type === "mid-term" ? "MID-TERM" : "SHORT-TERM"}
+            target={targetLabel}
+            progress={progress}
+            meta={[
+              `${projectsClosed} of ${projectsTotal} projects ${projectsTotal === 1 ? "closed" : "closed"}`,
+              `${actionsDone} actions done`,
+              `Last activity: ${lastLabel}`,
+            ]}
+            outcome={outcome}
+            effort={effort}
+            spark={spark.data}
+            sparkTips={spark.tips}
+            lastActivity={state === "active" ? lastLabel : undefined}
+            stalledFor={state === "stalled" ? `${days} days` : undefined}
+            color={`hsl(var(--${g.color}))`}
+            recent={
+              recentDone.length > 0 ? (
+                <>Recent: {recentDone.map((t) => `✓ ${t}`).join(" · ")}</>
+              ) : (
+                <>No closed actions yet.</>
+              )
+            }
           />
-        </Tooltip>
-      </div>
-
-      <div
-        className="flex-1 text-[15px] font-medium text-text-primary leading-[1.3] overflow-hidden"
-        style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}
-      >
-        {p.title}
-      </div>
-
-      <div className="h-1 w-full bg-surface-hover rounded-[2px] overflow-hidden">
-        <div className="h-full rounded-[2px]" style={{ width: `${pct}%`, background: p.goalColor }} />
-      </div>
-
-      <div className="flex items-center justify-between font-mono text-[11px] tabular-nums">
-        <div>
-          <span className="text-text-primary">{p.done}/{p.total}</span>
-          <span className="text-text-tertiary"> actions</span>
-        </div>
-        <div className="text-text-secondary">
-          Last:{" "}
-          <span className={p.warnLast ? "text-text-warning" : "text-text-secondary"}>{p.last}</span>
-        </div>
-      </div>
+        );
+      })}
     </div>
   );
-  if (p.href) return <Link to={p.href} className="block">{inner}</Link>;
-  return inner;
 };
 
-const ActiveProjects: React.FC = () => (
-  <section>
-    <SectionLabel meta="5 ACTIVE · 1 STALLED">Active projects · 5</SectionLabel>
-    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-      {PROJECTS.map((p, i) => (
-        <ProjectCard key={i} p={p} />
-      ))}
-    </div>
-  </section>
-);
+/* ===== Active Projects (live store-wired) ===== */
+const ActiveProjects: React.FC = () => {
+  const goals = useStore((s) => s.goals);
+  const projects = useStore((s) => s.projects);
+  const actions = useStore((s) => s.actions);
+
+  const activeProjects = projects.filter((p) => p.status === "active");
+  const projectsWithMeta = activeProjects.map((p) => {
+    const goal = goals.find((g) => g.id === p.goalId);
+    const projActions = actions.filter(
+      (a) => a.projectId === p.id && a.status !== "dropped" && a.status !== "cancelled",
+    );
+    const total = projActions.length;
+    const done = projActions.filter((a) => a.status === "done" || a.status === "delegated").length;
+    const lastIso = projActions
+      .map((a) => a.completedAt ?? a.delegatedAt ?? a.updatedAt ?? a.createdAt)
+      .filter(Boolean)
+      .sort()
+      .at(-1);
+    const days = lastIso
+      ? Math.floor((Date.now() - new Date(lastIso).getTime()) / 86400000)
+      : 999;
+    const state: "active" | "stalled" = days <= 7 ? "active" : "stalled";
+    let last: string;
+    if (!lastIso) last = "—";
+    else if (days <= 0) last = "today";
+    else if (days === 1) last = "1d ago";
+    else last = `${days}d ago`;
+    return {
+      id: p.id,
+      goalLabel: (goal?.title ?? "").toUpperCase(),
+      goalColor: goal ? `hsl(var(--${goal.color}))` : "hsl(var(--text-tertiary))",
+      title: p.title,
+      done,
+      total: Math.max(total, 1),
+      hasActions: total > 0,
+      last,
+      state,
+      warnLast: days > 7,
+    };
+  });
+
+  const stalledCount = projectsWithMeta.filter((p) => p.state === "stalled").length;
+  const openPanel = useStore.getState().openPanel;
+
+  return (
+    <section>
+      <SectionLabel meta={`${projectsWithMeta.length} ACTIVE · ${stalledCount} STALLED`}>
+        Active projects · {projectsWithMeta.length}
+      </SectionLabel>
+      {projectsWithMeta.length === 0 ? (
+        <div className="bg-surface-raised border border-dashed border-border-subtle rounded-[6px] py-8 text-center">
+          <div className="text-[13px] text-text-secondary">No active projects.</div>
+          <div className="font-mono text-[11px] text-text-tertiary mt-1">
+            Press ⌘K → “New project”.
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+          {projectsWithMeta.map((p) => {
+            const pct = p.hasActions ? Math.round((p.done / p.total) * 100) : 0;
+            return (
+              <div
+                key={p.id}
+                onClick={() => openPanel({ kind: "project", mode: "edit", id: p.id })}
+                className="group h-[120px] p-3 flex flex-col gap-2 rounded-[6px] bg-surface-raised border border-border-subtle hover:bg-surface-hover hover:border-accent cursor-pointer transition-colors duration-100"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <span className="w-2 h-2 rounded-full shrink-0" style={{ background: p.goalColor }} />
+                    <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary truncate">
+                      {p.goalLabel}
+                    </span>
+                  </div>
+                  <Tooltip content={<StateDotTooltip state={p.state} lastActivity={p.last} stalledFor={p.last} />}>
+                    <span
+                      className="w-2 h-2 rounded-full shrink-0"
+                      style={{ background: p.state === "active" ? "hsl(var(--state-active))" : "hsl(var(--state-stalled))" }}
+                    />
+                  </Tooltip>
+                </div>
+                <div
+                  className="flex-1 text-[15px] font-medium text-text-primary leading-[1.3] overflow-hidden"
+                  style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}
+                >
+                  {p.title}
+                </div>
+                <div className="h-1 w-full bg-surface-hover rounded-[2px] overflow-hidden">
+                  <div className="h-full rounded-[2px]" style={{ width: `${pct}%`, background: p.goalColor }} />
+                </div>
+                <div className="flex items-center justify-between font-mono text-[11px] tabular-nums">
+                  <div>
+                    <span className="text-text-primary">{p.done}/{p.hasActions ? p.total : 0}</span>
+                    <span className="text-text-tertiary"> actions</span>
+                  </div>
+                  <div className="text-text-secondary">
+                    Last:{" "}
+                    <span className={p.warnLast ? "text-text-warning" : "text-text-secondary"}>{p.last}</span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </section>
+  );
+};
 
 /* ===== Today (live store-wired) ===== */
 function fmtTime(min?: number): string | null {
@@ -715,9 +824,11 @@ const UtilityRow: React.FC = () => (
 
 /* ===== Page ===== */
 const Index: React.FC = () => {
+  const [settingsOpen, setSettingsOpen] = useState(false);
   return (
     <div className="min-h-screen bg-surface-base text-text-primary">
-      <Sidebar />
+      <Sidebar onOpenSettings={() => setSettingsOpen(true)} />
+      <SettingsPanel open={settingsOpen} onOpenChange={setSettingsOpen} />
       <main className="ml-[220px] px-8 py-6">
         <header className="mb-6">
           <h1 className="text-[20px] font-medium text-text-primary">Tuesday, May 5</h1>

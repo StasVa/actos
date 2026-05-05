@@ -1,7 +1,7 @@
 // Day Start / Day Close panel — captures dayType, morning intent, energy,
 // and (at end of day) reflection + evening energy. Backed by store.dayEntries.
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useStore } from "@/store/useStore";
 import type { DayType } from "@/types";
 import { toast } from "sonner";
@@ -64,12 +64,16 @@ const Score: React.FC<{
 
 export const DayStartPanel: React.FC = () => {
   const settings = useStore((s) => s.settings);
-  const todaysActions = useStore((s) =>
-    s.actions.filter(
-      (a) => a.scheduledDate === TODAY_ISO && a.status === "planned",
-    ),
+  const actions = useStore((s) => s.actions);
+  const dayEntries = useStore((s) => s.dayEntries);
+  const todaysActions = useMemo(
+    () => actions.filter((a) => a.scheduledDate === TODAY_ISO && a.status === "planned"),
+    [actions],
   );
-  const entry = useStore((s) => s.dayEntries.find((d) => d.date === TODAY_ISO));
+  const entry = useMemo(
+    () => dayEntries.find((d) => d.date === TODAY_ISO),
+    [dayEntries],
+  );
   const startDay = useStore((s) => s.startDay);
   const updateDayEntry = useStore((s) => s.updateDayEntry);
   const closeDay = useStore((s) => s.closeDay);

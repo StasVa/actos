@@ -1,10 +1,12 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Tooltip, StateDotTooltip } from "@/components/Tooltip";
 import { useStore, selectors } from "@/store/useStore";
-import type { Action, ActionStatus, GoalColorVar, Project } from "@/types";
+import type { Action, ActionStatus, GoalColorVar, Project, ProjectReference } from "@/types";
 import { AppSidebar } from "@/components/AppSidebar";
 import { ActionRow as SharedActionRow } from "@/components/ActionRow";
+import { RichTextEditor } from "@/components/RichTextEditor";
+import { CardMenu } from "@/components/CardMenu";
 
 const COLOR_VAR: Record<GoalColorVar, string> = {
   "goal-1": "hsl(var(--goal-1))",
@@ -64,6 +66,157 @@ const ActionRow: React.FC<{ a: Action; color: string }> = ({ a, color }) => {
         changeStatus(a.id, a.status === "done" ? "backlog" : "done")
       }
     />
+  );
+};
+
+const uid = () =>
+  typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID()
+    : `ref-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+
+const ReferencesSection: React.FC<{
+  project: Project;
+  onAdd: (r: ProjectReference) => void;
+  onRemove: (id: string) => void;
+  onUpdate: (id: string, partial: Partial<ProjectReference>) => void;
+}> = ({ project, onAdd, onRemove, onUpdate }) => {
+  const [adding, setAdding] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [url, setUrl] = useState("");
+  const [title, setTitle] = useState("");
+
+  const startAdd = () => {
+    setEditingId(null);
+    setUrl("");
+    setTitle("");
+    setAdding(true);
+  };
+
+  const startEdit = (r: ProjectReference) => {
+    setAdding(false);
+    setUrl(r.url);
+    setTitle(r.title ?? "");
+    setEditingId(r.id);
+  };
+
+  const cancel = () => {
+    setAdding(false);
+    setEditingId(null);
+    setUrl("");
+    setTitle("");
+  };
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const u = url.trim();
+    if (!u) return;
+    if (editingId) {
+      onUpdate(editingId, { url: u, title: title.trim() || undefined });
+    } else {
+      onAdd({ id: uid(), url: u, title: title.trim() || undefined });
+    }
+    cancel();
+  };
+
+  const formOpen = adding || editingId !== null;
+
+  return (
+    <section>
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
+          REFERENCES · {project.references.length}
+        </h2>
+        {!formOpen && (
+          <button
+            type="button"
+            onClick={startAdd}
+            className="text-[12px] text-accent hover:text-accent-hover"
+          >
+            + Add reference
+          </button>
+        )}
+      </div>
+
+      {formOpen && (
+        <form
+          onSubmit={submit}
+          className="mb-3 bg-surface-raised border border-border-subtle rounded-[6px] p-3 flex flex-col gap-2"
+        >
+          <input
+            autoFocus
+            type="url"
+            placeholder="https://..."
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            required
+            className="bg-surface-base border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-accent"
+          />
+          <input
+            type="text"
+            placeholder="Title (optional)"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="bg-surface-base border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-accent"
+          />
+          <div className="flex items-center gap-2 justify-end">
+            <button
+              type="button"
+              onClick={cancel}
+              className="text-[12px] text-text-tertiary hover:text-text-secondary px-2 py-1"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="text-[12px] bg-accent hover:bg-accent-hover text-white px-3 py-1 rounded-[4px]"
+            >
+              {editingId ? "Save" : "Add"}
+            </button>
+          </div>
+        </form>
+      )}
+
+      {project.references.length === 0 && !formOpen ? (
+        <div className="text-[13px] text-text-tertiary">
+          No references yet. Click + Add reference to add docs, links, materials.
+        </div>
+      ) : (
+        <div className="flex flex-col">
+          {project.references.map((r) => (
+            <div
+              key={r.id}
+              className="group flex items-start gap-2 px-2 py-2 rounded-[4px] hover:bg-surface-hover transition-colors"
+            >
+              <span className="text-text-tertiary text-[12px] mt-0.5 shrink-0">↗</span>
+              <a
+                href={r.url}
+                target="_blank"
+                rel="noreferrer"
+                className="flex-1 min-w-0"
+              >
+                <div className="text-[13px] text-text-primary hover:text-accent truncate">
+                  {r.title || r.url}
+                </div>
+                {r.title && (
+                  <div className="font-mono text-[11px] text-text-tertiary truncate">
+                    {r.url}
+                  </div>
+                )}
+              </a>
+              <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                <CardMenu
+                  ariaLabel="Reference menu"
+                  items={[
+                    { label: "Edit", onSelect: () => startEdit(r) },
+                    { label: "Remove", destructive: true, onSelect: () => onRemove(r.id) },
+                  ]}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
   );
 };
 
@@ -192,18 +345,37 @@ const ProjectDetail: React.FC = () => {
               </div>
             </section>
 
-            {project.description && (
-              <section>
-                <h2 className="text-[12px] font-medium uppercase tracking-[0.08em] text-text-secondary mb-2">
-                  Description
-                </h2>
-                <div className="bg-surface-raised border border-border-subtle rounded-[6px] p-6">
-                  <p className="text-[14px] text-text-primary leading-[1.6] whitespace-pre-wrap">
-                    {project.description}
-                  </p>
-                </div>
-              </section>
-            )}
+            <section>
+              <h2 className="text-[12px] font-medium uppercase tracking-[0.08em] text-text-secondary mb-2">
+                Description
+              </h2>
+              <RichTextEditor
+                value={project.description ?? ""}
+                onChange={(html) => updateProject(project.id, { description: html })}
+                placeholder="Describe the project, add references, materials..."
+              />
+            </section>
+
+            <ReferencesSection
+              project={project}
+              onAdd={(ref) =>
+                updateProject(project.id, {
+                  references: [...project.references, ref],
+                })
+              }
+              onRemove={(refId) =>
+                updateProject(project.id, {
+                  references: project.references.filter((r) => r.id !== refId),
+                })
+              }
+              onUpdate={(refId, partial) =>
+                updateProject(project.id, {
+                  references: project.references.map((r) =>
+                    r.id === refId ? { ...r, ...partial } : r,
+                  ),
+                })
+              }
+            />
 
             <section>
               <div className="flex items-center justify-between mb-3">
@@ -400,47 +572,6 @@ const ProjectDetail: React.FC = () => {
               <p className="mt-2 font-mono text-[11px] text-text-tertiary">
                 Effort discounts delegated work to 20%.
               </p>
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between">
-                <h3 className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-secondary">
-                  References · {project.references.length}
-                </h3>
-                <button
-                  onClick={() => openPanel({ kind: "project", mode: "edit", id: project.id })}
-                  className="text-[12px] text-text-secondary hover:text-text-primary hover:underline cursor-pointer"
-                >
-                  + Add
-                </button>
-              </div>
-              <div className="mt-2">
-                {project.references.length === 0 ? (
-                  <div className="font-mono text-[11px] text-text-tertiary">No references.</div>
-                ) : (
-                  project.references.map((r, i) => (
-                    <div
-                      key={r.id ?? i}
-                      className={`py-1.5 ${i < project.references.length - 1 ? "border-b border-border-subtle" : ""}`}
-                    >
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-text-tertiary text-[11px]">↗</span>
-                        <a
-                          href={r.url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-[12px] text-text-primary truncate hover:text-accent cursor-pointer"
-                        >
-                          {r.title}
-                        </a>
-                      </div>
-                      <div className="mt-0.5 ml-4 font-mono text-[10px] text-text-tertiary truncate">
-                        {r.url}
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
             </div>
           </div>
         </aside>

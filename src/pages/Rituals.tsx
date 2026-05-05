@@ -318,7 +318,7 @@ const FrequencyChart: React.FC<{ data: number[]; max: number; color: string; uni
 };
 
 /* ===== Ritual card ===== */
-const RitualCard: React.FC<{ r: RitualRow; onOpen: (r: RitualRow) => void }> = ({ r, onOpen }) => {
+const RitualCard: React.FC<{ r: RitualRow; onOpen: (r: RitualRow) => void; onMarkDone: (r: RitualRow) => void }> = ({ r, onOpen, onMarkDone }) => {
   const isMonthly = r.scheduleLabel.startsWith("MONTHLY");
   return (
     <div
@@ -385,6 +385,7 @@ const RitualCard: React.FC<{ r: RitualRow; onOpen: (r: RitualRow) => void }> = (
             type="button"
             onClick={(e) => {
               e.stopPropagation();
+              onMarkDone(r);
             }}
             className="px-3 py-1 rounded-[4px] border border-accent bg-transparent text-[12px] font-medium text-text-primary hover:bg-surface-hover transition-colors"
           >
@@ -406,7 +407,7 @@ const RitualCard: React.FC<{ r: RitualRow; onOpen: (r: RitualRow) => void }> = (
 };
 
 /* ===== Pending today list ===== */
-const PendingToday: React.FC<{ items: RitualRow[] }> = ({ items }) => (
+const PendingToday: React.FC<{ items: RitualRow[]; onMarkDone: (r: RitualRow) => void; onOpen: (r: RitualRow) => void }> = ({ items, onMarkDone, onOpen }) => (
   <section>
     <div className="text-[12px] font-medium uppercase tracking-[0.08em] text-text-secondary mb-3">
       Pending today · {items.length}
@@ -415,7 +416,8 @@ const PendingToday: React.FC<{ items: RitualRow[] }> = ({ items }) => (
       {items.map((r, i) => (
         <div
           key={r.id}
-          className={`flex items-center gap-3 pr-3 hover:bg-surface-hover transition-colors ${
+          onClick={() => onOpen(r)}
+          className={`flex items-center gap-3 pr-3 hover:bg-surface-hover transition-colors cursor-pointer ${
             i > 0 ? "border-t border-border-subtle" : ""
           }`}
           style={{ height: 36, padding: "8px 12px" }}
@@ -431,13 +433,16 @@ const PendingToday: React.FC<{ items: RitualRow[] }> = ({ items }) => (
           <span className="text-[13px] font-medium text-text-primary">{r.title}</span>
           <span className="text-[12px] text-text-secondary">· {r.scheduleShort}</span>
           <div className="flex-1" />
-          <a
-            href="#"
-            onClick={(e) => e.preventDefault()}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onMarkDone(r);
+            }}
             className="text-[12px] text-text-secondary hover:text-text-primary"
           >
             Mark done
-          </a>
+          </button>
         </div>
       ))}
     </div>

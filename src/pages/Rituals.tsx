@@ -576,6 +576,26 @@ const Rituals: React.FC = () => {
               {RITUALS.map((r) => (
                 <RitualCard key={r.id} r={r} onOpen={handleOpen} />
               ))}
+              <button
+                type="button"
+                onClick={handleAddRitual}
+                className="group rounded-[6px] bg-transparent border border-dashed border-border-default hover:border-solid hover:border-accent hover:bg-surface-hover transition-colors cursor-pointer flex flex-col items-center justify-center"
+                style={{ minHeight: 240 }}
+              >
+                <span
+                  className="font-mono text-text-tertiary group-hover:text-text-primary transition-colors leading-none"
+                  style={{ fontSize: 28 }}
+                >
+                  +
+                </span>
+                <span style={{ height: 8 }} />
+                <span
+                  className="text-[14px] text-text-secondary group-hover:text-text-primary transition-colors"
+                  style={{ fontFamily: "Inter, sans-serif" }}
+                >
+                  Add ritual
+                </span>
+              </button>
             </div>
           </section>
 
@@ -586,7 +606,7 @@ const Rituals: React.FC = () => {
         </div>
       </main>
 
-      <RitualPanel open={panelOpen} onClose={() => setPanelOpen(false)} />
+      <RitualPanel open={panelOpen} onClose={() => setPanelOpen(false)} mode={panelMode} />
     </div>
   );
 };

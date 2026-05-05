@@ -492,28 +492,28 @@ const ActionDetail: React.FC<{ action: Action }> = ({ action }) => {
       <div className="h-12" />
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <GhostButton onClick={fakeAction("Edit action")}>Edit action</GhostButton>
+          <GhostButton onClick={handleEdit}>Edit action</GhostButton>
           {isActive(action.status) && (
-            <GhostButton accent onClick={fakeAction("Mark done")}>
+            <GhostButton accent onClick={handleMarkDone}>
               Mark done
             </GhostButton>
           )}
           {action.status === "delegated" && (
             <>
-              <GhostButton accent onClick={fakeAction("Mark delegated done")}>
+              <GhostButton accent onClick={handleMarkDone}>
                 Mark done
               </GhostButton>
-              <GhostButton onClick={fakeAction("Re-open delegation")}>Re-open</GhostButton>
+              <GhostButton onClick={handleReopen}>Re-open</GhostButton>
             </>
           )}
           {(action.status === "done" ||
             action.status === "dropped" ||
             action.status === "cancelled") && (
-            <GhostButton onClick={fakeAction("Re-open action")}>Re-open</GhostButton>
+            <GhostButton onClick={handleReopen}>Re-open</GhostButton>
           )}
         </div>
         <button
-          onClick={fakeAction("Open menu")}
+          onClick={handleEdit}
           className="w-6 h-6 inline-flex items-center justify-center rounded-[4px] text-text-tertiary hover:bg-surface-hover hover:text-text-secondary transition-colors"
         >
           ···

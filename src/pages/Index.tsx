@@ -823,9 +823,11 @@ const UtilityRow: React.FC = () => (
 
 /* ===== Page ===== */
 const Index: React.FC = () => {
+  const [settingsOpen, setSettingsOpen] = useState(false);
   return (
     <div className="min-h-screen bg-surface-base text-text-primary">
-      <Sidebar />
+      <Sidebar onOpenSettings={() => setSettingsOpen(true)} />
+      <SettingsPanel open={settingsOpen} onOpenChange={setSettingsOpen} />
       <main className="ml-[220px] px-8 py-6">
         <header className="mb-6">
           <h1 className="text-[20px] font-medium text-text-primary">Tuesday, May 5</h1>

@@ -547,11 +547,17 @@ function buildRitualRow(
   const dueToday = ritualDueToday(r.schedule, r.scheduleConfig);
   const scheduleLabel = (() => {
     const base = r.schedule.toUpperCase();
-    if (r.schedule === "weekly" && r.scheduleConfig?.weekdays?.length) {
-      const names = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
-      return `${base} · ${r.scheduleConfig.weekdays.map((d: number) => names[d]).join(" ")}`;
+    const names = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+    if (r.schedule === "weekly" && r.scheduleConfig?.weekday !== undefined) {
+      return `${base} · ${names[r.scheduleConfig.weekday]}`;
     }
-    if (r.schedule === "monthly") return "MONTHLY · 1ST OF MONTH";
+    if (r.schedule === "custom" && r.scheduleConfig?.customDays?.length) {
+      return `${base} · ${r.scheduleConfig.customDays.map((d) => names[d]).join(" ")}`;
+    }
+    if (r.schedule === "monthly") {
+      const day = r.scheduleConfig?.monthDay ?? 1;
+      return `MONTHLY · DAY ${day}`;
+    }
     return base;
   })();
   return {

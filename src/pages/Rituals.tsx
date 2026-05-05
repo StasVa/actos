@@ -232,7 +232,7 @@ const FrequencyChart: React.FC<{ data: number[]; max: number; color: string; uni
 
 /* ===== Ritual card ===== */
 const RitualCard: React.FC<{ r: RitualRow; onOpen: (r: RitualRow) => void; onMarkDone: (r: RitualRow) => void }> = ({ r, onOpen, onMarkDone }) => {
-  const isMonthly = r.scheduleLabel.startsWith("MONTHLY");
+  const isMonthly = r.isMonthly;
   return (
     <div
       onClick={() => onOpen(r)}
@@ -309,10 +309,9 @@ const RitualCard: React.FC<{ r: RitualRow; onOpen: (r: RitualRow) => void; onMar
         )}
       </div>
 
-      {isMonthly && (
+      {isMonthly && r.pendingToday && (
         <div className="mt-1 font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary tabular-nums">
-          DUE: MAY 1 ·{" "}
-          <span style={{ color: "hsl(var(--text-warning))" }}>4 DAYS OVERDUE</span>
+          DUE THIS MONTH
         </div>
       )}
     </div>

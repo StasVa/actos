@@ -72,8 +72,22 @@ const Sidebar: React.FC = () => (
 );
 
 /* ===== Hero: Active Goals ===== */
-const SPARK_1 = [2, 3, 1, 4, 2, 5, 3, 4, 0, 2, 3, 4];
-const SPARK_2 = [3, 4, 2, 3, 5, 4, 3, 2, 1, 0, 0, 0];
+/* 30 days, weekday-heavy, building toward today (right edge) */
+const SPARK_1 = [
+  2, 3, 0, 0, 3, 4, 2,
+  3, 4, 1, 0, 2, 3, 4,
+  2, 3, 0, 1, 3, 4, 2,
+  4, 5, 1, 0, 3, 4, 2,
+  3, 5,
+];
+/* Active first ~21 days, then 9 days of zero (stalled) */
+const SPARK_2 = [
+  2, 3, 4, 0, 1, 3, 2,
+  3, 4, 2, 0, 0, 3, 4,
+  3, 2, 4, 0, 1, 3, 2,
+  0, 0, 0, 0, 0, 0, 0,
+  0, 0,
+];
 
 const Sparkline: React.FC<{ data: number[]; color: string }> = ({ data, color }) => {
   const max = 5;

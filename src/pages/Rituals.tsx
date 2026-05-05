@@ -361,13 +361,17 @@ const PendingToday: React.FC<{ items: RitualRow[]; onMarkDone: (r: RitualRow) =>
   </section>
 );
 
-/* ===== Top stats ===== */
-const TopStats: React.FC = () => {
+/* ===== Top stats (live) ===== */
+const TopStats: React.FC<{ rows: RitualRow[]; allTime: number; activeCount: number; pendingCount: number; dueCount: number }> = ({ rows, allTime, activeCount, pendingCount, dueCount }) => {
+  // Week consistency: across all active daily/weekly rituals, fraction of "due" days hit in last 7.
+  const weekDone = rows.reduce((sum, r) => sum + r.consistency.slice(-7).reduce((a, b) => a + b, 0), 0);
+  const weekDue = rows.length * 7;
+  const weekPct = weekDue > 0 ? Math.round((weekDone / weekDue) * 100) : 0;
   const stats = [
-    { label: "ACTIVE", value: "5", sub: "rituals" },
-    { label: "PENDING TODAY", value: "3", sub: "of 4 due" },
-    { label: "WEEK CONSISTENCY", value: "86%", sub: "12 of 14" },
-    { label: "ALL TIME", value: "94", sub: "completions" },
+    { label: "ACTIVE", value: `${activeCount}`, sub: activeCount === 1 ? "ritual" : "rituals" },
+    { label: "PENDING TODAY", value: `${pendingCount}`, sub: `of ${dueCount} due` },
+    { label: "WEEK CONSISTENCY", value: `${weekPct}%`, sub: `${weekDone} of ${weekDue}` },
+    { label: "ALL TIME", value: `${allTime}`, sub: "completions" },
   ];
   return (
     <div
@@ -391,9 +395,10 @@ const TopStats: React.FC = () => {
   );
 };
 
-/* ===== Archived ===== */
-const ArchivedSection: React.FC = () => {
+/* ===== Archived (live) ===== */
+const ArchivedSection: React.FC<{ rows: RitualRow[]; onRestore: (id: string) => void }> = ({ rows, onRestore }) => {
   const [open, setOpen] = useState(false);
+  if (rows.length === 0) return null;
   return (
     <section>
       <button
@@ -401,31 +406,34 @@ const ArchivedSection: React.FC = () => {
         onClick={() => setOpen((v) => !v)}
         className="text-[12px] font-medium uppercase tracking-[0.08em] text-text-tertiary hover:text-text-secondary cursor-pointer"
       >
-        {open ? "▾" : "▸"} ARCHIVED · 1
+        {open ? "▾" : "▸"} ARCHIVED · {rows.length}
       </button>
       {open && (
         <div className="mt-3 rounded-[4px] overflow-hidden border border-border-subtle">
-          <div
-            className="flex items-center gap-3 pr-3 hover:bg-surface-hover transition-colors"
-            style={{ height: 36, padding: "8px 12px" }}
-          >
-            <span
-              className="self-stretch shrink-0 -ml-3"
-              style={{ width: 3, background: "hsl(var(--state-stalled))" }}
-            />
-            <span className="text-[13px] text-text-tertiary">Daily meditation</span>
-            <span className="font-mono text-[11px] text-text-tertiary">
-              · DAILY · 9 completions · archived 2 weeks ago
-            </span>
-            <div className="flex-1" />
-            <a
-              href="#"
-              onClick={(e) => e.preventDefault()}
-              className="text-[12px] text-text-tertiary hover:text-text-secondary"
+          {rows.map((r, i) => (
+            <div
+              key={r.id}
+              className={`flex items-center gap-3 pr-3 hover:bg-surface-hover transition-colors ${i > 0 ? "border-t border-border-subtle" : ""}`}
+              style={{ height: 36, padding: "8px 12px" }}
             >
-              Restore
-            </a>
-          </div>
+              <span
+                className="self-stretch shrink-0 -ml-3"
+                style={{ width: 3, background: "hsl(var(--state-stalled))" }}
+              />
+              <span className="text-[13px] text-text-tertiary">{r.title}</span>
+              <span className="font-mono text-[11px] text-text-tertiary">
+                · {r.scheduleLabel} · {r.totalCompletions} completions{r.archivedAgoLabel ? ` · archived ${r.archivedAgoLabel}` : ""}
+              </span>
+              <div className="flex-1" />
+              <button
+                type="button"
+                onClick={() => onRestore(r.id)}
+                className="text-[12px] text-text-tertiary hover:text-text-secondary"
+              >
+                Restore
+              </button>
+            </div>
+          ))}
         </div>
       )}
     </section>

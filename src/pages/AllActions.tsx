@@ -117,11 +117,6 @@ const GhostButton: React.FC<{
 );
 
 
-const fakeAction = (label: string) => () => {
-  // Placeholder for future interactivity.
-  // eslint-disable-next-line no-console
-  console.log(`[ActOS prototype] ${label} — full interactivity coming next`);
-};
 
 /* ===== Inline-add row (create new action) ===== */
 const InlineAddAction: React.FC = () => {

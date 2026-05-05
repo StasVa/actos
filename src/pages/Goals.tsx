@@ -591,12 +591,9 @@ const Goals: React.FC = () => {
           </div>
         ) : (
           <div className="space-y-10">
-            {(active.length > 0 || stateFilter === "all" || stateFilter === "active") && (
+            {(active.length > 0 || stateFilter === "all" || stateFilter === "active") && active.length > 0 && (
               <SectionGrid label="ACTIVE" count={active.length}>
                 {active.map((m) => <GoalCard key={m.goal.id} m={m} logTimeOn={logTimeOn} />)}
-                {(stateFilter === "all" || stateFilter === "active") && (
-                  <GhostNewGoalCard disabled={ghostDisabled} />
-                )}
               </SectionGrid>
             )}
 

@@ -1,68 +1,14 @@
 import React, { useState } from "react";
 import { LifetimeCounters } from "@/components/LifetimeCounters";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Tooltip } from "@/components/Tooltip";
 import { useStore } from "@/store/useStore";
 import { toast } from "sonner";
+import { AppSidebar } from "@/components/AppSidebar";
 
 const G1 = "hsl(var(--goal-1))";
 const G2 = "hsl(var(--goal-2))";
 const G3 = "hsl(var(--goal-3))";
-
-/* ===== Sidebar ===== */
-const NAV = [
-  { label: "Home", href: "/" },
-  { label: "Weekly", href: "#" },
-  { label: "Ideas", href: "/ideas" },
-  { label: "Rituals", href: "/rituals" },
-  { label: "All actions", href: "/all-actions" },
-  { label: "All projects", href: "/all-projects" },
-  { label: "All delegated", href: "/all-delegated" },
-];
-
-const Sidebar: React.FC = () => {
-  const { pathname } = useLocation();
-  return (
-    <aside className="fixed left-0 top-0 bottom-0 w-[220px] bg-surface-raised border-r border-border-subtle p-4 flex flex-col">
-      <Link to="/" className="px-1 py-1 text-[17px] font-semibold text-text-primary tracking-tight">
-        ActOS
-      </Link>
-      <nav className="mt-8 flex flex-col gap-1">
-        {NAV.map((item) => {
-          const active =
-            (item.href === "/" && pathname === "/") ||
-            (item.href !== "/" && item.href !== "#" && pathname.startsWith(item.href));
-          return (
-            <Link
-              key={item.label}
-              to={item.href}
-              className={`px-2.5 py-1.5 rounded-[4px] text-[13px] transition-colors ${
-                active
-                  ? "bg-surface-hover text-text-primary font-medium"
-                  : "text-text-secondary font-normal hover:text-text-primary"
-              }`}
-            >
-              {item.label}
-            </Link>
-          );
-        })}
-      </nav>
-      <div className="flex-1" />
-      <div className="font-mono text-[11px] text-text-tertiary px-1">⌘K  Quick add</div>
-      <div className="font-mono text-[11px] text-text-tertiary px-1">?   Shortcuts</div>
-      <div className="mt-4 font-mono text-[11px] text-text-secondary px-1 leading-[1.7]">
-        <LifetimeCounters />
-      </div>
-      <div className="mt-3 flex items-center gap-2 p-1 rounded-[4px] hover:bg-surface-hover cursor-pointer">
-        <span className="w-7 h-7 rounded-full bg-surface-hover flex items-center justify-center font-mono text-[11px] text-text-primary">
-          AK
-        </span>
-        <span className="font-mono text-[11px] text-text-secondary truncate">ak@email</span>
-      </div>
-    </aside>
-  );
-};
-
 /* ===== Visual row shape (rendering layer; built from the store) ===== */
 type RitualRow = {
   id: string;
@@ -648,7 +594,7 @@ const Rituals: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-surface-base text-text-primary">
-      <Sidebar />
+      <AppSidebar />
       <main className="ml-[220px]" style={{ padding: "32px 40px" }}>
         <div className="mx-auto" style={{ maxWidth: 1100 }}>
           <div className="flex items-baseline justify-between">

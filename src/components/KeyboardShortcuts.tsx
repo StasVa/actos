@@ -20,12 +20,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useStore } from "@/store/useStore";
 
 const NAV_MAP: Record<string, { path: string; label: string }> = {
-  h: { path: "/", label: "Home" },
-  i: { path: "/ideas", label: "Ideas" },
+  t: { path: "/today", label: "Today" },
+  h: { path: "/today", label: "Today" },
+  s: { path: "/progress", label: "Progress" },
+  o: { path: "/goals", label: "Goals" },
+  p: { path: "/projects", label: "Projects" },
+  a: { path: "/actions", label: "Actions" },
+  d: { path: "/delegated", label: "Delegated" },
   r: { path: "/rituals", label: "Rituals" },
-  a: { path: "/all-actions", label: "All actions" },
-  p: { path: "/all-projects", label: "All projects" },
-  d: { path: "/all-delegated", label: "All delegated" },
+  i: { path: "/ideas", label: "Ideas" },
+  v: { path: "/reviews", label: "Reviews" },
 };
 
 function isEditableTarget(t: EventTarget | null): boolean {
@@ -111,12 +115,15 @@ export function KeyboardShortcuts() {
             <Row keys={["Esc"]} label="Close panels & overlays" />
           </Section>
           <Section title="NAVIGATE">
-            <Row keys={["g", "h"]} label="Home" />
-            <Row keys={["g", "i"]} label="Ideas" />
+            <Row keys={["g", "t"]} label="Today" />
+            <Row keys={["g", "s"]} label="Progress" />
+            <Row keys={["g", "o"]} label="Goals" />
+            <Row keys={["g", "p"]} label="Projects" />
+            <Row keys={["g", "a"]} label="Actions" />
+            <Row keys={["g", "d"]} label="Delegated" />
             <Row keys={["g", "r"]} label="Rituals" />
-            <Row keys={["g", "a"]} label="All actions" />
-            <Row keys={["g", "p"]} label="All projects" />
-            <Row keys={["g", "d"]} label="All delegated" />
+            <Row keys={["g", "i"]} label="Ideas" />
+            <Row keys={["g", "v"]} label="Reviews" />
           </Section>
         </div>
       </DialogContent>

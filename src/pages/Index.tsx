@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { AppSidebar } from "@/components/AppSidebar";
 import { Tooltip, SparkTooltipContent, StateDotTooltip } from "@/components/Tooltip";
 import { LifetimeCounters } from "@/components/LifetimeCounters";
 import { buildYouTubeTooltips, buildFitnessTooltips, buildReadingTooltips } from "@/lib/sparkTooltips";
@@ -11,14 +12,14 @@ import { ConfirmModal } from "@/components/ConfirmModal";
 import { PlanTodayModal, CloseDayModal, ClosePlanModal } from "@/components/PlanCloseModals";
 import { toast } from "sonner";
 
-const TODAY_ISO = new Date().toISOString().slice(0, 10);
-const YESTERDAY_ISO = (() => {
+export const TODAY_ISO = new Date().toISOString().slice(0, 10);
+export const YESTERDAY_ISO = (() => {
   const d = new Date();
   d.setDate(d.getDate() - 1);
   return d.toISOString().slice(0, 10);
 })();
 
-const DAY_TYPE_LABELS: Record<string, string> = {
+export const DAY_TYPE_LABELS: Record<string, string> = {
   execution: "Execution",
   recovery: "Recovery",
   "day-off": "Day Off",
@@ -32,7 +33,7 @@ const G2 = "hsl(var(--goal-2))";
 const G3 = "hsl(var(--goal-3))";
 
 /* ===== Primitives ===== */
-const SectionLabel: React.FC<{ children: React.ReactNode; meta?: React.ReactNode }> = ({ children, meta }) => (
+export const SectionLabel: React.FC<{ children: React.ReactNode; meta?: React.ReactNode }> = ({ children, meta }) => (
   <div className="flex items-center justify-between mb-3">
     <h2 className="text-[12px] font-medium uppercase tracking-[0.08em] text-text-secondary">{children}</h2>
     {meta && <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">{meta}</div>}
@@ -56,66 +57,7 @@ const Strip: React.FC<{ color: string }> = ({ color }) => (
   <span className="self-stretch w-[3px] shrink-0" style={{ background: color }} />
 );
 
-/* ===== Sidebar ===== */
-const NAV: { label: string; href: string }[] = [
-  { label: "Home", href: "/" },
-  { label: "Weekly", href: "#" },
-  { label: "Ideas", href: "/ideas" },
-  { label: "Rituals", href: "/rituals" },
-  { label: "All actions", href: "/all-actions" },
-  { label: "All projects", href: "/all-projects" },
-  { label: "All delegated", href: "/all-delegated" },
-];
-
-const Sidebar: React.FC<{ onOpenSettings: () => void }> = ({ onOpenSettings }) => {
-  const { pathname } = useLocation();
-  return (
-  <aside className="fixed left-0 top-0 bottom-0 w-[220px] bg-surface-raised border-r border-border-subtle p-4 flex flex-col">
-    <div className="px-1 py-1 text-[17px] font-semibold text-text-primary tracking-tight">ActOS</div>
-    <nav className="mt-8 flex flex-col gap-1">
-      {NAV.map((item) => {
-        const active =
-          (item.href === "/" && pathname === "/") ||
-          (item.href !== "/" && item.href !== "#" && pathname.startsWith(item.href));
-        return (
-          <Link
-            key={item.label}
-            to={item.href}
-            className={`px-2.5 py-1.5 rounded-[4px] text-[13px] transition-colors ${
-              active
-                ? "bg-surface-hover text-text-primary font-medium"
-                : "text-text-secondary font-normal hover:text-text-primary"
-            }`}
-          >
-            {item.label}
-          </Link>
-        );
-      })}
-    </nav>
-
-    <div className="flex-1" />
-
-    <button
-      type="button"
-      onClick={onOpenSettings}
-      className="text-left px-2.5 py-1.5 rounded-[4px] text-[13px] text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-colors mb-2"
-    >
-      Settings
-    </button>
-    <div className="font-mono text-[11px] text-text-tertiary px-1">⌘K  Quick add</div>
-      <div className="font-mono text-[11px] text-text-tertiary px-1">?   Shortcuts</div>
-    <div className="mt-4 font-mono text-[11px] text-text-secondary px-1 leading-[1.7]">
-      <LifetimeCounters />
-    </div>
-    <div className="mt-3 flex items-center gap-2 p-1 rounded-[4px] hover:bg-surface-hover cursor-pointer">
-      <span className="w-7 h-7 rounded-full bg-surface-hover flex items-center justify-center font-mono text-[11px] text-text-primary">
-        AK
-      </span>
-      <span className="font-mono text-[11px] text-text-secondary truncate">ak@email</span>
-    </div>
-  </aside>
-  );
-};
+/* Sidebar moved to src/components/AppSidebar.tsx */
 
 /* ===== Hero: Active Goals ===== */
 /* 30 days, weekday-heavy, building toward today (right edge) */
@@ -353,7 +295,7 @@ function relativeDayLabel(iso?: string): string {
   return `${days} days ago`;
 }
 
-const Hero: React.FC = () => {
+export const Hero: React.FC = () => {
   const goals = useStore((s) => s.goals);
   const projects = useStore((s) => s.projects);
   const actions = useStore((s) => s.actions);
@@ -556,7 +498,7 @@ const ActiveProjectCard: React.FC<{ p: ActiveProjectMeta; pct: number }> = ({ p,
 };
 
 /* ===== Active Projects (live store-wired) ===== */
-const ActiveProjects: React.FC = () => {
+export const ActiveProjects: React.FC = () => {
   const goals = useStore((s) => s.goals);
   const projects = useStore((s) => s.projects);
   const actions = useStore((s) => s.actions);
@@ -630,7 +572,7 @@ const ActiveProjects: React.FC = () => {
 };
 
 /* ===== Today (live store-wired) ===== */
-function fmtTime(min?: number): string | null {
+export function fmtTime(min?: number): string | null {
   if (!min) return null;
   const h = Math.floor(min / 60);
   const m = min % 60;
@@ -639,7 +581,7 @@ function fmtTime(min?: number): string | null {
   return `${m}m`;
 }
 
-const Today: React.FC<{
+export const TodayZone: React.FC<{
   onPlanClick: () => void;
   onCloseClick: () => void;
 }> = ({ onPlanClick, onCloseClick }) => {
@@ -1130,7 +1072,7 @@ const TinyHeader: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <div className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">{children}</div>
 );
 
-const RecentlyClosed: React.FC = () => {
+export const RecentlyClosed: React.FC = () => {
   const projects = useStore((s) => s.projects);
   const goals = useStore((s) => s.goals);
   const items = projects
@@ -1166,7 +1108,7 @@ const RecentlyClosed: React.FC = () => {
   );
 };
 
-const Delegated: React.FC = () => {
+export const Delegated: React.FC = () => {
   const actions = useStore((s) => s.actions);
   const items = actions.filter((a) => a.status === "delegated").slice(0, 4);
   return (
@@ -1185,7 +1127,7 @@ const Delegated: React.FC = () => {
           </div>
         ))}
       </div>
-      <Link to="/all-delegated" className="inline-block mt-2 text-[12px] text-accent hover:text-accent-hover">
+      <Link to="/delegated" className="inline-block mt-2 text-[12px] text-accent hover:text-accent-hover">
         View all →
       </Link>
     </div>
@@ -1232,7 +1174,96 @@ const UtilityRow: React.FC = () => (
   </div>
 );
 
-/* ===== Page ===== */
+/* ===== Yesterday review card ===== */
+const YesterdayCard: React.FC = () => {
+  const goals = useStore((s) => s.goals);
+  const actions = useStore((s) => s.actions);
+  const rituals = useStore((s) => s.rituals);
+  const yEntry = useStore((s) => s.dayEntries.find((d) => d.date === YESTERDAY_ISO));
+
+  const yDate = new Date(YESTERDAY_ISO + "T00:00:00");
+  const headerDate = yDate
+    .toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
+    .toUpperCase();
+
+  const dtLabel = yEntry?.dayType ? `${DAY_TYPE_LABELS[yEntry.dayType]} day` : "Not planned";
+
+  // Stats
+  const yActions = actions.filter((a) => a.completedAt?.slice(0, 10) === YESTERDAY_ISO && a.status === "done");
+  const actionsDone = yActions.length;
+  const ritualsDone = rituals.reduce(
+    (n, r) =>
+      n +
+      (r.completionHistory.some(
+        (c) => c.date === YESTERDAY_ISO && (c.status === "done" || !c.status),
+      )
+        ? 1
+        : 0),
+    0,
+  );
+  const totalMin = yActions.reduce((sum, a) => sum + (a.timeEstimateMinutes ?? 0), 0);
+  const hours = totalMin >= 60 ? `${(totalMin / 60).toFixed(1)}h` : `${totalMin}m`;
+
+  // Per-goal effort
+  const perGoal = goals
+    .filter((g) => g.status === "active")
+    .map((g) => {
+      const min = yActions
+        .filter((a) => a.goalId === g.id)
+        .reduce((s, a) => s + (a.timeEstimateMinutes ?? 0), 0);
+      return { g, min };
+    })
+    .filter((x) => x.min > 0);
+
+  // Last activity
+  const lastIso = yActions
+    .map((a) => a.completedAt)
+    .filter(Boolean)
+    .sort()
+    .at(-1);
+  const lastTime = lastIso
+    ? new Date(lastIso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    : null;
+
+  return (
+    <section className="bg-surface-elevated border border-border-subtle rounded-[6px] p-6">
+      <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
+        YESTERDAY · {headerDate}
+      </div>
+      <div className="mt-2 text-[14px] text-text-primary">{dtLabel}</div>
+      <div className="mt-1 font-mono text-[13px] text-text-secondary tabular-nums">
+        {actionsDone} actions done · {ritualsDone} rituals · {hours} invested
+      </div>
+      {perGoal.length > 0 && (
+        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5">
+          {perGoal.map(({ g, min }) => (
+            <div key={g.id} className="flex items-center gap-1.5 font-mono text-[12px] text-text-secondary">
+              <span className="w-2 h-2 rounded-full" style={{ background: `hsl(var(--${g.color}))` }} />
+              <span className="text-text-primary">{g.title}</span>
+              <span className="text-text-tertiary">·</span>
+              <span className="tabular-nums">
+                {min >= 60 ? `${(min / 60).toFixed(1)}h` : `${min}m`}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+      {lastTime && (
+        <div className="mt-3 font-mono text-[12px] text-text-tertiary">
+          Last activity: {lastTime}
+        </div>
+      )}
+      <Link
+        to={`/reviews/days/${YESTERDAY_ISO}`}
+        className="inline-block mt-4 text-[12px] text-text-secondary hover:text-text-primary transition-colors"
+      >
+        View full review →
+      </Link>
+    </section>
+  );
+};
+
+/* ===== Page (Today) ===== */
 const Index: React.FC = () => {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [planOpen, setPlanOpen] = useState(false);
@@ -1242,6 +1273,8 @@ const Index: React.FC = () => {
   const settings = useStore((s) => s.settings);
   const todayEntry = useStore((s) => s.dayEntries.find((d) => d.date === TODAY_ISO));
   const yesterdayEntry = useStore((s) => s.dayEntries.find((d) => d.date === YESTERDAY_ISO));
+  const actions = useStore((s) => s.actions);
+  const rituals = useStore((s) => s.rituals);
 
   // Auto-open Plan or Combined modal once per day on first visit.
   useEffect(() => {
@@ -1250,54 +1283,94 @@ const Index: React.FC = () => {
     if (sessionStorage.getItem(flagKey)) return;
     if (todayEntry?.isPlanned) return;
     sessionStorage.setItem(flagKey, "1");
-    // Combined modal if yesterday started but not closed.
     if (yesterdayEntry && !yesterdayEntry.isClosed && (yesterdayEntry.isPlanned || yesterdayEntry.startedAt)) {
       setCombinedOpen(true);
     } else {
       setPlanOpen(true);
     }
-    // Run only on initial mount.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const isPlanned = !!todayEntry?.isPlanned;
+  const isClosed = !!todayEntry?.isClosed;
+  const planAndReview = settings.layers.planAndReview;
+
+  // Header date + meta
+  const today = new Date();
+  const headerDate = today.toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+  const startedTime = todayEntry?.startedAt
+    ? new Date(todayEntry.startedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    : null;
+  const dayTypeLabel = todayEntry?.dayType ? `${DAY_TYPE_LABELS[todayEntry.dayType]} day` : null;
+  const subLine =
+    isPlanned && dayTypeLabel
+      ? `${dayTypeLabel}${startedTime ? ` · Started ${startedTime}` : ""}`
+      : "";
+
+  // Aggregate stats for header right
+  const plannedSet = new Set(todayEntry?.plannedActionIds ?? []);
+  const todaysActionCount = actions.filter(
+    (a) =>
+      a.status !== "dropped" &&
+      a.status !== "cancelled" &&
+      (planAndReview && isPlanned
+        ? plannedSet.has(a.id) || a.scheduledDate === TODAY_ISO
+        : a.scheduledDate === TODAY_ISO),
+  ).length;
+  const plannedRitualSet = new Set(todayEntry?.plannedRitualIds ?? []);
+  const todaysRitualCount = rituals.filter(
+    (r) => r.status === "active" && (planAndReview && isPlanned ? plannedRitualSet.has(r.id) : true),
+  ).length;
+  const aggMeta = isPlanned ? `${todaysActionCount} actions · ${todaysRitualCount} rituals` : "";
+
+  // Yesterday card visibility: show if yesterday wasn't closed OR today isn't planned
+  const showYesterday = (!yesterdayEntry?.isClosed || !isPlanned) && !!(
+    yesterdayEntry || actions.some((a) => a.completedAt?.slice(0, 10) === YESTERDAY_ISO)
+  );
+
   return (
     <div className="min-h-screen bg-surface-base text-text-primary">
-      <Sidebar onOpenSettings={() => setSettingsOpen(true)} />
+      <AppSidebar onOpenSettings={() => setSettingsOpen(true)} />
       <SettingsPanel open={settingsOpen} onOpenChange={setSettingsOpen} />
       <PlanTodayModal open={planOpen} onClose={() => setPlanOpen(false)} />
       <CloseDayModal open={closeOpen} onClose={() => setCloseOpen(false)} />
       <ClosePlanModal open={combinedOpen} onClose={() => setCombinedOpen(false)} />
-      <main className="ml-[220px] px-8 py-6">
-        <header className="mb-6">
-          <h1 className="text-[20px] font-medium text-text-primary">Tuesday, May 5</h1>
-          <div className="font-mono text-[12px] text-text-tertiary mt-0.5">Execution day</div>
+      <main className="ml-[220px] px-8 py-6 max-w-[1200px]">
+        <header className="mb-8 flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-[24px] font-medium text-text-primary leading-tight">{headerDate}</h1>
+            {subLine && (
+              <div className="font-mono text-[13px] text-text-tertiary mt-1">{subLine}</div>
+            )}
+          </div>
+          {aggMeta && (
+            <div className="font-mono text-[13px] text-text-tertiary tabular-nums pt-2">
+              {aggMeta}
+            </div>
+          )}
         </header>
 
-        <Hero />
+        {showYesterday && !isClosed && (
+          <>
+            <YesterdayCard />
+            <div className="h-8" />
+          </>
+        )}
 
-        <div className="h-8" />
-        <ActiveProjects />
-        <div className="h-8 border-b border-border-subtle" />
-
-        <div className="h-8" />
-        <Today
+        <TodayZone
           onPlanClick={() => setPlanOpen(true)}
           onCloseClick={() => setCloseOpen(true)}
         />
 
-        <div className="my-6 border-t border-border-subtle" />
-        <HeavyLift />
-
-        <div className="my-6 border-t border-border-subtle" />
-        <QuickMoves />
-
-        <div className="h-8" />
-        <UtilityRow />
-
-        <div className="h-8" />
+        <div className="h-12" />
       </main>
     </div>
   );
 };
 
 export default Index;
+

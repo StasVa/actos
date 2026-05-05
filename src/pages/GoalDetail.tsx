@@ -372,15 +372,15 @@ const RecentActivity: React.FC = () => (
   </section>
 );
 
-/* ===== Ideas (collapsible) ===== */
-const IDEAS = [
-  "Series on creator tooling comparisons",
-  "Behind-the-scenes setup teardown video",
-  "Collab with workflow channels",
+/* ===== Ideas (collapsible) — mirrors first 3 YouTube ideas from /ideas ===== */
+const IDEAS: { title: string; captured: string }[] = [
+  { title: "Test vlog-style intro for video #2", captured: "captured 2d ago" },
+  { title: "Research lighting kits under $200", captured: "captured 3d ago" },
+  { title: "Music licensing services comparison", captured: "captured 4d ago" },
 ];
 
 const IdeasSection: React.FC = () => {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
   return (
     <section>
       <button
@@ -391,19 +391,30 @@ const IdeasSection: React.FC = () => {
         Ideas · 3 captured
       </button>
       {open && (
-        <div className="mt-3 space-y-1">
-          {IDEAS.map((idea, i) => (
-            <div
-              key={i}
-              className="flex items-center gap-3 h-7 px-2 -mx-2 rounded-[2px] hover:bg-surface-hover transition-colors text-[13px] text-text-primary"
-            >
-              <span className="font-mono text-[11px] text-text-tertiary w-4">{i + 1}</span>
-              <span>{idea}</span>
-            </div>
-          ))}
-          <a href="#" className="inline-block mt-2 text-[12px] text-text-secondary hover:text-text-primary hover:underline transition-colors">
-            + Capture idea
-          </a>
+        <div className="mt-3">
+          <div className="flex items-center gap-2 bg-surface-raised border border-border-subtle rounded-[4px] px-3 py-2.5">
+            <input
+              placeholder="Capture an idea..."
+              className="flex-1 bg-transparent outline-none text-[13px] text-text-primary placeholder:text-text-tertiary"
+            />
+          </div>
+          <div className="mt-3">
+            {IDEAS.map((idea, i) => (
+              <div
+                key={i}
+                className="flex items-center justify-between gap-3 h-8 px-2 -mx-2 rounded-[2px] hover:bg-surface-hover transition-colors"
+              >
+                <span className="text-[13px] text-text-primary truncate">{idea.title}</span>
+                <span className="font-mono text-[11px] text-text-tertiary shrink-0">{idea.captured}</span>
+              </div>
+            ))}
+          </div>
+          <Link
+            to="/ideas?goal=g1"
+            className="inline-block mt-3 text-[12px] text-[hsl(var(--accent))] hover:text-text-primary transition-colors"
+          >
+            View all ideas in this goal →
+          </Link>
         </div>
       )}
     </section>

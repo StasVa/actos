@@ -522,23 +522,54 @@ const ArchivedSection: React.FC = () => {
 
 /* ===== Page ===== */
 const Rituals: React.FC = () => {
-  const [panelOpen, setPanelOpen] = useState(false);
-  const [panelMode, setPanelMode] = useState<"edit" | "new">("edit");
+  const storeRituals = useStore((s) => s.rituals);
+  const storeGoals = useStore((s) => s.goals);
+  const openPanel = useStore((s) => s.openPanel);
+  const markRitualInstanceDone = useStore((s) => s.markRitualInstanceDone);
+
   const pending = RITUALS.filter((r) => r.pendingToday);
 
+  // Bridge static visual rows → real store records by title.
+  const findStoreRitual = (r: RitualRow) =>
+    storeRituals.find((sr) => sr.title.toLowerCase() === r.title.toLowerCase());
+
   const handleOpen = (r: RitualRow) => {
-    if (r.hasPanel) {
-      setPanelMode("edit");
-      setPanelOpen(true);
+    const match = findStoreRitual(r);
+    if (match) {
+      openPanel({ kind: "ritual", mode: "edit", id: match.id });
     } else {
-      // eslint-disable-next-line no-console
-      console.log("Open ritual:", r.id);
+      openPanel({
+        kind: "ritual",
+        mode: "new",
+        prefill: {
+          title: r.title,
+          goalId: storeGoals.find((g) => g.status === "active")?.id,
+        },
+      });
     }
   };
 
   const handleAddRitual = () => {
-    setPanelMode("new");
-    setPanelOpen(true);
+    openPanel({
+      kind: "ritual",
+      mode: "new",
+      prefill: { goalId: storeGoals.find((g) => g.status === "active")?.id },
+    });
+  };
+
+  const handleMarkDone = (r: RitualRow) => {
+    const match = findStoreRitual(r);
+    if (!match) {
+      toast.error("Ritual not found in store");
+      return;
+    }
+    const today = new Date().toISOString().slice(0, 10);
+    if (match.completionHistory.some((c) => c.date === today)) {
+      toast("Already logged today");
+      return;
+    }
+    markRitualInstanceDone(match.id);
+    toast(`Logged · ${match.totalCompletions + 1} completion${match.totalCompletions + 1 === 1 ? "" : "s"}`);
   };
 
   return (
@@ -560,7 +591,9 @@ const Rituals: React.FC = () => {
           <TopStats />
 
           <div style={{ height: 24 }} />
-          {pending.length > 0 && <PendingToday items={pending} />}
+          {pending.length > 0 && (
+            <PendingToday items={pending} onMarkDone={handleMarkDone} onOpen={handleOpen} />
+          )}
 
           <div style={{ height: 32 }} />
 
@@ -574,7 +607,7 @@ const Rituals: React.FC = () => {
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {RITUALS.map((r) => (
-                <RitualCard key={r.id} r={r} onOpen={handleOpen} />
+                <RitualCard key={r.id} r={r} onOpen={handleOpen} onMarkDone={handleMarkDone} />
               ))}
               <button
                 type="button"
@@ -605,8 +638,6 @@ const Rituals: React.FC = () => {
           <div style={{ height: 32 }} />
         </div>
       </main>
-
-      <RitualPanel open={panelOpen} onClose={() => setPanelOpen(false)} mode={panelMode} />
     </div>
   );
 };

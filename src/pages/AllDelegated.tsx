@@ -122,10 +122,6 @@ const TertiaryLink: React.FC<{ children: React.ReactNode; onClick?: () => void }
   </button>
 );
 
-const fakeAction = (label: string) => () => {
-  // eslint-disable-next-line no-console
-  console.log(`[ActOS prototype] ${label} — full interactivity coming next`);
-};
 
 /* ===== Bucket logic ===== */
 type Bucket = "overdue" | "upcoming" | "nodate";

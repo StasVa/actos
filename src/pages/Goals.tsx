@@ -144,6 +144,10 @@ const GoalCard: React.FC<{ m: GoalMeta; logTimeOn: boolean }> = ({ m, logTimeOn 
   const showTime = logTimeOn && time.hasData;
   const showCriteria = criteria.total > 0;
 
+  const isReadyToClose = !archived && progress >= 75;
+  const isFullyReady =
+    !archived && progress >= 100 && projects.active === 0 && projects.closed > 0;
+
   const projectsValue = (() => {
     const parts = [`${projects.active} active`, `${projects.closed} closed`];
     if (projects.dropped > 0) parts.push(`${projects.dropped} dropped`);
@@ -185,7 +189,16 @@ const GoalCard: React.FC<{ m: GoalMeta; logTimeOn: boolean }> = ({ m, logTimeOn 
       >
         <span
           className="absolute left-0 top-0 bottom-0"
-          style={{ background: color, width: 3 }}
+          style={{
+            background: color,
+            width: isReadyToClose ? 4 : 3,
+            boxShadow: isFullyReady
+              ? `0 0 12px 0 ${color}`
+              : isReadyToClose
+              ? `0 0 6px -1px ${color}`
+              : undefined,
+            filter: isReadyToClose ? "saturate(1.2) brightness(1.1)" : undefined,
+          }}
         />
 
         <div className="pl-6 pr-6 py-6 flex flex-col gap-4">
@@ -199,6 +212,22 @@ const GoalCard: React.FC<{ m: GoalMeta; logTimeOn: boolean }> = ({ m, logTimeOn 
                 </span>
               </div>
               <div className="flex items-center gap-2 shrink-0" data-no-nav>
+                {isReadyToClose && (
+                  <span
+                    className="font-mono uppercase tracking-[0.06em] rounded-[2px]"
+                    style={{
+                      fontSize: 9,
+                      padding: "2px 6px",
+                      background: isFullyReady ? color : "hsl(var(--surface-hover))",
+                      color: isFullyReady
+                        ? "hsl(var(--surface-base))"
+                        : "hsl(var(--text-warning))",
+                      letterSpacing: "0.06em",
+                    }}
+                  >
+                    READY TO CLOSE
+                  </span>
+                )}
                 <Tooltip content={<StateDotTooltip state={state} lastActivity={fmtAgo(lastIso)} />}>
                   <span className="w-2 h-2 rounded-full shrink-0" style={{ background: stateColor }} />
                 </Tooltip>
@@ -476,8 +505,15 @@ const Goals: React.FC = () => {
     return arr;
   }, [filtered, sortKey]);
 
-  const active = sorted.filter((m) => m.goal.status === "active" && m.progress < 75);
-  const near = sorted.filter((m) => m.goal.status === "active" && m.progress >= 75);
+  const activeAll = sorted
+    .filter((m) => m.goal.status === "active")
+    .slice()
+    .sort((a, b) => {
+      const aReady = a.progress >= 75 ? 1 : 0;
+      const bReady = b.progress >= 75 ? 1 : 0;
+      if (aReady !== bReady) return bReady - aReady;
+      return (b.lastIso ?? "").localeCompare(a.lastIso ?? "");
+    });
   const completed = sorted.filter((m) => m.goal.status === "completed");
   const dropped = sorted.filter((m) => m.goal.status === "dropped");
 
@@ -563,15 +599,9 @@ const Goals: React.FC = () => {
           </div>
         ) : (
           <div className="space-y-10">
-            {(active.length > 0 || stateFilter === "all" || stateFilter === "active") && active.length > 0 && (
-              <SectionGrid label="ACTIVE" count={active.length}>
-                {active.map((m) => <GoalCard key={m.goal.id} m={m} logTimeOn={logTimeOn} />)}
-              </SectionGrid>
-            )}
-
-            {near.length > 0 && (
-              <SectionGrid label="NEAR COMPLETION" count={near.length}>
-                {near.map((m) => <GoalCard key={m.goal.id} m={m} logTimeOn={logTimeOn} />)}
+            {(activeAll.length > 0 || stateFilter === "all" || stateFilter === "active") && activeAll.length > 0 && (
+              <SectionGrid label="ACTIVE" count={activeAll.length}>
+                {activeAll.map((m) => <GoalCard key={m.goal.id} m={m} logTimeOn={logTimeOn} />)}
               </SectionGrid>
             )}
 

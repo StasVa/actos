@@ -50,16 +50,20 @@ const Divider: React.FC = () => (
   <div className="my-6 h-px w-full bg-border-subtle" />
 );
 
-const RitualPanel: React.FC<Props> = ({ open, onClose }) => {
+const RitualPanel: React.FC<Props> = ({ open, onClose, mode = "edit" }) => {
+  const isNew = mode === "new";
   const [mounted, setMounted] = useState(open);
   const [visible, setVisible] = useState(false);
-  const [schedule, setSchedule] = useState<ScheduleOpt>("Weekly");
-  const [title, setTitle] = useState("Weekly project audit");
+  const [schedule, setSchedule] = useState<ScheduleOpt>(isNew ? "Daily" : "Weekly");
+  const [title, setTitle] = useState(isNew ? "" : "Weekly project audit");
   const [impact, setImpact] = useState(5);
   const [time, setTime] = useState("30m");
   const [notes, setNotes] = useState(
-    "Review what's moving across all projects in this goal. Identify stuck items and adjust scope if needed.",
+    isNew
+      ? ""
+      : "Review what's moving across all projects in this goal. Identify stuck items and adjust scope if needed.",
   );
+  const titleRef = React.useRef<HTMLInputElement>(null);
 
   // Mount / animate
   useEffect(() => {

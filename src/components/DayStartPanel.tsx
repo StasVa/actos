@@ -1,7 +1,7 @@
 // Day Start / Day Close panel — captures dayType, morning intent, energy,
 // and (at end of day) reflection + evening energy. Backed by store.dayEntries.
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useStore } from "@/store/useStore";
 import type { DayType } from "@/types";
 import { toast } from "sonner";

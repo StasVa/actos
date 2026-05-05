@@ -9,7 +9,7 @@ import { FilterDropdown, FilterOption } from "@/components/FilterDropdown";
 import { SortDropdown } from "@/components/SortDropdown";
 import { Tooltip, SparkTooltipContent, StateDotTooltip, type DayInfo } from "@/components/Tooltip";
 import { toast } from "sonner";
-import type { Goal, Action, Project, Ritual } from "@/types";
+import type { Goal } from "@/types";
 
 type StateFilter = "all" | "active" | "completed" | "dropped";
 type TypeFilter = "all" | "short-term" | "mid-term";

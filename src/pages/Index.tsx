@@ -1,6 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Tooltip, SparkTooltipContent, StateDotTooltip } from "@/components/Tooltip";
+import { LifetimeCounters } from "@/components/LifetimeCounters";
 import { buildYouTubeTooltips, buildFitnessTooltips, buildReadingTooltips } from "@/lib/sparkTooltips";
 
 /* ===== Tokens ===== */
@@ -74,8 +75,7 @@ const Sidebar: React.FC = () => {
 
     <div className="font-mono text-[11px] text-text-tertiary px-1">⌘K  Quick add</div>
     <div className="mt-4 font-mono text-[11px] text-text-secondary px-1 leading-[1.7]">
-      <div>3 projects closed</div>
-      <div>47 actions done</div>
+      <LifetimeCounters />
     </div>
     <div className="mt-3 flex items-center gap-2 p-1 rounded-[4px] hover:bg-surface-hover cursor-pointer">
       <span className="w-7 h-7 rounded-full bg-surface-hover flex items-center justify-center font-mono text-[11px] text-text-primary">

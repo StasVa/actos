@@ -192,7 +192,8 @@ const GoalColumn: React.FC<{
   color: string;
   recent: React.ReactNode;
   href?: string;
-}> = ({ title, state, type, target, progress, meta, outcome, effort, spark, sparkTips, lastActivity, stalledFor, color, recent, href }) => {
+  menu?: React.ReactNode;
+}> = ({ title, state, type, target, progress, meta, outcome, effort, spark, sparkTips, lastActivity, stalledFor, color, recent, href, menu }) => {
   const inner = (
     <div className="px-6 py-1 space-y-4 first:pl-0 last:pr-0 group">
     <div className="flex items-center justify-between gap-2">
@@ -206,9 +207,12 @@ const GoalColumn: React.FC<{
         <h3 className={`text-[18px] font-medium text-text-primary truncate ${href ? "group-hover:text-accent transition-colors" : ""}`}>{title}</h3>
         <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary shrink-0">{type}</span>
       </div>
-      {target && (
-        <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary shrink-0">{target}</div>
-      )}
+      <div className="flex items-center gap-2 shrink-0">
+        {target && (
+          <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">{target}</div>
+        )}
+        {menu}
+      </div>
     </div>
 
     <div className="flex gap-6 items-end">
@@ -247,6 +251,47 @@ const GoalColumn: React.FC<{
     );
   }
   return inner;
+};
+
+/* ===== Goal column menu (composed in Hero) ===== */
+const GoalColumnMenu: React.FC<{ goalId: string }> = ({ goalId }) => {
+  const openPanel = useStore((s) => s.openPanel);
+  const markGoalComplete = useStore((s) => s.markGoalComplete);
+  const dropGoal = useStore((s) => s.dropGoal);
+  const deleteGoal = useStore((s) => s.deleteGoal);
+  const [confirmDrop, setConfirmDrop] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  return (
+    <>
+      <CardMenu
+        ariaLabel="Goal menu"
+        items={[
+          { label: "Edit", onSelect: () => openPanel({ kind: "goal", mode: "edit", id: goalId }) },
+          { label: "Mark complete", onSelect: () => { markGoalComplete(goalId); toast("Goal completed"); } },
+          { label: "Drop", destructive: true, onSelect: () => setConfirmDrop(true) },
+          { label: "Delete", destructive: true, onSelect: () => setConfirmDelete(true) },
+        ]}
+      />
+      <ConfirmModal
+        open={confirmDrop}
+        title="Drop this goal?"
+        body="Open projects, actions, and rituals under this goal will be dropped."
+        confirmLabel="Drop goal"
+        destructive
+        onCancel={() => setConfirmDrop(false)}
+        onConfirm={() => { dropGoal(goalId); toast("Goal dropped"); setConfirmDrop(false); }}
+      />
+      <ConfirmModal
+        open={confirmDelete}
+        title="Delete this goal?"
+        body="This permanently removes the goal and ALL its projects, actions, rituals, and ideas."
+        confirmLabel="Delete"
+        destructive
+        onCancel={() => setConfirmDelete(false)}
+        onConfirm={() => { deleteGoal(goalId); toast("Goal deleted"); setConfirmDelete(false); }}
+      />
+    </>
+  );
 };
 
 const SPARK_1_TIPS = buildYouTubeTooltips(SPARK_1);

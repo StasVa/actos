@@ -1127,7 +1127,7 @@ export const Delegated: React.FC = () => {
           </div>
         ))}
       </div>
-      <Link to="/all-delegated" className="inline-block mt-2 text-[12px] text-accent hover:text-accent-hover">
+      <Link to="/delegated" className="inline-block mt-2 text-[12px] text-accent hover:text-accent-hover">
         View all →
       </Link>
     </div>

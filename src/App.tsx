@@ -15,6 +15,7 @@ import NotFound from "./pages/NotFound.tsx";
 import { ActionEditor } from "./components/ActionEditor";
 import { ProjectEditor } from "./components/ProjectEditor";
 import { GoalEditor } from "./components/GoalEditor";
+import { RitualEditor } from "./components/RitualEditor";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,7 @@ const App = () => (
       <ActionEditor />
       <ProjectEditor />
       <GoalEditor />
+      <RitualEditor />
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />

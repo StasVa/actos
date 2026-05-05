@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import { LifetimeCounters } from "@/components/LifetimeCounters";
 import { Link, useLocation } from "react-router-dom";
 import { Tooltip } from "@/components/Tooltip";
-import RitualPanel from "@/components/RitualPanel";
+import { useStore } from "@/store/useStore";
+import { toast } from "sonner";
 
 const G1 = "hsl(var(--goal-1))";
 const G2 = "hsl(var(--goal-2))";
@@ -317,7 +318,7 @@ const FrequencyChart: React.FC<{ data: number[]; max: number; color: string; uni
 };
 
 /* ===== Ritual card ===== */
-const RitualCard: React.FC<{ r: RitualRow; onOpen: (r: RitualRow) => void }> = ({ r, onOpen }) => {
+const RitualCard: React.FC<{ r: RitualRow; onOpen: (r: RitualRow) => void; onMarkDone: (r: RitualRow) => void }> = ({ r, onOpen, onMarkDone }) => {
   const isMonthly = r.scheduleLabel.startsWith("MONTHLY");
   return (
     <div
@@ -384,6 +385,7 @@ const RitualCard: React.FC<{ r: RitualRow; onOpen: (r: RitualRow) => void }> = (
             type="button"
             onClick={(e) => {
               e.stopPropagation();
+              onMarkDone(r);
             }}
             className="px-3 py-1 rounded-[4px] border border-accent bg-transparent text-[12px] font-medium text-text-primary hover:bg-surface-hover transition-colors"
           >
@@ -405,7 +407,7 @@ const RitualCard: React.FC<{ r: RitualRow; onOpen: (r: RitualRow) => void }> = (
 };
 
 /* ===== Pending today list ===== */
-const PendingToday: React.FC<{ items: RitualRow[] }> = ({ items }) => (
+const PendingToday: React.FC<{ items: RitualRow[]; onMarkDone: (r: RitualRow) => void; onOpen: (r: RitualRow) => void }> = ({ items, onMarkDone, onOpen }) => (
   <section>
     <div className="text-[12px] font-medium uppercase tracking-[0.08em] text-text-secondary mb-3">
       Pending today · {items.length}
@@ -414,7 +416,8 @@ const PendingToday: React.FC<{ items: RitualRow[] }> = ({ items }) => (
       {items.map((r, i) => (
         <div
           key={r.id}
-          className={`flex items-center gap-3 pr-3 hover:bg-surface-hover transition-colors ${
+          onClick={() => onOpen(r)}
+          className={`flex items-center gap-3 pr-3 hover:bg-surface-hover transition-colors cursor-pointer ${
             i > 0 ? "border-t border-border-subtle" : ""
           }`}
           style={{ height: 36, padding: "8px 12px" }}
@@ -430,13 +433,16 @@ const PendingToday: React.FC<{ items: RitualRow[] }> = ({ items }) => (
           <span className="text-[13px] font-medium text-text-primary">{r.title}</span>
           <span className="text-[12px] text-text-secondary">· {r.scheduleShort}</span>
           <div className="flex-1" />
-          <a
-            href="#"
-            onClick={(e) => e.preventDefault()}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onMarkDone(r);
+            }}
             className="text-[12px] text-text-secondary hover:text-text-primary"
           >
             Mark done
-          </a>
+          </button>
         </div>
       ))}
     </div>
@@ -516,23 +522,54 @@ const ArchivedSection: React.FC = () => {
 
 /* ===== Page ===== */
 const Rituals: React.FC = () => {
-  const [panelOpen, setPanelOpen] = useState(false);
-  const [panelMode, setPanelMode] = useState<"edit" | "new">("edit");
+  const storeRituals = useStore((s) => s.rituals);
+  const storeGoals = useStore((s) => s.goals);
+  const openPanel = useStore((s) => s.openPanel);
+  const markRitualInstanceDone = useStore((s) => s.markRitualInstanceDone);
+
   const pending = RITUALS.filter((r) => r.pendingToday);
 
+  // Bridge static visual rows → real store records by title.
+  const findStoreRitual = (r: RitualRow) =>
+    storeRituals.find((sr) => sr.title.toLowerCase() === r.title.toLowerCase());
+
   const handleOpen = (r: RitualRow) => {
-    if (r.hasPanel) {
-      setPanelMode("edit");
-      setPanelOpen(true);
+    const match = findStoreRitual(r);
+    if (match) {
+      openPanel({ kind: "ritual", mode: "edit", id: match.id });
     } else {
-      // eslint-disable-next-line no-console
-      console.log("Open ritual:", r.id);
+      openPanel({
+        kind: "ritual",
+        mode: "new",
+        prefill: {
+          title: r.title,
+          goalId: storeGoals.find((g) => g.status === "active")?.id,
+        },
+      });
     }
   };
 
   const handleAddRitual = () => {
-    setPanelMode("new");
-    setPanelOpen(true);
+    openPanel({
+      kind: "ritual",
+      mode: "new",
+      prefill: { goalId: storeGoals.find((g) => g.status === "active")?.id },
+    });
+  };
+
+  const handleMarkDone = (r: RitualRow) => {
+    const match = findStoreRitual(r);
+    if (!match) {
+      toast.error("Ritual not found in store");
+      return;
+    }
+    const today = new Date().toISOString().slice(0, 10);
+    if (match.completionHistory.some((c) => c.date === today)) {
+      toast("Already logged today");
+      return;
+    }
+    markRitualInstanceDone(match.id);
+    toast(`Logged · ${match.totalCompletions + 1} completion${match.totalCompletions + 1 === 1 ? "" : "s"}`);
   };
 
   return (
@@ -554,7 +591,9 @@ const Rituals: React.FC = () => {
           <TopStats />
 
           <div style={{ height: 24 }} />
-          {pending.length > 0 && <PendingToday items={pending} />}
+          {pending.length > 0 && (
+            <PendingToday items={pending} onMarkDone={handleMarkDone} onOpen={handleOpen} />
+          )}
 
           <div style={{ height: 32 }} />
 
@@ -568,7 +607,7 @@ const Rituals: React.FC = () => {
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {RITUALS.map((r) => (
-                <RitualCard key={r.id} r={r} onOpen={handleOpen} />
+                <RitualCard key={r.id} r={r} onOpen={handleOpen} onMarkDone={handleMarkDone} />
               ))}
               <button
                 type="button"
@@ -599,8 +638,6 @@ const Rituals: React.FC = () => {
           <div style={{ height: 32 }} />
         </div>
       </main>
-
-      <RitualPanel open={panelOpen} onClose={() => setPanelOpen(false)} mode={panelMode} />
     </div>
   );
 };

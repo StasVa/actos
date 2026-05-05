@@ -2,41 +2,55 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ActOS Daylight theme — sober, paper-like surface */
+/* ActOS dark workspace theme — Linear/Plane density */
 
 @layer base {
   :root {
-    /* Surfaces */
-    --background: 36 38% 96%;        /* #FAF7F2 surface base */
-    --surface-raised: 36 30% 93%;    /* #F4F0E8 */
-    --foreground: 30 20% 10%;        /* #1F1A14 text primary */
-    --text-secondary: 30 10% 38%;    /* #6B6358 */
-    --text-tertiary: 38 13% 58%;     /* #A09989 */
-    --hairline: 38 28% 86%;          /* #E5DFD3 */
+    --surface-base: 240 9% 6%;          /* #0F0F12 */
+    --surface-raised: 240 8% 9%;        /* #16161A */
+    --surface-hover: 240 8% 12%;        /* #1C1C22 */
+    --surface-elevated: 240 9% 11%;     /* #1A1A20 */
 
-    /* Accent */
-    --inkwell: 210 27% 22%;          /* #2A3A4A */
-    --olive: 80 18% 36%;             /* #5C6B4A */
-    --status-dropped: 14 24% 42%;    /* #8B5A4A */
+    --text-primary: 240 4% 91%;         /* #E8E8EA */
+    --text-secondary: 240 4% 62%;       /* #9A9AA0 */
+    --text-tertiary: 240 4% 37%;        /* #5A5A60 */
+    --text-disabled: 240 4% 24%;
 
-    /* shadcn aliases (kept minimal — sections do not use Card) */
-    --card: 36 38% 96%;
-    --card-foreground: 30 20% 10%;
-    --popover: 36 38% 96%;
-    --popover-foreground: 30 20% 10%;
-    --primary: 210 27% 22%;
-    --primary-foreground: 36 38% 96%;
-    --secondary: 36 30% 93%;
-    --secondary-foreground: 30 20% 10%;
-    --muted: 36 30% 93%;
-    --muted-foreground: 30 10% 38%;
-    --accent: 36 30% 93%;
-    --accent-foreground: 30 20% 10%;
-    --destructive: 14 24% 42%;
-    --destructive-foreground: 36 38% 96%;
-    --border: 38 28% 86%;
-    --input: 38 28% 86%;
-    --ring: 210 27% 22%;
+    --border-subtle: 240 8% 14%;        /* #222228 */
+    --border-default: 240 8% 18%;       /* #2A2A32 */
+
+    --accent: 226 100% 64%;             /* #4A6AFF */
+    --accent-hover: 226 100% 75%;
+    --accent-muted: 228 53% 35%;
+
+    --goal-1: 199 38% 48%;              /* #4A8AAA */
+    --goal-2: 26 60% 56%;               /* #D4884A */
+
+    --state-active: 102 26% 48%;        /* #6B9A5A */
+    --state-stalled: 240 4% 62%;
+    --status-done: 102 26% 48%;
+    --status-delegated: 220 8% 53%;
+    --status-dropped: 18 25% 50%;
+
+    /* shadcn aliases */
+    --background: 240 9% 6%;
+    --foreground: 240 4% 91%;
+    --card: 240 9% 11%;
+    --card-foreground: 240 4% 91%;
+    --popover: 240 9% 11%;
+    --popover-foreground: 240 4% 91%;
+    --primary: 226 100% 64%;
+    --primary-foreground: 240 4% 91%;
+    --secondary: 240 8% 12%;
+    --secondary-foreground: 240 4% 91%;
+    --muted: 240 8% 12%;
+    --muted-foreground: 240 4% 62%;
+    --accent-foreground: 240 4% 91%;
+    --destructive: 18 25% 50%;
+    --destructive-foreground: 240 4% 91%;
+    --border: 240 8% 14%;
+    --input: 240 8% 18%;
+    --ring: 226 100% 64%;
     --radius: 0.25rem;
   }
 }
@@ -46,11 +60,11 @@
     @apply border-border;
   }
   html, body {
-    @apply bg-background text-foreground;
-    font-family: "Inter Tight", system-ui, -apple-system, "Segoe UI", sans-serif;
-    font-size: 14px;
-    line-height: 1.55;
-    font-feature-settings: "ss01", "cv11";
+    background: hsl(var(--surface-base));
+    color: hsl(var(--text-primary));
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 13px;
+    line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }

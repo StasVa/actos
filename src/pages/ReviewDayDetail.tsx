@@ -621,41 +621,6 @@ const ReviewDayDetail: React.FC = () => {
               </section>
             )}
 
-            {/* TIME INVESTED */}
-            {settings.layers.logTime && totalMin > 0 && (
-              <section>
-                <SectionHead meta={`Total: ${formatHM(totalMin)}`}>Time invested</SectionHead>
-                <div className="space-y-2">
-                  {perGoal.map(({ g, min }) => {
-                    const pct = yMax > 0 ? (min / yMax) * 100 : 0;
-                    return (
-                      <div key={g.id} className="flex items-center gap-3">
-                        <div className="flex items-center gap-2 w-[200px] min-w-0">
-                          <span
-                            className="w-2 h-2 rounded-full shrink-0"
-                            style={{ background: `hsl(var(--${g.color}))` }}
-                          />
-                          <span className="text-[13px] text-text-primary truncate">{g.title}</span>
-                        </div>
-                        <div className="flex-1 h-2 rounded-[2px] bg-surface-hover overflow-hidden">
-                          <div
-                            className="h-full rounded-[2px]"
-                            style={{
-                              width: `${pct}%`,
-                              background: `hsl(var(--${g.color}))`,
-                            }}
-                          />
-                        </div>
-                        <div className="w-[80px] text-right font-mono text-[12px] tabular-nums text-text-secondary">
-                          {min > 0 ? formatHM(min) : "—"}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </section>
-            )}
-
             {/* REFLECTION */}
             <section>
               <SectionHead>Reflection</SectionHead>

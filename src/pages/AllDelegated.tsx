@@ -285,6 +285,18 @@ const InfoRow: React.FC<{ label: string; children: React.ReactNode }> = ({ label
 );
 
 const DelegationDetail: React.FC<{ action: Action }> = ({ action }) => {
+  const openPanel = useStore((s) => s.openPanel);
+  const changeActionStatus = useStore((s) => s.changeActionStatus);
+  const handleEdit = () =>
+    openPanel({ kind: "action", mode: "edit", id: action.id });
+  const handleMarkDone = () => {
+    changeActionStatus(action.id, "done");
+    toast.success("Marked done");
+  };
+  const handleReopen = () => {
+    changeActionStatus(action.id, "planned");
+    toast.success("Re-opened");
+  };
   const goal = GOALS[action.goal];
   const overdueDays =
     action.expectedReturnDelta !== undefined && action.expectedReturnDelta < 0

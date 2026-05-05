@@ -147,18 +147,23 @@ const GoalColumn: React.FC<{
   outcome: number;
   effort: number;
   spark: number[];
+  sparkTips: import("@/components/Tooltip").DayInfo[];
+  lastActivity?: string;
+  stalledFor?: string;
   color: string;
   recent: React.ReactNode;
   href?: string;
-}> = ({ title, state, type, target, progress, meta, outcome, effort, spark, color, recent, href }) => {
+}> = ({ title, state, type, target, progress, meta, outcome, effort, spark, sparkTips, lastActivity, stalledFor, color, recent, href }) => {
   const inner = (
     <div className="px-6 py-1 space-y-4 first:pl-0 last:pr-0 group">
     <div className="flex items-center justify-between gap-2">
       <div className="flex items-center gap-2.5 min-w-0">
-        <span
-          className="w-2 h-2 rounded-full shrink-0"
-          style={{ background: state === "active" ? "hsl(var(--state-active))" : "hsl(var(--state-stalled))" }}
-        />
+        <Tooltip content={<StateDotTooltip state={state} lastActivity={lastActivity} stalledFor={stalledFor} />}>
+          <span
+            className="w-2 h-2 rounded-full shrink-0"
+            style={{ background: state === "active" ? "hsl(var(--state-active))" : "hsl(var(--state-stalled))" }}
+          />
+        </Tooltip>
         <h3 className={`text-[18px] font-medium text-text-primary truncate ${href ? "group-hover:text-accent transition-colors" : ""}`}>{title}</h3>
         <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary shrink-0">{type}</span>
       </div>
@@ -189,7 +194,7 @@ const GoalColumn: React.FC<{
       <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-1.5">
         Activity · Last 30 days
       </div>
-      <Sparkline data={spark} color={color} />
+      <Sparkline data={spark} color={color} tips={sparkTips} />
     </div>
 
     <div className="font-mono text-[11px] text-text-secondary leading-relaxed">{recent}</div>

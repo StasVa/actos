@@ -649,7 +649,7 @@ const AllActions: React.FC = () => {
     setQuery("");
   };
 
-  const noop = () => {};
+  const openAction = (id: string) => openPanel({ kind: "action", mode: "edit", id });
 
   return (
     <div className="min-h-screen bg-surface-base text-text-primary">

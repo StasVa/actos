@@ -372,7 +372,7 @@ const ProjectCard: React.FC<{ p: Project }> = ({ p }) => {
 
 const ActiveProjects: React.FC = () => (
   <section>
-    <SectionLabel meta="4 ACTIVE · 1 STALLED">Active projects · 4</SectionLabel>
+    <SectionLabel meta="5 ACTIVE · 1 STALLED">Active projects · 5</SectionLabel>
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
       {PROJECTS.map((p, i) => (
         <ProjectCard key={i} p={p} />
@@ -384,7 +384,7 @@ const ActiveProjects: React.FC = () => (
 /* ===== Today ===== */
 const Today: React.FC = () => (
   <section>
-    <SectionLabel meta="3 ACTIONS · 2 RITUALS">Today</SectionLabel>
+    <SectionLabel meta="4 ACTIONS · 3 RITUALS">Today</SectionLabel>
     <div className="space-y-2">
       <div className="flex items-center gap-3 px-3 py-2 bg-surface-raised rounded-[4px]">
         <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">MAIN</span>
@@ -399,6 +399,7 @@ const Today: React.FC = () => (
         { c: G1, title: "Research thumbnail styles", crumb: "YouTube · Shoot video #1", time: "30m" },
         { c: G1, title: "Buy ring light", crumb: "YouTube · Set up workspace", del: "→ Maria", time: "45m" },
         { c: G2, title: "Plan tomorrow's meals", crumb: "Lose 5 kg · Nutrition plan", time: "20m" },
+        { c: G3, title: "Read chapter 4 of current book", crumb: "Read 24 books · Daily reading habit", time: "30m" },
       ].map((r, i) => (
         <div
           key={i}

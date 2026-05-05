@@ -476,12 +476,6 @@ const AllActions: React.FC = () => {
     return { active, terminal };
   }, [filtered, statusFilter, sortFn]);
 
-  const selected = filtered.find((a) => a.id === selectedId) ?? filtered[0];
-
-  React.useEffect(() => {
-    if (selected && selected.id !== selectedId) setSelectedId(selected.id);
-  }, [selected, selectedId]);
-
   const anyApplied =
     statusFilter !== "all" ||
     goalFilter !== "all" ||
@@ -497,140 +491,110 @@ const AllActions: React.FC = () => {
     setQuery("");
   };
 
+  const noop = () => {};
+
   return (
     <div className="min-h-screen bg-surface-base text-text-primary">
       <Sidebar />
       <main className="ml-[220px] flex flex-col h-screen">
         {/* Page header */}
-        <div className="px-8 py-6 border-b border-border-subtle shrink-0">
+        <div className="px-10 pt-6 pb-3 shrink-0">
           <div className="flex items-baseline justify-between">
             <h1 className="text-[24px] font-medium text-text-primary">All actions</h1>
             <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary tabular-nums">
               {meta}
             </div>
           </div>
-        </div>
 
-        {/* Body */}
-        <div className="flex-1 flex min-h-0">
-          {/* Left column */}
-          <div className="w-[42%] border-r border-border-subtle flex flex-col min-h-0">
-            {/* Filter dropdowns */}
-            <div style={{ padding: "16px 16px 12px 16px" }}>
-              <div className="flex items-center gap-2 flex-wrap">
-                <FilterDropdown
-                  label="STATUS"
-                  value={statusFilter}
-                  defaultValue="all"
-                  options={STATUS_OPTIONS}
-                  onChange={(v) => setStatusFilter(v)}
-                />
-                <FilterDropdown
-                  label="GOAL"
-                  value={goalFilter}
-                  defaultValue="all"
-                  options={GOAL_OPTIONS}
-                  onChange={(v) => setGoalFilter(v)}
-                />
-                <FilterDropdown
-                  label="DATE"
-                  value={dateFilter}
-                  defaultValue="all"
-                  options={DATE_OPTIONS}
-                  onChange={(v) => setDateFilter(v)}
-                />
-              </div>
-            </div>
-            {/* Search */}
-            <div style={{ padding: "0 16px 16px 16px" }}>
-              <div className="flex items-center gap-2 bg-surface-raised border border-border-subtle rounded-[4px] px-3 py-2 w-full">
-                <span className="text-[12px] text-text-tertiary">⌕</span>
-                <input
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search actions..."
-                  className="flex-1 bg-transparent outline-none text-[13px] text-text-primary placeholder:text-text-tertiary"
-                />
-              </div>
-            </div>
-            {/* Sort + clear row */}
-            <div className="flex items-center justify-between px-4 pb-2">
-              {anyApplied ? (
+          {/* Filters row */}
+          <div className="mt-3 flex items-center justify-between gap-3 flex-wrap">
+            <div className="flex items-center gap-2 flex-wrap">
+              <FilterDropdown
+                label="STATUS"
+                value={statusFilter}
+                defaultValue="all"
+                options={STATUS_OPTIONS}
+                onChange={(v) => setStatusFilter(v)}
+              />
+              <FilterDropdown
+                label="GOAL"
+                value={goalFilter}
+                defaultValue="all"
+                options={GOAL_OPTIONS}
+                onChange={(v) => setGoalFilter(v)}
+              />
+              <FilterDropdown
+                label="DATE"
+                value={dateFilter}
+                defaultValue="all"
+                options={DATE_OPTIONS}
+                onChange={(v) => setDateFilter(v)}
+              />
+              {anyApplied && (
                 <button
                   onClick={clearFilters}
-                  className="text-[12px] text-text-tertiary hover:text-text-secondary transition-colors"
+                  className="ml-1 text-[12px] text-text-tertiary hover:text-text-secondary transition-colors"
                 >
                   Clear filters
                 </button>
-              ) : (
-                <span />
-              )}
-              <SortDropdown
-                value={sortKey}
-                options={SORT_OPTIONS}
-                onChange={(v) => setSortKey(v)}
-              />
-            </div>
-            <div className="flex-1 overflow-y-auto">
-              {filtered.length === 0 ? (
-                <div className="p-8 text-center font-mono text-[11px] text-text-tertiary">
-                  No actions match these filters.
-                </div>
-              ) : "single" in grouped ? (
-                grouped.single!.map((a) => (
-                  <ActionRow
-                    key={a.id}
-                    action={a}
-                    selected={selected?.id === a.id}
-                    onSelect={() => setSelectedId(a.id)}
-                  />
-                ))
-              ) : (
-                <>
-                  {grouped.active!.length > 0 &&
-                    grouped.active!.map((a) => (
-                      <ActionRow
-                        key={a.id}
-                        action={a}
-                        selected={selected?.id === a.id}
-                        onSelect={() => setSelectedId(a.id)}
-                      />
-                    ))}
-                  {grouped.terminal!.length > 0 && (
-                    <>
-                      <GroupHeader
-                        label="TERMINAL"
-                        count={grouped.terminal!.length}
-                        collapsible
-                        collapsed={terminalCollapsed}
-                        onToggle={() => setTerminalCollapsed((v) => !v)}
-                      />
-                      {!terminalCollapsed &&
-                        grouped.terminal!.map((a) => (
-                          <ActionRow
-                            key={a.id}
-                            action={a}
-                            selected={selected?.id === a.id}
-                            onSelect={() => setSelectedId(a.id)}
-                          />
-                        ))}
-                    </>
-                  )}
-                </>
               )}
             </div>
+            <SortDropdown
+              value={sortKey}
+              options={SORT_OPTIONS}
+              onChange={(v) => setSortKey(v)}
+            />
           </div>
 
-          {/* Right column */}
-          <div className="flex-1 overflow-y-auto min-h-0">
-            {filtered.length === 0 ? (
-              <EmptyFiltered onClear={clearFilters} />
-            ) : selected ? (
-              <ActionDetail action={selected} key={selected.id} />
-            ) : (
-              <EmptyDetail />
-            )}
+          {/* Search */}
+          <div className="mt-3 max-w-[720px]">
+            <div className="flex items-center gap-2 bg-surface-raised border border-border-subtle rounded-[4px] px-3 py-2 w-full">
+              <span className="text-[12px] text-text-tertiary">⌕</span>
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search actions..."
+                className="flex-1 bg-transparent outline-none text-[13px] text-text-primary placeholder:text-text-tertiary"
+              />
+            </div>
           </div>
+        </div>
+
+        <div className="border-t border-border-subtle" />
+
+        {/* Full-width list */}
+        <div className="flex-1 overflow-y-auto min-h-0 pt-6">
+          {filtered.length === 0 ? (
+            <div className="p-8 text-center font-mono text-[11px] text-text-tertiary">
+              No actions match these filters.
+            </div>
+          ) : "single" in grouped ? (
+            grouped.single!.map((a) => (
+              <ActionRow key={a.id} action={a} selected={false} onSelect={noop} />
+            ))
+          ) : (
+            <>
+              {grouped.active!.length > 0 &&
+                grouped.active!.map((a) => (
+                  <ActionRow key={a.id} action={a} selected={false} onSelect={noop} />
+                ))}
+              {grouped.terminal!.length > 0 && (
+                <>
+                  <GroupHeader
+                    label="TERMINAL"
+                    count={grouped.terminal!.length}
+                    collapsible
+                    collapsed={terminalCollapsed}
+                    onToggle={() => setTerminalCollapsed((v) => !v)}
+                  />
+                  {!terminalCollapsed &&
+                    grouped.terminal!.map((a) => (
+                      <ActionRow key={a.id} action={a} selected={false} onSelect={noop} />
+                    ))}
+                </>
+              )}
+            </>
+          )}
         </div>
       </main>
     </div>

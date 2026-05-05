@@ -14,7 +14,7 @@ const NAV = [
   { label: "Ideas", href: "/ideas" },
   { label: "Rituals", href: "/rituals" },
   { label: "All actions", href: "/all-actions" },
-  { label: "All projects", href: "#" },
+  { label: "All projects", href: "/all-projects" },
   { label: "All delegated", href: "/all-delegated" },
 ];
 

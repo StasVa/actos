@@ -523,15 +523,22 @@ const ArchivedSection: React.FC = () => {
 /* ===== Page ===== */
 const Rituals: React.FC = () => {
   const [panelOpen, setPanelOpen] = useState(false);
+  const [panelMode, setPanelMode] = useState<"edit" | "new">("edit");
   const pending = RITUALS.filter((r) => r.pendingToday);
 
   const handleOpen = (r: RitualRow) => {
     if (r.hasPanel) {
+      setPanelMode("edit");
       setPanelOpen(true);
     } else {
       // eslint-disable-next-line no-console
       console.log("Open ritual:", r.id);
     }
+  };
+
+  const handleAddRitual = () => {
+    setPanelMode("new");
+    setPanelOpen(true);
   };
 
   return (

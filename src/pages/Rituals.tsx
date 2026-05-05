@@ -447,16 +447,23 @@ function isMonthlyRitual(schedule: string): boolean {
   return schedule === "monthly";
 }
 
-function ritualDueToday(schedule: string, scheduleConfig?: { weekdays?: number[] }): boolean {
+function ritualDueToday(schedule: string, scheduleConfig?: import("@/types").RitualScheduleConfig): boolean {
   const dow = new Date().getDay(); // 0=Sun
   switch (schedule) {
     case "daily": return true;
     case "weekdays": return dow >= 1 && dow <= 5;
     case "weekly": {
-      const allowed = scheduleConfig?.weekdays;
-      return allowed && allowed.length > 0 ? allowed.includes(dow) : true;
+      const target = scheduleConfig?.weekday;
+      return target === undefined ? true : target === dow;
     }
-    case "monthly": return new Date().getDate() === 1;
+    case "monthly": {
+      const target = scheduleConfig?.monthDay ?? 1;
+      return new Date().getDate() === target;
+    }
+    case "custom": {
+      const days = scheduleConfig?.customDays;
+      return days && days.length > 0 ? days.includes(dow) : true;
+    }
     default: return true;
   }
 }

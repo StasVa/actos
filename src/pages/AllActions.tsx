@@ -272,6 +272,7 @@ const ActionDetail: React.FC<{ action: Action }> = ({ action }) => {
 
   return (
     <div className="px-10 py-8">
+      <div className="max-w-[540px] mx-auto">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
         <span className="w-2 h-2 rounded-full" style={{ background: goal.color }} />

@@ -106,6 +106,7 @@ const SPARK = [
   4, 5, 1, 0, 3, 4, 2,
   3, 5,
 ];
+const SPARK_TIPS = buildYouTubeTooltips(SPARK);
 
 const Pillar: React.FC<{ label: string; value: string; sub: string }> = ({ label, value, sub }) => (
   <div className="flex flex-col">

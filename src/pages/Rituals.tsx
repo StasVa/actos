@@ -162,8 +162,12 @@ const RITUALS: RitualRow[] = [
     pendingToday: false,
     notDueToday: true,
     lastDoneLabel: "Apr 1",
-    consistency: new Array(30).fill(0),
-    frequency: [0,0,0,0,1,0,0,0,1,0,0,1],
+    consistency: (() => {
+      const arr = new Array(90).fill(0);
+      arr[55] = 1; // Apr 1 = ~35 days ago, position 90-35 = 55 from oldest
+      return arr;
+    })(),
+    frequency: [0,0,0,0,0,0,0,0,0,1,1,1],
     freqMax: 1,
   },
 ];
@@ -187,9 +191,19 @@ function weekLabel(weeksFromNow: number): string {
   d.setDate(d.getDate() - diff);
   return `Week of ${MONTH_SHORT[d.getMonth()]} ${d.getDate()}`;
 }
+function monthLabel(monthsFromNow: number): string {
+  const d = new Date();
+  d.setDate(1);
+  d.setMonth(d.getMonth() - monthsFromNow);
+  return `${MONTH_SHORT[d.getMonth()]} ${d.getFullYear()}`;
+}
 
 /* ===== Charts ===== */
-const ConsistencyCalendar: React.FC<{ data: number[]; color: string }> = ({ data, color }) => {
+const ConsistencyCalendar: React.FC<{ data: number[]; color: string; cellSize?: number }> = ({
+  data,
+  color,
+  cellSize = 12,
+}) => {
   const last = data.length - 1;
   return (
     <div className="flex items-center gap-[2px]">
@@ -211,9 +225,9 @@ const ConsistencyCalendar: React.FC<{ data: number[]; color: string }> = ({ data
             <span
               className="inline-block hover:brightness-[1.15]"
               style={{
-                width: 8,
-                height: 8,
-                borderRadius: 1,
+                width: cellSize,
+                height: cellSize,
+                borderRadius: 2,
                 background: v === 1 ? color : "hsl(var(--surface-hover))",
                 border: v === 1 ? "none" : "1px solid hsl(var(--border-subtle))",
                 boxSizing: "border-box",
@@ -227,15 +241,61 @@ const ConsistencyCalendar: React.FC<{ data: number[]; color: string }> = ({ data
   );
 };
 
-const FrequencyChart: React.FC<{ data: number[]; max: number; color: string }> = ({ data, max, color }) => {
+/* 90-day calendar in 3 rows of 30 (for monthly rituals) */
+const MonthlyConsistency: React.FC<{ data: number[]; color: string }> = ({ data, color }) => {
+  const last = data.length - 1;
+  const rows = [data.slice(0, 30), data.slice(30, 60), data.slice(60, 90)];
+  return (
+    <div className="flex flex-col" style={{ gap: 4 }}>
+      {rows.map((row, rIdx) => (
+        <div key={rIdx} className="flex items-center gap-[2px]">
+          {row.map((v, i) => {
+            const idx = rIdx * 30 + i;
+            const daysFromToday = last - idx;
+            const status =
+              daysFromToday === 0 && v === 0
+                ? "Pending"
+                : v === 1
+                ? "Done"
+                : "Missed";
+            const tip = (
+              <div className="text-[12px] text-text-primary" style={{ fontFamily: "Inter, sans-serif" }}>
+                {dayLabel(daysFromToday)} ·{" "}
+                <span className="font-mono text-text-secondary">{status}</span>
+              </div>
+            );
+            return (
+              <Tooltip key={i} content={tip}>
+                <span
+                  className="inline-block hover:brightness-[1.15]"
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: 1,
+                    background: v === 1 ? color : "hsl(var(--surface-hover))",
+                    border: v === 1 ? "none" : "1px solid hsl(var(--border-subtle))",
+                    boxSizing: "border-box",
+                    transition: "filter 80ms ease",
+                  }}
+                />
+              </Tooltip>
+            );
+          })}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const FrequencyChart: React.FC<{ data: number[]; max: number; color: string; unit?: "week" | "month" }> = ({ data, max, color, unit = "week" }) => {
   return (
     <div className="w-full flex items-end gap-[3px]" style={{ height: 44 }}>
       {data.map((v, i) => {
-        const weeksFromNow = data.length - 1 - i;
+        const stepsFromNow = data.length - 1 - i;
         const h = max === 0 ? 0 : Math.round((v / max) * 44);
         const tip = (
           <div className="text-[12px] text-text-primary" style={{ fontFamily: "Inter, sans-serif" }}>
-            {weekLabel(weeksFromNow)} ·{" "}
+            {unit === "month" ? monthLabel(stepsFromNow) : weekLabel(stepsFromNow)} ·{" "}
             <span className="font-mono text-text-secondary">
               {v === 0 ? "No completions" : `${v} done`}
             </span>
@@ -262,6 +322,7 @@ const FrequencyChart: React.FC<{ data: number[]; max: number; color: string }> =
 
 /* ===== Ritual card ===== */
 const RitualCard: React.FC<{ r: RitualRow; onOpen: (r: RitualRow) => void }> = ({ r, onOpen }) => {
+  const isMonthly = r.scheduleLabel.startsWith("MONTHLY");
   return (
     <div
       onClick={() => onOpen(r)}
@@ -297,9 +358,13 @@ const RitualCard: React.FC<{ r: RitualRow; onOpen: (r: RitualRow) => void }> = (
       {/* Chart 1 */}
       <div>
         <div className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary mb-1">
-          LAST 30 DAYS · CONSISTENCY
+          {isMonthly ? "LAST 90 DAYS · CONSISTENCY" : "LAST 30 DAYS · CONSISTENCY"}
         </div>
-        <ConsistencyCalendar data={r.consistency} color={r.goalColor} />
+        {isMonthly ? (
+          <MonthlyConsistency data={r.consistency} color={r.goalColor} />
+        ) : (
+          <ConsistencyCalendar data={r.consistency} color={r.goalColor} />
+        )}
       </div>
 
       <div style={{ height: 12 }} />
@@ -308,11 +373,16 @@ const RitualCard: React.FC<{ r: RitualRow; onOpen: (r: RitualRow) => void }> = (
       <div>
         <div className="flex items-baseline justify-between mb-1">
           <div className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">
-            12 WEEKS · FREQUENCY
+            {isMonthly ? "12 MONTHS · FREQUENCY" : "12 WEEKS · FREQUENCY"}
           </div>
           <div className="font-mono text-[9px] text-text-tertiary">max: {r.freqMax}</div>
         </div>
-        <FrequencyChart data={r.frequency} max={r.freqMax} color={r.goalColor} />
+        <FrequencyChart
+          data={r.frequency}
+          max={r.freqMax}
+          color={r.goalColor}
+          unit={isMonthly ? "month" : "week"}
+        />
       </div>
 
       <div className="flex-1" style={{ minHeight: 20 }} />
@@ -453,15 +523,22 @@ const ArchivedSection: React.FC = () => {
 /* ===== Page ===== */
 const Rituals: React.FC = () => {
   const [panelOpen, setPanelOpen] = useState(false);
+  const [panelMode, setPanelMode] = useState<"edit" | "new">("edit");
   const pending = RITUALS.filter((r) => r.pendingToday);
 
   const handleOpen = (r: RitualRow) => {
     if (r.hasPanel) {
+      setPanelMode("edit");
       setPanelOpen(true);
     } else {
       // eslint-disable-next-line no-console
       console.log("Open ritual:", r.id);
     }
+  };
+
+  const handleAddRitual = () => {
+    setPanelMode("new");
+    setPanelOpen(true);
   };
 
   return (
@@ -499,6 +576,26 @@ const Rituals: React.FC = () => {
               {RITUALS.map((r) => (
                 <RitualCard key={r.id} r={r} onOpen={handleOpen} />
               ))}
+              <button
+                type="button"
+                onClick={handleAddRitual}
+                className="group rounded-[6px] bg-transparent border border-dashed border-border-default hover:border-solid hover:border-accent hover:bg-surface-hover transition-colors cursor-pointer flex flex-col items-center justify-center"
+                style={{ minHeight: 240 }}
+              >
+                <span
+                  className="font-mono text-text-tertiary group-hover:text-text-primary transition-colors leading-none"
+                  style={{ fontSize: 28 }}
+                >
+                  +
+                </span>
+                <span style={{ height: 8 }} />
+                <span
+                  className="text-[14px] text-text-secondary group-hover:text-text-primary transition-colors"
+                  style={{ fontFamily: "Inter, sans-serif" }}
+                >
+                  Add ritual
+                </span>
+              </button>
             </div>
           </section>
 
@@ -509,7 +606,7 @@ const Rituals: React.FC = () => {
         </div>
       </main>
 
-      <RitualPanel open={panelOpen} onClose={() => setPanelOpen(false)} />
+      <RitualPanel open={panelOpen} onClose={() => setPanelOpen(false)} mode={panelMode} />
     </div>
   );
 };

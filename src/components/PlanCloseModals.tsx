@@ -10,6 +10,7 @@ import { X } from "lucide-react";
 import { toast } from "sonner";
 import { useStore } from "@/store/useStore";
 import type { Action, DayType, ID, Ritual } from "@/types";
+import { formatTime as formatTimeMin } from "@/lib/format";
 
 /* ───────── helpers ───────── */
 const todayISO = () => new Date().toISOString().slice(0, 10);

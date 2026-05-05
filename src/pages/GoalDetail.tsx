@@ -410,8 +410,6 @@ const GoalDetail: React.FC = () => {
           <div className="h-14" />
           <RecentActivity />
 
-          <div className="h-14" />
-          <Heatmap />
 
           <div className="h-14" />
           <IdeasSection />

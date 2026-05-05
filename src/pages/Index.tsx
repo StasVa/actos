@@ -681,84 +681,128 @@ const Today: React.FC = () => {
 };
 
 
-/* ===== Heavy Lift ===== */
-const HEAVY = [
-  { c: G1, impact: 8, title: "Edit first video draft", crumb: "YouTube · Shoot video #1", time: "2h 30m" },
-  { c: G1, impact: 7, title: "Outline video #2 series structure", crumb: "YouTube · Shoot video #1", time: "2h" },
-  { c: G2, impact: 6, title: "Cook batch meals for the week", crumb: "Lose 5 kg · Nutrition plan", time: "1h 30m" },
-];
+/* ===== Heavy Lift (live) ===== */
+const HeavyLift: React.FC = () => {
+  const actions = useStore((s) => s.actions);
+  const goals = useStore((s) => s.goals);
+  const projects = useStore((s) => s.projects);
+  const openPanel = useStore((s) => s.openPanel);
+  const changeStatus = useStore((s) => s.changeActionStatus);
 
-const HeavyLift: React.FC = () => (
-  <section>
-    <SectionLabel meta="HIGH IMPACT · HIGH EFFORT">Heavy lift today</SectionLabel>
-    <div className="space-y-1">
-      {HEAVY.map((r, i) => (
-        <div
-          key={i}
-          className="group flex items-center gap-3 pr-3 min-h-9 rounded-[2px] hover:bg-surface-hover transition-colors overflow-hidden"
-        >
-          <Strip color={r.c} />
-          <div className="w-[52px] pl-2">
-            <div className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary leading-none">
-              IMPACT
-            </div>
-            <div className="font-mono text-[16px] text-text-primary leading-tight">{r.impact}</div>
-          </div>
-          <div className="min-w-0 flex-1 py-1.5">
-            <div className="text-[13px] font-medium text-text-primary truncate">{r.title}</div>
-            <div className="text-[11px] text-text-secondary truncate">{r.crumb}</div>
-          </div>
-          <span className="font-mono text-[12px] text-text-secondary whitespace-nowrap">{r.time}</span>
-          <a
-            href="#"
-            className="text-[12px] text-accent hover:text-accent-hover whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-100"
-          >
-            Mark done
-          </a>
-          <a
-            href="#"
-            className="text-[12px] text-text-secondary hover:text-text-primary whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-100"
-          >
-            Open
-          </a>
+  const items = actions
+    .filter((a) => (a.status === "planned" || a.status === "backlog"))
+    .filter((a) => (a.impact ?? 0) >= 6 && (a.timeEstimateMinutes ?? 0) >= 60)
+    .sort((a, b) => (b.impact ?? 0) - (a.impact ?? 0))
+    .slice(0, 3);
+
+  return (
+    <section>
+      <SectionLabel meta="HIGH IMPACT · HIGH EFFORT">Heavy lift today</SectionLabel>
+      {items.length === 0 ? (
+        <div className="font-mono text-[11px] text-text-tertiary px-3 py-2">
+          No heavy-lift candidates. Add actions with impact ≥ 6 and time ≥ 1h.
         </div>
-      ))}
-    </div>
-  </section>
-);
-
-/* ===== Quick Moves ===== */
-const QUICK = [
-  { c: G1, title: "Send brief to thumbnail designer", crumb: "YouTube · Shoot video #1", del: "→ AI", meta: "I6 · 20m" },
-  { c: G2, title: "Order resistance bands", crumb: "Lose 5 kg · Nutrition plan", meta: "I5 · 15m" },
-  { c: G1, title: "Update channel description", crumb: "YouTube · Set up workspace", meta: "I5 · 30m" },
-  { c: G2, title: "Schedule weekly meal prep day", crumb: "Lose 5 kg · Nutrition plan", meta: "I4 · 20m" },
-  { c: G1, title: "Test new recording mic", crumb: "YouTube · Shoot video #1", meta: "I4 · 30m" },
-];
-
-const QuickMoves: React.FC = () => (
-  <section>
-    <SectionLabel meta="HIGH IMPACT · LOW EFFORT">Quick moves</SectionLabel>
-    <div className="space-y-0.5">
-      {QUICK.map((r, i) => (
-        <div
-          key={i}
-          className="flex items-center gap-3 pr-3 h-7 rounded-[2px] hover:bg-surface-hover transition-colors overflow-hidden"
-        >
-          <Strip color={r.c} />
-          <div className="pl-1">
-            <Checkbox />
-          </div>
-          <span className="text-[13px] text-text-primary truncate">{r.title}</span>
-          <span className="text-[12px] text-text-secondary truncate">· {r.crumb}</span>
-          <div className="flex-1" />
-          {r.del && <span className="font-mono text-[11px] text-text-tertiary">{r.del}</span>}
-          <span className="font-mono text-[11px] text-text-secondary whitespace-nowrap">{r.meta}</span>
+      ) : (
+        <div className="space-y-1">
+          {items.map((a) => {
+            const g = goals.find((gg) => gg.id === a.goalId);
+            const p = a.projectId ? projects.find((pp) => pp.id === a.projectId) : undefined;
+            const c = g ? `hsl(var(--${g.color}))` : "hsl(var(--text-tertiary))";
+            const time = fmtTime(a.timeEstimateMinutes);
+            const crumb = `${g?.title ?? ""}${p ? ` · ${p.title}` : ""}`;
+            return (
+              <div
+                key={a.id}
+                className="group flex items-center gap-3 pr-3 min-h-9 rounded-[2px] hover:bg-surface-hover transition-colors overflow-hidden"
+              >
+                <Strip color={c} />
+                <div className="w-[52px] pl-2">
+                  <div className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary leading-none">IMPACT</div>
+                  <div className="font-mono text-[16px] text-text-primary leading-tight">{a.impact}</div>
+                </div>
+                <div className="min-w-0 flex-1 py-1.5">
+                  <div className="text-[13px] font-medium text-text-primary truncate">{a.title}</div>
+                  <div className="text-[11px] text-text-secondary truncate">{crumb}</div>
+                </div>
+                {time && <span className="font-mono text-[12px] text-text-secondary whitespace-nowrap">{time}</span>}
+                <button
+                  onClick={() => { changeStatus(a.id, "done"); toast.success("Action completed"); }}
+                  className="text-[12px] text-accent hover:text-accent-hover whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  Mark done
+                </button>
+                <button
+                  onClick={() => openPanel({ kind: "action", mode: "edit", id: a.id })}
+                  className="text-[12px] text-text-secondary hover:text-text-primary whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  Open
+                </button>
+              </div>
+            );
+          })}
         </div>
-      ))}
-    </div>
-  </section>
-);
+      )}
+    </section>
+  );
+};
+
+/* ===== Quick Moves (live) ===== */
+const QuickMoves: React.FC = () => {
+  const actions = useStore((s) => s.actions);
+  const goals = useStore((s) => s.goals);
+  const projects = useStore((s) => s.projects);
+  const openPanel = useStore((s) => s.openPanel);
+  const changeStatus = useStore((s) => s.changeActionStatus);
+
+  const items = actions
+    .filter((a) => a.status === "planned" || a.status === "backlog")
+    .filter((a) => (a.impact ?? 0) >= 4 && (a.timeEstimateMinutes ?? 31) <= 30)
+    .sort((a, b) => (b.impact ?? 0) - (a.impact ?? 0))
+    .slice(0, 5);
+
+  return (
+    <section>
+      <SectionLabel meta="HIGH IMPACT · LOW EFFORT">Quick moves</SectionLabel>
+      {items.length === 0 ? (
+        <div className="font-mono text-[11px] text-text-tertiary px-3 py-2">
+          No quick wins available. Add actions with impact ≥ 4 and time ≤ 30m.
+        </div>
+      ) : (
+        <div className="space-y-0.5">
+          {items.map((a) => {
+            const g = goals.find((gg) => gg.id === a.goalId);
+            const p = a.projectId ? projects.find((pp) => pp.id === a.projectId) : undefined;
+            const c = g ? `hsl(var(--${g.color}))` : "hsl(var(--text-tertiary))";
+            const time = fmtTime(a.timeEstimateMinutes) ?? "";
+            const meta = `I${a.impact}${time ? ` · ${time}` : ""}`;
+            return (
+              <div
+                key={a.id}
+                onClick={() => openPanel({ kind: "action", mode: "edit", id: a.id })}
+                className="flex items-center gap-3 pr-3 h-7 rounded-[2px] hover:bg-surface-hover transition-colors overflow-hidden cursor-pointer"
+              >
+                <Strip color={c} />
+                <button
+                  onClick={(e) => { e.stopPropagation(); changeStatus(a.id, "done"); toast.success("Action completed"); }}
+                  className="ml-1 inline-block rounded-[2px] border border-text-tertiary hover:border-accent shrink-0"
+                  style={{ width: 14, height: 14 }}
+                  aria-label="Mark done"
+                />
+                <span className="text-[13px] text-text-primary truncate">{a.title}</span>
+                <span className="text-[12px] text-text-secondary truncate">· {g?.title}{p ? ` · ${p.title}` : ""}</span>
+                <div className="flex-1" />
+                {a.delegateName && (
+                  <span className="font-mono text-[11px] text-text-tertiary">→ {a.delegateName}</span>
+                )}
+                <span className="font-mono text-[11px] text-text-secondary whitespace-nowrap">{meta}</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </section>
+  );
+};
 
 /* ===== Bottom Utility Row ===== */
 const TinyHeader: React.FC<{ children: React.ReactNode }> = ({ children }) => (

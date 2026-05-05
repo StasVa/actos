@@ -428,10 +428,12 @@ const GoalDetail: React.FC = () => {
             <div className="h-4" />
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3 min-w-0">
-                <span
-                  className="w-2.5 h-2.5 rounded-full shrink-0"
-                  style={{ background: "hsl(var(--state-active))" }}
-                />
+                <Tooltip content={<StateDotTooltip state="active" lastActivity="today" />}>
+                  <span
+                    className="w-2.5 h-2.5 rounded-full shrink-0"
+                    style={{ background: "hsl(var(--state-active))" }}
+                  />
+                </Tooltip>
                 <h1 className="text-[28px] font-medium text-text-primary truncate">
                   Launch YouTube channel
                 </h1>

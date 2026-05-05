@@ -201,6 +201,7 @@ const PlaceholderSlot: React.FC = () => (
 const Hero: React.FC = () => (
   <div className="bg-surface-elevated border border-border-subtle rounded-[6px] p-6 grid grid-cols-3 divide-x divide-border-subtle">
     <GoalColumn
+      href="/goals/launch-youtube-channel"
       title="Launch YouTube channel"
       state="active"
       type="MID-TERM"

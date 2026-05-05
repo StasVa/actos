@@ -664,7 +664,7 @@ const Ideas: React.FC = () => {
           {/* Left column */}
           <div className="w-[42%] border-r border-border-subtle flex flex-col min-h-0">
             {/* Filter chips */}
-            <div style={{ padding: "16px 16px 12px 16px" }}>
+            <div style={{ padding: "16px 16px 12px 32px" }}>
               <div className="flex items-center gap-4 flex-wrap">
                 <FilterGroup label="GOAL">
                   <Chip active={goalFilter === "all"} onClick={() => setGoalFilter("all")}>
@@ -704,7 +704,7 @@ const Ideas: React.FC = () => {
               </div>
             </div>
             {/* Search */}
-            <div style={{ padding: "0 16px 16px 16px" }}>
+            <div style={{ padding: "0 16px 16px 32px" }}>
               <div className="flex items-center gap-2 bg-surface-raised border border-border-subtle rounded-[4px] px-3 py-2 w-full">
                 <span className="text-[12px] text-text-tertiary">⌕</span>
                 <input
@@ -716,16 +716,16 @@ const Ideas: React.FC = () => {
               </div>
             </div>
             {/* Capture input */}
-            <div className="px-4 pb-3 border-b border-border-subtle shrink-0">
+            <div className="pl-8 pr-4 pb-3 border-b border-border-subtle shrink-0">
               <CaptureInput subHint="Captured ideas land in your default goal — Launch YouTube channel." />
             </div>
             {/* Sort row */}
-            <div className="flex items-center justify-end px-4 py-2">
+            <div className="flex items-center justify-end pl-8 pr-4 py-2">
               <button className="font-mono text-[11px] text-text-secondary hover:text-text-primary inline-flex items-center gap-1 transition-colors">
                 Sort: Recent first <span className="text-text-tertiary">▾</span>
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto pl-8">
               {filtered.length === 0 ? (
                 <div className="p-8 text-center font-mono text-[11px] text-text-tertiary">
                   No ideas match these filters.

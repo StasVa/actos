@@ -248,10 +248,12 @@ const ProjectCard: React.FC<{ p: Project }> = ({ p }) => {
             {p.goalLabel}
           </span>
         </div>
-        <span
-          className="w-2 h-2 rounded-full shrink-0"
-          style={{ background: p.state === "active" ? "hsl(var(--state-active))" : "hsl(var(--state-stalled))" }}
-        />
+        <Tooltip content={<StateDotTooltip state={p.state} lastActivity={p.last} stalledFor={p.last} />}>
+          <span
+            className="w-2 h-2 rounded-full shrink-0"
+            style={{ background: p.state === "active" ? "hsl(var(--state-active))" : "hsl(var(--state-stalled))" }}
+          />
+        </Tooltip>
       </div>
       <div
         className="flex-1 text-[15px] font-medium text-text-primary leading-[1.3] overflow-hidden"

@@ -229,29 +229,28 @@ export function CommandPalette() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [planAndReview, isPlanned, isClosed]);
 
-  const navRows: Row[] = React.useMemo(
-    () =>
-      NAV_ITEMS.map((n) => ({
-        key: `nav-${n.path}`,
-        kind: "nav",
-        title: `Go to ${n.label}`,
-        rightHint: "→",
-        onSelect: () => {
-          navigate(n.path);
-          close();
-        },
-      })).concat([
-        {
-          key: "nav-settings",
-          kind: "nav",
-          title: "Settings",
-          rightHint: "→",
-          onSelect: () => {
-            close();
-            emitAppEvent("open-settings");
-          },
-        },
-      ]),
+  const navRows: Row[] = React.useMemo(() => {
+    const rows: Row[] = NAV_ITEMS.map((n) => ({
+      key: `nav-${n.path}`,
+      kind: "nav" as const,
+      title: `Go to ${n.label}`,
+      rightHint: "→",
+      onSelect: () => {
+        navigate(n.path);
+        close();
+      },
+    }));
+    rows.push({
+      key: "nav-settings",
+      kind: "nav",
+      title: "Settings",
+      rightHint: "→",
+      onSelect: () => {
+        close();
+        emitAppEvent("open-settings");
+      },
+    });
+    return rows;
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );

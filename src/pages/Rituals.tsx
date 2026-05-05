@@ -187,6 +187,12 @@ function weekLabel(weeksFromNow: number): string {
   d.setDate(d.getDate() - diff);
   return `Week of ${MONTH_SHORT[d.getMonth()]} ${d.getDate()}`;
 }
+function monthLabel(monthsFromNow: number): string {
+  const d = new Date();
+  d.setDate(1);
+  d.setMonth(d.getMonth() - monthsFromNow);
+  return `${MONTH_SHORT[d.getMonth()]} ${d.getFullYear()}`;
+}
 
 /* ===== Charts ===== */
 const ConsistencyCalendar: React.FC<{ data: number[]; color: string; cellSize?: number }> = ({

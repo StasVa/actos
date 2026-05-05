@@ -41,16 +41,93 @@ function fmtAgo(iso?: string): string {
   return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
+function fmtTime(minutes: number): string {
+  if (!minutes || minutes <= 0) return "0m";
+  const h = Math.floor(minutes / 60);
+  const m = Math.round(minutes - h * 60);
+  if (h === 0) return `${m}m`;
+  if (m === 0) return `${h}h`;
+  return `${h}h ${m}m`;
+}
+
 type GoalMeta = {
   goal: Goal;
   progress: number;
   outcome: number;
   effort: number;
   lastIso?: string;
+  state: "active" | "stalled";
+  projects: { active: number; closed: number; dropped: number };
+  rituals: { active: number; avgMultiplier: number };
+  criteria: { met: number; total: number };
+  time: { spent: number; remaining: number; hasData: boolean };
+  spark: number[];
+  sparkTips: DayInfo[];
 };
 
-const GoalCard: React.FC<{ m: GoalMeta }> = ({ m }) => {
-  const { goal: g, progress, outcome, effort, lastIso } = m;
+/* === MeasureBar (mirrors Index.tsx variant) === */
+const MeasureBar: React.FC<{
+  label: string;
+  percentage: number;
+  color: string;
+  opacity?: number;
+}> = ({ label, percentage, color, opacity = 1 }) => (
+  <div
+    className="grid w-full min-w-0 items-center gap-2"
+    style={{ gridTemplateColumns: "60px minmax(0, 1fr) 36px" }}
+  >
+    <div className="w-[60px] shrink-0 whitespace-nowrap font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary leading-none">
+      {label}
+    </div>
+    <div className="min-w-0 h-[7px] w-full overflow-hidden rounded-[2px] bg-surface-hover">
+      <div
+        className="block h-full rounded-[2px]"
+        style={{ width: `${Math.max(0, Math.min(100, percentage))}%`, background: color, opacity }}
+      />
+    </div>
+    <div className="w-[36px] shrink-0 whitespace-nowrap text-right font-mono text-[11px] tabular-nums text-text-secondary leading-none">
+      {percentage}%
+    </div>
+  </div>
+);
+
+/* === Sparkline (30 days) === */
+const Sparkline: React.FC<{ data: number[]; color: string; tips: DayInfo[] }> = ({ data, color, tips }) => {
+  const max = Math.max(1, ...data);
+  return (
+    <div className="w-full h-7 flex items-end gap-[1px]">
+      {data.map((v, i) => {
+        const h = v === 0 ? 2 : Math.max(2, Math.round((v / max) * 28));
+        return (
+          <Tooltip key={i} content={<SparkTooltipContent info={tips[i]} />} className="flex-1 h-full flex items-end">
+            <div
+              className="w-full hover:brightness-[1.15]"
+              style={{
+                height: h,
+                background: v === 0 ? "hsl(var(--border-subtle))" : color,
+                transition: "filter 80ms ease",
+              }}
+            />
+          </Tooltip>
+        );
+      })}
+    </div>
+  );
+};
+
+/* === Stat row === */
+const StatRow: React.FC<{ label: string; value: React.ReactNode }> = ({ label, value }) => (
+  <div className="flex items-baseline justify-between gap-3">
+    <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary shrink-0">
+      {label}
+    </span>
+    <span className="text-[13px] text-text-secondary text-right truncate min-w-0">{value}</span>
+  </div>
+);
+
+const GoalCard: React.FC<{ m: GoalMeta; logTimeOn: boolean }> = ({ m, logTimeOn }) => {
+  const { goal: g, progress, outcome, effort, lastIso, state, projects, rituals, criteria, time, spark, sparkTips } = m;
+  const navigate = useNavigate();
   const openPanel = useStore((s) => s.openPanel);
   const markGoalComplete = useStore((s) => s.markGoalComplete);
   const dropGoal = useStore((s) => s.dropGoal);
@@ -61,78 +138,142 @@ const GoalCard: React.FC<{ m: GoalMeta }> = ({ m }) => {
   const archived = g.status !== "active";
   const color = `hsl(var(--${g.color}))`;
   const typeLabel = g.type === "mid-term" ? "MID-TERM" : "SHORT-TERM";
+  const stateColor =
+    state === "active" ? "hsl(var(--state-active))" : "hsl(var(--state-stalled))";
+
+  const showTime = logTimeOn && time.hasData;
+  const showCriteria = criteria.total > 0;
+
+  const projectsValue = (() => {
+    const parts = [`${projects.active} active`, `${projects.closed} closed`];
+    if (projects.dropped > 0) parts.push(`${projects.dropped} dropped`);
+    return parts.join(" · ");
+  })();
+
+  const ritualsValue =
+    rituals.active === 0
+      ? "—"
+      : `${rituals.active} active · ×${rituals.avgMultiplier.toFixed(2)} avg`;
 
   const closedLabel =
     g.status === "completed"
       ? `Completed ${fmtAgo(g.completedAt)}`
       : g.status === "dropped"
       ? `Dropped ${fmtAgo(g.droppedAt)}`
-      : `Last: ${fmtAgo(lastIso)}`;
+      : `Last activity: ${fmtAgo(lastIso)}`;
+
+  const onCardClick = (e: React.MouseEvent) => {
+    // Avoid navigation when interacting with menu/tooltips.
+    const target = e.target as HTMLElement;
+    if (target.closest("[data-card-menu]") || target.closest("[data-no-nav]")) return;
+    navigate(`/goals/${g.id}`);
+  };
 
   return (
     <>
       <div
-        className={`group relative h-[160px] rounded-[6px] bg-surface-raised border border-border-subtle hover:border-accent transition-colors overflow-hidden ${
+        role="link"
+        tabIndex={0}
+        onClick={onCardClick}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") navigate(`/goals/${g.id}`);
+        }}
+        className={`group relative rounded-[6px] bg-surface-raised border border-border-subtle hover:border-accent hover:bg-surface-hover transition-colors overflow-hidden cursor-pointer ${
           archived ? "opacity-70" : ""
         }`}
+        style={{ minHeight: 360 }}
       >
         <span
           className="absolute left-0 top-0 bottom-0"
           style={{ background: color, width: 3 }}
         />
-        <Link to={`/goals/${g.id}`} className="block h-full pl-4 pr-3 py-3">
-          <div className="flex items-start justify-between gap-2">
-            <div className="min-w-0">
-              <div className="text-[14px] font-medium text-text-primary truncate">{g.title}</div>
-              <div className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary mt-0.5">
-                {typeLabel}
+
+        <div className="pl-6 pr-6 py-6 flex flex-col gap-4">
+          {/* Section 1 — Header */}
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="w-2 h-2 rounded-full shrink-0" style={{ background: color }} />
+                <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">
+                  {typeLabel}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 shrink-0" data-no-nav>
+                <Tooltip content={<StateDotTooltip state={state} lastActivity={fmtAgo(lastIso)} />}>
+                  <span className="w-2 h-2 rounded-full shrink-0" style={{ background: stateColor }} />
+                </Tooltip>
+                <div data-card-menu onClick={(e) => e.stopPropagation()}>
+                  <CardMenu
+                    ariaLabel="Goal menu"
+                    items={
+                      archived
+                        ? [
+                            { label: "Re-open", onSelect: () => { useStore.getState().reopenGoal?.(g.id); toast("Goal re-opened"); } },
+                            { label: "Edit", onSelect: () => openPanel({ kind: "goal", mode: "edit", id: g.id }) },
+                            { label: "Delete", destructive: true, onSelect: () => setConfirmDelete(true) },
+                          ]
+                        : [
+                            { label: "Edit", onSelect: () => openPanel({ kind: "goal", mode: "edit", id: g.id }) },
+                            { label: "Mark complete", onSelect: () => { markGoalComplete(g.id); toast("Goal completed"); } },
+                            { label: "Drop", destructive: true, onSelect: () => setConfirmDrop(true) },
+                            { label: "Delete", destructive: true, onSelect: () => setConfirmDelete(true) },
+                          ]
+                    }
+                  />
+                </div>
               </div>
             </div>
-            <div className="shrink-0 -mt-1 -mr-1" onClick={(e) => e.preventDefault()}>
-              <CardMenu
-                ariaLabel="Goal menu"
-                items={[
-                  { label: "Edit", onSelect: () => openPanel({ kind: "goal", mode: "edit", id: g.id }) },
-                  { label: "Mark complete", onSelect: () => { markGoalComplete(g.id); toast("Goal completed"); } },
-                  { label: "Drop", destructive: true, onSelect: () => setConfirmDrop(true) },
-                  { label: "Delete", destructive: true, onSelect: () => setConfirmDelete(true) },
-                ]}
-              />
-            </div>
+            <h3 className="text-[18px] font-medium text-text-primary truncate leading-tight">
+              {g.title}
+            </h3>
           </div>
 
-          {!archived && (
-            <div className="mt-2 font-mono text-[24px] font-medium text-text-primary leading-none tabular-nums">
+          {/* Section 2 — Big progress */}
+          <div>
+            <div className="font-medium text-text-primary leading-none tabular-nums" style={{ fontSize: 36 }}>
               {progress}%
             </div>
-          )}
-
-          {!archived && (
-            <div className="mt-3 space-y-1.5">
-              <div className="flex items-center gap-2">
-                <span className="font-mono text-[9px] uppercase tracking-[0.06em] text-text-tertiary w-[44px]">
-                  OUTCOME
-                </span>
-                <div className="flex-1 h-[5px] rounded-[2px] bg-surface-hover overflow-hidden">
-                  <div className="h-full" style={{ width: `${outcome}%`, background: color }} />
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="font-mono text-[9px] uppercase tracking-[0.06em] text-text-tertiary w-[44px]">
-                  EFFORT
-                </span>
-                <div className="flex-1 h-[5px] rounded-[2px] bg-surface-hover overflow-hidden">
-                  <div className="h-full" style={{ width: `${effort}%`, background: color, opacity: 0.6 }} />
-                </div>
-              </div>
+            <div className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary mt-1">
+              PROGRESS · OUTCOME
             </div>
-          )}
+          </div>
 
-          <div className="absolute left-4 right-3 bottom-3 font-mono text-[11px] text-text-tertiary truncate">
+          {/* Section 3 — Bars */}
+          <div className="flex flex-col gap-2">
+            <MeasureBar label="OUTCOME" percentage={outcome} color={color} />
+            <MeasureBar label="EFFORT" percentage={effort} color={color} opacity={0.6} />
+          </div>
+
+          {/* Section 4 — Stats */}
+          <div className="border-t border-border-subtle pt-3 flex flex-col gap-2">
+            <StatRow label="PROJECTS" value={projectsValue} />
+            <StatRow label="RITUALS" value={ritualsValue} />
+            {showCriteria && (
+              <StatRow label="CRITERIA" value={`${criteria.met}/${criteria.total} met`} />
+            )}
+            {showTime && (
+              <StatRow
+                label="TIME"
+                value={`${fmtTime(time.spent)} invested · ${fmtTime(time.remaining)} estimated remaining`}
+              />
+            )}
+          </div>
+
+          {/* Section 5 — Sparkline */}
+          <div className="border-t border-border-subtle pt-3" data-no-nav onClick={(e) => e.stopPropagation()}>
+            <div className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary mb-2">
+              ACTIVITY · LAST 30 DAYS
+            </div>
+            <Sparkline data={spark} color={color} tips={sparkTips} />
+          </div>
+
+          {/* Section 6 — Footer */}
+          <div className="font-mono text-[11px] text-text-tertiary truncate">
             {closedLabel}
           </div>
-        </Link>
+        </div>
       </div>
+
       <ConfirmModal
         open={confirmDrop}
         title="Drop this goal?"
@@ -162,11 +303,12 @@ const GhostNewGoalCard: React.FC<{ disabled: boolean }> = ({ disabled }) => {
       type="button"
       disabled={disabled}
       onClick={() => openPanel({ kind: "goal", mode: "new" })}
-      className={`h-[160px] w-full rounded-[6px] border border-dashed flex flex-col items-center justify-center gap-1 transition-colors ${
+      className={`w-full rounded-[6px] border border-dashed flex flex-col items-center justify-center gap-1 transition-colors ${
         disabled
           ? "border-border-subtle text-text-tertiary cursor-not-allowed"
           : "border-border-default text-text-secondary hover:border-accent hover:text-text-primary"
       }`}
+      style={{ minHeight: 360 }}
     >
       <span className="text-[24px] leading-none">+</span>
       <span className="text-[13px]">New goal</span>

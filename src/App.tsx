@@ -17,6 +17,7 @@ import { ProjectEditor } from "./components/ProjectEditor";
 import { GoalEditor } from "./components/GoalEditor";
 import { RitualEditor } from "./components/RitualEditor";
 import { CommandPalette } from "./components/CommandPalette";
+import { KeyboardShortcuts } from "./components/KeyboardShortcuts";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +32,7 @@ const App = () => (
       <RitualEditor />
       <BrowserRouter>
         <CommandPalette />
+        <KeyboardShortcuts />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/goals/:id" element={<GoalDetail />} />

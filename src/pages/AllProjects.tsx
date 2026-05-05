@@ -50,6 +50,7 @@ const Sidebar: React.FC = () => {
       </nav>
       <div className="flex-1" />
       <div className="font-mono text-[11px] text-text-tertiary px-1">⌘K  Quick add</div>
+      <div className="font-mono text-[11px] text-text-tertiary px-1">?   Shortcuts</div>
       <div className="mt-4 font-mono text-[11px] text-text-secondary px-1 leading-[1.7]">
         <LifetimeCounters />
       </div>

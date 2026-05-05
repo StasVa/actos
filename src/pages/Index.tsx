@@ -428,6 +428,11 @@ const Today: React.FC = () => (
           <span className="text-[13px] text-text-primary">Evening weight log</span>
           <span className="font-mono text-[11px] text-text-tertiary">Daily · 8 done · ×1.05</span>
         </div>
+        <div className="flex items-center gap-2">
+          <span className="w-2.5 h-2.5 rounded-full border" style={{ borderColor: G3 }} />
+          <span className="text-[13px] text-text-primary">Daily reading 30min</span>
+          <span className="font-mono text-[11px] text-text-tertiary">Daily · 47 done · ×1.25</span>
+        </div>
       </div>
 
       <div className="flex items-center gap-2 bg-surface-raised border border-border-subtle rounded-[4px] px-3 py-2 mt-2">

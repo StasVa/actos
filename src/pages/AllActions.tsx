@@ -202,7 +202,18 @@ const InlineAddAction: React.FC = () => {
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
             onKeyDown={(e) => {
-              if (e.key === "Enter") setValue("");
+              if (e.key === "Enter" && value.trim()) {
+                const projectId = projectsByGoal.titleToId[project];
+                const goalId = projectsByGoal.titleToGoalId[project];
+                const newId = createAction({
+                  title: value.trim(),
+                  projectId: projectId ?? null,
+                  goalId,
+                });
+                toast(`Action added to ${project}`);
+                setValue("");
+                openPanel({ kind: "action", mode: "edit", id: newId });
+              }
             }}
             placeholder="Add an action..."
             className="flex-1 bg-transparent outline-none text-[13px] text-text-primary placeholder:text-text-tertiary"
@@ -222,7 +233,7 @@ const InlineAddAction: React.FC = () => {
               <div
                 className="absolute right-0 top-[calc(100%+4px)] z-20 min-w-[220px] bg-surface-elevated border border-border-default rounded-[4px] py-1.5 shadow-lg"
               >
-                {projectsByGoal.map(({ goal, projects }) => (
+                {projectsByGoal.groups.map(({ goal, projects }) => (
                   <div key={goal}>
                     <div className="flex items-center gap-1.5 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
                       <span

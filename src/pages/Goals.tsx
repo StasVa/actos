@@ -476,8 +476,15 @@ const Goals: React.FC = () => {
     return arr;
   }, [filtered, sortKey]);
 
-  const active = sorted.filter((m) => m.goal.status === "active" && m.progress < 75);
-  const near = sorted.filter((m) => m.goal.status === "active" && m.progress >= 75);
+  const activeAll = sorted
+    .filter((m) => m.goal.status === "active")
+    .slice()
+    .sort((a, b) => {
+      const aReady = a.progress >= 75 ? 1 : 0;
+      const bReady = b.progress >= 75 ? 1 : 0;
+      if (aReady !== bReady) return bReady - aReady;
+      return (b.lastIso ?? "").localeCompare(a.lastIso ?? "");
+    });
   const completed = sorted.filter((m) => m.goal.status === "completed");
   const dropped = sorted.filter((m) => m.goal.status === "dropped");
 

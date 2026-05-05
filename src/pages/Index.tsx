@@ -250,12 +250,12 @@ const GoalColumn: React.FC<{
   );
   if (href) {
     return (
-      <Link to={href} className="block min-w-0 overflow-hidden cursor-pointer">
+      <Link to={href} className="block min-w-0 overflow-hidden cursor-pointer px-6 first:pl-0 last:pr-0">
         {inner}
       </Link>
     );
   }
-  return inner;
+  return <div className="min-w-0 px-6 first:pl-0 last:pr-0">{inner}</div>;
 };
 
 /* ===== Goal column menu (composed in Hero) ===== */

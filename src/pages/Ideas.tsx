@@ -637,64 +637,12 @@ const Ideas: React.FC = () => {
     <div className="min-h-screen bg-surface-base text-text-primary">
       <Sidebar activePath={location.pathname} />
       <main className="ml-[220px] flex flex-col h-screen">
-        {/* Header */}
+        {/* Page header */}
         <div className="px-8 py-6 border-b border-border-subtle shrink-0">
           <div className="flex items-center justify-between">
             <h1 className="text-[24px] font-medium text-text-primary">Ideas</h1>
             <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary tabular-nums">
               {meta}
-            </div>
-          </div>
-          <div className="h-3" />
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <div className="flex items-center gap-6 flex-wrap">
-              <FilterGroup label="GOAL">
-                <Chip active={goalFilter === "all"} onClick={() => setGoalFilter("all")}>
-                  All
-                </Chip>
-                <Chip
-                  active={goalFilter === "g1"}
-                  onClick={() => setGoalFilter("g1")}
-                  dot={G1}
-                >
-                  Launch YouTube channel
-                </Chip>
-                <Chip active={goalFilter === "g2"} onClick={() => setGoalFilter("g2")} dot={G2}>
-                  Lose 5 kg
-                </Chip>
-              </FilterGroup>
-              <FilterGroup label="STATUS">
-                <Chip
-                  active={statusFilter === "captured"}
-                  onClick={() => setStatusFilter("captured")}
-                >
-                  Captured
-                </Chip>
-                <Chip
-                  active={statusFilter === "converted"}
-                  onClick={() => setStatusFilter("converted")}
-                >
-                  Converted
-                </Chip>
-                <Chip
-                  active={statusFilter === "discarded"}
-                  onClick={() => setStatusFilter("discarded")}
-                >
-                  Discarded
-                </Chip>
-              </FilterGroup>
-              <button className="font-mono text-[11px] text-text-secondary hover:text-text-primary inline-flex items-center gap-1 transition-colors">
-                Sort: Recent first <span className="text-text-tertiary">▾</span>
-              </button>
-            </div>
-            <div className="flex items-center gap-2 bg-surface-raised border border-border-subtle rounded-[4px] px-2.5 py-1.5 w-[240px]">
-              <span className="text-[12px] text-text-tertiary">⌕</span>
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search ideas..."
-                className="flex-1 bg-transparent outline-none text-[13px] text-text-primary placeholder:text-text-tertiary"
-              />
             </div>
           </div>
         </div>
@@ -703,8 +651,67 @@ const Ideas: React.FC = () => {
         <div className="flex-1 flex min-h-0">
           {/* Left column */}
           <div className="w-[42%] border-r border-border-subtle flex flex-col min-h-0">
-            <div className="p-4 border-b border-border-subtle shrink-0">
+            {/* Filter chips */}
+            <div style={{ padding: "16px 16px 12px 16px" }}>
+              <div className="flex items-center gap-4 flex-wrap">
+                <FilterGroup label="GOAL">
+                  <Chip active={goalFilter === "all"} onClick={() => setGoalFilter("all")}>
+                    All
+                  </Chip>
+                  <Chip
+                    active={goalFilter === "g1"}
+                    onClick={() => setGoalFilter("g1")}
+                    dot={G1}
+                  >
+                    Launch YouTube
+                  </Chip>
+                  <Chip active={goalFilter === "g2"} onClick={() => setGoalFilter("g2")} dot={G2}>
+                    Lose 5 kg
+                  </Chip>
+                </FilterGroup>
+                <FilterGroup label="STATUS">
+                  <Chip
+                    active={statusFilter === "captured"}
+                    onClick={() => setStatusFilter("captured")}
+                  >
+                    Captured
+                  </Chip>
+                  <Chip
+                    active={statusFilter === "converted"}
+                    onClick={() => setStatusFilter("converted")}
+                  >
+                    Converted
+                  </Chip>
+                  <Chip
+                    active={statusFilter === "discarded"}
+                    onClick={() => setStatusFilter("discarded")}
+                  >
+                    Discarded
+                  </Chip>
+                </FilterGroup>
+              </div>
+            </div>
+            {/* Search */}
+            <div style={{ padding: "0 16px 16px 16px" }}>
+              <div className="flex items-center gap-2 bg-surface-raised border border-border-subtle rounded-[4px] px-3 py-2 w-full">
+                <span className="text-[12px] text-text-tertiary">⌕</span>
+                <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search ideas..."
+                  className="flex-1 bg-transparent outline-none text-[13px] text-text-primary placeholder:text-text-tertiary"
+                />
+              </div>
+            </div>
+            {/* Capture input */}
+            <div className="px-4 pb-3 border-b border-border-subtle shrink-0">
               <CaptureInput subHint="Captured ideas land in your default goal — Launch YouTube channel." />
+            </div>
+            {/* Sort row */}
+            <div className="flex items-center justify-end px-4 py-2">
+              <button className="font-mono text-[11px] text-text-secondary hover:text-text-primary inline-flex items-center gap-1 transition-colors">
+                Sort: Recent first <span className="text-text-tertiary">▾</span>
+              </button>
             </div>
             <div className="flex-1 overflow-y-auto">
               {filtered.length === 0 ? (

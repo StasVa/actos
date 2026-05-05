@@ -527,7 +527,16 @@ const Ideas: React.FC = () => {
     initialGoalParam && goals.some((g) => g.id === initialGoalParam) ? initialGoalParam : "all",
   );
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("captured");
-  const [query, setQuery] = useState("");
+
+  // Focus the inline capture input when triggered from the ⌘K palette.
+  useEffect(() => {
+    return subscribeAppEvent("focus-idea-capture", () => {
+      requestAnimationFrame(() => {
+        const el = document.getElementById("ideas-capture-input") as HTMLInputElement | null;
+        el?.focus();
+      });
+    });
+  }, []);
 
   const matchesStatus = (s: IdeaStatus): boolean => {
     if (statusFilter === "captured") return s === "captured";

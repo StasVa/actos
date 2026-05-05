@@ -194,18 +194,37 @@ const ProjectDetail: React.FC = () => {
               </div>
             </section>
 
-            {project.description && (
-              <section>
-                <h2 className="text-[12px] font-medium uppercase tracking-[0.08em] text-text-secondary mb-2">
-                  Description
-                </h2>
-                <div className="bg-surface-raised border border-border-subtle rounded-[6px] p-6">
-                  <p className="text-[14px] text-text-primary leading-[1.6] whitespace-pre-wrap">
-                    {project.description}
-                  </p>
-                </div>
-              </section>
-            )}
+            <section>
+              <h2 className="text-[12px] font-medium uppercase tracking-[0.08em] text-text-secondary mb-2">
+                Description
+              </h2>
+              <RichTextEditor
+                value={project.description ?? ""}
+                onChange={(html) => updateProject(project.id, { description: html })}
+                placeholder="Describe the project, add references, materials..."
+              />
+            </section>
+
+            <ReferencesSection
+              project={project}
+              onAdd={(ref) =>
+                updateProject(project.id, {
+                  references: [...project.references, ref],
+                })
+              }
+              onRemove={(refId) =>
+                updateProject(project.id, {
+                  references: project.references.filter((r) => r.id !== refId),
+                })
+              }
+              onUpdate={(refId, partial) =>
+                updateProject(project.id, {
+                  references: project.references.map((r) =>
+                    r.id === refId ? { ...r, ...partial } : r,
+                  ),
+                })
+              }
+            />
 
             <section>
               <div className="flex items-center justify-between mb-3">

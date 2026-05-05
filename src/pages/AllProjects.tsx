@@ -63,7 +63,7 @@ const Sidebar: React.FC = () => {
   );
 };
 
-/* ===== Data ===== */
+/* ===== Data shape (visual rendering only) ===== */
 type GoalKey = "g1" | "g2" | "g3";
 type ProjectState = "near" | "active" | "stalled" | "completed" | "dropped";
 
@@ -75,132 +75,32 @@ type Project = {
   title: string;
   done: number;
   total: number;
-  /** friendly last activity, e.g. "today", "2d ago", "11d ago" */
   last: string;
-  /** numeric days since last activity for sorting */
   lastDays: number;
   state: ProjectState;
-  /** for completed/dropped — closing label */
   closedLabel?: string;
-  closedSort?: number; // higher = more recent close
-  href?: string;
+  closedSort?: number;
 };
 
-const PROJECTS: Project[] = [
-  // Active / near
-  {
-    id: "shoot-video-1",
-    goal: "g1",
-    goalLabel: "YOUTUBE CHANNEL",
-    goalColor: G1,
-    title: "Shoot video #1",
-    done: 3,
-    total: 7,
-    last: "today",
-    lastDays: 0,
-    state: "active",
-    href: "/projects/shoot-video-1",
-  },
-  {
-    id: "set-up-workspace",
-    goal: "g1",
-    goalLabel: "YOUTUBE CHANNEL",
-    goalColor: G1,
-    title: "Set up workspace",
-    done: 4,
-    total: 5,
-    last: "2d ago",
-    lastDays: 2,
-    state: "near",
-  },
-  {
-    id: "nutrition-plan",
-    goal: "g2",
-    goalLabel: "LOSE 5 KG",
-    goalColor: G2,
-    title: "Nutrition plan",
-    done: 3,
-    total: 4,
-    last: "today",
-    lastDays: 0,
-    state: "near",
-  },
-  {
-    id: "build-cardio",
-    goal: "g2",
-    goalLabel: "LOSE 5 KG",
-    goalColor: G2,
-    title: "Build cardio routine",
-    done: 1,
-    total: 6,
-    last: "11d ago",
-    lastDays: 11,
-    state: "stalled",
-  },
-  {
-    id: "daily-reading",
-    goal: "g3",
-    goalLabel: "READ 24 BOOKS",
-    goalColor: G3,
-    title: "Build daily reading habit",
-    done: 8,
-    total: 24,
-    last: "today",
-    lastDays: 0,
-    state: "active",
-  },
-  // Closed / dropped
-  {
-    id: "content-pillars",
-    goal: "g1",
-    goalLabel: "YOUTUBE CHANNEL",
-    goalColor: G1,
-    title: "Define content pillars",
-    done: 4,
-    total: 4,
-    last: "Apr 22",
-    lastDays: 13,
-    state: "completed",
-    closedLabel: "Apr 22",
-    closedSort: 422,
-  },
-  {
-    id: "grocery-overhaul",
-    goal: "g2",
-    goalLabel: "LOSE 5 KG",
-    goalColor: G2,
-    title: "First grocery overhaul",
-    done: 6,
-    total: 6,
-    last: "Apr 18",
-    lastDays: 17,
-    state: "completed",
-    closedLabel: "Apr 18",
-    closedSort: 418,
-  },
-  {
-    id: "morning-runs",
-    goal: "g2",
-    goalLabel: "LOSE 5 KG",
-    goalColor: G2,
-    title: "Morning runs experiment",
-    done: 2,
-    total: 8,
-    last: "Apr 10",
-    lastDays: 25,
-    state: "dropped",
-    closedLabel: "Apr 10",
-    closedSort: 410,
-  },
-];
-
-const GOAL_NAMES: Record<GoalKey, string> = {
-  g1: "Launch YouTube channel",
-  g2: "Lose 5 kg",
-  g3: "Read 24 books",
+const GOAL_COLOR_VARS: Record<string, GoalKey> = {
+  "goal-1": "g1",
+  "goal-2": "g2",
+  "goal-3": "g3",
 };
 
-const GOAL_COLOR: Record<GoalKey, string> = { g1: G1, g2: G2, g3: G3 };
+function fmtAgo(iso?: string): { label: string; days: number } {
+  if (!iso) return { label: "—", days: 999 };
+  const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+  if (days <= 0) return { label: "today", days: 0 };
+  if (days === 1) return { label: "1d ago", days: 1 };
+  if (days < 30) return { label: `${days}d ago`, days };
+  const d = new Date(iso);
+  return {
+    label: d.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+    days,
+  };
+}
+
 
 /* ===== Tooltip content ===== */
 const StateTooltip: React.FC<{ p: Project }> = ({ p }) => (

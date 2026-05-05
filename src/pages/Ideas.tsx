@@ -516,9 +516,9 @@ const IdeaDetail: React.FC<{ idea: Idea }> = ({ idea }) => {
       <ConfirmModal
         open={confirmDiscard}
         title="Discard this idea?"
-        description="It will be archived (visible under Discarded) but not deleted."
+        body="It will be archived (visible under Discarded) but not deleted."
         confirmLabel="Discard"
-        variant="warning"
+        destructive
         onConfirm={() => {
           discardIdea(idea.id);
           toast.success("Idea discarded");

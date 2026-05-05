@@ -1,8 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Tooltip, SparkTooltipContent, StateDotTooltip } from "@/components/Tooltip";
 import { LifetimeCounters } from "@/components/LifetimeCounters";
 import { buildYouTubeTooltips, buildFitnessTooltips, buildReadingTooltips } from "@/lib/sparkTooltips";
+import { useStore } from "@/store/useStore";
+import { DayStartPanel } from "@/components/DayStartPanel";
+import { ritualMultiplier } from "@/store/useStore";
+import { toast } from "sonner";
+
+const TODAY_ISO = new Date().toISOString().slice(0, 10);
 
 /* ===== Tokens ===== */
 const G1 = "hsl(var(--goal-1))";

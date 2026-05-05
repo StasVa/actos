@@ -4,6 +4,9 @@ import { Tooltip } from "@/components/Tooltip";
 import { LifetimeCounters } from "@/components/LifetimeCounters";
 import { FilterDropdown, FilterOption } from "@/components/FilterDropdown";
 import { SortDropdown } from "@/components/SortDropdown";
+import { CardMenu } from "@/components/CardMenu";
+import { ConfirmModal } from "@/components/ConfirmModal";
+import { toast } from "sonner";
 import { useStore } from "@/store/useStore";
 
 const G1 = "hsl(var(--goal-1))";

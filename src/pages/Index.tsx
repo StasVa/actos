@@ -1174,7 +1174,96 @@ const UtilityRow: React.FC = () => (
   </div>
 );
 
-/* ===== Page ===== */
+/* ===== Yesterday review card ===== */
+const YesterdayCard: React.FC = () => {
+  const goals = useStore((s) => s.goals);
+  const actions = useStore((s) => s.actions);
+  const rituals = useStore((s) => s.rituals);
+  const yEntry = useStore((s) => s.dayEntries.find((d) => d.date === YESTERDAY_ISO));
+
+  const yDate = new Date(YESTERDAY_ISO + "T00:00:00");
+  const headerDate = yDate
+    .toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
+    .toUpperCase();
+
+  const dtLabel = yEntry?.dayType ? `${DAY_TYPE_LABELS[yEntry.dayType]} day` : "Not planned";
+
+  // Stats
+  const yActions = actions.filter((a) => a.completedAt?.slice(0, 10) === YESTERDAY_ISO && a.status === "done");
+  const actionsDone = yActions.length;
+  const ritualsDone = rituals.reduce(
+    (n, r) =>
+      n +
+      (r.completionHistory.some(
+        (c) => c.date === YESTERDAY_ISO && (c.status === "done" || !c.status),
+      )
+        ? 1
+        : 0),
+    0,
+  );
+  const totalMin = yActions.reduce((sum, a) => sum + (a.timeEstimateMinutes ?? 0), 0);
+  const hours = totalMin >= 60 ? `${(totalMin / 60).toFixed(1)}h` : `${totalMin}m`;
+
+  // Per-goal effort
+  const perGoal = goals
+    .filter((g) => g.status === "active")
+    .map((g) => {
+      const min = yActions
+        .filter((a) => a.goalId === g.id)
+        .reduce((s, a) => s + (a.timeEstimateMinutes ?? 0), 0);
+      return { g, min };
+    })
+    .filter((x) => x.min > 0);
+
+  // Last activity
+  const lastIso = yActions
+    .map((a) => a.completedAt)
+    .filter(Boolean)
+    .sort()
+    .at(-1);
+  const lastTime = lastIso
+    ? new Date(lastIso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    : null;
+
+  return (
+    <section className="bg-surface-elevated border border-border-subtle rounded-[6px] p-6">
+      <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
+        YESTERDAY · {headerDate}
+      </div>
+      <div className="mt-2 text-[14px] text-text-primary">{dtLabel}</div>
+      <div className="mt-1 font-mono text-[13px] text-text-secondary tabular-nums">
+        {actionsDone} actions done · {ritualsDone} rituals · {hours} invested
+      </div>
+      {perGoal.length > 0 && (
+        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5">
+          {perGoal.map(({ g, min }) => (
+            <div key={g.id} className="flex items-center gap-1.5 font-mono text-[12px] text-text-secondary">
+              <span className="w-2 h-2 rounded-full" style={{ background: `hsl(var(--${g.color}))` }} />
+              <span className="text-text-primary">{g.title}</span>
+              <span className="text-text-tertiary">·</span>
+              <span className="tabular-nums">
+                {min >= 60 ? `${(min / 60).toFixed(1)}h` : `${min}m`}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+      {lastTime && (
+        <div className="mt-3 font-mono text-[12px] text-text-tertiary">
+          Last activity: {lastTime}
+        </div>
+      )}
+      <Link
+        to={`/reviews/days/${YESTERDAY_ISO}`}
+        className="inline-block mt-4 text-[12px] text-text-secondary hover:text-text-primary transition-colors"
+      >
+        View full review →
+      </Link>
+    </section>
+  );
+};
+
+/* ===== Page (Today) ===== */
 const Index: React.FC = () => {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [planOpen, setPlanOpen] = useState(false);
@@ -1184,6 +1273,8 @@ const Index: React.FC = () => {
   const settings = useStore((s) => s.settings);
   const todayEntry = useStore((s) => s.dayEntries.find((d) => d.date === TODAY_ISO));
   const yesterdayEntry = useStore((s) => s.dayEntries.find((d) => d.date === YESTERDAY_ISO));
+  const actions = useStore((s) => s.actions);
+  const rituals = useStore((s) => s.rituals);
 
   // Auto-open Plan or Combined modal once per day on first visit.
   useEffect(() => {
@@ -1192,54 +1283,94 @@ const Index: React.FC = () => {
     if (sessionStorage.getItem(flagKey)) return;
     if (todayEntry?.isPlanned) return;
     sessionStorage.setItem(flagKey, "1");
-    // Combined modal if yesterday started but not closed.
     if (yesterdayEntry && !yesterdayEntry.isClosed && (yesterdayEntry.isPlanned || yesterdayEntry.startedAt)) {
       setCombinedOpen(true);
     } else {
       setPlanOpen(true);
     }
-    // Run only on initial mount.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const isPlanned = !!todayEntry?.isPlanned;
+  const isClosed = !!todayEntry?.isClosed;
+  const planAndReview = settings.layers.planAndReview;
+
+  // Header date + meta
+  const today = new Date();
+  const headerDate = today.toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+  const startedTime = todayEntry?.startedAt
+    ? new Date(todayEntry.startedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    : null;
+  const dayTypeLabel = todayEntry?.dayType ? `${DAY_TYPE_LABELS[todayEntry.dayType]} day` : null;
+  const subLine =
+    isPlanned && dayTypeLabel
+      ? `${dayTypeLabel}${startedTime ? ` · Started ${startedTime}` : ""}`
+      : "";
+
+  // Aggregate stats for header right
+  const plannedSet = new Set(todayEntry?.plannedActionIds ?? []);
+  const todaysActionCount = actions.filter(
+    (a) =>
+      a.status !== "dropped" &&
+      a.status !== "cancelled" &&
+      (planAndReview && isPlanned
+        ? plannedSet.has(a.id) || a.scheduledDate === TODAY_ISO
+        : a.scheduledDate === TODAY_ISO),
+  ).length;
+  const plannedRitualSet = new Set(todayEntry?.plannedRitualIds ?? []);
+  const todaysRitualCount = rituals.filter(
+    (r) => r.status === "active" && (planAndReview && isPlanned ? plannedRitualSet.has(r.id) : true),
+  ).length;
+  const aggMeta = isPlanned ? `${todaysActionCount} actions · ${todaysRitualCount} rituals` : "";
+
+  // Yesterday card visibility: show if yesterday wasn't closed OR today isn't planned
+  const showYesterday = (!yesterdayEntry?.isClosed || !isPlanned) && !!(
+    yesterdayEntry || actions.some((a) => a.completedAt?.slice(0, 10) === YESTERDAY_ISO)
+  );
+
   return (
     <div className="min-h-screen bg-surface-base text-text-primary">
-      <Sidebar onOpenSettings={() => setSettingsOpen(true)} />
+      <AppSidebar onOpenSettings={() => setSettingsOpen(true)} />
       <SettingsPanel open={settingsOpen} onOpenChange={setSettingsOpen} />
       <PlanTodayModal open={planOpen} onClose={() => setPlanOpen(false)} />
       <CloseDayModal open={closeOpen} onClose={() => setCloseOpen(false)} />
       <ClosePlanModal open={combinedOpen} onClose={() => setCombinedOpen(false)} />
-      <main className="ml-[220px] px-8 py-6">
-        <header className="mb-6">
-          <h1 className="text-[20px] font-medium text-text-primary">Tuesday, May 5</h1>
-          <div className="font-mono text-[12px] text-text-tertiary mt-0.5">Execution day</div>
+      <main className="ml-[220px] px-8 py-6 max-w-[1200px]">
+        <header className="mb-8 flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-[24px] font-medium text-text-primary leading-tight">{headerDate}</h1>
+            {subLine && (
+              <div className="font-mono text-[13px] text-text-tertiary mt-1">{subLine}</div>
+            )}
+          </div>
+          {aggMeta && (
+            <div className="font-mono text-[13px] text-text-tertiary tabular-nums pt-2">
+              {aggMeta}
+            </div>
+          )}
         </header>
 
-        <Hero />
+        {showYesterday && !isClosed && (
+          <>
+            <YesterdayCard />
+            <div className="h-8" />
+          </>
+        )}
 
-        <div className="h-8" />
-        <ActiveProjects />
-        <div className="h-8 border-b border-border-subtle" />
-
-        <div className="h-8" />
-        <Today
+        <TodayZone
           onPlanClick={() => setPlanOpen(true)}
           onCloseClick={() => setCloseOpen(true)}
         />
 
-        <div className="my-6 border-t border-border-subtle" />
-        <HeavyLift />
-
-        <div className="my-6 border-t border-border-subtle" />
-        <QuickMoves />
-
-        <div className="h-8" />
-        <UtilityRow />
-
-        <div className="h-8" />
+        <div className="h-12" />
       </main>
     </div>
   );
 };
 
 export default Index;
+

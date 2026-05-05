@@ -296,34 +296,6 @@ const GoalCard: React.FC<{ m: GoalMeta; logTimeOn: boolean }> = ({ m, logTimeOn 
   );
 };
 
-const GhostNewGoalCard: React.FC<{ disabled: boolean }> = ({ disabled }) => {
-  const openPanel = useStore((s) => s.openPanel);
-  const card = (
-    <button
-      type="button"
-      disabled={disabled}
-      onClick={() => openPanel({ kind: "goal", mode: "new" })}
-      className={`w-full rounded-[6px] border border-dashed flex flex-col items-center justify-center gap-1 transition-colors ${
-        disabled
-          ? "border-border-subtle text-text-tertiary cursor-not-allowed"
-          : "border-border-default text-text-secondary hover:border-accent hover:text-text-primary"
-      }`}
-      style={{ minHeight: 360 }}
-    >
-      <span className="text-[24px] leading-none">+</span>
-      <span className="text-[13px]">New goal</span>
-    </button>
-  );
-  if (disabled) {
-    return (
-      <Tooltip content="You have 3 active goals. Complete or drop one to add another.">
-        <div>{card}</div>
-      </Tooltip>
-    );
-  }
-  return card;
-};
-
 const SectionGrid: React.FC<{
   label: string;
   count: number;

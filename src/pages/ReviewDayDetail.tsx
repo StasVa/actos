@@ -363,7 +363,7 @@ const ReviewDayDetail: React.FC = () => {
                 <div className="space-y-2">
                   {perGoal.map(({ g, min, projectRows }) => {
                     const pct = yMax > 0 ? (min / yMax) * 100 : 0;
-                    const showProjects = projectRows.length >= 2;
+                    const showProjects = projectRows.length >= 1;
                     return (
                       <div key={g.id}>
                         <div className="flex items-center gap-3">

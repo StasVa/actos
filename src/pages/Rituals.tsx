@@ -440,33 +440,169 @@ const ArchivedSection: React.FC<{ rows: RitualRow[]; onRestore: (id: string) => 
   );
 };
 
+/* ===== Helpers: derive RitualRow from store ===== */
+const TODAY_ISO = new Date().toISOString().slice(0, 10);
+
+function isMonthlyRitual(schedule: string): boolean {
+  return schedule === "monthly";
+}
+
+function ritualDueToday(schedule: string, scheduleConfig?: { weekdays?: number[] }): boolean {
+  const dow = new Date().getDay(); // 0=Sun
+  switch (schedule) {
+    case "daily": return true;
+    case "weekdays": return dow >= 1 && dow <= 5;
+    case "weekly": {
+      const allowed = scheduleConfig?.weekdays;
+      return allowed && allowed.length > 0 ? allowed.includes(dow) : true;
+    }
+    case "monthly": return new Date().getDate() === 1;
+    default: return true;
+  }
+}
+
+function multLabel(total: number): string {
+  if (total < 3) return "×1.00";
+  if (total < 7) return "×1.10";
+  if (total < 14) return "×1.25";
+  if (total < 30) return "×1.50";
+  if (total < 60) return "×1.75";
+  if (total < 100) return "×2.00";
+  return "×2.50";
+}
+
+function buildConsistency(history: { date: string }[], days = 30): number[] {
+  const set = new Set(history.map((h) => h.date));
+  const arr: number[] = [];
+  const base = new Date();
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(base);
+    d.setDate(base.getDate() - i);
+    arr.push(set.has(d.toISOString().slice(0, 10)) ? 1 : 0);
+  }
+  return arr;
+}
+
+function buildFrequency(history: { date: string }[], unit: "week" | "month", buckets: number): number[] {
+  const arr = new Array(buckets).fill(0);
+  const now = new Date();
+  for (const h of history) {
+    const d = new Date(h.date);
+    let stepsAgo: number;
+    if (unit === "week") {
+      stepsAgo = Math.floor((now.getTime() - d.getTime()) / (7 * 86400000));
+    } else {
+      stepsAgo = (now.getFullYear() - d.getFullYear()) * 12 + (now.getMonth() - d.getMonth());
+    }
+    if (stepsAgo >= 0 && stepsAgo < buckets) {
+      arr[buckets - 1 - stepsAgo] += 1;
+    }
+  }
+  return arr;
+}
+
+function lastDoneLabel(history: { date: string }[]): string {
+  if (history.length === 0) return "never";
+  const sorted = [...history].sort((a, b) => b.date.localeCompare(a.date));
+  const last = sorted[0].date;
+  if (last === TODAY_ISO) return "today";
+  const yest = new Date();
+  yest.setDate(yest.getDate() - 1);
+  if (last === yest.toISOString().slice(0, 10)) return "yesterday";
+  const d = new Date(last);
+  return `${MONTH_SHORT[d.getMonth()]} ${d.getDate()}`;
+}
+
+function archivedAgoLabel(iso?: string): string | undefined {
+  if (!iso) return undefined;
+  const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+  if (days < 7) return `${days}d ago`;
+  if (days < 30) return `${Math.round(days / 7)}w ago`;
+  return `${Math.round(days / 30)}mo ago`;
+}
+
+function buildRitualRow(
+  r: import("@/types").Ritual,
+  goalsById: Record<string, import("@/types").Goal>,
+): RitualRow {
+  const goal = goalsById[r.goalId];
+  const goalColor = goal ? `hsl(var(--${goal.color}))` : "hsl(var(--text-tertiary))";
+  const goalName = goal?.title ?? "—";
+  const monthly = isMonthlyRitual(r.schedule);
+  const consistency = monthly
+    ? new Array(30).fill(0).concat()
+    : buildConsistency(r.completionHistory, 30);
+  const frequency = monthly
+    ? buildFrequency(r.completionHistory, "month", 12)
+    : buildFrequency(r.completionHistory, "week", 12);
+  const freqMax = Math.max(1, ...frequency);
+  const doneToday = r.completionHistory.some((c) => c.date === TODAY_ISO);
+  const dueToday = ritualDueToday(r.schedule, r.scheduleConfig);
+  const scheduleLabel = (() => {
+    const base = r.schedule.toUpperCase();
+    if (r.schedule === "weekly" && r.scheduleConfig?.weekdays?.length) {
+      const names = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+      return `${base} · ${r.scheduleConfig.weekdays.map((d: number) => names[d]).join(" ")}`;
+    }
+    if (r.schedule === "monthly") return "MONTHLY · 1ST OF MONTH";
+    return base;
+  })();
+  return {
+    id: r.id,
+    title: r.title,
+    goalName,
+    goalColor,
+    scheduleLabel,
+    scheduleShort: r.schedule,
+    multiplier: multLabel(r.totalCompletions),
+    totalCompletions: r.totalCompletions,
+    pendingToday: dueToday && !doneToday,
+    notDueToday: !dueToday,
+    lastDoneLabel: lastDoneLabel(r.completionHistory),
+    consistency,
+    frequency,
+    freqMax,
+    isMonthly: monthly,
+    archived: r.status === "archived",
+    archivedAgoLabel: archivedAgoLabel(r.archivedAt),
+  };
+}
+
 /* ===== Page ===== */
 const Rituals: React.FC = () => {
   const storeRituals = useStore((s) => s.rituals);
   const storeGoals = useStore((s) => s.goals);
   const openPanel = useStore((s) => s.openPanel);
   const markRitualInstanceDone = useStore((s) => s.markRitualInstanceDone);
+  const restoreRitual = useStore((s) => s.restoreRitual);
 
-  const pending = RITUALS.filter((r) => r.pendingToday);
+  const goalsById = React.useMemo(() => {
+    const m: Record<string, import("@/types").Goal> = {};
+    for (const g of storeGoals) m[g.id] = g;
+    return m;
+  }, [storeGoals]);
 
-  // Bridge static visual rows → real store records by title.
-  const findStoreRitual = (r: RitualRow) =>
-    storeRituals.find((sr) => sr.title.toLowerCase() === r.title.toLowerCase());
+  const activeRows = React.useMemo(
+    () =>
+      storeRituals
+        .filter((r) => r.status === "active")
+        .map((r) => buildRitualRow(r, goalsById)),
+    [storeRituals, goalsById],
+  );
+  const archivedRows = React.useMemo(
+    () =>
+      storeRituals
+        .filter((r) => r.status === "archived")
+        .map((r) => buildRitualRow(r, goalsById)),
+    [storeRituals, goalsById],
+  );
+
+  const pending = activeRows.filter((r) => r.pendingToday);
+  const dueCount = activeRows.filter((r) => !r.notDueToday).length;
+  const allTime = storeRituals.reduce((s, r) => s + r.totalCompletions, 0);
 
   const handleOpen = (r: RitualRow) => {
-    const match = findStoreRitual(r);
-    if (match) {
-      openPanel({ kind: "ritual", mode: "edit", id: match.id });
-    } else {
-      openPanel({
-        kind: "ritual",
-        mode: "new",
-        prefill: {
-          title: r.title,
-          goalId: storeGoals.find((g) => g.status === "active")?.id,
-        },
-      });
-    }
+    openPanel({ kind: "ritual", mode: "edit", id: r.id });
   };
 
   const handleAddRitual = () => {
@@ -478,37 +614,46 @@ const Rituals: React.FC = () => {
   };
 
   const handleMarkDone = (r: RitualRow) => {
-    const match = findStoreRitual(r);
-    if (!match) {
-      toast.error("Ritual not found in store");
-      return;
-    }
-    const today = new Date().toISOString().slice(0, 10);
-    if (match.completionHistory.some((c) => c.date === today)) {
+    const match = storeRituals.find((sr) => sr.id === r.id);
+    if (!match) return;
+    if (match.completionHistory.some((c) => c.date === TODAY_ISO)) {
       toast("Already logged today");
       return;
     }
     markRitualInstanceDone(match.id);
-    toast(`Logged · ${match.totalCompletions + 1} completion${match.totalCompletions + 1 === 1 ? "" : "s"}`);
+    toast.success(`Logged · ${match.totalCompletions + 1} completion${match.totalCompletions + 1 === 1 ? "" : "s"}`);
   };
+
+  const handleRestore = (id: string) => {
+    restoreRitual(id);
+    toast.success("Ritual restored");
+  };
+
+  const headerMeta =
+    `${activeRows.length} ACTIVE · ${pending.length} PENDING TODAY · ${allTime} TOTAL DONE`;
 
   return (
     <div className="min-h-screen bg-surface-base text-text-primary">
       <Sidebar />
       <main className="ml-[220px]" style={{ padding: "32px 40px" }}>
         <div className="mx-auto" style={{ maxWidth: 1100 }}>
-          {/* Header */}
           <div className="flex items-baseline justify-between">
             <h1 className="text-[24px] font-medium text-text-primary" style={{ fontWeight: 500 }}>
               Rituals
             </h1>
             <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary tabular-nums">
-              5 ACTIVE · 3 PENDING TODAY · 86% WEEK CONSISTENCY
+              {headerMeta}
             </div>
           </div>
 
           <div style={{ height: 24 }} />
-          <TopStats />
+          <TopStats
+            rows={activeRows}
+            allTime={allTime}
+            activeCount={activeRows.length}
+            pendingCount={pending.length}
+            dueCount={dueCount}
+          />
 
           <div style={{ height: 24 }} />
           {pending.length > 0 && (
@@ -517,16 +662,14 @@ const Rituals: React.FC = () => {
 
           <div style={{ height: 32 }} />
 
-          {/* Active rituals grid */}
           <section>
             <div className="flex items-center justify-between mb-3">
               <div className="text-[12px] font-medium uppercase tracking-[0.08em] text-text-secondary">
-                Active rituals · 5
+                Active rituals · {activeRows.length}
               </div>
-              <div className="font-mono text-[11px] text-text-secondary">Sort: by consistency</div>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {RITUALS.map((r) => (
+              {activeRows.map((r) => (
                 <RitualCard key={r.id} r={r} onOpen={handleOpen} onMarkDone={handleMarkDone} />
               ))}
               <button
@@ -550,10 +693,15 @@ const Rituals: React.FC = () => {
                 </span>
               </button>
             </div>
+            {activeRows.length === 0 && (
+              <div className="mt-4 font-mono text-[11px] text-text-tertiary text-center">
+                No active rituals. Use the “+ Add ritual” button or ⌘K.
+              </div>
+            )}
           </section>
 
           <div style={{ height: 24 }} />
-          <ArchivedSection />
+          <ArchivedSection rows={archivedRows} onRestore={handleRestore} />
 
           <div style={{ height: 32 }} />
         </div>
@@ -563,3 +711,4 @@ const Rituals: React.FC = () => {
 };
 
 export default Rituals;
+

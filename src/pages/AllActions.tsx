@@ -221,12 +221,12 @@ const ActionRow: React.FC<{ action: Action; selected: boolean; onSelect: () => v
   const goal = GOALS[action.goal];
   const isTerminal = !isActive(action.status);
   const bottomBits: React.ReactNode[] = [];
-  bottomBits.push(<span key="goal">{goal.short}</span>);
+  bottomBits.push(<span key="goal">{goal.name}</span>);
   bottomBits.push(<span key="proj">{action.project}</span>);
-  if (action.impact) bottomBits.push(<span key="imp">I{action.impact}</span>);
-  if (action.timeMinutes) bottomBits.push(<span key="time">{formatTime(action.timeMinutes)}</span>);
+  if (action.impact) bottomBits.push(<span key="imp" className="tabular-nums">I{action.impact}</span>);
+  if (action.timeMinutes) bottomBits.push(<span key="time" className="tabular-nums">{formatTime(action.timeMinutes)}</span>);
   if (action.status === "delegated" && action.delegate)
-    bottomBits.push(<span key="del">→ {action.delegate.toUpperCase()}</span>);
+    bottomBits.push(<span key="del">→ {action.delegate}</span>);
 
   return (
     <div

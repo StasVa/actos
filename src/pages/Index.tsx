@@ -104,6 +104,14 @@ const SPARK_2 = [
   0, 0, 0, 0, 0, 0, 0,
   0, 0,
 ];
+/* Reading goal — very consistent daily activity */
+const SPARK_3 = [
+  1, 2, 1, 1, 0, 2, 1,
+  1, 1, 2, 1, 0, 1, 2,
+  1, 1, 1, 0, 1, 2, 1,
+  1, 1, 2, 1, 1, 0, 2,
+  1, 1,
+];
 
 const Sparkline: React.FC<{ data: number[]; color: string; tips: import("@/components/Tooltip").DayInfo[] }> = ({ data, color, tips }) => {
   const max = 5;

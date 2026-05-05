@@ -18,12 +18,15 @@ import { toast } from "sonner";
 const TODAY_ISO = new Date().toISOString().slice(0, 10);
 
 const NAV_ITEMS = [
-  { label: "Home", path: "/" },
-  { label: "Ideas", path: "/ideas" },
+  { label: "Today", path: "/today" },
+  { label: "Progress", path: "/progress" },
+  { label: "Goals", path: "/goals" },
+  { label: "Projects", path: "/projects" },
+  { label: "Actions", path: "/actions" },
+  { label: "Delegated", path: "/delegated" },
   { label: "Rituals", path: "/rituals" },
-  { label: "All actions", path: "/all-actions" },
-  { label: "All projects", path: "/all-projects" },
-  { label: "All delegated", path: "/all-delegated" },
+  { label: "Ideas", path: "/ideas" },
+  { label: "Reviews", path: "/reviews" },
 ];
 
 export function CommandPalette() {

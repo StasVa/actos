@@ -221,6 +221,80 @@ const Hero: React.FC = () => (
   </div>
 );
 
+/* ===== Active Projects ===== */
+type Project = {
+  goalLabel: string;
+  goalColor: string;
+  title: string;
+  done: number;
+  total: number;
+  last: string;
+  state: "active" | "stalled";
+  warnLast?: boolean;
+};
+
+const PROJECTS: Project[] = [
+  { goalLabel: "YOUTUBE CHANNEL", goalColor: G1, title: "Shoot video #1", done: 3, total: 7, last: "today", state: "active" },
+  { goalLabel: "YOUTUBE CHANNEL", goalColor: G1, title: "Set up workspace", done: 4, total: 5, last: "2d ago", state: "active" },
+  { goalLabel: "LOSE 5 KG", goalColor: G2, title: "Nutrition plan", done: 3, total: 4, last: "today", state: "active" },
+  { goalLabel: "LOSE 5 KG", goalColor: G2, title: "Build cardio routine", done: 1, total: 6, last: "11d ago", state: "stalled", warnLast: true },
+];
+
+const ProjectCard: React.FC<{ p: Project }> = ({ p }) => {
+  const pct = Math.round((p.done / p.total) * 100);
+  return (
+    <div
+      className="group h-[120px] p-3 flex flex-col gap-2 rounded-[6px] bg-surface-raised border border-border-subtle hover:bg-surface-hover hover:border-accent cursor-pointer transition-colors duration-100"
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <span className="w-2 h-2 rounded-full shrink-0" style={{ background: p.goalColor }} />
+          <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary truncate">
+            {p.goalLabel}
+          </span>
+        </div>
+        <span
+          className="w-2 h-2 rounded-full shrink-0"
+          style={{ background: p.state === "active" ? "hsl(var(--state-active))" : "hsl(var(--state-stalled))" }}
+        />
+      </div>
+
+      <div
+        className="flex-1 text-[15px] font-medium text-text-primary leading-[1.3] overflow-hidden"
+        style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}
+      >
+        {p.title}
+      </div>
+
+      <div className="h-1 w-full bg-surface-hover rounded-[2px] overflow-hidden">
+        <div className="h-full rounded-[2px]" style={{ width: `${pct}%`, background: p.goalColor }} />
+      </div>
+
+      <div className="flex items-center justify-between font-mono text-[11px] tabular-nums">
+        <div>
+          <span className="text-text-primary">{p.done}/{p.total}</span>
+          <span className="text-text-tertiary"> actions</span>
+        </div>
+        <div className="text-text-secondary">
+          Last:{" "}
+          <span className={p.warnLast ? "text-text-warning" : "text-text-secondary"}>{p.last}</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ActiveProjects: React.FC = () => (
+  <section>
+    <SectionLabel meta="4 ACTIVE · 1 STALLED">Active projects · 4</SectionLabel>
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+      {PROJECTS.map((p, i) => (
+        <ProjectCard key={i} p={p} />
+      ))}
+    </div>
+  </section>
+);
+
 /* ===== Today ===== */
 const Today: React.FC = () => (
   <section>
@@ -451,6 +525,10 @@ const Index: React.FC = () => {
         </header>
 
         <Hero />
+
+        <div className="h-8" />
+        <ActiveProjects />
+        <div className="h-8 border-b border-border-subtle" />
 
         <div className="h-8" />
         <Today />

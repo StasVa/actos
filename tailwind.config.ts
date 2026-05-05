@@ -25,6 +25,7 @@ export default {
         "text-secondary": "hsl(var(--text-secondary))",
         "text-tertiary": "hsl(var(--text-tertiary))",
         "text-disabled": "hsl(var(--text-disabled))",
+        "text-warning": "hsl(var(--text-warning))",
         "border-subtle": "hsl(var(--border-subtle))",
         "border-default": "hsl(var(--border-default))",
         accent: "hsl(var(--accent))",

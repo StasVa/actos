@@ -490,7 +490,31 @@ export const useStore = create<StoreState>()(
               ? {
                   ...r,
                   totalCompletions: r.totalCompletions + 1,
-                  completionHistory: [...r.completionHistory, { date: day, at }],
+                  // Replace any existing entry for this date (e.g. a prior "skipped"),
+                  // then append the new "done" entry.
+                  completionHistory: [
+                    ...r.completionHistory.filter((c) => c.date !== day),
+                    { date: day, at, status: "done" },
+                  ],
+                }
+              : r,
+          ),
+        });
+      },
+
+      skipRitualInstance: (ritualId, date) => {
+        const at = nowISO();
+        const day = date ?? todayISO();
+        set({
+          rituals: get().rituals.map((r) =>
+            r.id === ritualId
+              ? {
+                  ...r,
+                  // Skipped does NOT increment totalCompletions.
+                  completionHistory: [
+                    ...r.completionHistory.filter((c) => c.date !== day),
+                    { date: day, at, status: "skipped" },
+                  ],
                 }
               : r,
           ),

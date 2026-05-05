@@ -1,10 +1,12 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Tooltip, StateDotTooltip } from "@/components/Tooltip";
 import { useStore, selectors } from "@/store/useStore";
-import type { Action, ActionStatus, GoalColorVar, Project } from "@/types";
+import type { Action, ActionStatus, GoalColorVar, Project, ProjectReference } from "@/types";
 import { AppSidebar } from "@/components/AppSidebar";
 import { ActionRow as SharedActionRow } from "@/components/ActionRow";
+import { RichTextEditor } from "@/components/RichTextEditor";
+import { CardMenu } from "@/components/CardMenu";
 
 const COLOR_VAR: Record<GoalColorVar, string> = {
   "goal-1": "hsl(var(--goal-1))",

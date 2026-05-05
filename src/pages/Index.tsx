@@ -245,6 +245,7 @@ const PlaceholderSlot: React.FC = () => (
 
 const SPARK_1_TIPS = buildYouTubeTooltips(SPARK_1);
 const SPARK_2_TIPS = buildFitnessTooltips(SPARK_2);
+const SPARK_3_TIPS = buildReadingTooltips(SPARK_3);
 
 const Hero: React.FC = () => (
   <div className="bg-surface-elevated border border-border-subtle rounded-[6px] p-6 grid grid-cols-3 divide-x divide-border-subtle">
@@ -282,7 +283,21 @@ const Hero: React.FC = () => (
         </>
       }
     />
-    <PlaceholderSlot />
+    <GoalColumn
+      title="Read 24 books this year"
+      state="active"
+      type="MID-TERM"
+      target="TARGET DEC 31"
+      progress={38}
+      meta={["1 of 1 projects active", "32 actions done", "Last activity: today"]}
+      outcome={38}
+      effort={42}
+      spark={SPARK_3}
+      sparkTips={SPARK_3_TIPS}
+      lastActivity="today"
+      color={G3}
+      recent={<>Recent: ✓ Finished book 9 of 24 today · ✓ Read 30 minutes · ✓ Logged today's read</>}
+    />
   </div>
 );
 

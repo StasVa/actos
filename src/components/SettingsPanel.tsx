@@ -141,6 +141,40 @@ export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
             </select>
           </section>
 
+          {/* Backup */}
+          <section>
+            <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-3">
+              BACKUP
+            </div>
+            <div className="text-[11px] text-text-tertiary mb-3">
+              Export a JSON snapshot of every goal, project, action, ritual, idea, and day entry.
+              Import replaces all current data — make a backup first.
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleExport}
+                className="h-9 px-4 text-[13px] font-medium rounded-[4px] border border-border-default text-text-primary hover:border-[hsl(var(--accent))] hover:bg-surface-hover transition-colors"
+              >
+                Export JSON
+              </button>
+              <button
+                type="button"
+                onClick={handleImportPick}
+                className="h-9 px-4 text-[13px] font-medium rounded-[4px] border border-border-default text-text-primary hover:border-[hsl(var(--accent))] hover:bg-surface-hover transition-colors"
+              >
+                Import JSON
+              </button>
+              <input
+                ref={fileRef}
+                type="file"
+                accept="application/json,.json"
+                className="hidden"
+                onChange={handleImportFile}
+              />
+            </div>
+          </section>
+
           {/* Danger */}
           <section>
             <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-3">

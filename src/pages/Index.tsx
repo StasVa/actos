@@ -11,14 +11,14 @@ import { ConfirmModal } from "@/components/ConfirmModal";
 import { PlanTodayModal, CloseDayModal, ClosePlanModal } from "@/components/PlanCloseModals";
 import { toast } from "sonner";
 
-const TODAY_ISO = new Date().toISOString().slice(0, 10);
-const YESTERDAY_ISO = (() => {
+export const TODAY_ISO = new Date().toISOString().slice(0, 10);
+export const YESTERDAY_ISO = (() => {
   const d = new Date();
   d.setDate(d.getDate() - 1);
   return d.toISOString().slice(0, 10);
 })();
 
-const DAY_TYPE_LABELS: Record<string, string> = {
+export const DAY_TYPE_LABELS: Record<string, string> = {
   execution: "Execution",
   recovery: "Recovery",
   "day-off": "Day Off",
@@ -32,7 +32,7 @@ const G2 = "hsl(var(--goal-2))";
 const G3 = "hsl(var(--goal-3))";
 
 /* ===== Primitives ===== */
-const SectionLabel: React.FC<{ children: React.ReactNode; meta?: React.ReactNode }> = ({ children, meta }) => (
+export const SectionLabel: React.FC<{ children: React.ReactNode; meta?: React.ReactNode }> = ({ children, meta }) => (
   <div className="flex items-center justify-between mb-3">
     <h2 className="text-[12px] font-medium uppercase tracking-[0.08em] text-text-secondary">{children}</h2>
     {meta && <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">{meta}</div>}
@@ -353,7 +353,7 @@ function relativeDayLabel(iso?: string): string {
   return `${days} days ago`;
 }
 
-const Hero: React.FC = () => {
+export const Hero: React.FC = () => {
   const goals = useStore((s) => s.goals);
   const projects = useStore((s) => s.projects);
   const actions = useStore((s) => s.actions);
@@ -556,7 +556,7 @@ const ActiveProjectCard: React.FC<{ p: ActiveProjectMeta; pct: number }> = ({ p,
 };
 
 /* ===== Active Projects (live store-wired) ===== */
-const ActiveProjects: React.FC = () => {
+export const ActiveProjects: React.FC = () => {
   const goals = useStore((s) => s.goals);
   const projects = useStore((s) => s.projects);
   const actions = useStore((s) => s.actions);
@@ -630,7 +630,7 @@ const ActiveProjects: React.FC = () => {
 };
 
 /* ===== Today (live store-wired) ===== */
-function fmtTime(min?: number): string | null {
+export function fmtTime(min?: number): string | null {
   if (!min) return null;
   const h = Math.floor(min / 60);
   const m = min % 60;
@@ -639,7 +639,7 @@ function fmtTime(min?: number): string | null {
   return `${m}m`;
 }
 
-const Today: React.FC<{
+export const TodayZone: React.FC<{
   onPlanClick: () => void;
   onCloseClick: () => void;
 }> = ({ onPlanClick, onCloseClick }) => {

@@ -194,6 +194,13 @@ function ActionEditorPanel({
       timeEstimateMinutes: timeMin === "" ? undefined : Number(timeMin),
       energyCost: energy === "" ? undefined : Number(energy),
       focusCost: focus === "" ? undefined : Number(focus),
+      // Honor a prefilled terminal status (e.g. retro-logging a Done action
+      // against a past day from the Reviews drill-down).
+      status: prefill?.status,
+      completedAt: prefill?.completedAt,
+      delegatedAt: prefill?.delegatedAt,
+      droppedAt: prefill?.droppedAt,
+      cancelledAt: prefill?.cancelledAt,
     });
     toast("Action created");
     // Re-open as edit so user can keep tweaking the saved record.

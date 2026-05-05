@@ -1,11 +1,11 @@
 import React from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { AppSidebar } from "@/components/AppSidebar";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { useStore } from "@/store/useStore";
 import { formatHM } from "@/lib/timeStats";
-import type { Action, Ritual } from "@/types";
+import type { Action, Goal, Project, Ritual } from "@/types";
 import { DAY_TYPE_LABELS } from "./Index";
 
 const longDate = (iso: string) =>
@@ -39,8 +39,13 @@ const ActionLine: React.FC<{
   goalColor: string;
   parent: string;
   showTime: boolean;
-}> = ({ a, icon, iconClass = "text-text-tertiary", goalColor, parent, showTime }) => (
-  <div className="flex items-center gap-2.5 py-1.5">
+  onClick: () => void;
+}> = ({ a, icon, iconClass = "text-text-tertiary", goalColor, parent, showTime, onClick }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className="w-full flex items-center gap-2.5 py-1.5 px-2 -mx-2 rounded-[4px] hover:bg-surface-hover transition-colors text-left"
+  >
     <span className={`font-mono text-[12px] ${iconClass}`}>{icon}</span>
     <span className="w-2 h-2 rounded-full shrink-0" style={{ background: goalColor }} />
     <span className="text-[13px] text-text-primary truncate">{a.title}</span>
@@ -51,7 +56,7 @@ const ActionLine: React.FC<{
         {formatHM(a.timeEstimateMinutes)}
       </span>
     )}
-  </div>
+  </button>
 );
 
 const RitualLine: React.FC<{ r: Ritual; icon: string; iconClass?: string; goalColor: string; mult: number }> = ({
@@ -71,8 +76,43 @@ const RitualLine: React.FC<{ r: Ritual; icon: string; iconClass?: string; goalCo
   </div>
 );
 
+const ClosedRow: React.FC<{
+  title: string;
+  stripeColor: string;
+  pillLabel: "COMPLETED" | "DROPPED";
+  subline: React.ReactNode;
+  onClick: () => void;
+}> = ({ title, stripeColor, pillLabel, subline, onClick }) => {
+  const pillColor =
+    pillLabel === "COMPLETED"
+      ? "hsl(var(--state-active))"
+      : "hsl(var(--text-warning, var(--state-stalled)))";
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="group w-full flex items-stretch gap-3 rounded-[4px] hover:bg-surface-hover transition-colors text-left overflow-hidden"
+    >
+      <div className="w-[3px] shrink-0 self-stretch" style={{ background: stripeColor }} />
+      <div className="flex-1 min-w-0 py-2 pr-3">
+        <div className="flex items-center gap-3">
+          <div className="text-[14px] font-medium text-text-primary truncate flex-1">{title}</div>
+          <div
+            className="font-mono text-[10px] uppercase tracking-[0.08em] tabular-nums shrink-0"
+            style={{ color: pillColor }}
+          >
+            {pillLabel}
+          </div>
+        </div>
+        <div className="mt-0.5 font-mono text-[11px] text-text-tertiary">{subline}</div>
+      </div>
+    </button>
+  );
+};
+
 const ReviewDayDetail: React.FC = () => {
   const { date = "" } = useParams();
+  const navigate = useNavigate();
   const [settingsOpen, setSettingsOpen] = React.useState(false);
   const dayEntry = useStore((s) => s.dayEntries.find((d) => d.date === date));
   const actions = useStore((s) => s.actions);
@@ -82,6 +122,7 @@ const ReviewDayDetail: React.FC = () => {
   const settings = useStore((s) => s.settings);
   const reopenDay = useStore((s) => (s as any).reopenDay);
   const updateDayEntry = useStore((s) => (s as any).updateDayEntry);
+  const openPanel = useStore((s) => s.openPanel);
 
   const [editingReflection, setEditingReflection] = React.useState(false);
   const [reflectionDraft, setReflectionDraft] = React.useState("");
@@ -133,6 +174,26 @@ const ReviewDayDetail: React.FC = () => {
   }
   const ritualMult = (r: Ritual) => 1 + Math.min(r.totalCompletions, 100) * 0.01;
 
+  // ─── Closed entities on this date ───
+  const sameDate = (iso?: string) => !!iso && iso.slice(0, 10) === date;
+  type Closed<T> = { entity: T; type: "completed" | "dropped"; at: string };
+
+  const closedProjects: Closed<Project>[] = projects
+    .flatMap<Closed<Project>>((p) => {
+      if (sameDate(p.completedAt)) return [{ entity: p, type: "completed", at: p.completedAt! }];
+      if (sameDate(p.droppedAt)) return [{ entity: p, type: "dropped", at: p.droppedAt! }];
+      return [];
+    })
+    .sort((a, b) => a.at.localeCompare(b.at));
+
+  const closedGoals: Closed<Goal>[] = goals
+    .flatMap<Closed<Goal>>((g) => {
+      if (sameDate(g.completedAt)) return [{ entity: g, type: "completed", at: g.completedAt! }];
+      if (sameDate(g.droppedAt)) return [{ entity: g, type: "dropped", at: g.droppedAt! }];
+      return [];
+    })
+    .sort((a, b) => a.at.localeCompare(b.at));
+
   // Time per goal
   const perGoal = goals
     .filter((g) => g.status === "active")
@@ -145,9 +206,13 @@ const ReviewDayDetail: React.FC = () => {
   const totalMin = perGoal.reduce((s, x) => s + x.min, 0);
   const yMax = Math.max(1, ...perGoal.map((x) => x.min));
 
-  // No data at all
+  // No data at all (closed entities also count as data)
   const hasAnyData =
-    !!dayEntry || doneToday.length > 0 || ritualsDone.length > 0;
+    !!dayEntry ||
+    doneToday.length > 0 ||
+    ritualsDone.length > 0 ||
+    closedProjects.length > 0 ||
+    closedGoals.length > 0;
 
   const main =
     dayEntry?.mainTaskActionId
@@ -162,6 +227,12 @@ const ReviewDayDetail: React.FC = () => {
   if (startedT) subParts.push(`Started ${startedT}`);
   if (dayEntry?.isClosed && closedT) subParts.push(`Closed ${closedT}`);
   else if (dayEntry && !dayEntry.isClosed) subParts.push("Not closed");
+
+  // Part 6 — show "Not planned · X actions logged" when no formal plan but activity exists
+  const isNotPlanned = !dayEntry || dayEntry.isPlanned === false;
+  if (isNotPlanned && doneToday.length > 0 && subParts.length === 0) {
+    subParts.push(`Not planned · ${doneToday.length} action${doneToday.length === 1 ? "" : "s"} logged`);
+  }
 
   const handleReopen = () => {
     if (typeof reopenDay === "function") {
@@ -182,6 +253,42 @@ const ReviewDayDetail: React.FC = () => {
     }
     setEditingReflection(false);
     toast("Reflection saved");
+  };
+
+  const openActionEdit = (id: string) => {
+    openPanel({ kind: "action", mode: "edit", id });
+  };
+
+  const openActionAddRetro = () => {
+    openPanel({
+      kind: "action",
+      mode: "new",
+      prefill: {
+        scheduledDate: date,
+        status: "done",
+        completedAt: new Date(date + "T12:00:00").toISOString(),
+      },
+    });
+  };
+
+  // Stats helpers (Part 5)
+  const actionTotal = doneToday.length + skipped.length + notCompleted.length;
+  const actionSubgroupCount =
+    (doneToday.length > 0 ? 1 : 0) + (skipped.length > 0 ? 1 : 0) + (notCompleted.length > 0 ? 1 : 0);
+  const actionTimeMin = doneToday.reduce((s, a) => s + (a.timeEstimateMinutes ?? 0), 0);
+  const showActionTimeMeta = settings.layers.logTime && actionTimeMin > 0;
+
+  const ritualTotal = plannedRituals.length;
+  const ritualSubgroupCount =
+    (ritualsDone.length > 0 ? 1 : 0) +
+    (ritualsSkippedList.length > 0 ? 1 : 0) +
+    (ritualsMissed.length > 0 ? 1 : 0);
+
+  // Goal closed sub-line: type + days active
+  const daysActive = (g: Goal) => {
+    const start = new Date(g.createdAt).getTime();
+    const end = new Date((g.completedAt || g.droppedAt || g.createdAt) as string).getTime();
+    return Math.max(1, Math.round((end - start) / 86400000));
   };
 
   return (
@@ -238,16 +345,18 @@ const ReviewDayDetail: React.FC = () => {
               )}
 
             {/* INTENT */}
-            <section>
-              <SectionHead>Intent</SectionHead>
-              {dayEntry?.morningIntentNote ? (
-                <div className="text-[14px] text-text-primary whitespace-pre-wrap">
-                  {dayEntry.morningIntentNote}
-                </div>
-              ) : (
-                <div className="text-[13px] text-text-tertiary italic">No intent set</div>
-              )}
-            </section>
+            {(dayEntry?.morningIntentNote || dayEntry?.isPlanned) && (
+              <section>
+                <SectionHead>Intent</SectionHead>
+                {dayEntry?.morningIntentNote ? (
+                  <div className="text-[14px] text-text-primary whitespace-pre-wrap">
+                    {dayEntry.morningIntentNote}
+                  </div>
+                ) : (
+                  <div className="text-[13px] text-text-tertiary italic">No intent set</div>
+                )}
+              </section>
+            )}
 
             {/* MAIN TASK */}
             {main && (
@@ -268,18 +377,20 @@ const ReviewDayDetail: React.FC = () => {
 
             {/* ACTIONS */}
             <section>
-              <SectionHead meta={`${doneToday.length + skipped.length + notCompleted.length} total`}>
-                Actions · {doneToday.length + skipped.length + notCompleted.length}
+              <SectionHead meta={showActionTimeMeta ? formatHM(actionTimeMin) : undefined}>
+                Actions · {actionTotal}
               </SectionHead>
-              {doneToday.length === 0 && skipped.length === 0 && notCompleted.length === 0 ? (
-                <div className="text-[13px] text-text-tertiary italic">No actions tracked.</div>
+              {actionTotal === 0 ? (
+                <div className="text-[13px] text-text-tertiary italic mb-3">No actions tracked.</div>
               ) : (
                 <div>
                   {doneToday.length > 0 && (
                     <>
-                      <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mt-2 mb-1">
-                        Done · {doneToday.length}
-                      </div>
+                      {actionSubgroupCount > 1 && (
+                        <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mt-2 mb-1">
+                          Done · {doneToday.length}
+                        </div>
+                      )}
                       {doneToday.map((a) => (
                         <ActionLine
                           key={a.id}
@@ -289,15 +400,18 @@ const ReviewDayDetail: React.FC = () => {
                           goalColor={goalColorOf(a)}
                           parent={breadcrumb(a)}
                           showTime={settings.layers.logTime}
+                          onClick={() => openActionEdit(a.id)}
                         />
                       ))}
                     </>
                   )}
                   {skipped.length > 0 && (
                     <>
-                      <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mt-3 mb-1">
-                        Skipped · {skipped.length}
-                      </div>
+                      {actionSubgroupCount > 1 && (
+                        <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mt-3 mb-1">
+                          Skipped · {skipped.length}
+                        </div>
+                      )}
                       {skipped.map((a) => (
                         <ActionLine
                           key={a.id}
@@ -306,15 +420,18 @@ const ReviewDayDetail: React.FC = () => {
                           goalColor={goalColorOf(a)}
                           parent={breadcrumb(a)}
                           showTime={settings.layers.logTime}
+                          onClick={() => openActionEdit(a.id)}
                         />
                       ))}
                     </>
                   )}
                   {notCompleted.length > 0 && (
                     <>
-                      <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mt-3 mb-1">
-                        Not completed · {notCompleted.length}
-                      </div>
+                      {actionSubgroupCount > 1 && (
+                        <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mt-3 mb-1">
+                          Not completed · {notCompleted.length}
+                        </div>
+                      )}
                       {notCompleted.map((a) => (
                         <ActionLine
                           key={a.id}
@@ -323,25 +440,95 @@ const ReviewDayDetail: React.FC = () => {
                           goalColor={goalColorOf(a)}
                           parent={breadcrumb(a)}
                           showTime={settings.layers.logTime}
+                          onClick={() => openActionEdit(a.id)}
                         />
                       ))}
                     </>
                   )}
                 </div>
               )}
+
+              {/* + Add action to this day */}
+              <button
+                type="button"
+                onClick={openActionAddRetro}
+                className="group mt-3 w-full h-12 flex items-center justify-center gap-2 rounded-[4px] border border-dashed border-border-subtle hover:border-solid hover:border-[hsl(var(--accent))] transition-colors"
+              >
+                <span className="font-mono text-[16px] text-text-tertiary group-hover:text-text-primary transition-colors">
+                  +
+                </span>
+                <span className="text-[13px] text-text-secondary group-hover:text-text-primary transition-colors">
+                  Add action to this day
+                </span>
+              </button>
             </section>
+
+            {/* PROJECTS CLOSED */}
+            {closedProjects.length > 0 && (
+              <section>
+                <SectionHead>Projects closed · {closedProjects.length}</SectionHead>
+                <div className="space-y-1">
+                  {closedProjects.map(({ entity: p, type }) => {
+                    const g = goalById(p.goalId);
+                    const goalColor = `hsl(var(--${g?.color ?? "goal-1"}))`;
+                    return (
+                      <ClosedRow
+                        key={p.id}
+                        title={p.title}
+                        stripeColor={goalColor}
+                        pillLabel={type === "completed" ? "COMPLETED" : "DROPPED"}
+                        subline={
+                          <span className="inline-flex items-center gap-1.5">
+                            <span
+                              className="w-1.5 h-1.5 rounded-full"
+                              style={{ background: goalColor }}
+                            />
+                            {g?.title ?? "—"}
+                          </span>
+                        }
+                        onClick={() => navigate(`/projects/${p.id}`)}
+                      />
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
+            {/* GOALS CLOSED */}
+            {closedGoals.length > 0 && (
+              <section>
+                <SectionHead>Goals closed · {closedGoals.length}</SectionHead>
+                <div className="space-y-1">
+                  {closedGoals.map(({ entity: g, type }) => {
+                    const goalColor = `hsl(var(--${g.color}))`;
+                    const typeBadge = g.type === "mid-term" ? "MID-TERM" : "SHORT-TERM";
+                    const days = daysActive(g);
+                    return (
+                      <ClosedRow
+                        key={g.id}
+                        title={g.title}
+                        stripeColor={goalColor}
+                        pillLabel={type === "completed" ? "COMPLETED" : "DROPPED"}
+                        subline={`${typeBadge} · ${days} day${days === 1 ? "" : "s"} active`}
+                        onClick={() => navigate(`/goals/${g.id}`)}
+                      />
+                    );
+                  })}
+                </div>
+              </section>
+            )}
 
             {/* RITUALS */}
             {plannedRituals.length > 0 && (
               <section>
-                <SectionHead>
-                  Rituals · {plannedRituals.length}
-                </SectionHead>
+                <SectionHead>Rituals · {ritualTotal}</SectionHead>
                 {ritualsDone.length > 0 && (
                   <>
-                    <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mt-2 mb-1">
-                      Done · {ritualsDone.length}
-                    </div>
+                    {ritualSubgroupCount > 1 && (
+                      <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mt-2 mb-1">
+                        Done · {ritualsDone.length}
+                      </div>
+                    )}
                     {ritualsDone.map((r) => (
                       <RitualLine
                         key={r.id}
@@ -356,9 +543,11 @@ const ReviewDayDetail: React.FC = () => {
                 )}
                 {ritualsSkippedList.length > 0 && (
                   <>
-                    <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mt-3 mb-1">
-                      Skipped · {ritualsSkippedList.length}
-                    </div>
+                    {ritualSubgroupCount > 1 && (
+                      <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mt-3 mb-1">
+                        Skipped · {ritualsSkippedList.length}
+                      </div>
+                    )}
                     {ritualsSkippedList.map((r) => (
                       <RitualLine key={r.id} r={r} icon="○" goalColor={goalColorOf(r)} mult={ritualMult(r)} />
                     ))}
@@ -366,9 +555,11 @@ const ReviewDayDetail: React.FC = () => {
                 )}
                 {ritualsMissed.length > 0 && (
                   <>
-                    <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mt-3 mb-1">
-                      Missed · {ritualsMissed.length}
-                    </div>
+                    {ritualSubgroupCount > 1 && (
+                      <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mt-3 mb-1">
+                        Missed · {ritualsMissed.length}
+                      </div>
+                    )}
                     {ritualsMissed.map((r) => (
                       <RitualLine key={r.id} r={r} icon="✗" goalColor={goalColorOf(r)} mult={ritualMult(r)} />
                     ))}

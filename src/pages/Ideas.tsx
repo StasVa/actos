@@ -5,6 +5,7 @@ import type { Idea, IdeaStatus, ID } from "@/types";
 import { toast } from "sonner";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { AppSidebar } from "@/components/AppSidebar";
+import { subscribeAppEvent } from "@/lib/appEvents";
 
  function relativeAgo(iso: string): { label: string; full: string; sort: number } {
   const d = new Date(iso);

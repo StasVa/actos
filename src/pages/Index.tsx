@@ -1130,7 +1130,7 @@ const TinyHeader: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <div className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">{children}</div>
 );
 
-const RecentlyClosed: React.FC = () => {
+export const RecentlyClosed: React.FC = () => {
   const projects = useStore((s) => s.projects);
   const goals = useStore((s) => s.goals);
   const items = projects
@@ -1166,7 +1166,7 @@ const RecentlyClosed: React.FC = () => {
   );
 };
 
-const Delegated: React.FC = () => {
+export const Delegated: React.FC = () => {
   const actions = useStore((s) => s.actions);
   const items = actions.filter((a) => a.status === "delegated").slice(0, 4);
   return (

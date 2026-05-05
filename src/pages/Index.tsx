@@ -1,11 +1,12 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Tooltip, SparkTooltipContent, StateDotTooltip } from "@/components/Tooltip";
-import { buildYouTubeTooltips, buildFitnessTooltips } from "@/lib/sparkTooltips";
+import { buildYouTubeTooltips, buildFitnessTooltips, buildReadingTooltips } from "@/lib/sparkTooltips";
 
 /* ===== Tokens ===== */
 const G1 = "hsl(var(--goal-1))";
 const G2 = "hsl(var(--goal-2))";
+const G3 = "hsl(var(--goal-3))";
 
 /* ===== Primitives ===== */
 const SectionLabel: React.FC<{ children: React.ReactNode; meta?: React.ReactNode }> = ({ children, meta }) => (
@@ -37,17 +38,22 @@ const NAV: { label: string; href: string }[] = [
   { label: "Home", href: "/" },
   { label: "Weekly", href: "#" },
   { label: "Ideas", href: "/ideas" },
+  { label: "Rituals", href: "/rituals" },
   { label: "All actions", href: "#" },
   { label: "All projects", href: "#" },
   { label: "All delegated", href: "#" },
 ];
 
-const Sidebar: React.FC = () => (
+const Sidebar: React.FC = () => {
+  const { pathname } = useLocation();
+  return (
   <aside className="fixed left-0 top-0 bottom-0 w-[220px] bg-surface-raised border-r border-border-subtle p-4 flex flex-col">
     <div className="px-1 py-1 text-[17px] font-semibold text-text-primary tracking-tight">ActOS</div>
     <nav className="mt-8 flex flex-col gap-1">
       {NAV.map((item) => {
-        const active = item.href === "/";
+        const active =
+          (item.href === "/" && pathname === "/") ||
+          (item.href !== "/" && item.href !== "#" && pathname.startsWith(item.href));
         return (
           <Link
             key={item.label}
@@ -78,7 +84,8 @@ const Sidebar: React.FC = () => (
       <span className="font-mono text-[11px] text-text-secondary truncate">ak@email</span>
     </div>
   </aside>
-);
+  );
+};
 
 /* ===== Hero: Active Goals ===== */
 /* 30 days, weekday-heavy, building toward today (right edge) */
@@ -96,6 +103,14 @@ const SPARK_2 = [
   3, 2, 4, 0, 1, 3, 2,
   0, 0, 0, 0, 0, 0, 0,
   0, 0,
+];
+/* Reading goal — very consistent daily activity */
+const SPARK_3 = [
+  1, 2, 1, 1, 0, 2, 1,
+  1, 1, 2, 1, 0, 1, 2,
+  1, 1, 1, 0, 1, 2, 1,
+  1, 1, 2, 1, 1, 0, 2,
+  1, 1,
 ];
 
 const Sparkline: React.FC<{ data: number[]; color: string; tips: import("@/components/Tooltip").DayInfo[] }> = ({ data, color, tips }) => {
@@ -217,19 +232,9 @@ const GoalColumn: React.FC<{
   return inner;
 };
 
-const PlaceholderSlot: React.FC = () => (
-  <div className="px-6 first:pl-0 last:pr-0">
-    <div className="group h-full p-2 cursor-pointer">
-      <div className="h-full min-h-[280px] rounded-[6px] border border-dashed border-border-default group-hover:border-solid group-hover:border-accent flex flex-col items-center justify-center transition-colors">
-        <div className="text-[13px] text-text-secondary group-hover:text-text-primary transition-colors">+ Add goal</div>
-        <div className="mt-1 font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">2 of 3 active</div>
-      </div>
-    </div>
-  </div>
-);
-
 const SPARK_1_TIPS = buildYouTubeTooltips(SPARK_1);
 const SPARK_2_TIPS = buildFitnessTooltips(SPARK_2);
+const SPARK_3_TIPS = buildReadingTooltips(SPARK_3);
 
 const Hero: React.FC = () => (
   <div className="bg-surface-elevated border border-border-subtle rounded-[6px] p-6 grid grid-cols-3 divide-x divide-border-subtle">
@@ -267,7 +272,21 @@ const Hero: React.FC = () => (
         </>
       }
     />
-    <PlaceholderSlot />
+    <GoalColumn
+      title="Read 24 books this year"
+      state="active"
+      type="MID-TERM"
+      target="TARGET DEC 31"
+      progress={38}
+      meta={["1 of 1 projects active", "32 actions done", "Last activity: today"]}
+      outcome={38}
+      effort={42}
+      spark={SPARK_3}
+      sparkTips={SPARK_3_TIPS}
+      lastActivity="today"
+      color={G3}
+      recent={<>Recent: ✓ Finished book 9 of 24 today · ✓ Read 30 minutes · ✓ Logged today's read</>}
+    />
   </div>
 );
 
@@ -289,6 +308,7 @@ const PROJECTS: Project[] = [
   { goalLabel: "YOUTUBE CHANNEL", goalColor: G1, title: "Set up workspace", done: 4, total: 5, last: "2d ago", state: "active" },
   { goalLabel: "LOSE 5 KG", goalColor: G2, title: "Nutrition plan", done: 3, total: 4, last: "today", state: "active" },
   { goalLabel: "LOSE 5 KG", goalColor: G2, title: "Build cardio routine", done: 1, total: 6, last: "11d ago", state: "stalled", warnLast: true },
+  { goalLabel: "READ 24 BOOKS", goalColor: G3, title: "Build daily reading habit", done: 8, total: 24, last: "today", state: "active" },
 ];
 
 const ProjectCard: React.FC<{ p: Project }> = ({ p }) => {
@@ -341,7 +361,7 @@ const ProjectCard: React.FC<{ p: Project }> = ({ p }) => {
 
 const ActiveProjects: React.FC = () => (
   <section>
-    <SectionLabel meta="4 ACTIVE · 1 STALLED">Active projects · 4</SectionLabel>
+    <SectionLabel meta="5 ACTIVE · 1 STALLED">Active projects · 5</SectionLabel>
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
       {PROJECTS.map((p, i) => (
         <ProjectCard key={i} p={p} />
@@ -353,7 +373,7 @@ const ActiveProjects: React.FC = () => (
 /* ===== Today ===== */
 const Today: React.FC = () => (
   <section>
-    <SectionLabel meta="3 ACTIONS · 2 RITUALS">Today</SectionLabel>
+    <SectionLabel meta="4 ACTIONS · 3 RITUALS">Today</SectionLabel>
     <div className="space-y-2">
       <div className="flex items-center gap-3 px-3 py-2 bg-surface-raised rounded-[4px]">
         <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">MAIN</span>
@@ -368,6 +388,7 @@ const Today: React.FC = () => (
         { c: G1, title: "Research thumbnail styles", crumb: "YouTube · Shoot video #1", time: "30m" },
         { c: G1, title: "Buy ring light", crumb: "YouTube · Set up workspace", del: "→ Maria", time: "45m" },
         { c: G2, title: "Plan tomorrow's meals", crumb: "Lose 5 kg · Nutrition plan", time: "20m" },
+        { c: G3, title: "Read chapter 4 of current book", crumb: "Read 24 books · Daily reading habit", time: "30m" },
       ].map((r, i) => (
         <div
           key={i}
@@ -395,6 +416,11 @@ const Today: React.FC = () => (
           <span className="w-2.5 h-2.5 rounded-full border" style={{ borderColor: G2 }} />
           <span className="text-[13px] text-text-primary">Evening weight log</span>
           <span className="font-mono text-[11px] text-text-tertiary">Daily · 8 done · ×1.05</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="w-2.5 h-2.5 rounded-full border" style={{ borderColor: G3 }} />
+          <span className="text-[13px] text-text-primary">Daily reading 30min</span>
+          <span className="font-mono text-[11px] text-text-tertiary">Daily · 47 done · ×1.25</span>
         </div>
       </div>
 

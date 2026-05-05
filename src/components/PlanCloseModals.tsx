@@ -339,96 +339,55 @@ const PlanForm: React.FC<{
     setShowAdd(false);
   };
 
-  const allSuggestions = [
-    ...suggestions.scheduled,
-    ...(suggestions.bigFrog ? [suggestions.bigFrog] : []),
-    ...suggestions.easyWins,
-  ];
-  const seen = new Set<string>();
-  const uniqSuggestions = allSuggestions.filter((a) => {
-    if (seen.has(a.id)) return false;
-    seen.add(a.id);
-    return true;
-  });
+  const allSuggestionIds = new Set<string>([
+    ...suggestions.scheduled.map((a) => a.id),
+    ...suggestions.heavyLift.map((a) => a.id),
+    ...suggestions.quickMoves.map((a) => a.id),
+  ]);
+  // Selected actions includes anything ticked in the form, even if it's no
+  // longer in suggestions (e.g. just-added action).
+  const selectedActions = actions.filter((a) => state.selectedActionIds.has(a.id));
 
-  const selectedActions = uniqSuggestions.filter((a) => state.selectedActionIds.has(a.id));
-
-  const labelFor = (a: Action): string => {
-    if (suggestions.scheduled.some((x) => x.id === a.id)) return "SCHEDULED";
-    if (suggestions.bigFrog?.id === a.id) return "BIG FROG";
-    if (suggestions.easyWins.some((x) => x.id === a.id)) return "EASY WIN";
-    return "ADDED";
+  const renderRow = (a: Action, opts: { showImpactBadge?: boolean } = {}) => {
+    const checked = state.selectedActionIds.has(a.id);
+    return (
+      <label
+        key={a.id}
+        className="flex items-center gap-2.5 px-2 py-1.5 rounded-[3px] hover:bg-surface-hover cursor-pointer"
+      >
+        <input
+          type="checkbox"
+          checked={checked}
+          onChange={() => toggleAction(a.id)}
+          className="accent-[hsl(var(--accent))]"
+        />
+        {opts.showImpactBadge && (
+          <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary w-[26px] shrink-0 tabular-nums">
+            I{a.impact ?? 0}
+          </span>
+        )}
+        <span className="text-[13px] text-text-primary truncate">{a.title}</span>
+        <span className="text-[12px] text-text-secondary truncate">
+          · {breadcrumb(a)}
+        </span>
+        <div className="flex-1" />
+        <span className="font-mono text-[11px] text-text-tertiary whitespace-nowrap">
+          {a.timeEstimateMinutes ? `${a.timeEstimateMinutes}m` : "—"}
+        </span>
+      </label>
+    );
   };
 
-  return (
-    <div className="space-y-6">
-      {/* DAY TYPE */}
-      <section>
-        <SectionHead>DAY TYPE</SectionHead>
-        <div className="flex flex-wrap gap-1.5">
-          {DAY_TYPE_OPTIONS.map((opt) => (
-            <Pill
-              key={opt.value}
-              active={state.dayType === opt.value}
-              onClick={() => setState((s) => ({ ...s, dayType: opt.value }))}
-            >
-              {opt.label}
-            </Pill>
-          ))}
-        </div>
-      </section>
+  const SubHeading: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+    <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mt-3 mb-1">
+      {children}
+    </div>
+  );
 
-      {/* MORNING ENERGY */}
-      {settings.layers.logEnergy && (
-        <section>
-          <SectionHead>MORNING ENERGY</SectionHead>
-          <EnergyPicker
-            value={state.morningEnergy}
-            onChange={(v) => setState((s) => ({ ...s, morningEnergy: v }))}
-          />
-        </section>
-      )}
-
-      {/* ACTIONS */}
-      <section>
-        <SectionHead sub="Pick what you'll work on. You can add more later.">
-          ACTIONS FOR TODAY
-        </SectionHead>
-        <div className="space-y-1">
-          {uniqSuggestions.length === 0 && (
-            <div className="font-mono text-[11px] text-text-tertiary py-2">
-              No suggestions. Add one below.
-            </div>
-          )}
-          {uniqSuggestions.map((a) => {
-            const checked = state.selectedActionIds.has(a.id);
-            return (
-              <label
-                key={a.id}
-                className="flex items-center gap-2.5 px-2 py-1.5 rounded-[3px] hover:bg-surface-hover cursor-pointer"
-              >
-                <input
-                  type="checkbox"
-                  checked={checked}
-                  onChange={() => toggleAction(a.id)}
-                  className="accent-[hsl(var(--accent))]"
-                />
-                <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary w-[70px] shrink-0">
-                  {labelFor(a)}
-                </span>
-                <span className="text-[13px] text-text-primary truncate">{a.title}</span>
-                <span className="text-[12px] text-text-secondary truncate">
-                  · {breadcrumb(a)}
-                </span>
-                <div className="flex-1" />
-                <span className="font-mono text-[11px] text-text-tertiary whitespace-nowrap">
-                  I{a.impact ?? 0}
-                  {a.timeEstimateMinutes ? ` · ${a.timeEstimateMinutes}m` : ""}
-                </span>
-              </label>
-            );
-          })}
-        </div>
+  const noneAtAll =
+    suggestions.scheduled.length === 0 &&
+    suggestions.heavyLift.length === 0 &&
+    suggestions.quickMoves.length === 0;
         {showAdd ? (
           <div className="mt-2 flex items-center gap-2 p-2 bg-surface-raised rounded-[4px] border border-border-subtle">
             <input

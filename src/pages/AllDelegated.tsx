@@ -595,7 +595,7 @@ const AllDelegated: React.FC = () => {
         </div>
 
         {/* Full-width list */}
-        <div className="flex-1 overflow-y-auto min-h-0 pt-2">
+        <div className="flex-1 overflow-y-auto min-h-0 pt-2 pl-8">
           {filtered.length === 0 ? (
             <div className="p-8 text-center font-mono text-[11px] text-text-tertiary">
               No delegations match these filters.

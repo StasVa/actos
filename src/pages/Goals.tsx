@@ -212,6 +212,22 @@ const GoalCard: React.FC<{ m: GoalMeta; logTimeOn: boolean }> = ({ m, logTimeOn 
                 </span>
               </div>
               <div className="flex items-center gap-2 shrink-0" data-no-nav>
+                {isReadyToClose && (
+                  <span
+                    className="font-mono uppercase tracking-[0.06em] rounded-[2px]"
+                    style={{
+                      fontSize: 9,
+                      padding: "2px 6px",
+                      background: isFullyReady ? color : "hsl(var(--surface-hover))",
+                      color: isFullyReady
+                        ? "hsl(var(--surface-base))"
+                        : "hsl(var(--text-warning))",
+                      letterSpacing: "0.06em",
+                    }}
+                  >
+                    READY TO CLOSE
+                  </span>
+                )}
                 <Tooltip content={<StateDotTooltip state={state} lastActivity={fmtAgo(lastIso)} />}>
                   <span className="w-2 h-2 rounded-full shrink-0" style={{ background: stateColor }} />
                 </Tooltip>

@@ -406,11 +406,39 @@ const EmptyFiltered: React.FC<{ onClear: () => void }> = ({ onClear }) => (
 type DateFilter = "all" | "overdue" | "upcoming" | "nodate";
 type DelegateFilter = "all" | Delegate;
 type GoalFilter = "all" | GoalKey;
+type SortKey = "overdue" | "recent" | "delegate";
+
+const RETURN_OPTIONS: FilterOption<DateFilter>[] = [
+  { value: "all", label: "All" },
+  { value: "overdue", label: "Overdue" },
+  { value: "upcoming", label: "Upcoming" },
+  { value: "nodate", label: "No date" },
+];
+
+const GOAL_OPTIONS: FilterOption<GoalFilter>[] = [
+  { value: "all", label: "All" },
+  { value: "g1", label: "Launch YouTube", dot: GOALS.g1.color },
+  { value: "g2", label: "Lose 5 kg", dot: GOALS.g2.color },
+  { value: "g3", label: "Read 24 books", dot: GOALS.g3.color },
+];
+
+const DELEGATE_OPTIONS: FilterOption<DelegateFilter>[] = [
+  { value: "all", label: "All" },
+  { value: "Maria", label: "Maria" },
+  { value: "AI", label: "AI" },
+];
+
+const SORT_OPTIONS: FilterOption<SortKey>[] = [
+  { value: "overdue", label: "Most overdue first" },
+  { value: "recent", label: "Most recent" },
+  { value: "delegate", label: "By delegate" },
+];
 
 const AllDelegated: React.FC = () => {
   const [dateFilter, setDateFilter] = useState<DateFilter>("all");
   const [delegateFilter, setDelegateFilter] = useState<DelegateFilter>("all");
   const [goalFilter, setGoalFilter] = useState<GoalFilter>("all");
+  const [sortKey, setSortKey] = useState<SortKey>("overdue");
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string>("d-grocery");
 
@@ -432,18 +460,26 @@ const AllDelegated: React.FC = () => {
     });
   }, [allDelegated, dateFilter, delegateFilter, goalFilter, query]);
 
+  const sortFn = useMemo(() => {
+    return (a: Action, b: Action) => {
+      switch (sortKey) {
+        case "recent":
+          return b.changedSort - a.changedSort;
+        case "delegate":
+          return (a.delegate ?? "").localeCompare(b.delegate ?? "");
+        case "overdue":
+        default:
+          return (a.expectedReturnDelta ?? Number.POSITIVE_INFINITY) - (b.expectedReturnDelta ?? Number.POSITIVE_INFINITY);
+      }
+    };
+  }, [sortKey]);
+
   const groups = useMemo(() => {
-    const overdue = filtered
-      .filter((a) => bucketFor(a) === "overdue")
-      .sort((a, b) => (a.expectedReturnDelta ?? 0) - (b.expectedReturnDelta ?? 0));
-    const upcoming = filtered
-      .filter((a) => bucketFor(a) === "upcoming")
-      .sort((a, b) => (a.expectedReturnDelta ?? 0) - (b.expectedReturnDelta ?? 0));
-    const nodate = filtered
-      .filter((a) => bucketFor(a) === "nodate")
-      .sort((a, b) => b.changedSort - a.changedSort);
+    const overdue = filtered.filter((a) => bucketFor(a) === "overdue").sort(sortFn);
+    const upcoming = filtered.filter((a) => bucketFor(a) === "upcoming").sort(sortFn);
+    const nodate = filtered.filter((a) => bucketFor(a) === "nodate").sort(sortFn);
     return { overdue, upcoming, nodate };
-  }, [filtered]);
+  }, [filtered, sortFn]);
 
   const meta = useMemo(() => {
     const total = allDelegated.length;
@@ -459,10 +495,18 @@ const AllDelegated: React.FC = () => {
     if (selected && selected.id !== selectedId) setSelectedId(selected.id);
   }, [selected, selectedId]);
 
+  const anyApplied =
+    dateFilter !== "all" ||
+    delegateFilter !== "all" ||
+    goalFilter !== "all" ||
+    sortKey !== "overdue" ||
+    query.trim() !== "";
+
   const clearFilters = () => {
     setDateFilter("all");
     setDelegateFilter("all");
     setGoalFilter("all");
+    setSortKey("overdue");
     setQuery("");
   };
 

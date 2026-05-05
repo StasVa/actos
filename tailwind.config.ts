@@ -33,6 +33,7 @@ export default {
         "accent-muted": "hsl(var(--accent-muted))",
         "goal-1": "hsl(var(--goal-1))",
         "goal-2": "hsl(var(--goal-2))",
+        "goal-3": "hsl(var(--goal-3))",
         "state-active": "hsl(var(--state-active))",
         "state-stalled": "hsl(var(--state-stalled))",
         "status-done": "hsl(var(--status-done))",

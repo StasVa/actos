@@ -155,30 +155,30 @@ const Sparkline: React.FC<{ data: number[]; color: string; tips: import("@/compo
 
 const MeasureBar: React.FC<{
   label: string;
-  pct: number;
+  percentage: number;
   color: string;
   opacity?: number;
-}> = ({ label, pct, color, opacity = 1 }) => (
-  <div className="flex items-center gap-2">
-    <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary w-[60px] shrink-0">
+}> = ({ label, percentage, color, opacity = 1 }) => (
+  <div className="grid grid-cols-[60px_minmax(0,1fr)_36px] items-center gap-2 min-w-0">
+    <div className="w-[60px] shrink-0 whitespace-nowrap font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary leading-none">
       {label}
-    </span>
-    <div className="flex-1 h-[7px] bg-surface-hover rounded-[2px] overflow-hidden">
+    </div>
+    <div className="min-w-0 h-[7px] w-full overflow-hidden rounded-[2px] bg-surface-hover">
       <div
-        className="h-full rounded-[2px]"
-        style={{ width: `${Math.max(0, Math.min(100, pct))}%`, background: color, opacity }}
+        className="block h-full rounded-[2px]"
+        style={{ width: `${Math.max(0, Math.min(100, percentage))}%`, background: color, opacity }}
       />
     </div>
-    <span className="font-mono text-[11px] tabular-nums text-text-secondary w-[36px] text-right shrink-0">
-      {pct}%
-    </span>
+    <div className="w-[36px] shrink-0 whitespace-nowrap text-right font-mono text-[11px] tabular-nums text-text-secondary leading-none">
+      {percentage}%
+    </div>
   </div>
 );
 
 const DualBars: React.FC<{ outcome: number; effort: number; color: string }> = ({ outcome, effort, color }) => (
-  <div className="space-y-2">
-    <MeasureBar label="OUTCOME" pct={outcome} color={color} />
-    <MeasureBar label="EFFORT" pct={effort} color={color} opacity={0.6} />
+  <div className="flex min-w-0 flex-col gap-2">
+    <MeasureBar label="OUTCOME" percentage={outcome} color={color} />
+    <MeasureBar label="EFFORT" percentage={effort} color={color} opacity={0.6} />
   </div>
 );
 

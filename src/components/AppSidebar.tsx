@@ -1,6 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { LifetimeCounters } from "@/components/LifetimeCounters";
+import { emitAppEvent } from "@/lib/appEvents";
 
 type NavItem = { label: string; href: string };
 

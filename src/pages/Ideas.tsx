@@ -103,6 +103,7 @@ const CaptureInput: React.FC<{ subHint?: string; defaultGoalTitle?: string }> = 
           +
         </span>
         <input
+          id="ideas-capture-input"
           value={value}
           onChange={(e) => setValue(e.target.value)}
           onFocus={() => setFocused(true)}

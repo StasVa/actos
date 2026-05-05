@@ -257,127 +257,130 @@ const RitualPanel: React.FC<Props> = ({ open, onClose, mode = "edit" }) => {
               />
             </div>
 
-            <Divider />
+            {!isNew && (
+              <>
+                <Divider />
 
-            {/* Multiplier */}
-            <div className="font-mono text-[11px] uppercase tracking-[0.08em] text-text-secondary">
-              MULTIPLIER
-            </div>
-            <div className="h-3" />
-            <div className="font-mono text-[32px] font-medium text-text-primary tabular-nums leading-none">
-              ×1.10
-            </div>
-            <div className="h-2" />
-            <div className="font-mono">
-              <span className="text-[13px] text-text-primary">Effective impact: 5.5</span>
-              <span className="text-[11px] text-text-tertiary"> (base 5 × 1.10)</span>
-            </div>
-
-            <div className="h-4" />
-
-            <TinyLabel>PROGRESS TO ×1.25</TinyLabel>
-            <div className="w-full h-1.5 bg-surface-hover rounded-[2px] overflow-hidden">
-              <div
-                className="h-full rounded-[2px]"
-                style={{ width: "40%", background: G1 }}
-              />
-            </div>
-            <div className="mt-2 font-mono text-[11px] text-text-tertiary">
-              12 of 30 completions · 18 to go
-            </div>
-
-            <Divider />
-
-            {/* Recent consistency */}
-            <div className="flex items-center justify-between">
-              <div className="font-mono text-[11px] uppercase tracking-[0.08em] text-text-secondary">
-                RECENT CONSISTENCY
-              </div>
-              <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
-                10 OF 12 LAST WEEKS
-              </div>
-            </div>
-            <div className="h-3" />
-            <div className="flex" style={{ gap: 4 }}>
-              {WEEKS.map((w, i) => (
-                <Tooltip
-                  key={i}
-                  content={
-                    <div>
-                      <div
-                        className="text-[12px] font-medium text-text-primary"
-                        style={{ fontFamily: "Inter, sans-serif" }}
-                      >
-                        {w.label}
-                      </div>
-                      <div className="font-mono text-[11px] text-text-tertiary mt-1">
-                        {w.done ? "Completed" : "Missed"}
-                      </div>
-                    </div>
-                  }
-                >
-                  <div
-                    style={{
-                      width: 28,
-                      height: 24,
-                      borderRadius: 4,
-                      background: w.done ? G1 : "hsl(var(--surface-hover))",
-                    }}
-                  />
-                </Tooltip>
-              ))}
-            </div>
-            <div className="mt-2 font-mono text-[10px] text-text-tertiary">
-              Each block represents one week. Streak is not tracked — only total completions.
-            </div>
-
-            <Divider />
-
-            {/* History */}
-            <div className="flex items-center justify-between">
-              <div className="font-mono text-[11px] uppercase tracking-[0.08em] text-text-secondary">
-                HISTORY
-              </div>
-              <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
-                12 ALL-TIME
-              </div>
-            </div>
-            <div className="h-3" />
-            <div>
-              {HISTORY.map((h, i) => (
-                <div
-                  key={i}
-                  className={`h-7 py-1 flex items-center justify-between ${
-                    i > 0 ? "border-t border-border-subtle" : ""
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <span
-                      className="text-[12px] leading-none"
-                      style={{ color: "hsl(var(--status-done))" }}
-                    >
-                      ✓
-                    </span>
-                    <span
-                      className="text-[12px] text-text-primary"
-                      style={{ fontFamily: "Inter, sans-serif" }}
-                    >
-                      {h.date}
-                    </span>
-                  </div>
-                  <div className="font-mono text-[10px] text-text-tertiary">{h.rel}</div>
+                {/* Multiplier */}
+                <div className="font-mono text-[11px] uppercase tracking-[0.08em] text-text-secondary">
+                  MULTIPLIER
                 </div>
-              ))}
-            </div>
-            <div className="h-3" />
-            <a
-              href="#"
-              className="inline-block text-[12px] text-[hsl(var(--accent))] hover:text-text-primary hover:underline transition-colors"
-              style={{ fontFamily: "Inter, sans-serif" }}
-            >
-              View all 12 completions
-            </a>
+                <div className="h-3" />
+                <div className="font-mono text-[32px] font-medium text-text-primary tabular-nums leading-none">
+                  ×1.10
+                </div>
+                <div className="h-2" />
+                <div className="font-mono">
+                  <span className="text-[13px] text-text-primary">Effective impact: 5.5</span>
+                  <span className="text-[11px] text-text-tertiary"> (base 5 × 1.10)</span>
+                </div>
 
+                <div className="h-4" />
+
+                <TinyLabel>PROGRESS TO ×1.25</TinyLabel>
+                <div className="w-full h-1.5 bg-surface-hover rounded-[2px] overflow-hidden">
+                  <div
+                    className="h-full rounded-[2px]"
+                    style={{ width: "40%", background: G1 }}
+                  />
+                </div>
+                <div className="mt-2 font-mono text-[11px] text-text-tertiary">
+                  12 of 30 completions · 18 to go
+                </div>
+
+                <Divider />
+
+                {/* Recent consistency */}
+                <div className="flex items-center justify-between">
+                  <div className="font-mono text-[11px] uppercase tracking-[0.08em] text-text-secondary">
+                    RECENT CONSISTENCY
+                  </div>
+                  <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
+                    10 OF 12 LAST WEEKS
+                  </div>
+                </div>
+                <div className="h-3" />
+                <div className="flex" style={{ gap: 4 }}>
+                  {WEEKS.map((w, i) => (
+                    <Tooltip
+                      key={i}
+                      content={
+                        <div>
+                          <div
+                            className="text-[12px] font-medium text-text-primary"
+                            style={{ fontFamily: "Inter, sans-serif" }}
+                          >
+                            {w.label}
+                          </div>
+                          <div className="font-mono text-[11px] text-text-tertiary mt-1">
+                            {w.done ? "Completed" : "Missed"}
+                          </div>
+                        </div>
+                      }
+                    >
+                      <div
+                        style={{
+                          width: 28,
+                          height: 24,
+                          borderRadius: 4,
+                          background: w.done ? G1 : "hsl(var(--surface-hover))",
+                        }}
+                      />
+                    </Tooltip>
+                  ))}
+                </div>
+                <div className="mt-2 font-mono text-[10px] text-text-tertiary">
+                  Each block represents one week. Streak is not tracked — only total completions.
+                </div>
+
+                <Divider />
+
+                {/* History */}
+                <div className="flex items-center justify-between">
+                  <div className="font-mono text-[11px] uppercase tracking-[0.08em] text-text-secondary">
+                    HISTORY
+                  </div>
+                  <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
+                    12 ALL-TIME
+                  </div>
+                </div>
+                <div className="h-3" />
+                <div>
+                  {HISTORY.map((h, i) => (
+                    <div
+                      key={i}
+                      className={`h-7 py-1 flex items-center justify-between ${
+                        i > 0 ? "border-t border-border-subtle" : ""
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span
+                          className="text-[12px] leading-none"
+                          style={{ color: "hsl(var(--status-done))" }}
+                        >
+                          ✓
+                        </span>
+                        <span
+                          className="text-[12px] text-text-primary"
+                          style={{ fontFamily: "Inter, sans-serif" }}
+                        >
+                          {h.date}
+                        </span>
+                      </div>
+                      <div className="font-mono text-[10px] text-text-tertiary">{h.rel}</div>
+                    </div>
+                  ))}
+                </div>
+                <div className="h-3" />
+                <a
+                  href="#"
+                  className="inline-block text-[12px] text-[hsl(var(--accent))] hover:text-text-primary hover:underline transition-colors"
+                  style={{ fontFamily: "Inter, sans-serif" }}
+                >
+                  View all 12 completions
+                </a>
+              </>
+            )}
             <div className="h-6" />
           </div>
 

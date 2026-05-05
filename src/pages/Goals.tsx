@@ -189,7 +189,16 @@ const GoalCard: React.FC<{ m: GoalMeta; logTimeOn: boolean }> = ({ m, logTimeOn 
       >
         <span
           className="absolute left-0 top-0 bottom-0"
-          style={{ background: color, width: 3 }}
+          style={{
+            background: color,
+            width: isReadyToClose ? 4 : 3,
+            boxShadow: isFullyReady
+              ? `0 0 12px 0 ${color}`
+              : isReadyToClose
+              ? `0 0 6px -1px ${color}`
+              : undefined,
+            filter: isReadyToClose ? "saturate(1.2) brightness(1.1)" : undefined,
+          }}
         />
 
         <div className="pl-6 pr-6 py-6 flex flex-col gap-4">

@@ -534,7 +534,6 @@ const ActiveProjects: React.FC = () => {
   });
 
   const stalledCount = projectsWithMeta.filter((p) => p.state === "stalled").length;
-  const openPanel = useStore.getState().openPanel;
 
   return (
     <section>

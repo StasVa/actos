@@ -131,7 +131,7 @@ const IdeaRow: React.FC<{
 }> = ({ idea, goalColor, selected, onSelect }) => {
   const refCount = idea.references?.length ?? 0;
   const imgCount = idea.imageAttachments?.length ?? 0;
-  const { label } = relativeCaptured(idea.capturedAt);
+  const { label } = relativeAgo(idea.capturedAt);
   return (
     <div
       onClick={onSelect}
@@ -354,7 +354,7 @@ const IdeaDetail: React.FC<{ idea: Idea }> = ({ idea }) => {
   }, [idea.id]);
 
   const goalColor = goal ? `hsl(var(--${goal.color}))` : "hsl(var(--text-tertiary))";
-  const captured = relativeCaptured(idea.capturedAt);
+  const captured = relativeAgo(idea.capturedAt);
 
   const commitTitle = () => {
     const t = title.trim();

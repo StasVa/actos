@@ -1,5 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { Tooltip, SparkTooltipContent, StateDotTooltip } from "@/components/Tooltip";
+import { buildYouTubeTooltips, buildFitnessTooltips } from "@/lib/sparkTooltips";
 
 /* ===== Tokens ===== */
 const G1 = "hsl(var(--goal-1))";

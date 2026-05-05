@@ -1,11 +1,12 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Tooltip, SparkTooltipContent, StateDotTooltip } from "@/components/Tooltip";
 import { buildYouTubeTooltips, buildFitnessTooltips } from "@/lib/sparkTooltips";
 
 /* ===== Tokens ===== */
 const G1 = "hsl(var(--goal-1))";
 const G2 = "hsl(var(--goal-2))";
+const G3 = "hsl(var(--goal-3))";
 
 /* ===== Primitives ===== */
 const SectionLabel: React.FC<{ children: React.ReactNode; meta?: React.ReactNode }> = ({ children, meta }) => (
@@ -43,12 +44,16 @@ const NAV: { label: string; href: string }[] = [
   { label: "All delegated", href: "#" },
 ];
 
-const Sidebar: React.FC = () => (
+const Sidebar: React.FC = () => {
+  const { pathname } = useLocation();
+  return (
   <aside className="fixed left-0 top-0 bottom-0 w-[220px] bg-surface-raised border-r border-border-subtle p-4 flex flex-col">
     <div className="px-1 py-1 text-[17px] font-semibold text-text-primary tracking-tight">ActOS</div>
     <nav className="mt-8 flex flex-col gap-1">
       {NAV.map((item) => {
-        const active = item.href === "/";
+        const active =
+          (item.href === "/" && pathname === "/") ||
+          (item.href !== "/" && item.href !== "#" && pathname.startsWith(item.href));
         return (
           <Link
             key={item.label}
@@ -79,7 +84,8 @@ const Sidebar: React.FC = () => (
       <span className="font-mono text-[11px] text-text-secondary truncate">ak@email</span>
     </div>
   </aside>
-);
+  );
+};
 
 /* ===== Hero: Active Goals ===== */
 /* 30 days, weekday-heavy, building toward today (right edge) */

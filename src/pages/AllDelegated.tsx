@@ -1,7 +1,8 @@
 import React, { useMemo, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import {
+import { AppSidebar } from "@/components/AppSidebar";
   Action,
   Delegate,
   GoalKey,
@@ -16,19 +17,7 @@ import { SortDropdown } from "@/components/SortDropdown";
 import { useStore } from "@/store/useStore";
 import { toLegacyActions } from "@/lib/actionsAdapter";
 
-/* ===== Sidebar ===== */
-const NAV: { label: string; href: string }[] = [
-  { label: "Home", href: "/" },
-  { label: "Weekly", href: "#" },
-  { label: "Ideas", href: "/ideas" },
-  { label: "Rituals", href: "/rituals" },
-  { label: "All actions", href: "/all-actions" },
-  { label: "All projects", href: "/all-projects" },
-  { label: "All delegated", href: "/all-delegated" },
-];
 
-const Sidebar: React.FC = () => {
-  const { pathname } = useLocation();
   return (
     <aside className="fixed left-0 top-0 bottom-0 w-[220px] bg-surface-raised border-r border-border-subtle p-4 flex flex-col">
       <Link to="/" className="px-1 py-1 text-[17px] font-semibold text-text-primary tracking-tight">
@@ -533,7 +522,7 @@ const AllDelegated: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-surface-base text-text-primary">
-      <Sidebar />
+      <AppSidebar />
       <main className="ml-[220px] flex flex-col h-screen">
         {/* Page header */}
         <div className="px-10 pt-6 pb-3 shrink-0">

@@ -6,7 +6,14 @@ import { buildYouTubeTooltips } from "@/lib/sparkTooltips";
 const G1 = "hsl(var(--goal-1))";
 
 /* ===== Sidebar (inactive variant for sub-routes) ===== */
-const NAV = ["Home", "Weekly", "All actions", "All projects", "All delegated"];
+const NAV: { label: string; href: string }[] = [
+  { label: "Home", href: "/" },
+  { label: "Weekly", href: "#" },
+  { label: "Ideas", href: "/ideas" },
+  { label: "All actions", href: "#" },
+  { label: "All projects", href: "#" },
+  { label: "All delegated", href: "#" },
+];
 
 const Sidebar: React.FC = () => (
   <aside className="fixed left-0 top-0 bottom-0 w-[220px] bg-surface-raised border-r border-border-subtle p-4 flex flex-col">
@@ -16,11 +23,11 @@ const Sidebar: React.FC = () => (
     <nav className="mt-8 flex flex-col gap-1">
       {NAV.map((item) => (
         <Link
-          key={item}
-          to={item === "Home" ? "/" : "#"}
+          key={item.label}
+          to={item.href}
           className="px-2.5 py-1.5 rounded-[4px] text-[13px] text-text-secondary font-normal hover:text-text-primary transition-colors"
         >
-          {item}
+          {item.label}
         </Link>
       ))}
     </nav>
@@ -372,15 +379,15 @@ const RecentActivity: React.FC = () => (
   </section>
 );
 
-/* ===== Ideas (collapsible) ===== */
-const IDEAS = [
-  "Series on creator tooling comparisons",
-  "Behind-the-scenes setup teardown video",
-  "Collab with workflow channels",
+/* ===== Ideas (collapsible) — mirrors first 3 YouTube ideas from /ideas ===== */
+const IDEAS: { title: string; captured: string }[] = [
+  { title: "Test vlog-style intro for video #2", captured: "captured 2d ago" },
+  { title: "Research lighting kits under $200", captured: "captured 3d ago" },
+  { title: "Music licensing services comparison", captured: "captured 4d ago" },
 ];
 
 const IdeasSection: React.FC = () => {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
   return (
     <section>
       <button
@@ -391,19 +398,30 @@ const IdeasSection: React.FC = () => {
         Ideas · 3 captured
       </button>
       {open && (
-        <div className="mt-3 space-y-1">
-          {IDEAS.map((idea, i) => (
-            <div
-              key={i}
-              className="flex items-center gap-3 h-7 px-2 -mx-2 rounded-[2px] hover:bg-surface-hover transition-colors text-[13px] text-text-primary"
-            >
-              <span className="font-mono text-[11px] text-text-tertiary w-4">{i + 1}</span>
-              <span>{idea}</span>
-            </div>
-          ))}
-          <a href="#" className="inline-block mt-2 text-[12px] text-text-secondary hover:text-text-primary hover:underline transition-colors">
-            + Capture idea
-          </a>
+        <div className="mt-3">
+          <div className="flex items-center gap-2 bg-surface-raised border border-border-subtle rounded-[4px] px-3 py-2.5">
+            <input
+              placeholder="Capture an idea..."
+              className="flex-1 bg-transparent outline-none text-[13px] text-text-primary placeholder:text-text-tertiary"
+            />
+          </div>
+          <div className="mt-3">
+            {IDEAS.map((idea, i) => (
+              <div
+                key={i}
+                className="flex items-center justify-between gap-3 h-8 px-2 -mx-2 rounded-[2px] hover:bg-surface-hover transition-colors"
+              >
+                <span className="text-[13px] text-text-primary truncate">{idea.title}</span>
+                <span className="font-mono text-[11px] text-text-tertiary shrink-0">{idea.captured}</span>
+              </div>
+            ))}
+          </div>
+          <Link
+            to="/ideas?goal=g1"
+            className="inline-block mt-3 text-[12px] text-[hsl(var(--accent))] hover:text-text-primary transition-colors"
+          >
+            View all ideas in this goal →
+          </Link>
         </div>
       )}
     </section>

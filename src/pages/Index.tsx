@@ -33,26 +33,33 @@ const Strip: React.FC<{ color: string }> = ({ color }) => (
 );
 
 /* ===== Sidebar ===== */
-const NAV = ["Home", "Weekly", "All actions", "All projects", "All delegated"];
+const NAV: { label: string; href: string }[] = [
+  { label: "Home", href: "/" },
+  { label: "Weekly", href: "#" },
+  { label: "Ideas", href: "/ideas" },
+  { label: "All actions", href: "#" },
+  { label: "All projects", href: "#" },
+  { label: "All delegated", href: "#" },
+];
 
 const Sidebar: React.FC = () => (
   <aside className="fixed left-0 top-0 bottom-0 w-[220px] bg-surface-raised border-r border-border-subtle p-4 flex flex-col">
     <div className="px-1 py-1 text-[17px] font-semibold text-text-primary tracking-tight">ActOS</div>
     <nav className="mt-8 flex flex-col gap-1">
       {NAV.map((item) => {
-        const active = item === "Home";
+        const active = item.href === "/";
         return (
-          <a
-            key={item}
-            href="#"
+          <Link
+            key={item.label}
+            to={item.href}
             className={`px-2.5 py-1.5 rounded-[4px] text-[13px] transition-colors ${
               active
                 ? "bg-surface-hover text-text-primary font-medium"
                 : "text-text-secondary font-normal hover:text-text-primary"
             }`}
           >
-            {item}
-          </a>
+            {item.label}
+          </Link>
         );
       })}
     </nav>

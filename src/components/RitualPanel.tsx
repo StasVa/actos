@@ -389,33 +389,61 @@ const RitualPanel: React.FC<Props> = ({ open, onClose, mode = "edit" }) => {
             className="sticky bottom-0 bg-surface-elevated border-t border-border-subtle flex items-center justify-between"
             style={{ padding: "16px 24px" }}
           >
-            <button
-              className="h-9 px-4 rounded-[4px] border text-[13px] font-medium text-text-primary bg-transparent transition-colors cursor-pointer"
-              style={{
-                borderColor: "hsl(var(--accent))",
-                fontFamily: "Inter, sans-serif",
-              }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.background = "hsl(var(--accent-muted))")
-              }
-              onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
-            >
-              Mark today done
-            </button>
-            <div className="flex items-center" style={{ gap: 12 }}>
-              <button
-                className="text-[12px] text-text-tertiary hover:text-text-secondary transition-colors cursor-pointer bg-transparent"
-                style={{ fontFamily: "Inter, sans-serif" }}
-              >
-                Archive ritual
-              </button>
-              <button
-                aria-label="More"
-                className="w-6 h-6 rounded-[4px] text-text-tertiary hover:bg-surface-hover hover:text-text-primary transition-colors text-[16px] leading-none cursor-pointer flex items-center justify-center"
-              >
-                ···
-              </button>
-            </div>
+            {isNew ? (
+              <>
+                <button
+                  onClick={onClose}
+                  className="h-9 px-4 rounded-[4px] border text-[13px] font-medium text-text-primary bg-transparent transition-colors cursor-pointer"
+                  style={{
+                    borderColor: "hsl(var(--accent))",
+                    fontFamily: "Inter, sans-serif",
+                  }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.background = "hsl(var(--accent-muted))")
+                  }
+                  onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                >
+                  Save ritual
+                </button>
+                <button
+                  onClick={onClose}
+                  className="text-[12px] text-text-tertiary hover:text-text-secondary transition-colors cursor-pointer bg-transparent"
+                  style={{ fontFamily: "Inter, sans-serif" }}
+                >
+                  Cancel
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  className="h-9 px-4 rounded-[4px] border text-[13px] font-medium text-text-primary bg-transparent transition-colors cursor-pointer"
+                  style={{
+                    borderColor: "hsl(var(--accent))",
+                    fontFamily: "Inter, sans-serif",
+                  }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.background = "hsl(var(--accent-muted))")
+                  }
+                  onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                >
+                  Mark today done
+                </button>
+                <div className="flex items-center" style={{ gap: 12 }}>
+                  <button
+                    className="text-[12px] text-text-tertiary hover:text-text-secondary transition-colors cursor-pointer bg-transparent"
+                    style={{ fontFamily: "Inter, sans-serif" }}
+                  >
+                    Archive ritual
+                  </button>
+                  <button
+                    aria-label="More"
+                    className="w-6 h-6 rounded-[4px] text-text-tertiary hover:bg-surface-hover hover:text-text-primary transition-colors text-[16px] leading-none cursor-pointer flex items-center justify-center"
+                  >
+                    ···
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

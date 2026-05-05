@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { LifetimeCounters } from "@/components/LifetimeCounters";
 import { Link, useLocation } from "react-router-dom";
 import { Tooltip } from "@/components/Tooltip";
 import RitualPanel from "@/components/RitualPanel";

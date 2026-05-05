@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { toast } from "sonner";
 import {
-  ACTIONS,
   Action,
   Delegate,
   GoalKey,
@@ -13,6 +13,8 @@ import { LifetimeCounters } from "@/components/LifetimeCounters";
 import { formatTime } from "@/lib/format";
 import { FilterDropdown, FilterOption } from "@/components/FilterDropdown";
 import { SortDropdown } from "@/components/SortDropdown";
+import { useStore } from "@/store/useStore";
+import { toLegacyActions } from "@/lib/actionsAdapter";
 
 /* ===== Sidebar ===== */
 const NAV: { label: string; href: string }[] = [
@@ -443,9 +445,20 @@ const AllDelegated: React.FC = () => {
   const [goalFilter, setGoalFilter] = useState<GoalFilter>("all");
   const [sortKey, setSortKey] = useState<SortKey>("overdue");
   const [query, setQuery] = useState("");
-  const [selectedId, setSelectedId] = useState<string>("d-grocery");
 
-  const allDelegated = useMemo(() => ACTIONS.filter((a) => a.status === "delegated"), []);
+  // Live store data → legacy renderer shape.
+  const storeActions = useStore((s) => s.actions);
+  const storeProjects = useStore((s) => s.projects);
+  const openPanel = useStore((s) => s.openPanel);
+  const ACTIONS = useMemo(
+    () => toLegacyActions(storeActions, storeProjects),
+    [storeActions, storeProjects],
+  );
+
+  const allDelegated = useMemo(
+    () => ACTIONS.filter((a) => a.status === "delegated"),
+    [ACTIONS],
+  );
 
   const filtered = useMemo(() => {
     return allDelegated.filter((a) => {
@@ -507,7 +520,7 @@ const AllDelegated: React.FC = () => {
     setQuery("");
   };
 
-  const noop = () => {};
+  const openAction = (id: string) => openPanel({ kind: "action", mode: "edit", id });
 
   return (
     <div className="min-h-screen bg-surface-base text-text-primary">
@@ -606,7 +619,7 @@ const AllDelegated: React.FC = () => {
                 <>
                   <GroupHeader label="OVERDUE" count={groups.overdue.length} warning />
                   {groups.overdue.map((a) => (
-                    <DelegationRow key={a.id} action={a} selected={false} onSelect={noop} />
+                    <DelegationRow key={a.id} action={a} selected={false} onSelect={() => openAction(a.id)} />
                   ))}
                 </>
               )}
@@ -614,7 +627,7 @@ const AllDelegated: React.FC = () => {
                 <>
                   <GroupHeader label="UPCOMING" count={groups.upcoming.length} />
                   {groups.upcoming.map((a) => (
-                    <DelegationRow key={a.id} action={a} selected={false} onSelect={noop} />
+                    <DelegationRow key={a.id} action={a} selected={false} onSelect={() => openAction(a.id)} />
                   ))}
                 </>
               )}
@@ -622,7 +635,7 @@ const AllDelegated: React.FC = () => {
                 <>
                   <GroupHeader label="NO RETURN DATE" count={groups.nodate.length} />
                   {groups.nodate.map((a) => (
-                    <DelegationRow key={a.id} action={a} selected={false} onSelect={noop} />
+                    <DelegationRow key={a.id} action={a} selected={false} onSelect={() => openAction(a.id)} />
                   ))}
                 </>
               )}

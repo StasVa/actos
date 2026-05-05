@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { toast } from "sonner";
 import {
-  ACTIONS,
   Action,
   ActionStatus,
   GoalKey,
@@ -14,6 +14,9 @@ import { LifetimeCounters } from "@/components/LifetimeCounters";
 import { formatTime } from "@/lib/format";
 import { FilterDropdown, FilterOption } from "@/components/FilterDropdown";
 import { SortDropdown } from "@/components/SortDropdown";
+import { useStore } from "@/store/useStore";
+import { toLegacyActions } from "@/lib/actionsAdapter";
+import { GOAL_IDS, PROJECT_IDS } from "@/store/mockData";
 
 /* ===== Sidebar ===== */
 const NAV: { label: string; href: string }[] = [
@@ -129,6 +132,11 @@ const InlineAddAction: React.FC = () => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const popRef = React.useRef<HTMLDivElement>(null);
 
+  const storeProjects = useStore((s) => s.projects);
+  const storeActions = useStore((s) => s.actions);
+  const createAction = useStore((s) => s.createAction);
+  const openPanel = useStore((s) => s.openPanel);
+
   React.useEffect(() => {
     if (!popoverOpen) return;
     const onDoc = (e: MouseEvent) => {
@@ -145,18 +153,25 @@ const InlineAddAction: React.FC = () => {
     };
   }, [popoverOpen]);
 
-  // Build active projects grouped by goal from ACTIONS data
+  // Build active projects grouped by goal from the live store.
   const projectsByGoal = React.useMemo(() => {
-    const map = new Map<GoalKey, Set<string>>();
-    ACTIONS.forEach((a) => {
-      if (!isActive(a.status)) return;
-      if (!map.has(a.goal)) map.set(a.goal, new Set());
-      map.get(a.goal)!.add(a.project);
-    });
-    return (Object.keys(GOALS) as GoalKey[])
-      .filter((g) => map.has(g))
-      .map((g) => ({ goal: g, projects: Array.from(map.get(g)!) }));
-  }, []);
+    const titleByGoalKey = new Map<GoalKey, Set<string>>();
+    const titleToId: Record<string, string> = {};
+    const titleToGoalId: Record<string, string> = {};
+    for (const p of storeProjects) {
+      if (p.status !== "active") continue;
+      const goalKey = (Object.entries(GOAL_IDS).find(([, id]) => id === p.goalId)?.[0] ??
+        "g1") as GoalKey;
+      if (!titleByGoalKey.has(goalKey)) titleByGoalKey.set(goalKey, new Set());
+      titleByGoalKey.get(goalKey)!.add(p.title);
+      titleToId[p.title] = p.id;
+      titleToGoalId[p.title] = p.goalId;
+    }
+    const groups = (Object.keys(GOALS) as GoalKey[])
+      .filter((g) => titleByGoalKey.has(g))
+      .map((g) => ({ goal: g, projects: Array.from(titleByGoalKey.get(g)!) }));
+    return { groups, titleToId, titleToGoalId };
+  }, [storeProjects]);
 
   const active = focused || hovered;
 
@@ -187,7 +202,18 @@ const InlineAddAction: React.FC = () => {
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
             onKeyDown={(e) => {
-              if (e.key === "Enter") setValue("");
+              if (e.key === "Enter" && value.trim()) {
+                const projectId = projectsByGoal.titleToId[project];
+                const goalId = projectsByGoal.titleToGoalId[project];
+                const newId = createAction({
+                  title: value.trim(),
+                  projectId: projectId ?? null,
+                  goalId,
+                });
+                toast(`Action added to ${project}`);
+                setValue("");
+                openPanel({ kind: "action", mode: "edit", id: newId });
+              }
             }}
             placeholder="Add an action..."
             className="flex-1 bg-transparent outline-none text-[13px] text-text-primary placeholder:text-text-tertiary"
@@ -207,7 +233,7 @@ const InlineAddAction: React.FC = () => {
               <div
                 className="absolute right-0 top-[calc(100%+4px)] z-20 min-w-[220px] bg-surface-elevated border border-border-default rounded-[4px] py-1.5 shadow-lg"
               >
-                {projectsByGoal.map(({ goal, projects }) => (
+                {projectsByGoal.groups.map(({ goal, projects }) => (
                   <div key={goal}>
                     <div className="flex items-center gap-1.5 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
                       <span
@@ -548,8 +574,16 @@ const AllActions: React.FC = () => {
   const [dateFilter, setDateFilter] = useState<DateFilter>("all");
   const [sortKey, setSortKey] = useState<SortKey>("recent");
   const [query, setQuery] = useState("");
-  const [selectedId, setSelectedId] = useState<string>("a-research-thumb");
   const [terminalCollapsed, setTerminalCollapsed] = useState(false);
+
+  // Live store data → legacy renderer shape (rendering JSX is unchanged).
+  const storeActions = useStore((s) => s.actions);
+  const storeProjects = useStore((s) => s.projects);
+  const openPanel = useStore((s) => s.openPanel);
+  const ACTIONS = useMemo(
+    () => toLegacyActions(storeActions, storeProjects),
+    [storeActions, storeProjects],
+  );
 
   const filtered = useMemo(() => {
     return ACTIONS.filter((a) => {
@@ -562,7 +596,7 @@ const AllActions: React.FC = () => {
       if (query.trim() && !a.title.toLowerCase().includes(query.trim().toLowerCase())) return false;
       return true;
     });
-  }, [statusFilter, goalFilter, dateFilter, query]);
+  }, [ACTIONS, statusFilter, goalFilter, dateFilter, query]);
 
   const meta = useMemo(() => {
     const total = ACTIONS.length;
@@ -570,7 +604,7 @@ const AllActions: React.FC = () => {
     const done = ACTIONS.filter((a) => a.status === "done").length;
     const delegated = ACTIONS.filter((a) => a.status === "delegated").length;
     return `${total} ACTIONS · ${active} ACTIVE · ${done} DONE · ${delegated} DELEGATED`;
-  }, []);
+  }, [ACTIONS]);
 
   const sortFn = useMemo(() => {
     return (a: Action, b: Action) => {
@@ -615,7 +649,7 @@ const AllActions: React.FC = () => {
     setQuery("");
   };
 
-  const noop = () => {};
+  const openAction = (id: string) => openPanel({ kind: "action", mode: "edit", id });
 
   return (
     <div className="min-h-screen bg-surface-base text-text-primary">
@@ -699,13 +733,13 @@ const AllActions: React.FC = () => {
             </div>
           ) : "single" in grouped ? (
             grouped.single!.map((a) => (
-              <ActionRow key={a.id} action={a} selected={false} onSelect={noop} />
+              <ActionRow key={a.id} action={a} selected={false} onSelect={() => openAction(a.id)} />
             ))
           ) : (
             <>
               {grouped.active!.length > 0 &&
                 grouped.active!.map((a) => (
-                  <ActionRow key={a.id} action={a} selected={false} onSelect={noop} />
+                  <ActionRow key={a.id} action={a} selected={false} onSelect={() => openAction(a.id)} />
                 ))}
               {grouped.terminal!.length > 0 && (
                 <>
@@ -718,7 +752,7 @@ const AllActions: React.FC = () => {
                   />
                   {!terminalCollapsed &&
                     grouped.terminal!.map((a) => (
-                      <ActionRow key={a.id} action={a} selected={false} onSelect={noop} />
+                      <ActionRow key={a.id} action={a} selected={false} onSelect={() => openAction(a.id)} />
                     ))}
                 </>
               )}

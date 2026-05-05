@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { LifetimeCounters } from "@/components/LifetimeCounters";
 import { Link } from "react-router-dom";
 import { Tooltip, SparkTooltipContent, StateDotTooltip } from "@/components/Tooltip";
 import { buildYouTubeTooltips } from "@/lib/sparkTooltips";

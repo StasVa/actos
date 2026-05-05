@@ -1,4 +1,5 @@
 import React from "react";
+import { LifetimeCounters } from "@/components/LifetimeCounters";
 import { Link } from "react-router-dom";
 import { Tooltip, StateDotTooltip } from "@/components/Tooltip";
 

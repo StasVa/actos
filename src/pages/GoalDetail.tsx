@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Tooltip, SparkTooltipContent, StateDotTooltip } from "@/components/Tooltip";
 import { buildYouTubeTooltips } from "@/lib/sparkTooltips";
+import RitualPanel from "@/components/RitualPanel";
 
 const G1 = "hsl(var(--goal-1))";
 
@@ -307,10 +308,21 @@ const ActiveProjectsSection: React.FC = () => {
 /* ===== Rituals ===== */
 const RITUAL_STRIP = [1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1];
 
-const RitualsSection: React.FC = () => (
+const RitualsSection: React.FC<{ onOpenRitual: () => void }> = ({ onOpenRitual }) => (
   <section>
     <SectionHeader>Rituals · 1</SectionHeader>
-    <div className="bg-surface-raised border border-border-subtle rounded-[6px] p-4 flex items-center gap-6">
+    <div
+      onClick={onOpenRitual}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onOpenRitual();
+        }
+      }}
+      className="bg-surface-raised border border-border-subtle rounded-[6px] p-4 flex items-center gap-6 cursor-pointer hover:bg-surface-hover transition-colors"
+    >
       <span className="w-3 h-3 rounded-full shrink-0" style={{ background: G1 }} />
       <div>
         <div className="text-[14px] font-medium text-text-primary">Weekly project audit</div>
@@ -430,6 +442,7 @@ const IdeasSection: React.FC = () => {
 
 /* ===== Page ===== */
 const GoalDetail: React.FC = () => {
+  const [ritualOpen, setRitualOpen] = useState(false);
   return (
     <div className="min-h-screen bg-surface-base text-text-primary">
       <Sidebar />
@@ -487,7 +500,7 @@ const GoalDetail: React.FC = () => {
           <ActiveProjectsSection />
 
           <div className="h-14" />
-          <RitualsSection />
+          <RitualsSection onOpenRitual={() => setRitualOpen(true)} />
 
           <div className="h-14" />
           <RecentActivity />
@@ -497,6 +510,7 @@ const GoalDetail: React.FC = () => {
           <IdeasSection />
         </div>
       </main>
+      <RitualPanel open={ritualOpen} onClose={() => setRitualOpen(false)} />
     </div>
   );
 };

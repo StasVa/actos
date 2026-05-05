@@ -520,8 +520,23 @@ const AllProjects: React.FC = () => {
         <div className="px-10 pt-6 pb-3 shrink-0">
           <div className="flex items-baseline justify-between">
             <h1 className="text-[24px] font-medium text-text-primary">All projects</h1>
-            <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary tabular-nums">
-              {meta}
+            <div className="flex items-center gap-3">
+              <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary tabular-nums">
+                {meta}
+              </div>
+              <button
+                onClick={handleNewGoal}
+                className="text-[12px] px-2.5 py-1 rounded-[4px] border border-border-subtle text-text-secondary hover:text-text-primary hover:border-accent transition-colors"
+              >
+                + New goal
+              </button>
+              <button
+                onClick={handleNewProject}
+                className="text-[12px] font-medium px-2.5 py-1 rounded-[4px]"
+                style={{ background: "hsl(var(--accent))", color: "hsl(var(--surface-base))" }}
+              >
+                + New project
+              </button>
             </div>
           </div>
 
@@ -598,7 +613,7 @@ const AllProjects: React.FC = () => {
               />
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {groups.near.map((p) => (
-                  <ProjectCard key={p.id} p={p} />
+                  <ProjectCard key={p.id} p={p} onOpen={handleOpenProject} />
                 ))}
               </div>
             </section>
@@ -609,7 +624,7 @@ const AllProjects: React.FC = () => {
               <SectionHeader label="ACTIVE" count={groups.active.length} meta="MOVING THIS WEEK" />
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {groups.active.map((p) => (
-                  <ProjectCard key={p.id} p={p} />
+                  <ProjectCard key={p.id} p={p} onOpen={handleOpenProject} />
                 ))}
               </div>
             </section>
@@ -625,7 +640,7 @@ const AllProjects: React.FC = () => {
               />
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {groups.stalled.map((p) => (
-                  <ProjectCard key={p.id} p={p} />
+                  <ProjectCard key={p.id} p={p} onOpen={handleOpenProject} />
                 ))}
               </div>
             </section>
@@ -644,7 +659,7 @@ const AllProjects: React.FC = () => {
               {!archivedCollapsed && (
                 <div className="border-t border-border-subtle">
                   {groups.closed.map((p) => (
-                    <ClosedRow key={p.id} p={p} />
+                    <ClosedRow key={p.id} p={p} onOpen={handleOpenProject} />
                   ))}
                 </div>
               )}

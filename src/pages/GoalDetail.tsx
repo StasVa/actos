@@ -197,15 +197,18 @@ const HeroState: React.FC = () => {
         <div className="w-full h-20 flex items-end gap-[2px]">
           {SPARK.map((v, i) => {
             const h = v === 0 ? 4 : Math.max(4, Math.round((v / max) * 80));
+            const info = SPARK_TIPS[i];
             return (
-              <div
-                key={i}
-                className="flex-1 hover:brightness-125 transition-[filter]"
-                style={{
-                  height: h,
-                  background: v === 0 ? "hsl(var(--border-subtle))" : G1,
-                }}
-              />
+              <Tooltip key={i} content={<SparkTooltipContent info={info} />} className="flex-1 h-full flex items-end">
+                <div
+                  className="w-full hover:brightness-[1.15]"
+                  style={{
+                    height: h,
+                    background: v === 0 ? "hsl(var(--border-subtle))" : G1,
+                    transition: "filter 80ms ease",
+                  }}
+                />
+              </Tooltip>
             );
           })}
         </div>

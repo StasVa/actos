@@ -132,6 +132,11 @@ const InlineAddAction: React.FC = () => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const popRef = React.useRef<HTMLDivElement>(null);
 
+  const storeProjects = useStore((s) => s.projects);
+  const storeActions = useStore((s) => s.actions);
+  const createAction = useStore((s) => s.createAction);
+  const openPanel = useStore((s) => s.openPanel);
+
   React.useEffect(() => {
     if (!popoverOpen) return;
     const onDoc = (e: MouseEvent) => {
@@ -148,18 +153,25 @@ const InlineAddAction: React.FC = () => {
     };
   }, [popoverOpen]);
 
-  // Build active projects grouped by goal from ACTIONS data
+  // Build active projects grouped by goal from the live store.
   const projectsByGoal = React.useMemo(() => {
-    const map = new Map<GoalKey, Set<string>>();
-    ACTIONS.forEach((a) => {
-      if (!isActive(a.status)) return;
-      if (!map.has(a.goal)) map.set(a.goal, new Set());
-      map.get(a.goal)!.add(a.project);
-    });
-    return (Object.keys(GOALS) as GoalKey[])
-      .filter((g) => map.has(g))
-      .map((g) => ({ goal: g, projects: Array.from(map.get(g)!) }));
-  }, []);
+    const titleByGoalKey = new Map<GoalKey, Set<string>>();
+    const titleToId: Record<string, string> = {};
+    const titleToGoalId: Record<string, string> = {};
+    for (const p of storeProjects) {
+      if (p.status !== "active") continue;
+      const goalKey = (Object.entries(GOAL_IDS).find(([, id]) => id === p.goalId)?.[0] ??
+        "g1") as GoalKey;
+      if (!titleByGoalKey.has(goalKey)) titleByGoalKey.set(goalKey, new Set());
+      titleByGoalKey.get(goalKey)!.add(p.title);
+      titleToId[p.title] = p.id;
+      titleToGoalId[p.title] = p.goalId;
+    }
+    const groups = (Object.keys(GOALS) as GoalKey[])
+      .filter((g) => titleByGoalKey.has(g))
+      .map((g) => ({ goal: g, projects: Array.from(titleByGoalKey.get(g)!) }));
+    return { groups, titleToId, titleToGoalId };
+  }, [storeProjects]);
 
   const active = focused || hovered;
 

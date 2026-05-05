@@ -115,7 +115,7 @@ export const Tooltip = React.forwardRef<HTMLSpanElement, Props>(function Tooltip
         )}
     </>
   );
-};
+});
 
 /* ===== Helpers for tooltip content ===== */
 

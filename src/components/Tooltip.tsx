@@ -16,13 +16,10 @@ type Props = {
  * Tooltip — top-placed, no shadow, no animation, viewport-aware.
  * Uses a portal so it can escape overflow:hidden parents.
  */
-export const Tooltip: React.FC<Props> = ({
-  content,
-  children,
-  className,
-  showDelay = 250,
-  hideDelay = 100,
-}) => {
+export const Tooltip = React.forwardRef<HTMLSpanElement, Props>(function Tooltip(
+  { content, children, className, showDelay = 250, hideDelay = 100 },
+  forwardedRef,
+) {
   const triggerRef = useRef<HTMLSpanElement | null>(null);
   const tipRef = useRef<HTMLDivElement | null>(null);
   const showTimer = useRef<number | null>(null);
@@ -83,7 +80,11 @@ export const Tooltip: React.FC<Props> = ({
   return (
     <>
       <span
-        ref={triggerRef}
+        ref={(node) => {
+          triggerRef.current = node;
+          if (typeof forwardedRef === "function") forwardedRef(node);
+          else if (forwardedRef) forwardedRef.current = node;
+        }}
         className={className}
         onMouseEnter={handleEnter}
         onMouseLeave={handleLeave}
@@ -118,7 +119,7 @@ export const Tooltip: React.FC<Props> = ({
         )}
     </>
   );
-};
+});
 
 /* ===== Helpers for tooltip content ===== */
 

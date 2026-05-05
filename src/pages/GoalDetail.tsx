@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { useShallow } from "zustand/react/shallow";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { LifetimeCounters } from "@/components/LifetimeCounters";
 import { Tooltip, StateDotTooltip } from "@/components/Tooltip";
@@ -155,7 +156,9 @@ const HeroState: React.FC<{
   actions: Action[];
 }> = ({ goal, projects, rituals, actions }) => {
   const color = COLOR_VAR[goal.color];
-  const progress = useStore((s) => selectors.goalProgress(s, goal.id));
+  const progressOutcome = useStore((s) => selectors.goalProgress(s, goal.id).outcome);
+  const progressEffort = useStore((s) => selectors.goalProgress(s, goal.id).effort);
+  const progress = { outcome: progressOutcome, effort: progressEffort };
   const projectsClosed = projects.filter((p) => p.status === "completed").length;
   const projectsActive = projects.filter((p) => p.status === "active").length;
   const projectsTotal = projects.length;
@@ -284,14 +287,17 @@ const ProjectCard: React.FC<{ p: Project; color: string; goalLabel: string }> = 
   color,
   goalLabel,
 }) => {
-  const progress = useStore((s) => selectors.projectProgress(s, p.id));
+  const progressOutcome = useStore((s) => selectors.projectProgress(s, p.id).outcome);
+  const progressEffort = useStore((s) => selectors.projectProgress(s, p.id).effort);
+  const progress = { outcome: progressOutcome, effort: progressEffort };
   const state = useStore((s) => selectors.stateIndicator(s, "project", p.id));
-  const counts = useStore((s) => {
-    const acts = s.actions.filter(
-      (a) => a.projectId === p.id && a.status !== "dropped" && a.status !== "cancelled",
-    );
-    return { done: acts.filter((a) => a.status === "done").length, total: acts.length };
-  });
+  const countsDone = useStore((s) => s.actions.filter(
+    (a) => a.projectId === p.id && a.status === "done",
+  ).length);
+  const countsTotal = useStore((s) => s.actions.filter(
+    (a) => a.projectId === p.id && a.status !== "dropped" && a.status !== "cancelled",
+  ).length);
+  const counts = { done: countsDone, total: countsTotal };
   const lastTs = useStore((s) => {
     const acts = s.actions.filter((a) => a.projectId === p.id);
     return acts
@@ -447,7 +453,9 @@ const RecentActivity: React.FC<{ actions: Action[] }> = ({ actions }) => {
 /* ===== Ideas ===== */
 const IdeasSection: React.FC<{ goalId: string }> = ({ goalId }) => {
   const [open, setOpen] = useState(true);
-  const ideas = useStore((s) => s.ideas.filter((i) => i.goalId === goalId && i.status === "captured"));
+  const ideas = useStore(
+    useShallow((s) => s.ideas.filter((i) => i.goalId === goalId && i.status === "captured")),
+  );
   const captureIdea = useStore((s) => s.captureIdea);
   const [text, setText] = useState("");
   const submit = () => {

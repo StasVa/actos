@@ -8,11 +8,14 @@ import { useStore, selectors } from "@/store/useStore";
  * visual output is identical — only the numbers are now real.
  */
 export function LifetimeCounters() {
-  const counters = useStore((s) => selectors.lifetimeCounters(s));
+  // Subscribe to primitives only — returning a new object each render would
+  // trip Zustand's strict-equality check and cause an infinite update loop.
+  const projectsClosed = useStore((s) => s.projects.filter((p) => p.status === "completed").length);
+  const actionsDone = useStore((s) => s.actions.filter((a) => a.status === "done").length);
   return (
     <>
-      <div>{counters.projectsClosed} projects closed</div>
-      <div>{counters.actionsDone} actions done</div>
+      <div>{projectsClosed} projects closed</div>
+      <div>{actionsDone} actions done</div>
     </>
   );
 }

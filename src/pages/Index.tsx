@@ -77,9 +77,9 @@ const SPARK_2 = [3, 4, 2, 3, 5, 4, 3, 2, 1, 0, 0, 0];
 const Sparkline: React.FC<{ data: number[]; color: string }> = ({ data, color }) => {
   const max = 5;
   return (
-    <div className="w-full h-9 flex items-end gap-[2px]">
+    <div className="w-full h-7 flex items-end gap-[1px]">
       {data.map((v, i) => {
-        const h = v === 0 ? 2 : Math.max(2, Math.round((v / max) * 36));
+        const h = v === 0 ? 2 : Math.max(2, Math.round((v / max) * 28));
         return (
           <div
             key={i}
@@ -131,18 +131,18 @@ const GoalColumn: React.FC<{
   color: string;
   recent: React.ReactNode;
 }> = ({ title, state, type, target, progress, meta, outcome, effort, spark, color, recent }) => (
-  <div className="flex-1 px-6 py-1 space-y-4 first:pl-0 last:pr-0">
-    <div className="flex items-center justify-between">
-      <div className="flex items-center gap-2.5">
+  <div className="px-6 py-1 space-y-4 first:pl-0 last:pr-0">
+    <div className="flex items-center justify-between gap-2">
+      <div className="flex items-center gap-2.5 min-w-0">
         <span
           className="w-2 h-2 rounded-full shrink-0"
           style={{ background: state === "active" ? "hsl(var(--state-active))" : "hsl(var(--state-stalled))" }}
         />
-        <h3 className="text-[18px] font-medium text-text-primary">{title}</h3>
-        <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">{type}</span>
+        <h3 className="text-[18px] font-medium text-text-primary truncate">{title}</h3>
+        <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary shrink-0">{type}</span>
       </div>
       {target && (
-        <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">{target}</div>
+        <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary shrink-0">{target}</div>
       )}
     </div>
 
@@ -153,9 +153,9 @@ const GoalColumn: React.FC<{
         </div>
         <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mt-2">Progress</div>
       </div>
-      <div className="flex-1 flex flex-col gap-1.5 pb-1">
+      <div className="flex-1 flex flex-col gap-1.5 pb-1 min-w-0">
         {meta.map((m, i) => (
-          <div key={i} className="font-mono text-[12px] text-text-secondary">
+          <div key={i} className="font-mono text-[12px] text-text-secondary truncate">
             {m}
           </div>
         ))}
@@ -175,8 +175,19 @@ const GoalColumn: React.FC<{
   </div>
 );
 
+const PlaceholderSlot: React.FC = () => (
+  <div className="px-6 first:pl-0 last:pr-0">
+    <div className="group h-full p-2 cursor-pointer">
+      <div className="h-full min-h-[280px] rounded-[6px] border border-dashed border-border-default group-hover:border-solid group-hover:border-accent flex flex-col items-center justify-center transition-colors">
+        <div className="text-[13px] text-text-secondary group-hover:text-text-primary transition-colors">+ Add goal</div>
+        <div className="mt-1 font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">2 of 3 active</div>
+      </div>
+    </div>
+  </div>
+);
+
 const Hero: React.FC = () => (
-  <div className="bg-surface-elevated border border-border-subtle rounded-[6px] p-6 flex">
+  <div className="bg-surface-elevated border border-border-subtle rounded-[6px] p-6 grid grid-cols-3 divide-x divide-border-subtle">
     <GoalColumn
       title="Launch YouTube channel"
       state="active"
@@ -189,7 +200,6 @@ const Hero: React.FC = () => (
       color={G1}
       recent={<>Recent: ✓ Outline structure · ✓ Set up workspace · ✓ Define content pillars</>}
     />
-    <div className="w-px bg-border-subtle self-stretch" />
     <GoalColumn
       title="Lose 5 kg"
       state="stalled"
@@ -207,6 +217,7 @@ const Hero: React.FC = () => (
         </>
       }
     />
+    <PlaceholderSlot />
   </div>
 );
 
@@ -215,7 +226,6 @@ const Today: React.FC = () => (
   <section>
     <SectionLabel meta="3 ACTIONS · 2 RITUALS">Today</SectionLabel>
     <div className="space-y-2">
-      {/* Main */}
       <div className="flex items-center gap-3 px-3 py-2 bg-surface-raised rounded-[4px]">
         <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">MAIN</span>
         <span className="text-[13px] font-medium text-text-primary">Write script for video #1</span>
@@ -225,7 +235,6 @@ const Today: React.FC = () => (
         <Checkbox />
       </div>
 
-      {/* Scheduled rows */}
       {[
         { c: G1, title: "Research thumbnail styles", crumb: "YouTube · Shoot video #1", time: "30m" },
         { c: G1, title: "Buy ring light", crumb: "YouTube · Set up workspace", del: "→ Maria", time: "45m" },
@@ -247,7 +256,6 @@ const Today: React.FC = () => (
         </div>
       ))}
 
-      {/* Rituals */}
       <div className="flex gap-6 pt-1">
         <div className="flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full" style={{ background: G2 }} />
@@ -261,7 +269,6 @@ const Today: React.FC = () => (
         </div>
       </div>
 
-      {/* Quick add */}
       <div className="flex items-center gap-2 bg-surface-raised border border-border-subtle rounded-[4px] px-3 py-2 mt-2">
         <input
           className="flex-1 bg-transparent text-[13px] text-text-primary placeholder:text-text-tertiary focus:outline-none"
@@ -287,7 +294,7 @@ const HeavyLift: React.FC = () => (
       {HEAVY.map((r, i) => (
         <div
           key={i}
-          className="flex items-center gap-3 pr-3 min-h-9 rounded-[2px] hover:bg-surface-hover transition-colors overflow-hidden"
+          className="group flex items-center gap-3 pr-3 min-h-9 rounded-[2px] hover:bg-surface-hover transition-colors overflow-hidden"
         >
           <Strip color={r.c} />
           <div className="w-[52px] pl-2">
@@ -301,10 +308,16 @@ const HeavyLift: React.FC = () => (
             <div className="text-[11px] text-text-secondary truncate">{r.crumb}</div>
           </div>
           <span className="font-mono text-[12px] text-text-secondary whitespace-nowrap">{r.time}</span>
-          <a href="#" className="text-[12px] text-accent hover:text-accent-hover whitespace-nowrap">
+          <a
+            href="#"
+            className="text-[12px] text-accent hover:text-accent-hover whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-100"
+          >
             Mark done
           </a>
-          <a href="#" className="text-[12px] text-text-secondary hover:text-text-primary whitespace-nowrap">
+          <a
+            href="#"
+            className="text-[12px] text-text-secondary hover:text-text-primary whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-100"
+          >
             Open
           </a>
         </div>
@@ -346,100 +359,84 @@ const QuickMoves: React.FC = () => (
   </section>
 );
 
-/* ===== Activity Heatmap ===== */
-type Cell = { g1: number; g2: number }; // intensity 0-4
-const OPACITIES = [0, 0.3, 0.55, 0.8, 1];
+/* ===== Bottom Utility Row ===== */
+const TinyHeader: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <div className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">{children}</div>
+);
 
-function buildHeatmap(): Cell[][] {
-  const weeks: Cell[][] = [];
-  // seeded pseudo-random
-  let seed = 7;
-  const rand = () => {
-    seed = (seed * 9301 + 49297) % 233280;
-    return seed / 233280;
-  };
-  for (let w = 0; w < 12; w++) {
-    const week: Cell[] = [];
-    for (let d = 0; d < 7; d++) {
-      const isWeekend = d === 0 || d === 6;
-      const weekendActive = isWeekend && rand() > 0.7;
-      const weekdayActive = !isWeekend && rand() > 0.25;
-      const active = weekendActive || weekdayActive;
-      let g1 = 0, g2 = 0;
-      if (active) {
-        const r = rand();
-        if (r < 0.45) g1 = Math.ceil(rand() * 4);
-        else if (r < 0.85) g2 = Math.ceil(rand() * 4);
-        else { g1 = Math.ceil(rand() * 4); g2 = Math.ceil(rand() * 4); }
-      }
-      // last 3 weeks: no goal-2
-      if (w >= 9) g2 = 0;
-      week.push({ g1, g2 });
-    }
-    weeks.push(week);
-  }
-  return weeks;
-}
-
-const HEATMAP = buildHeatmap();
-
-const HeatCell: React.FC<{ cell: Cell }> = ({ cell }) => {
-  const { g1, g2 } = cell;
-  if (g1 === 0 && g2 === 0) {
-    return (
-      <div
-        className="w-3 h-3 rounded-[2px] border border-border-subtle"
-        style={{ background: "hsl(var(--surface-raised))" }}
-      />
-    );
-  }
-  let bg = "";
-  if (g1 > 0 && g2 > 0) {
-    bg = `linear-gradient(135deg, hsl(var(--goal-1) / ${OPACITIES[g1]}) 50%, hsl(var(--goal-2) / ${OPACITIES[g2]}) 50%)`;
-  } else if (g1 > 0) {
-    bg = `hsl(var(--goal-1) / ${OPACITIES[g1]})`;
-  } else {
-    bg = `hsl(var(--goal-2) / ${OPACITIES[g2]})`;
-  }
-  return <div className="w-3 h-3 rounded-[2px]" style={{ background: bg }} />;
-};
-
-const Activity: React.FC = () => (
-  <section>
-    <SectionLabel meta="LAST 12 WEEKS · ALL GOALS">Activity</SectionLabel>
-    <div className="overflow-x-auto">
-      <div className="flex gap-[3px]">
-        {HEATMAP.map((week, wi) => (
-          <div key={wi} className="flex flex-col gap-[3px]">
-            {week.map((cell, di) => (
-              <HeatCell key={di} cell={cell} />
-            ))}
+const RecentlyClosed: React.FC = () => {
+  const items = [
+    { c: G1, name: "Set up workspace", date: "Apr 28" },
+    { c: G1, name: "Define content pillars", date: "Apr 22" },
+    { c: G2, name: "First grocery overhaul", date: "Apr 18" },
+  ];
+  return (
+    <div className="p-4">
+      <TinyHeader>RECENTLY CLOSED · 3</TinyHeader>
+      <div className="mt-3 space-y-1.5">
+        {items.map((it, i) => (
+          <div key={i} className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full shrink-0" style={{ background: it.c }} />
+            <span className="text-[12px] text-text-primary truncate">{it.name}</span>
+            <span className="font-mono text-[11px] text-text-tertiary whitespace-nowrap">· {it.date}</span>
           </div>
         ))}
       </div>
     </div>
-    <div className="mt-3 flex items-center gap-4 font-mono text-[11px] text-text-tertiary uppercase tracking-[0.06em]">
-      <div className="flex items-center gap-1.5">
-        <span className="w-2.5 h-2.5 rounded-[2px]" style={{ background: G1 }} />
-        YouTube channel
-      </div>
-      <div className="flex items-center gap-1.5">
-        <span className="w-2.5 h-2.5 rounded-[2px]" style={{ background: G2 }} />
-        Lose 5 kg
-      </div>
-      <div className="ml-auto flex items-center gap-1.5">
-        <span>Less</span>
-        {[1, 2, 3, 4].map((l) => (
-          <span
-            key={l}
-            className="w-2.5 h-2.5 rounded-[2px]"
-            style={{ background: `hsl(var(--text-secondary) / ${OPACITIES[l]})` }}
-          />
+  );
+};
+
+const Delegated: React.FC = () => {
+  const items = [
+    { name: "Buy ring light", to: "→ Maria" },
+    { name: "Send brief to thumbnail designer", to: "→ AI" },
+  ];
+  return (
+    <div className="p-4">
+      <TinyHeader>DELEGATED · 2 ACTIVE</TinyHeader>
+      <div className="mt-3 space-y-1.5">
+        {items.map((it, i) => (
+          <div key={i} className="flex items-baseline gap-1 min-w-0">
+            <span className="text-[12px] text-text-primary truncate">{it.name}</span>
+            <span className="font-mono text-[11px] text-text-tertiary whitespace-nowrap">· {it.to}</span>
+          </div>
         ))}
-        <span>More</span>
+      </div>
+      <a href="#" className="inline-block mt-2 text-[12px] text-accent hover:text-accent-hover">
+        View all →
+      </a>
+    </div>
+  );
+};
+
+const ThisWeek: React.FC = () => {
+  const stats = [
+    { n: "12", label: "actions done" },
+    { n: "3", label: "delegated" },
+    { n: "1", label: "dropped" },
+    { n: "0", label: "projects closed" },
+  ];
+  return (
+    <div className="p-4">
+      <TinyHeader>THIS WEEK</TinyHeader>
+      <div className="mt-3 space-y-1.5 font-mono text-[12px]">
+        {stats.map((s, i) => (
+          <div key={i} className="flex items-baseline gap-3">
+            <span className="text-text-primary tabular-nums w-4 text-right">{s.n}</span>
+            <span className="text-text-tertiary">{s.label}</span>
+          </div>
+        ))}
       </div>
     </div>
-  </section>
+  );
+};
+
+const UtilityRow: React.FC = () => (
+  <div className="grid grid-cols-3 divide-x divide-border-subtle border border-border-subtle rounded-[6px] bg-surface-elevated">
+    <RecentlyClosed />
+    <Delegated />
+    <ThisWeek />
+  </div>
 );
 
 /* ===== Page ===== */
@@ -464,10 +461,10 @@ const Index: React.FC = () => {
         <div className="my-6 border-t border-border-subtle" />
         <QuickMoves />
 
-        <div className="my-6 border-t border-border-subtle" />
-        <Activity />
+        <div className="h-8" />
+        <UtilityRow />
 
-        <div className="h-12" />
+        <div className="h-8" />
       </main>
     </div>
   );

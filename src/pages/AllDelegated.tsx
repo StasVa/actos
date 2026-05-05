@@ -290,7 +290,8 @@ const DelegationDetail: React.FC<{ action: Action }> = ({ action }) => {
   const isToday = action.expectedReturnDelta === 0;
 
   return (
-    <div className="px-10 py-8 max-w-[760px]">
+    <div className="px-10 py-8">
+      <div className="max-w-[540px] mx-auto">
       <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
         <span className="w-2 h-2 rounded-full" style={{ background: goal.color }} />
         <span className="hover:text-text-secondary cursor-pointer transition-colors">
@@ -384,6 +385,7 @@ const DelegationDetail: React.FC<{ action: Action }> = ({ action }) => {
         >
           ···
         </button>
+      </div>
       </div>
     </div>
   );

@@ -461,7 +461,8 @@ const IdeaDetail: React.FC<{ idea: Idea }> = ({ idea }) => {
   }, [idea.id]);
 
   return (
-    <div className="px-10 py-8 max-w-[760px]">
+    <div className="px-10 py-8">
+      <div className="max-w-[540px] mx-auto">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 cursor-pointer group">
           <span className="w-2 h-2 rounded-full" style={{ background: goal.color }} />
@@ -560,6 +561,7 @@ const IdeaDetail: React.FC<{ idea: Idea }> = ({ idea }) => {
         <ConvertProjectOverlay idea={idea} onClose={() => setOverlay(null)} />
       )}
       {overlay === "discard" && <DiscardConfirm onClose={() => setOverlay(null)} />}
+      </div>
     </div>
   );
 };

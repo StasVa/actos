@@ -216,13 +216,26 @@ const FilterGroup: React.FC<{ label: string; children: React.ReactNode }> = ({ l
 const CaptureInput: React.FC<{ subHint?: string }> = ({ subHint }) => {
   const [value, setValue] = useState("");
   const [focused, setFocused] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const active = focused || hovered;
   return (
     <div>
       <div
-        className={`flex items-center gap-2 bg-surface-raised rounded-[4px] px-3 py-2.5 border transition-colors ${
-          focused ? "border-border-default" : "border-border-subtle"
-        }`}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        className="flex items-center gap-3 bg-surface-elevated rounded-[4px] px-4 transition-colors"
+        style={{
+          height: 52,
+          border: `1px dashed ${active ? "hsl(var(--accent))" : "hsl(var(--border-default))"}`,
+          borderStyle: active ? "solid" : "dashed",
+        }}
       >
+        <span
+          className="font-mono text-[16px] leading-none shrink-0"
+          style={{ color: active ? "hsl(var(--text-secondary))" : "hsl(var(--text-tertiary))" }}
+        >
+          +
+        </span>
         <input
           value={value}
           onChange={(e) => setValue(e.target.value)}
@@ -232,18 +245,17 @@ const CaptureInput: React.FC<{ subHint?: string }> = ({ subHint }) => {
             if (e.key === "Enter") setValue("");
           }}
           placeholder="Capture an idea..."
-          className={`flex-1 bg-transparent outline-none text-[13px] text-text-primary ${
-            focused ? "placeholder:text-text-secondary" : "placeholder:text-text-tertiary"
-          }`}
+          className="flex-1 bg-transparent outline-none text-[14px] text-text-primary placeholder:text-text-tertiary"
         />
         {focused && (
-          <span className="font-mono text-[10px] text-text-tertiary shrink-0">⏎ to capture</span>
+          <span className="font-mono text-[10px] text-text-tertiary shrink-0">⏎</span>
         )}
       </div>
       {subHint && <div className="mt-2 text-[12px] text-text-tertiary">{subHint}</div>}
     </div>
   );
 };
+
 
 /* ===== Idea row ===== */
 const IdeaRow: React.FC<{ idea: Idea; selected: boolean; onSelect: () => void }> = ({

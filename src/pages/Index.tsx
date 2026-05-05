@@ -204,7 +204,7 @@ const GoalColumn: React.FC<{
   menu?: React.ReactNode;
 }> = ({ title, state, type, target, progress, meta, outcome, effort, spark, sparkTips, lastActivity, stalledFor, color, recent, href, menu }) => {
   const inner = (
-    <div className="group min-w-0 overflow-hidden px-6 py-1 space-y-4 first:pl-0 last:pr-0">
+    <div className="group min-w-0 overflow-hidden py-1 space-y-4">
     <div className="flex items-center justify-between gap-2">
       <div className="flex items-center gap-2.5 min-w-0">
         <Tooltip content={<StateDotTooltip state={state} lastActivity={lastActivity} stalledFor={stalledFor} />}>
@@ -250,12 +250,12 @@ const GoalColumn: React.FC<{
   );
   if (href) {
     return (
-      <Link to={href} className="block min-w-0 overflow-hidden cursor-pointer">
+      <Link to={href} className="block min-w-0 overflow-hidden cursor-pointer px-6 first:pl-0 last:pr-0">
         {inner}
       </Link>
     );
   }
-  return inner;
+  return <div className="min-w-0 px-6 first:pl-0 last:pr-0">{inner}</div>;
 };
 
 /* ===== Goal column menu (composed in Hero) ===== */

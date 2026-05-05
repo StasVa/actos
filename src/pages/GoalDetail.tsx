@@ -442,6 +442,7 @@ const IdeasSection: React.FC = () => {
 
 /* ===== Page ===== */
 const GoalDetail: React.FC = () => {
+  const [ritualOpen, setRitualOpen] = useState(false);
   return (
     <div className="min-h-screen bg-surface-base text-text-primary">
       <Sidebar />
@@ -499,7 +500,7 @@ const GoalDetail: React.FC = () => {
           <ActiveProjectsSection />
 
           <div className="h-14" />
-          <RitualsSection />
+          <RitualsSection onOpenRitual={() => setRitualOpen(true)} />
 
           <div className="h-14" />
           <RecentActivity />
@@ -509,6 +510,7 @@ const GoalDetail: React.FC = () => {
           <IdeasSection />
         </div>
       </main>
+      <RitualPanel open={ritualOpen} onClose={() => setRitualOpen(false)} />
     </div>
   );
 };

@@ -192,10 +192,28 @@ function ritualDueOn(r: Ritual, iso: string): boolean {
 }
 
 /* ───────── suggestion logic ───────── */
-function buildActionSuggestions(
-  actions: Action[],
-  date: string,
-): { scheduled: Action[]; bigFrog?: Action; easyWins: Action[] } {
+function quantile(vals: number[], q: number): number {
+  if (vals.length === 0) return 0;
+  const sorted = [...vals].sort((a, b) => a - b);
+  const idx = Math.min(sorted.length - 1, Math.floor(q * sorted.length));
+  return sorted[idx];
+}
+
+interface ActionSuggestions {
+  scheduled: Action[];
+  heavyLift: Action[];
+  quickMoves: Action[];
+}
+
+function effortFor(a: Action): number {
+  // Composite effort signal — prefer focusCost, then energyCost, then time bucket.
+  if (a.focusCost != null) return a.focusCost;
+  if (a.energyCost != null) return a.energyCost;
+  if (a.timeEstimateMinutes != null) return Math.min(10, Math.ceil(a.timeEstimateMinutes / 30));
+  return 5;
+}
+
+function buildActionSuggestions(actions: Action[], date: string): ActionSuggestions {
   const scheduled = actions.filter(
     (a) => a.scheduledDate === date && (a.status === "planned" || a.status === "backlog"),
   );
@@ -203,20 +221,39 @@ function buildActionSuggestions(
   const backlog = actions.filter(
     (a) => a.status === "backlog" && !scheduledIds.has(a.id),
   );
-  const bigFrog = [...backlog].sort(
-    (a, b) =>
-      (b.impact ?? 0) * (b.focusCost ?? b.timeEstimateMinutes ?? 1) -
-      (a.impact ?? 0) * (a.focusCost ?? a.timeEstimateMinutes ?? 1),
-  )[0];
-  const easyWins = [...backlog]
-    .filter((a) => a.id !== bigFrog?.id)
-    .sort(
-      (a, b) =>
-        (b.impact ?? 0) / Math.max(b.focusCost ?? 1, 1) -
-        (a.impact ?? 0) / Math.max(a.focusCost ?? 1, 1),
-    )
+
+  if (backlog.length === 0) return { scheduled, heavyLift: [], quickMoves: [] };
+
+  const impacts = backlog.map((a) => a.impact ?? 0);
+  const efforts = backlog.map((a) => effortFor(a));
+  const impactP75 = quantile(impacts, 0.75);
+  const effortP75 = quantile(efforts, 0.75);
+  const impactMedian = quantile(impacts, 0.5);
+  const effortP30 = quantile(efforts, 0.3);
+
+  const heavyLift = backlog
+    .filter((a) => (a.impact ?? 0) >= impactP75 && effortFor(a) >= effortP75)
+    .sort((a, b) => (b.impact ?? 0) - (a.impact ?? 0))
     .slice(0, 3);
-  return { scheduled, bigFrog, easyWins };
+  const heavyIds = new Set(heavyLift.map((a) => a.id));
+
+  const quickMoves = backlog
+    .filter((a) => !heavyIds.has(a.id))
+    .filter((a) => {
+      const imp = a.impact ?? 0;
+      const eff = effortFor(a);
+      const timeOk =
+        (a.timeEstimateMinutes != null && a.timeEstimateMinutes <= 60) || eff <= effortP30;
+      return imp >= impactMedian && timeOk;
+    })
+    .sort((a, b) => {
+      const di = (b.impact ?? 0) - (a.impact ?? 0);
+      if (di !== 0) return di;
+      return effortFor(a) - effortFor(b);
+    })
+    .slice(0, 5);
+
+  return { scheduled, heavyLift, quickMoves };
 }
 
 /* ═════════════ Plan Today form (re-usable inside Plan and Combined modals) ═════════════ */

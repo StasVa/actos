@@ -16,7 +16,7 @@ const COLOR_VAR: Record<GoalColorVar, string> = {
 };
 
 
- meta?: React.ReactNode }> = ({ children, meta }) => (
+ const SectionHeader: React.FC<{ children: React.ReactNode; meta?: React.ReactNode }> = ({ children, meta }) => (
   <div className="flex items-center justify-between mb-3">
     <h2 className="text-[12px] font-medium uppercase tracking-[0.08em] text-text-secondary">{children}</h2>
     {meta && <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">{meta}</div>}

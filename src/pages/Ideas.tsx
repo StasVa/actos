@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { AppSidebar } from "@/components/AppSidebar";
 
- full: string; sort: number } {
+ function relativeAgo(iso: string): { label: string; full: string; sort: number } {
   const d = new Date(iso);
   const now = new Date();
   const days = Math.floor((now.getTime() - d.getTime()) / 86400000);

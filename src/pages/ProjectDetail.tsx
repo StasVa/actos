@@ -11,7 +11,7 @@ const COLOR_VAR: Record<GoalColorVar, string> = {
   "goal-3": "hsl(var(--goal-3))",
 };
 
-
+function fmtAgo(iso: string): string {
   const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
   if (days <= 0) return "today";
   if (days === 1) return "yesterday";

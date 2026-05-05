@@ -386,6 +386,7 @@ const DelegationDetail: React.FC<{ action: Action }> = ({ action }) => {
           ···
         </button>
       </div>
+      </div>
     </div>
   );
 };

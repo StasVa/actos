@@ -12,9 +12,9 @@ const NAV: { label: string; href: string }[] = [
   { label: "Weekly", href: "#" },
   { label: "Ideas", href: "/ideas" },
   { label: "Rituals", href: "/rituals" },
-  { label: "All actions", href: "#" },
+  { label: "All actions", href: "/all-actions" },
   { label: "All projects", href: "#" },
-  { label: "All delegated", href: "#" },
+  { label: "All delegated", href: "/all-delegated" },
 ];
 
 const Sidebar: React.FC = () => (

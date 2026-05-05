@@ -213,7 +213,7 @@ const StateTooltip: React.FC<{ p: Project }> = ({ p }) => (
 );
 
 /* ===== Project card (active grid) ===== */
-const ProjectCard: React.FC<{ p: Project }> = ({ p }) => {
+const ProjectCard: React.FC<{ p: Project; onOpen: (p: Project) => void }> = ({ p, onOpen }) => {
   const pct = Math.round((p.done / p.total) * 100);
   const stateColor =
     p.state === "stalled"
@@ -222,53 +222,58 @@ const ProjectCard: React.FC<{ p: Project }> = ({ p }) => {
       ? "hsl(var(--accent))"
       : "hsl(var(--state-active))";
   const warnLast = p.lastDays >= 7;
-  const inner = (
-    <div className="group h-[124px] p-3 flex flex-col gap-2 rounded-[6px] bg-surface-raised border border-border-subtle hover:bg-surface-hover hover:border-accent cursor-pointer transition-colors duration-100">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5 min-w-0">
-          <span className="w-2 h-2 rounded-full shrink-0" style={{ background: p.goalColor }} />
-          <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary truncate">
-            {p.goalLabel}
-          </span>
+  return (
+    <button
+      type="button"
+      onClick={() => onOpen(p)}
+      className="text-left w-full"
+    >
+      <div className="group h-[124px] p-3 flex flex-col gap-2 rounded-[6px] bg-surface-raised border border-border-subtle hover:bg-surface-hover hover:border-accent cursor-pointer transition-colors duration-100">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <span className="w-2 h-2 rounded-full shrink-0" style={{ background: p.goalColor }} />
+            <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary truncate">
+              {p.goalLabel}
+            </span>
+          </div>
+          <Tooltip content={<StateTooltip p={p} />}>
+            <span className="w-2 h-2 rounded-full shrink-0" style={{ background: stateColor }} />
+          </Tooltip>
         </div>
-        <Tooltip content={<StateTooltip p={p} />}>
-          <span className="w-2 h-2 rounded-full shrink-0" style={{ background: stateColor }} />
-        </Tooltip>
-      </div>
 
-      <div
-        className="flex-1 text-[15px] font-medium text-text-primary leading-[1.3] overflow-hidden"
-        style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}
-      >
-        {p.title}
-      </div>
-
-      <div className="h-1 w-full bg-surface-hover rounded-[2px] overflow-hidden">
-        <div className="h-full rounded-[2px]" style={{ width: `${pct}%`, background: p.goalColor }} />
-      </div>
-
-      <div className="flex items-center justify-between font-mono text-[11px] tabular-nums">
-        <div>
-          <span className="text-text-primary">
-            {p.done}/{p.total}
-          </span>
-          <span className="text-text-tertiary"> · {pct}%</span>
+        <div
+          className="flex-1 text-[15px] font-medium text-text-primary leading-[1.3] overflow-hidden"
+          style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}
+        >
+          {p.title}
         </div>
-        <div className="text-text-secondary">
-          Last: <span className={warnLast ? "text-text-warning" : "text-text-secondary"}>{p.last}</span>
+
+        <div className="h-1 w-full bg-surface-hover rounded-[2px] overflow-hidden">
+          <div className="h-full rounded-[2px]" style={{ width: `${pct}%`, background: p.goalColor }} />
+        </div>
+
+        <div className="flex items-center justify-between font-mono text-[11px] tabular-nums">
+          <div>
+            <span className="text-text-primary">
+              {p.done}/{p.total}
+            </span>
+            <span className="text-text-tertiary"> · {pct}%</span>
+          </div>
+          <div className="text-text-secondary">
+            Last: <span className={warnLast ? "text-text-warning" : "text-text-secondary"}>{p.last}</span>
+          </div>
         </div>
       </div>
-    </div>
+    </button>
   );
-  if (p.href) return <Link to={p.href} className="block">{inner}</Link>;
-  return inner;
 };
 
 /* ===== Closed list row (denser, history) ===== */
-const ClosedRow: React.FC<{ p: Project }> = ({ p }) => {
+const ClosedRow: React.FC<{ p: Project; onOpen: (p: Project) => void }> = ({ p, onOpen }) => {
   const isDropped = p.state === "dropped";
   return (
     <div
+      onClick={() => onOpen(p)}
       className="relative flex items-stretch border-b border-border-subtle hover:bg-surface-hover transition-colors cursor-pointer"
       style={{ minHeight: 48 }}
     >

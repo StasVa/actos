@@ -502,10 +502,26 @@ const GoalDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const goal = useStore((s) => s.goals.find((g) => g.id === id));
-  const projects = useStore((s) => s.projects.filter((p) => p.goalId === id));
-  const rituals = useStore((s) => s.rituals.filter((r) => r.goalId === id && r.status === "active"));
-  const actions = useStore((s) => s.actions.filter((a) => a.goalId === id));
+  const allProjects = useStore((s) => s.projects);
+  const allRituals = useStore((s) => s.rituals);
+  const allActions = useStore((s) => s.actions);
   const openPanel = useStore((s) => s.openPanel);
+  const state = useStore((s) =>
+    goal ? selectors.stateIndicator(s, "goal", goal.id) : "active",
+  );
+
+  const projects = useMemo(
+    () => allProjects.filter((p) => p.goalId === id),
+    [allProjects, id],
+  );
+  const rituals = useMemo(
+    () => allRituals.filter((r) => r.goalId === id && r.status === "active"),
+    [allRituals, id],
+  );
+  const actions = useMemo(
+    () => allActions.filter((a) => a.goalId === id),
+    [allActions, id],
+  );
 
   if (!goal) {
     return (

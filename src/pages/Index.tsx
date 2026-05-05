@@ -7,6 +7,8 @@ import { useStore } from "@/store/useStore";
 import { DayStartPanel } from "@/components/DayStartPanel";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { ritualMultiplier } from "@/store/useStore";
+import { CardMenu } from "@/components/CardMenu";
+import { ConfirmModal } from "@/components/ConfirmModal";
 import { toast } from "sonner";
 
 const TODAY_ISO = new Date().toISOString().slice(0, 10);

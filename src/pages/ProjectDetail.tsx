@@ -254,22 +254,7 @@ const ProjectDetail: React.FC = () => {
                   </div>
                   <div className="border-t border-border-subtle">
                     {grouped.delegated.map((a) => (
-                      <div
-                        key={a.id}
-                        className="group flex items-center gap-3 h-9 px-3 border-b border-border-subtle hover:bg-surface-hover transition-colors"
-                      >
-                        <Check color={color} />
-                        <span className="text-[13px] font-medium text-text-primary truncate">{a.title}</span>
-                        {a.delegateName && (
-                          <span className="font-mono text-[11px] text-text-tertiary">→ {a.delegateName}</span>
-                        )}
-                        <div className="flex-1" />
-                        {a.expectedReturnDate && (
-                          <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">
-                            EXPECTED {a.expectedReturnDate}
-                          </span>
-                        )}
-                      </div>
+                      <ActionRow key={a.id} a={a} color={color} />
                     ))}
                   </div>
                 </div>

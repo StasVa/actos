@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { Tooltip, StateDotTooltip } from "@/components/Tooltip";
 
 const G1 = "hsl(var(--goal-1))";
 

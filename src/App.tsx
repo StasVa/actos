@@ -7,6 +7,8 @@ import Index from "./pages/Index.tsx";
 import Progress from "./pages/Progress.tsx";
 import Goals from "./pages/Goals.tsx";
 import Reviews from "./pages/Reviews.tsx";
+import ReviewsDays from "./pages/ReviewsDays.tsx";
+import ReviewDayDetail from "./pages/ReviewDayDetail.tsx";
 import GoalDetail from "./pages/GoalDetail.tsx";
 import ProjectDetail from "./pages/ProjectDetail.tsx";
 import Ideas from "./pages/Ideas.tsx";
@@ -55,8 +57,11 @@ const App = () => (
           <Route path="/delegated" element={<AllDelegated />} />
           <Route path="/rituals" element={<Rituals />} />
           <Route path="/ideas" element={<Ideas />} />
-          <Route path="/reviews" element={<Reviews />} />
-          <Route path="/reviews/days/:date" element={<Reviews />} />
+          <Route path="/reviews" element={<Navigate to="/reviews/days" replace />} />
+          <Route path="/reviews/days" element={<ReviewsDays />} />
+          <Route path="/reviews/days/:date" element={<ReviewDayDetail />} />
+          <Route path="/reviews/weeks" element={<Reviews />} />
+          <Route path="/reviews/months" element={<Reviews />} />
 
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

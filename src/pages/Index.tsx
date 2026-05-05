@@ -296,6 +296,8 @@ const ProjectCard: React.FC<{ p: Project }> = ({ p }) => {
       </div>
     </div>
   );
+  if (p.href) return <Link to={p.href} className="block">{inner}</Link>;
+  return inner;
 };
 
 const ActiveProjects: React.FC = () => (

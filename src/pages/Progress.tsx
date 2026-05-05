@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useStore } from "@/store/useStore";
 import { AppSidebar } from "@/components/AppSidebar";
 import { SettingsPanel } from "@/components/SettingsPanel";
+import { TimeInvestmentSection } from "@/components/TimeInvestmentSection";
 import {
   Hero,
   ActiveProjects,
@@ -139,18 +140,6 @@ const DelegatedSection: React.FC = () => {
   );
 };
 
-const TimeInvestmentPlaceholder: React.FC = () => (
-  <section>
-    <SectionLabel>Time investment</SectionLabel>
-    <div className="bg-surface-elevated border border-dashed border-border-subtle rounded-[6px] p-10 text-center">
-      <div className="text-[13px] text-text-secondary">Coming soon</div>
-      <div className="font-mono text-[11px] text-text-tertiary mt-1">
-        Will show hours invested per goal over last 30 days.
-      </div>
-    </div>
-  </section>
-);
-
 const Progress: React.FC = () => {
   const [settingsOpen, setSettingsOpen] = React.useState(false);
   const goals = useStore((s) => s.goals);
@@ -181,7 +170,7 @@ const Progress: React.FC = () => {
         <div className="h-10" />
         <DelegatedSection />
         <div className="h-10" />
-        <TimeInvestmentPlaceholder />
+        <TimeInvestmentSection />
         <div className="h-12" />
       </main>
     </div>

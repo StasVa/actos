@@ -619,7 +619,7 @@ const AllDelegated: React.FC = () => {
                 <>
                   <GroupHeader label="OVERDUE" count={groups.overdue.length} warning />
                   {groups.overdue.map((a) => (
-                    <DelegationRow key={a.id} action={a} selected={false} onSelect={noop} />
+                    <DelegationRow key={a.id} action={a} selected={false} onSelect={() => openAction(a.id)} />
                   ))}
                 </>
               )}
@@ -627,7 +627,7 @@ const AllDelegated: React.FC = () => {
                 <>
                   <GroupHeader label="UPCOMING" count={groups.upcoming.length} />
                   {groups.upcoming.map((a) => (
-                    <DelegationRow key={a.id} action={a} selected={false} onSelect={noop} />
+                    <DelegationRow key={a.id} action={a} selected={false} onSelect={() => openAction(a.id)} />
                   ))}
                 </>
               )}
@@ -635,7 +635,7 @@ const AllDelegated: React.FC = () => {
                 <>
                   <GroupHeader label="NO RETURN DATE" count={groups.nodate.length} />
                   {groups.nodate.map((a) => (
-                    <DelegationRow key={a.id} action={a} selected={false} onSelect={noop} />
+                    <DelegationRow key={a.id} action={a} selected={false} onSelect={() => openAction(a.id)} />
                   ))}
                 </>
               )}

@@ -1,13 +1,16 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { LifetimeCounters } from "@/components/LifetimeCounters";
-import { Link } from "react-router-dom";
-import { Tooltip, SparkTooltipContent, StateDotTooltip } from "@/components/Tooltip";
-import { buildYouTubeTooltips } from "@/lib/sparkTooltips";
-import RitualPanel from "@/components/RitualPanel";
+import { Tooltip, StateDotTooltip } from "@/components/Tooltip";
+import { useStore, selectors } from "@/store/useStore";
+import type { Action, Goal, Project, Ritual, GoalColorVar } from "@/types";
 
-const G1 = "hsl(var(--goal-1))";
+const COLOR_VAR: Record<GoalColorVar, string> = {
+  "goal-1": "hsl(var(--goal-1))",
+  "goal-2": "hsl(var(--goal-2))",
+  "goal-3": "hsl(var(--goal-3))",
+};
 
-/* ===== Sidebar (inactive variant for sub-routes) ===== */
 const NAV: { label: string; href: string }[] = [
   { label: "Home", href: "/" },
   { label: "Weekly", href: "#" },
@@ -48,7 +51,6 @@ const Sidebar: React.FC = () => (
   </aside>
 );
 
-/* ===== Section header ===== */
 const SectionHeader: React.FC<{ children: React.ReactNode; meta?: React.ReactNode }> = ({ children, meta }) => (
   <div className="flex items-center justify-between mb-3">
     <h2 className="text-[12px] font-medium uppercase tracking-[0.08em] text-text-secondary">{children}</h2>
@@ -56,7 +58,6 @@ const SectionHeader: React.FC<{ children: React.ReactNode; meta?: React.ReactNod
   </div>
 );
 
-/* ===== Tier B: Ghost add button ===== */
 const GhostAddButton: React.FC<{ children: React.ReactNode; onClick?: () => void }> = ({ children, onClick }) => (
   <button
     onClick={onClick}
@@ -67,56 +68,56 @@ const GhostAddButton: React.FC<{ children: React.ReactNode; onClick?: () => void
 );
 
 /* ===== Success Criteria ===== */
-const CRITERIA = [
-  { text: "Define content pillars and audience", done: true },
-  { text: "Publish first 3 videos", done: false },
-  { text: "Reach 1,000 subscribers", done: false },
-  { text: "Sustain weekly publishing for 3 months", done: false },
-];
-
-const SuccessCriteria: React.FC = () => (
-  <section>
-    <div className="flex items-center justify-between mb-3">
-      <h2 className="text-[12px] font-medium uppercase tracking-[0.08em] text-text-secondary">Success criteria</h2>
-      <div className="font-mono text-[11px] tabular-nums text-text-tertiary">1 of 4 met</div>
-    </div>
-    <div>
-      {CRITERIA.map((c, i) => (
-        <div
-          key={i}
-          className="flex items-center gap-3 h-7 px-2 -mx-2 rounded-[2px] hover:bg-surface-hover transition-colors cursor-pointer"
-        >
-          <span
-            className="inline-flex items-center justify-center w-4 h-4 rounded-[2px] border shrink-0"
-            style={{
-              borderColor: c.done ? "hsl(var(--accent))" : "hsl(var(--text-tertiary))",
-              background: c.done ? "hsl(var(--accent))" : "transparent",
-            }}
-          >
-            {c.done && <span className="text-text-primary text-[10px] leading-none">✓</span>}
-          </span>
-          <span
-            className={`text-[13px] ${c.done ? "text-text-secondary line-through" : "text-text-primary"}`}
-          >
-            {c.text}
-          </span>
+const SuccessCriteria: React.FC<{ goal: Goal }> = ({ goal }) => {
+  const updateGoal = useStore((s) => s.updateGoal);
+  const criteria = goal.successCriteria ?? [];
+  const met = criteria.filter((c) => c.done).length;
+  const toggle = (cid: string) => {
+    updateGoal(goal.id, {
+      successCriteria: criteria.map((c) => (c.id === cid ? { ...c, done: !c.done } : c)),
+    });
+  };
+  return (
+    <section>
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-[12px] font-medium uppercase tracking-[0.08em] text-text-secondary">Success criteria</h2>
+        <div className="font-mono text-[11px] tabular-nums text-text-tertiary">
+          {met} of {criteria.length} met
         </div>
-      ))}
-    </div>
-  </section>
-);
+      </div>
+      {criteria.length === 0 ? (
+        <div className="font-mono text-[11px] text-text-tertiary">No criteria defined.</div>
+      ) : (
+        <div>
+          {criteria.map((c) => (
+            <div
+              key={c.id}
+              onClick={() => toggle(c.id)}
+              className="flex items-center gap-3 h-7 px-2 -mx-2 rounded-[2px] hover:bg-surface-hover transition-colors cursor-pointer"
+            >
+              <span
+                className="inline-flex items-center justify-center w-4 h-4 rounded-[2px] border shrink-0"
+                style={{
+                  borderColor: c.done ? "hsl(var(--accent))" : "hsl(var(--text-tertiary))",
+                  background: c.done ? "hsl(var(--accent))" : "transparent",
+                }}
+              >
+                {c.done && <span className="text-text-primary text-[10px] leading-none">✓</span>}
+              </span>
+              <span
+                className={`text-[13px] ${c.done ? "text-text-secondary line-through" : "text-text-primary"}`}
+              >
+                {c.text}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+};
 
-/* ===== Hero state block ===== */
-/* 30 days, weekday-heavy, sustained recent movement */
-const SPARK = [
-  2, 3, 0, 0, 3, 4, 2,
-  3, 4, 1, 0, 2, 3, 4,
-  2, 3, 0, 1, 3, 4, 2,
-  4, 5, 1, 0, 3, 4, 2,
-  3, 5,
-];
-const SPARK_TIPS = buildYouTubeTooltips(SPARK);
-
+/* ===== Hero state ===== */
 const Pillar: React.FC<{ label: string; value: string; sub: string }> = ({ label, value, sub }) => (
   <div className="flex flex-col">
     <div className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">{label}</div>
@@ -125,14 +126,14 @@ const Pillar: React.FC<{ label: string; value: string; sub: string }> = ({ label
   </div>
 );
 
-/* Unified state row: label / value / mini-bar */
 const StateRow: React.FC<{
   label: string;
   value: React.ReactNode;
   pct: number;
+  color: string;
   opacity?: number;
   isLast?: boolean;
-}> = ({ label, value, pct, opacity = 1, isLast }) => (
+}> = ({ label, value, pct, color, opacity = 1, isLast }) => (
   <div
     className={`h-8 flex items-center gap-4 py-1.5 ${isLast ? "" : "border-b border-border-subtle"}`}
   >
@@ -141,56 +142,117 @@ const StateRow: React.FC<{
     </span>
     <span className="flex-1 min-w-0">{value}</span>
     <div className="w-[80px] h-[5px] bg-surface-hover rounded-[2px] overflow-hidden shrink-0">
-      <div className="h-full rounded-[2px]" style={{ width: `${pct}%`, background: G1, opacity }} />
+      <div className="h-full rounded-[2px]" style={{ width: `${pct}%`, background: color, opacity }} />
     </div>
   </div>
 );
 
-const HeroState: React.FC = () => {
-  const max = Math.max(...SPARK, 1);
+const HeroState: React.FC<{
+  goal: Goal;
+  projects: Project[];
+  rituals: Ritual[];
+  actions: Action[];
+}> = ({ goal, projects, rituals, actions }) => {
+  const color = COLOR_VAR[goal.color];
+  const progress = useStore((s) => selectors.goalProgress(s, goal.id));
+  const projectsClosed = projects.filter((p) => p.status === "completed").length;
+  const projectsActive = projects.filter((p) => p.status === "active").length;
+  const projectsTotal = projects.length;
+  const criteria = goal.successCriteria ?? [];
+  const criteriaMet = criteria.filter((c) => c.done).length;
+  const ritualMultText =
+    rituals.length === 0
+      ? "no rituals"
+      : `×${(
+          rituals.reduce((acc, r) => acc + (r.totalCompletions >= 3 ? 1 : 0), 0) > 0
+            ? 1.1
+            : 1.0
+        ).toFixed(2)} multiplier`;
+
+  // Time estimate aggregate
+  const totalMinutes = actions
+    .filter((a) => a.status !== "dropped" && a.status !== "cancelled")
+    .reduce((s, a) => s + (a.timeEstimateMinutes ?? 0), 0);
+  const doneMinutes = actions
+    .filter((a) => a.status === "done")
+    .reduce((s, a) => s + (a.timeEstimateMinutes ?? 0), 0);
+  const fmtH = (m: number) => `${Math.round(m / 60)}h`;
+
+  // Last activity
+  const lastTs = actions
+    .map((a) => a.completedAt ?? a.delegatedAt ?? a.updatedAt ?? a.createdAt)
+    .filter(Boolean)
+    .sort()
+    .reverse()[0];
+  const lastLabel = lastTs ? fmtAgo(lastTs) : "—";
+
+  const actionsDone = actions.filter((a) => a.status === "done").length;
+  const ageMonths = Math.max(
+    1,
+    Math.round((Date.now() - new Date(goal.createdAt).getTime()) / (1000 * 60 * 60 * 24 * 30)),
+  );
+
   return (
     <div className="bg-surface-elevated border border-border-subtle rounded-[8px] p-8">
-      {/* Top row */}
       <div className="flex justify-between items-start gap-8">
         <div>
-          <div className="font-mono text-[56px] font-medium text-text-primary tabular-nums leading-none">47%</div>
-          <div className="mt-3 text-[13px] uppercase tracking-[0.08em] text-text-tertiary">PROGRESS · OUTCOME</div>
-          <div className="mt-1 text-[12px] text-text-secondary">12 actions done · 2 of 3 projects closed · Active 4 months</div>
+          <div className="font-mono text-[56px] font-medium text-text-primary tabular-nums leading-none">
+            {progress.outcome}%
+          </div>
+          <div className="mt-3 text-[13px] uppercase tracking-[0.08em] text-text-tertiary">
+            PROGRESS · OUTCOME
+          </div>
+          <div className="mt-1 text-[12px] text-text-secondary">
+            {actionsDone} actions done · {projectsClosed} of {projectsTotal} projects closed · Active{" "}
+            {ageMonths} {ageMonths === 1 ? "month" : "months"}
+          </div>
         </div>
         <div className="flex gap-6 shrink-0">
-          <Pillar label="PROJECTS" value="2/3" sub="closed · 1 active" />
-          <Pillar label="RITUALS" value="1" sub="active · ×1.10 multiplier" />
-          <Pillar label="CRITERIA" value="1/4" sub="criteria met" />
+          <Pillar
+            label="PROJECTS"
+            value={`${projectsClosed}/${projectsTotal}`}
+            sub={`closed · ${projectsActive} active`}
+          />
+          <Pillar
+            label="RITUALS"
+            value={`${rituals.length}`}
+            sub={`active · ${ritualMultText}`}
+          />
+          <Pillar
+            label="CRITERIA"
+            value={`${criteriaMet}/${criteria.length}`}
+            sub="criteria met"
+          />
         </div>
       </div>
 
-      {/* State block */}
       <div className="mt-8">
-        <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-2">
-          STATE
-        </div>
+        <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-2">STATE</div>
         <div>
           <StateRow
             label="OUTCOME"
-            value={<span className="font-mono text-[14px] text-text-primary tabular-nums">47%</span>}
-            pct={47}
+            value={<span className="font-mono text-[14px] text-text-primary tabular-nums">{progress.outcome}%</span>}
+            pct={progress.outcome}
+            color={color}
           />
           <StateRow
             label="EFFORT"
-            value={<span className="font-mono text-[14px] text-text-primary tabular-nums">32%</span>}
-            pct={32}
+            value={<span className="font-mono text-[14px] text-text-primary tabular-nums">{progress.effort}%</span>}
+            pct={progress.effort}
+            color={color}
             opacity={0.6}
           />
           <StateRow
             label="TIME"
             value={
               <span className="font-mono tabular-nums">
-                <span className="text-[14px] text-text-primary">32h</span>
+                <span className="text-[14px] text-text-primary">{fmtH(doneMinutes)}</span>
                 <span className="text-text-tertiary"> / </span>
-                <span className="text-[12px] text-text-secondary">75h</span>
+                <span className="text-[12px] text-text-secondary">{fmtH(totalMinutes)}</span>
               </span>
             }
-            pct={43}
+            pct={totalMinutes > 0 ? Math.round((doneMinutes / totalMinutes) * 100) : 0}
+            color={color}
             isLast
           />
         </div>
@@ -199,208 +261,199 @@ const HeroState: React.FC = () => {
         </div>
       </div>
 
-      {/* Sparkline */}
-      <div className="mt-6">
-        <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-2">
-          ACTIVITY · LAST 30 DAYS
-        </div>
-        <div className="w-full h-20 flex items-end gap-[2px]">
-          {SPARK.map((v, i) => {
-            const h = v === 0 ? 4 : Math.max(4, Math.round((v / max) * 80));
-            const info = SPARK_TIPS[i];
-            return (
-              <Tooltip key={i} content={<SparkTooltipContent info={info} />} className="flex-1 h-full flex items-end">
-                <div
-                  className="w-full hover:brightness-[1.15]"
-                  style={{
-                    height: h,
-                    background: v === 0 ? "hsl(var(--border-subtle))" : G1,
-                    transition: "filter 80ms ease",
-                  }}
-                />
-              </Tooltip>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* State summary */}
       <div className="mt-4 font-mono text-[12px] text-text-secondary">
-        Last activity today · 14 actions done in the last 4 weeks ·{" "}
-        <span className="text-text-primary">Movement steady</span>
+        Last activity {lastLabel} · {actionsDone} actions done overall
       </div>
     </div>
   );
 };
 
-/* ===== Project card (reused style) ===== */
-type Project = {
-  goalLabel: string;
-  goalColor: string;
-  title: string;
-  done: number;
-  total: number;
-  last: string;
-  state: "active" | "stalled";
-  warnLast?: boolean;
-  href?: string;
-};
+function fmtAgo(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  if (days <= 0) return "today";
+  if (days === 1) return "yesterday";
+  if (days < 30) return `${days}d ago`;
+  return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
 
-const ProjectCard: React.FC<{ p: Project }> = ({ p }) => {
-  const pct = Math.round((p.done / p.total) * 100);
-  const inner = (
-    <div className="group h-[120px] p-3 flex flex-col gap-2 rounded-[6px] bg-surface-raised border border-border-subtle hover:bg-surface-hover hover:border-accent cursor-pointer transition-colors duration-100">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5 min-w-0">
-          <span className="w-2 h-2 rounded-full shrink-0" style={{ background: p.goalColor }} />
-          <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary truncate">
-            {p.goalLabel}
-          </span>
-        </div>
-        <Tooltip content={<StateDotTooltip state={p.state} lastActivity={p.last} stalledFor={p.last} />}>
-          <span
-            className="w-2 h-2 rounded-full shrink-0"
-            style={{ background: p.state === "active" ? "hsl(var(--state-active))" : "hsl(var(--state-stalled))" }}
-          />
-        </Tooltip>
-      </div>
-      <div
-        className="flex-1 text-[15px] font-medium text-text-primary leading-[1.3] overflow-hidden"
-        style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}
-      >
-        {p.title}
-      </div>
-      <div className="h-1 w-full bg-surface-hover rounded-[2px] overflow-hidden">
-        <div className="h-full rounded-[2px]" style={{ width: `${pct}%`, background: p.goalColor }} />
-      </div>
-      <div className="flex items-center justify-between font-mono text-[11px] tabular-nums">
-        <div>
-          <span className="text-text-primary">{p.done}/{p.total}</span>
-          <span className="text-text-tertiary"> actions</span>
-        </div>
-        <div className="text-text-secondary">
-          Last: <span className={p.warnLast ? "text-text-warning" : "text-text-secondary"}>{p.last}</span>
-        </div>
-      </div>
-    </div>
-  );
-  if (p.href) return <Link to={p.href} className="block">{inner}</Link>;
-  return inner;
-};
+/* ===== Project card ===== */
+const ProjectCard: React.FC<{ p: Project; color: string; goalLabel: string }> = ({
+  p,
+  color,
+  goalLabel,
+}) => {
+  const progress = useStore((s) => selectors.projectProgress(s, p.id));
+  const state = useStore((s) => selectors.stateIndicator(s, "project", p.id));
+  const counts = useStore((s) => {
+    const acts = s.actions.filter(
+      (a) => a.projectId === p.id && a.status !== "dropped" && a.status !== "cancelled",
+    );
+    return { done: acts.filter((a) => a.status === "done").length, total: acts.length };
+  });
+  const lastTs = useStore((s) => {
+    const acts = s.actions.filter((a) => a.projectId === p.id);
+    return acts
+      .map((a) => a.completedAt ?? a.delegatedAt ?? a.updatedAt ?? a.createdAt)
+      .filter(Boolean)
+      .sort()
+      .reverse()[0];
+  });
+  const last = lastTs ? fmtAgo(lastTs) : "—";
+  const warnLast = lastTs ? Date.now() - new Date(lastTs).getTime() > 7 * 86400000 : false;
 
-const ActiveProjectsSection: React.FC = () => {
-  const projects: Project[] = [
-    { goalLabel: "YOUTUBE CHANNEL", goalColor: G1, title: "Shoot video #1", done: 3, total: 7, last: "today", state: "active", href: "/projects/shoot-video-1" },
-    { goalLabel: "YOUTUBE CHANNEL", goalColor: G1, title: "Set up workspace", done: 4, total: 5, last: "2d ago", state: "active" },
-  ];
   return (
-    <section>
-      <SectionHeader meta="1 NEAR COMPLETION">Active projects · 2</SectionHeader>
-      <div className="grid grid-cols-2 gap-4">
-        {projects.map((p, i) => (
-          <ProjectCard key={i} p={p} />
-        ))}
+    <Link to={`/projects/${p.id}`} className="block">
+      <div className="group h-[120px] p-3 flex flex-col gap-2 rounded-[6px] bg-surface-raised border border-border-subtle hover:bg-surface-hover hover:border-accent cursor-pointer transition-colors duration-100">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <span className="w-2 h-2 rounded-full shrink-0" style={{ background: color }} />
+            <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary truncate">
+              {goalLabel}
+            </span>
+          </div>
+          <Tooltip content={<StateDotTooltip state={state} lastActivity={last} stalledFor={last} />}>
+            <span
+              className="w-2 h-2 rounded-full shrink-0"
+              style={{ background: state === "active" ? "hsl(var(--state-active))" : "hsl(var(--state-stalled))" }}
+            />
+          </Tooltip>
+        </div>
+        <div
+          className="flex-1 text-[15px] font-medium text-text-primary leading-[1.3] overflow-hidden"
+          style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}
+        >
+          {p.title}
+        </div>
+        <div className="h-1 w-full bg-surface-hover rounded-[2px] overflow-hidden">
+          <div className="h-full rounded-[2px]" style={{ width: `${progress.outcome}%`, background: color }} />
+        </div>
+        <div className="flex items-center justify-between font-mono text-[11px] tabular-nums">
+          <div>
+            <span className="text-text-primary">
+              {counts.done}/{counts.total}
+            </span>
+            <span className="text-text-tertiary"> actions</span>
+          </div>
+          <div className="text-text-secondary">
+            Last: <span className={warnLast ? "text-text-warning" : "text-text-secondary"}>{last}</span>
+          </div>
+        </div>
       </div>
-      <GhostAddButton>+ Add project to this goal</GhostAddButton>
-    </section>
+    </Link>
   );
 };
 
-/* ===== Rituals ===== */
-const RITUAL_STRIP = [1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1];
-
-const RitualsSection: React.FC<{ onOpenRitual: () => void }> = ({ onOpenRitual }) => (
-  <section>
-    <SectionHeader>Rituals · 1</SectionHeader>
+/* ===== Ritual row ===== */
+const RitualRow: React.FC<{ r: Ritual; color: string; onOpen: () => void }> = ({ r, color, onOpen }) => {
+  const mult = useStore((s) => selectors.ritualMultiplier(s, r.id));
+  const lastDays = r.completionHistory.slice(-12).map(() => 1);
+  while (lastDays.length < 12) lastDays.unshift(0);
+  return (
     <div
-      onClick={onOpenRitual}
+      onClick={onOpen}
       role="button"
       tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onOpenRitual();
-        }
-      }}
       className="bg-surface-raised border border-border-subtle rounded-[6px] p-4 flex items-center gap-6 cursor-pointer hover:bg-surface-hover transition-colors"
     >
-      <span className="w-3 h-3 rounded-full shrink-0" style={{ background: G1 }} />
+      <span className="w-3 h-3 rounded-full shrink-0" style={{ background: color }} />
       <div>
-        <div className="text-[14px] font-medium text-text-primary">Weekly project audit</div>
+        <div className="text-[14px] font-medium text-text-primary">{r.title}</div>
         <div className="mt-0.5 font-mono text-[11px] uppercase tracking-[0.06em] text-text-secondary">
-          Weekly · Mondays
+          {r.schedule}
         </div>
       </div>
       <div className="flex-1" />
       <div className="flex flex-col items-end">
-        <div className="font-mono text-[18px] text-text-primary">×1.10</div>
-        <div className="font-mono text-[11px] text-text-tertiary">12 completions · next ×1.25 at 30</div>
+        <div className="font-mono text-[18px] text-text-primary">×{mult.toFixed(2)}</div>
+        <div className="font-mono text-[11px] text-text-tertiary">{r.totalCompletions} completions</div>
       </div>
       <div className="flex gap-[2px]">
-        {RITUAL_STRIP.map((v, i) => (
+        {lastDays.map((v, i) => (
           <span
             key={i}
             className="w-2 h-2"
-            style={{ background: v ? G1 : "hsl(var(--surface-hover))" }}
+            style={{ background: v ? color : "hsl(var(--surface-hover))" }}
           />
         ))}
       </div>
     </div>
-    <GhostAddButton>+ Add ritual to this goal</GhostAddButton>
-  </section>
-);
-
-/* ===== Recent activity ===== */
-type ActivityKind = "done" | "delegated" | "closed";
-const ACTIVITY: { kind: ActivityKind; title: string; crumb?: string; date: string }[] = [
-  { kind: "done", title: "Outline structure", crumb: "Shoot video #1", date: "Today" },
-  { kind: "done", title: "Define content pillars", crumb: "Set up workspace", date: "Yesterday" },
-  { kind: "delegated", title: "Buy ring light → Maria", crumb: "Set up workspace", date: "2d ago" },
-  { kind: "done", title: "Research camera options", crumb: "Set up workspace", date: "3d ago" },
-  { kind: "done", title: "Set up recording space", crumb: "Set up workspace", date: "4d ago" },
-  { kind: "closed", title: "Define content pillars project closed", date: "5d ago" },
-  { kind: "done", title: "Test microphone", crumb: "Set up workspace", date: "6d ago" },
-  { kind: "done", title: "Define audience persona", crumb: "Set up workspace", date: "Apr 28" },
-];
-
-const ActivityMarker: React.FC<{ kind: ActivityKind }> = ({ kind }) => {
-  if (kind === "done") return <span className="text-[12px] w-3 text-center" style={{ color: "hsl(var(--status-done))" }}>✓</span>;
-  if (kind === "delegated") return <span className="text-[12px] w-3 text-center" style={{ color: "hsl(var(--status-delegated))" }}>→</span>;
-  return <span className="text-[12px] w-3 text-center text-text-secondary">■</span>;
+  );
 };
 
-const RecentActivity: React.FC = () => (
-  <section>
-    <SectionHeader>Recent activity · 8</SectionHeader>
-    <div>
-      {ACTIVITY.map((a, i) => (
-        <div
-          key={i}
-          className="flex items-center gap-3 h-8 py-1 border-b border-border-subtle last:border-b-0"
-        >
-          <ActivityMarker kind={a.kind} />
-          <span className="text-[13px] text-text-primary">{a.title}</span>
-          {a.crumb && <span className="text-[12px] text-text-secondary">· {a.crumb}</span>}
-          <div className="flex-1" />
-          <span className="font-mono text-[11px] text-text-tertiary">{a.date}</span>
-        </div>
-      ))}
-    </div>
-    <a href="#" className="inline-block mt-3 text-[12px] text-text-secondary hover:text-text-primary hover:underline transition-colors">
-      View all activity →
-    </a>
-  </section>
-);
+/* ===== Recent activity ===== */
+const RecentActivity: React.FC<{ actions: Action[] }> = ({ actions }) => {
+  const events = useMemo(() => {
+    const items = actions
+      .filter(
+        (a) =>
+          a.status === "done" ||
+          a.status === "delegated" ||
+          a.status === "dropped" ||
+          a.status === "cancelled",
+      )
+      .map((a) => {
+        const at =
+          a.completedAt ?? a.delegatedAt ?? a.droppedAt ?? a.cancelledAt ?? a.updatedAt ?? a.createdAt;
+        return { a, at };
+      })
+      .sort((x, y) => (y.at ?? "").localeCompare(x.at ?? ""))
+      .slice(0, 10);
+    return items;
+  }, [actions]);
 
-/* ===== Ideas (collapsible) — mirrors first 3 YouTube ideas from /ideas ===== */
-const IDEAS: { title: string; captured: string }[] = [
-  { title: "Test vlog-style intro for video #2", captured: "captured 2d ago" },
-  { title: "Research lighting kits under $200", captured: "captured 3d ago" },
-  { title: "Music licensing services comparison", captured: "captured 4d ago" },
-];
+  if (events.length === 0) {
+    return (
+      <section>
+        <SectionHeader>Recent activity · 0</SectionHeader>
+        <div className="font-mono text-[11px] text-text-tertiary">No completed actions yet.</div>
+      </section>
+    );
+  }
 
-const IdeasSection: React.FC = () => {
+  return (
+    <section>
+      <SectionHeader>Recent activity · {events.length}</SectionHeader>
+      <div>
+        {events.map(({ a, at }) => (
+          <div
+            key={a.id}
+            className="flex items-center gap-3 h-8 py-1 border-b border-border-subtle last:border-b-0"
+          >
+            <span
+              className="text-[12px] w-3 text-center"
+              style={{
+                color:
+                  a.status === "done"
+                    ? "hsl(var(--status-done))"
+                    : a.status === "delegated"
+                    ? "hsl(var(--status-delegated))"
+                    : "hsl(var(--text-secondary))",
+              }}
+            >
+              {a.status === "done" ? "✓" : a.status === "delegated" ? "→" : "■"}
+            </span>
+            <span className="text-[13px] text-text-primary">{a.title}</span>
+            <div className="flex-1" />
+            <span className="font-mono text-[11px] text-text-tertiary">{fmtAgo(at!)}</span>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+};
+
+/* ===== Ideas ===== */
+const IdeasSection: React.FC<{ goalId: string }> = ({ goalId }) => {
   const [open, setOpen] = useState(true);
+  const ideas = useStore((s) => s.ideas.filter((i) => i.goalId === goalId && i.status === "captured"));
+  const captureIdea = useStore((s) => s.captureIdea);
+  const [text, setText] = useState("");
+  const submit = () => {
+    if (!text.trim()) return;
+    captureIdea({ title: text.trim(), goalId });
+    setText("");
+  };
   return (
     <section>
       <button
@@ -408,29 +461,32 @@ const IdeasSection: React.FC = () => {
         className="flex items-center gap-2 text-[12px] font-medium uppercase tracking-[0.08em] text-text-tertiary hover:text-text-secondary transition-colors cursor-pointer"
       >
         <span className="inline-block w-3">{open ? "▾" : "▸"}</span>
-        Ideas · 3 captured
+        Ideas · {ideas.length} captured
       </button>
       {open && (
         <div className="mt-3">
           <div className="flex items-center gap-2 bg-surface-raised border border-border-subtle rounded-[4px] px-3 py-2.5">
             <input
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && submit()}
               placeholder="Capture an idea..."
               className="flex-1 bg-transparent outline-none text-[13px] text-text-primary placeholder:text-text-tertiary"
             />
           </div>
           <div className="mt-3">
-            {IDEAS.map((idea, i) => (
+            {ideas.map((idea) => (
               <div
-                key={i}
+                key={idea.id}
                 className="flex items-center justify-between gap-3 h-8 px-2 -mx-2 rounded-[2px] hover:bg-surface-hover transition-colors"
               >
                 <span className="text-[13px] text-text-primary truncate">{idea.title}</span>
-                <span className="font-mono text-[11px] text-text-tertiary shrink-0">{idea.captured}</span>
+                <span className="font-mono text-[11px] text-text-tertiary shrink-0">{fmtAgo(idea.capturedAt)}</span>
               </div>
             ))}
           </div>
           <Link
-            to="/ideas?goal=g1"
+            to="/ideas"
             className="inline-block mt-3 text-[12px] text-[hsl(var(--accent))] hover:text-text-primary transition-colors"
           >
             View all ideas in this goal →
@@ -443,13 +499,38 @@ const IdeasSection: React.FC = () => {
 
 /* ===== Page ===== */
 const GoalDetail: React.FC = () => {
-  const [ritualOpen, setRitualOpen] = useState(false);
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const goal = useStore((s) => s.goals.find((g) => g.id === id));
+  const projects = useStore((s) => s.projects.filter((p) => p.goalId === id));
+  const rituals = useStore((s) => s.rituals.filter((r) => r.goalId === id && r.status === "active"));
+  const actions = useStore((s) => s.actions.filter((a) => a.goalId === id));
+  const openPanel = useStore((s) => s.openPanel);
+
+  if (!goal) {
+    return (
+      <div className="min-h-screen bg-surface-base text-text-primary">
+        <Sidebar />
+        <main className="ml-[220px] p-10">
+          <div className="text-[14px] text-text-secondary">Goal not found.</div>
+          <Link to="/" className="mt-4 inline-block text-[13px] text-accent hover:underline">
+            ← Back to home
+          </Link>
+        </main>
+      </div>
+    );
+  }
+
+  const color = COLOR_VAR[goal.color];
+  const goalLabel = goal.title.toUpperCase();
+  const state = useStore((s) => selectors.stateIndicator(s, "goal", goal.id));
+  const activeProjects = projects.filter((p) => p.status === "active");
+
   return (
     <div className="min-h-screen bg-surface-base text-text-primary">
       <Sidebar />
       <main className="ml-[220px] flex justify-center">
         <div className="w-full max-w-[1000px] px-10 pt-8 pb-16">
-          {/* Header */}
           <div>
             <Link
               to="/"
@@ -460,58 +541,110 @@ const GoalDetail: React.FC = () => {
             <div className="h-4" />
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3 min-w-0">
-                <Tooltip content={<StateDotTooltip state="active" lastActivity="today" />}>
+                <Tooltip content={<StateDotTooltip state={state} lastActivity="recent" />}>
                   <span
                     className="w-2.5 h-2.5 rounded-full shrink-0"
-                    style={{ background: "hsl(var(--state-active))" }}
+                    style={{ background: state === "active" ? "hsl(var(--state-active))" : "hsl(var(--state-stalled))" }}
                   />
                 </Tooltip>
-                <h1 className="text-[28px] font-medium text-text-primary truncate">
-                  Launch YouTube channel
-                </h1>
+                <h1 className="text-[28px] font-medium text-text-primary truncate">{goal.title}</h1>
                 <span className="ml-3 font-mono text-[11px] uppercase tracking-[0.08em] text-text-tertiary shrink-0">
-                  MID-TERM
+                  {goal.type === "mid-term" ? "MID-TERM" : "SHORT-TERM"}
                 </span>
               </div>
-              <button className="px-2 py-1 rounded-[4px] text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-colors text-[16px] leading-none">
+              <button
+                onClick={() => openPanel({ kind: "goal", mode: "edit", id: goal.id })}
+                className="px-2 py-1 rounded-[4px] text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-colors text-[16px] leading-none"
+                aria-label="Edit goal"
+              >
                 ···
               </button>
             </div>
             <div className="h-2" />
             <div className="font-mono text-[12px] text-text-tertiary">
-              Created Jan 15, 2026 · No target date
+              Created {new Date(goal.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} ·{" "}
+              {goal.targetDate
+                ? `Target ${new Date(goal.targetDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`
+                : "No target date"}
             </div>
           </div>
 
           <div className="h-6" />
 
-          {/* Description */}
-          <p className="text-[14px] text-text-secondary leading-[1.6]">
-            A long-term YouTube channel about creative tools and workflows. Goal is sustained presence and
-            meaningful audience, not a viral hit.
-          </p>
+          {goal.description && (
+            <p className="text-[14px] text-text-secondary leading-[1.6]">{goal.description}</p>
+          )}
 
           <div className="h-14" />
-          <SuccessCriteria />
+          <SuccessCriteria goal={goal} />
 
           <div className="h-14" />
-          <HeroState />
+          <HeroState goal={goal} projects={projects} rituals={rituals} actions={actions} />
 
           <div className="h-14" />
-          <ActiveProjectsSection />
+          <section>
+            <SectionHeader meta={`${activeProjects.length} ACTIVE`}>
+              Active projects · {activeProjects.length}
+            </SectionHeader>
+            {activeProjects.length === 0 ? (
+              <div className="font-mono text-[11px] text-text-tertiary">No active projects.</div>
+            ) : (
+              <div className="grid grid-cols-2 gap-4">
+                {activeProjects.map((p) => (
+                  <ProjectCard key={p.id} p={p} color={color} goalLabel={goalLabel} />
+                ))}
+              </div>
+            )}
+            <GhostAddButton
+              onClick={() =>
+                openPanel({
+                  kind: "project",
+                  mode: "new",
+                  prefill: { goalId: goal.id } as Partial<Project>,
+                })
+              }
+            >
+              + Add project to this goal
+            </GhostAddButton>
+          </section>
 
           <div className="h-14" />
-          <RitualsSection onOpenRitual={() => setRitualOpen(true)} />
+          <section>
+            <SectionHeader>Rituals · {rituals.length}</SectionHeader>
+            {rituals.length === 0 ? (
+              <div className="font-mono text-[11px] text-text-tertiary">No active rituals.</div>
+            ) : (
+              <div className="space-y-3">
+                {rituals.map((r) => (
+                  <RitualRow
+                    key={r.id}
+                    r={r}
+                    color={color}
+                    onOpen={() => openPanel({ kind: "ritual", mode: "edit", id: r.id })}
+                  />
+                ))}
+              </div>
+            )}
+            <GhostAddButton
+              onClick={() =>
+                openPanel({
+                  kind: "ritual",
+                  mode: "new",
+                  prefill: { goalId: goal.id } as Partial<Ritual>,
+                })
+              }
+            >
+              + Add ritual to this goal
+            </GhostAddButton>
+          </section>
 
           <div className="h-14" />
-          <RecentActivity />
-
+          <RecentActivity actions={actions} />
 
           <div className="h-14" />
-          <IdeasSection />
+          <IdeasSection goalId={goal.id} />
         </div>
       </main>
-      <RitualPanel open={ritualOpen} onClose={() => setRitualOpen(false)} />
     </div>
   );
 };

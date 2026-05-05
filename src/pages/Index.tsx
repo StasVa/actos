@@ -376,70 +376,183 @@ const ActiveProjects: React.FC = () => (
   </section>
 );
 
-/* ===== Today ===== */
-const Today: React.FC = () => (
-  <section>
-    <SectionLabel meta="4 ACTIONS · 3 RITUALS">Today</SectionLabel>
-    <div className="space-y-2">
-      <div className="flex items-center gap-3 px-3 py-2 bg-surface-raised rounded-[4px]">
-        <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">MAIN</span>
-        <span className="text-[13px] font-medium text-text-primary">Write script for video #1</span>
-        <span className="text-[12px] text-text-secondary">· YouTube channel · Shoot video #1</span>
-        <div className="flex-1" />
-        <TimePill>1h 30m</TimePill>
-        <Checkbox />
-      </div>
+/* ===== Today (live store-wired) ===== */
+function fmtTime(min?: number): string | null {
+  if (!min) return null;
+  const h = Math.floor(min / 60);
+  const m = min % 60;
+  if (h && m) return `${h}h ${m}m`;
+  if (h) return `${h}h`;
+  return `${m}m`;
+}
 
-      {[
-        { c: G1, title: "Research thumbnail styles", crumb: "YouTube · Shoot video #1", time: "30m" },
-        { c: G1, title: "Buy ring light", crumb: "YouTube · Set up workspace", del: "→ Maria", time: "45m" },
-        { c: G2, title: "Plan tomorrow's meals", crumb: "Lose 5 kg · Nutrition plan", time: "20m" },
-        { c: G3, title: "Read chapter 4 of current book", crumb: "Read 24 books · Daily reading habit", time: "30m" },
-      ].map((r, i) => (
-        <div
-          key={i}
-          className="flex items-center gap-3 pr-3 h-8 rounded-[2px] hover:bg-surface-hover transition-colors overflow-hidden"
-        >
-          <Strip color={r.c} />
-          <div className="pl-1">
-            <Checkbox />
+const Today: React.FC = () => {
+  const goals = useStore((s) => s.goals);
+  const projects = useStore((s) => s.projects);
+  const actions = useStore((s) => s.actions);
+  const rituals = useStore((s) => s.rituals);
+  const dayEntry = useStore((s) =>
+    s.dayEntries.find((d) => d.date === TODAY_ISO),
+  );
+  const settings = useStore((s) => s.settings);
+  const changeActionStatus = useStore((s) => s.changeActionStatus);
+  const createAction = useStore((s) => s.createAction);
+  const openPanel = useStore((s) => s.openPanel);
+  const markRitualInstanceDone = useStore((s) => s.markRitualInstanceDone);
+
+  const [quickAdd, setQuickAdd] = useState("");
+
+  const todays = actions
+    .filter((a) => a.scheduledDate === TODAY_ISO && a.status === "planned")
+    .sort((a, b) => (b.impact ?? 0) - (a.impact ?? 0));
+
+  const mainTaskId = dayEntry?.mainTaskActionId;
+  const mainTask = mainTaskId ? actions.find((a) => a.id === mainTaskId) : undefined;
+  const others = todays.filter((a) => a.id !== mainTaskId);
+
+  const todaysRituals = rituals.filter((r) => r.status === "active");
+  const ritualsTotal = todaysRituals.length;
+
+  const goalById = (id: string) => goals.find((g) => g.id === id);
+  const projectById = (id: string | null) =>
+    id ? projects.find((p) => p.id === id) : undefined;
+
+  const colorVar = (goalId: string) => {
+    const g = goalById(goalId);
+    return g ? `hsl(var(--${g.color}))` : "hsl(var(--text-tertiary))";
+  };
+
+  const breadcrumb = (goalId: string, projectId: string | null) => {
+    const g = goalById(goalId);
+    const p = projectById(projectId);
+    if (g && p) return `· ${g.title} · ${p.title}`;
+    if (g) return `· ${g.title}`;
+    return "";
+  };
+
+  const handleToggleDone = (id: string) => {
+    changeActionStatus(id, "done");
+    toast.success("Action completed");
+  };
+
+  const handleQuickAdd = () => {
+    const t = quickAdd.trim();
+    if (!t) return;
+    const id = createAction({ title: t, scheduledDate: TODAY_ISO });
+    setQuickAdd("");
+    toast.success("Action added to today");
+    openPanel({ kind: "action", mode: "edit", id });
+  };
+
+  const handleRitualToggle = (ritualId: string, alreadyDone: boolean) => {
+    if (alreadyDone) return;
+    markRitualInstanceDone(ritualId);
+    toast.success("Ritual logged");
+  };
+
+  return (
+    <section>
+      <SectionLabel meta={`${todays.length} ACTIONS · ${ritualsTotal} RITUALS`}>Today</SectionLabel>
+      <div className="space-y-2">
+        {mainTask && (
+          <div
+            onClick={() => openPanel({ kind: "action", mode: "edit", id: mainTask.id })}
+            className="flex items-center gap-3 px-3 py-2 bg-surface-raised rounded-[4px] cursor-pointer hover:bg-surface-hover transition-colors"
+          >
+            <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">MAIN</span>
+            <span className="text-[13px] font-medium text-text-primary">{mainTask.title}</span>
+            <span className="text-[12px] text-text-secondary">{breadcrumb(mainTask.goalId, mainTask.projectId)}</span>
+            <div className="flex-1" />
+            {fmtTime(mainTask.timeEstimateMinutes) && (
+              <TimePill>{fmtTime(mainTask.timeEstimateMinutes)}</TimePill>
+            )}
+            <button
+              onClick={(e) => { e.stopPropagation(); handleToggleDone(mainTask.id); }}
+              className="inline-block rounded-[2px] border border-text-tertiary hover:border-accent shrink-0"
+              style={{ width: 14, height: 14 }}
+              aria-label="Mark done"
+            />
           </div>
-          <span className="text-[13px] text-text-primary">{r.title}</span>
-          <span className="text-[12px] text-text-secondary">· {r.crumb}</span>
-          <div className="flex-1" />
-          {r.del && <span className="font-mono text-[11px] text-text-tertiary">{r.del}</span>}
-          <TimePill>{r.time}</TimePill>
-        </div>
-      ))}
+        )}
 
-      <div className="flex gap-6 pt-1">
-        <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full" style={{ background: G2 }} />
-          <span className="text-[13px] text-text-primary">Morning run</span>
-          <span className="font-mono text-[11px] text-text-tertiary">Daily · 24 done · ×1.10</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full border" style={{ borderColor: G2 }} />
-          <span className="text-[13px] text-text-primary">Evening weight log</span>
-          <span className="font-mono text-[11px] text-text-tertiary">Daily · 8 done · ×1.05</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full border" style={{ borderColor: G3 }} />
-          <span className="text-[13px] text-text-primary">Daily reading 30min</span>
-          <span className="font-mono text-[11px] text-text-tertiary">Daily · 47 done · ×1.25</span>
+        {others.length === 0 && !mainTask && (
+          <div className="px-3 py-6 text-center font-mono text-[11px] text-text-tertiary border border-dashed border-border-subtle rounded-[4px]">
+            No actions scheduled for today. Add one below.
+          </div>
+        )}
+
+        {others.map((a) => {
+          const time = fmtTime(a.timeEstimateMinutes);
+          return (
+            <div
+              key={a.id}
+              onClick={() => openPanel({ kind: "action", mode: "edit", id: a.id })}
+              className="flex items-center gap-3 pr-3 h-8 rounded-[2px] hover:bg-surface-hover transition-colors overflow-hidden cursor-pointer"
+            >
+              <Strip color={colorVar(a.goalId)} />
+              <button
+                onClick={(e) => { e.stopPropagation(); handleToggleDone(a.id); }}
+                className="ml-1 inline-block rounded-[2px] border border-text-tertiary hover:border-accent shrink-0"
+                style={{ width: 14, height: 14 }}
+                aria-label="Mark done"
+              />
+              <span className="text-[13px] text-text-primary truncate">{a.title}</span>
+              <span className="text-[12px] text-text-secondary truncate">{breadcrumb(a.goalId, a.projectId)}</span>
+              <div className="flex-1" />
+              {a.delegateName && (
+                <span className="font-mono text-[11px] text-text-tertiary">→ {a.delegateName}</span>
+              )}
+              {time && <TimePill>{time}</TimePill>}
+            </div>
+          );
+        })}
+
+        {todaysRituals.length > 0 && (
+          <div className="flex flex-wrap gap-x-6 gap-y-2 pt-1">
+            {todaysRituals.map((r) => {
+              const doneToday = r.completionHistory.some((c) => c.date === TODAY_ISO);
+              const mult = ritualMultiplier(r.totalCompletions);
+              const color = colorVar(r.goalId);
+              return (
+                <div
+                  key={r.id}
+                  onClick={() => openPanel({ kind: "ritual", mode: "edit", id: r.id })}
+                  className="flex items-center gap-2 cursor-pointer group"
+                >
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleRitualToggle(r.id, doneToday); }}
+                    className="w-2.5 h-2.5 rounded-full border transition-colors"
+                    style={{
+                      borderColor: color,
+                      background: doneToday ? color : "transparent",
+                    }}
+                    aria-label={doneToday ? "Done today" : "Mark ritual done"}
+                  />
+                  <span className="text-[13px] text-text-primary group-hover:text-accent transition-colors">{r.title}</span>
+                  <span className="font-mono text-[11px] text-text-tertiary">
+                    {r.schedule[0].toUpperCase() + r.schedule.slice(1)} · {r.totalCompletions} done · ×{mult.toFixed(2)}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        <div className="flex items-center gap-2 bg-surface-raised border border-border-subtle rounded-[4px] px-3 py-2 mt-2">
+          <input
+            value={quickAdd}
+            onChange={(e) => setQuickAdd(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") handleQuickAdd(); }}
+            className="flex-1 bg-transparent text-[13px] text-text-primary placeholder:text-text-tertiary focus:outline-none"
+            placeholder="Add an action for today…"
+          />
+          <span className="font-mono text-[11px] text-text-tertiary">⏎</span>
         </div>
       </div>
+    </section>
+  );
+};
 
-      <div className="flex items-center gap-2 bg-surface-raised border border-border-subtle rounded-[4px] px-3 py-2 mt-2">
-        <input
-          className="flex-1 bg-transparent text-[13px] text-text-primary placeholder:text-text-tertiary focus:outline-none"
-          placeholder="Add an action…  ⌘K for command"
-        />
-        <span className="font-mono text-[11px] text-text-tertiary">⌘K</span>
-      </div>
-    </div>
-  </section>
-);
 
 /* ===== Heavy Lift ===== */
 const HEAVY = [

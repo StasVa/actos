@@ -1,17 +1,30 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Tooltip, SparkTooltipContent, StateDotTooltip } from "@/components/Tooltip";
 import { LifetimeCounters } from "@/components/LifetimeCounters";
 import { buildYouTubeTooltips, buildFitnessTooltips, buildReadingTooltips } from "@/lib/sparkTooltips";
 import { useStore } from "@/store/useStore";
-import { DayStartPanel } from "@/components/DayStartPanel";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { ritualMultiplier } from "@/store/useStore";
 import { CardMenu } from "@/components/CardMenu";
 import { ConfirmModal } from "@/components/ConfirmModal";
+import { PlanTodayModal, CloseDayModal, ClosePlanModal } from "@/components/PlanCloseModals";
 import { toast } from "sonner";
 
 const TODAY_ISO = new Date().toISOString().slice(0, 10);
+const YESTERDAY_ISO = (() => {
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  return d.toISOString().slice(0, 10);
+})();
+
+const DAY_TYPE_LABELS: Record<string, string> = {
+  execution: "Execution",
+  recovery: "Recovery",
+  "day-off": "Day Off",
+  sick: "Sick",
+};
+
 
 /* ===== Tokens ===== */
 const G1 = "hsl(var(--goal-1))";

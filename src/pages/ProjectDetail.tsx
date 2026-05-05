@@ -63,8 +63,8 @@ type ActiveAction = {
 
 const ACTIVE: ActiveAction[] = [
   { kind: "planned", title: "Record talking-head intro", date: "TOMORROW" },
-  { kind: "backlog", title: "Edit first video draft", impact: 8, time: "~150 min" },
-  { kind: "backlog", title: "Outline video #2 series structure", impact: 7, time: "~120 min" },
+  { kind: "backlog", title: "Edit first video draft", impact: 8, time: "2h 30m" },
+  { kind: "backlog", title: "Outline video #2 series structure", impact: 7, time: "2h" },
 ];
 
 const ActionRow: React.FC<{ a: ActiveAction }> = ({ a }) => (
@@ -194,7 +194,7 @@ const References: React.FC = () => {
         <h3 className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-secondary">
           References · 3
         </h3>
-        <a className="text-[11px] text-text-tertiary hover:text-text-secondary cursor-pointer">+ Add</a>
+        <a className="text-[12px] text-text-secondary hover:text-text-primary hover:underline cursor-pointer">+ Add</a>
       </div>
       <div className="mt-2">
         {refs.map((r, i) => (
@@ -215,18 +215,6 @@ const References: React.FC = () => {
     </div>
   );
 };
-
-const TimeBlock: React.FC = () => (
-  <div>
-    <h3 className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-secondary">
-      Time · Estimated
-    </h3>
-    <div className="mt-2 font-mono text-[16px] text-text-primary">5h 30m</div>
-    <div className="mt-2 font-mono text-[11px] text-text-tertiary">
-      across 3 active actions · ~110 min average
-    </div>
-  </div>
-);
 
 /* ===== Page ===== */
 const ProjectDetail: React.FC = () => {
@@ -386,9 +374,8 @@ const ProjectDetail: React.FC = () => {
           </div>
           <div className="p-6 space-y-6">
             <StatusBlock />
-            <OutcomeEffort />
+            <StateBlock />
             <References />
-            <TimeBlock />
           </div>
         </aside>
       </div>

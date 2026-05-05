@@ -252,8 +252,7 @@ export function CommandPalette() {
     });
     return rows;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
-  );
+  }, []);
 
   // ─── Default-state sections ───
   const defaultSections: Section[] = React.useMemo(() => {

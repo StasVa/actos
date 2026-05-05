@@ -51,7 +51,7 @@ const NAV: { label: string; href: string }[] = [
   { label: "All delegated", href: "/all-delegated" },
 ];
 
-const Sidebar: React.FC = () => {
+const Sidebar: React.FC<{ onOpenSettings: () => void }> = ({ onOpenSettings }) => {
   const { pathname } = useLocation();
   return (
   <aside className="fixed left-0 top-0 bottom-0 w-[220px] bg-surface-raised border-r border-border-subtle p-4 flex flex-col">
@@ -79,6 +79,13 @@ const Sidebar: React.FC = () => {
 
     <div className="flex-1" />
 
+    <button
+      type="button"
+      onClick={onOpenSettings}
+      className="text-left px-2.5 py-1.5 rounded-[4px] text-[13px] text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-colors mb-2"
+    >
+      Settings
+    </button>
     <div className="font-mono text-[11px] text-text-tertiary px-1">⌘K  Quick add</div>
     <div className="mt-4 font-mono text-[11px] text-text-secondary px-1 leading-[1.7]">
       <LifetimeCounters />

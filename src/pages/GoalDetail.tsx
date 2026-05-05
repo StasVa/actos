@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { useShallow } from "zustand/react/shallow";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { LifetimeCounters } from "@/components/LifetimeCounters";
 import { Tooltip, StateDotTooltip } from "@/components/Tooltip";
@@ -452,7 +453,9 @@ const RecentActivity: React.FC<{ actions: Action[] }> = ({ actions }) => {
 /* ===== Ideas ===== */
 const IdeasSection: React.FC<{ goalId: string }> = ({ goalId }) => {
   const [open, setOpen] = useState(true);
-  const ideas = useStore((s) => s.ideas.filter((i) => i.goalId === goalId && i.status === "captured"));
+  const ideas = useStore(
+    useShallow((s) => s.ideas.filter((i) => i.goalId === goalId && i.status === "captured")),
+  );
   const captureIdea = useStore((s) => s.captureIdea);
   const [text, setText] = useState("");
   const submit = () => {

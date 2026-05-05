@@ -539,7 +539,6 @@ const GoalDetail: React.FC = () => {
 
   const color = COLOR_VAR[goal.color];
   const goalLabel = goal.title.toUpperCase();
-  const state = useStore((s) => selectors.stateIndicator(s, "goal", goal.id));
   const activeProjects = projects.filter((p) => p.status === "active");
 
   return (

@@ -4,6 +4,7 @@ import { Tooltip, StateDotTooltip } from "@/components/Tooltip";
 import { useStore, selectors } from "@/store/useStore";
 import type { Action, ActionStatus, GoalColorVar, Project } from "@/types";
 import { AppSidebar } from "@/components/AppSidebar";
+import { ActionRow as SharedActionRow } from "@/components/ActionRow";
 
 const COLOR_VAR: Record<GoalColorVar, string> = {
   "goal-1": "hsl(var(--goal-1))",

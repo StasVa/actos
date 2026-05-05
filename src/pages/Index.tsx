@@ -335,7 +335,7 @@ const Today: React.FC = () => (
         <span className="text-[13px] font-medium text-text-primary">Write script for video #1</span>
         <span className="text-[12px] text-text-secondary">· YouTube channel · Shoot video #1</span>
         <div className="flex-1" />
-        <TimePill>~90 min</TimePill>
+        <TimePill>1h 30m</TimePill>
         <Checkbox />
       </div>
 
@@ -386,9 +386,9 @@ const Today: React.FC = () => (
 
 /* ===== Heavy Lift ===== */
 const HEAVY = [
-  { c: G1, impact: 8, title: "Edit first video draft", crumb: "YouTube · Shoot video #1", time: "~150 min" },
-  { c: G1, impact: 7, title: "Outline video #2 series structure", crumb: "YouTube · Shoot video #1", time: "~120 min" },
-  { c: G2, impact: 6, title: "Cook batch meals for the week", crumb: "Lose 5 kg · Nutrition plan", time: "~90 min" },
+  { c: G1, impact: 8, title: "Edit first video draft", crumb: "YouTube · Shoot video #1", time: "2h 30m" },
+  { c: G1, impact: 7, title: "Outline video #2 series structure", crumb: "YouTube · Shoot video #1", time: "2h" },
+  { c: G2, impact: 6, title: "Cook batch meals for the week", crumb: "Lose 5 kg · Nutrition plan", time: "1h 30m" },
 ];
 
 const HeavyLift: React.FC = () => (

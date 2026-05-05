@@ -422,10 +422,7 @@ const AllProjects: React.FC = () => {
     });
   }, [storeProjects, storeActions, storeGoals]);
 
-  // Bridge clicks to the real store record.
-  const handleOpenProject = (p: Project) => {
-    openPanel({ kind: "project", mode: "edit", id: p.id });
-  };
+
 
   const handleNewProject = () => {
     openPanel({

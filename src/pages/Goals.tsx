@@ -367,11 +367,21 @@ const Goals: React.FC = () => {
   const goals = useStore((s) => s.goals);
   const projects = useStore((s) => s.projects);
   const actions = useStore((s) => s.actions);
+  const rituals = useStore((s) => s.rituals);
+  const settings = useStore((s) => s.settings);
+  const logTimeOn = !!settings?.layers?.logTime;
 
   const enriched: GoalMeta[] = useMemo(() => {
+    const now = Date.now();
+    const todayMidnight = new Date();
+    todayMidnight.setHours(0, 0, 0, 0);
+
     return goals.map((g) => {
       const goalProjects = projects.filter((p) => p.goalId === g.id);
       const activeProjs = goalProjects.filter((p) => p.status === "active");
+      const closedProjs = goalProjects.filter((p) => p.status === "completed").length;
+      const droppedProjs = goalProjects.filter((p) => p.status === "dropped").length;
+
       let totalCost = 0,
         doneCost = 0,
         doneOrDelegatedCost = 0;
@@ -388,15 +398,87 @@ const Goals: React.FC = () => {
       }
       const outcome = totalCost > 0 ? Math.round((doneOrDelegatedCost / totalCost) * 100) : 0;
       const effort = totalCost > 0 ? Math.round((doneCost / totalCost) * 100) : 0;
-      const lastIso = actions
-        .filter((a) => a.goalId === g.id)
+
+      const goalActions = actions.filter((a) => a.goalId === g.id);
+      const lastIso = goalActions
         .map((a) => a.completedAt ?? a.delegatedAt ?? a.updatedAt ?? a.createdAt)
         .filter(Boolean)
         .sort()
         .at(-1);
-      return { goal: g, progress: outcome, outcome, effort, lastIso: lastIso ?? undefined };
+
+      // State: stalled if no activity in last 7 days
+      const stalled =
+        !lastIso || (now - new Date(lastIso).getTime()) / 86400000 > 7;
+      const state: "active" | "stalled" =
+        g.status === "active" && stalled ? "stalled" : "active";
+
+      // Rituals
+      const goalRituals = rituals.filter((r) => r.goalId === g.id && r.status === "active");
+      const avgMult =
+        goalRituals.length === 0
+          ? 0
+          : goalRituals.reduce((s, r) => s + ritualMultiplier(r.totalCompletions), 0) /
+            goalRituals.length;
+
+      // Criteria
+      const totalCrit = g.successCriteria?.length ?? 0;
+      const metCrit = g.successCriteria?.filter((c) => c.done).length ?? 0;
+
+      // Time
+      const doneActionsWithTime = goalActions.filter(
+        (a) => a.status === "done" && (a.timeEstimateMinutes ?? 0) > 0,
+      );
+      const openActionsWithTime = goalActions.filter(
+        (a) =>
+          (a.status === "backlog" || a.status === "planned") &&
+          (a.timeEstimateMinutes ?? 0) > 0,
+      );
+      const spent = doneActionsWithTime.reduce(
+        (s, a) => s + (a.timeEstimateMinutes ?? 0),
+        0,
+      );
+      const remaining = openActionsWithTime.reduce(
+        (s, a) => s + (a.timeEstimateMinutes ?? 0),
+        0,
+      );
+      const hasTimeData = doneActionsWithTime.length > 0;
+
+      // Sparkline: last 30 days, count of done actions per day
+      const spark: number[] = new Array(30).fill(0);
+      const sparkActionTitles: string[][] = Array.from({ length: 30 }, () => []);
+      for (const a of goalActions) {
+        if (a.status !== "done" || !a.completedAt) continue;
+        const d = new Date(a.completedAt);
+        d.setHours(0, 0, 0, 0);
+        const diffDays = Math.floor((todayMidnight.getTime() - d.getTime()) / 86400000);
+        if (diffDays >= 0 && diffDays < 30) {
+          const idx = 29 - diffDays;
+          spark[idx] += 1;
+          sparkActionTitles[idx].push(`✓ ${a.title}`);
+        }
+      }
+      const sparkTips: DayInfo[] = spark.map((count, i) => ({
+        daysFromToday: 29 - i,
+        count,
+        actions: sparkActionTitles[i],
+      }));
+
+      return {
+        goal: g,
+        progress: outcome,
+        outcome,
+        effort,
+        lastIso: lastIso ?? undefined,
+        state,
+        projects: { active: activeProjs.length, closed: closedProjs, dropped: droppedProjs },
+        rituals: { active: goalRituals.length, avgMultiplier: avgMult },
+        criteria: { met: metCrit, total: totalCrit },
+        time: { spent, remaining, hasData: hasTimeData },
+        spark,
+        sparkTips,
+      };
     });
-  }, [goals, projects, actions]);
+  }, [goals, projects, actions, rituals]);
 
   const filtered = useMemo(() => {
     return enriched.filter((m) => {

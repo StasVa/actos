@@ -561,6 +561,7 @@ const IdeaDetail: React.FC<{ idea: Idea }> = ({ idea }) => {
         <ConvertProjectOverlay idea={idea} onClose={() => setOverlay(null)} />
       )}
       {overlay === "discard" && <DiscardConfirm onClose={() => setOverlay(null)} />}
+      </div>
     </div>
   );
 };

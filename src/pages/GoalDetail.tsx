@@ -3,6 +3,9 @@ import { useShallow } from "zustand/react/shallow";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { LifetimeCounters } from "@/components/LifetimeCounters";
 import { Tooltip, StateDotTooltip } from "@/components/Tooltip";
+import { CardMenu } from "@/components/CardMenu";
+import { ConfirmModal } from "@/components/ConfirmModal";
+import { toast } from "sonner";
 import { useStore, selectors } from "@/store/useStore";
 import type { Action, Goal, Project, Ritual, GoalColorVar } from "@/types";
 
@@ -287,6 +290,13 @@ const ProjectCard: React.FC<{ p: Project; color: string; goalLabel: string }> = 
   color,
   goalLabel,
 }) => {
+  const openPanel = useStore((s) => s.openPanel);
+  const markProjectComplete = useStore((s) => s.markProjectComplete);
+  const dropProject = useStore((s) => s.dropProject);
+  const deleteProject = useStore((s) => s.deleteProject);
+  const [confirmDrop, setConfirmDrop] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+
   const progressOutcome = useStore((s) => selectors.projectProgress(s, p.id).outcome);
   const progressEffort = useStore((s) => selectors.projectProgress(s, p.id).effort);
   const progress = { outcome: progressOutcome, effort: progressEffort };
@@ -310,44 +320,75 @@ const ProjectCard: React.FC<{ p: Project; color: string; goalLabel: string }> = 
   const warnLast = lastTs ? Date.now() - new Date(lastTs).getTime() > 7 * 86400000 : false;
 
   return (
-    <Link to={`/projects/${p.id}`} className="block">
-      <div className="group h-[120px] p-3 flex flex-col gap-2 rounded-[6px] bg-surface-raised border border-border-subtle hover:bg-surface-hover hover:border-accent cursor-pointer transition-colors duration-100">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5 min-w-0">
-            <span className="w-2 h-2 rounded-full shrink-0" style={{ background: color }} />
-            <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary truncate">
-              {goalLabel}
-            </span>
+    <>
+      <Link to={`/projects/${p.id}`} className="block">
+        <div className="group h-[120px] p-3 flex flex-col gap-2 rounded-[6px] bg-surface-raised border border-border-subtle hover:bg-surface-hover hover:border-accent cursor-pointer transition-colors duration-100">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="w-2 h-2 rounded-full shrink-0" style={{ background: color }} />
+              <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary truncate">
+                {goalLabel}
+              </span>
+            </div>
+            <div className="flex items-center gap-1 shrink-0">
+              <Tooltip content={<StateDotTooltip state={state} lastActivity={last} stalledFor={last} />}>
+                <span
+                  className="w-2 h-2 rounded-full shrink-0"
+                  style={{ background: state === "active" ? "hsl(var(--state-active))" : "hsl(var(--state-stalled))" }}
+                />
+              </Tooltip>
+              <CardMenu
+                ariaLabel="Project menu"
+                items={[
+                  { label: "Edit", onSelect: () => openPanel({ kind: "project", mode: "edit", id: p.id }) },
+                  { label: "Mark complete", onSelect: () => { markProjectComplete(p.id); toast("Project completed"); } },
+                  { label: "Drop", destructive: true, onSelect: () => setConfirmDrop(true) },
+                  { label: "Delete", destructive: true, onSelect: () => setConfirmDelete(true) },
+                ]}
+              />
+            </div>
           </div>
-          <Tooltip content={<StateDotTooltip state={state} lastActivity={last} stalledFor={last} />}>
-            <span
-              className="w-2 h-2 rounded-full shrink-0"
-              style={{ background: state === "active" ? "hsl(var(--state-active))" : "hsl(var(--state-stalled))" }}
-            />
-          </Tooltip>
-        </div>
-        <div
-          className="flex-1 text-[15px] font-medium text-text-primary leading-[1.3] overflow-hidden"
-          style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}
-        >
-          {p.title}
-        </div>
-        <div className="h-1 w-full bg-surface-hover rounded-[2px] overflow-hidden">
-          <div className="h-full rounded-[2px]" style={{ width: `${progress.outcome}%`, background: color }} />
-        </div>
-        <div className="flex items-center justify-between font-mono text-[11px] tabular-nums">
-          <div>
-            <span className="text-text-primary">
-              {counts.done}/{counts.total}
-            </span>
-            <span className="text-text-tertiary"> actions</span>
+          <div
+            className="flex-1 text-[15px] font-medium text-text-primary leading-[1.3] overflow-hidden"
+            style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}
+          >
+            {p.title}
           </div>
-          <div className="text-text-secondary">
-            Last: <span className={warnLast ? "text-text-warning" : "text-text-secondary"}>{last}</span>
+          <div className="h-1 w-full bg-surface-hover rounded-[2px] overflow-hidden">
+            <div className="h-full rounded-[2px]" style={{ width: `${progress.outcome}%`, background: color }} />
+          </div>
+          <div className="flex items-center justify-between font-mono text-[11px] tabular-nums">
+            <div>
+              <span className="text-text-primary">
+                {counts.done}/{counts.total}
+              </span>
+              <span className="text-text-tertiary"> actions</span>
+            </div>
+            <div className="text-text-secondary">
+              Last: <span className={warnLast ? "text-text-warning" : "text-text-secondary"}>{last}</span>
+            </div>
           </div>
         </div>
-      </div>
-    </Link>
+      </Link>
+      <ConfirmModal
+        open={confirmDrop}
+        title="Drop this project?"
+        body="Open actions in this project will be dropped. You can re-open it later."
+        confirmLabel="Drop project"
+        destructive
+        onCancel={() => setConfirmDrop(false)}
+        onConfirm={() => { dropProject(p.id); toast("Project dropped"); setConfirmDrop(false); }}
+      />
+      <ConfirmModal
+        open={confirmDelete}
+        title="Delete this project?"
+        body="This permanently removes the project and all its actions. This cannot be undone."
+        confirmLabel="Delete"
+        destructive
+        onCancel={() => setConfirmDelete(false)}
+        onConfirm={() => { deleteProject(p.id); toast("Project deleted"); setConfirmDelete(false); }}
+      />
+    </>
   );
 };
 

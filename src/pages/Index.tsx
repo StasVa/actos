@@ -7,6 +7,8 @@ import { useStore } from "@/store/useStore";
 import { DayStartPanel } from "@/components/DayStartPanel";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { ritualMultiplier } from "@/store/useStore";
+import { CardMenu } from "@/components/CardMenu";
+import { ConfirmModal } from "@/components/ConfirmModal";
 import { toast } from "sonner";
 
 const TODAY_ISO = new Date().toISOString().slice(0, 10);
@@ -190,7 +192,8 @@ const GoalColumn: React.FC<{
   color: string;
   recent: React.ReactNode;
   href?: string;
-}> = ({ title, state, type, target, progress, meta, outcome, effort, spark, sparkTips, lastActivity, stalledFor, color, recent, href }) => {
+  menu?: React.ReactNode;
+}> = ({ title, state, type, target, progress, meta, outcome, effort, spark, sparkTips, lastActivity, stalledFor, color, recent, href, menu }) => {
   const inner = (
     <div className="px-6 py-1 space-y-4 first:pl-0 last:pr-0 group">
     <div className="flex items-center justify-between gap-2">
@@ -204,9 +207,12 @@ const GoalColumn: React.FC<{
         <h3 className={`text-[18px] font-medium text-text-primary truncate ${href ? "group-hover:text-accent transition-colors" : ""}`}>{title}</h3>
         <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary shrink-0">{type}</span>
       </div>
-      {target && (
-        <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary shrink-0">{target}</div>
-      )}
+      <div className="flex items-center gap-2 shrink-0">
+        {target && (
+          <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">{target}</div>
+        )}
+        {menu}
+      </div>
     </div>
 
     <div className="flex gap-6 items-end">
@@ -245,6 +251,47 @@ const GoalColumn: React.FC<{
     );
   }
   return inner;
+};
+
+/* ===== Goal column menu (composed in Hero) ===== */
+const GoalColumnMenu: React.FC<{ goalId: string }> = ({ goalId }) => {
+  const openPanel = useStore((s) => s.openPanel);
+  const markGoalComplete = useStore((s) => s.markGoalComplete);
+  const dropGoal = useStore((s) => s.dropGoal);
+  const deleteGoal = useStore((s) => s.deleteGoal);
+  const [confirmDrop, setConfirmDrop] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  return (
+    <>
+      <CardMenu
+        ariaLabel="Goal menu"
+        items={[
+          { label: "Edit", onSelect: () => openPanel({ kind: "goal", mode: "edit", id: goalId }) },
+          { label: "Mark complete", onSelect: () => { markGoalComplete(goalId); toast("Goal completed"); } },
+          { label: "Drop", destructive: true, onSelect: () => setConfirmDrop(true) },
+          { label: "Delete", destructive: true, onSelect: () => setConfirmDelete(true) },
+        ]}
+      />
+      <ConfirmModal
+        open={confirmDrop}
+        title="Drop this goal?"
+        body="Open projects, actions, and rituals under this goal will be dropped."
+        confirmLabel="Drop goal"
+        destructive
+        onCancel={() => setConfirmDrop(false)}
+        onConfirm={() => { dropGoal(goalId); toast("Goal dropped"); setConfirmDrop(false); }}
+      />
+      <ConfirmModal
+        open={confirmDelete}
+        title="Delete this goal?"
+        body="This permanently removes the goal and ALL its projects, actions, rituals, and ideas."
+        confirmLabel="Delete"
+        destructive
+        onCancel={() => setConfirmDelete(false)}
+        onConfirm={() => { deleteGoal(goalId); toast("Goal deleted"); setConfirmDelete(false); }}
+      />
+    </>
+  );
 };
 
 const SPARK_1_TIPS = buildYouTubeTooltips(SPARK_1);
@@ -388,10 +435,105 @@ const Hero: React.FC = () => {
                 <>No closed actions yet.</>
               )
             }
+            menu={<GoalColumnMenu goalId={g.id} />}
           />
         );
       })}
     </div>
+  );
+};
+
+/* ===== Active project card (navigates; "..." opens edit/destructive menu) ===== */
+type ActiveProjectMeta = {
+  id: string;
+  title: string;
+  goalLabel: string;
+  goalColor: string;
+  state: "active" | "stalled";
+  hasActions: boolean;
+  done: number;
+  total: number;
+  last: string;
+  warnLast: boolean;
+};
+
+const ActiveProjectCard: React.FC<{ p: ActiveProjectMeta; pct: number }> = ({ p, pct }) => {
+  const openPanel = useStore((s) => s.openPanel);
+  const markProjectComplete = useStore((s) => s.markProjectComplete);
+  const dropProject = useStore((s) => s.dropProject);
+  const deleteProject = useStore((s) => s.deleteProject);
+  const [confirmDrop, setConfirmDrop] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+
+  return (
+    <>
+      <Link to={`/projects/${p.id}`} className="block">
+        <div className="group relative h-[120px] p-3 flex flex-col gap-2 rounded-[6px] bg-surface-raised border border-border-subtle hover:bg-surface-hover hover:border-accent cursor-pointer transition-colors duration-100">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="w-2 h-2 rounded-full shrink-0" style={{ background: p.goalColor }} />
+              <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary truncate">
+                {p.goalLabel}
+              </span>
+            </div>
+            <div className="flex items-center gap-1 shrink-0">
+              <Tooltip content={<StateDotTooltip state={p.state} lastActivity={p.last} stalledFor={p.last} />}>
+                <span
+                  className="w-2 h-2 rounded-full shrink-0"
+                  style={{ background: p.state === "active" ? "hsl(var(--state-active))" : "hsl(var(--state-stalled))" }}
+                />
+              </Tooltip>
+              <CardMenu
+                ariaLabel="Project menu"
+                items={[
+                  { label: "Edit", onSelect: () => openPanel({ kind: "project", mode: "edit", id: p.id }) },
+                  { label: "Mark complete", onSelect: () => { markProjectComplete(p.id); toast("Project completed"); } },
+                  { label: "Drop", destructive: true, onSelect: () => setConfirmDrop(true) },
+                  { label: "Delete", destructive: true, onSelect: () => setConfirmDelete(true) },
+                ]}
+              />
+            </div>
+          </div>
+          <div
+            className="flex-1 text-[15px] font-medium text-text-primary leading-[1.3] overflow-hidden"
+            style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}
+          >
+            {p.title}
+          </div>
+          <div className="h-1 w-full bg-surface-hover rounded-[2px] overflow-hidden">
+            <div className="h-full rounded-[2px]" style={{ width: `${pct}%`, background: p.goalColor }} />
+          </div>
+          <div className="flex items-center justify-between font-mono text-[11px] tabular-nums">
+            <div>
+              <span className="text-text-primary">{p.done}/{p.hasActions ? p.total : 0}</span>
+              <span className="text-text-tertiary"> actions</span>
+            </div>
+            <div className="text-text-secondary">
+              Last:{" "}
+              <span className={p.warnLast ? "text-text-warning" : "text-text-secondary"}>{p.last}</span>
+            </div>
+          </div>
+        </div>
+      </Link>
+      <ConfirmModal
+        open={confirmDrop}
+        title="Drop this project?"
+        body="Open actions in this project will be dropped. You can re-open it later."
+        confirmLabel="Drop project"
+        destructive
+        onCancel={() => setConfirmDrop(false)}
+        onConfirm={() => { dropProject(p.id); toast("Project dropped"); setConfirmDrop(false); }}
+      />
+      <ConfirmModal
+        open={confirmDelete}
+        title="Delete this project?"
+        body="This permanently removes the project and all its actions. This cannot be undone."
+        confirmLabel="Delete"
+        destructive
+        onCancel={() => setConfirmDelete(false)}
+        onConfirm={() => { deleteProject(p.id); toast("Project deleted"); setConfirmDelete(false); }}
+      />
+    </>
   );
 };
 
@@ -438,7 +580,6 @@ const ActiveProjects: React.FC = () => {
   });
 
   const stalledCount = projectsWithMeta.filter((p) => p.state === "stalled").length;
-  const openPanel = useStore.getState().openPanel;
 
   return (
     <section>
@@ -457,45 +598,11 @@ const ActiveProjects: React.FC = () => {
           {projectsWithMeta.map((p) => {
             const pct = p.hasActions ? Math.round((p.done / p.total) * 100) : 0;
             return (
-              <div
+              <ActiveProjectCard
                 key={p.id}
-                onClick={() => openPanel({ kind: "project", mode: "edit", id: p.id })}
-                className="group h-[120px] p-3 flex flex-col gap-2 rounded-[6px] bg-surface-raised border border-border-subtle hover:bg-surface-hover hover:border-accent cursor-pointer transition-colors duration-100"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    <span className="w-2 h-2 rounded-full shrink-0" style={{ background: p.goalColor }} />
-                    <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary truncate">
-                      {p.goalLabel}
-                    </span>
-                  </div>
-                  <Tooltip content={<StateDotTooltip state={p.state} lastActivity={p.last} stalledFor={p.last} />}>
-                    <span
-                      className="w-2 h-2 rounded-full shrink-0"
-                      style={{ background: p.state === "active" ? "hsl(var(--state-active))" : "hsl(var(--state-stalled))" }}
-                    />
-                  </Tooltip>
-                </div>
-                <div
-                  className="flex-1 text-[15px] font-medium text-text-primary leading-[1.3] overflow-hidden"
-                  style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}
-                >
-                  {p.title}
-                </div>
-                <div className="h-1 w-full bg-surface-hover rounded-[2px] overflow-hidden">
-                  <div className="h-full rounded-[2px]" style={{ width: `${pct}%`, background: p.goalColor }} />
-                </div>
-                <div className="flex items-center justify-between font-mono text-[11px] tabular-nums">
-                  <div>
-                    <span className="text-text-primary">{p.done}/{p.hasActions ? p.total : 0}</span>
-                    <span className="text-text-tertiary"> actions</span>
-                  </div>
-                  <div className="text-text-secondary">
-                    Last:{" "}
-                    <span className={p.warnLast ? "text-text-warning" : "text-text-secondary"}>{p.last}</span>
-                  </div>
-                </div>
-              </div>
+                p={p}
+                pct={pct}
+              />
             );
           })}
         </div>

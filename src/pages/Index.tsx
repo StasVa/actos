@@ -1,5 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { Tooltip, SparkTooltipContent, StateDotTooltip } from "@/components/Tooltip";
+import { buildYouTubeTooltips, buildFitnessTooltips } from "@/lib/sparkTooltips";
 
 /* ===== Tokens ===== */
 const G1 = "hsl(var(--goal-1))";
@@ -89,21 +91,23 @@ const SPARK_2 = [
   0, 0,
 ];
 
-const Sparkline: React.FC<{ data: number[]; color: string }> = ({ data, color }) => {
+const Sparkline: React.FC<{ data: number[]; color: string; tips: import("@/components/Tooltip").DayInfo[] }> = ({ data, color, tips }) => {
   const max = 5;
   return (
     <div className="w-full h-7 flex items-end gap-[1px]">
       {data.map((v, i) => {
         const h = v === 0 ? 2 : Math.max(2, Math.round((v / max) * 28));
         return (
-          <div
-            key={i}
-            className="flex-1"
-            style={{
-              height: h,
-              background: v === 0 ? "hsl(var(--border-subtle))" : color,
-            }}
-          />
+          <Tooltip key={i} content={<SparkTooltipContent info={tips[i]} />} className="flex-1 h-full flex items-end">
+            <div
+              className="w-full hover:brightness-[1.15]"
+              style={{
+                height: h,
+                background: v === 0 ? "hsl(var(--border-subtle))" : color,
+                transition: "filter 80ms ease",
+              }}
+            />
+          </Tooltip>
         );
       })}
     </div>
@@ -143,18 +147,23 @@ const GoalColumn: React.FC<{
   outcome: number;
   effort: number;
   spark: number[];
+  sparkTips: import("@/components/Tooltip").DayInfo[];
+  lastActivity?: string;
+  stalledFor?: string;
   color: string;
   recent: React.ReactNode;
   href?: string;
-}> = ({ title, state, type, target, progress, meta, outcome, effort, spark, color, recent, href }) => {
+}> = ({ title, state, type, target, progress, meta, outcome, effort, spark, sparkTips, lastActivity, stalledFor, color, recent, href }) => {
   const inner = (
     <div className="px-6 py-1 space-y-4 first:pl-0 last:pr-0 group">
     <div className="flex items-center justify-between gap-2">
       <div className="flex items-center gap-2.5 min-w-0">
-        <span
-          className="w-2 h-2 rounded-full shrink-0"
-          style={{ background: state === "active" ? "hsl(var(--state-active))" : "hsl(var(--state-stalled))" }}
-        />
+        <Tooltip content={<StateDotTooltip state={state} lastActivity={lastActivity} stalledFor={stalledFor} />}>
+          <span
+            className="w-2 h-2 rounded-full shrink-0"
+            style={{ background: state === "active" ? "hsl(var(--state-active))" : "hsl(var(--state-stalled))" }}
+          />
+        </Tooltip>
         <h3 className={`text-[18px] font-medium text-text-primary truncate ${href ? "group-hover:text-accent transition-colors" : ""}`}>{title}</h3>
         <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary shrink-0">{type}</span>
       </div>
@@ -185,7 +194,7 @@ const GoalColumn: React.FC<{
       <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-1.5">
         Activity · Last 30 days
       </div>
-      <Sparkline data={spark} color={color} />
+      <Sparkline data={spark} color={color} tips={sparkTips} />
     </div>
 
     <div className="font-mono text-[11px] text-text-secondary leading-relaxed">{recent}</div>
@@ -212,6 +221,9 @@ const PlaceholderSlot: React.FC = () => (
   </div>
 );
 
+const SPARK_1_TIPS = buildYouTubeTooltips(SPARK_1);
+const SPARK_2_TIPS = buildFitnessTooltips(SPARK_2);
+
 const Hero: React.FC = () => (
   <div className="bg-surface-elevated border border-border-subtle rounded-[6px] p-6 grid grid-cols-3 divide-x divide-border-subtle">
     <GoalColumn
@@ -224,6 +236,8 @@ const Hero: React.FC = () => (
       outcome={47}
       effort={32}
       spark={SPARK_1}
+      sparkTips={SPARK_1_TIPS}
+      lastActivity="today"
       color={G1}
       recent={<>Recent: ✓ Outline structure · ✓ Set up workspace · ✓ Define content pillars</>}
     />
@@ -237,6 +251,8 @@ const Hero: React.FC = () => (
       outcome={33}
       effort={28}
       spark={SPARK_2}
+      sparkTips={SPARK_2_TIPS}
+      stalledFor="9 days"
       color={G2}
       recent={
         <>
@@ -281,10 +297,12 @@ const ProjectCard: React.FC<{ p: Project }> = ({ p }) => {
             {p.goalLabel}
           </span>
         </div>
-        <span
-          className="w-2 h-2 rounded-full shrink-0"
-          style={{ background: p.state === "active" ? "hsl(var(--state-active))" : "hsl(var(--state-stalled))" }}
-        />
+        <Tooltip content={<StateDotTooltip state={p.state} lastActivity={p.last} stalledFor={p.last} />}>
+          <span
+            className="w-2 h-2 rounded-full shrink-0"
+            style={{ background: p.state === "active" ? "hsl(var(--state-active))" : "hsl(var(--state-stalled))" }}
+          />
+        </Tooltip>
       </div>
 
       <div

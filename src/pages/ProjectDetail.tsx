@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { Tooltip, StateDotTooltip } from "@/components/Tooltip";
 
 const G1 = "hsl(var(--goal-1))";
 
@@ -96,7 +97,9 @@ const StatusBlock: React.FC = () => {
     [
       "STATUS",
       <span className="inline-flex items-center gap-1.5">
-        <span className="w-1.5 h-1.5 rounded-full" style={{ background: "hsl(var(--status-done))" }} />
+        <Tooltip content={<StateDotTooltip state="active" lastActivity="today" />}>
+          <span className="w-1.5 h-1.5 rounded-full" style={{ background: "hsl(var(--status-done))" }} />
+        </Tooltip>
         Active
       </span>,
     ],

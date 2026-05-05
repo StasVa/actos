@@ -119,6 +119,7 @@ export interface StoreState {
   ) => ID;
   updateRitual: (id: ID, partial: Partial<Ritual>) => void;
   markRitualInstanceDone: (ritualId: ID, date?: ISODate) => void;
+  skipRitualInstance: (ritualId: ID, date?: ISODate) => void;
   archiveRitual: (id: ID) => void;
   restoreRitual: (id: ID) => void;
   deleteRitual: (id: ID) => void;
@@ -145,8 +146,19 @@ export interface StoreState {
     morningEnergyScore?: number,
     morningIntentNote?: string,
   ) => void;
+  startDayPlan: (params: {
+    date: ISODate;
+    dayType?: DayType;
+    mainTaskActionId?: ID;
+    morningEnergyScore?: number;
+    morningIntentNote?: string;
+    plannedActionIds: ID[];
+    plannedRitualIds: ID[];
+    skippedRitualIds: ID[];
+  }) => void;
   updateDayEntry: (date: ISODate, partial: Partial<DayEntry>) => void;
   closeDay: (date: ISODate, eveningEnergyScore?: number, reflectionText?: string) => void;
+  getDayEntry: (date: ISODate) => DayEntry | undefined;
 
   // ─── Settings ───
   toggleLayer: (layerName: keyof UserSettings["layers"], enabled: boolean) => void;

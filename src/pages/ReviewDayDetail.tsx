@@ -194,15 +194,27 @@ const ReviewDayDetail: React.FC = () => {
     })
     .sort((a, b) => a.at.localeCompare(b.at));
 
-  // Time per goal
+  // Time per goal (with per-project breakdown)
   const perGoal = goals
     .filter((g) => g.status === "active")
     .map((g) => {
-      const min = doneToday
-        .filter((a) => a.goalId === g.id)
-        .reduce((s, a) => s + (a.timeEstimateMinutes ?? 0), 0);
-      return { g, min };
-    });
+      const goalDone = doneToday.filter((a) => a.goalId === g.id);
+      const min = goalDone.reduce((s, a) => s + (a.timeEstimateMinutes ?? 0), 0);
+      // Aggregate by project (skip null projectId — those are goal-level backlog).
+      const byProject = new Map<string, number>();
+      for (const a of goalDone) {
+        if (!a.projectId) continue;
+        const t = a.timeEstimateMinutes ?? 0;
+        if (t <= 0) continue;
+        byProject.set(a.projectId, (byProject.get(a.projectId) ?? 0) + t);
+      }
+      const projectRows = Array.from(byProject.entries())
+        .map(([pid, m]) => ({ project: projects.find((p) => p.id === pid), min: m }))
+        .filter((row) => !!row.project)
+        .sort((a, b) => b.min - a.min) as { project: Project; min: number }[];
+      return { g, min, projectRows };
+    })
+    .sort((a, b) => b.min - a.min);
   const totalMin = perGoal.reduce((s, x) => s + x.min, 0);
   const yMax = Math.max(1, ...perGoal.map((x) => x.min));
 
@@ -344,17 +356,58 @@ const ReviewDayDetail: React.FC = () => {
                 </section>
               )}
 
-            {/* INTENT */}
-            {(dayEntry?.morningIntentNote || dayEntry?.isPlanned) && (
+            {/* TIME INVESTED */}
+            {settings.layers.logTime && totalMin > 0 && (
               <section>
-                <SectionHead>Intent</SectionHead>
-                {dayEntry?.morningIntentNote ? (
-                  <div className="text-[14px] text-text-primary whitespace-pre-wrap">
-                    {dayEntry.morningIntentNote}
-                  </div>
-                ) : (
-                  <div className="text-[13px] text-text-tertiary italic">No intent set</div>
-                )}
+                <SectionHead meta={`Total: ${formatHM(totalMin)}`}>Time invested</SectionHead>
+                <div className="space-y-2">
+                  {perGoal.map(({ g, min, projectRows }) => {
+                    const pct = yMax > 0 ? (min / yMax) * 100 : 0;
+                    const showProjects = projectRows.length >= 2;
+                    return (
+                      <div key={g.id}>
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-2 w-[200px] min-w-0">
+                            <span
+                              className="w-2 h-2 rounded-full shrink-0"
+                              style={{ background: `hsl(var(--${g.color}))` }}
+                            />
+                            <span className="text-[13px] text-text-primary truncate">{g.title}</span>
+                          </div>
+                          <div className="flex-1 h-2 rounded-[2px] bg-surface-hover overflow-hidden">
+                            <div
+                              className="h-full rounded-[2px]"
+                              style={{
+                                width: `${pct}%`,
+                                background: `hsl(var(--${g.color}))`,
+                              }}
+                            />
+                          </div>
+                          <div className="w-[80px] text-right font-mono text-[12px] tabular-nums text-text-secondary">
+                            {min > 0 ? formatHM(min) : "—"}
+                          </div>
+                        </div>
+                        {showProjects && (
+                          <div className="mt-1 mb-1 pl-[18px] space-y-0.5">
+                            {projectRows.map(({ project, min: pMin }) => (
+                              <div key={project.id} className="flex items-center gap-2">
+                                <span className="font-mono text-[12px] text-text-tertiary leading-none">
+                                  └
+                                </span>
+                                <span className="text-[13px] text-text-secondary truncate flex-1">
+                                  {project.title}
+                                </span>
+                                <span className="font-mono text-[12px] tabular-nums text-text-tertiary">
+                                  {formatHM(pMin)}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               </section>
             )}
 
@@ -565,41 +618,6 @@ const ReviewDayDetail: React.FC = () => {
                     ))}
                   </>
                 )}
-              </section>
-            )}
-
-            {/* TIME INVESTED */}
-            {settings.layers.logTime && totalMin > 0 && (
-              <section>
-                <SectionHead meta={`Total: ${formatHM(totalMin)}`}>Time invested</SectionHead>
-                <div className="space-y-2">
-                  {perGoal.map(({ g, min }) => {
-                    const pct = yMax > 0 ? (min / yMax) * 100 : 0;
-                    return (
-                      <div key={g.id} className="flex items-center gap-3">
-                        <div className="flex items-center gap-2 w-[200px] min-w-0">
-                          <span
-                            className="w-2 h-2 rounded-full shrink-0"
-                            style={{ background: `hsl(var(--${g.color}))` }}
-                          />
-                          <span className="text-[13px] text-text-primary truncate">{g.title}</span>
-                        </div>
-                        <div className="flex-1 h-2 rounded-[2px] bg-surface-hover overflow-hidden">
-                          <div
-                            className="h-full rounded-[2px]"
-                            style={{
-                              width: `${pct}%`,
-                              background: `hsl(var(--${g.color}))`,
-                            }}
-                          />
-                        </div>
-                        <div className="w-[80px] text-right font-mono text-[12px] tabular-nums text-text-secondary">
-                          {min > 0 ? formatHM(min) : "—"}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
               </section>
             )}
 

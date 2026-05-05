@@ -363,7 +363,7 @@ const Hero: React.FC = () => {
 
   return (
     <div
-      className="grid w-full grid-flow-col auto-cols-fr divide-x divide-border-subtle rounded-[6px] border border-border-subtle bg-surface-elevated p-6"
+      className="grid w-full divide-x divide-border-subtle rounded-[6px] border border-border-subtle bg-surface-elevated p-6"
       style={{ gridTemplateColumns: `repeat(${activeGoals.length}, minmax(0, 1fr))` }}
     >
       {activeGoals.map((g) => {

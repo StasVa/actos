@@ -214,12 +214,8 @@ const GoalColumn: React.FC<{
           />
         </Tooltip>
         <h3 className={`text-[18px] font-medium text-text-primary truncate ${href ? "group-hover:text-accent transition-colors" : ""}`}>{title}</h3>
-        <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary shrink-0">{type}</span>
       </div>
       <div className="flex items-center gap-2 shrink-0">
-        {target && (
-          <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">{target}</div>
-        )}
         {menu}
       </div>
     </div>

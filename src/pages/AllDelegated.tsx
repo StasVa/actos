@@ -150,36 +150,88 @@ const DelegationRow: React.FC<{ action: Action; selected: boolean; onSelect: () 
 }) => {
   const goal = GOALS[action.goal];
   const ret = returnLabelFor(action);
+  const overdueDays =
+    action.expectedReturnDelta !== undefined && action.expectedReturnDelta < 0
+      ? Math.abs(action.expectedReturnDelta)
+      : 0;
+  // Right side label for top row
+  let topRight: React.ReactNode = null;
+  if (overdueDays > 0) {
+    topRight = (
+      <span
+        className="font-mono uppercase tracking-[0.06em]"
+        style={{ fontSize: 10, color: "hsl(var(--text-warning))" }}
+      >
+        {overdueDays}d OVERDUE
+      </span>
+    );
+  } else if (ret) {
+    topRight = (
+      <span
+        className="font-mono uppercase tracking-[0.06em] text-text-secondary bg-surface-hover"
+        style={{ fontSize: 10, padding: "2px 6px", borderRadius: 2 }}
+      >
+        {ret.text}
+      </span>
+    );
+  }
+
+  const bottomBits: React.ReactNode[] = [
+    <span key="goal">{goal.short}</span>,
+    <span key="proj">{action.project}</span>,
+    <span key="del">→ {(action.delegate ?? "").toUpperCase()}</span>,
+  ];
+  if (action.impact) bottomBits.push(<span key="imp">I{action.impact}</span>);
+  if (action.timeMinutes) bottomBits.push(<span key="time">{formatTime(action.timeMinutes)}</span>);
+
   return (
     <div
       onClick={onSelect}
-      className={`relative flex items-center gap-2 h-8 px-3 cursor-pointer border-b border-border-subtle transition-colors ${
+      className={`relative flex items-stretch cursor-pointer border-b border-border-subtle transition-colors ${
         selected ? "bg-surface-elevated" : "hover:bg-surface-hover"
       }`}
+      style={{ minHeight: 56 }}
     >
       <span
         className="absolute left-0 top-0 bottom-0"
-        style={{ background: selected ? "hsl(var(--accent))" : goal.color, width: selected ? 2 : 3 }}
-      />
-      <span
-        className="ml-1 inline-block rounded-[2px] border shrink-0"
         style={{
-          width: 14,
-          height: 14,
-          borderColor: "hsl(var(--text-tertiary))",
+          background: selected ? "hsl(var(--accent))" : goal.color,
+          width: selected ? 2 : 3,
         }}
       />
-      <span className="text-[13px] font-medium text-text-primary truncate">{action.title}</span>
-      <span className="font-mono text-[11px] text-text-tertiary shrink-0">→ {action.delegate}</span>
-      <div className="flex-1" />
-      {ret && (
-        <span
-          className="font-mono text-[11px] tabular-nums shrink-0"
-          style={{ color: ret.color }}
-        >
-          {ret.text}
-        </span>
-      )}
+      <div
+        className="flex flex-col gap-1 py-3 pr-4 w-full"
+        style={{ paddingLeft: 16 + (selected ? 2 : 3) }}
+      >
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <span
+              className="inline-block rounded-[2px] border shrink-0"
+              style={{
+                width: 16,
+                height: 16,
+                borderColor: "hsl(var(--text-tertiary))",
+              }}
+            />
+            <span className="text-[14px] font-medium text-text-primary truncate">
+              {action.title}
+            </span>
+          </div>
+          <div className="shrink-0">{topRight}</div>
+        </div>
+        <div className="flex items-center font-mono text-[11px] text-text-tertiary tabular-nums">
+          <span
+            className="inline-block w-1.5 h-1.5 rounded-full mr-1.5 shrink-0"
+            style={{ background: goal.color }}
+          />
+          {bottomBits.map((b, i) => (
+            <React.Fragment key={i}>
+              {i > 0 && <span className="mx-1.5">·</span>}
+              {b}
+            </React.Fragment>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };

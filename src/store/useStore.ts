@@ -369,6 +369,24 @@ export const useStore = create<StoreState>()(
         const status: ActionStatus =
           payload.status ?? (payload.scheduledDate ? "planned" : "backlog");
         const at = nowISO();
+        // For retroactive creation (e.g. logging a Done action against a past day),
+        // honor terminal timestamps from the payload instead of forcing them to "now".
+        const completedAt =
+          payload.completedAt ?? (status === "done" ? at : undefined);
+        const delegatedAt =
+          payload.delegatedAt ?? (status === "delegated" ? at : undefined);
+        const droppedAt =
+          payload.droppedAt ?? (status === "dropped" ? at : undefined);
+        const cancelledAt =
+          payload.cancelledAt ?? (status === "cancelled" ? at : undefined);
+        const createdLabel: Record<ActionStatus, string> = {
+          backlog: "Backlog",
+          planned: "Planned",
+          done: "Done",
+          delegated: "Delegated",
+          dropped: "Dropped",
+          cancelled: "Cancelled",
+        };
         const action: Action = {
           id,
           title: payload.title,
@@ -384,7 +402,11 @@ export const useStore = create<StoreState>()(
           delegateName: payload.delegateName,
           delegateNote: payload.delegateNote,
           expectedReturnDate: payload.expectedReturnDate,
-          timeline: [{ at, text: `Created in ${status === "planned" ? "Planned" : "Backlog"}` }],
+          completedAt,
+          delegatedAt,
+          droppedAt,
+          cancelledAt,
+          timeline: [{ at, text: `Created in ${createdLabel[status]}` }],
           createdAt: at,
         };
         set({ actions: [...state.actions, action] });

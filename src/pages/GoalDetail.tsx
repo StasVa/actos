@@ -11,6 +11,7 @@ const NAV: { label: string; href: string }[] = [
   { label: "Home", href: "/" },
   { label: "Weekly", href: "#" },
   { label: "Ideas", href: "/ideas" },
+  { label: "Rituals", href: "/rituals" },
   { label: "All actions", href: "#" },
   { label: "All projects", href: "#" },
   { label: "All delegated", href: "#" },

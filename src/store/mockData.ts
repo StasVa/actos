@@ -339,16 +339,7 @@ export const SEED_IDEAS: Idea[] = [
 ];
 
 // ───────── Day entries ─────────
-export const SEED_DAY_ENTRIES: DayEntry[] = [
-  {
-    date: TODAY,
-    dayType: "deep",
-    mainTaskActionId: "a-write-script",
-    morningEnergyScore: 7,
-    morningIntentNote: "Ship the script draft before lunch.",
-    startedAt: "2026-05-05T07:30:00.000Z",
-  },
-];
+export const SEED_DAY_ENTRIES: DayEntry[] = [];
 
 // ───────── Settings ─────────
 export const SEED_SETTINGS: UserSettings = {

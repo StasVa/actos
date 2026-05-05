@@ -119,6 +119,7 @@ export interface StoreState {
   ) => ID;
   updateRitual: (id: ID, partial: Partial<Ritual>) => void;
   markRitualInstanceDone: (ritualId: ID, date?: ISODate) => void;
+  skipRitualInstance: (ritualId: ID, date?: ISODate) => void;
   archiveRitual: (id: ID) => void;
   restoreRitual: (id: ID) => void;
   deleteRitual: (id: ID) => void;
@@ -145,8 +146,19 @@ export interface StoreState {
     morningEnergyScore?: number,
     morningIntentNote?: string,
   ) => void;
+  startDayPlan: (params: {
+    date: ISODate;
+    dayType?: DayType;
+    mainTaskActionId?: ID;
+    morningEnergyScore?: number;
+    morningIntentNote?: string;
+    plannedActionIds: ID[];
+    plannedRitualIds: ID[];
+    skippedRitualIds: ID[];
+  }) => void;
   updateDayEntry: (date: ISODate, partial: Partial<DayEntry>) => void;
   closeDay: (date: ISODate, eveningEnergyScore?: number, reflectionText?: string) => void;
+  getDayEntry: (date: ISODate) => DayEntry | undefined;
 
   // ─── Settings ───
   toggleLayer: (layerName: keyof UserSettings["layers"], enabled: boolean) => void;
@@ -478,7 +490,31 @@ export const useStore = create<StoreState>()(
               ? {
                   ...r,
                   totalCompletions: r.totalCompletions + 1,
-                  completionHistory: [...r.completionHistory, { date: day, at }],
+                  // Replace any existing entry for this date (e.g. a prior "skipped"),
+                  // then append the new "done" entry.
+                  completionHistory: [
+                    ...r.completionHistory.filter((c) => c.date !== day),
+                    { date: day, at, status: "done" },
+                  ],
+                }
+              : r,
+          ),
+        });
+      },
+
+      skipRitualInstance: (ritualId, date) => {
+        const at = nowISO();
+        const day = date ?? todayISO();
+        set({
+          rituals: get().rituals.map((r) =>
+            r.id === ritualId
+              ? {
+                  ...r,
+                  // Skipped does NOT increment totalCompletions.
+                  completionHistory: [
+                    ...r.completionHistory.filter((c) => c.date !== day),
+                    { date: day, at, status: "skipped" },
+                  ],
                 }
               : r,
           ),
@@ -623,6 +659,42 @@ export const useStore = create<StoreState>()(
         }
       },
 
+      startDayPlan: ({
+        date,
+        dayType,
+        mainTaskActionId,
+        morningEnergyScore,
+        morningIntentNote,
+        plannedActionIds,
+        plannedRitualIds,
+        skippedRitualIds,
+      }) => {
+        const state = get();
+        const existing = state.dayEntries.find((d) => d.date === date);
+        const at = nowISO();
+        const next: DayEntry = {
+          ...(existing ?? { date }),
+          dayType,
+          mainTaskActionId,
+          morningEnergyScore,
+          morningIntentNote,
+          plannedActionIds,
+          plannedRitualIds,
+          skippedRitualIds,
+          isPlanned: true,
+          startedAt: existing?.startedAt ?? at,
+        };
+        set({
+          dayEntries: existing
+            ? state.dayEntries.map((d) => (d.date === date ? next : d))
+            : [...state.dayEntries, next],
+        });
+        // Persist skip decisions to ritual completion history.
+        for (const rid of skippedRitualIds) {
+          state.skipRitualInstance(rid, date);
+        }
+      },
+
       closeDay: (date, eveningEnergyScore, reflectionText) => {
         const at = nowISO();
         const state = get();
@@ -630,15 +702,22 @@ export const useStore = create<StoreState>()(
         if (existing) {
           set({
             dayEntries: state.dayEntries.map((d) =>
-              d.date === date ? { ...d, eveningEnergyScore, reflectionText, closedAt: at } : d,
+              d.date === date
+                ? { ...d, eveningEnergyScore, reflectionText, closedAt: at, isClosed: true }
+                : d,
             ),
           });
         } else {
           set({
-            dayEntries: [...state.dayEntries, { date, eveningEnergyScore, reflectionText, closedAt: at }],
+            dayEntries: [
+              ...state.dayEntries,
+              { date, eveningEnergyScore, reflectionText, closedAt: at, isClosed: true },
+            ],
           });
         }
       },
+
+      getDayEntry: (date) => get().dayEntries.find((d) => d.date === date),
 
       // ───────── Settings ─────────
       toggleLayer: (layerName, enabled) => {

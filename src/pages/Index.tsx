@@ -1,17 +1,30 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Tooltip, SparkTooltipContent, StateDotTooltip } from "@/components/Tooltip";
 import { LifetimeCounters } from "@/components/LifetimeCounters";
 import { buildYouTubeTooltips, buildFitnessTooltips, buildReadingTooltips } from "@/lib/sparkTooltips";
 import { useStore } from "@/store/useStore";
-import { DayStartPanel } from "@/components/DayStartPanel";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { ritualMultiplier } from "@/store/useStore";
 import { CardMenu } from "@/components/CardMenu";
 import { ConfirmModal } from "@/components/ConfirmModal";
+import { PlanTodayModal, CloseDayModal, ClosePlanModal } from "@/components/PlanCloseModals";
 import { toast } from "sonner";
 
 const TODAY_ISO = new Date().toISOString().slice(0, 10);
+const YESTERDAY_ISO = (() => {
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  return d.toISOString().slice(0, 10);
+})();
+
+const DAY_TYPE_LABELS: Record<string, string> = {
+  execution: "Execution",
+  recovery: "Recovery",
+  "day-off": "Day Off",
+  sick: "Sick",
+};
+
 
 /* ===== Tokens ===== */
 const G1 = "hsl(var(--goal-1))";
@@ -626,7 +639,10 @@ function fmtTime(min?: number): string | null {
   return `${m}m`;
 }
 
-const Today: React.FC = () => {
+const Today: React.FC<{
+  onPlanClick: () => void;
+  onCloseClick: () => void;
+}> = ({ onPlanClick, onCloseClick }) => {
   const goals = useStore((s) => s.goals);
   const projects = useStore((s) => s.projects);
   const actions = useStore((s) => s.actions);
@@ -638,30 +654,20 @@ const Today: React.FC = () => {
   const changeActionStatus = useStore((s) => s.changeActionStatus);
   const createAction = useStore((s) => s.createAction);
   const openPanel = useStore((s) => s.openPanel);
+  const updateDayEntry = useStore((s) => s.updateDayEntry);
   const markRitualInstanceDone = useStore((s) => s.markRitualInstanceDone);
+  const skipRitualInstance = useStore((s) => s.skipRitualInstance);
 
   const [quickAdd, setQuickAdd] = useState("");
-
-  const todays = actions
-    .filter((a) => a.scheduledDate === TODAY_ISO && a.status === "planned")
-    .sort((a, b) => (b.impact ?? 0) - (a.impact ?? 0));
-
-  const mainTaskId = dayEntry?.mainTaskActionId;
-  const mainTask = mainTaskId ? actions.find((a) => a.id === mainTaskId) : undefined;
-  const others = todays.filter((a) => a.id !== mainTaskId);
-
-  const todaysRituals = rituals.filter((r) => r.status === "active");
-  const ritualsTotal = todaysRituals.length;
+  const [showSkipped, setShowSkipped] = useState(false);
 
   const goalById = (id: string) => goals.find((g) => g.id === id);
   const projectById = (id: string | null) =>
     id ? projects.find((p) => p.id === id) : undefined;
-
   const colorVar = (goalId: string) => {
     const g = goalById(goalId);
     return g ? `hsl(var(--${g.color}))` : "hsl(var(--text-tertiary))";
   };
-
   const breadcrumb = (goalId: string, projectId: string | null) => {
     const g = goalById(goalId);
     const p = projectById(projectId);
@@ -669,6 +675,61 @@ const Today: React.FC = () => {
     if (g) return `· ${g.title}`;
     return "";
   };
+
+  const planAndReview = settings.layers.planAndReview;
+  const isPlanned = !!dayEntry?.isPlanned;
+  const isClosed = !!dayEntry?.isClosed;
+
+  // ─── STATE A: no plan yet (only when planAndReview layer is on) ───
+  if (planAndReview && !isPlanned) {
+    return (
+      <section>
+        <SectionLabel>Today</SectionLabel>
+        <div className="flex flex-col items-center justify-center text-center bg-surface-elevated border border-dashed border-border-subtle rounded-[6px] py-10 px-6">
+          <div className="text-[14px] text-text-secondary">Plan today to start your day.</div>
+          <button
+            type="button"
+            onClick={onPlanClick}
+            className="mt-3 px-5 py-2 rounded-[4px] bg-[hsl(var(--accent))] text-white text-[13px] font-medium hover:brightness-110 transition"
+          >
+            Plan today
+          </button>
+        </div>
+      </section>
+    );
+  }
+
+  // Compute action lists.
+  // When planAndReview off: fall back to scheduledDate=today.
+  // When planned: use plannedActionIds + any new actions scheduled for today.
+  const plannedSet = new Set(dayEntry?.plannedActionIds ?? []);
+  const includeAction = (a: typeof actions[number]) =>
+    planAndReview && isPlanned
+      ? plannedSet.has(a.id) || a.scheduledDate === TODAY_ISO
+      : a.scheduledDate === TODAY_ISO;
+  const todays = actions
+    .filter((a) => includeAction(a))
+    .filter((a) => a.status !== "dropped" && a.status !== "cancelled")
+    .sort((a, b) => (b.impact ?? 0) - (a.impact ?? 0));
+
+  const mainTaskId = dayEntry?.mainTaskActionId;
+  const mainTask = mainTaskId ? actions.find((a) => a.id === mainTaskId) : undefined;
+  const others = todays.filter((a) => a.id !== mainTaskId);
+
+  // Rituals: when planned, use kept (skipped excluded). Otherwise show all due.
+  const skippedRitualSet = new Set(dayEntry?.skippedRitualIds ?? []);
+  const plannedRitualSet = new Set(dayEntry?.plannedRitualIds ?? []);
+  const todaysRituals = rituals.filter((r) => {
+    if (r.status !== "active") return false;
+    if (planAndReview && isPlanned) {
+      return plannedRitualSet.has(r.id);
+    }
+    return true;
+  });
+  const skippedRituals = rituals.filter(
+    (r) => r.status === "active" && skippedRitualSet.has(r.id),
+  );
+  const ritualsTotal = todaysRituals.length;
 
   const handleToggleDone = (id: string) => {
     changeActionStatus(id, "done");
@@ -680,20 +741,99 @@ const Today: React.FC = () => {
     if (!t) return;
     const id = createAction({ title: t, scheduledDate: TODAY_ISO });
     setQuickAdd("");
+    // If a plan exists, append to plannedActionIds.
+    if (isPlanned) {
+      updateDayEntry(TODAY_ISO, {
+        plannedActionIds: [...(dayEntry?.plannedActionIds ?? []), id],
+      });
+    }
     toast.success("Action added to today");
     openPanel({ kind: "action", mode: "edit", id });
   };
 
-  const handleRitualToggle = (ritualId: string, alreadyDone: boolean) => {
+  const handleRitualDone = (ritualId: string, alreadyDone: boolean) => {
     if (alreadyDone) return;
     markRitualInstanceDone(ritualId);
     toast.success("Ritual logged");
   };
 
+  const handleRitualSkip = (ritualId: string) => {
+    skipRitualInstance(ritualId);
+    if (isPlanned) {
+      updateDayEntry(TODAY_ISO, {
+        plannedRitualIds: (dayEntry?.plannedRitualIds ?? []).filter((id) => id !== ritualId),
+        skippedRitualIds: [...(dayEntry?.skippedRitualIds ?? []), ritualId],
+      });
+    }
+    toast("Ritual skipped today");
+  };
+
+  const handleReopen = () => {
+    updateDayEntry(TODAY_ISO, { isClosed: false, closedAt: undefined });
+    toast("Day re-opened");
+  };
+
+  // ─── STATE C: closed ───
+  if (planAndReview && isClosed) {
+    const dt = dayEntry?.dayType ? DAY_TYPE_LABELS[dayEntry.dayType] : "—";
+    const closedTime = dayEntry?.closedAt
+      ? new Date(dayEntry.closedAt).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      : "—";
+    return (
+      <section>
+        <SectionLabel meta={`Closed at ${closedTime} · ${dt}`}>Today</SectionLabel>
+        <div className="bg-surface-elevated border border-border-subtle rounded-[6px] p-5 space-y-4">
+          {mainTask && (
+            <div className="text-[13px]">
+              <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary mr-2">MAIN</span>
+              <span className="text-text-primary">{mainTask.title}</span>
+              <span className="text-text-secondary ml-1">
+                {mainTask.status === "done" ? "✓ done" : "· not completed"}
+              </span>
+            </div>
+          )}
+          <div className="font-mono text-[12px] text-text-secondary">
+            {todays.filter((a) => a.status === "done").length} of {todays.length} actions done · {todaysRituals.filter((r) => r.completionHistory.some((c) => c.date === TODAY_ISO && (c.status === "done" || !c.status))).length} of {todaysRituals.length} rituals
+          </div>
+          {dayEntry?.eveningEnergyScore && (
+            <div className="font-mono text-[12px] text-text-secondary">
+              Evening energy: {dayEntry.eveningEnergyScore}/10
+            </div>
+          )}
+          {dayEntry?.reflectionText && (
+            <div className="text-[13px] text-text-primary leading-[1.5] border-l-2 border-border-default pl-3">
+              {dayEntry.reflectionText}
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={handleReopen}
+            className="text-[12px] text-text-secondary hover:text-text-primary transition"
+          >
+            Re-open day
+          </button>
+        </div>
+      </section>
+    );
+  }
+
+  // ─── STATE B (or planAndReview off): in-progress ───
+  const startedTime = dayEntry?.startedAt
+    ? new Date(dayEntry.startedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    : null;
+  const dayTypeLabel = dayEntry?.dayType ? DAY_TYPE_LABELS[dayEntry.dayType] : null;
+  const meta =
+    planAndReview && isPlanned
+      ? [startedTime ? `Started ${startedTime}` : null, dayTypeLabel].filter(Boolean).join(" · ")
+      : `${todays.length} ACTIONS · ${ritualsTotal} RITUALS`;
+
   return (
     <section>
-      <SectionLabel meta={`${todays.length} ACTIONS · ${ritualsTotal} RITUALS`}>Today</SectionLabel>
-      <div className="space-y-2">
+      <SectionLabel meta={meta}>Today</SectionLabel>
+      <div className="space-y-4">
         {mainTask && (
           <div
             onClick={() => openPanel({ kind: "action", mode: "edit", id: mainTask.id })}
@@ -715,79 +855,147 @@ const Today: React.FC = () => {
           </div>
         )}
 
-        {others.length === 0 && !mainTask && (
-          <div className="px-3 py-6 text-center font-mono text-[11px] text-text-tertiary border border-dashed border-border-subtle rounded-[4px]">
-            No actions scheduled for today. Add one below.
+        {/* ACTIONS GROUP */}
+        <div>
+          <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-2">
+            ACTIONS · {others.length}
           </div>
-        )}
-
-        {others.map((a) => {
-          const time = fmtTime(a.timeEstimateMinutes);
-          return (
-            <div
-              key={a.id}
-              onClick={() => openPanel({ kind: "action", mode: "edit", id: a.id })}
-              className="flex items-center gap-3 pr-3 h-8 rounded-[2px] hover:bg-surface-hover transition-colors overflow-hidden cursor-pointer"
-            >
-              <Strip color={colorVar(a.goalId)} />
-              <button
-                onClick={(e) => { e.stopPropagation(); handleToggleDone(a.id); }}
-                className="ml-1 inline-block rounded-[2px] border border-text-tertiary hover:border-accent shrink-0"
-                style={{ width: 14, height: 14 }}
-                aria-label="Mark done"
-              />
-              <span className="text-[13px] text-text-primary truncate">{a.title}</span>
-              <span className="text-[12px] text-text-secondary truncate">{breadcrumb(a.goalId, a.projectId)}</span>
-              <div className="flex-1" />
-              {a.delegateName && (
-                <span className="font-mono text-[11px] text-text-tertiary">→ {a.delegateName}</span>
-              )}
-              {time && <TimePill>{time}</TimePill>}
+          {others.length === 0 ? (
+            <div className="px-3 py-4 text-center font-mono text-[11px] text-text-tertiary border border-dashed border-border-subtle rounded-[4px]">
+              No actions for today.
             </div>
-          );
-        })}
+          ) : (
+            <div className="space-y-1">
+              {others.map((a) => {
+                const time = fmtTime(a.timeEstimateMinutes);
+                const done = a.status === "done";
+                return (
+                  <div
+                    key={a.id}
+                    onClick={() => openPanel({ kind: "action", mode: "edit", id: a.id })}
+                    className={`flex items-center gap-3 pr-3 h-8 rounded-[2px] hover:bg-surface-hover transition-colors overflow-hidden cursor-pointer ${done ? "opacity-60" : ""}`}
+                  >
+                    <Strip color={colorVar(a.goalId)} />
+                    <button
+                      onClick={(e) => { e.stopPropagation(); if (!done) handleToggleDone(a.id); }}
+                      className="ml-1 inline-block rounded-[2px] border border-text-tertiary hover:border-accent shrink-0"
+                      style={{
+                        width: 14,
+                        height: 14,
+                        background: done ? "hsl(var(--accent))" : "transparent",
+                      }}
+                      aria-label="Mark done"
+                    />
+                    <span className={`text-[13px] truncate ${done ? "text-text-tertiary line-through" : "text-text-primary"}`}>{a.title}</span>
+                    <span className="text-[12px] text-text-secondary truncate">{breadcrumb(a.goalId, a.projectId)}</span>
+                    <div className="flex-1" />
+                    {a.delegateName && (
+                      <span className="font-mono text-[11px] text-text-tertiary">→ {a.delegateName}</span>
+                    )}
+                    {time && <TimePill>{time}</TimePill>}
+                    <span className="font-mono text-[11px] text-text-tertiary tabular-nums">I{a.impact ?? 0}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
 
-        {todaysRituals.length > 0 && (
-          <div className="flex flex-wrap gap-x-6 gap-y-2 pt-1">
-            {todaysRituals.map((r) => {
-              const doneToday = r.completionHistory.some((c) => c.date === TODAY_ISO);
-              const mult = ritualMultiplier(r.totalCompletions);
-              const color = colorVar(r.goalId);
-              return (
-                <div
-                  key={r.id}
-                  onClick={() => openPanel({ kind: "ritual", mode: "edit", id: r.id })}
-                  className="flex items-center gap-2 cursor-pointer group"
-                >
-                  <button
-                    onClick={(e) => { e.stopPropagation(); handleRitualToggle(r.id, doneToday); }}
-                    className="w-2.5 h-2.5 rounded-full border transition-colors"
-                    style={{
-                      borderColor: color,
-                      background: doneToday ? color : "transparent",
-                    }}
-                    aria-label={doneToday ? "Done today" : "Mark ritual done"}
-                  />
-                  <span className="text-[13px] text-text-primary group-hover:text-accent transition-colors">{r.title}</span>
-                  <span className="font-mono text-[11px] text-text-tertiary">
-                    {r.schedule[0].toUpperCase() + r.schedule.slice(1)} · {r.totalCompletions} done · ×{mult.toFixed(2)}
-                  </span>
-                </div>
-              );
-            })}
+        {/* RITUALS GROUP */}
+        <div>
+          <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-2">
+            RITUALS · {ritualsTotal}
           </div>
-        )}
+          {todaysRituals.length === 0 ? (
+            <div className="font-mono text-[11px] text-text-tertiary px-3 py-2">No rituals today.</div>
+          ) : (
+            <div className="space-y-1">
+              {todaysRituals.map((r) => {
+                const doneToday = r.completionHistory.some(
+                  (c) => c.date === TODAY_ISO && (c.status === "done" || !c.status),
+                );
+                const mult = ritualMultiplier(r.totalCompletions);
+                const color = colorVar(r.goalId);
+                return (
+                  <div
+                    key={r.id}
+                    className="flex items-center gap-2 pr-3 h-8 rounded-[2px] hover:bg-surface-hover transition-colors group"
+                  >
+                    <button
+                      onClick={() => handleRitualDone(r.id, doneToday)}
+                      className="ml-2 w-2.5 h-2.5 rounded-full border transition-colors shrink-0"
+                      style={{ borderColor: color, background: doneToday ? color : "transparent" }}
+                      aria-label={doneToday ? "Done today" : "Mark ritual done"}
+                    />
+                    <span
+                      className={`text-[13px] truncate cursor-pointer ${doneToday ? "text-text-tertiary" : "text-text-primary"}`}
+                      onClick={() => openPanel({ kind: "ritual", mode: "edit", id: r.id })}
+                    >
+                      {r.title}
+                    </span>
+                    <span className="font-mono text-[11px] text-text-tertiary truncate">
+                      {r.schedule[0].toUpperCase() + r.schedule.slice(1)} · {r.totalCompletions} done · ×{mult.toFixed(2)}
+                    </span>
+                    <div className="flex-1" />
+                    {doneToday ? (
+                      <span className="font-mono text-[11px] text-text-secondary">✓ Done</span>
+                    ) : (
+                      <button
+                        onClick={() => handleRitualSkip(r.id)}
+                        className="text-[11px] text-text-tertiary hover:text-text-primary opacity-0 group-hover:opacity-100 transition"
+                      >
+                        Skip
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          {skippedRituals.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setShowSkipped((v) => !v)}
+              className="mt-2 text-[12px] text-text-tertiary hover:text-text-primary transition"
+            >
+              {showSkipped ? "Hide" : "Show"} skipped ({skippedRituals.length})
+            </button>
+          )}
+          {showSkipped && skippedRituals.length > 0 && (
+            <div className="mt-2 space-y-1">
+              {skippedRituals.map((r) => (
+                <div key={r.id} className="flex items-center gap-2 pl-2 text-[12px] text-text-tertiary">
+                  <span className="w-2 h-2 rounded-full" style={{ background: colorVar(r.goalId), opacity: 0.5 }} />
+                  <span className="line-through">{r.title}</span>
+                  <span className="font-mono text-[11px]">· skipped</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
-        <div className="flex items-center gap-2 bg-surface-raised border border-border-subtle rounded-[4px] px-3 py-2 mt-2">
+        {/* INLINE-ADD */}
+        <div className="flex items-center gap-2 bg-surface-raised border border-dashed border-border-subtle rounded-[4px] px-3 py-2">
           <input
             value={quickAdd}
             onChange={(e) => setQuickAdd(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") handleQuickAdd(); }}
             className="flex-1 bg-transparent text-[13px] text-text-primary placeholder:text-text-tertiary focus:outline-none"
-            placeholder="Add an action for today…"
+            placeholder="+ Add action for today…"
           />
           <span className="font-mono text-[11px] text-text-tertiary">⏎</span>
         </div>
+
+        {/* CLOSE DAY */}
+        {planAndReview && (
+          <button
+            type="button"
+            onClick={onCloseClick}
+            className="w-full md:w-auto px-5 py-2 rounded-[4px] border border-[hsl(var(--accent))] text-[hsl(var(--accent))] text-[13px] font-medium hover:bg-surface-hover transition"
+          >
+            Close day
+          </button>
+        )}
       </div>
     </section>
   );
@@ -1027,10 +1235,38 @@ const UtilityRow: React.FC = () => (
 /* ===== Page ===== */
 const Index: React.FC = () => {
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [planOpen, setPlanOpen] = useState(false);
+  const [closeOpen, setCloseOpen] = useState(false);
+  const [combinedOpen, setCombinedOpen] = useState(false);
+
+  const settings = useStore((s) => s.settings);
+  const todayEntry = useStore((s) => s.dayEntries.find((d) => d.date === TODAY_ISO));
+  const yesterdayEntry = useStore((s) => s.dayEntries.find((d) => d.date === YESTERDAY_ISO));
+
+  // Auto-open Plan or Combined modal once per day on first visit.
+  useEffect(() => {
+    if (!settings.layers.planAndReview) return;
+    const flagKey = `actos-day-prompt-${TODAY_ISO}`;
+    if (sessionStorage.getItem(flagKey)) return;
+    if (todayEntry?.isPlanned) return;
+    sessionStorage.setItem(flagKey, "1");
+    // Combined modal if yesterday started but not closed.
+    if (yesterdayEntry && !yesterdayEntry.isClosed && (yesterdayEntry.isPlanned || yesterdayEntry.startedAt)) {
+      setCombinedOpen(true);
+    } else {
+      setPlanOpen(true);
+    }
+    // Run only on initial mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div className="min-h-screen bg-surface-base text-text-primary">
       <Sidebar onOpenSettings={() => setSettingsOpen(true)} />
       <SettingsPanel open={settingsOpen} onOpenChange={setSettingsOpen} />
+      <PlanTodayModal open={planOpen} onClose={() => setPlanOpen(false)} />
+      <CloseDayModal open={closeOpen} onClose={() => setCloseOpen(false)} />
+      <ClosePlanModal open={combinedOpen} onClose={() => setCombinedOpen(false)} />
       <main className="ml-[220px] px-8 py-6">
         <header className="mb-6">
           <h1 className="text-[20px] font-medium text-text-primary">Tuesday, May 5</h1>
@@ -1044,10 +1280,10 @@ const Index: React.FC = () => {
         <div className="h-8 border-b border-border-subtle" />
 
         <div className="h-8" />
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6">
-          <Today />
-          <DayStartPanel />
-        </div>
+        <Today
+          onPlanClick={() => setPlanOpen(true)}
+          onCloseClick={() => setCloseOpen(true)}
+        />
 
         <div className="my-6 border-t border-border-subtle" />
         <HeavyLift />

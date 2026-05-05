@@ -672,6 +672,9 @@ const GoalDetail: React.FC = () => {
           <div className="h-14" />
           <HeroState goal={goal} projects={projects} rituals={rituals} actions={actions} />
 
+          <div className="h-8" />
+          <ResourcesBlock actions={actions} />
+
           <div className="h-14" />
           <section>
             <SectionHeader meta={`${activeProjects.length} ACTIVE`}>

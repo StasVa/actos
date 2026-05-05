@@ -319,6 +319,7 @@ const PROJECTS: Project[] = [
   { goalLabel: "YOUTUBE CHANNEL", goalColor: G1, title: "Set up workspace", done: 4, total: 5, last: "2d ago", state: "active" },
   { goalLabel: "LOSE 5 KG", goalColor: G2, title: "Nutrition plan", done: 3, total: 4, last: "today", state: "active" },
   { goalLabel: "LOSE 5 KG", goalColor: G2, title: "Build cardio routine", done: 1, total: 6, last: "11d ago", state: "stalled", warnLast: true },
+  { goalLabel: "READ 24 BOOKS", goalColor: G3, title: "Build daily reading habit", done: 8, total: 24, last: "today", state: "active" },
 ];
 
 const ProjectCard: React.FC<{ p: Project }> = ({ p }) => {

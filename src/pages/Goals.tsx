@@ -522,10 +522,33 @@ const Goals: React.FC = () => {
       <AppSidebar onOpenSettings={() => setSettingsOpen(true)} />
       <SettingsPanel open={settingsOpen} onOpenChange={setSettingsOpen} />
       <main className="ml-[220px] px-8 py-6 max-w-[1400px]">
-        <header className="mb-6 flex items-end justify-between gap-4">
+        <header className="mb-6 flex items-center justify-between gap-4">
           <h1 className="text-[24px] font-medium text-text-primary leading-tight">Goals</h1>
-          <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary tabular-nums pb-1">
-            {totalAll} goals · {totalActive} active · {totalCompleted} completed
+          <div className="flex items-center gap-4">
+            <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary tabular-nums">
+              {totalAll} goals · {totalActive} active · {totalCompleted} completed
+            </div>
+            {ghostDisabled ? (
+              <Tooltip content="You have 3 active goals. Complete or drop one to add another.">
+                <button
+                  type="button"
+                  disabled
+                  className="inline-flex items-center gap-1 rounded-[4px] bg-surface-hover text-text-secondary px-[14px] py-[8px] text-[13px] font-medium cursor-not-allowed"
+                >
+                  <span className="text-[15px] leading-none">+</span>
+                  <span>New goal</span>
+                </button>
+              </Tooltip>
+            ) : (
+              <button
+                type="button"
+                onClick={() => useStore.getState().openPanel({ kind: "goal", mode: "new" })}
+                className="inline-flex items-center gap-1 rounded-[4px] bg-accent hover:bg-accent-hover text-white px-[14px] py-[8px] text-[13px] font-medium transition-colors"
+              >
+                <span className="text-[15px] leading-none">+</span>
+                <span>New goal</span>
+              </button>
+            )}
           </div>
         </header>
 

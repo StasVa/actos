@@ -522,76 +522,56 @@ const AllDelegated: React.FC = () => {
               {meta}
             </div>
           </div>
-          <div className="h-3" />
-          {/* Filter row 1: RETURN + search */}
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <FilterGroup label="RETURN">
-              <Chip active={dateFilter === "all"} onClick={() => setDateFilter("all")}>
-                All
-              </Chip>
-              <Chip active={dateFilter === "overdue"} onClick={() => setDateFilter("overdue")}>
-                Overdue
-              </Chip>
-              <Chip active={dateFilter === "upcoming"} onClick={() => setDateFilter("upcoming")}>
-                Upcoming
-              </Chip>
-              <Chip active={dateFilter === "nodate"} onClick={() => setDateFilter("nodate")}>
-                No date
-              </Chip>
-            </FilterGroup>
-            <div className="flex items-center gap-2 bg-surface-raised border border-border-subtle rounded-[4px] px-2.5 py-1.5 w-[240px]">
-              <span className="text-[12px] text-text-tertiary">⌕</span>
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search delegations..."
-                className="flex-1 bg-transparent outline-none text-[13px] text-text-primary placeholder:text-text-tertiary"
-              />
-            </div>
+          <div className="h-4" />
+          {/* Filters row */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <FilterDropdown
+              label="RETURN"
+              value={dateFilter}
+              defaultValue="all"
+              options={RETURN_OPTIONS}
+              onChange={(v) => setDateFilter(v)}
+            />
+            <FilterDropdown
+              label="GOAL"
+              value={goalFilter}
+              defaultValue="all"
+              options={GOAL_OPTIONS}
+              onChange={(v) => setGoalFilter(v)}
+            />
+            <FilterDropdown
+              label="DELEGATE"
+              value={delegateFilter}
+              defaultValue="all"
+              options={DELEGATE_OPTIONS}
+              onChange={(v) => setDelegateFilter(v)}
+            />
+            <FilterDropdown
+              label="SORT"
+              value={sortKey}
+              defaultValue="overdue"
+              options={SORT_OPTIONS}
+              onChange={(v) => setSortKey(v)}
+            />
+            {anyApplied && (
+              <button
+                onClick={clearFilters}
+                className="ml-auto text-[12px] text-text-tertiary hover:text-text-secondary transition-colors"
+              >
+                Clear filters
+              </button>
+            )}
           </div>
-          <div className="h-2" />
-          {/* Filter row 2: GOAL + DELEGATE */}
-          <div className="flex items-center gap-8 flex-wrap">
-            <FilterGroup label="GOAL">
-              <Chip active={goalFilter === "all"} onClick={() => setGoalFilter("all")}>
-                All
-              </Chip>
-              <Chip
-                active={goalFilter === "g1"}
-                onClick={() => setGoalFilter("g1")}
-                dot={GOALS.g1.color}
-              >
-                Launch YouTube
-              </Chip>
-              <Chip
-                active={goalFilter === "g2"}
-                onClick={() => setGoalFilter("g2")}
-                dot={GOALS.g2.color}
-              >
-                Lose 5 kg
-              </Chip>
-              <Chip
-                active={goalFilter === "g3"}
-                onClick={() => setGoalFilter("g3")}
-                dot={GOALS.g3.color}
-              >
-                Read 24 books
-              </Chip>
-            </FilterGroup>
-            <FilterGroup label="DELEGATE">
-              <Chip active={delegateFilter === "all"} onClick={() => setDelegateFilter("all")}>
-                All
-              </Chip>
-              <Chip
-                active={delegateFilter === "Maria"}
-                onClick={() => setDelegateFilter("Maria")}
-              >
-                Maria
-              </Chip>
-              <Chip active={delegateFilter === "AI"} onClick={() => setDelegateFilter("AI")}>
-                AI
-              </Chip>
-            </FilterGroup>
+          <div className="h-4" />
+          {/* Search row */}
+          <div className="flex items-center gap-2 bg-surface-raised border border-border-subtle rounded-[4px] px-3 py-2 max-w-[480px]">
+            <span className="text-[12px] text-text-tertiary">⌕</span>
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search delegations..."
+              className="flex-1 bg-transparent outline-none text-[13px] text-text-primary placeholder:text-text-tertiary"
+            />
           </div>
         </div>
 

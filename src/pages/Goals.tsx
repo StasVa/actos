@@ -570,7 +570,7 @@ const Goals: React.FC = () => {
           <div className="space-y-10">
             {(active.length > 0 || stateFilter === "all" || stateFilter === "active") && (
               <SectionGrid label="ACTIVE" count={active.length}>
-                {active.map((m) => <GoalCard key={m.goal.id} m={m} />)}
+                {active.map((m) => <GoalCard key={m.goal.id} m={m} logTimeOn={logTimeOn} />)}
                 {(stateFilter === "all" || stateFilter === "active") && (
                   <GhostNewGoalCard disabled={ghostDisabled} />
                 )}
@@ -579,19 +579,19 @@ const Goals: React.FC = () => {
 
             {near.length > 0 && (
               <SectionGrid label="NEAR COMPLETION" count={near.length}>
-                {near.map((m) => <GoalCard key={m.goal.id} m={m} />)}
+                {near.map((m) => <GoalCard key={m.goal.id} m={m} logTimeOn={logTimeOn} />)}
               </SectionGrid>
             )}
 
             {completed.length > 0 && (
               <SectionGrid label="COMPLETED" count={completed.length} collapsible defaultOpen={false}>
-                {completed.map((m) => <GoalCard key={m.goal.id} m={m} />)}
+                {completed.map((m) => <GoalCard key={m.goal.id} m={m} logTimeOn={logTimeOn} />)}
               </SectionGrid>
             )}
 
             {dropped.length > 0 && (
               <SectionGrid label="DROPPED" count={dropped.length} collapsible defaultOpen={false}>
-                {dropped.map((m) => <GoalCard key={m.goal.id} m={m} />)}
+                {dropped.map((m) => <GoalCard key={m.goal.id} m={m} logTimeOn={logTimeOn} />)}
               </SectionGrid>
             )}
           </div>

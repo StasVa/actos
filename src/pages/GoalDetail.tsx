@@ -3,6 +3,9 @@ import { useShallow } from "zustand/react/shallow";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { LifetimeCounters } from "@/components/LifetimeCounters";
 import { Tooltip, StateDotTooltip } from "@/components/Tooltip";
+import { CardMenu } from "@/components/CardMenu";
+import { ConfirmModal } from "@/components/ConfirmModal";
+import { toast } from "sonner";
 import { useStore, selectors } from "@/store/useStore";
 import type { Action, Goal, Project, Ritual, GoalColorVar } from "@/types";
 

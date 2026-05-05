@@ -573,47 +573,6 @@ const ProjectDetail: React.FC = () => {
                 Effort discounts delegated work to 20%.
               </p>
             </div>
-
-            <div>
-              <div className="flex items-center justify-between">
-                <h3 className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-secondary">
-                  References · {project.references.length}
-                </h3>
-                <button
-                  onClick={() => openPanel({ kind: "project", mode: "edit", id: project.id })}
-                  className="text-[12px] text-text-secondary hover:text-text-primary hover:underline cursor-pointer"
-                >
-                  + Add
-                </button>
-              </div>
-              <div className="mt-2">
-                {project.references.length === 0 ? (
-                  <div className="font-mono text-[11px] text-text-tertiary">No references.</div>
-                ) : (
-                  project.references.map((r, i) => (
-                    <div
-                      key={r.id ?? i}
-                      className={`py-1.5 ${i < project.references.length - 1 ? "border-b border-border-subtle" : ""}`}
-                    >
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-text-tertiary text-[11px]">↗</span>
-                        <a
-                          href={r.url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-[12px] text-text-primary truncate hover:text-accent cursor-pointer"
-                        >
-                          {r.title}
-                        </a>
-                      </div>
-                      <div className="mt-0.5 ml-4 font-mono text-[10px] text-text-tertiary truncate">
-                        {r.url}
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
           </div>
         </aside>
       </div>

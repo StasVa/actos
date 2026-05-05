@@ -244,10 +244,11 @@ type Project = {
   last: string;
   state: "active" | "stalled";
   warnLast?: boolean;
+  href?: string;
 };
 
 const PROJECTS: Project[] = [
-  { goalLabel: "YOUTUBE CHANNEL", goalColor: G1, title: "Shoot video #1", done: 3, total: 7, last: "today", state: "active" },
+  { goalLabel: "YOUTUBE CHANNEL", goalColor: G1, title: "Shoot video #1", done: 3, total: 7, last: "today", state: "active", href: "/projects/shoot-video-1" },
   { goalLabel: "YOUTUBE CHANNEL", goalColor: G1, title: "Set up workspace", done: 4, total: 5, last: "2d ago", state: "active" },
   { goalLabel: "LOSE 5 KG", goalColor: G2, title: "Nutrition plan", done: 3, total: 4, last: "today", state: "active" },
   { goalLabel: "LOSE 5 KG", goalColor: G2, title: "Build cardio routine", done: 1, total: 6, last: "11d ago", state: "stalled", warnLast: true },
@@ -255,7 +256,7 @@ const PROJECTS: Project[] = [
 
 const ProjectCard: React.FC<{ p: Project }> = ({ p }) => {
   const pct = Math.round((p.done / p.total) * 100);
-  return (
+  const inner = (
     <div
       className="group h-[120px] p-3 flex flex-col gap-2 rounded-[6px] bg-surface-raised border border-border-subtle hover:bg-surface-hover hover:border-accent cursor-pointer transition-colors duration-100"
     >

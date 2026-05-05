@@ -124,12 +124,12 @@ const DelegationRow: React.FC<{ action: Action; selected: boolean; onSelect: () 
   }
 
   const bottomBits: React.ReactNode[] = [
-    <span key="goal">{goal.short}</span>,
+    <span key="goal">{goal.name}</span>,
     <span key="proj">{action.project}</span>,
-    <span key="del">→ {(action.delegate ?? "").toUpperCase()}</span>,
+    <span key="del">→ {action.delegate ?? ""}</span>,
   ];
-  if (action.impact) bottomBits.push(<span key="imp">I{action.impact}</span>);
-  if (action.timeMinutes) bottomBits.push(<span key="time">{formatTime(action.timeMinutes)}</span>);
+  if (action.impact) bottomBits.push(<span key="imp" className="tabular-nums">I{action.impact}</span>);
+  if (action.timeMinutes) bottomBits.push(<span key="time" className="tabular-nums">{formatTime(action.timeMinutes)}</span>);
 
   return (
     <div
@@ -160,23 +160,25 @@ const DelegationRow: React.FC<{ action: Action; selected: boolean; onSelect: () 
                 borderColor: "hsl(var(--text-tertiary))",
               }}
             />
-            <span className="text-[14px] font-medium text-text-primary truncate">
+            <span className="text-[15px] font-medium text-text-primary truncate">
               {action.title}
             </span>
           </div>
           <div className="shrink-0">{topRight}</div>
         </div>
-        <div className="flex items-center font-mono text-[11px] text-text-tertiary tabular-nums">
+        <div className="flex items-center font-mono text-[12px] text-text-secondary tabular-nums truncate">
           <span
             className="inline-block w-1.5 h-1.5 rounded-full mr-1.5 shrink-0"
             style={{ background: goal.color }}
           />
-          {bottomBits.map((b, i) => (
-            <React.Fragment key={i}>
-              {i > 0 && <span className="mx-1.5">·</span>}
-              {b}
-            </React.Fragment>
-          ))}
+          <span className="truncate">
+            {bottomBits.map((b, i) => (
+              <React.Fragment key={i}>
+                {i > 0 && <span className="mx-1.5 text-text-tertiary">·</span>}
+                {b}
+              </React.Fragment>
+            ))}
+          </span>
         </div>
       </div>
     </div>

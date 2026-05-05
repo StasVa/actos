@@ -126,63 +126,89 @@ const ActionRow: React.FC<{ action: Action; selected: boolean; onSelect: () => v
 }) => {
   const goal = GOALS[action.goal];
   const isTerminal = !isActive(action.status);
+  const bottomBits: React.ReactNode[] = [];
+  bottomBits.push(<span key="goal">{goal.short}</span>);
+  bottomBits.push(<span key="proj">{action.project}</span>);
+  if (action.impact) bottomBits.push(<span key="imp">I{action.impact}</span>);
+  if (action.timeMinutes) bottomBits.push(<span key="time">{formatTime(action.timeMinutes)}</span>);
+  if (action.status === "delegated" && action.delegate)
+    bottomBits.push(<span key="del">→ {action.delegate.toUpperCase()}</span>);
+
   return (
     <div
       onClick={onSelect}
-      className={`relative flex items-center gap-2 h-8 px-3 cursor-pointer border-b border-border-subtle transition-colors ${
+      className={`relative flex items-stretch cursor-pointer border-b border-border-subtle transition-colors ${
         selected ? "bg-surface-elevated" : "hover:bg-surface-hover"
       }`}
+      style={{ minHeight: 56 }}
     >
       <span
-        className="absolute left-0 top-0 bottom-0 w-[3px]"
-        style={{ background: selected ? "hsl(var(--accent))" : goal.color, width: selected ? 2 : 3 }}
-      />
-      <span
-        className="ml-1 inline-flex items-center justify-center rounded-[2px] border shrink-0"
+        className="absolute left-0 top-0 bottom-0"
         style={{
-          width: 14,
-          height: 14,
-          background: action.status === "done" ? goal.color : "transparent",
-          borderColor:
-            action.status === "done" ? goal.color : "hsl(var(--text-tertiary))",
-          color: "hsl(var(--surface-base))",
-          fontSize: 10,
-          lineHeight: 1,
+          background: selected ? "hsl(var(--accent))" : goal.color,
+          width: selected ? 2 : 3,
         }}
-      >
-        {action.status === "done" ? "✓" : ""}
-      </span>
-
-      {action.status === "planned" && action.scheduledLabel && (
-        <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-secondary bg-surface-raised px-1.5 py-0.5 rounded-[2px] shrink-0">
-          {action.scheduledLabel}
-        </span>
-      )}
-
-      <span
-        className={`text-[13px] font-medium truncate ${
-          isTerminal ? "text-text-secondary line-through" : "text-text-primary"
-        }`}
-      >
-        {action.title}
-      </span>
-      <span className="text-[12px] text-text-secondary truncate">
-        · {goal.short} · {action.project}
-      </span>
-
-      <div className="flex-1" />
-
-      {action.status === "delegated" && action.delegate && (
-        <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary shrink-0">
-          → {action.delegate}
-        </span>
-      )}
-      <span className="font-mono text-[11px] text-text-secondary tabular-nums shrink-0">
-        I{action.impact}
-      </span>
-      <span className="font-mono text-[11px] text-text-secondary tabular-nums shrink-0">
-        {formatTime(action.timeMinutes)}
-      </span>
+      />
+      <div className="flex flex-col gap-1 py-3 pr-4 w-full" style={{ paddingLeft: 16 + (selected ? 2 : 3) }}>
+        {/* Top row */}
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <span
+              className="inline-flex items-center justify-center rounded-[2px] border shrink-0"
+              style={{
+                width: 16,
+                height: 16,
+                background: action.status === "done" ? goal.color : "transparent",
+                borderColor:
+                  action.status === "done" ? goal.color : "hsl(var(--text-tertiary))",
+                color: "hsl(var(--surface-base))",
+                fontSize: 11,
+                lineHeight: 1,
+              }}
+            >
+              {action.status === "done" ? "✓" : ""}
+            </span>
+            <span
+              className={`text-[14px] font-medium truncate ${
+                isTerminal ? "text-text-secondary line-through" : "text-text-primary"
+              }`}
+            >
+              {action.title}
+            </span>
+          </div>
+          <div className="shrink-0">
+            {action.status === "planned" && action.scheduledLabel && (
+              <span
+                className="font-mono uppercase tracking-[0.06em] text-text-secondary bg-surface-hover"
+                style={{ fontSize: 10, padding: "2px 6px", borderRadius: 2 }}
+              >
+                {action.scheduledLabel}
+              </span>
+            )}
+            {action.status === "done" && (
+              <span
+                className="font-mono"
+                style={{ color: "hsl(var(--status-done))", fontSize: 12 }}
+              >
+                ✓
+              </span>
+            )}
+          </div>
+        </div>
+        {/* Bottom row */}
+        <div className="flex items-center font-mono text-[11px] text-text-tertiary tabular-nums">
+          <span
+            className="inline-block w-1.5 h-1.5 rounded-full mr-1.5 shrink-0"
+            style={{ background: goal.color }}
+          />
+          {bottomBits.map((b, i) => (
+            <React.Fragment key={i}>
+              {i > 0 && <span className="mx-1.5">·</span>}
+              {b}
+            </React.Fragment>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };

@@ -810,17 +810,31 @@ const TinyHeader: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 );
 
 const RecentlyClosed: React.FC = () => {
-  const items = [
-    { c: G1, name: "Set up workspace", date: "Apr 28" },
-    { c: G1, name: "Define content pillars", date: "Apr 22" },
-    { c: G2, name: "First grocery overhaul", date: "Apr 18" },
-  ];
+  const projects = useStore((s) => s.projects);
+  const goals = useStore((s) => s.goals);
+  const items = projects
+    .filter((p) => p.status === "completed" && p.completedAt)
+    .sort((a, b) => (b.completedAt ?? "").localeCompare(a.completedAt ?? ""))
+    .slice(0, 3)
+    .map((p) => {
+      const g = goals.find((gg) => gg.id === p.goalId);
+      const d = new Date(p.completedAt!);
+      return {
+        id: p.id,
+        c: g ? `hsl(var(--${g.color}))` : "hsl(var(--text-tertiary))",
+        name: p.title,
+        date: d.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+      };
+    });
   return (
     <div className="p-4">
-      <TinyHeader>RECENTLY CLOSED · 3</TinyHeader>
+      <TinyHeader>RECENTLY CLOSED · {items.length}</TinyHeader>
       <div className="mt-3 space-y-1.5">
-        {items.map((it, i) => (
-          <div key={i} className="flex items-center gap-2">
+        {items.length === 0 && (
+          <div className="font-mono text-[11px] text-text-tertiary">No closed projects yet.</div>
+        )}
+        {items.map((it) => (
+          <div key={it.id} className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full shrink-0" style={{ background: it.c }} />
             <span className="text-[12px] text-text-primary truncate">{it.name}</span>
             <span className="font-mono text-[11px] text-text-tertiary whitespace-nowrap">· {it.date}</span>
@@ -832,34 +846,47 @@ const RecentlyClosed: React.FC = () => {
 };
 
 const Delegated: React.FC = () => {
-  const items = [
-    { name: "Buy ring light", to: "→ Maria" },
-    { name: "Send brief to thumbnail designer", to: "→ AI" },
-  ];
+  const actions = useStore((s) => s.actions);
+  const items = actions.filter((a) => a.status === "delegated").slice(0, 4);
   return (
     <div className="p-4">
-      <TinyHeader>DELEGATED · 2 ACTIVE</TinyHeader>
+      <TinyHeader>DELEGATED · {items.length} ACTIVE</TinyHeader>
       <div className="mt-3 space-y-1.5">
-        {items.map((it, i) => (
-          <div key={i} className="flex items-baseline gap-1 min-w-0">
-            <span className="text-[12px] text-text-primary truncate">{it.name}</span>
-            <span className="font-mono text-[11px] text-text-tertiary whitespace-nowrap">· {it.to}</span>
+        {items.length === 0 && (
+          <div className="font-mono text-[11px] text-text-tertiary">No delegations.</div>
+        )}
+        {items.map((a) => (
+          <div key={a.id} className="flex items-baseline gap-1 min-w-0">
+            <span className="text-[12px] text-text-primary truncate">{a.title}</span>
+            {a.delegateName && (
+              <span className="font-mono text-[11px] text-text-tertiary whitespace-nowrap">· → {a.delegateName}</span>
+            )}
           </div>
         ))}
       </div>
-      <a href="#" className="inline-block mt-2 text-[12px] text-accent hover:text-accent-hover">
+      <Link to="/all-delegated" className="inline-block mt-2 text-[12px] text-accent hover:text-accent-hover">
         View all →
-      </a>
+      </Link>
     </div>
   );
 };
 
 const ThisWeek: React.FC = () => {
+  const actions = useStore((s) => s.actions);
+  const projects = useStore((s) => s.projects);
+  const cutoff = Date.now() - 7 * 86400000;
+  const inWeek = (iso?: string) => !!iso && new Date(iso).getTime() >= cutoff;
+  const done = actions.filter((a) => a.status === "done" && inWeek(a.completedAt)).length;
+  const delegated = actions.filter((a) => a.status === "delegated" && inWeek(a.delegatedAt)).length;
+  const dropped = actions.filter(
+    (a) => (a.status === "dropped" || a.status === "cancelled") && inWeek(a.droppedAt ?? a.cancelledAt),
+  ).length;
+  const projClosed = projects.filter((p) => p.status === "completed" && inWeek(p.completedAt)).length;
   const stats = [
-    { n: "12", label: "actions done" },
-    { n: "3", label: "delegated" },
-    { n: "1", label: "dropped" },
-    { n: "0", label: "projects closed" },
+    { n: `${done}`, label: "actions done" },
+    { n: `${delegated}`, label: "delegated" },
+    { n: `${dropped}`, label: "dropped" },
+    { n: `${projClosed}`, label: "projects closed" },
   ];
   return (
     <div className="p-4">

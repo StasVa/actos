@@ -80,7 +80,11 @@ export const Tooltip = React.forwardRef<HTMLSpanElement, Props>(function Tooltip
   return (
     <>
       <span
-        ref={triggerRef}
+        ref={(node) => {
+          triggerRef.current = node;
+          if (typeof forwardedRef === "function") forwardedRef(node);
+          else if (forwardedRef) forwardedRef.current = node;
+        }}
         className={className}
         onMouseEnter={handleEnter}
         onMouseLeave={handleLeave}

@@ -32,7 +32,7 @@ const App = () => (
       <RitualEditor />
       <BrowserRouter>
         <CommandPalette />
-        {/* <KeyboardShortcuts /> temporarily disabled for diagnosis */}
+        <KeyboardShortcuts />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/goals/:id" element={<GoalDetail />} />

@@ -4,6 +4,7 @@ import { Tooltip } from "@/components/Tooltip";
 import { LifetimeCounters } from "@/components/LifetimeCounters";
 import { FilterDropdown, FilterOption } from "@/components/FilterDropdown";
 import { SortDropdown } from "@/components/SortDropdown";
+import { useStore } from "@/store/useStore";
 
 const G1 = "hsl(var(--goal-1))";
 const G2 = "hsl(var(--goal-2))";
@@ -212,7 +213,7 @@ const StateTooltip: React.FC<{ p: Project }> = ({ p }) => (
 );
 
 /* ===== Project card (active grid) ===== */
-const ProjectCard: React.FC<{ p: Project }> = ({ p }) => {
+const ProjectCard: React.FC<{ p: Project; onOpen: (p: Project) => void }> = ({ p, onOpen }) => {
   const pct = Math.round((p.done / p.total) * 100);
   const stateColor =
     p.state === "stalled"
@@ -221,53 +222,58 @@ const ProjectCard: React.FC<{ p: Project }> = ({ p }) => {
       ? "hsl(var(--accent))"
       : "hsl(var(--state-active))";
   const warnLast = p.lastDays >= 7;
-  const inner = (
-    <div className="group h-[124px] p-3 flex flex-col gap-2 rounded-[6px] bg-surface-raised border border-border-subtle hover:bg-surface-hover hover:border-accent cursor-pointer transition-colors duration-100">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5 min-w-0">
-          <span className="w-2 h-2 rounded-full shrink-0" style={{ background: p.goalColor }} />
-          <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary truncate">
-            {p.goalLabel}
-          </span>
+  return (
+    <button
+      type="button"
+      onClick={() => onOpen(p)}
+      className="text-left w-full"
+    >
+      <div className="group h-[124px] p-3 flex flex-col gap-2 rounded-[6px] bg-surface-raised border border-border-subtle hover:bg-surface-hover hover:border-accent cursor-pointer transition-colors duration-100">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <span className="w-2 h-2 rounded-full shrink-0" style={{ background: p.goalColor }} />
+            <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary truncate">
+              {p.goalLabel}
+            </span>
+          </div>
+          <Tooltip content={<StateTooltip p={p} />}>
+            <span className="w-2 h-2 rounded-full shrink-0" style={{ background: stateColor }} />
+          </Tooltip>
         </div>
-        <Tooltip content={<StateTooltip p={p} />}>
-          <span className="w-2 h-2 rounded-full shrink-0" style={{ background: stateColor }} />
-        </Tooltip>
-      </div>
 
-      <div
-        className="flex-1 text-[15px] font-medium text-text-primary leading-[1.3] overflow-hidden"
-        style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}
-      >
-        {p.title}
-      </div>
-
-      <div className="h-1 w-full bg-surface-hover rounded-[2px] overflow-hidden">
-        <div className="h-full rounded-[2px]" style={{ width: `${pct}%`, background: p.goalColor }} />
-      </div>
-
-      <div className="flex items-center justify-between font-mono text-[11px] tabular-nums">
-        <div>
-          <span className="text-text-primary">
-            {p.done}/{p.total}
-          </span>
-          <span className="text-text-tertiary"> · {pct}%</span>
+        <div
+          className="flex-1 text-[15px] font-medium text-text-primary leading-[1.3] overflow-hidden"
+          style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}
+        >
+          {p.title}
         </div>
-        <div className="text-text-secondary">
-          Last: <span className={warnLast ? "text-text-warning" : "text-text-secondary"}>{p.last}</span>
+
+        <div className="h-1 w-full bg-surface-hover rounded-[2px] overflow-hidden">
+          <div className="h-full rounded-[2px]" style={{ width: `${pct}%`, background: p.goalColor }} />
+        </div>
+
+        <div className="flex items-center justify-between font-mono text-[11px] tabular-nums">
+          <div>
+            <span className="text-text-primary">
+              {p.done}/{p.total}
+            </span>
+            <span className="text-text-tertiary"> · {pct}%</span>
+          </div>
+          <div className="text-text-secondary">
+            Last: <span className={warnLast ? "text-text-warning" : "text-text-secondary"}>{p.last}</span>
+          </div>
         </div>
       </div>
-    </div>
+    </button>
   );
-  if (p.href) return <Link to={p.href} className="block">{inner}</Link>;
-  return inner;
 };
 
 /* ===== Closed list row (denser, history) ===== */
-const ClosedRow: React.FC<{ p: Project }> = ({ p }) => {
+const ClosedRow: React.FC<{ p: Project; onOpen: (p: Project) => void }> = ({ p, onOpen }) => {
   const isDropped = p.state === "dropped";
   return (
     <div
+      onClick={() => onOpen(p)}
       className="relative flex items-stretch border-b border-border-subtle hover:bg-surface-hover transition-colors cursor-pointer"
       style={{ minHeight: 48 }}
     >
@@ -408,6 +414,39 @@ const AllProjects: React.FC = () => {
   const [sortKey, setSortKey] = useState<SortKey>("recent");
   const [archivedCollapsed, setArchivedCollapsed] = useState(false);
 
+  const storeProjects = useStore((s) => s.projects);
+  const storeGoals = useStore((s) => s.goals);
+  const openPanel = useStore((s) => s.openPanel);
+
+  // Bridge static visual project rows to real store records by title.
+  const handleOpenProject = (p: Project) => {
+    const match = storeProjects.find(
+      (sp) => sp.title.toLowerCase() === p.title.toLowerCase(),
+    );
+    if (match) {
+      openPanel({ kind: "project", mode: "edit", id: match.id });
+    } else {
+      // Fallback: open new with the title prefilled.
+      openPanel({
+        kind: "project",
+        mode: "new",
+        prefill: { title: p.title, goalId: storeGoals[0]?.id },
+      });
+    }
+  };
+
+  const handleNewProject = () => {
+    openPanel({
+      kind: "project",
+      mode: "new",
+      prefill: { goalId: storeGoals.find((g) => g.status === "active")?.id },
+    });
+  };
+
+  const handleNewGoal = () => {
+    openPanel({ kind: "goal", mode: "new" });
+  };
+
   const counts = useMemo(() => {
     const total = PROJECTS.length;
     const active = PROJECTS.filter((p) => p.state === "active").length;
@@ -481,8 +520,23 @@ const AllProjects: React.FC = () => {
         <div className="px-10 pt-6 pb-3 shrink-0">
           <div className="flex items-baseline justify-between">
             <h1 className="text-[24px] font-medium text-text-primary">All projects</h1>
-            <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary tabular-nums">
-              {meta}
+            <div className="flex items-center gap-3">
+              <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary tabular-nums">
+                {meta}
+              </div>
+              <button
+                onClick={handleNewGoal}
+                className="text-[12px] px-2.5 py-1 rounded-[4px] border border-border-subtle text-text-secondary hover:text-text-primary hover:border-accent transition-colors"
+              >
+                + New goal
+              </button>
+              <button
+                onClick={handleNewProject}
+                className="text-[12px] font-medium px-2.5 py-1 rounded-[4px]"
+                style={{ background: "hsl(var(--accent))", color: "hsl(var(--surface-base))" }}
+              >
+                + New project
+              </button>
             </div>
           </div>
 
@@ -559,7 +613,7 @@ const AllProjects: React.FC = () => {
               />
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {groups.near.map((p) => (
-                  <ProjectCard key={p.id} p={p} />
+                  <ProjectCard key={p.id} p={p} onOpen={handleOpenProject} />
                 ))}
               </div>
             </section>
@@ -570,7 +624,7 @@ const AllProjects: React.FC = () => {
               <SectionHeader label="ACTIVE" count={groups.active.length} meta="MOVING THIS WEEK" />
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {groups.active.map((p) => (
-                  <ProjectCard key={p.id} p={p} />
+                  <ProjectCard key={p.id} p={p} onOpen={handleOpenProject} />
                 ))}
               </div>
             </section>
@@ -586,7 +640,7 @@ const AllProjects: React.FC = () => {
               />
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {groups.stalled.map((p) => (
-                  <ProjectCard key={p.id} p={p} />
+                  <ProjectCard key={p.id} p={p} onOpen={handleOpenProject} />
                 ))}
               </div>
             </section>
@@ -605,7 +659,7 @@ const AllProjects: React.FC = () => {
               {!archivedCollapsed && (
                 <div className="border-t border-border-subtle">
                   {groups.closed.map((p) => (
-                    <ClosedRow key={p.id} p={p} />
+                    <ClosedRow key={p.id} p={p} onOpen={handleOpenProject} />
                   ))}
                 </div>
               )}
@@ -615,8 +669,10 @@ const AllProjects: React.FC = () => {
           {/* Add project affordance */}
           {filtered.length > 0 && (
             <div className="max-w-[480px]">
-              <div
-                className="flex items-center gap-3 rounded-[4px] px-3 transition-colors cursor-pointer hover:bg-surface-hover"
+              <button
+                type="button"
+                onClick={handleNewProject}
+                className="w-full flex items-center gap-3 rounded-[4px] px-3 transition-colors cursor-pointer hover:bg-surface-hover"
                 style={{
                   height: 48,
                   border: "1px dashed hsl(var(--border-default))",
@@ -624,7 +680,7 @@ const AllProjects: React.FC = () => {
               >
                 <span className="font-mono text-[16px] leading-none text-text-tertiary">+</span>
                 <span className="text-[13px] text-text-tertiary">Add a project...</span>
-              </div>
+              </button>
             </div>
           )}
         </div>

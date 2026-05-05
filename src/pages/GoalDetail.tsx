@@ -45,6 +45,16 @@ const SectionHeader: React.FC<{ children: React.ReactNode; meta?: React.ReactNod
   </div>
 );
 
+/* ===== Tier B: Ghost add button ===== */
+const GhostAddButton: React.FC<{ children: React.ReactNode; onClick?: () => void }> = ({ children, onClick }) => (
+  <button
+    onClick={onClick}
+    className="block w-full h-9 px-4 py-2 mt-4 text-[13px] text-text-secondary text-center bg-transparent border border-dashed border-border-default rounded-[4px] cursor-pointer transition-[border-color,color] duration-100 hover:border-solid hover:border-accent-muted hover:text-text-primary"
+  >
+    {children}
+  </button>
+);
+
 /* ===== Success Criteria ===== */
 const CRITERIA = [
   { text: "Define content pillars and audience", done: true },

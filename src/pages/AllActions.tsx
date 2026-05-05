@@ -12,6 +12,7 @@ import {
 } from "@/lib/actionsData";
 import { formatTime } from "@/lib/format";
 import { FilterDropdown, FilterOption } from "@/components/FilterDropdown";
+import { SortDropdown } from "@/components/SortDropdown";
 
 /* ===== Sidebar ===== */
 const NAV: { label: string; href: string }[] = [

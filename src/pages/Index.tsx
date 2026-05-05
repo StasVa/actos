@@ -527,6 +527,10 @@ const Index: React.FC = () => {
         <Hero />
 
         <div className="h-8" />
+        <ActiveProjects />
+        <div className="h-8 border-b border-border-subtle" />
+
+        <div className="h-8" />
         <Today />
 
         <div className="my-6 border-t border-border-subtle" />

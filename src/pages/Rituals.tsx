@@ -322,6 +322,7 @@ const FrequencyChart: React.FC<{ data: number[]; max: number; color: string; uni
 
 /* ===== Ritual card ===== */
 const RitualCard: React.FC<{ r: RitualRow; onOpen: (r: RitualRow) => void }> = ({ r, onOpen }) => {
+  const isMonthly = r.scheduleLabel.startsWith("MONTHLY");
   return (
     <div
       onClick={() => onOpen(r)}

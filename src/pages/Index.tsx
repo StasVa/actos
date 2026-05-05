@@ -435,6 +435,7 @@ const Hero: React.FC = () => {
                 <>No closed actions yet.</>
               )
             }
+            menu={<GoalColumnMenu goalId={g.id} />}
           />
         );
       })}

@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import { LifetimeCounters } from "@/components/LifetimeCounters";
 import { Link, useLocation } from "react-router-dom";
 import { Tooltip } from "@/components/Tooltip";
-import RitualPanel from "@/components/RitualPanel";
+import { useStore } from "@/store/useStore";
+import { toast } from "sonner";
 
 const G1 = "hsl(var(--goal-1))";
 const G2 = "hsl(var(--goal-2))";

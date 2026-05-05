@@ -324,13 +324,7 @@ const Goals: React.FC = () => {
           <SortDropdown<SortKey> value={sortKey} options={SORT_OPTIONS} onChange={setSortKey} />
         </div>
 
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search goals..."
-          className="w-full max-w-[720px] bg-surface-raised border border-border-subtle rounded-[4px] px-3 py-2 text-[13px] text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-accent"
-        />
+        {/* Search removed — global ⌘K palette handles search. */}
 
         <div className="my-6 border-t border-border-subtle" />
 

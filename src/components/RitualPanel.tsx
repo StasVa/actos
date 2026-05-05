@@ -65,11 +65,26 @@ const RitualPanel: React.FC<Props> = ({ open, onClose, mode = "edit" }) => {
   );
   const titleRef = React.useRef<HTMLInputElement>(null);
 
-  // Mount / animate
+  // Mount / animate + reset form state on each open
   useEffect(() => {
     if (open) {
+      // Reset form to mode defaults whenever panel opens
+      if (isNew) {
+        setTitle("");
+        setSchedule("Daily");
+        setImpact(5);
+        setTime("30m");
+        setNotes("");
+      } else {
+        setTitle("Weekly project audit");
+        setSchedule("Weekly");
+        setImpact(5);
+        setTime("30m");
+        setNotes(
+          "Review what's moving across all projects in this goal. Identify stuck items and adjust scope if needed.",
+        );
+      }
       setMounted(true);
-      // Next frame, trigger transition
       const id = window.requestAnimationFrame(() => {
         setVisible(true);
         if (isNew) titleRef.current?.focus();

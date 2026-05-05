@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { LifetimeCounters } from "@/components/LifetimeCounters";
 import { Link, useLocation } from "react-router-dom";
 
 const G1 = "hsl(var(--goal-1))";

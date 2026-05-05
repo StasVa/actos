@@ -77,7 +77,33 @@ export const AppSidebar: React.FC<{ onOpenSettings?: () => void }> = ({ onOpenSe
       <Link to="/today" className="px-1 py-1 text-[17px] font-semibold text-text-primary tracking-tight">
         ActOS
       </Link>
-      <div className="mt-8 flex flex-col">
+
+      {/* Top-level Search — opens Command Palette */}
+      <button
+        type="button"
+        onClick={() => {
+          const ev = new KeyboardEvent("keydown", { key: "k", metaKey: true, bubbles: true });
+          document.dispatchEvent(ev);
+        }}
+        className="mt-8 group flex items-center gap-2 pl-2.5 pr-2 py-2 rounded-[4px] text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-colors"
+      >
+        <span className="text-[16px] leading-none w-4 text-center">⌕</span>
+        <span className="text-[14px] font-medium flex-1 text-left">Search</span>
+        <span
+          className="font-mono text-[10px] text-text-tertiary"
+          style={{
+            background: "hsl(var(--surface-hover))",
+            padding: "2px 6px",
+            borderRadius: 2,
+          }}
+        >
+          ⌘K
+        </span>
+      </button>
+
+      <div className="mt-2 mb-3 border-t border-border-subtle" />
+
+      <div className="flex flex-col">
         <NavGroup items={GROUP_TEMPORAL} pathname={pathname} />
         <Divider />
         <NavGroup items={GROUP_ENTITIES} pathname={pathname} />
@@ -93,17 +119,6 @@ export const AppSidebar: React.FC<{ onOpenSettings?: () => void }> = ({ onOpenSe
         className="text-left px-2.5 py-1.5 rounded-[4px] text-[13px] text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-colors mb-2"
       >
         Settings
-      </button>
-      <button
-        type="button"
-        onClick={() => {
-          // Dispatch a synthetic ⌘K so the global palette opens.
-          const ev = new KeyboardEvent("keydown", { key: "k", metaKey: true, bubbles: true });
-          document.dispatchEvent(ev);
-        }}
-        className="text-left font-mono text-[11px] text-text-tertiary px-1 hover:text-text-primary transition-colors"
-      >
-        ⌘K  Search
       </button>
       <div className="font-mono text-[11px] text-text-tertiary px-1">?   Shortcuts</div>
       <div className="mt-4 font-mono text-[11px] text-text-secondary px-1 leading-[1.7]">

@@ -308,10 +308,21 @@ const ActiveProjectsSection: React.FC = () => {
 /* ===== Rituals ===== */
 const RITUAL_STRIP = [1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1];
 
-const RitualsSection: React.FC = () => (
+const RitualsSection: React.FC<{ onOpenRitual: () => void }> = ({ onOpenRitual }) => (
   <section>
     <SectionHeader>Rituals · 1</SectionHeader>
-    <div className="bg-surface-raised border border-border-subtle rounded-[6px] p-4 flex items-center gap-6">
+    <div
+      onClick={onOpenRitual}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onOpenRitual();
+        }
+      }}
+      className="bg-surface-raised border border-border-subtle rounded-[6px] p-4 flex items-center gap-6 cursor-pointer hover:bg-surface-hover transition-colors"
+    >
       <span className="w-3 h-3 rounded-full shrink-0" style={{ background: G1 }} />
       <div>
         <div className="text-[14px] font-medium text-text-primary">Weekly project audit</div>

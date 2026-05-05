@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { createPortal } from "react-dom";
 import { Link, useLocation } from "react-router-dom";
 import { Tooltip } from "@/components/Tooltip";
 import RitualPanel from "@/components/RitualPanel";

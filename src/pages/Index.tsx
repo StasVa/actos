@@ -221,6 +221,9 @@ const PlaceholderSlot: React.FC = () => (
   </div>
 );
 
+const SPARK_1_TIPS = buildYouTubeTooltips(SPARK_1);
+const SPARK_2_TIPS = buildFitnessTooltips(SPARK_2);
+
 const Hero: React.FC = () => (
   <div className="bg-surface-elevated border border-border-subtle rounded-[6px] p-6 grid grid-cols-3 divide-x divide-border-subtle">
     <GoalColumn
@@ -233,6 +236,8 @@ const Hero: React.FC = () => (
       outcome={47}
       effort={32}
       spark={SPARK_1}
+      sparkTips={SPARK_1_TIPS}
+      lastActivity="today"
       color={G1}
       recent={<>Recent: ✓ Outline structure · ✓ Set up workspace · ✓ Define content pillars</>}
     />
@@ -246,6 +251,8 @@ const Hero: React.FC = () => (
       outcome={33}
       effort={28}
       spark={SPARK_2}
+      sparkTips={SPARK_2_TIPS}
+      stalledFor="9 days"
       color={G2}
       recent={
         <>

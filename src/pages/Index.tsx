@@ -57,66 +57,7 @@ const Strip: React.FC<{ color: string }> = ({ color }) => (
   <span className="self-stretch w-[3px] shrink-0" style={{ background: color }} />
 );
 
-/* ===== Sidebar ===== */
-const NAV: { label: string; href: string }[] = [
-  { label: "Home", href: "/" },
-  { label: "Weekly", href: "#" },
-  { label: "Ideas", href: "/ideas" },
-  { label: "Rituals", href: "/rituals" },
-  { label: "All actions", href: "/all-actions" },
-  { label: "All projects", href: "/all-projects" },
-  { label: "All delegated", href: "/all-delegated" },
-];
-
-const Sidebar: React.FC<{ onOpenSettings: () => void }> = ({ onOpenSettings }) => {
-  const { pathname } = useLocation();
-  return (
-  <aside className="fixed left-0 top-0 bottom-0 w-[220px] bg-surface-raised border-r border-border-subtle p-4 flex flex-col">
-    <div className="px-1 py-1 text-[17px] font-semibold text-text-primary tracking-tight">ActOS</div>
-    <nav className="mt-8 flex flex-col gap-1">
-      {NAV.map((item) => {
-        const active =
-          (item.href === "/" && pathname === "/") ||
-          (item.href !== "/" && item.href !== "#" && pathname.startsWith(item.href));
-        return (
-          <Link
-            key={item.label}
-            to={item.href}
-            className={`px-2.5 py-1.5 rounded-[4px] text-[13px] transition-colors ${
-              active
-                ? "bg-surface-hover text-text-primary font-medium"
-                : "text-text-secondary font-normal hover:text-text-primary"
-            }`}
-          >
-            {item.label}
-          </Link>
-        );
-      })}
-    </nav>
-
-    <div className="flex-1" />
-
-    <button
-      type="button"
-      onClick={onOpenSettings}
-      className="text-left px-2.5 py-1.5 rounded-[4px] text-[13px] text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-colors mb-2"
-    >
-      Settings
-    </button>
-    <div className="font-mono text-[11px] text-text-tertiary px-1">⌘K  Quick add</div>
-      <div className="font-mono text-[11px] text-text-tertiary px-1">?   Shortcuts</div>
-    <div className="mt-4 font-mono text-[11px] text-text-secondary px-1 leading-[1.7]">
-      <LifetimeCounters />
-    </div>
-    <div className="mt-3 flex items-center gap-2 p-1 rounded-[4px] hover:bg-surface-hover cursor-pointer">
-      <span className="w-7 h-7 rounded-full bg-surface-hover flex items-center justify-center font-mono text-[11px] text-text-primary">
-        AK
-      </span>
-      <span className="font-mono text-[11px] text-text-secondary truncate">ak@email</span>
-    </div>
-  </aside>
-  );
-};
+/* Sidebar moved to src/components/AppSidebar.tsx */
 
 /* ===== Hero: Active Goals ===== */
 /* 30 days, weekday-heavy, building toward today (right edge) */

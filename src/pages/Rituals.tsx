@@ -354,13 +354,9 @@ const RitualCard: React.FC<{ r: RitualRow; onOpen: (r: RitualRow) => void }> = (
       {/* Chart 1 */}
       <div>
         <div className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary mb-1">
-          {isMonthly ? "LAST 90 DAYS · CONSISTENCY" : "LAST 30 DAYS · CONSISTENCY"}
+          LAST 30 DAYS · CONSISTENCY
         </div>
-        {isMonthly ? (
-          <MonthlyConsistency data={r.consistency} color={r.goalColor} />
-        ) : (
-          <ConsistencyCalendar data={r.consistency} color={r.goalColor} />
-        )}
+        <ConsistencyCalendar data={r.consistency} color={r.goalColor} />
       </div>
 
       <div style={{ height: 12 }} />
@@ -369,16 +365,11 @@ const RitualCard: React.FC<{ r: RitualRow; onOpen: (r: RitualRow) => void }> = (
       <div>
         <div className="flex items-baseline justify-between mb-1">
           <div className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">
-            {isMonthly ? "12 MONTHS · FREQUENCY" : "12 WEEKS · FREQUENCY"}
+            12 WEEKS · FREQUENCY
           </div>
           <div className="font-mono text-[9px] text-text-tertiary">max: {r.freqMax}</div>
         </div>
-        <FrequencyChart
-          data={r.frequency}
-          max={r.freqMax}
-          color={r.goalColor}
-          unit={isMonthly ? "month" : "week"}
-        />
+        <FrequencyChart data={r.frequency} max={r.freqMax} color={r.goalColor} />
       </div>
 
       <div className="flex-1" style={{ minHeight: 20 }} />
@@ -398,10 +389,17 @@ const RitualCard: React.FC<{ r: RitualRow; onOpen: (r: RitualRow) => void }> = (
           >
             Mark today done
           </button>
-        ) : (
+        ) : isMonthly ? null : (
           <span className="font-mono text-[11px] text-text-tertiary">Not due today</span>
         )}
       </div>
+
+      {isMonthly && (
+        <div className="mt-1 font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary tabular-nums">
+          DUE: MAY 1 ·{" "}
+          <span style={{ color: "hsl(var(--text-warning))" }}>4 DAYS OVERDUE</span>
+        </div>
+      )}
     </div>
   );
 };

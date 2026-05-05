@@ -125,30 +125,32 @@ const SuccessCriteria: React.FC<{ goal: Goal }> = ({ goal }) => {
 /* ===== Hero state ===== */
 const Pillar: React.FC<{ label: string; value: string; sub: string }> = ({ label, value, sub }) => (
   <div className="flex flex-col">
-    <div className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">{label}</div>
-    <div className="font-mono text-[24px] text-text-primary leading-tight mt-1">{value}</div>
-    <div className="font-mono text-[11px] text-text-secondary mt-0.5">{sub}</div>
+    <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">{label}</div>
+    <div className="text-[26px] font-medium text-text-primary leading-tight tabular-nums mt-1.5">{value}</div>
+    <div className="font-mono text-[11px] text-text-tertiary mt-1">{sub}</div>
   </div>
 );
 
-const StateRow: React.FC<{
+const StateBarRow: React.FC<{
   label: string;
-  value: React.ReactNode;
   pct: number;
+  value: string;
   color: string;
   opacity?: number;
-  isLast?: boolean;
-}> = ({ label, value, pct, color, opacity = 1, isLast }) => (
-  <div
-    className={`h-8 flex items-center gap-4 py-1.5 ${isLast ? "" : "border-b border-border-subtle"}`}
-  >
-    <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary w-[70px] shrink-0">
+}> = ({ label, pct, value, color, opacity = 1 }) => (
+  <div className="flex items-center gap-4 py-1.5">
+    <span className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-secondary w-[80px] shrink-0">
       {label}
     </span>
-    <span className="flex-1 min-w-0">{value}</span>
-    <div className="w-[80px] h-[5px] bg-surface-hover rounded-[2px] overflow-hidden shrink-0">
-      <div className="h-full rounded-[2px]" style={{ width: `${pct}%`, background: color, opacity }} />
+    <div className="flex-1 h-[7px] bg-surface-hover rounded-[2px] overflow-hidden">
+      <div
+        className="h-full rounded-[2px]"
+        style={{ width: `${Math.max(0, Math.min(100, pct))}%`, background: color, opacity }}
+      />
     </div>
+    <span className="font-mono text-[13px] text-text-primary tabular-nums w-[70px] text-right shrink-0">
+      {value}
+    </span>
   </div>
 );
 
@@ -161,29 +163,17 @@ const HeroState: React.FC<{
   const color = COLOR_VAR[goal.color];
   const progressOutcome = useStore((s) => selectors.goalProgress(s, goal.id).outcome);
   const progressEffort = useStore((s) => selectors.goalProgress(s, goal.id).effort);
-  const progress = { outcome: progressOutcome, effort: progressEffort };
   const projectsClosed = projects.filter((p) => p.status === "completed").length;
   const projectsActive = projects.filter((p) => p.status === "active").length;
   const projectsTotal = projects.length;
   const criteria = goal.successCriteria ?? [];
   const criteriaMet = criteria.filter((c) => c.done).length;
-  const ritualMultText =
-    rituals.length === 0
-      ? "no rituals"
-      : `×${(
-          rituals.reduce((acc, r) => acc + (r.totalCompletions >= 3 ? 1 : 0), 0) > 0
-            ? 1.1
-            : 1.0
-        ).toFixed(2)} multiplier`;
 
-  // Time estimate aggregate
-  const totalMinutes = actions
-    .filter((a) => a.status !== "dropped" && a.status !== "cancelled")
-    .reduce((s, a) => s + (a.timeEstimateMinutes ?? 0), 0);
-  const doneMinutes = actions
-    .filter((a) => a.status === "done")
-    .reduce((s, a) => s + (a.timeEstimateMinutes ?? 0), 0);
-  const fmtH = (m: number) => `${Math.round(m / 60)}h`;
+  // Average ritual multiplier (rituals with ≥3 completions get ×1.10, else ×1.00 — matches existing heuristic)
+  const avgMult =
+    rituals.length === 0
+      ? 0
+      : rituals.reduce((acc, r) => acc + (r.totalCompletions >= 3 ? 1.1 : 1.0), 0) / rituals.length;
 
   // Last activity
   const lastTs = actions
@@ -201,77 +191,113 @@ const HeroState: React.FC<{
 
   return (
     <div className="bg-surface-elevated border border-border-subtle rounded-[8px] p-8">
+      {/* Top tier */}
       <div className="flex justify-between items-start gap-8">
         <div>
-          <div className="font-mono text-[56px] font-medium text-text-primary tabular-nums leading-none">
-            {progress.outcome}%
+          <div className="text-[60px] font-medium text-text-primary tabular-nums leading-none">
+            {progressOutcome}%
           </div>
-          <div className="mt-3 text-[13px] uppercase tracking-[0.08em] text-text-tertiary">
+          <div className="mt-1 font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
             PROGRESS · OUTCOME
           </div>
-          <div className="mt-1 text-[12px] text-text-secondary">
+          <div className="mt-3 font-mono text-[12px] text-text-secondary tabular-nums">
             {actionsDone} actions done · {projectsClosed} of {projectsTotal} projects closed · Active{" "}
             {ageMonths} {ageMonths === 1 ? "month" : "months"}
           </div>
         </div>
-        <div className="flex gap-6 shrink-0">
+        <div className="flex gap-10 shrink-0">
           <Pillar
             label="PROJECTS"
-            value={`${projectsClosed}/${projectsTotal}`}
-            sub={`closed · ${projectsActive} active`}
+            value={projectsTotal === 0 ? "—" : `${projectsClosed}/${projectsTotal}`}
+            sub={projectsTotal === 0 ? "no projects" : `closed · ${projectsActive} active`}
           />
           <Pillar
             label="RITUALS"
-            value={`${rituals.length}`}
-            sub={`active · ${ritualMultText}`}
+            value={rituals.length === 0 ? "—" : `${rituals.length}`}
+            sub={
+              rituals.length === 0
+                ? "no active"
+                : `active · ×${avgMult.toFixed(2)} avg multiplier`
+            }
           />
           <Pillar
             label="CRITERIA"
-            value={`${criteriaMet}/${criteria.length}`}
-            sub="criteria met"
+            value={criteria.length === 0 ? "—" : `${criteriaMet}/${criteria.length}`}
+            sub={criteria.length === 0 ? "no criteria" : "criteria met"}
           />
         </div>
       </div>
 
+      {/* Bottom tier — STATE */}
       <div className="mt-8">
-        <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-2">STATE</div>
-        <div>
-          <StateRow
-            label="OUTCOME"
-            value={<span className="font-mono text-[14px] text-text-primary tabular-nums">{progress.outcome}%</span>}
-            pct={progress.outcome}
-            color={color}
-          />
-          <StateRow
-            label="EFFORT"
-            value={<span className="font-mono text-[14px] text-text-primary tabular-nums">{progress.effort}%</span>}
-            pct={progress.effort}
-            color={color}
-            opacity={0.6}
-          />
-          <StateRow
-            label="TIME"
-            value={
-              <span className="font-mono tabular-nums">
-                <span className="text-[14px] text-text-primary">{fmtH(doneMinutes)}</span>
-                <span className="text-text-tertiary"> / </span>
-                <span className="text-[12px] text-text-secondary">{fmtH(totalMinutes)}</span>
-              </span>
-            }
-            pct={totalMinutes > 0 ? Math.round((doneMinutes / totalMinutes) * 100) : 0}
-            color={color}
-            isLast
-          />
+        <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-3">
+          STATE
         </div>
-        <div className="mt-2 font-mono text-[11px] text-text-tertiary">
+        <div className="space-y-1">
+          <StateBarRow label="OUTCOME" pct={progressOutcome} value={`${progressOutcome}%`} color={color} />
+          <StateBarRow label="EFFORT" pct={progressEffort} value={`${progressEffort}%`} color={color} opacity={0.6} />
+        </div>
+        <div className="mt-3 font-mono text-[11px] italic text-text-tertiary">
           Effort discounts delegated work to 20%.
         </div>
       </div>
 
-      <div className="mt-4 font-mono text-[12px] text-text-secondary">
+      {/* Last activity */}
+      <div className="mt-6 font-mono text-[12px] text-text-secondary tabular-nums">
         Last activity {lastLabel} · {actionsDone} actions done overall
       </div>
     </div>
+  );
+};
+
+/* ===== Resources block ===== */
+const ResourcesBlock: React.FC<{ actions: Action[] }> = ({ actions }) => {
+  const layers = useStore((s) => s.settings.layers);
+
+  const done = actions.filter((a) => a.status === "done");
+  const pending = actions.filter((a) => a.status === "backlog" || a.status === "planned");
+
+  const timeSpent = done.reduce((s, a) => s + (a.timeEstimateMinutes ?? 0), 0);
+  const timeRemaining = pending.reduce((s, a) => s + (a.timeEstimateMinutes ?? 0), 0);
+  const energyLogged = done.reduce((s, a) => s + (a.energyCost ?? 0), 0);
+  const energyEstimated = pending.reduce((s, a) => s + (a.energyCost ?? 0), 0);
+  const focusLogged = done.reduce((s, a) => s + (a.focusCost ?? 0), 0);
+  const focusEstimated = pending.reduce((s, a) => s + (a.focusCost ?? 0), 0);
+
+  const showTime = layers.logTime && timeSpent > 0;
+  const showEnergy = layers.logEnergy && energyLogged > 0;
+  const showFocus = layers.logFocus && focusLogged > 0;
+
+  if (!showTime && !showEnergy && !showFocus) return null;
+
+  const fmtH = (m: number) => {
+    if (m < 60) return `${m}m`;
+    return `${Math.round(m / 60)}h`;
+  };
+
+  return (
+    <section>
+      <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-3">
+        RESOURCES
+      </div>
+      <div className="space-y-1.5">
+        {showTime && (
+          <div className="font-mono text-[13px] text-text-secondary tabular-nums">
+            Time spent: {fmtH(timeSpent)} · Time remaining: {fmtH(timeRemaining)} estimated
+          </div>
+        )}
+        {showEnergy && (
+          <div className="font-mono text-[13px] text-text-secondary tabular-nums">
+            Energy logged: {energyLogged} · Energy estimated: {energyEstimated}
+          </div>
+        )}
+        {showFocus && (
+          <div className="font-mono text-[13px] text-text-secondary tabular-nums">
+            Focus logged: {focusLogged} · Focus estimated: {focusEstimated}
+          </div>
+        )}
+      </div>
+    </section>
   );
 };
 
@@ -645,6 +671,9 @@ const GoalDetail: React.FC = () => {
 
           <div className="h-14" />
           <HeroState goal={goal} projects={projects} rituals={rituals} actions={actions} />
+
+          <div className="h-8" />
+          <ResourcesBlock actions={actions} />
 
           <div className="h-14" />
           <section>

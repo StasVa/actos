@@ -120,6 +120,130 @@ const fakeAction = (label: string) => () => {
   console.log(`[ActOS prototype] ${label} — full interactivity coming next`);
 };
 
+/* ===== Inline-add row (create new action) ===== */
+const InlineAddAction: React.FC = () => {
+  const [value, setValue] = useState("");
+  const [focused, setFocused] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const [project, setProject] = useState("Shoot video #1");
+  const [popoverOpen, setPopoverOpen] = useState(false);
+  const popRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (!popoverOpen) return;
+    const onDoc = (e: MouseEvent) => {
+      if (popRef.current && !popRef.current.contains(e.target as Node)) setPopoverOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setPopoverOpen(false);
+    };
+    document.addEventListener("mousedown", onDoc);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [popoverOpen]);
+
+  // Build active projects grouped by goal from ACTIONS data
+  const projectsByGoal = React.useMemo(() => {
+    const map = new Map<GoalKey, Set<string>>();
+    ACTIONS.forEach((a) => {
+      if (!isActive(a.status)) return;
+      if (!map.has(a.goal)) map.set(a.goal, new Set());
+      map.get(a.goal)!.add(a.project);
+    });
+    return (Object.keys(GOALS) as GoalKey[])
+      .filter((g) => map.has(g))
+      .map((g) => ({ goal: g, projects: Array.from(map.get(g)!) }));
+  }, []);
+
+  const active = focused || hovered;
+
+  return (
+    <div className="px-10 pb-2">
+      <div className="max-w-[720px]">
+        <div
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
+          className="flex items-center gap-3 rounded-[4px] px-3 transition-colors"
+          style={{
+            height: 48,
+            background: "transparent",
+            border: `1px ${active ? "solid" : "dashed"} ${
+              active ? "hsl(var(--accent))" : "hsl(var(--border-default))"
+            }`,
+          }}
+        >
+          <span
+            className="font-mono text-[16px] leading-none shrink-0"
+            style={{ color: active ? "hsl(var(--text-secondary))" : "hsl(var(--text-tertiary))" }}
+          >
+            +
+          </span>
+          <input
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") setValue("");
+            }}
+            placeholder="Add an action..."
+            className="flex-1 bg-transparent outline-none text-[13px] text-text-primary placeholder:text-text-tertiary"
+          />
+          <div className="relative shrink-0" ref={popRef}>
+            <button
+              type="button"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => setPopoverOpen((v) => !v)}
+              className="inline-flex items-center gap-1.5 px-2 py-1 rounded-[4px] hover:bg-surface-hover transition-colors"
+            >
+              <span className="font-mono text-[11px] text-text-tertiary">→</span>
+              <span className="font-mono text-[11px] text-text-secondary">{project}</span>
+              <span className="font-mono text-[11px] text-text-tertiary">▾</span>
+            </button>
+            {popoverOpen && (
+              <div
+                className="absolute right-0 top-[calc(100%+4px)] z-20 min-w-[220px] bg-surface-elevated border border-border-default rounded-[4px] py-1.5 shadow-lg"
+              >
+                {projectsByGoal.map(({ goal, projects }) => (
+                  <div key={goal}>
+                    <div className="flex items-center gap-1.5 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
+                      <span
+                        className="w-1.5 h-1.5 rounded-full"
+                        style={{ background: GOALS[goal].color }}
+                      />
+                      {GOALS[goal].short}
+                    </div>
+                    {projects.map((p) => (
+                      <button
+                        key={p}
+                        type="button"
+                        onClick={() => {
+                          setProject(p);
+                          setPopoverOpen(false);
+                        }}
+                        className="w-full text-left px-3 py-1.5 text-[13px] text-text-primary hover:bg-surface-hover flex items-center justify-between gap-2"
+                      >
+                        <span className="truncate">{p}</span>
+                        {p === project && (
+                          <span className="text-text-secondary text-[12px]">✓</span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
 /* ===== Action row ===== */
 const ActionRow: React.FC<{ action: Action; selected: boolean; onSelect: () => void }> = ({
   action,

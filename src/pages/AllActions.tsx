@@ -686,8 +686,13 @@ const AllActions: React.FC = () => {
 
         <div className="border-t border-border-subtle" />
 
+        {/* Inline-add */}
+        <div className="pt-6">
+          <InlineAddAction />
+        </div>
+
         {/* Full-width list */}
-        <div className="flex-1 overflow-y-auto min-h-0 pt-6">
+        <div className="flex-1 overflow-y-auto min-h-0 pt-2">
           {filtered.length === 0 ? (
             <div className="p-8 text-center font-mono text-[11px] text-text-tertiary">
               No actions match these filters.

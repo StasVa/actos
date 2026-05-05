@@ -578,8 +578,24 @@ const AllDelegated: React.FC = () => {
 
         <div className="border-t border-border-subtle" />
 
+        {/* Navigational hint */}
+        <div className="px-10 pt-6">
+          <div className="text-center text-[13px] text-text-tertiary py-4">
+            To delegate work, change an action's status to Delegated from{" "}
+            <button
+              type="button"
+              onClick={(e) => e.preventDefault()}
+              className="transition-colors hover:text-text-primary"
+              style={{ color: "hsl(var(--accent))" }}
+            >
+              any action editor
+            </button>
+            .
+          </div>
+        </div>
+
         {/* Full-width list */}
-        <div className="flex-1 overflow-y-auto min-h-0 pt-6">
+        <div className="flex-1 overflow-y-auto min-h-0 pt-2">
           {filtered.length === 0 ? (
             <div className="p-8 text-center font-mono text-[11px] text-text-tertiary">
               No delegations match these filters.

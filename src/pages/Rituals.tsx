@@ -510,10 +510,7 @@ const Rituals: React.FC = () => {
         </div>
       </main>
 
-      {panelOpen && createPortal(
-        <RitualPanel open={panelOpen} onClose={() => setPanelOpen(false)} />,
-        document.body,
-      )}
+      <RitualPanel open={panelOpen} onClose={() => setPanelOpen(false)} />
     </div>
   );
 };

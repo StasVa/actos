@@ -669,8 +669,10 @@ const AllProjects: React.FC = () => {
           {/* Add project affordance */}
           {filtered.length > 0 && (
             <div className="max-w-[480px]">
-              <div
-                className="flex items-center gap-3 rounded-[4px] px-3 transition-colors cursor-pointer hover:bg-surface-hover"
+              <button
+                type="button"
+                onClick={handleNewProject}
+                className="w-full flex items-center gap-3 rounded-[4px] px-3 transition-colors cursor-pointer hover:bg-surface-hover"
                 style={{
                   height: 48,
                   border: "1px dashed hsl(var(--border-default))",
@@ -678,7 +680,7 @@ const AllProjects: React.FC = () => {
               >
                 <span className="font-mono text-[16px] leading-none text-text-tertiary">+</span>
                 <span className="text-[13px] text-text-tertiary">Add a project...</span>
-              </div>
+              </button>
             </div>
           )}
         </div>

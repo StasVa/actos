@@ -8,6 +8,8 @@ import GoalDetail from "./pages/GoalDetail.tsx";
 import ProjectDetail from "./pages/ProjectDetail.tsx";
 import Ideas from "./pages/Ideas.tsx";
 import Rituals from "./pages/Rituals.tsx";
+import AllActions from "./pages/AllActions.tsx";
+import AllDelegated from "./pages/AllDelegated.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -24,6 +26,8 @@ const App = () => (
           <Route path="/projects/shoot-video-1" element={<ProjectDetail />} />
           <Route path="/ideas" element={<Ideas />} />
           <Route path="/rituals" element={<Rituals />} />
+          <Route path="/all-actions" element={<AllActions />} />
+          <Route path="/all-delegated" element={<AllDelegated />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

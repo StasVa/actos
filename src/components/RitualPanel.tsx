@@ -135,7 +135,7 @@ const RitualPanel: React.FC<Props> = ({ open, onClose, mode = "edit" }) => {
               style={{ zIndex: 1 }}
             >
               <div className="font-mono text-[11px] uppercase tracking-[0.08em] text-text-secondary">
-                EDIT RITUAL
+                {isNew ? "NEW RITUAL" : "EDIT RITUAL"}
               </div>
               <button
                 onClick={onClose}
@@ -148,9 +148,11 @@ const RitualPanel: React.FC<Props> = ({ open, onClose, mode = "edit" }) => {
 
             {/* Title */}
             <input
+              ref={titleRef}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full bg-transparent text-text-primary text-[18px] font-medium outline-none border border-transparent rounded-[4px] focus:border-border-default focus:px-3 focus:py-2 transition-[padding,border-color] duration-100"
+              placeholder={isNew ? "Ritual title" : undefined}
+              className="w-full bg-transparent text-text-primary text-[18px] font-medium outline-none border border-transparent rounded-[4px] focus:border-border-default focus:px-3 focus:py-2 transition-[padding,border-color] duration-100 placeholder:text-text-tertiary"
               style={{ fontFamily: "Inter, sans-serif" }}
             />
 

@@ -107,7 +107,7 @@ const DelegationRow: React.FC<{ action: Action; selected: boolean; onSelect: () 
     topRight = (
       <span
         className="font-mono uppercase tracking-[0.06em]"
-        style={{ fontSize: 10, color: "hsl(var(--text-warning))" }}
+        style={{ fontSize: 11, color: "hsl(var(--text-warning))" }}
       >
         {overdueDays}d OVERDUE
       </span>
@@ -116,7 +116,7 @@ const DelegationRow: React.FC<{ action: Action; selected: boolean; onSelect: () 
     topRight = (
       <span
         className="font-mono uppercase tracking-[0.06em] text-text-secondary bg-surface-hover"
-        style={{ fontSize: 10, padding: "2px 6px", borderRadius: 2 }}
+        style={{ fontSize: 11, padding: "2px 8px", borderRadius: 2 }}
       >
         {ret.text}
       </span>

@@ -919,7 +919,7 @@ function StatusDropdown({
               return (
                 <Tooltip key={s}>
                   <TooltipTrigger asChild>
-                    <div>{item}</div>
+                    <span className="block">{item}</span>
                   </TooltipTrigger>
                   <TooltipContent side="left" className="text-[12px]">
                     Assign to a Project to plan or complete this action.

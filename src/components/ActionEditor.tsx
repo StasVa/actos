@@ -19,7 +19,7 @@ import { useStore } from "@/store/useStore";
 import type { Action, ActionStatus, ID } from "@/types";
 import { ConfirmModal } from "./ConfirmModal";
 import { ClampedNumberInput } from "./ClampedNumberInput";
-import { EditorShell } from "./EditorShell";
+import { EditorShell, EditorCloseX, EditorCancelButton } from "./EditorShell";
 import {
   DropdownMenu,
   DropdownMenuTrigger,

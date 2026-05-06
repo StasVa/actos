@@ -581,20 +581,21 @@ const SessionBuilder: React.FC = () => {
 
   /* Validation */
   const validNums =
-    typeof work === "number" && work >= 5 &&
-    typeof brk === "number" && brk >= 0 &&
-    typeof cycles === "number" && cycles >= 1;
+    typeof totalSession === "number" && totalSession >= 15 &&
+    (!breaksOn || (typeof work === "number" && work >= 5 && typeof brk === "number" && brk >= 1));
   const hasActiveSession = sessions.some((s) => s.status === "in_progress");
   const canStart = selectedIds.length > 0 && validNums && !hasActiveSession;
 
   const handleStart = () => {
-    if (!canStart || typeof work !== "number" || typeof brk !== "number" || typeof cycles !== "number") return;
-    const inferredMode: SessionMode = mode ?? (cycles === 1 && brk === 0 ? "continuous" : "custom");
+    if (!canStart || typeof totalSession !== "number") return;
+    const inferredMode: SessionMode = mode ?? (!breaksOn ? "continuous" : "custom");
+    const wd = breaksOn ? (typeof work === "number" ? work : 25) : totalSession;
+    const bd = breaksOn ? (typeof brk === "number" ? brk : 5) : 0;
     const result = createDraftSession({
       mode: inferredMode,
-      workDuration: work,
-      breakDuration: brk,
-      cyclesPlanned: cycles,
+      workDuration: wd,
+      breakDuration: bd,
+      cyclesPlanned: cyclesN,
       plannedActionIds: selectedIds,
     });
     if (!result.ok) {

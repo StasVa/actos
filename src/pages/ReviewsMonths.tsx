@@ -167,21 +167,38 @@ const ReviewsMonths: React.FC = () => {
                       {dayTypeLine}
                     </div>
                   )}
-                  <div className="mt-1 font-mono text-[12px] text-text-secondary tabular-nums">
-                    <span className="text-text-primary">{s.doneActions.length}</span> actions done
-                    {ritualConsistent > 0 && (
-                      <>
-                        <span className="text-text-tertiary"> · </span>
-                        <span className="text-text-primary">{ritualConsistent}</span> rituals consistent
-                      </>
-                    )}
-                    {settings.layers.logTime && s.totalTimeMinutes > 0 && (
-                      <>
-                        <span className="text-text-tertiary"> · </span>
-                        <span className="text-text-primary">{formatHM(s.totalTimeMinutes)}</span> invested
-                      </>
-                    )}
-                  </div>
+                  {(() => {
+                    const o = getOutcomeSummary(
+                      s.doneActions,
+                      s.delegatedActions,
+                      goals,
+                      projects,
+                      actions,
+                    );
+                    return (
+                      <div className="mt-1 font-mono text-[12px] text-text-secondary tabular-nums">
+                        {o.outcomeAdded > 0 && (
+                          <>
+                            <span className="text-text-primary">+{o.outcomeAdded}</span> outcome
+                            <span className="text-text-tertiary"> · </span>
+                          </>
+                        )}
+                        <span className="text-text-primary">{s.doneActions.length}</span> actions done
+                        {ritualConsistent > 0 && (
+                          <>
+                            <span className="text-text-tertiary"> · </span>
+                            <span className="text-text-primary">{ritualConsistent}</span> rituals consistent
+                          </>
+                        )}
+                        {settings.layers.logTime && s.totalTimeMinutes > 0 && (
+                          <>
+                            <span className="text-text-tertiary"> · </span>
+                            <span className="text-text-primary">{formatHM(s.totalTimeMinutes)}</span> invested
+                          </>
+                        )}
+                      </div>
+                    );
+                  })()}
                   {settings.layers.logTime &&
                     s.totalTimeMinutes > 0 &&
                     s.perGoalTime.some((p) => p.minutes > 0) && (

@@ -493,7 +493,7 @@ const SessionBuilder: React.FC = () => {
       <div className="p-3 border-b border-border-subtle font-mono text-[11px] uppercase tracking-[0.06em] text-text-secondary">
         SELECTED · {selectedIds.length}
       </div>
-      <div className="max-h-[440px] overflow-y-auto flex-1">
+      <div className={`flex-1 ${isMobile ? "" : "max-h-[480px] overflow-y-auto"}`}>
         {selectedIds.length === 0 ? (
           <div
             className="m-3 rounded-[4px] p-6 text-center text-[13px] text-text-tertiary"
@@ -506,12 +506,15 @@ const SessionBuilder: React.FC = () => {
             const a = actions.find((x) => x.id === id);
             if (!a) return null;
             const goal = goals.find((g) => g.id === a.goalId);
+            const project = a.projectId ? projects.find((p) => p.id === a.projectId) : undefined;
             return (
               <SelectedRow
                 key={id}
                 index={idx}
                 action={a}
                 goalColor={goal ? `hsl(var(--${goal.color}))` : "hsl(var(--border-default))"}
+                goalTitle={goal?.title}
+                projectTitle={project?.title}
                 onRemove={() => remove(id)}
                 draggable
                 onDragStart={() => setDragIndex(idx)}

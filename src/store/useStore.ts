@@ -20,6 +20,8 @@ import type {
   Ritual,
   RitualSchedule,
   RitualScheduleConfig,
+  Session,
+  SessionMode,
   UIState,
   UserSettings,
   ID,
@@ -77,6 +79,7 @@ export interface StoreState {
   rituals: Ritual[];
   ideas: Idea[];
   dayEntries: DayEntry[];
+  sessions: Session[];
   settings: UserSettings;
   ui: UIState;
 
@@ -163,6 +166,22 @@ export interface StoreState {
   // ─── Settings ───
   toggleLayer: (layerName: keyof UserSettings["layers"], enabled: boolean) => void;
   setDefaultGoal: (goalId: ID) => void;
+
+  // ─── Sessions ───
+  createDraftSession: (config: {
+    mode: SessionMode;
+    workDuration: number;
+    breakDuration: number;
+    cyclesPlanned: number;
+    plannedActionIds: ID[];
+  }) => { ok: true; id: ID } | { ok: false; reason: "active-exists" };
+  completeSession: (sessionId: ID) => void;
+  abortSession: (sessionId: ID) => void;
+  addCompletedActionToSession: (sessionId: ID, actionId: ID) => void;
+  addDroppedActionToSession: (sessionId: ID, actionId: ID) => void;
+  incrementSessionCycles: (sessionId: ID) => void;
+  deleteSession: (sessionId: ID) => void;
+  getActiveSession: () => Session | null;
 
   // ─── UI ───
   openPanel: (panel: UIState["activePanel"]) => void;

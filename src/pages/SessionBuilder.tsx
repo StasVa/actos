@@ -1,10 +1,10 @@
 import React, { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { GripVertical, X as XIcon } from "lucide-react";
+import { ChevronLeft, ChevronRight, GripVertical, X as XIcon } from "lucide-react";
 import { toast } from "sonner";
 import { useStore } from "@/store/useStore";
 import { AppSidebar } from "@/components/AppSidebar";
-import { ClampedNumberInput } from "@/components/ClampedNumberInput";
+import { Switch } from "@/components/ui/switch";
 import { FilterDropdown, FilterOption } from "@/components/FilterDropdown";
 import { useIsMobile } from "@/hooks/use-mobile";
 import type { Action, ID, SessionMode } from "@/types";

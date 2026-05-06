@@ -680,11 +680,6 @@ const AllActions: React.FC = () => {
 
         <div className="border-t border-border-subtle" />
 
-        {/* Inline-add */}
-        <div className="pt-6">
-          <InlineAddAction />
-        </div>
-
         {/* Full-width list */}
         <div className="flex-1 overflow-y-auto min-h-0 pt-2 pl-8">
           {filtered.length === 0 ? (
@@ -720,6 +715,17 @@ const AllActions: React.FC = () => {
           )}
         </div>
       </main>
+
+      {/* Mobile FAB — quick capture */}
+      <button
+        type="button"
+        onClick={() => openPanel({ kind: "action", mode: "new" })}
+        aria-label="New action"
+        className="sm:hidden fixed bottom-4 right-4 z-50 w-14 h-14 rounded-full bg-accent hover:bg-accent-hover text-white flex items-center justify-center transition-colors"
+        style={{ boxShadow: "0 6px 16px hsl(var(--accent) / 0.4)" }}
+      >
+        <span className="text-[24px] leading-none">+</span>
+      </button>
     </div>
   );
 };

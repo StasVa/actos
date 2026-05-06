@@ -90,6 +90,21 @@ const NumberField: React.FC<{
 
 /* ───────── Action rows ───────── */
 
+const ImpactPill: React.FC<{ impact: number; goalColor: string }> = ({ impact, goalColor }) => (
+  <span
+    className="inline-flex items-center font-mono text-[12px] font-medium tabular-nums"
+    style={{
+      padding: "3px 10px",
+      borderRadius: 4,
+      // Tinted background derived from goal color (low alpha against surface)
+      background: `color-mix(in srgb, ${goalColor} 15%, transparent)`,
+      color: goalColor,
+    }}
+  >
+    +{impact}
+  </span>
+);
+
 const AvailableActionRow: React.FC<{
   action: Action;
   goalColor: string;
@@ -98,41 +113,70 @@ const AvailableActionRow: React.FC<{
   selected: boolean;
   onToggle: () => void;
 }> = ({ action, goalColor, goalTitle, projectTitle, selected, onToggle }) => {
-  const breadcrumb = [goalTitle, projectTitle].filter(Boolean).join(" › ");
+  const impact = action.impact ?? 0;
   return (
     <div
       onClick={onToggle}
-      className="flex items-stretch h-10 cursor-pointer transition-colors hover:bg-surface-hover border-b border-border-subtle"
-      style={{ opacity: selected ? 0.5 : 1 }}
+      className="relative flex items-stretch cursor-pointer transition-colors hover:bg-surface-hover border-b border-border-subtle"
+      style={{ minHeight: 56, opacity: selected ? 0.5 : 1 }}
     >
-      <span className="w-[3px] shrink-0" style={{ background: goalColor }} />
-      <div className="flex-1 min-w-0 flex items-center gap-3 pl-3 pr-3">
-        <span
-          className="inline-flex items-center justify-center w-4 h-4 shrink-0 rounded-[3px] border"
-          style={{
-            borderColor: selected ? "hsl(var(--accent))" : "hsl(var(--border-default))",
-            background: selected ? "hsl(var(--accent))" : "transparent",
-            color: "hsl(var(--accent-foreground))",
-            fontSize: 10,
-            lineHeight: 1,
-          }}
-        >
-          {selected ? "✓" : ""}
-        </span>
-        <div className="flex-1 min-w-0">
-          <div className="text-[13px] text-text-primary truncate">{action.title}</div>
-          {breadcrumb && (
-            <div className="font-mono text-[11px] text-text-secondary truncate">
-              {breadcrumb}
-            </div>
-          )}
+      <span
+        className="absolute left-0 top-0 bottom-0"
+        style={{ background: goalColor, width: 3 }}
+      />
+      <div className="flex flex-col gap-1 py-3 pr-4 w-full min-w-0" style={{ paddingLeft: 19 }}>
+        {/* Top line */}
+        <div className="flex items-center justify-between gap-3 min-w-0">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            <span
+              className="inline-flex items-center justify-center shrink-0 rounded-[2px] border"
+              style={{
+                width: 16,
+                height: 16,
+                borderColor: selected ? "hsl(var(--accent))" : "hsl(var(--text-tertiary))",
+                background: selected ? "hsl(var(--accent))" : "transparent",
+                color: "hsl(var(--surface-base))",
+                fontSize: 11,
+                lineHeight: 1,
+              }}
+            >
+              {selected ? "✓" : ""}
+            </span>
+            <span className="text-[15px] font-medium text-text-primary truncate">
+              {action.title}
+            </span>
+          </div>
+          <div className="shrink-0 flex items-center gap-3">
+            {action.timeEstimateMinutes ? (
+              <span className="font-mono text-[12px] tabular-nums text-text-secondary">
+                {action.timeEstimateMinutes}m
+              </span>
+            ) : null}
+            {selected ? (
+              <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">
+                Already added
+              </span>
+            ) : impact > 0 ? (
+              <ImpactPill impact={impact} goalColor={goalColor} />
+            ) : null}
+          </div>
         </div>
-        <div className="shrink-0 flex items-center gap-2 font-mono text-[12px] tabular-nums">
-          {action.timeEstimateMinutes ? (
-            <span className="text-text-secondary">{action.timeEstimateMinutes}m</span>
-          ) : null}
-          <span style={{ color: "hsl(var(--accent))" }}>I{action.impact ?? 0}</span>
-        </div>
+        {/* Bottom line */}
+        {(goalTitle || projectTitle) && (
+          <div className="flex items-center font-mono text-[12px] tabular-nums text-text-secondary truncate">
+            <span
+              className="inline-block w-1.5 h-1.5 rounded-full mr-1.5 shrink-0"
+              style={{ background: goalColor }}
+            />
+            <span className="truncate">
+              {goalTitle && <span>{goalTitle}</span>}
+              {goalTitle && projectTitle && (
+                <span className="mx-1.5 text-text-tertiary">·</span>
+              )}
+              {projectTitle && <span>{projectTitle}</span>}
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -142,42 +186,91 @@ const SelectedRow: React.FC<{
   index: number;
   action: Action;
   goalColor: string;
+  goalTitle?: string;
+  projectTitle?: string;
   onRemove: () => void;
   draggable: boolean;
   onDragStart: () => void;
   onDragOver: (e: React.DragEvent) => void;
   onDrop: () => void;
   isDragging: boolean;
-}> = ({ index, action, goalColor, onRemove, draggable, onDragStart, onDragOver, onDrop, isDragging }) => (
-  <div
-    draggable={draggable}
-    onDragStart={onDragStart}
-    onDragOver={onDragOver}
-    onDrop={onDrop}
-    className="group flex items-stretch transition-colors hover:bg-surface-hover border-b border-border-subtle"
-    style={{ opacity: isDragging ? 0.4 : 1 }}
-  >
-    <span className="w-[3px] shrink-0" style={{ background: goalColor }} />
-    <div className="flex-1 min-w-0 flex items-center gap-2 pl-2 pr-2 py-2">
-      <span className="text-text-tertiary cursor-grab active:cursor-grabbing">
-        <GripVertical size={14} />
-      </span>
-      <span className="font-mono text-[11px] uppercase text-text-tertiary w-5 shrink-0">
-        {index + 1}.
-      </span>
-      <div className="flex-1 min-w-0 text-[13px] text-text-primary truncate">
-        {action.title}
+}> = ({
+  index,
+  action,
+  goalColor,
+  goalTitle,
+  projectTitle,
+  onRemove,
+  draggable,
+  onDragStart,
+  onDragOver,
+  onDrop,
+  isDragging,
+}) => {
+  const impact = action.impact ?? 0;
+  return (
+    <div
+      draggable={draggable}
+      onDragStart={onDragStart}
+      onDragOver={onDragOver}
+      onDrop={onDrop}
+      className="group relative flex items-stretch transition-colors hover:bg-surface-hover border-b border-border-subtle"
+      style={{ minHeight: 56, opacity: isDragging ? 0.4 : 1 }}
+    >
+      <span
+        className="absolute left-0 top-0 bottom-0"
+        style={{ background: goalColor, width: 3 }}
+      />
+      <div className="flex flex-col gap-1 py-3 pr-3 w-full min-w-0" style={{ paddingLeft: 15 }}>
+        {/* Top line */}
+        <div className="flex items-center justify-between gap-3 min-w-0">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <span className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary shrink-0 w-5">
+              {index + 1}.
+            </span>
+            <span className="text-[15px] font-medium text-text-primary truncate">
+              {action.title}
+            </span>
+          </div>
+          <div className="shrink-0 flex items-center gap-3">
+            {action.timeEstimateMinutes ? (
+              <span className="font-mono text-[12px] tabular-nums text-text-secondary">
+                {action.timeEstimateMinutes}m
+              </span>
+            ) : null}
+            {impact > 0 && <ImpactPill impact={impact} goalColor={goalColor} />}
+            <span className="text-text-tertiary cursor-grab active:cursor-grabbing">
+              <GripVertical size={14} />
+            </span>
+            <button
+              onClick={onRemove}
+              className="w-6 h-6 inline-flex items-center justify-center rounded-[3px] text-text-tertiary opacity-0 group-hover:opacity-100 hover:text-text-primary hover:bg-surface-elevated transition-all"
+              aria-label="Remove"
+            >
+              <XIcon size={14} />
+            </button>
+          </div>
+        </div>
+        {/* Bottom line */}
+        {(goalTitle || projectTitle) && (
+          <div className="flex items-center font-mono text-[12px] tabular-nums text-text-secondary truncate" style={{ paddingLeft: 28 }}>
+            <span
+              className="inline-block w-1.5 h-1.5 rounded-full mr-1.5 shrink-0"
+              style={{ background: goalColor }}
+            />
+            <span className="truncate">
+              {goalTitle && <span>{goalTitle}</span>}
+              {goalTitle && projectTitle && (
+                <span className="mx-1.5 text-text-tertiary">·</span>
+              )}
+              {projectTitle && <span>{projectTitle}</span>}
+            </span>
+          </div>
+        )}
       </div>
-      <button
-        onClick={onRemove}
-        className="shrink-0 w-6 h-6 inline-flex items-center justify-center rounded-[3px] text-text-tertiary hover:text-text-primary hover:bg-surface-elevated transition-colors"
-        aria-label="Remove"
-      >
-        <XIcon size={14} />
-      </button>
     </div>
-  </div>
-);
+  );
+};
 
 /* ───────── Page ───────── */
 

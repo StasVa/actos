@@ -285,8 +285,15 @@ const GoalSelector: React.FC<{
   project: Project;
   onChange: (goalId: string) => void;
 }> = ({ project, onChange }) => {
-  const goals = useStore((s) => s.goals.filter((g) => g.status === "active"));
-  const goal = useStore((s) => s.goals.find((g) => g.id === project.goalId));
+  const allGoals = useStore((s) => s.goals);
+  const goals = useMemo(
+    () => allGoals.filter((g) => g.status === "active"),
+    [allGoals],
+  );
+  const goal = useMemo(
+    () => allGoals.find((g) => g.id === project.goalId),
+    [allGoals, project.goalId],
+  );
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 

@@ -74,7 +74,7 @@ export function EditorShell({
 
   // ── NEW mode → centered modal (or bottom sheet on mobile)
   return (
-    <>
+    <EditorCloseContext.Provider value={requestClose}>
       <div
         className="fixed inset-0 z-[190]"
         style={{
@@ -87,15 +87,15 @@ export function EditorShell({
       <div
         className={
           isMobile
-            ? "fixed inset-x-0 bottom-0 z-[200] max-h-[90vh] bg-surface-elevated border-t border-border-subtle rounded-t-[12px] flex flex-col"
-            : "fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[200] w-[640px] max-w-[calc(100vw-32px)] max-h-[85vh] bg-surface-elevated border border-border-subtle rounded-[6px] flex flex-col"
+            ? "fixed inset-x-0 bottom-0 z-[200] max-h-[90vh] bg-surface-elevated border-t border-border-subtle rounded-t-[12px] flex flex-col overflow-hidden"
+            : "fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[200] w-[640px] max-w-[calc(100vw-32px)] max-h-[85vh] bg-surface-elevated border border-border-subtle rounded-[6px] flex flex-col overflow-hidden"
         }
         style={{ boxShadow: "0 24px 48px rgba(0,0,0,0.4)" }}
         role="dialog"
         aria-modal="true"
       >
         {isMobile && (
-          <div className="flex justify-center pt-2 pb-1">
+          <div className="flex justify-center pt-2 pb-1 shrink-0">
             <div className="h-1 w-10 rounded-full bg-border-default" />
           </div>
         )}
@@ -139,6 +139,6 @@ export function EditorShell({
           </div>
         )}
       </div>
-    </>
+    </EditorCloseContext.Provider>
   );
 }

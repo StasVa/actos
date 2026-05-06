@@ -597,12 +597,23 @@ const Rituals: React.FC = () => {
       <AppSidebar />
       <main className="ml-[220px]" style={{ padding: "32px 40px" }}>
         <div className="mx-auto" style={{ maxWidth: 1100 }}>
-          <div className="flex items-baseline justify-between">
+          <div className="flex items-center justify-between gap-4">
             <h1 className="text-[24px] font-medium text-text-primary" style={{ fontWeight: 500 }}>
               Rituals
             </h1>
-            <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary tabular-nums">
-              {headerMeta}
+            <div className="flex items-center gap-4">
+              <div className="hidden sm:block font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary tabular-nums">
+                {headerMeta}
+              </div>
+              <button
+                type="button"
+                onClick={handleAddRitual}
+                aria-label="New ritual"
+                className="inline-flex items-center justify-center gap-1 rounded-[4px] bg-accent hover:bg-accent-hover text-white min-w-[40px] min-h-[40px] sm:min-h-0 sm:min-w-0 sm:px-[16px] sm:py-[8px] text-[13px] font-medium transition-colors"
+              >
+                <span className="text-[15px] leading-none">+</span>
+                <span className="hidden sm:inline">New ritual</span>
+              </button>
             </div>
           </div>
 

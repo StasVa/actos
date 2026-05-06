@@ -769,11 +769,13 @@ export const useStore = create<StoreState>()(
       getDayEntry: (date) => get().dayEntries.find((d) => d.date === date),
 
       // ───────── Settings ─────────
-      toggleLayer: (layerName, enabled) => {
+      // Layer toggles removed — Plan & Review and Log Time are now always-on
+      // core mechanics. The setter is kept as a no-op for compatibility.
+      toggleLayer: (_layerName, _enabled) => {
         set({
           settings: {
             ...get().settings,
-            layers: { ...get().settings.layers, [layerName]: enabled },
+            layers: { planAndReview: true, logTime: true },
           },
         });
       },

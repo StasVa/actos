@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { useStore } from "@/store/useStore";
 import type { Goal, GoalType, GoalStatus, ID } from "@/types";
 import { ConfirmModal } from "./ConfirmModal";
+import { EditorShell, EditorCloseX, EditorCancelButton } from "./EditorShell";
 
 const STATUS_ORDER: GoalStatus[] = ["active", "completed", "dropped"];
 const STATUS_LABEL: Record<GoalStatus, string> = {

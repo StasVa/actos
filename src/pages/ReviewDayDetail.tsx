@@ -369,20 +369,23 @@ const ReviewDayDetail: React.FC = () => {
             {(() => {
               const tiles: AccomplishmentTile[] = [];
               const hasAny =
+                outcome.outcomeAdded > 0 ||
                 doneToday.length > 0 ||
                 ritualsDone.length > 0 ||
                 closedProjects.length > 0 ||
                 closedGoals.length > 0 ||
                 (settings.layers.logTime && actionTimeMin > 0);
               if (hasAny) {
+                if (outcome.outcomeAdded > 0)
+                  tiles.push({ key: "outcome", value: `+${outcome.outcomeAdded}`, label: "Outcome added" });
                 tiles.push({ key: "actions", value: String(doneToday.length), label: "Actions done" });
                 tiles.push({ key: "rituals", value: String(ritualsDone.length), label: "Rituals done" });
+                if (settings.layers.logTime && actionTimeMin > 0)
+                  tiles.push({ key: "time", value: formatHM(actionTimeMin), label: "Time invested" });
                 if (closedProjects.length > 0)
                   tiles.push({ key: "projects", value: String(closedProjects.length), label: "Projects closed" });
                 if (closedGoals.length > 0)
                   tiles.push({ key: "goals", value: String(closedGoals.length), label: "Goals closed" });
-                if (settings.layers.logTime && actionTimeMin > 0)
-                  tiles.push({ key: "time", value: formatHM(actionTimeMin), label: "Time invested" });
               }
               return <AccomplishmentsSection tiles={tiles} period="day" />;
             })()}

@@ -17,6 +17,7 @@ const GROUP_ENTITIES: NavItem[] = [
   { label: "Actions", href: "/actions" },
   { label: "Rituals", href: "/rituals" },
   { label: "Ideas", href: "/ideas" },
+  { label: "Sessions", href: "/sessions" },
 ];
 
 const REVIEWS_SUB: NavItem[] = [

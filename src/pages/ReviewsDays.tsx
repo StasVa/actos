@@ -39,6 +39,7 @@ interface DayRow {
   date: ISODate;
   entry?: DayEntry;
   doneActions: Action[];
+  delegatedActions: Action[];
 }
 
 function buildDayRows(
@@ -48,16 +49,18 @@ function buildDayRows(
   const dates = new Set<ISODate>();
   for (const e of entries) dates.add(e.date);
   for (const a of actions) {
-    if (a.status === "done" && a.completedAt) {
-      dates.add(a.completedAt.slice(0, 10));
-    }
+    if (a.status === "done" && a.completedAt) dates.add(a.completedAt.slice(0, 10));
+    if (a.status === "delegated" && a.delegatedAt) dates.add(a.delegatedAt.slice(0, 10));
   }
   const rows: DayRow[] = Array.from(dates).map((date) => {
     const entry = entries.find((e) => e.date === date);
     const doneActions = actions.filter(
       (a) => a.status === "done" && a.completedAt?.slice(0, 10) === date,
     );
-    return { date, entry, doneActions };
+    const delegatedActions = actions.filter(
+      (a) => a.status === "delegated" && a.delegatedAt?.slice(0, 10) === date,
+    );
+    return { date, entry, doneActions, delegatedActions };
   });
   rows.sort((a, b) => b.date.localeCompare(a.date));
   return rows;

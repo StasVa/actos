@@ -9,6 +9,8 @@ import {
   formatMonthLabel,
   formatMonthDayTypeDistribution,
   getMonthSummary,
+  yearMonthFromDate,
+  dateFromYearMonth,
 } from "@/lib/monthUtils";
 import {
   formatWeekLabel,
@@ -16,6 +18,8 @@ import {
   weekRange,
 } from "@/lib/weekUtils";
 import { ActionRow } from "@/components/ActionRow";
+import { AccomplishmentsSection, type AccomplishmentTile } from "@/components/AccomplishmentsSection";
+import { addMonths } from "date-fns";
 import { DAY_TYPE_LABELS } from "./Index";
 import type { Action } from "@/types";
 
@@ -47,6 +51,19 @@ const ReviewMonthDetail: React.FC = () => {
   const summary = React.useMemo(
     () => getMonthSummary(yearMonth, { actions, dayEntries, goals, projects, rituals }),
     [yearMonth, actions, dayEntries, goals, projects, rituals],
+  );
+
+  const prevYearMonth = React.useMemo(() => {
+    const d = dateFromYearMonth(yearMonth);
+    if (!d) return null;
+    return yearMonthFromDate(addMonths(d, -1));
+  }, [yearMonth]);
+  const prevSummary = React.useMemo(
+    () =>
+      prevYearMonth
+        ? getMonthSummary(prevYearMonth, { actions, dayEntries, goals, projects, rituals })
+        : null,
+    [prevYearMonth, actions, dayEntries, goals, projects, rituals],
   );
 
   if (!summary) {
@@ -127,6 +144,146 @@ const ReviewMonthDetail: React.FC = () => {
         <div className="h-8" />
 
         <div className="space-y-10">
+          {/* ACCOMPLISHMENTS */}
+          {(() => {
+            const tiles: AccomplishmentTile[] = [];
+            const actionsCount = summary.doneActions.length;
+            const ritualsCount = summary.ritualMonth.reduce((s, r) => s + r.doneCount, 0);
+            const prevActionsCount = prevSummary?.doneActions.length ?? null;
+            const prevRitualsCount =
+              prevSummary?.ritualMonth.reduce((s, r) => s + r.doneCount, 0) ?? null;
+            const prevTime = prevSummary?.totalTimeMinutes ?? null;
+            const hasAny =
+              actionsCount > 0 ||
+              ritualsCount > 0 ||
+              summary.closedProjects.length > 0 ||
+              summary.closedGoals.length > 0 ||
+              (settings.layers.logTime && totalMin > 0);
+            if (hasAny) {
+              tiles.push({
+                key: "actions",
+                value: String(actionsCount),
+                label: "Actions done",
+                delta: prevActionsCount != null ? actionsCount - prevActionsCount : null,
+                deltaLabel: "vs last month",
+              });
+              tiles.push({
+                key: "rituals",
+                value: String(ritualsCount),
+                label: "Rituals done",
+                delta: prevRitualsCount != null ? ritualsCount - prevRitualsCount : null,
+                deltaLabel: "vs last month",
+              });
+              if (summary.closedProjects.length > 0)
+                tiles.push({
+                  key: "projects",
+                  value: String(summary.closedProjects.length),
+                  label: "Projects closed",
+                });
+              if (summary.closedGoals.length > 0)
+                tiles.push({
+                  key: "goals",
+                  value: String(summary.closedGoals.length),
+                  label: "Goals closed",
+                });
+              if (settings.layers.logTime && totalMin > 0) {
+                const deltaH =
+                  prevTime != null
+                    ? Math.round(((totalMin - prevTime) / 60) * 10) / 10
+                    : null;
+                tiles.push({
+                  key: "time",
+                  value: formatHM(totalMin),
+                  label: "Time invested",
+                  delta: deltaH,
+                  deltaLabel: "h vs last month",
+                });
+              }
+            }
+            return <AccomplishmentsSection tiles={tiles} period="month" />;
+          })()}
+
+          {/* GOALS CLOSED */}
+          {summary.closedGoals.length > 0 && (
+            <section>
+              <SectionHead meta={`${summary.closedGoals.length}`}>Goals closed</SectionHead>
+              <div className="space-y-1">
+                {summary.closedGoals.map(({ entity: g, type, at }) => {
+                  const goalColor = `hsl(var(--${g.color}))`;
+                  const pillColor =
+                    type === "completed" ? "hsl(var(--state-active))" : "hsl(var(--state-stalled))";
+                  return (
+                    <button
+                      key={g.id}
+                      type="button"
+                      onClick={() => navigate(`/goals/${g.id}`)}
+                      className="w-full flex items-stretch gap-3 rounded-[4px] hover:bg-surface-hover transition-colors text-left overflow-hidden"
+                    >
+                      <div className="w-[3px] shrink-0 self-stretch" style={{ background: goalColor }} />
+                      <div className="flex-1 min-w-0 py-2 pr-3">
+                        <div className="flex items-center gap-3">
+                          <div className="text-[14px] font-medium text-text-primary truncate flex-1">
+                            {g.title}
+                          </div>
+                          <div
+                            className="font-mono text-[10px] uppercase tracking-[0.08em] tabular-nums shrink-0"
+                            style={{ color: pillColor }}
+                          >
+                            {type === "completed" ? "COMPLETED" : "DROPPED"}
+                          </div>
+                        </div>
+                        <div className="mt-0.5 font-mono text-[11px] text-text-tertiary">
+                          {g.type === "mid-term" ? "MID-TERM" : "SHORT-TERM"} · {format(parseISO(at), "MMM d")}
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+          )}
+
+          {/* PROJECTS CLOSED */}
+          {summary.closedProjects.length > 0 && (
+            <section>
+              <SectionHead meta={`${summary.closedProjects.length}`}>Projects closed</SectionHead>
+              <div className="space-y-1">
+                {summary.closedProjects.map(({ entity: p, type, at }) => {
+                  const g = goalById(p.goalId);
+                  const goalColor = `hsl(var(--${g?.color ?? "goal-1"}))`;
+                  const pillColor =
+                    type === "completed" ? "hsl(var(--state-active))" : "hsl(var(--state-stalled))";
+                  return (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => navigate(`/projects/${p.id}`)}
+                      className="w-full flex items-stretch gap-3 rounded-[4px] hover:bg-surface-hover transition-colors text-left overflow-hidden"
+                    >
+                      <div className="w-[3px] shrink-0 self-stretch" style={{ background: goalColor }} />
+                      <div className="flex-1 min-w-0 py-2 pr-3">
+                        <div className="flex items-center gap-3">
+                          <div className="text-[14px] font-medium text-text-primary truncate flex-1">
+                            {p.title}
+                          </div>
+                          <div
+                            className="font-mono text-[10px] uppercase tracking-[0.08em] tabular-nums shrink-0"
+                            style={{ color: pillColor }}
+                          >
+                            {type === "completed" ? "COMPLETED" : "DROPPED"}
+                          </div>
+                        </div>
+                        <div className="mt-0.5 font-mono text-[11px] text-text-tertiary">
+                          {g?.title ?? "—"} · {format(parseISO(at), "MMM d")}
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+          )}
+
           {/* ENERGY */}
           {settings.layers.logEnergy &&
             (summary.morningEnergyAvg != null || summary.eveningEnergyAvg != null) && (
@@ -352,87 +509,6 @@ const ReviewMonthDetail: React.FC = () => {
                         />
                       ))}
                     </div>
-                  );
-                })}
-              </div>
-            </section>
-          )}
-
-          {/* PROJECTS CLOSED */}
-          {summary.closedProjects.length > 0 && (
-            <section>
-              <SectionHead meta={`${summary.closedProjects.length}`}>Projects closed</SectionHead>
-              <div className="space-y-1">
-                {summary.closedProjects.map(({ entity: p, type, at }) => {
-                  const g = goalById(p.goalId);
-                  const goalColor = `hsl(var(--${g?.color ?? "goal-1"}))`;
-                  const pillColor =
-                    type === "completed" ? "hsl(var(--state-active))" : "hsl(var(--state-stalled))";
-                  return (
-                    <button
-                      key={p.id}
-                      type="button"
-                      onClick={() => navigate(`/projects/${p.id}`)}
-                      className="w-full flex items-stretch gap-3 rounded-[4px] hover:bg-surface-hover transition-colors text-left overflow-hidden"
-                    >
-                      <div className="w-[3px] shrink-0 self-stretch" style={{ background: goalColor }} />
-                      <div className="flex-1 min-w-0 py-2 pr-3">
-                        <div className="flex items-center gap-3">
-                          <div className="text-[14px] font-medium text-text-primary truncate flex-1">
-                            {p.title}
-                          </div>
-                          <div
-                            className="font-mono text-[10px] uppercase tracking-[0.08em] tabular-nums shrink-0"
-                            style={{ color: pillColor }}
-                          >
-                            {type === "completed" ? "COMPLETED" : "DROPPED"}
-                          </div>
-                        </div>
-                        <div className="mt-0.5 font-mono text-[11px] text-text-tertiary">
-                          {g?.title ?? "—"} · {format(parseISO(at), "MMM d")}
-                        </div>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </section>
-          )}
-
-          {/* GOALS CLOSED */}
-          {summary.closedGoals.length > 0 && (
-            <section>
-              <SectionHead meta={`${summary.closedGoals.length}`}>Goals closed</SectionHead>
-              <div className="space-y-1">
-                {summary.closedGoals.map(({ entity: g, type, at }) => {
-                  const goalColor = `hsl(var(--${g.color}))`;
-                  const pillColor =
-                    type === "completed" ? "hsl(var(--state-active))" : "hsl(var(--state-stalled))";
-                  return (
-                    <button
-                      key={g.id}
-                      type="button"
-                      onClick={() => navigate(`/goals/${g.id}`)}
-                      className="w-full flex items-stretch gap-3 rounded-[4px] hover:bg-surface-hover transition-colors text-left overflow-hidden"
-                    >
-                      <div className="w-[3px] shrink-0 self-stretch" style={{ background: goalColor }} />
-                      <div className="flex-1 min-w-0 py-2 pr-3">
-                        <div className="flex items-center gap-3">
-                          <div className="text-[14px] font-medium text-text-primary truncate flex-1">
-                            {g.title}
-                          </div>
-                          <div
-                            className="font-mono text-[10px] uppercase tracking-[0.08em] tabular-nums shrink-0"
-                            style={{ color: pillColor }}
-                          >
-                            {type === "completed" ? "COMPLETED" : "DROPPED"}
-                          </div>
-                        </div>
-                        <div className="mt-0.5 font-mono text-[11px] text-text-tertiary">
-                          {g.type === "mid-term" ? "MID-TERM" : "SHORT-TERM"} · {format(parseISO(at), "MMM d")}
-                        </div>
-                      </div>
-                    </button>
                   );
                 })}
               </div>

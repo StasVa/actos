@@ -8,6 +8,7 @@ import { formatHM } from "@/lib/timeStats";
 import type { Action, Goal, Project, Ritual } from "@/types";
 import { DAY_TYPE_LABELS } from "./Index";
 import { ActionRow as SharedActionRow } from "@/components/ActionRow";
+import { AccomplishmentsSection, type AccomplishmentTile } from "@/components/AccomplishmentsSection";
 
 const longDate = (iso: string) =>
   new Date(iso + "T00:00:00").toLocaleDateString("en-US", {
@@ -356,6 +357,83 @@ const ReviewDayDetail: React.FC = () => {
           </div>
         ) : (
           <div className="space-y-10">
+            {/* ACCOMPLISHMENTS */}
+            {(() => {
+              const tiles: AccomplishmentTile[] = [];
+              const hasAny =
+                doneToday.length > 0 ||
+                ritualsDone.length > 0 ||
+                closedProjects.length > 0 ||
+                closedGoals.length > 0 ||
+                (settings.layers.logTime && actionTimeMin > 0);
+              if (hasAny) {
+                tiles.push({ key: "actions", value: String(doneToday.length), label: "Actions done" });
+                tiles.push({ key: "rituals", value: String(ritualsDone.length), label: "Rituals done" });
+                if (closedProjects.length > 0)
+                  tiles.push({ key: "projects", value: String(closedProjects.length), label: "Projects closed" });
+                if (closedGoals.length > 0)
+                  tiles.push({ key: "goals", value: String(closedGoals.length), label: "Goals closed" });
+                if (settings.layers.logTime && actionTimeMin > 0)
+                  tiles.push({ key: "time", value: formatHM(actionTimeMin), label: "Time invested" });
+              }
+              return <AccomplishmentsSection tiles={tiles} period="day" />;
+            })()}
+
+            {/* GOALS CLOSED */}
+            {closedGoals.length > 0 && (
+              <section>
+                <SectionHead>Goals closed · {closedGoals.length}</SectionHead>
+                <div className="space-y-1">
+                  {closedGoals.map(({ entity: g, type }) => {
+                    const goalColor = `hsl(var(--${g.color}))`;
+                    const typeBadge = g.type === "mid-term" ? "MID-TERM" : "SHORT-TERM";
+                    const days = daysActive(g);
+                    return (
+                      <ClosedRow
+                        key={g.id}
+                        title={g.title}
+                        stripeColor={goalColor}
+                        pillLabel={type === "completed" ? "COMPLETED" : "DROPPED"}
+                        subline={`${typeBadge} · ${days} day${days === 1 ? "" : "s"} active`}
+                        onClick={() => navigate(`/goals/${g.id}`)}
+                      />
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
+            {/* PROJECTS CLOSED */}
+            {closedProjects.length > 0 && (
+              <section>
+                <SectionHead>Projects closed · {closedProjects.length}</SectionHead>
+                <div className="space-y-1">
+                  {closedProjects.map(({ entity: p, type }) => {
+                    const g = goalById(p.goalId);
+                    const goalColor = `hsl(var(--${g?.color ?? "goal-1"}))`;
+                    return (
+                      <ClosedRow
+                        key={p.id}
+                        title={p.title}
+                        stripeColor={goalColor}
+                        pillLabel={type === "completed" ? "COMPLETED" : "DROPPED"}
+                        subline={
+                          <span className="inline-flex items-center gap-1.5">
+                            <span
+                              className="w-1.5 h-1.5 rounded-full"
+                              style={{ background: goalColor }}
+                            />
+                            {g?.title ?? "—"}
+                          </span>
+                        }
+                        onClick={() => navigate(`/projects/${p.id}`)}
+                      />
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
             {/* ENERGY */}
             {settings.layers.logEnergy &&
               (dayEntry?.morningEnergyScore != null || dayEntry?.eveningEnergyScore != null) && (
@@ -574,62 +652,6 @@ const ReviewDayDetail: React.FC = () => {
                 </span>
               </button>
             </section>
-
-            {/* PROJECTS CLOSED */}
-            {closedProjects.length > 0 && (
-              <section>
-                <SectionHead>Projects closed · {closedProjects.length}</SectionHead>
-                <div className="space-y-1">
-                  {closedProjects.map(({ entity: p, type }) => {
-                    const g = goalById(p.goalId);
-                    const goalColor = `hsl(var(--${g?.color ?? "goal-1"}))`;
-                    return (
-                      <ClosedRow
-                        key={p.id}
-                        title={p.title}
-                        stripeColor={goalColor}
-                        pillLabel={type === "completed" ? "COMPLETED" : "DROPPED"}
-                        subline={
-                          <span className="inline-flex items-center gap-1.5">
-                            <span
-                              className="w-1.5 h-1.5 rounded-full"
-                              style={{ background: goalColor }}
-                            />
-                            {g?.title ?? "—"}
-                          </span>
-                        }
-                        onClick={() => navigate(`/projects/${p.id}`)}
-                      />
-                    );
-                  })}
-                </div>
-              </section>
-            )}
-
-            {/* GOALS CLOSED */}
-            {closedGoals.length > 0 && (
-              <section>
-                <SectionHead>Goals closed · {closedGoals.length}</SectionHead>
-                <div className="space-y-1">
-                  {closedGoals.map(({ entity: g, type }) => {
-                    const goalColor = `hsl(var(--${g.color}))`;
-                    const typeBadge = g.type === "mid-term" ? "MID-TERM" : "SHORT-TERM";
-                    const days = daysActive(g);
-                    return (
-                      <ClosedRow
-                        key={g.id}
-                        title={g.title}
-                        stripeColor={goalColor}
-                        pillLabel={type === "completed" ? "COMPLETED" : "DROPPED"}
-                        subline={`${typeBadge} · ${days} day${days === 1 ? "" : "s"} active`}
-                        onClick={() => navigate(`/goals/${g.id}`)}
-                      />
-                    );
-                  })}
-                </div>
-              </section>
-            )}
-
             {/* RITUALS */}
             {plannedRituals.length > 0 && (
               <section>

@@ -5,10 +5,8 @@
 
 import React from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Switch } from "@/components/ui/switch";
 import { useStore } from "@/store/useStore";
 import { toast } from "sonner";
-import type { UserSettings } from "@/types";
 
 const STORAGE_KEY = "actos-store";
 

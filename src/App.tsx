@@ -5,6 +5,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index.tsx";
 import Progress from "./pages/Progress.tsx";
+import ReviewsMonths from "./pages/ReviewsMonths.tsx";
+import ReviewMonthDetail from "./pages/ReviewMonthDetail.tsx";
 import Goals from "./pages/Goals.tsx";
 import Reviews from "./pages/Reviews.tsx";
 import ReviewsDays from "./pages/ReviewsDays.tsx";
@@ -65,7 +67,8 @@ const App = () => (
           <Route path="/reviews/days/:date" element={<ReviewDayDetail />} />
           <Route path="/reviews/weeks" element={<ReviewsWeeks />} />
           <Route path="/reviews/weeks/:yearWeek" element={<ReviewWeekDetail />} />
-          <Route path="/reviews/months" element={<Reviews />} />
+          <Route path="/reviews/months" element={<ReviewsMonths />} />
+          <Route path="/reviews/months/:yearMonth" element={<ReviewMonthDetail />} />
 
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

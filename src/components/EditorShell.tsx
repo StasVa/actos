@@ -15,6 +15,33 @@ const EditorCloseContext = createContext<() => void>(() => {});
 
 export const useEditorClose = () => useContext(EditorCloseContext);
 
+/** X button that triggers the shell's guarded close. */
+export function EditorCloseX() {
+  const requestClose = useEditorClose();
+  return (
+    <button
+      onClick={requestClose}
+      className="w-7 h-7 inline-flex items-center justify-center rounded-[4px] text-text-tertiary hover:bg-surface-hover hover:text-text-primary transition-colors"
+      aria-label="Close"
+    >
+      ✕
+    </button>
+  );
+}
+
+/** "Cancel" link button that triggers the shell's guarded close. */
+export function EditorCancelButton({ label = "Cancel" }: { label?: string }) {
+  const requestClose = useEditorClose();
+  return (
+    <button
+      onClick={requestClose}
+      className="text-[13px] text-text-secondary hover:text-text-primary px-3 py-1.5"
+    >
+      {label}
+    </button>
+  );
+}
+
 export function EditorShell({
   mode,
   dirty,

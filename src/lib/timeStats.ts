@@ -5,7 +5,7 @@
 //   • Other      → 0
 // Use timeInvestedMinutes(action) for any "time invested" calculation.
 
-import type { Action, Goal, ID, ISODate } from "@/types";
+import type { Action, Goal, Project, ID, ISODate } from "@/types";
 
 /** Delegation discount factor for time invested (matches Effort discount). */
 export const DELEGATION_TIME_FACTOR = 0.2;
@@ -26,11 +26,19 @@ export function sumTimeInvested(actions: Action[]): number {
   return total;
 }
 
+export interface PerProjectTimeStats {
+  project: Project;
+  total30d: number;
+  totalAllTime: number;
+}
+
 export interface PerGoalTimeStats {
   goal: Goal;
   totalAllTime: number; // minutes
   total30d: number; // minutes
   series30d: number[]; // length 30, oldest → today
+  perProject: PerProjectTimeStats[]; // sorted by total30d desc, 0-time filtered out
+  isClosed: boolean; // goal is completed/dropped (within recent window)
 }
 
 export interface TimeStatsResult {
@@ -54,12 +62,19 @@ export function computeTimeStats(
   goals: Goal[],
   days = 30,
   now: Date = new Date(),
+  projects: Project[] = [],
 ): TimeStatsResult {
   const today = startOfDay(now);
-  const activeGoals = goals.filter((g) => g.status === "active");
+  const windowMs = days * MS_DAY;
+  const includedGoals = goals.filter((g) => {
+    if (g.status === "active") return true;
+    const stamp = g.completedAt ?? g.droppedAt;
+    if (!stamp) return false;
+    return today.getTime() - startOfDay(new Date(stamp)).getTime() <= windowMs;
+  });
   let hasAny = false;
 
-  const perGoal: PerGoalTimeStats[] = activeGoals.map((g) => {
+  const perGoal: PerGoalTimeStats[] = includedGoals.map((g) => {
     const goalActions = actions.filter(
       (a) =>
         a.goalId === g.id &&
@@ -69,11 +84,17 @@ export function computeTimeStats(
     const series = new Array(days).fill(0);
     let total30d = 0;
     let totalAllTime = 0;
+    // per-project accumulators
+    const projAll = new Map<string, number>();
+    const proj30 = new Map<string, number>();
     for (const a of goalActions) {
       const min = timeInvestedMinutes(a);
       if (min <= 0) continue;
       totalAllTime += min;
       hasAny = true;
+      if (a.projectId) {
+        projAll.set(a.projectId, (projAll.get(a.projectId) ?? 0) + min);
+      }
       const stamp = a.status === "done" ? a.completedAt : a.delegatedAt;
       if (!stamp) continue;
       const d = startOfDay(new Date(stamp));
@@ -82,8 +103,29 @@ export function computeTimeStats(
       const idx = days - 1 - daysAgo;
       series[idx] += min;
       total30d += min;
+      if (a.projectId) {
+        proj30.set(a.projectId, (proj30.get(a.projectId) ?? 0) + min);
+      }
     }
-    return { goal: g, totalAllTime, total30d, series30d: series };
+    const projectIds = new Set<string>([...projAll.keys(), ...proj30.keys()]);
+    const perProject: PerProjectTimeStats[] = [];
+    for (const pid of projectIds) {
+      const p = projects.find((pp) => pp.id === pid);
+      if (!p) continue;
+      const t30 = proj30.get(pid) ?? 0;
+      const tAll = projAll.get(pid) ?? 0;
+      if (t30 === 0 && tAll === 0) continue;
+      perProject.push({ project: p, total30d: t30, totalAllTime: tAll });
+    }
+    perProject.sort((a, b) => b.total30d - a.total30d || b.totalAllTime - a.totalAllTime);
+    return {
+      goal: g,
+      totalAllTime,
+      total30d,
+      series30d: series,
+      perProject,
+      isClosed: g.status !== "active",
+    };
   });
 
   const total30d = perGoal.reduce((s, x) => s + x.total30d, 0);

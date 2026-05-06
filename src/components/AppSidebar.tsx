@@ -101,12 +101,15 @@ const ReviewsGroup: React.FC<{ pathname: string }> = ({ pathname }) => {
         type="button"
         onClick={toggle}
         aria-expanded={expanded}
-        className="flex items-center gap-1.5 pl-2.5 pr-2.5 py-1.5 rounded-[4px] text-[13px] text-text-secondary font-normal hover:text-text-primary hover:bg-surface-hover transition-colors text-left"
+        className="flex items-center justify-between pl-2.5 pr-3 py-1.5 rounded-[4px] text-[13px] text-text-secondary font-normal hover:text-text-primary hover:bg-surface-hover transition-colors text-left"
       >
-        <span className="text-[10px] text-text-tertiary w-2.5 inline-flex justify-center">
-          {expanded ? "▾" : "▸"}
-        </span>
         <span>Reviews</span>
+        <ChevronDown
+          size={12}
+          className={`text-text-tertiary transition-transform duration-150 ease-out ${
+            expanded ? "rotate-0" : "-rotate-90"
+          }`}
+        />
       </button>
       {expanded && (
         <nav className="flex flex-col gap-1">

@@ -86,29 +86,6 @@ export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
         </SheetHeader>
 
         <div className="mt-6 space-y-8">
-          {/* Layers */}
-          <section>
-            <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-3">
-              LAYERS
-            </div>
-            <div className="space-y-3">
-              {LAYERS.map((l) => (
-                <div
-                  key={l.key}
-                  className="flex items-start justify-between gap-3 py-2"
-                >
-                  <div className="min-w-0">
-                    <div className="text-[13px] text-text-primary">{l.label}</div>
-                    <div className="text-[11px] text-text-tertiary mt-0.5">{l.hint}</div>
-                  </div>
-                  <Switch
-                    checked={settings.layers[l.key]}
-                    onCheckedChange={(v) => toggleLayer(l.key, v)}
-                  />
-                </div>
-              ))}
-            </div>
-          </section>
 
           {/* Default goal */}
           <section>

@@ -365,7 +365,7 @@ export function CommandPalette() {
       }));
 
     const projectRows: Row[] = projects
-      .filter((p) => p.title.toLowerCase().includes(q))
+      .filter((p) => !p.isDraft && p.title.toLowerCase().includes(q))
       .slice(0, 12)
       .map((p) => {
         const g = goalById[p.goalId];

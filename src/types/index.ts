@@ -197,7 +197,6 @@ export interface UserSettings {
 export interface UIState {
   activePanel:
     | { kind: "action"; mode: "edit" | "new"; id?: ID; prefill?: Partial<Action> }
-    | { kind: "project"; mode: "edit" | "new"; id?: ID; prefill?: Partial<Project> }
     | { kind: "goal"; mode: "edit" | "new"; id?: ID; prefill?: Partial<Goal> }
     | { kind: "ritual"; mode: "edit" | "new"; id?: ID; prefill?: Partial<Ritual> }
     | null;

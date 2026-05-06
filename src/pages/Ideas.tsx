@@ -879,12 +879,34 @@ const Ideas: React.FC = () => {
       <main className="ml-[220px] flex flex-col h-screen">
         {/* Page header */}
         <div className="px-8 py-6 border-b border-border-subtle shrink-0">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4">
             <h1 className="text-[24px] font-medium text-text-primary">Ideas</h1>
-            <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary tabular-nums">
-              {meta}
+            <div className="flex items-center gap-4">
+              <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary tabular-nums">
+                {meta}
+              </div>
+              {!showNewForm && (
+                <button
+                  onClick={() => setShowNewForm(true)}
+                  className="h-9 px-4 text-[13px] font-medium rounded-[4px] transition-colors"
+                  style={{
+                    background: "hsl(var(--accent))",
+                    color: "hsl(var(--accent-foreground))",
+                  }}
+                >
+                  + New idea
+                </button>
+              )}
             </div>
           </div>
+          {showNewForm && (
+            <div className="mt-4">
+              <NewIdeaForm
+                defaultGoalId={defaultGoal?.id}
+                onClose={() => setShowNewForm(false)}
+              />
+            </div>
+          )}
         </div>
 
         {/* Two-column body */}

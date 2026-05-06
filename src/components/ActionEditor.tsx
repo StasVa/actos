@@ -633,36 +633,6 @@ function ActionEditorPanel({
               />
               {impactError && <InlineError text={impactError} />}
             </FieldRow>
-            {layers.logEnergy && (
-              <FieldRow label="Energy (1-10)">
-                <ClampedNumberInput
-                  value={energy}
-                  min={1}
-                  max={10}
-                  step={1}
-                  ariaLabel="Energy"
-                  onChange={setEnergy}
-                  onCommit={(v) =>
-                    persistField("energyCost", v === "" ? undefined : v)
-                  }
-                />
-              </FieldRow>
-            )}
-            {layers.logFocus && (
-              <FieldRow label="Focus (1-10)">
-                <ClampedNumberInput
-                  value={focus}
-                  min={1}
-                  max={10}
-                  step={1}
-                  ariaLabel="Focus"
-                  onChange={setFocus}
-                  onCommit={(v) =>
-                    persistField("focusCost", v === "" ? undefined : v)
-                  }
-                />
-              </FieldRow>
-            )}
             {layers.logTime && (
               <FieldRow label="Time (min) · required">
                 <ClampedNumberInput

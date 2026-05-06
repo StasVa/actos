@@ -625,28 +625,26 @@ function ActionEditorPanel({
               />
               {impactError && <InlineError text={impactError} />}
             </FieldRow>
-            {layers.logTime && (
-              <FieldRow label="Time (min) · required">
-                <ClampedNumberInput
-                  value={timeMin}
-                  min={1}
-                  max={600}
-                  step={5}
-                  placeholder="e.g. 30"
-                  required
-                  requiredMessage="Time estimate is required."
-                  ariaLabel="Time in minutes"
-                  onChange={(v) => {
-                    setTimeMin(v);
-                    if (v !== "" && typeof v === "number" && v > 0) setTimeError(null);
-                  }}
-                  onCommit={(v) =>
-                    persistField("timeEstimateMinutes", v === "" ? undefined : v)
-                  }
-                />
-                {timeError && <InlineError text={timeError} />}
-              </FieldRow>
-            )}
+            <FieldRow label="Time (min) · required">
+              <ClampedNumberInput
+                value={timeMin}
+                min={1}
+                max={600}
+                step={5}
+                placeholder="e.g. 30"
+                required
+                requiredMessage="Time estimate is required."
+                ariaLabel="Time in minutes"
+                onChange={(v) => {
+                  setTimeMin(v);
+                  if (v !== "" && typeof v === "number" && v > 0) setTimeError(null);
+                }}
+                onCommit={(v) =>
+                  persistField("timeEstimateMinutes", v === "" ? undefined : v)
+                }
+              />
+              {timeError && <InlineError text={timeError} />}
+            </FieldRow>
           </div>
         </div>
 

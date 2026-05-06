@@ -8,6 +8,7 @@ import { formatHM } from "@/lib/timeStats";
 import type { Action, Goal, Project, Ritual } from "@/types";
 import { DAY_TYPE_LABELS } from "./Index";
 import { ActionRow as SharedActionRow } from "@/components/ActionRow";
+import { AccomplishmentsSection, type AccomplishmentTile } from "@/components/AccomplishmentsSection";
 
 const longDate = (iso: string) =>
   new Date(iso + "T00:00:00").toLocaleDateString("en-US", {

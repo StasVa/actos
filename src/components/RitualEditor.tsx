@@ -30,32 +30,16 @@ export function RitualEditor() {
   const closePanel = useStore((s) => s.closePanel);
   const open = panel?.kind === "ritual";
 
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") closePanel();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [open, closePanel]);
-
   if (!open || panel?.kind !== "ritual") return null;
 
   return (
-    <>
-      <div
-        className="fixed inset-0 z-[80]"
-        style={{ background: "rgba(0,0,0,0.4)" }}
-        onClick={closePanel}
-      />
-      <RitualEditorPanel
-        key={(panel.mode === "edit" ? panel.id : "new") ?? "new"}
-        mode={panel.mode}
-        ritualId={panel.id}
-        prefill={panel.prefill}
-        onClose={closePanel}
-      />
-    </>
+    <RitualEditorPanel
+      key={(panel.mode === "edit" ? panel.id : "new") ?? "new"}
+      mode={panel.mode}
+      ritualId={panel.id}
+      prefill={panel.prefill}
+      onClose={closePanel}
+    />
   );
 }
 

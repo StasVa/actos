@@ -56,7 +56,7 @@ export function EditorShell({
   // ── EDIT mode → slide-in panel (legacy)
   if (mode === "edit") {
     return (
-      <>
+      <EditorCloseContext.Provider value={requestClose}>
         <div
           className="fixed inset-0 z-[80]"
           style={{ background: "rgba(0,0,0,0.4)" }}
@@ -66,11 +66,9 @@ export function EditorShell({
           className="fixed top-0 right-0 bottom-0 z-[90] w-[480px] max-w-[100vw] bg-surface-base border-l border-border-subtle flex flex-col"
           style={{ boxShadow: "-8px 0 24px rgba(0,0,0,0.3)" }}
         >
-          {typeof children === "function"
-            ? (children as (ctx: { requestClose: () => void }) => React.ReactNode)({ requestClose })
-            : children}
+          {children}
         </aside>
-      </>
+      </EditorCloseContext.Provider>
     );
   }
 

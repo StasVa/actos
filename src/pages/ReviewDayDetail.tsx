@@ -383,6 +383,7 @@ const ReviewDayDetail: React.FC = () => {
                 ritualsDone.length > 0 ||
                 closedProjects.length > 0 ||
                 closedGoals.length > 0 ||
+                sessionsForDay.length > 0 ||
                 (settings.layers.logTime && actionTimeMin > 0);
               if (hasAny) {
                 if (outcome.outcomeAdded > 0)
@@ -391,6 +392,8 @@ const ReviewDayDetail: React.FC = () => {
                 tiles.push({ key: "rituals", value: String(ritualsDone.length), label: "Rituals done" });
                 if (settings.layers.logTime && actionTimeMin > 0)
                   tiles.push({ key: "time", value: formatHM(actionTimeMin), label: "Time invested" });
+                if (sessionsForDay.length > 0)
+                  tiles.push({ key: "sessions", value: String(sessionsForDay.length), label: "Sessions" });
                 if (closedProjects.length > 0)
                   tiles.push({ key: "projects", value: String(closedProjects.length), label: "Projects closed" });
                 if (closedGoals.length > 0)

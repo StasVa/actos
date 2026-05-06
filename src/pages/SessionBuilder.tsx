@@ -16,15 +16,16 @@ type ModePreset = {
   title: string;
   desc: string;
   sub: string;
+  total: number;
   work: number;
   brk: number;
-  cycles: number;
+  breaksOn: boolean;
 };
 
 const PRESETS: ModePreset[] = [
-  { key: "pomodoro", title: "Pomodoro", desc: "25min work, 5min break, 4 cycles", sub: "100min total focus", work: 25, brk: 5, cycles: 4 },
-  { key: "continuous", title: "Continuous", desc: "60min uninterrupted work", sub: "No breaks · single block", work: 60, brk: 0, cycles: 1 },
-  { key: "custom", title: "Custom", desc: "Pick your own durations", sub: "Tune everything", work: 25, brk: 5, cycles: 4 },
+  { key: "pomodoro", title: "Pomodoro", desc: "25min focus, 5min break", sub: "100min total", total: 100, work: 25, brk: 5, breaksOn: true },
+  { key: "continuous", title: "Continuous", desc: "60min uninterrupted", sub: "No breaks · single block", total: 60, work: 60, brk: 0, breaksOn: false },
+  { key: "custom", title: "Custom", desc: "Pick your own durations", sub: "Tune everything", total: 60, work: 25, brk: 5, breaksOn: true },
 ];
 
 const ModeCard: React.FC<{

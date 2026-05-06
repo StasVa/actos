@@ -438,6 +438,21 @@ const ReviewWeekDetail: React.FC = () => {
             </section>
           )}
 
+          {/* SESSIONS */}
+          {(() => {
+            const sessionsForWk = getSessionsForWeek(allSessions, yearWeek);
+            if (sessionsForWk.length === 0) return null;
+            const focusMin = sessionsForWk.reduce((s, x) => s + sessionDurationMinutes(x), 0);
+            return (
+              <section>
+                <SectionHead meta={`${formatHM(focusMin).toUpperCase()} FOCUSED`}>
+                  Sessions · {sessionsForWk.length}
+                </SectionHead>
+                <SessionsSection sessions={sessionsForWk} variant="by-day" showStats initialLimit={10} />
+              </section>
+            );
+          })()}
+
           {/* DAYS */}
           <section>
             <SectionHead meta={`${summary.days.length}`}>Days</SectionHead>

@@ -436,6 +436,21 @@ const ReviewMonthDetail: React.FC = () => {
             </section>
           )}
 
+          {/* SESSIONS */}
+          {(() => {
+            const sessionsForMo = getSessionsForMonth(allSessions, yearMonth);
+            if (sessionsForMo.length === 0) return null;
+            const focusMin = sessionsForMo.reduce((s, x) => s + sessionDurationMinutes(x), 0);
+            return (
+              <section>
+                <SectionHead meta={`${formatHM(focusMin).toUpperCase()} FOCUSED`}>
+                  Sessions · {sessionsForMo.length}
+                </SectionHead>
+                <SessionsSection sessions={sessionsForMo} variant="by-week" showStats />
+              </section>
+            );
+          })()}
+
           {/* WEEKS */}
           <section>
             <SectionHead meta={`${summary.weeks.length}`}>Weeks</SectionHead>

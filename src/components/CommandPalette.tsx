@@ -134,7 +134,7 @@ export function CommandPalette() {
   };
 
   const openEditor = (
-    kind: "action" | "project" | "goal" | "ritual",
+    kind: "action" | "goal" | "ritual",
     id: string,
     recentKind: RecentKind,
   ) => {

@@ -201,6 +201,7 @@ const ReviewsDays: React.FC = () => {
   const dayEntries = useStore((s) => s.dayEntries);
   const actions = useStore((s) => s.actions);
   const goals = useStore((s) => s.goals);
+  const projects = useStore((s) => s.projects);
   const settings = useStore((s) => s.settings);
 
   const [dayType, setDayType] = React.useState("all");

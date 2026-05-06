@@ -143,7 +143,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ projectId, goalLabel, 
     );
   }
 
-  const showTimeRow = logTime && meta.hasTimeData;
+  const showTimeRow = meta.hasTimeData;
 
   return (
     <>

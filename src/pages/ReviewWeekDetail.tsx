@@ -320,6 +320,9 @@ const ReviewWeekDetail: React.FC = () => {
             </section>
           )}
 
+          {/* OUTCOME ADDED */}
+          <OutcomeAddedSection outcome={outcome} period="week" />
+
           {/* ENERGY */}
           {settings.layers.logEnergy &&
             (summary.morningEnergyAvg != null || summary.eveningEnergyAvg != null) && (

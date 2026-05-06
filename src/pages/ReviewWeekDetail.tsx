@@ -178,12 +178,24 @@ const ReviewWeekDetail: React.FC = () => {
               prevSummary?.ritualWeek.reduce((s, r) => s + r.doneCount, 0) ?? null;
             const prevTime = prevSummary?.totalTimeMinutes ?? null;
             const hasAny =
+              outcome.outcomeAdded > 0 ||
               actionsCount > 0 ||
               ritualsCount > 0 ||
               summary.closedProjects.length > 0 ||
               summary.closedGoals.length > 0 ||
               (settings.layers.logTime && totalMin > 0);
             if (hasAny) {
+              if (outcome.outcomeAdded > 0)
+                tiles.push({
+                  key: "outcome",
+                  value: `+${outcome.outcomeAdded}`,
+                  label: "Outcome added",
+                  delta:
+                    prevOutcome != null
+                      ? outcome.outcomeAdded - prevOutcome.outcomeAdded
+                      : null,
+                  deltaLabel: "vs last week",
+                });
               tiles.push({
                 key: "actions",
                 value: String(actionsCount),
@@ -198,18 +210,6 @@ const ReviewWeekDetail: React.FC = () => {
                 delta: prevRitualsCount != null ? ritualsCount - prevRitualsCount : null,
                 deltaLabel: "vs last week",
               });
-              if (summary.closedProjects.length > 0)
-                tiles.push({
-                  key: "projects",
-                  value: String(summary.closedProjects.length),
-                  label: "Projects closed",
-                });
-              if (summary.closedGoals.length > 0)
-                tiles.push({
-                  key: "goals",
-                  value: String(summary.closedGoals.length),
-                  label: "Goals closed",
-                });
               if (settings.layers.logTime && totalMin > 0) {
                 const deltaH =
                   prevTime != null
@@ -223,6 +223,18 @@ const ReviewWeekDetail: React.FC = () => {
                   deltaLabel: "h vs last week",
                 });
               }
+              if (summary.closedProjects.length > 0)
+                tiles.push({
+                  key: "projects",
+                  value: String(summary.closedProjects.length),
+                  label: "Projects closed",
+                });
+              if (summary.closedGoals.length > 0)
+                tiles.push({
+                  key: "goals",
+                  value: String(summary.closedGoals.length),
+                  label: "Goals closed",
+                });
             }
             return <AccomplishmentsSection tiles={tiles} period="week" />;
           })()}

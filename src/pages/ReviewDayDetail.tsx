@@ -476,14 +476,34 @@ const ReviewDayDetail: React.FC = () => {
                       ))}
                     </>
                   )}
-                  {skipped.length > 0 && (
+                  {delegatedToday.length > 0 && (
                     <>
                       {actionSubgroupCount > 1 && (
                         <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mt-3 mb-1">
-                          Skipped · {skipped.length}
+                          Delegated · {delegatedToday.length}
                         </div>
                       )}
-                      {skipped.map((a) => (
+                      {delegatedToday.map((a) => (
+                        <ActionLine
+                          key={a.id}
+                          a={a}
+                          icon="→"
+                          goalColor={goalColorOf(a)}
+                          parent={breadcrumb(a)}
+                          showTime={settings.layers.logTime}
+                          onClick={() => openActionEdit(a.id)}
+                        />
+                      ))}
+                    </>
+                  )}
+                  {droppedToday.length > 0 && (
+                    <>
+                      {actionSubgroupCount > 1 && (
+                        <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mt-3 mb-1">
+                          Dropped · {droppedToday.length}
+                        </div>
+                      )}
+                      {droppedToday.map((a) => (
                         <ActionLine
                           key={a.id}
                           a={a}
@@ -496,6 +516,27 @@ const ReviewDayDetail: React.FC = () => {
                       ))}
                     </>
                   )}
+                  {cancelledToday.length > 0 && (
+                    <>
+                      {actionSubgroupCount > 1 && (
+                        <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mt-3 mb-1">
+                          Cancelled · {cancelledToday.length}
+                        </div>
+                      )}
+                      {cancelledToday.map((a) => (
+                        <ActionLine
+                          key={a.id}
+                          a={a}
+                          icon="✗"
+                          goalColor={goalColorOf(a)}
+                          parent={breadcrumb(a)}
+                          showTime={settings.layers.logTime}
+                          onClick={() => openActionEdit(a.id)}
+                        />
+                      ))}
+                    </>
+                  )}
+
                   {notCompleted.length > 0 && (
                     <>
                       {actionSubgroupCount > 1 && (

@@ -11,7 +11,7 @@ import React, { useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useStore } from "@/store/useStore";
-import { formatTime } from "@/lib/format";
+
 import {
   sessionDurationMinutes,
   sessionPlannedMinutes,

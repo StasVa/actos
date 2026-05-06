@@ -176,21 +176,21 @@ const ReviewMonthDetail: React.FC = () => {
               prevSummary?.ritualMonth.reduce((s, r) => s + r.doneCount, 0) ?? null;
             const prevTime = prevSummary?.totalTimeMinutes ?? null;
             const hasAny =
-              outcome.outcomeAdded > 0 ||
+              outcome.valueAdded > 0 ||
               actionsCount > 0 ||
               ritualsCount > 0 ||
               summary.closedProjects.length > 0 ||
               summary.closedGoals.length > 0 ||
               (settings.layers.logTime && totalMin > 0);
             if (hasAny) {
-              if (outcome.outcomeAdded > 0)
+              if (outcome.valueAdded > 0)
                 tiles.push({
                   key: "outcome",
-                  value: `+${outcome.outcomeAdded}`,
+                  value: `+${outcome.valueAdded}`,
                   label: "Outcome added",
                   delta:
                     prevOutcome != null
-                      ? outcome.outcomeAdded - prevOutcome.outcomeAdded
+                      ? outcome.valueAdded - prevOutcome.valueAdded
                       : null,
                   deltaLabel: "vs last month",
                 });

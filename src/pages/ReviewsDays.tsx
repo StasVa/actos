@@ -136,7 +136,7 @@ const DayRowItem: React.FC<{
   const outcome = getOutcomeSummary(doneActions, delegatedActions, goals, projects, allActions);
 
   const stats: string[] = [];
-  if (outcome.outcomeAdded > 0) stats.push(`+${outcome.outcomeAdded} value`);
+  if (outcome.valueAdded > 0) stats.push(`+${outcome.valueAdded} value`);
   stats.push(`${doneActions.length} actions done`);
   if (ritualCount > 0) stats.push(`${ritualCount} rituals`);
   if (logTime && totalMin > 0) stats.push(`${formatHM(totalMin)} invested`);

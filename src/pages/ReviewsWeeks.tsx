@@ -181,9 +181,9 @@ const ReviewsWeeks: React.FC = () => {
                     );
                     return (
                       <div className="mt-1 font-mono text-[12px] text-text-secondary tabular-nums">
-                        {o.outcomeAdded > 0 && (
+                        {o.valueAdded > 0 && (
                           <>
-                            <span className="text-text-primary">+{o.outcomeAdded}</span> outcome
+                            <span className="text-text-primary">+{o.valueAdded}</span> outcome
                             <span className="text-text-tertiary"> · </span>
                           </>
                         )}

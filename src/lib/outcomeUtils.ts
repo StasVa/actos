@@ -18,7 +18,7 @@ export interface OutcomePerGoalRow {
 
 export interface OutcomeSummary {
   /** Total Outcome added (all qualifying actions, regardless of goal filter). */
-  outcomeAdded: number;
+  valueAdded: number;
   /** Per-active-goal breakdown. */
   outcomePerGoal: OutcomePerGoalRow[];
   /**
@@ -75,7 +75,7 @@ export function getOutcomeSummary(
     if (isActiveProjectFor(a.projectId, a.goalId, projects, activeGoalIds))
       qualifying.push({ a, kind: "delegated" });
 
-  const outcomeAdded = qualifying.reduce((s, x) => s + (x.a.impact ?? 0), 0);
+  const valueAdded = qualifying.reduce((s, x) => s + (x.a.impact ?? 0), 0);
 
   const perGoal: OutcomePerGoalRow[] = activeGoals
     .map((g) => {
@@ -120,5 +120,5 @@ export function getOutcomeSummary(
   const hadOutcomeButNoneOnActiveGoals =
     hadAnyDoneOrDelegated && qualifying.length === 0;
 
-  return { outcomeAdded, outcomePerGoal: perGoal, hadOutcomeButNoneOnActiveGoals };
+  return { valueAdded, outcomePerGoal: perGoal, hadOutcomeButNoneOnActiveGoals };
 }

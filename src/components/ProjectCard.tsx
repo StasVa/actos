@@ -60,8 +60,10 @@ export type ProjectCardProps = {
 
 export const ProjectCard: React.FC<ProjectCardProps> = ({ projectId, goalLabel, goalColor }) => {
   const project = useStore((s) => s.projects.find((p) => p.id === projectId));
-  const actions = useStore((s) =>
-    s.actions.filter((a) => a.projectId === projectId),
+  const allActions = useStore((s) => s.actions);
+  const actions = useMemo(
+    () => allActions.filter((a) => a.projectId === projectId),
+    [allActions, projectId],
   );
   const logTime = useStore((s) => s.settings.layers.logTime);
 
@@ -71,7 +73,9 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ projectId, goalLabel, 
   const [confirmDrop, setConfirmDrop] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
-  const progress = useStore((s) => selectors.projectProgress(s, projectId));
+  const progressOutcome = useStore((s) => selectors.projectProgress(s, projectId).outcome);
+  const progressEffort = useStore((s) => selectors.projectProgress(s, projectId).effort);
+  const progress = { outcome: progressOutcome, effort: progressEffort };
   const stateDot = useStore((s) => selectors.stateIndicator(s, "project", projectId));
 
   const meta = useMemo(() => {

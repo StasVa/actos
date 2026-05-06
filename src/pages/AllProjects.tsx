@@ -380,16 +380,17 @@ const AllProjects: React.FC = () => {
               </div>
               <button
                 onClick={handleNewGoal}
-                className="text-[12px] px-2.5 py-1 rounded-[4px] border border-border-subtle text-text-secondary hover:text-text-primary hover:border-accent transition-colors"
+                className="hidden sm:inline-flex text-[12px] px-2.5 py-1 rounded-[4px] border border-border-subtle text-text-secondary hover:text-text-primary hover:border-accent transition-colors"
               >
                 + New goal
               </button>
               <button
                 onClick={handleNewProject}
-                className="text-[12px] font-medium px-2.5 py-1 rounded-[4px]"
-                style={{ background: "hsl(var(--accent))", color: "hsl(var(--surface-base))" }}
+                aria-label="New project"
+                className="inline-flex items-center justify-center gap-1 rounded-[4px] bg-accent hover:bg-accent-hover text-white min-w-[40px] min-h-[40px] sm:min-h-0 sm:min-w-0 sm:px-[16px] sm:py-[8px] text-[13px] font-medium transition-colors"
               >
-                + New project
+                <span className="text-[15px] leading-none">+</span>
+                <span className="hidden sm:inline">New project</span>
               </button>
             </div>
           </div>

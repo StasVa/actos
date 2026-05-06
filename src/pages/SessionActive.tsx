@@ -837,6 +837,96 @@ const SessionActive: React.FC = () => {
           handleRestartCycle();
         }}
       />
+      <ConfirmModal
+        open={confirmEndEarly}
+        title="End session early?"
+        body={`You completed all planned actions in ${actualFocusedMinutes}min of ${plannedFocusMinutes}min. End now?`}
+        confirmLabel="End session"
+        destructive
+        onCancel={() => setConfirmEndEarly(false)}
+        onConfirm={handleEndSessionEarly}
+      />
+
+      {/* Add-action picker overlay */}
+      {pickerOpen && (
+        <div
+          className="fixed inset-0 z-[90] flex items-center justify-center"
+          style={{ background: "rgba(0,0,0,0.5)" }}
+          onClick={() => setPickerOpen(false)}
+        >
+          <div
+            className="w-[560px] max-w-[92vw] max-h-[80vh] flex flex-col bg-surface-elevated border border-border-subtle rounded-[6px] shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="px-5 py-4 border-b border-border-subtle">
+              <h2 className="text-[16px] font-medium text-text-primary">Add actions to session</h2>
+              <p className="mt-1 text-[12px] text-text-secondary">
+                Pick from your active backlog and planned actions.
+              </p>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              {pickerAvailable.length === 0 ? (
+                <div className="p-6 text-[13px] text-text-tertiary text-center">
+                  No more actions available. Create one from /actions first.
+                </div>
+              ) : (
+                pickerAvailable.map((a) => {
+                  const goal = goals.find((g) => g.id === a.goalId);
+                  const project = a.projectId ? projects.find((p) => p.id === a.projectId) : undefined;
+                  const checked = pickerSelected.includes(a.id);
+                  return (
+                    <button
+                      key={a.id}
+                      type="button"
+                      onClick={() =>
+                        setPickerSelected((prev) =>
+                          prev.includes(a.id) ? prev.filter((x) => x !== a.id) : [...prev, a.id],
+                        )
+                      }
+                      className="w-full text-left flex items-start gap-3 px-5 py-3 border-b border-border-subtle hover:bg-surface-hover transition-colors"
+                    >
+                      <span
+                        className="mt-1 inline-block w-3 h-3 rounded-[2px] border"
+                        style={{
+                          borderColor: "hsl(var(--border-default))",
+                          background: checked ? "hsl(var(--accent))" : "transparent",
+                        }}
+                      />
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-[14px] text-text-primary">{a.title}</span>
+                        <span className="block mt-0.5 font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">
+                          {goal?.title ?? "—"}
+                          {project ? ` · ${project.title}` : ""}
+                          {a.timeEstimateMinutes ? ` · ${a.timeEstimateMinutes}min` : ""}
+                        </span>
+                      </span>
+                    </button>
+                  );
+                })
+              )}
+            </div>
+            <div className="px-5 py-3 border-t border-border-subtle flex items-center justify-end gap-3">
+              <button
+                onClick={() => setPickerOpen(false)}
+                className="text-[13px] text-text-secondary hover:text-text-primary px-3 py-1.5"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmAddActions}
+                disabled={pickerSelected.length === 0}
+                className="text-[13px] font-medium px-3 py-1.5 rounded-[4px] transition-colors disabled:opacity-40"
+                style={{
+                  background: "hsl(var(--accent))",
+                  color: "hsl(var(--accent-foreground))",
+                }}
+              >
+                Add {pickerSelected.length > 0 ? `(${pickerSelected.length})` : ""}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -583,16 +583,40 @@ function ActionEditorPanel({
         <div className="mb-6">
           <SectionHead>Estimates</SectionHead>
           <div className="grid grid-cols-2 gap-3">
-            <FieldRow label="Impact (0-10)">
+            <FieldRow label="Impact (1-10) · required">
               <input
                 type="number"
-                min={0}
+                min={1}
                 max={10}
                 value={impact}
-                onChange={(e) => setImpact(Number(e.target.value))}
-                onBlur={() => persistField("impact", Number(impact) || 0)}
-                className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
+                placeholder="1–10"
+                onChange={(e) => {
+                  const v = e.target.value;
+                  if (v === "") {
+                    setImpact("");
+                    setImpactError(null);
+                    return;
+                  }
+                  const n = Number(v);
+                  setImpact(n);
+                  if (n <= 0) setImpactError("Impact must be 1 or higher.");
+                  else setImpactError(null);
+                }}
+                onBlur={() => {
+                  if (impact === "") {
+                    persistField("impact", 0);
+                    return;
+                  }
+                  persistField("impact", Number(impact) || 0);
+                }}
+                className="w-full bg-surface-raised border rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
+                style={{
+                  borderColor: impactError
+                    ? "hsl(var(--text-warning))"
+                    : "hsl(var(--border-subtle))",
+                }}
               />
+              {impactError && <InlineError text={impactError} />}
             </FieldRow>
             {layers.logEnergy && (
               <FieldRow label="Energy (1-10)">

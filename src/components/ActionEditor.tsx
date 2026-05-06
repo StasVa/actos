@@ -592,94 +592,78 @@ function ActionEditorPanel({
           <SectionHead>Estimates</SectionHead>
           <div className="grid grid-cols-2 gap-3">
             <FieldRow label="Impact (1-10) · required">
-              <input
-                type="number"
+              <ClampedNumberInput
+                value={impact}
                 min={1}
                 max={10}
-                value={impact}
+                step={1}
                 placeholder="1–10"
-                onChange={(e) => {
-                  const v = e.target.value;
+                required
+                requiredMessage="Impact is required."
+                ariaLabel="Impact"
+                onChange={(v) => {
+                  setImpact(v);
+                  if (v === "" || (typeof v === "number" && v > 0)) setImpactError(null);
+                }}
+                onCommit={(v) => {
                   if (v === "") {
-                    setImpact("");
-                    setImpactError(null);
-                    return;
-                  }
-                  const n = Number(v);
-                  setImpact(n);
-                  if (n <= 0) setImpactError("Impact must be 1 or higher.");
-                  else setImpactError(null);
-                }}
-                onBlur={() => {
-                  if (impact === "") {
                     persistField("impact", 0);
-                    return;
+                  } else {
+                    persistField("impact", v);
+                    setImpactError(null);
                   }
-                  persistField("impact", Number(impact) || 0);
-                }}
-                className="w-full bg-surface-raised border rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
-                style={{
-                  borderColor: impactError
-                    ? "hsl(var(--text-warning))"
-                    : "hsl(var(--border-subtle))",
                 }}
               />
               {impactError && <InlineError text={impactError} />}
             </FieldRow>
             {layers.logEnergy && (
               <FieldRow label="Energy (1-10)">
-                <input
-                  type="number"
+                <ClampedNumberInput
+                  value={energy}
                   min={1}
                   max={10}
-                  value={energy}
-                  onChange={(e) => setEnergy(e.target.value === "" ? "" : Number(e.target.value))}
-                  onBlur={() =>
-                    persistField("energyCost", energy === "" ? undefined : Number(energy))
+                  step={1}
+                  ariaLabel="Energy"
+                  onChange={setEnergy}
+                  onCommit={(v) =>
+                    persistField("energyCost", v === "" ? undefined : v)
                   }
-                  className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
                 />
               </FieldRow>
             )}
             {layers.logFocus && (
               <FieldRow label="Focus (1-10)">
-                <input
-                  type="number"
+                <ClampedNumberInput
+                  value={focus}
                   min={1}
                   max={10}
-                  value={focus}
-                  onChange={(e) => setFocus(e.target.value === "" ? "" : Number(e.target.value))}
-                  onBlur={() =>
-                    persistField("focusCost", focus === "" ? undefined : Number(focus))
+                  step={1}
+                  ariaLabel="Focus"
+                  onChange={setFocus}
+                  onCommit={(v) =>
+                    persistField("focusCost", v === "" ? undefined : v)
                   }
-                  className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
                 />
               </FieldRow>
             )}
             {layers.logTime && (
               <FieldRow label="Time (min) · required">
-                <input
-                  type="number"
-                  min={1}
+                <ClampedNumberInput
                   value={timeMin}
+                  min={1}
+                  max={600}
+                  step={5}
                   placeholder="e.g. 30"
-                  onChange={(e) => {
-                    const v = e.target.value;
-                    setTimeMin(v === "" ? "" : Number(v));
-                    if (v !== "" && Number(v) > 0) setTimeError(null);
+                  required
+                  requiredMessage="Time estimate is required."
+                  ariaLabel="Time in minutes"
+                  onChange={(v) => {
+                    setTimeMin(v);
+                    if (v !== "" && typeof v === "number" && v > 0) setTimeError(null);
                   }}
-                  onBlur={() =>
-                    persistField(
-                      "timeEstimateMinutes",
-                      timeMin === "" ? undefined : Number(timeMin),
-                    )
+                  onCommit={(v) =>
+                    persistField("timeEstimateMinutes", v === "" ? undefined : v)
                   }
-                  className="w-full bg-surface-raised border rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
-                  style={{
-                    borderColor: timeError
-                      ? "hsl(var(--text-warning))"
-                      : "hsl(var(--border-subtle))",
-                  }}
                 />
                 {timeError && <InlineError text={timeError} />}
               </FieldRow>

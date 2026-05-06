@@ -61,17 +61,22 @@ export function computeTimeStats(
 
   const perGoal: PerGoalTimeStats[] = activeGoals.map((g) => {
     const goalActions = actions.filter(
-      (a) => a.goalId === g.id && a.status === "done" && (a.timeEstimateMinutes ?? 0) > 0,
+      (a) =>
+        a.goalId === g.id &&
+        (a.status === "done" || a.status === "delegated") &&
+        (a.timeEstimateMinutes ?? 0) > 0,
     );
     const series = new Array(days).fill(0);
     let total30d = 0;
     let totalAllTime = 0;
     for (const a of goalActions) {
-      const min = a.timeEstimateMinutes ?? 0;
+      const min = timeInvestedMinutes(a);
+      if (min <= 0) continue;
       totalAllTime += min;
       hasAny = true;
-      if (!a.completedAt) continue;
-      const d = startOfDay(new Date(a.completedAt));
+      const stamp = a.status === "done" ? a.completedAt : a.delegatedAt;
+      if (!stamp) continue;
+      const d = startOfDay(new Date(stamp));
       const daysAgo = Math.round((today.getTime() - d.getTime()) / MS_DAY);
       if (daysAgo < 0 || daysAgo >= days) continue;
       const idx = days - 1 - daysAgo;

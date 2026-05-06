@@ -197,25 +197,38 @@ function RitualEditorPanel({
     return g ? `hsl(var(--${g.color}))` : "hsl(var(--text-tertiary))";
   }, [goalId, goals]);
 
+  const dirty =
+    mode === "new" &&
+    (!!title.trim() ||
+      !!notes.trim() ||
+      timeMin !== "" ||
+      energy !== "" ||
+      focus !== "");
+
   return (
-    <aside
-      className="fixed top-0 right-0 bottom-0 z-[90] w-[480px] max-w-[100vw] bg-surface-base border-l border-border-subtle flex flex-col"
-      style={{ boxShadow: "-8px 0 24px rgba(0,0,0,0.3)" }}
-    >
+    <EditorShell mode={mode} dirty={dirty} onClose={onClose}>
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-border-subtle">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-border-subtle shrink-0">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full" style={{ background: goalColor }} />
-          <div className="font-mono text-[11px] uppercase tracking-[0.08em] text-text-tertiary">
-            {mode === "new" ? "New ritual" : status === "archived" ? "Archived ritual" : "Edit ritual"}
-          </div>
+          {mode === "new" ? (
+            <div className="text-[18px] font-medium text-text-primary">New ritual</div>
+          ) : (
+            <div className="font-mono text-[11px] uppercase tracking-[0.08em] text-text-tertiary">
+              {status === "archived" ? "Archived ritual" : "Edit ritual"}
+            </div>
+          )}
         </div>
-        <button
-          onClick={onClose}
-          className="w-7 h-7 inline-flex items-center justify-center rounded-[4px] text-text-tertiary hover:bg-surface-hover hover:text-text-primary transition-colors"
-        >
-          ✕
-        </button>
+        {mode === "new" ? (
+          <EditorCloseX />
+        ) : (
+          <button
+            onClick={onClose}
+            className="w-7 h-7 inline-flex items-center justify-center rounded-[4px] text-text-tertiary hover:bg-surface-hover hover:text-text-primary transition-colors"
+          >
+            ✕
+          </button>
+        )}
       </div>
 
       {/* Body */}

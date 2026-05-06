@@ -230,6 +230,12 @@ const ReviewDayDetail: React.FC = () => {
   const totalMin = perGoal.reduce((s, x) => s + x.min, 0);
   const yMax = Math.max(1, ...perGoal.map((x) => x.min));
 
+  // Outcome added (Done + Delegated impact, scoped to active goals)
+  const outcome = React.useMemo(
+    () => getOutcomeSummary(doneToday, delegatedToday, goals, projects, actions),
+    [doneToday, delegatedToday, goals, projects, actions],
+  );
+
   // No data at all (closed entities also count as data)
   const hasAnyData =
     !!dayEntry ||

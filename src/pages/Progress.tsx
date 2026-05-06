@@ -75,11 +75,12 @@ const RecentlyClosedSection: React.FC = () => {
                 onClick={() => openPanel({ kind: "action", mode: "edit", id: r.id })}
                 className="w-full flex items-center gap-3 px-2 py-1.5 rounded-[3px] hover:bg-surface-hover transition-colors text-left"
               >
-                <span className="font-mono text-[12px] text-text-tertiary">✓</span>
+                <span className="font-mono text-[12px] text-state-active">✓</span>
                 <span className="text-[13px] text-text-primary truncate">{r.title}</span>
-                <span className="font-mono text-[11px] text-text-tertiary truncate">· {r.parent}</span>
+                <span className="font-mono text-[11px] text-text-tertiary">·</span>
+                <span className="font-mono text-[11px] text-text-secondary truncate">{r.parent}</span>
                 <div className="flex-1" />
-                <span className="font-mono text-[11px] text-text-tertiary tabular-nums whitespace-nowrap">{r.date}</span>
+                <span className="font-mono text-[11px] text-text-secondary tabular-nums whitespace-nowrap">{r.date}</span>
               </button>
             ) : (
               <Link
@@ -89,9 +90,10 @@ const RecentlyClosedSection: React.FC = () => {
               >
                 <span className="font-mono text-[12px] text-text-tertiary">⌐</span>
                 <span className="text-[13px] text-text-primary truncate">{r.title}</span>
-                <span className="font-mono text-[11px] text-text-tertiary truncate">· {r.parent}</span>
+                <span className="font-mono text-[11px] text-text-tertiary">·</span>
+                <span className="font-mono text-[11px] text-text-secondary truncate">{r.parent}</span>
                 <div className="flex-1" />
-                <span className="font-mono text-[11px] text-text-tertiary tabular-nums whitespace-nowrap">{r.date}</span>
+                <span className="font-mono text-[11px] text-text-secondary tabular-nums whitespace-nowrap">{r.date}</span>
               </Link>
             ),
           )}

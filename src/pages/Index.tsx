@@ -129,7 +129,7 @@ const MeasureBar: React.FC<{
         style={{ width: `${Math.max(0, Math.min(100, percentage))}%`, background: color, opacity }}
       />
     </div>
-    <div className="w-[36px] shrink-0 whitespace-nowrap text-right font-mono text-[11px] tabular-nums text-text-secondary leading-none">
+    <div className="w-[36px] shrink-0 whitespace-nowrap text-right font-mono text-[11px] tabular-nums text-text-primary leading-none">
       {percentage}%
     </div>
   </div>
@@ -148,7 +148,7 @@ const GoalColumn: React.FC<{
   type: string;
   target?: string;
   progress: number;
-  meta: string[];
+  meta: React.ReactNode[];
   outcome: number;
   effort: number;
   spark: number[];
@@ -202,7 +202,7 @@ const GoalColumn: React.FC<{
       <Sparkline data={spark} color={color} tips={sparkTips} />
     </div>
 
-    <div className="font-mono text-[11px] text-text-secondary leading-relaxed">{recent}</div>
+    <div className="font-mono text-[11px] text-text-tertiary leading-relaxed">{recent}</div>
     </div>
   );
   if (href) {
@@ -379,9 +379,9 @@ export const Hero: React.FC = () => {
             target={targetLabel}
             progress={progress}
             meta={[
-              `${projectsClosed} of ${projectsTotal} projects ${projectsTotal === 1 ? "closed" : "closed"}`,
-              `${actionsDone} actions done`,
-              `Last activity: ${lastLabel}`,
+              <><span className="text-text-primary tabular-nums">{projectsClosed}</span> of <span className="text-text-primary tabular-nums">{projectsTotal}</span> projects closed</>,
+              <><span className="text-text-primary tabular-nums">{actionsDone}</span> actions done</>,
+              <><span className="text-text-tertiary">Last activity:</span> <span className="text-text-primary">{lastLabel}</span></>,
             ]}
             outcome={outcome}
             effort={effort}
@@ -392,7 +392,16 @@ export const Hero: React.FC = () => {
             color={`hsl(var(--${g.color}))`}
             recent={
               recentDone.length > 0 ? (
-                <>Recent: {recentDone.map((t) => `✓ ${t}`).join(" · ")}</>
+                <>
+                  <span className="text-text-tertiary">Recent: </span>
+                  {recentDone.map((t, i) => (
+                    <React.Fragment key={i}>
+                      {i > 0 && <span className="text-text-tertiary"> · </span>}
+                      <span className="text-text-tertiary">✓ </span>
+                      <span className="text-text-secondary">{t}</span>
+                    </React.Fragment>
+                  ))}
+                </>
               ) : (
                 <>No closed actions yet.</>
               )

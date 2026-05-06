@@ -102,6 +102,23 @@ const ReviewWeekDetail: React.FC = () => {
   const totalMin = summary.totalTimeMinutes;
   const yMaxGoal = Math.max(1, ...summary.perGoalTime.map((p) => p.minutes));
 
+  const outcome = getOutcomeSummary(
+    summary.doneActions,
+    summary.delegatedActions,
+    goals,
+    projects,
+    actions,
+  );
+  const prevOutcome = prevSummary
+    ? getOutcomeSummary(
+        prevSummary.doneActions,
+        prevSummary.delegatedActions,
+        goals,
+        projects,
+        actions,
+      )
+    : null;
+
   // Top contributing actions: Done, sorted by impact desc, top 10, grouped by goal
   const topActions = [...summary.doneActions]
     .sort((a, b) => (b.impact ?? 0) - (a.impact ?? 0))

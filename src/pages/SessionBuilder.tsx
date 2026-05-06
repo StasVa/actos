@@ -797,69 +797,73 @@ const SessionBuilder: React.FC = () => {
 
           {/* DURATION */}
           <section className="mt-8">
-            <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-6">
+            <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-3">
               DURATION
             </div>
-
-            {/* Big numbers */}
             <div
-              className={`flex ${isMobile ? "flex-col" : "flex-row"} ${
-                isMobile ? "gap-4" : "gap-8"
-              } items-stretch`}
+              className="rounded-[8px] border border-border-subtle bg-surface-raised"
+              style={{ padding: isMobile ? 24 : 32 }}
             >
-              <BigNumberField
-                label="WORK BLOCK"
-                value={work}
-                onChange={setWork}
-                min={5}
-                max={180}
-                step={5}
-                suffix="min"
-                isMobile={isMobile}
-              />
-              <BigNumberField
-                label="BREAK"
-                value={brk}
-                onChange={setBrk}
-                min={0}
-                max={30}
-                step={1}
-                suffix="min"
-                helper={brk === 0 ? "0 = no breaks" : undefined}
-                isMobile={isMobile}
-              />
-              <BigNumberField
-                label="CYCLES"
-                value={cycles}
-                onChange={setCycles}
-                min={1}
-                max={12}
-                step={1}
-                suffix={cyclesN === 1 ? "block" : "blocks"}
-                isMobile={isMobile}
-              />
-            </div>
-
-            {/* Visualization bar */}
-            <SessionTimelineBar work={workN} brk={brkN} cycles={cyclesN} />
-
-            {/* Total summary */}
-            <div className="mt-6 flex flex-wrap items-baseline justify-between gap-4">
-              <div className="flex items-baseline gap-2">
-                <span className="text-[28px] font-medium tabular-nums text-text-primary leading-none">
-                  {grandTotal}
-                </span>
-                <span className="font-mono text-[14px] text-text-secondary">
-                  min total
-                </span>
+              {/* Steppers */}
+              <div
+                className={`flex ${isMobile ? "flex-col" : "flex-row"} ${
+                  isMobile ? "gap-4" : "gap-8"
+                } items-stretch`}
+              >
+                <StepperField
+                  label="WORK BLOCK"
+                  value={work}
+                  onChange={setWork}
+                  min={5}
+                  max={180}
+                  step={5}
+                  suffix="min"
+                  isMobile={isMobile}
+                />
+                <StepperField
+                  label="BREAK"
+                  value={brk}
+                  onChange={setBrk}
+                  min={0}
+                  max={30}
+                  step={1}
+                  suffix="min"
+                  helper={brk === 0 ? "0 = no breaks" : undefined}
+                  isMobile={isMobile}
+                />
+                <StepperField
+                  label="CYCLES"
+                  value={cycles}
+                  onChange={setCycles}
+                  min={1}
+                  max={12}
+                  step={1}
+                  suffix={cyclesN === 1 ? "block" : "blocks"}
+                  isMobile={isMobile}
+                />
               </div>
-              {brkN > 0 && cyclesN > 1 && (
-                <div className="font-mono text-[13px] tabular-nums text-text-secondary">
-                  <span className="text-text-primary">{focusTotal}</span> min focus
-                  <span className="mx-2 text-text-tertiary">·</span>
-                  <span className="text-text-primary">{breakTotal}</span> min breaks
+
+              {/* Wall-clock visualization bar */}
+              <SessionTimelineBar work={workN} brk={brkN} cycles={cyclesN} />
+
+              {/* Total summary */}
+              <div className="mt-6 flex flex-wrap items-baseline justify-between gap-4">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-[28px] font-medium tabular-nums text-text-primary leading-none">
+                    {grandTotal}
+                  </span>
+                  <span className="font-mono text-[14px] text-text-secondary">
+                    min total
+                  </span>
                 </div>
-              )}
+                {brkN > 0 && cyclesN > 1 && (
+                  <div className="font-mono text-[13px] tabular-nums text-text-secondary">
+                    <span className="text-text-primary">{focusTotal}</span> min focus
+                    <span className="mx-2 text-text-tertiary">·</span>
+                    <span className="text-text-primary">{breakTotal}</span> min breaks
+                  </div>
+                )}
+              </div>
             </div>
           </section>
 

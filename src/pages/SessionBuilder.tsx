@@ -463,9 +463,10 @@ const SessionBuilder: React.FC = () => {
   const sessions = useStore((s) => s.sessions);
 
   const [mode, setMode] = useState<SessionMode | null>(null);
+  const [totalSession, setTotalSession] = useState<number | "">(60);
+  const [breaksOn, setBreaksOn] = useState<boolean>(true);
   const [work, setWork] = useState<number | "">(25);
   const [brk, setBrk] = useState<number | "">(5);
-  const [cycles, setCycles] = useState<number | "">(4);
 
   const [goalFilter, setGoalFilter] = useState<string>("all");
   const [projectFilter, setProjectFilter] = useState<string>("all");
@@ -484,9 +485,12 @@ const SessionBuilder: React.FC = () => {
 
   const pickPreset = (p: ModePreset) => {
     setMode(p.key);
-    setWork(p.work);
-    setBrk(p.brk);
-    setCycles(p.cycles);
+    setTotalSession(p.total);
+    setBreaksOn(p.breaksOn);
+    if (p.breaksOn) {
+      setWork(p.work);
+      setBrk(p.brk);
+    }
   };
 
   /* Available actions */

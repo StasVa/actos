@@ -199,6 +199,7 @@ const initialState = {
   rituals: SEED_RITUALS,
   ideas: SEED_IDEAS,
   dayEntries: SEED_DAY_ENTRIES,
+  sessions: [] as Session[],
   settings: SEED_SETTINGS,
   ui: { activePanel: null } as UIState,
 };

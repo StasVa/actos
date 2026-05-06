@@ -9,7 +9,7 @@
 // Each session row click opens a slide-in detail panel reused from the same
 // component so all integration points behave consistently.
 
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { format, parseISO } from "date-fns";
 import { useStore } from "@/store/useStore";

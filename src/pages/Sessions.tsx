@@ -353,6 +353,7 @@ const PrimaryButton: React.FC<{ onClick?: () => void; children: React.ReactNode 
 );
 
 const Sessions: React.FC = () => {
+  const navigate = useNavigate();
   const sessions = useStore((s) => s.sessions);
   const actions = useStore((s) => s.actions);
   const deleteSession = useStore((s) => s.deleteSession);

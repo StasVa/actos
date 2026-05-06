@@ -4,9 +4,16 @@
 //
 // Includes a discard guard: if the user attempts to close while `dirty` is
 // true, an inline confirmation appears in-place (no nested modal).
+//
+// Inner panels can call `useEditorClose()` to trigger a guarded close from
+// their own X/Cancel buttons.
 
-import { useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
+
+const EditorCloseContext = createContext<() => void>(() => {});
+
+export const useEditorClose = () => useContext(EditorCloseContext);
 
 export function EditorShell({
   mode,

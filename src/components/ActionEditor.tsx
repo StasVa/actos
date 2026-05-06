@@ -68,14 +68,6 @@ function addDaysISO(iso: string, n: number): string {
   d.setDate(d.getDate() + n);
   return d.toISOString().slice(0, 10);
 }
-function nextMondayISO(): string {
-  const t = new Date();
-  t.setHours(0, 0, 0, 0);
-  const day = t.getDay(); // 0=Sun..6=Sat
-  const diff = day === 0 ? 1 : (8 - day) % 7 || 7;
-  t.setDate(t.getDate() + diff);
-  return t.toISOString().slice(0, 10);
-}
 
 function fmtRelDate(iso: string): string {
   const today = TODAY_ISO();

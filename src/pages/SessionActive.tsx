@@ -114,6 +114,7 @@ const SessionActive: React.FC = () => {
   const changeActionStatus = useStore((s) => s.changeActionStatus);
   const addCompletedActionToSession = useStore((s) => s.addCompletedActionToSession);
   const addDroppedActionToSession = useStore((s) => s.addDroppedActionToSession);
+  const addPlannedActionsToSession = useStore((s) => s.addPlannedActionsToSession);
   const incrementSessionCycles = useStore((s) => s.incrementSessionCycles);
   const completeSession = useStore((s) => s.completeSession);
   const abortSession = useStore((s) => s.abortSession);
@@ -257,6 +258,9 @@ const SessionActive: React.FC = () => {
   const [confirmDrop, setConfirmDrop] = useState<string | null>(null);
   const [confirmAbort, setConfirmAbort] = useState(false);
   const [confirmRestart, setConfirmRestart] = useState(false);
+  const [confirmEndEarly, setConfirmEndEarly] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickerSelected, setPickerSelected] = useState<string[]>([]);
 
   if (!session || !timer) return null;
 
@@ -417,6 +421,51 @@ const SessionActive: React.FC = () => {
     .map((id) => actions.find((a) => a.id === id)?.impact ?? 0)
     .reduce((s, n) => s + n, 0);
 
+  // Total session remaining minutes (rough, friendly format) for empty-state copy.
+  const remainingCyclesAfterCurrent = Math.max(0, session.cyclesPlanned - timer.cycleIndex - 1);
+  const remainingMinutesTotal = (() => {
+    const cur = isWorking || isBreak ? Math.ceil(remainingMs / 60_000) : 0;
+    const future = remainingCyclesAfterCurrent * (session.workDuration + session.breakDuration);
+    return Math.max(0, cur + future);
+  })();
+  const minutesLabel = `${remainingMinutesTotal} ${remainingMinutesTotal === 1 ? "minute" : "minutes"}`;
+
+  // Actions available for in-session add (exclude already in this session).
+  const sessionActionIdSet = new Set(session.plannedActionIds);
+  const activeGoalIds = new Set(goals.filter((g) => g.status === "active").map((g) => g.id));
+  const pickerAvailable = actions.filter((a) => {
+    if (sessionActionIdSet.has(a.id)) return false;
+    if (a.status !== "backlog" && a.status !== "planned") return false;
+    if (!activeGoalIds.has(a.goalId)) return false;
+    if (a.projectId) {
+      const p = projects.find((x) => x.id === a.projectId);
+      if (!p || p.status !== "active") return false;
+    }
+    return true;
+  });
+
+  const handleConfirmAddActions = () => {
+    if (pickerSelected.length === 0) {
+      setPickerOpen(false);
+      return;
+    }
+    addPlannedActionsToSession(session.id, pickerSelected);
+    toast.success(`Added ${pickerSelected.length} action${pickerSelected.length === 1 ? "" : "s"}.`);
+    setPickerSelected([]);
+    setPickerOpen(false);
+  };
+
+  const handleEndSessionEarly = () => {
+    setConfirmEndEarly(false);
+    handleSessionComplete();
+  };
+
+  const actualFocusedMinutes = (() => {
+    const start = new Date(session.startedAt).getTime();
+    return Math.max(0, Math.round((Date.now() - start) / 60_000));
+  })();
+  const plannedFocusMinutes = session.workDuration * session.cyclesPlanned;
+
   /* ─── Render ─── */
   return (
     <div className="min-h-screen bg-background text-text-primary">
@@ -535,11 +584,34 @@ const SessionActive: React.FC = () => {
                 className="w-full max-w-[640px] rounded-[8px] border border-border-subtle p-8 text-center"
                 style={{ background: "hsl(var(--surface-raised))" }}
               >
-                <div className="text-[15px] text-text-primary font-medium">
+                <div className="text-[18px] text-text-primary font-medium">
                   All planned actions completed.
                 </div>
-                <div className="mt-2 text-[13px] text-text-secondary">
-                  Add another or end session.
+                <div className="mt-2 text-[14px] text-text-secondary">
+                  You still have {minutesLabel} of focus time.
+                </div>
+                <div className="mt-4 flex flex-col items-center gap-3">
+                  <button
+                    onClick={() => {
+                      setPickerSelected([]);
+                      setPickerOpen(true);
+                    }}
+                    className="text-[14px] font-medium rounded-[4px] transition-colors"
+                    style={{
+                      padding: "10px 20px",
+                      background: "hsl(var(--accent))",
+                      color: "hsl(var(--accent-foreground))",
+                    }}
+                  >
+                    + Add action
+                  </button>
+                  <button
+                    onClick={() => setConfirmEndEarly(true)}
+                    className="text-[13px] hover:underline"
+                    style={{ color: "hsl(var(--text-warning))" }}
+                  >
+                    End session
+                  </button>
                 </div>
               </div>
             )}
@@ -765,6 +837,96 @@ const SessionActive: React.FC = () => {
           handleRestartCycle();
         }}
       />
+      <ConfirmModal
+        open={confirmEndEarly}
+        title="End session early?"
+        body={`You completed all planned actions in ${actualFocusedMinutes}min of ${plannedFocusMinutes}min. End now?`}
+        confirmLabel="End session"
+        destructive
+        onCancel={() => setConfirmEndEarly(false)}
+        onConfirm={handleEndSessionEarly}
+      />
+
+      {/* Add-action picker overlay */}
+      {pickerOpen && (
+        <div
+          className="fixed inset-0 z-[90] flex items-center justify-center"
+          style={{ background: "rgba(0,0,0,0.5)" }}
+          onClick={() => setPickerOpen(false)}
+        >
+          <div
+            className="w-[560px] max-w-[92vw] max-h-[80vh] flex flex-col bg-surface-elevated border border-border-subtle rounded-[6px] shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="px-5 py-4 border-b border-border-subtle">
+              <h2 className="text-[16px] font-medium text-text-primary">Add actions to session</h2>
+              <p className="mt-1 text-[12px] text-text-secondary">
+                Pick from your active backlog and planned actions.
+              </p>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              {pickerAvailable.length === 0 ? (
+                <div className="p-6 text-[13px] text-text-tertiary text-center">
+                  No more actions available. Create one from /actions first.
+                </div>
+              ) : (
+                pickerAvailable.map((a) => {
+                  const goal = goals.find((g) => g.id === a.goalId);
+                  const project = a.projectId ? projects.find((p) => p.id === a.projectId) : undefined;
+                  const checked = pickerSelected.includes(a.id);
+                  return (
+                    <button
+                      key={a.id}
+                      type="button"
+                      onClick={() =>
+                        setPickerSelected((prev) =>
+                          prev.includes(a.id) ? prev.filter((x) => x !== a.id) : [...prev, a.id],
+                        )
+                      }
+                      className="w-full text-left flex items-start gap-3 px-5 py-3 border-b border-border-subtle hover:bg-surface-hover transition-colors"
+                    >
+                      <span
+                        className="mt-1 inline-block w-3 h-3 rounded-[2px] border"
+                        style={{
+                          borderColor: "hsl(var(--border-default))",
+                          background: checked ? "hsl(var(--accent))" : "transparent",
+                        }}
+                      />
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-[14px] text-text-primary">{a.title}</span>
+                        <span className="block mt-0.5 font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">
+                          {goal?.title ?? "—"}
+                          {project ? ` · ${project.title}` : ""}
+                          {a.timeEstimateMinutes ? ` · ${a.timeEstimateMinutes}min` : ""}
+                        </span>
+                      </span>
+                    </button>
+                  );
+                })
+              )}
+            </div>
+            <div className="px-5 py-3 border-t border-border-subtle flex items-center justify-end gap-3">
+              <button
+                onClick={() => setPickerOpen(false)}
+                className="text-[13px] text-text-secondary hover:text-text-primary px-3 py-1.5"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmAddActions}
+                disabled={pickerSelected.length === 0}
+                className="text-[13px] font-medium px-3 py-1.5 rounded-[4px] transition-colors disabled:opacity-40"
+                style={{
+                  background: "hsl(var(--accent))",
+                  color: "hsl(var(--accent-foreground))",
+                }}
+              >
+                Add {pickerSelected.length > 0 ? `(${pickerSelected.length})` : ""}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

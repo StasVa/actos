@@ -179,6 +179,7 @@ export interface StoreState {
   abortSession: (sessionId: ID) => void;
   addCompletedActionToSession: (sessionId: ID, actionId: ID) => void;
   addDroppedActionToSession: (sessionId: ID, actionId: ID) => void;
+  addPlannedActionsToSession: (sessionId: ID, actionIds: ID[]) => void;
   incrementSessionCycles: (sessionId: ID) => void;
   deleteSession: (sessionId: ID) => void;
   setSessionReflection: (sessionId: ID, reflection: string) => void;
@@ -843,6 +844,18 @@ export const useStore = create<StoreState>()(
               ? { ...s, droppedActionIds: [...s.droppedActionIds, actionId] }
               : s,
           ),
+        });
+      },
+
+      addPlannedActionsToSession: (sessionId, actionIds) => {
+        set({
+          sessions: get().sessions.map((s) => {
+            if (s.id !== sessionId || s.status !== "in_progress") return s;
+            const existing = new Set(s.plannedActionIds);
+            const additions = actionIds.filter((id) => !existing.has(id));
+            if (additions.length === 0) return s;
+            return { ...s, plannedActionIds: [...s.plannedActionIds, ...additions] };
+          }),
         });
       },
 

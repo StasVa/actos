@@ -537,18 +537,17 @@ const SessionBuilder: React.FC = () => {
     setDragIndex(null);
   };
 
-  /* Totals */
-  const workN = typeof work === "number" ? work : 0;
-  const brkN = typeof brk === "number" ? brk : 0;
-  const cyclesN = typeof cycles === "number" ? cycles : 0;
+  /* Totals — derived from totalSession + breaks model */
+  const totalN = typeof totalSession === "number" ? totalSession : 0;
+  const workN = breaksOn ? (typeof work === "number" ? work : 0) : totalN;
+  const brkN = breaksOn ? (typeof brk === "number" ? brk : 0) : 0;
+  // cyclesPlanned = number of work blocks needed to cover totalSession.
+  const cyclesN = breaksOn && workN + brkN > 0
+    ? Math.max(1, Math.ceil(totalN / (workN + brkN)))
+    : 1;
   const focusTotal = workN * cyclesN;
   const breakTotal = brkN * Math.max(0, cyclesN - 1);
   const grandTotal = focusTotal + breakTotal;
-
-  const totalLine =
-    cyclesN <= 1 && brkN === 0
-      ? `Total session: ${focusTotal}min`
-      : `Total session: ${focusTotal}min focus + ${breakTotal}min breaks = ${grandTotal}min`;
 
   /* Selected stats */
   const selectedActions = selectedIds

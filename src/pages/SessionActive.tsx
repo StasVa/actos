@@ -114,6 +114,7 @@ const SessionActive: React.FC = () => {
   const changeActionStatus = useStore((s) => s.changeActionStatus);
   const addCompletedActionToSession = useStore((s) => s.addCompletedActionToSession);
   const addDroppedActionToSession = useStore((s) => s.addDroppedActionToSession);
+  const addPlannedActionsToSession = useStore((s) => s.addPlannedActionsToSession);
   const incrementSessionCycles = useStore((s) => s.incrementSessionCycles);
   const completeSession = useStore((s) => s.completeSession);
   const abortSession = useStore((s) => s.abortSession);
@@ -257,6 +258,9 @@ const SessionActive: React.FC = () => {
   const [confirmDrop, setConfirmDrop] = useState<string | null>(null);
   const [confirmAbort, setConfirmAbort] = useState(false);
   const [confirmRestart, setConfirmRestart] = useState(false);
+  const [confirmEndEarly, setConfirmEndEarly] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickerSelected, setPickerSelected] = useState<string[]>([]);
 
   if (!session || !timer) return null;
 

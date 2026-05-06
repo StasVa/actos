@@ -88,19 +88,21 @@ const NumberField: React.FC<{
   </div>
 );
 
-/* ───────── Big editable number (Duration centerpiece) ───────── */
+/* ───────── Stepper number control (Duration centerpiece) ───────── */
 
-const BigNumberField: React.FC<{
+import { ChevronLeft, ChevronRight } from "lucide-react";
+
+const StepperField: React.FC<{
   label: string;
   value: number | "";
   onChange: (v: number | "") => void;
   min: number;
   max: number;
-  step?: number;
+  step: number;
   suffix: string;
   helper?: string;
   isMobile: boolean;
-}> = ({ label, value, onChange, min, max, suffix, helper, isMobile }) => {
+}> = ({ label, value, onChange, min, max, step, suffix, helper, isMobile }) => {
   const [focused, setFocused] = useState(false);
   const [flash, setFlash] = useState(false);
   const flashTimer = React.useRef<number | null>(null);
@@ -111,6 +113,19 @@ const BigNumberField: React.FC<{
     },
     [],
   );
+
+  const numeric = typeof value === "number" ? value : NaN;
+  const atMin = Number.isFinite(numeric) && numeric <= min;
+  const atMax = Number.isFinite(numeric) && numeric >= max;
+
+  const inc = () => {
+    const base = Number.isFinite(numeric) ? numeric : min;
+    onChange(Math.min(max, base + step));
+  };
+  const dec = () => {
+    const base = Number.isFinite(numeric) ? numeric : min;
+    onChange(Math.max(min, base - step));
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     const allowed = ["Backspace", "Delete", "Tab", "Enter", "Escape", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"];
@@ -156,48 +171,73 @@ const BigNumberField: React.FC<{
   };
 
   const display = value === "" ? "" : String(value);
+  const fontSize = isMobile ? 28 : 36;
   const charCount = Math.max(display.length, 1);
-  const fontSize = isMobile ? 32 : 40;
-  // Approximate width per digit at given font size
-  const inputWidth = `${charCount * (fontSize * 0.6)}px`;
+  const inputWidth = `${charCount * (fontSize * 0.62)}px`;
 
   const underlineColor = flash
     ? "hsl(var(--text-warning))"
     : focused
     ? "hsl(var(--accent))"
-    : "hsl(var(--border-subtle))";
+    : "transparent";
+
+  const StepBtn: React.FC<{ disabled: boolean; onClick: () => void; children: React.ReactNode; ariaLabel: string }> = ({
+    disabled,
+    onClick,
+    children,
+    ariaLabel,
+  }) => (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={ariaLabel}
+      className="inline-flex items-center justify-center rounded-[4px] transition-colors text-text-secondary hover:text-text-primary hover:bg-surface-hover disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-text-secondary disabled:cursor-not-allowed"
+      style={{ padding: "8px 12px" }}
+    >
+      {children}
+    </button>
+  );
 
   return (
     <div className={`flex-1 flex flex-col items-center ${isMobile ? "py-2" : ""}`}>
       <div className="font-mono text-[10px] uppercase text-text-tertiary mb-3" style={{ letterSpacing: "0.08em" }}>
         {label}
       </div>
-      <div className="flex items-baseline gap-2">
-        <input
-          type="number"
-          inputMode="numeric"
-          value={display}
-          min={min}
-          max={max}
-          onKeyDown={handleKeyDown}
-          onChange={handleChange}
-          onFocus={(e) => {
-            setFocused(true);
-            e.currentTarget.select();
-          }}
-          onBlur={handleBlur}
-          aria-label={label}
-          className="bg-transparent outline-none text-text-primary font-medium tabular-nums text-center transition-colors"
-          style={{
-            fontSize,
-            lineHeight: 1.1,
-            width: inputWidth,
-            minWidth: fontSize * 0.7,
-            borderBottom: `2px solid ${underlineColor}`,
-            paddingBottom: 2,
-          }}
-        />
-        <span className="font-mono text-[14px] text-text-secondary">{suffix}</span>
+      <div className="flex items-center gap-2">
+        <StepBtn disabled={atMin} onClick={dec} ariaLabel={`Decrease ${label}`}>
+          <ChevronLeft size={16} />
+        </StepBtn>
+        <div className="flex items-baseline gap-2">
+          <input
+            type="number"
+            inputMode="numeric"
+            value={display}
+            min={min}
+            max={max}
+            onKeyDown={handleKeyDown}
+            onChange={handleChange}
+            onFocus={(e) => {
+              setFocused(true);
+              e.currentTarget.select();
+            }}
+            onBlur={handleBlur}
+            aria-label={label}
+            className="bg-transparent outline-none text-text-primary font-medium tabular-nums text-center transition-colors"
+            style={{
+              fontSize,
+              lineHeight: 1.1,
+              width: inputWidth,
+              minWidth: fontSize * 0.7,
+              borderBottom: `2px solid ${underlineColor}`,
+              paddingBottom: 2,
+            }}
+          />
+          <span className="font-mono text-[14px] text-text-secondary">{suffix}</span>
+        </div>
+        <StepBtn disabled={atMax} onClick={inc} ariaLabel={`Increase ${label}`}>
+          <ChevronRight size={16} />
+        </StepBtn>
       </div>
       <div className="mt-2 font-mono text-[11px] text-text-tertiary h-4">
         {helper ?? ""}
@@ -206,7 +246,16 @@ const BigNumberField: React.FC<{
   );
 };
 
-/* ───────── Session timeline visualization bar ───────── */
+/* ───────── Session timeline visualization bar (wall-clock) ───────── */
+
+function fmtClock(d: Date): string {
+  const h = d.getHours();
+  const m = d.getMinutes();
+  const hh = ((h + 11) % 12) + 1;
+  const mm = m < 10 ? `0${m}` : `${m}`;
+  const ap = h < 12 ? "AM" : "PM";
+  return `${hh}:${mm} ${ap}`;
+}
 
 const SessionTimelineBar: React.FC<{ work: number; brk: number; cycles: number }> = ({
   work,
@@ -220,6 +269,10 @@ const SessionTimelineBar: React.FC<{ work: number; brk: number; cycles: number }
     if (i < c - 1 && brk > 0) blocks.push({ kind: "break", mins: brk });
   }
   const total = blocks.reduce((s, b) => s + b.mins, 0) || 1;
+
+  // Memoize start so both labels stay consistent within a render.
+  const start = React.useMemo(() => new Date(), []);
+  const end = new Date(start.getTime() + total * 60_000);
 
   return (
     <div className="mt-8">
@@ -241,11 +294,15 @@ const SessionTimelineBar: React.FC<{ work: number; brk: number; cycles: number }
                 b.kind === "work" ? "hsl(var(--accent))" : "hsl(var(--surface-hover))",
               borderRight:
                 i < blocks.length - 1 && b.kind === "work"
-                  ? "1px solid hsl(var(--surface-base))"
+                  ? "1px solid hsl(var(--surface-raised))"
                   : undefined,
             }}
           />
         ))}
+      </div>
+      <div className="mt-2 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary tabular-nums">
+        <span>{fmtClock(start)} · NOW</span>
+        <span>ENDS {fmtClock(end)}</span>
       </div>
     </div>
   );

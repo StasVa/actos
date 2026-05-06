@@ -12,6 +12,7 @@ import {
   formatDayTypeDistribution,
   dateFromYearWeek,
 } from "@/lib/weekUtils";
+import { getOutcomeSummary } from "@/lib/outcomeUtils";
 
 const RANGE_OPTIONS = [
   { value: "all", label: "All" },

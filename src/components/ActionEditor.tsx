@@ -208,7 +208,7 @@ function ActionEditorPanel({
   // ─── Required-field validation ───
   const impactNum = impact === "" ? 0 : Number(impact);
   const timeNum = timeMin === "" ? 0 : Number(timeMin);
-  const requireTime = layers.logTime;
+  const requireTime = true; // Time is now a required core field.
 
   const missingForCreate = useMemo(() => {
     const missing: string[] = [];

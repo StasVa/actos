@@ -252,7 +252,7 @@ function ActionEditorPanel({
         return;
       }
       if (requireTime && !(timeNum > 0)) {
-        setTimeError("Time estimate required when Log Time is on.");
+        setTimeError("Set time estimate first.");
         toast.error("Set Time estimate to mark Done");
         return;
       }

@@ -53,6 +53,19 @@ const ReviewMonthDetail: React.FC = () => {
     [yearMonth, actions, dayEntries, goals, projects, rituals],
   );
 
+  const prevYearMonth = React.useMemo(() => {
+    const d = dateFromYearMonth(yearMonth);
+    if (!d) return null;
+    return yearMonthFromDate(addMonths(d, -1));
+  }, [yearMonth]);
+  const prevSummary = React.useMemo(
+    () =>
+      prevYearMonth
+        ? getMonthSummary(prevYearMonth, { actions, dayEntries, goals, projects, rituals })
+        : null,
+    [prevYearMonth, actions, dayEntries, goals, projects, rituals],
+  );
+
   if (!summary) {
     return (
       <div className="min-h-screen bg-surface-base text-text-primary">

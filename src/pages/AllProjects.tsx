@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Tooltip } from "@/components/Tooltip";
 import { LifetimeCounters } from "@/components/LifetimeCounters";
 import { FilterDropdown, FilterOption } from "@/components/FilterDropdown";
@@ -302,6 +302,8 @@ const AllProjects: React.FC = () => {
   const storeGoals = useStore((s) => s.goals);
   const storeActions = useStore((s) => s.actions);
   const openPanel = useStore((s) => s.openPanel);
+  const createProject = useStore((s) => s.createProject);
+  const navigate = useNavigate();
 
   // Derive the visual project rows from the live store (preserves the existing
   // renderer shape so the rest of the page stays unchanged).
@@ -371,11 +373,13 @@ const AllProjects: React.FC = () => {
 
 
   const handleNewProject = () => {
-    openPanel({
-      kind: "project",
-      mode: "new",
-      prefill: { goalId: storeGoals.find((g) => g.status === "active")?.id },
-    });
+    const goalId = storeGoals.find((g) => g.status === "active")?.id ?? storeGoals[0]?.id;
+    if (!goalId) {
+      toast.error("Create an active goal first");
+      return;
+    }
+    const id = createProject({ title: "", goalId, isDraft: true });
+    navigate(`/projects/${id}`);
   };
 
   const handleNewGoal = () => {

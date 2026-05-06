@@ -70,6 +70,72 @@ const Divider: React.FC = () => (
   <div className="my-4 border-t border-border-subtle" />
 );
 
+const REVIEWS_LS_KEY = "sidebarReviewsExpanded";
+
+const ReviewsGroup: React.FC<{ pathname: string }> = ({ pathname }) => {
+  const [expanded, setExpanded] = React.useState<boolean>(() => {
+    if (typeof window === "undefined") return true;
+    const v = window.localStorage.getItem(REVIEWS_LS_KEY);
+    return v === null ? true : v === "true";
+  });
+  // Auto-expand whenever a sub-route is active so the active item is visible.
+  const childActive = REVIEWS_SUB.some((i) => isActive(pathname, i.href));
+  React.useEffect(() => {
+    if (childActive && !expanded) {
+      setExpanded(true);
+      window.localStorage.setItem(REVIEWS_LS_KEY, "true");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [childActive]);
+  const toggle = () => {
+    setExpanded((v) => {
+      const next = !v;
+      window.localStorage.setItem(REVIEWS_LS_KEY, String(next));
+      return next;
+    });
+  };
+  return (
+    <div className="flex flex-col gap-1">
+      <button
+        type="button"
+        onClick={toggle}
+        aria-expanded={expanded}
+        className="flex items-center gap-1.5 pl-2.5 pr-2.5 py-1.5 rounded-[4px] text-[13px] text-text-secondary font-normal hover:text-text-primary hover:bg-surface-hover transition-colors text-left"
+      >
+        <span className="text-[10px] text-text-tertiary w-2.5 inline-flex justify-center">
+          {expanded ? "▾" : "▸"}
+        </span>
+        <span>Reviews</span>
+      </button>
+      {expanded && (
+        <nav className="flex flex-col gap-1">
+          {REVIEWS_SUB.map((item) => {
+            const active = isActive(pathname, item.href);
+            return (
+              <Link
+                key={item.label}
+                to={item.href}
+                className={`relative py-1.5 rounded-[4px] text-[13px] transition-colors ${
+                  active
+                    ? "bg-surface-hover text-text-primary font-medium"
+                    : "text-text-secondary font-normal hover:text-text-primary"
+                }`}
+                style={{
+                  paddingLeft: 32,
+                  paddingRight: 10,
+                  ...(active ? { boxShadow: "inset 2px 0 0 0 hsl(var(--accent))" } : {}),
+                }}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+      )}
+    </div>
+  );
+};
+
 export const AppSidebar: React.FC<{ onOpenSettings?: () => void }> = ({ onOpenSettings }) => {
   const { pathname } = useLocation();
   const handleSettings = onOpenSettings ?? (() => emitAppEvent("open-settings"));

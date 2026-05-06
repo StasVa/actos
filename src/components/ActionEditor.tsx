@@ -167,7 +167,12 @@ function ActionEditorPanel({
   );
   const [scheduledDate, setScheduledDate] = useState<string>(seed.scheduledDate ?? "");
   const [notes, setNotes] = useState<string>(seed.notes ?? "");
-  const [impact, setImpact] = useState<number>(seed.impact ?? 0);
+  const [impact, setImpact] = useState<number | "">(
+    seed.impact === undefined || seed.impact === null ? "" : (seed.impact as number),
+  );
+  const [impactError, setImpactError] = useState<string | null>(null);
+  const [timeError, setTimeError] = useState<string | null>(null);
+  const [delegateError, setDelegateError] = useState<string | null>(null);
   const [timeMin, setTimeMin] = useState<number | "">(seed.timeEstimateMinutes ?? "");
   const [energy, setEnergy] = useState<number | "">(seed.energyCost ?? "");
   const [focus, setFocus] = useState<number | "">(seed.focusCost ?? "");

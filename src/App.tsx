@@ -8,7 +8,7 @@ import Progress from "./pages/Progress.tsx";
 import ReviewsMonths from "./pages/ReviewsMonths.tsx";
 import ReviewMonthDetail from "./pages/ReviewMonthDetail.tsx";
 import Goals from "./pages/Goals.tsx";
-import Reviews from "./pages/Reviews.tsx";
+
 import ReviewsDays from "./pages/ReviewsDays.tsx";
 import ReviewsWeeks from "./pages/ReviewsWeeks.tsx";
 import ReviewWeekDetail from "./pages/ReviewWeekDetail.tsx";

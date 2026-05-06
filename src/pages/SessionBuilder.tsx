@@ -765,68 +765,88 @@ const SessionBuilder: React.FC = () => {
               className="rounded-[8px] border border-border-subtle bg-surface-raised"
               style={{ padding: isMobile ? 24 : 32 }}
             >
-              {/* Steppers */}
-              <div
-                className={`flex ${isMobile ? "flex-col" : "flex-row"} ${
-                  isMobile ? "gap-4" : "gap-8"
-                } items-stretch`}
-              >
+              {/* Total session — primary stepper */}
+              <div className="flex flex-col items-center">
+                <div className="font-mono text-[10px] uppercase text-text-tertiary mb-3" style={{ letterSpacing: "0.08em" }}>
+                  TOTAL SESSION
+                </div>
                 <StepperField
-                  label="WORK BLOCK"
-                  value={work}
-                  onChange={setWork}
-                  min={5}
-                  max={180}
+                  value={totalSession}
+                  onChange={setTotalSession}
+                  min={15}
+                  max={240}
                   step={5}
                   suffix="min"
+                  size="xl"
                   isMobile={isMobile}
-                />
-                <StepperField
-                  label="BREAK"
-                  value={brk}
-                  onChange={setBrk}
-                  min={0}
-                  max={30}
-                  step={1}
-                  suffix="min"
-                  helper={brk === 0 ? "0 = no breaks" : undefined}
-                  isMobile={isMobile}
-                />
-                <StepperField
-                  label="CYCLES"
-                  value={cycles}
-                  onChange={setCycles}
-                  min={1}
-                  max={12}
-                  step={1}
-                  suffix={cyclesN === 1 ? "block" : "blocks"}
-                  isMobile={isMobile}
+                  ariaLabel="Total session"
                 />
               </div>
 
-              {/* Wall-clock visualization bar */}
-              <SessionTimelineBar work={workN} brk={brkN} cycles={cyclesN} />
+              {/* Breaks toggle + frequency + length */}
+              <div className={`mt-8 flex ${isMobile ? "flex-col items-start gap-4" : "flex-row items-center flex-wrap gap-x-6 gap-y-3"}`}>
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <Switch checked={breaksOn} onCheckedChange={setBreaksOn} aria-label="Toggle breaks" />
+                  <span className="text-[14px] text-text-primary">Breaks</span>
+                </label>
 
-              {/* Total summary */}
-              <div className="mt-6 flex flex-wrap items-baseline justify-between gap-4">
+                {breaksOn && (
+                  <>
+                    <div className="flex items-center gap-3">
+                      <span className="text-[14px] text-text-secondary">every</span>
+                      <StepperField
+                        value={work}
+                        onChange={setWork}
+                        min={5}
+                        max={60}
+                        step={5}
+                        suffix="min"
+                        size="md"
+                        ariaLabel="Frequency between breaks"
+                      />
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-[14px] text-text-secondary">break length</span>
+                      <StepperField
+                        value={brk}
+                        onChange={setBrk}
+                        min={1}
+                        max={15}
+                        step={1}
+                        suffix="min"
+                        size="sm"
+                        ariaLabel="Break length"
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Wall-clock visualization bar */}
+              <SessionTimelineBar work={workN} brk={brkN} cycles={cyclesN} breaksOn={breaksOn} />
+
+              {/* Derived stats — three pills */}
+              <div className="mt-5 flex flex-wrap items-baseline gap-x-6 gap-y-2">
                 <div className="flex items-baseline gap-2">
-                  <span className="text-[28px] font-medium tabular-nums text-text-primary leading-none">
-                    {grandTotal}
+                  <span className="text-[14px] tabular-nums text-text-primary">
+                    {cyclesN} {cyclesN === 1 ? "session" : "sessions"}
                   </span>
-                  <span className="font-mono text-[14px] text-text-secondary">
-                    min total
-                  </span>
+                  <span className="font-mono text-[12px] text-text-secondary">of focus</span>
                 </div>
-                {brkN > 0 && cyclesN > 1 && (
-                  <div className="font-mono text-[13px] tabular-nums text-text-secondary">
-                    <span className="text-text-primary">{focusTotal}</span> min focus
-                    <span className="mx-2 text-text-tertiary">·</span>
-                    <span className="text-text-primary">{breakTotal}</span> min breaks
+                <div className="flex items-baseline gap-2">
+                  <span className="text-[14px] tabular-nums text-text-primary">{focusTotal} min</span>
+                  <span className="font-mono text-[12px] text-text-secondary">focused</span>
+                </div>
+                {breaksOn && breakTotal > 0 && (
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-[14px] tabular-nums text-text-primary">{breakTotal} min</span>
+                    <span className="font-mono text-[12px] text-text-secondary">breaks</span>
                   </div>
                 )}
               </div>
             </div>
           </section>
+
 
           {/* ACTIONS */}
           <section className="mt-8">

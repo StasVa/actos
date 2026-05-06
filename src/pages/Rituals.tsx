@@ -597,12 +597,23 @@ const Rituals: React.FC = () => {
       <AppSidebar />
       <main className="ml-[220px]" style={{ padding: "32px 40px" }}>
         <div className="mx-auto" style={{ maxWidth: 1100 }}>
-          <div className="flex items-baseline justify-between">
+          <div className="flex items-center justify-between gap-4">
             <h1 className="text-[24px] font-medium text-text-primary" style={{ fontWeight: 500 }}>
               Rituals
             </h1>
-            <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary tabular-nums">
-              {headerMeta}
+            <div className="flex items-center gap-4">
+              <div className="hidden sm:block font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary tabular-nums">
+                {headerMeta}
+              </div>
+              <button
+                type="button"
+                onClick={handleAddRitual}
+                aria-label="New ritual"
+                className="inline-flex items-center justify-center gap-1 rounded-[4px] bg-accent hover:bg-accent-hover text-white min-w-[40px] min-h-[40px] sm:min-h-0 sm:min-w-0 sm:px-[16px] sm:py-[8px] text-[13px] font-medium transition-colors"
+              >
+                <span className="text-[15px] leading-none">+</span>
+                <span className="hidden sm:inline">New ritual</span>
+              </button>
             </div>
           </div>
 
@@ -632,30 +643,10 @@ const Rituals: React.FC = () => {
               {activeRows.map((r) => (
                 <RitualCard key={r.id} r={r} onOpen={handleOpen} onMarkDone={handleMarkDone} />
               ))}
-              <button
-                type="button"
-                onClick={handleAddRitual}
-                className="group rounded-[6px] bg-transparent border border-dashed border-border-default hover:border-solid hover:border-accent hover:bg-surface-hover transition-colors cursor-pointer flex flex-col items-center justify-center"
-                style={{ minHeight: 240 }}
-              >
-                <span
-                  className="font-mono text-text-tertiary group-hover:text-text-primary transition-colors leading-none"
-                  style={{ fontSize: 28 }}
-                >
-                  +
-                </span>
-                <span style={{ height: 8 }} />
-                <span
-                  className="text-[14px] text-text-secondary group-hover:text-text-primary transition-colors"
-                  style={{ fontFamily: "Inter, sans-serif" }}
-                >
-                  Add ritual
-                </span>
-              </button>
             </div>
             {activeRows.length === 0 && (
               <div className="mt-4 font-mono text-[11px] text-text-tertiary text-center">
-                No active rituals. Use the “+ Add ritual” button or ⌘K.
+                No active rituals. Use the “+ New ritual” button or ⌘K.
               </div>
             )}
           </section>

@@ -380,16 +380,17 @@ const AllProjects: React.FC = () => {
               </div>
               <button
                 onClick={handleNewGoal}
-                className="text-[12px] px-2.5 py-1 rounded-[4px] border border-border-subtle text-text-secondary hover:text-text-primary hover:border-accent transition-colors"
+                className="hidden sm:inline-flex text-[12px] px-2.5 py-1 rounded-[4px] border border-border-subtle text-text-secondary hover:text-text-primary hover:border-accent transition-colors"
               >
                 + New goal
               </button>
               <button
                 onClick={handleNewProject}
-                className="text-[12px] font-medium px-2.5 py-1 rounded-[4px]"
-                style={{ background: "hsl(var(--accent))", color: "hsl(var(--surface-base))" }}
+                aria-label="New project"
+                className="inline-flex items-center justify-center gap-1 rounded-[4px] bg-accent hover:bg-accent-hover text-white min-w-[40px] min-h-[40px] sm:min-h-0 sm:min-w-0 sm:px-[16px] sm:py-[8px] text-[13px] font-medium transition-colors"
               >
-                + New project
+                <span className="text-[15px] leading-none">+</span>
+                <span className="hidden sm:inline">New project</span>
               </button>
             </div>
           </div>
@@ -509,23 +510,7 @@ const AllProjects: React.FC = () => {
             </section>
           )}
 
-          {/* Add project affordance */}
-          {filtered.length > 0 && (
-            <div className="max-w-[480px]">
-              <button
-                type="button"
-                onClick={handleNewProject}
-                className="w-full flex items-center gap-3 rounded-[4px] px-3 transition-colors cursor-pointer hover:bg-surface-hover"
-                style={{
-                  height: 48,
-                  border: "1px dashed hsl(var(--border-default))",
-                }}
-              >
-                <span className="font-mono text-[16px] leading-none text-text-tertiary">+</span>
-                <span className="text-[13px] text-text-tertiary">Add a project...</span>
-              </button>
-            </div>
-          )}
+          {/* Add project affordance moved to page header "+ New project" button. */}
         </div>
       </main>
     </div>

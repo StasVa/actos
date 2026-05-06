@@ -882,19 +882,17 @@ const Ideas: React.FC = () => {
           <div className="flex items-center justify-between gap-4">
             <h1 className="text-[24px] font-medium text-text-primary">Ideas</h1>
             <div className="flex items-center gap-4">
-              <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary tabular-nums">
+              <div className="hidden sm:block font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary tabular-nums">
                 {meta}
               </div>
               {!showNewForm && (
                 <button
                   onClick={() => setShowNewForm(true)}
-                  className="h-9 px-4 text-[13px] font-medium rounded-[4px] transition-colors"
-                  style={{
-                    background: "hsl(var(--accent))",
-                    color: "hsl(var(--accent-foreground))",
-                  }}
+                  aria-label="New idea"
+                  className="inline-flex items-center justify-center gap-1 rounded-[4px] bg-accent hover:bg-accent-hover text-white min-w-[40px] min-h-[40px] sm:min-h-0 sm:min-w-0 sm:px-[16px] sm:py-[8px] text-[13px] font-medium transition-colors"
                 >
-                  + New idea
+                  <span className="text-[15px] leading-none">+</span>
+                  <span className="hidden sm:inline">New idea</span>
                 </button>
               )}
             </div>

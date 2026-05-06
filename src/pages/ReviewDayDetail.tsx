@@ -10,7 +10,9 @@ import { DAY_TYPE_LABELS } from "./Index";
 import { ActionRow as SharedActionRow } from "@/components/ActionRow";
 import { AccomplishmentsSection, type AccomplishmentTile } from "@/components/AccomplishmentsSection";
 import { OutcomeAddedSection } from "@/components/OutcomeAddedSection";
+import { SessionsSection } from "@/components/SessionsSection";
 import { getOutcomeSummary } from "@/lib/outcomeUtils";
+import { getSessionsForDay, sessionDurationMinutes } from "@/lib/sessionUtils";
 
 const longDate = (iso: string) =>
   new Date(iso + "T00:00:00").toLocaleDateString("en-US", {
@@ -236,6 +238,13 @@ const ReviewDayDetail: React.FC = () => {
     [doneToday, delegatedToday, goals, projects, actions],
   );
 
+  // Sessions started on this day
+  const allSessions = useStore((s) => s.sessions);
+  const sessionsForDay = React.useMemo(
+    () => getSessionsForDay(allSessions, date),
+    [allSessions, date],
+  );
+
   // No data at all (closed entities also count as data)
   const hasAnyData =
     !!dayEntry ||
@@ -374,6 +383,7 @@ const ReviewDayDetail: React.FC = () => {
                 ritualsDone.length > 0 ||
                 closedProjects.length > 0 ||
                 closedGoals.length > 0 ||
+                sessionsForDay.length > 0 ||
                 (settings.layers.logTime && actionTimeMin > 0);
               if (hasAny) {
                 if (outcome.outcomeAdded > 0)
@@ -382,6 +392,8 @@ const ReviewDayDetail: React.FC = () => {
                 tiles.push({ key: "rituals", value: String(ritualsDone.length), label: "Rituals done" });
                 if (settings.layers.logTime && actionTimeMin > 0)
                   tiles.push({ key: "time", value: formatHM(actionTimeMin), label: "Time invested" });
+                if (sessionsForDay.length > 0)
+                  tiles.push({ key: "sessions", value: String(sessionsForDay.length), label: "Sessions" });
                 if (closedProjects.length > 0)
                   tiles.push({ key: "projects", value: String(closedProjects.length), label: "Projects closed" });
                 if (closedGoals.length > 0)
@@ -521,7 +533,20 @@ const ReviewDayDetail: React.FC = () => {
               </section>
             )}
 
-            {/* MAIN TASK */}
+            {/* SESSIONS */}
+            {sessionsForDay.length > 0 && (
+              <section>
+                <SectionHead
+                  meta={`${formatHM(
+                    sessionsForDay.reduce((s, x) => s + sessionDurationMinutes(x), 0),
+                  ).toUpperCase()} FOCUSED`}
+                >
+                  Sessions · {sessionsForDay.length}
+                </SectionHead>
+                <SessionsSection sessions={sessionsForDay} variant="flat" />
+              </section>
+            )}
+
             {main && (
               <section>
                 <SectionHead>Main task</SectionHead>

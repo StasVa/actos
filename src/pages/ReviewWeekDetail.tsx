@@ -15,7 +15,9 @@ import {
 import { ActionRow } from "@/components/ActionRow";
 import { AccomplishmentsSection, type AccomplishmentTile } from "@/components/AccomplishmentsSection";
 import { OutcomeAddedSection } from "@/components/OutcomeAddedSection";
+import { SessionsSection } from "@/components/SessionsSection";
 import { getOutcomeSummary } from "@/lib/outcomeUtils";
+import { getSessionsForWeek, sessionDurationMinutes } from "@/lib/sessionUtils";
 import { addDays } from "date-fns";
 import { DAY_TYPE_LABELS } from "./Index";
 import type { Action } from "@/types";
@@ -51,6 +53,7 @@ const ReviewWeekDetail: React.FC = () => {
   const rituals = useStore((s) => s.rituals);
   const settings = useStore((s) => s.settings);
   const openPanel = useStore((s) => s.openPanel);
+  const allSessions = useStore((s) => s.sessions);
 
   const summary = React.useMemo(
     () => getWeekSummary(yearWeek, { actions, dayEntries, goals, projects, rituals }),
@@ -434,6 +437,21 @@ const ReviewWeekDetail: React.FC = () => {
               </div>
             </section>
           )}
+
+          {/* SESSIONS */}
+          {(() => {
+            const sessionsForWk = getSessionsForWeek(allSessions, yearWeek);
+            if (sessionsForWk.length === 0) return null;
+            const focusMin = sessionsForWk.reduce((s, x) => s + sessionDurationMinutes(x), 0);
+            return (
+              <section>
+                <SectionHead meta={`${formatHM(focusMin).toUpperCase()} FOCUSED`}>
+                  Sessions · {sessionsForWk.length}
+                </SectionHead>
+                <SessionsSection sessions={sessionsForWk} variant="by-day" showStats initialLimit={10} />
+              </section>
+            );
+          })()}
 
           {/* DAYS */}
           <section>

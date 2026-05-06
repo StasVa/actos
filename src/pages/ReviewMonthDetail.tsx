@@ -20,7 +20,9 @@ import {
 import { ActionRow } from "@/components/ActionRow";
 import { AccomplishmentsSection, type AccomplishmentTile } from "@/components/AccomplishmentsSection";
 import { OutcomeAddedSection } from "@/components/OutcomeAddedSection";
+import { SessionsSection } from "@/components/SessionsSection";
 import { getOutcomeSummary } from "@/lib/outcomeUtils";
+import { getSessionsForMonth, sessionDurationMinutes } from "@/lib/sessionUtils";
 import { addMonths } from "date-fns";
 import { DAY_TYPE_LABELS } from "./Index";
 import type { Action } from "@/types";
@@ -49,6 +51,7 @@ const ReviewMonthDetail: React.FC = () => {
   const rituals = useStore((s) => s.rituals);
   const settings = useStore((s) => s.settings);
   const openPanel = useStore((s) => s.openPanel);
+  const allSessions = useStore((s) => s.sessions);
 
   const summary = React.useMemo(
     () => getMonthSummary(yearMonth, { actions, dayEntries, goals, projects, rituals }),
@@ -432,6 +435,21 @@ const ReviewMonthDetail: React.FC = () => {
               </div>
             </section>
           )}
+
+          {/* SESSIONS */}
+          {(() => {
+            const sessionsForMo = getSessionsForMonth(allSessions, yearMonth);
+            if (sessionsForMo.length === 0) return null;
+            const focusMin = sessionsForMo.reduce((s, x) => s + sessionDurationMinutes(x), 0);
+            return (
+              <section>
+                <SectionHead meta={`${formatHM(focusMin).toUpperCase()} FOCUSED`}>
+                  Sessions · {sessionsForMo.length}
+                </SectionHead>
+                <SessionsSection sessions={sessionsForMo} variant="by-week" showStats />
+              </section>
+            );
+          })()}
 
           {/* WEEKS */}
           <section>

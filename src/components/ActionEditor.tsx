@@ -498,17 +498,21 @@ function ActionEditorPanel({
                 </datalist>
                 {delegateError && <InlineError text={delegateError} />}
               </FieldRow>
-              <FieldRow label="Expected return">
-                <input
-                  type="date"
+              <div>
+                <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-2">
+                  Expected back
+                </div>
+                <DateChipPicker
                   value={expectedReturn}
-                  onChange={(e) => setExpectedReturn(e.target.value)}
-                  onBlur={() =>
-                    persistField("expectedReturnDate", expectedReturn || undefined)
-                  }
-                  className="bg-surface-base border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
+                  optional
+                  onChange={(iso) => {
+                    setExpectedReturn(iso);
+                    if (mode === "edit") {
+                      persistField("expectedReturnDate", iso || undefined);
+                    }
+                  }}
                 />
-              </FieldRow>
+              </div>
               <FieldRow label="Delegate note">
                 <textarea
                   value={delegateNote}

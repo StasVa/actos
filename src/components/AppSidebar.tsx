@@ -116,7 +116,7 @@ export const AppSidebar: React.FC<{ onOpenSettings?: () => void }> = ({ onOpenSe
       <button
         type="button"
         onClick={handleSettings}
-        className="text-left px-2.5 py-1.5 rounded-[4px] text-[13px] text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-colors mb-2"
+        className="text-left px-2.5 py-1.5 rounded-[4px] text-[13px] text-text-tertiary hover:text-text-primary hover:bg-surface-hover transition-colors mb-2"
       >
         Settings
       </button>

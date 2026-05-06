@@ -64,7 +64,6 @@ const StateTooltip: React.FC<{ p: Project }> = ({ p }) => (
 
 /* ===== Project card (active grid) — navigates to /projects/:id ===== */
 const ProjectCard: React.FC<{ p: Project }> = ({ p }) => {
-  const openPanel = useStore((s) => s.openPanel);
   const markProjectComplete = useStore((s) => s.markProjectComplete);
   const dropProject = useStore((s) => s.dropProject);
   const deleteProject = useStore((s) => s.deleteProject);

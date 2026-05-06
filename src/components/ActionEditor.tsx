@@ -425,9 +425,6 @@ function ActionEditorPanel({
 
   return (
     <EditorShell mode={mode} dirty={dirty} onClose={onClose}>
-      <div className="flex flex-col h-full max-h-inherit"
-        style={mode === "new" ? { boxShadow: "none" } : undefined}
-      >
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-border-subtle">
         <div className="font-mono text-[11px] uppercase tracking-[0.08em] text-text-tertiary">

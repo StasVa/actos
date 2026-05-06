@@ -832,6 +832,17 @@ function SectionHead({ children }: { children: React.ReactNode }) {
   );
 }
 
+function InlineError({ text }: { text: string }) {
+  return (
+    <div
+      className="mt-1 text-[12px]"
+      style={{ color: "hsl(var(--text-warning))", fontFamily: "Inter, sans-serif" }}
+    >
+      {text}
+    </div>
+  );
+}
+
 function FieldRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>

@@ -703,7 +703,14 @@ function ActionEditorPanel({
       </div>
 
       {/* Footer */}
-      <div className="border-t border-border-subtle px-6 py-3 flex items-center justify-between">
+      <div
+        className="px-6 flex items-center justify-between"
+        style={{
+          borderTop: "1px solid hsl(var(--border-subtle))",
+          paddingTop: 16,
+          paddingBottom: 16,
+        }}
+      >
         {mode === "new" ? (
           <>
             <button
@@ -714,25 +721,41 @@ function ActionEditorPanel({
             </button>
             <button
               onClick={handleSaveNew}
-              className="text-[13px] font-medium px-3 py-1.5 rounded-[4px]"
+              disabled={!canCreate}
+              title={canCreate ? "" : createTooltip}
+              className="text-[13px] font-medium px-3 py-1.5 rounded-[4px] transition-colors"
               style={{
-                background: "hsl(var(--accent))",
-                color: "hsl(var(--surface-base))",
+                background: canCreate ? "hsl(var(--accent))" : "hsl(var(--surface-hover))",
+                color: canCreate ? "hsl(var(--surface-base))" : "hsl(var(--text-tertiary))",
+                cursor: canCreate ? "pointer" : "not-allowed",
               }}
             >
-              Save action
+              Create
             </button>
           </>
         ) : (
           <>
-            <button
-              onClick={() => setConfirmDelete(true)}
-              className="text-[13px] text-text-tertiary hover:text-text-warning px-3 py-1.5"
-            >
-              Delete
-            </button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  className="w-8 h-8 inline-flex items-center justify-center rounded-[4px] text-text-tertiary hover:bg-surface-hover hover:text-text-primary transition-colors"
+                  aria-label="More actions"
+                >
+                  <MoreHorizontal size={16} />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="bg-surface-raised border border-border-default">
+                <DropdownMenuItem onSelect={handleDuplicate}>Duplicate</DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={() => setConfirmDelete(true)}
+                  className="text-[hsl(var(--text-warning))] focus:text-[hsl(var(--text-warning))]"
+                >
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <div className="flex items-center gap-2">
-              {!isTerminal && status !== "delegated" && !isGoalLevel && (
+              {(status === "backlog" || status === "planned") && !isGoalLevel && (
                 <button
                   onClick={() => handleStatusChange("done")}
                   className="text-[13px] font-medium px-3 py-1.5 rounded-[4px]"
@@ -744,7 +767,27 @@ function ActionEditorPanel({
                   Mark done
                 </button>
               )}
-              {isTerminal && (
+              {status === "delegated" && (
+                <>
+                  <button
+                    onClick={() => handleStatusChange("backlog")}
+                    className="text-[13px] px-3 py-1.5 rounded-[4px] border border-border-subtle text-text-secondary hover:text-text-primary"
+                  >
+                    Re-open
+                  </button>
+                  <button
+                    onClick={() => handleStatusChange("done")}
+                    className="text-[13px] font-medium px-3 py-1.5 rounded-[4px]"
+                    style={{
+                      background: "hsl(var(--accent))",
+                      color: "hsl(var(--surface-base))",
+                    }}
+                  >
+                    Mark done
+                  </button>
+                </>
+              )}
+              {(status === "done" || status === "dropped" || status === "cancelled") && (
                 <button
                   onClick={() => handleStatusChange("backlog")}
                   className="text-[13px] px-3 py-1.5 rounded-[4px] border border-border-subtle text-text-secondary hover:text-text-primary"

@@ -22,6 +22,7 @@ import {
   sessionOutcome,
   sessionPlannedMinutes,
 } from "@/lib/sessionUtils";
+import { formatWeekLabel, weekRange, yearWeekFromDate } from "@/lib/weekUtils";
 
 /* ───────── Status pill ───────── */
 

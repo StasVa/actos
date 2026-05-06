@@ -315,6 +315,9 @@ const ReviewMonthDetail: React.FC = () => {
             </section>
           )}
 
+          {/* OUTCOME ADDED */}
+          <OutcomeAddedSection outcome={outcome} period="month" />
+
           {/* ENERGY */}
           {settings.layers.logEnergy &&
             (summary.morningEnergyAvg != null || summary.eveningEnergyAvg != null) && (

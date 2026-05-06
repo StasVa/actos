@@ -212,50 +212,51 @@ function fmtClock(d: Date): string {
   return `${hh}:${mm} ${ap}`;
 }
 
-const SessionTimelineBar: React.FC<{ work: number; brk: number; cycles: number }> = ({
+const SessionTimelineBar: React.FC<{ work: number; brk: number; cycles: number; breaksOn: boolean }> = ({
   work,
   brk,
   cycles,
+  breaksOn,
 }) => {
   const c = Math.max(1, cycles);
-  const blocks: { kind: "work" | "break"; mins: number }[] = [];
-  for (let i = 0; i < c; i++) {
-    blocks.push({ kind: "work", mins: work });
-    if (i < c - 1 && brk > 0) blocks.push({ kind: "break", mins: brk });
-  }
-  const total = blocks.reduce((s, b) => s + b.mins, 0) || 1;
+  const effectiveBrk = breaksOn ? brk : 0;
+  const total = c * work + Math.max(0, c - 1) * effectiveBrk || 1;
 
-  // Memoize start so both labels stay consistent within a render.
   const start = React.useMemo(() => new Date(), []);
   const end = new Date(start.getTime() + total * 60_000);
 
+  // Build sequence: work blocks rendered as filled bars, gaps = breaks (transparent).
+  const items: { kind: "work" | "gap"; mins: number }[] = [];
+  for (let i = 0; i < c; i++) {
+    items.push({ kind: "work", mins: work });
+    if (i < c - 1 && effectiveBrk > 0) items.push({ kind: "gap", mins: effectiveBrk });
+  }
+
   return (
-    <div className="mt-8">
+    <div className="mt-6">
       <div
-        className="flex w-full overflow-hidden"
+        className="flex w-full items-center"
         style={{
-          height: 24,
-          borderRadius: 2,
-          background: "hsl(var(--surface-hover))",
+          height: 32,
+          borderRadius: 4,
+          background: "hsl(var(--surface-base))",
+          padding: 0,
         }}
       >
-        {blocks.map((b, i) => (
+        {items.map((b, i) => (
           <div
             key={i}
             className="transition-all duration-200 ease-out"
             style={{
               width: `${(b.mins / total) * 100}%`,
-              background:
-                b.kind === "work" ? "hsl(var(--accent))" : "hsl(var(--surface-hover))",
-              borderRight:
-                i < blocks.length - 1 && b.kind === "work"
-                  ? "1px solid hsl(var(--surface-raised))"
-                  : undefined,
+              height: "100%",
+              background: b.kind === "work" ? "hsl(var(--accent))" : "transparent",
+              borderRadius: b.kind === "work" ? 4 : 0,
             }}
           />
         ))}
       </div>
-      <div className="mt-2 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary tabular-nums">
+      <div className="mt-2 flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary tabular-nums">
         <span>{fmtClock(start)} · NOW</span>
         <span>ENDS {fmtClock(end)}</span>
       </div>

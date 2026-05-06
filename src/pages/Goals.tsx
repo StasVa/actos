@@ -426,24 +426,26 @@ const Goals: React.FC = () => {
       const totalCrit = g.successCriteria?.length ?? 0;
       const metCrit = g.successCriteria?.filter((c) => c.done).length ?? 0;
 
-      // Time
-      const doneActionsWithTime = goalActions.filter(
-        (a) => a.status === "done" && (a.timeEstimateMinutes ?? 0) > 0,
+      // Time invested = full Done time + 20% Delegated time.
+      const investedActions = goalActions.filter(
+        (a) =>
+          (a.status === "done" || a.status === "delegated") &&
+          (a.timeEstimateMinutes ?? 0) > 0,
       );
       const openActionsWithTime = goalActions.filter(
         (a) =>
           (a.status === "backlog" || a.status === "planned") &&
           (a.timeEstimateMinutes ?? 0) > 0,
       );
-      const spent = doneActionsWithTime.reduce(
-        (s, a) => s + (a.timeEstimateMinutes ?? 0),
-        0,
-      );
+      const spent = investedActions.reduce((s, a) => {
+        const t = a.timeEstimateMinutes ?? 0;
+        return s + (a.status === "done" ? t : Math.round(t * 0.2));
+      }, 0);
       const remaining = openActionsWithTime.reduce(
         (s, a) => s + (a.timeEstimateMinutes ?? 0),
         0,
       );
-      const hasTimeData = doneActionsWithTime.length > 0;
+      const hasTimeData = investedActions.length > 0;
 
       // Sparkline: last 30 days, count of done actions per day
       const spark: number[] = new Array(30).fill(0);

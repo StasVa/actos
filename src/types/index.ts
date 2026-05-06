@@ -200,6 +200,8 @@ export interface Session {
   completedActionIds: ID[];
   droppedActionIds: ID[];
   cyclesCompleted: number;
+  /** Optional user reflection captured on the session summary screen. */
+  reflection?: string | null;
 }
 
 // ───────── Settings ─────────

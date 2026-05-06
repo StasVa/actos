@@ -19,6 +19,7 @@ import Ideas from "./pages/Ideas.tsx";
 import Sessions from "./pages/Sessions.tsx";
 import SessionBuilder from "./pages/SessionBuilder.tsx";
 import SessionActive from "./pages/SessionActive.tsx";
+import SessionSummary from "./pages/SessionSummary.tsx";
 import Rituals from "./pages/Rituals.tsx";
 import AllActions from "./pages/AllActions.tsx";
 import AllDelegated from "./pages/AllDelegated.tsx";
@@ -31,6 +32,7 @@ import { RitualEditor } from "./components/RitualEditor";
 import { CommandPalette } from "./components/CommandPalette";
 import { KeyboardShortcuts } from "./components/KeyboardShortcuts";
 import { GlobalSettingsHost } from "./components/GlobalSettingsHost";
+import { ActiveSessionGuard } from "./components/ActiveSessionGuard";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +48,7 @@ const App = () => (
         <GlobalSettingsHost />
         <CommandPalette />
         <KeyboardShortcuts />
+        <ActiveSessionGuard />
         <Routes>
           {/* Default + legacy redirects */}
           <Route path="/" element={<Navigate to="/today" replace />} />
@@ -68,6 +71,7 @@ const App = () => (
           <Route path="/sessions" element={<Sessions />} />
           <Route path="/sessions/new" element={<SessionBuilder />} />
           <Route path="/sessions/active" element={<SessionActive />} />
+          <Route path="/sessions/:sessionId/summary" element={<SessionSummary />} />
           <Route path="/reviews" element={<Navigate to="/reviews/days" replace />} />
           <Route path="/reviews/days" element={<ReviewsDays />} />
           <Route path="/reviews/days/:date" element={<ReviewDayDetail />} />

@@ -15,7 +15,9 @@ import {
 import { ActionRow } from "@/components/ActionRow";
 import { AccomplishmentsSection, type AccomplishmentTile } from "@/components/AccomplishmentsSection";
 import { OutcomeAddedSection } from "@/components/OutcomeAddedSection";
+import { SessionsSection } from "@/components/SessionsSection";
 import { getOutcomeSummary } from "@/lib/outcomeUtils";
+import { getSessionsForWeek, sessionDurationMinutes } from "@/lib/sessionUtils";
 import { addDays } from "date-fns";
 import { DAY_TYPE_LABELS } from "./Index";
 import type { Action } from "@/types";

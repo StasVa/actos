@@ -428,7 +428,7 @@ const SessionBuilder: React.FC = () => {
   /* ─── Picker panes ─── */
   const LeftPane = (
     <div className="rounded-[6px] border border-border-subtle bg-surface-raised">
-      <div className="flex items-center gap-2 flex-wrap p-3 border-b border-border-subtle">
+      <div className="flex items-center gap-2 flex-wrap px-3 pt-3 pb-4 border-b border-border-subtle">
         <FilterDropdown
           label="GOAL"
           value={goalFilter}
@@ -462,7 +462,7 @@ const SessionBuilder: React.FC = () => {
           </button>
         )}
       </div>
-      <div className="max-h-[440px] overflow-y-auto">
+      <div className={`${isMobile ? "" : "max-h-[480px] overflow-y-auto"}`}>
         {available.length === 0 ? (
           <div className="p-6 text-[13px] text-text-tertiary text-center">
             No actions available. Create some first or pick a different goal/project filter.

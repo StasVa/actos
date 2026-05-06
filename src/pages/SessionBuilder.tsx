@@ -1,10 +1,10 @@
 import React, { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { GripVertical, X as XIcon } from "lucide-react";
+import { ChevronLeft, ChevronRight, GripVertical, X as XIcon } from "lucide-react";
 import { toast } from "sonner";
 import { useStore } from "@/store/useStore";
 import { AppSidebar } from "@/components/AppSidebar";
-import { ClampedNumberInput } from "@/components/ClampedNumberInput";
+import { Switch } from "@/components/ui/switch";
 import { FilterDropdown, FilterOption } from "@/components/FilterDropdown";
 import { useIsMobile } from "@/hooks/use-mobile";
 import type { Action, ID, SessionMode } from "@/types";
@@ -16,15 +16,16 @@ type ModePreset = {
   title: string;
   desc: string;
   sub: string;
+  total: number;
   work: number;
   brk: number;
-  cycles: number;
+  breaksOn: boolean;
 };
 
 const PRESETS: ModePreset[] = [
-  { key: "pomodoro", title: "Pomodoro", desc: "25min work, 5min break, 4 cycles", sub: "100min total focus", work: 25, brk: 5, cycles: 4 },
-  { key: "continuous", title: "Continuous", desc: "60min uninterrupted work", sub: "No breaks · single block", work: 60, brk: 0, cycles: 1 },
-  { key: "custom", title: "Custom", desc: "Pick your own durations", sub: "Tune everything", work: 25, brk: 5, cycles: 4 },
+  { key: "pomodoro", title: "Pomodoro", desc: "25min focus, 5min break", sub: "100min total", total: 100, work: 25, brk: 5, breaksOn: true },
+  { key: "continuous", title: "Continuous", desc: "60min uninterrupted", sub: "No breaks · single block", total: 60, work: 60, brk: 0, breaksOn: false },
+  { key: "custom", title: "Custom", desc: "Pick your own durations", sub: "Tune everything", total: 60, work: 25, brk: 5, breaksOn: true },
 ];
 
 const ModeCard: React.FC<{
@@ -53,56 +54,29 @@ const ModeCard: React.FC<{
   </button>
 );
 
-/* ───────── Field ───────── */
-
-const NumberField: React.FC<{
-  label: string;
-  value: number | "";
-  onChange: (v: number | "") => void;
-  min: number;
-  max: number;
-  step?: number;
-  suffix: string;
-  helper?: string;
-}> = ({ label, value, onChange, min, max, step, suffix, helper }) => (
-  <div className="flex flex-col gap-1.5" style={{ width: 140 }}>
-    <div className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">
-      {label}
-    </div>
-    <div className="flex items-center gap-2">
-      <div style={{ width: 90 }}>
-        <ClampedNumberInput
-          value={value}
-          onChange={onChange}
-          min={min}
-          max={max}
-          step={step}
-          ariaLabel={label}
-        />
-      </div>
-      <span className="font-mono text-[12px] text-text-secondary">{suffix}</span>
-    </div>
-    {helper && (
-      <div className="font-mono text-[11px] text-text-tertiary">{helper}</div>
-    )}
-  </div>
-);
-
 /* ───────── Stepper number control (Duration centerpiece) ───────── */
 
-import { ChevronLeft, ChevronRight } from "lucide-react";
+
+type StepperSize = "xl" | "md" | "sm";
+
+const SIZE_SPEC: Record<StepperSize, { font: number; suffixSize: number; btnPad: string; iconSize: number }> = {
+  xl: { font: 48, suffixSize: 14, btnPad: "10px 14px", iconSize: 18 },
+  md: { font: 20, suffixSize: 13, btnPad: "6px 8px", iconSize: 14 },
+  sm: { font: 16, suffixSize: 12, btnPad: "4px 6px", iconSize: 12 },
+};
 
 const StepperField: React.FC<{
-  label: string;
+  label?: string;
   value: number | "";
   onChange: (v: number | "") => void;
   min: number;
   max: number;
   step: number;
   suffix: string;
-  helper?: string;
-  isMobile: boolean;
-}> = ({ label, value, onChange, min, max, step, suffix, helper, isMobile }) => {
+  size?: StepperSize;
+  isMobile?: boolean;
+  ariaLabel?: string;
+}> = ({ label, value, onChange, min, max, step, suffix, size = "xl", isMobile, ariaLabel }) => {
   const [focused, setFocused] = useState(false);
   const [flash, setFlash] = useState(false);
   const flashTimer = React.useRef<number | null>(null);
@@ -137,10 +111,7 @@ const StepperField: React.FC<{
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value;
-    if (raw === "") {
-      onChange("");
-      return;
-    }
+    if (raw === "") { onChange(""); return; }
     const n = Number(raw);
     if (Number.isNaN(n)) return;
     onChange(n);
@@ -150,18 +121,10 @@ const StepperField: React.FC<{
     setFocused(false);
     if (value === "") return;
     let n = Math.round(Number(value));
-    if (!Number.isFinite(n)) {
-      onChange("");
-      return;
-    }
+    if (!Number.isFinite(n)) { onChange(""); return; }
     let clamped = false;
-    if (n > max) {
-      n = max;
-      clamped = true;
-    } else if (n < min) {
-      n = min;
-      clamped = true;
-    }
+    if (n > max) { n = max; clamped = true; }
+    else if (n < min) { n = min; clamped = true; }
     if (clamped) {
       setFlash(true);
       if (flashTimer.current) window.clearTimeout(flashTimer.current);
@@ -171,7 +134,8 @@ const StepperField: React.FC<{
   };
 
   const display = value === "" ? "" : String(value);
-  const fontSize = isMobile ? 28 : 36;
+  const spec = SIZE_SPEC[size];
+  const fontSize = size === "xl" && isMobile ? 36 : spec.font;
   const charCount = Math.max(display.length, 1);
   const inputWidth = `${charCount * (fontSize * 0.62)}px`;
 
@@ -181,33 +145,24 @@ const StepperField: React.FC<{
     ? "hsl(var(--accent))"
     : "transparent";
 
-  const StepBtn: React.FC<{ disabled: boolean; onClick: () => void; children: React.ReactNode; ariaLabel: string }> = ({
-    disabled,
-    onClick,
-    children,
-    ariaLabel,
-  }) => (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      aria-label={ariaLabel}
-      className="inline-flex items-center justify-center rounded-[4px] transition-colors text-text-secondary hover:text-text-primary hover:bg-surface-hover disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-text-secondary disabled:cursor-not-allowed"
-      style={{ padding: "8px 12px" }}
-    >
-      {children}
-    </button>
-  );
-
   return (
-    <div className={`flex-1 flex flex-col items-center ${isMobile ? "py-2" : ""}`}>
-      <div className="font-mono text-[10px] uppercase text-text-tertiary mb-3" style={{ letterSpacing: "0.08em" }}>
-        {label}
-      </div>
-      <div className="flex items-center gap-2">
-        <StepBtn disabled={atMin} onClick={dec} ariaLabel={`Decrease ${label}`}>
-          <ChevronLeft size={16} />
-        </StepBtn>
+    <div className="flex flex-col items-center">
+      {label && (
+        <div className="font-mono text-[10px] uppercase text-text-tertiary mb-3" style={{ letterSpacing: "0.08em" }}>
+          {label}
+        </div>
+      )}
+      <div className="flex items-center gap-1">
+        <button
+          type="button"
+          onClick={dec}
+          disabled={atMin}
+          aria-label={`Decrease ${ariaLabel ?? label ?? ""}`}
+          className="inline-flex items-center justify-center rounded-[4px] transition-colors text-text-secondary hover:text-text-primary hover:bg-surface-hover disabled:opacity-30 disabled:hover:bg-transparent disabled:cursor-not-allowed"
+          style={{ padding: spec.btnPad }}
+        >
+          <ChevronLeft size={spec.iconSize} />
+        </button>
         <div className="flex items-baseline gap-2">
           <input
             type="number"
@@ -217,12 +172,9 @@ const StepperField: React.FC<{
             max={max}
             onKeyDown={handleKeyDown}
             onChange={handleChange}
-            onFocus={(e) => {
-              setFocused(true);
-              e.currentTarget.select();
-            }}
+            onFocus={(e) => { setFocused(true); e.currentTarget.select(); }}
             onBlur={handleBlur}
-            aria-label={label}
+            aria-label={ariaLabel ?? label}
             className="bg-transparent outline-none text-text-primary font-medium tabular-nums text-center transition-colors"
             style={{
               fontSize,
@@ -233,14 +185,18 @@ const StepperField: React.FC<{
               paddingBottom: 2,
             }}
           />
-          <span className="font-mono text-[14px] text-text-secondary">{suffix}</span>
+          <span className="font-mono text-text-secondary" style={{ fontSize: spec.suffixSize }}>{suffix}</span>
         </div>
-        <StepBtn disabled={atMax} onClick={inc} ariaLabel={`Increase ${label}`}>
-          <ChevronRight size={16} />
-        </StepBtn>
-      </div>
-      <div className="mt-2 font-mono text-[11px] text-text-tertiary h-4">
-        {helper ?? ""}
+        <button
+          type="button"
+          onClick={inc}
+          disabled={atMax}
+          aria-label={`Increase ${ariaLabel ?? label ?? ""}`}
+          className="inline-flex items-center justify-center rounded-[4px] transition-colors text-text-secondary hover:text-text-primary hover:bg-surface-hover disabled:opacity-30 disabled:hover:bg-transparent disabled:cursor-not-allowed"
+          style={{ padding: spec.btnPad }}
+        >
+          <ChevronRight size={spec.iconSize} />
+        </button>
       </div>
     </div>
   );
@@ -257,50 +213,51 @@ function fmtClock(d: Date): string {
   return `${hh}:${mm} ${ap}`;
 }
 
-const SessionTimelineBar: React.FC<{ work: number; brk: number; cycles: number }> = ({
+const SessionTimelineBar: React.FC<{ work: number; brk: number; cycles: number; breaksOn: boolean }> = ({
   work,
   brk,
   cycles,
+  breaksOn,
 }) => {
   const c = Math.max(1, cycles);
-  const blocks: { kind: "work" | "break"; mins: number }[] = [];
-  for (let i = 0; i < c; i++) {
-    blocks.push({ kind: "work", mins: work });
-    if (i < c - 1 && brk > 0) blocks.push({ kind: "break", mins: brk });
-  }
-  const total = blocks.reduce((s, b) => s + b.mins, 0) || 1;
+  const effectiveBrk = breaksOn ? brk : 0;
+  const total = c * work + Math.max(0, c - 1) * effectiveBrk || 1;
 
-  // Memoize start so both labels stay consistent within a render.
   const start = React.useMemo(() => new Date(), []);
   const end = new Date(start.getTime() + total * 60_000);
 
+  // Build sequence: work blocks rendered as filled bars, gaps = breaks (transparent).
+  const items: { kind: "work" | "gap"; mins: number }[] = [];
+  for (let i = 0; i < c; i++) {
+    items.push({ kind: "work", mins: work });
+    if (i < c - 1 && effectiveBrk > 0) items.push({ kind: "gap", mins: effectiveBrk });
+  }
+
   return (
-    <div className="mt-8">
+    <div className="mt-6">
       <div
-        className="flex w-full overflow-hidden"
+        className="flex w-full items-center"
         style={{
-          height: 24,
-          borderRadius: 2,
-          background: "hsl(var(--surface-hover))",
+          height: 32,
+          borderRadius: 4,
+          background: "hsl(var(--surface-base))",
+          padding: 0,
         }}
       >
-        {blocks.map((b, i) => (
+        {items.map((b, i) => (
           <div
             key={i}
             className="transition-all duration-200 ease-out"
             style={{
               width: `${(b.mins / total) * 100}%`,
-              background:
-                b.kind === "work" ? "hsl(var(--accent))" : "hsl(var(--surface-hover))",
-              borderRight:
-                i < blocks.length - 1 && b.kind === "work"
-                  ? "1px solid hsl(var(--surface-raised))"
-                  : undefined,
+              height: "100%",
+              background: b.kind === "work" ? "hsl(var(--accent))" : "transparent",
+              borderRadius: b.kind === "work" ? 4 : 0,
             }}
           />
         ))}
       </div>
-      <div className="mt-2 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary tabular-nums">
+      <div className="mt-2 flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary tabular-nums">
         <span>{fmtClock(start)} · NOW</span>
         <span>ENDS {fmtClock(end)}</span>
       </div>
@@ -506,9 +463,10 @@ const SessionBuilder: React.FC = () => {
   const sessions = useStore((s) => s.sessions);
 
   const [mode, setMode] = useState<SessionMode | null>(null);
+  const [totalSession, setTotalSession] = useState<number | "">(60);
+  const [breaksOn, setBreaksOn] = useState<boolean>(true);
   const [work, setWork] = useState<number | "">(25);
   const [brk, setBrk] = useState<number | "">(5);
-  const [cycles, setCycles] = useState<number | "">(4);
 
   const [goalFilter, setGoalFilter] = useState<string>("all");
   const [projectFilter, setProjectFilter] = useState<string>("all");
@@ -527,9 +485,12 @@ const SessionBuilder: React.FC = () => {
 
   const pickPreset = (p: ModePreset) => {
     setMode(p.key);
-    setWork(p.work);
-    setBrk(p.brk);
-    setCycles(p.cycles);
+    setTotalSession(p.total);
+    setBreaksOn(p.breaksOn);
+    if (p.breaksOn) {
+      setWork(p.work);
+      setBrk(p.brk);
+    }
   };
 
   /* Available actions */
@@ -576,18 +537,17 @@ const SessionBuilder: React.FC = () => {
     setDragIndex(null);
   };
 
-  /* Totals */
-  const workN = typeof work === "number" ? work : 0;
-  const brkN = typeof brk === "number" ? brk : 0;
-  const cyclesN = typeof cycles === "number" ? cycles : 0;
+  /* Totals — derived from totalSession + breaks model */
+  const totalN = typeof totalSession === "number" ? totalSession : 0;
+  const workN = breaksOn ? (typeof work === "number" ? work : 0) : totalN;
+  const brkN = breaksOn ? (typeof brk === "number" ? brk : 0) : 0;
+  // cyclesPlanned = number of work blocks needed to cover totalSession.
+  const cyclesN = breaksOn && workN + brkN > 0
+    ? Math.max(1, Math.ceil(totalN / (workN + brkN)))
+    : 1;
   const focusTotal = workN * cyclesN;
   const breakTotal = brkN * Math.max(0, cyclesN - 1);
   const grandTotal = focusTotal + breakTotal;
-
-  const totalLine =
-    cyclesN <= 1 && brkN === 0
-      ? `Total session: ${focusTotal}min`
-      : `Total session: ${focusTotal}min focus + ${breakTotal}min breaks = ${grandTotal}min`;
 
   /* Selected stats */
   const selectedActions = selectedIds
@@ -621,20 +581,21 @@ const SessionBuilder: React.FC = () => {
 
   /* Validation */
   const validNums =
-    typeof work === "number" && work >= 5 &&
-    typeof brk === "number" && brk >= 0 &&
-    typeof cycles === "number" && cycles >= 1;
+    typeof totalSession === "number" && totalSession >= 15 &&
+    (!breaksOn || (typeof work === "number" && work >= 5 && typeof brk === "number" && brk >= 1));
   const hasActiveSession = sessions.some((s) => s.status === "in_progress");
   const canStart = selectedIds.length > 0 && validNums && !hasActiveSession;
 
   const handleStart = () => {
-    if (!canStart || typeof work !== "number" || typeof brk !== "number" || typeof cycles !== "number") return;
-    const inferredMode: SessionMode = mode ?? (cycles === 1 && brk === 0 ? "continuous" : "custom");
+    if (!canStart || typeof totalSession !== "number") return;
+    const inferredMode: SessionMode = mode ?? (!breaksOn ? "continuous" : "custom");
+    const wd = breaksOn ? (typeof work === "number" ? work : 25) : totalSession;
+    const bd = breaksOn ? (typeof brk === "number" ? brk : 5) : 0;
     const result = createDraftSession({
       mode: inferredMode,
-      workDuration: work,
-      breakDuration: brk,
-      cyclesPlanned: cycles,
+      workDuration: wd,
+      breakDuration: bd,
+      cyclesPlanned: cyclesN,
       plannedActionIds: selectedIds,
     });
     if (!result.ok) {
@@ -804,68 +765,88 @@ const SessionBuilder: React.FC = () => {
               className="rounded-[8px] border border-border-subtle bg-surface-raised"
               style={{ padding: isMobile ? 24 : 32 }}
             >
-              {/* Steppers */}
-              <div
-                className={`flex ${isMobile ? "flex-col" : "flex-row"} ${
-                  isMobile ? "gap-4" : "gap-8"
-                } items-stretch`}
-              >
+              {/* Total session — primary stepper */}
+              <div className="flex flex-col items-center">
+                <div className="font-mono text-[10px] uppercase text-text-tertiary mb-3" style={{ letterSpacing: "0.08em" }}>
+                  TOTAL SESSION
+                </div>
                 <StepperField
-                  label="WORK BLOCK"
-                  value={work}
-                  onChange={setWork}
-                  min={5}
-                  max={180}
+                  value={totalSession}
+                  onChange={setTotalSession}
+                  min={15}
+                  max={240}
                   step={5}
                   suffix="min"
+                  size="xl"
                   isMobile={isMobile}
-                />
-                <StepperField
-                  label="BREAK"
-                  value={brk}
-                  onChange={setBrk}
-                  min={0}
-                  max={30}
-                  step={1}
-                  suffix="min"
-                  helper={brk === 0 ? "0 = no breaks" : undefined}
-                  isMobile={isMobile}
-                />
-                <StepperField
-                  label="CYCLES"
-                  value={cycles}
-                  onChange={setCycles}
-                  min={1}
-                  max={12}
-                  step={1}
-                  suffix={cyclesN === 1 ? "block" : "blocks"}
-                  isMobile={isMobile}
+                  ariaLabel="Total session"
                 />
               </div>
 
-              {/* Wall-clock visualization bar */}
-              <SessionTimelineBar work={workN} brk={brkN} cycles={cyclesN} />
+              {/* Breaks toggle + frequency + length */}
+              <div className={`mt-8 flex ${isMobile ? "flex-col items-start gap-4" : "flex-row items-center flex-wrap gap-x-6 gap-y-3"}`}>
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <Switch checked={breaksOn} onCheckedChange={setBreaksOn} aria-label="Toggle breaks" />
+                  <span className="text-[14px] text-text-primary">Breaks</span>
+                </label>
 
-              {/* Total summary */}
-              <div className="mt-6 flex flex-wrap items-baseline justify-between gap-4">
+                {breaksOn && (
+                  <>
+                    <div className="flex items-center gap-3">
+                      <span className="text-[14px] text-text-secondary">every</span>
+                      <StepperField
+                        value={work}
+                        onChange={setWork}
+                        min={5}
+                        max={60}
+                        step={5}
+                        suffix="min"
+                        size="md"
+                        ariaLabel="Frequency between breaks"
+                      />
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-[14px] text-text-secondary">break length</span>
+                      <StepperField
+                        value={brk}
+                        onChange={setBrk}
+                        min={1}
+                        max={15}
+                        step={1}
+                        suffix="min"
+                        size="sm"
+                        ariaLabel="Break length"
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Wall-clock visualization bar */}
+              <SessionTimelineBar work={workN} brk={brkN} cycles={cyclesN} breaksOn={breaksOn} />
+
+              {/* Derived stats — three pills */}
+              <div className="mt-5 flex flex-wrap items-baseline gap-x-6 gap-y-2">
                 <div className="flex items-baseline gap-2">
-                  <span className="text-[28px] font-medium tabular-nums text-text-primary leading-none">
-                    {grandTotal}
+                  <span className="text-[14px] tabular-nums text-text-primary">
+                    {cyclesN} {cyclesN === 1 ? "session" : "sessions"}
                   </span>
-                  <span className="font-mono text-[14px] text-text-secondary">
-                    min total
-                  </span>
+                  <span className="font-mono text-[12px] text-text-secondary">of focus</span>
                 </div>
-                {brkN > 0 && cyclesN > 1 && (
-                  <div className="font-mono text-[13px] tabular-nums text-text-secondary">
-                    <span className="text-text-primary">{focusTotal}</span> min focus
-                    <span className="mx-2 text-text-tertiary">·</span>
-                    <span className="text-text-primary">{breakTotal}</span> min breaks
+                <div className="flex items-baseline gap-2">
+                  <span className="text-[14px] tabular-nums text-text-primary">{focusTotal} min</span>
+                  <span className="font-mono text-[12px] text-text-secondary">focused</span>
+                </div>
+                {breaksOn && breakTotal > 0 && (
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-[14px] tabular-nums text-text-primary">{breakTotal} min</span>
+                    <span className="font-mono text-[12px] text-text-secondary">breaks</span>
                   </div>
                 )}
               </div>
             </div>
           </section>
+
 
           {/* ACTIONS */}
           <section className="mt-8">

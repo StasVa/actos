@@ -6,6 +6,7 @@ import { CardMenu } from "@/components/CardMenu";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { useStore, selectors } from "@/store/useStore";
 import { formatTime } from "@/lib/format";
+import { timeInvestedMinutes } from "@/lib/timeStats";
 
 /* ===== MeasureBar (matches Index/Goals variant) ===== */
 const MeasureBar: React.FC<{

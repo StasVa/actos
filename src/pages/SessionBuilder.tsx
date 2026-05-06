@@ -1,0 +1,579 @@
+import React, { useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { GripVertical, X as XIcon } from "lucide-react";
+import { toast } from "sonner";
+import { useStore } from "@/store/useStore";
+import { AppSidebar } from "@/components/AppSidebar";
+import { ClampedNumberInput } from "@/components/ClampedNumberInput";
+import { FilterDropdown, FilterOption } from "@/components/FilterDropdown";
+import { useIsMobile } from "@/hooks/use-mobile";
+import type { Action, ID, SessionMode } from "@/types";
+
+/* ───────── Mode presets ───────── */
+
+type ModePreset = {
+  key: SessionMode;
+  title: string;
+  desc: string;
+  sub: string;
+  work: number;
+  brk: number;
+  cycles: number;
+};
+
+const PRESETS: ModePreset[] = [
+  { key: "pomodoro", title: "Pomodoro", desc: "25min work, 5min break, 4 cycles", sub: "100min total focus", work: 25, brk: 5, cycles: 4 },
+  { key: "continuous", title: "Continuous", desc: "60min uninterrupted work", sub: "No breaks · single block", work: 60, brk: 0, cycles: 1 },
+  { key: "custom", title: "Custom", desc: "Pick your own durations", sub: "Tune everything", work: 25, brk: 5, cycles: 4 },
+];
+
+const ModeCard: React.FC<{
+  preset: ModePreset;
+  selected: boolean;
+  onClick: () => void;
+}> = ({ preset, selected, onClick }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className="flex-1 text-left rounded-[6px] transition-colors flex flex-col justify-between"
+    style={{
+      padding: "20px 24px",
+      minHeight: 120,
+      background: selected ? "hsl(var(--surface-hover))" : "hsl(var(--surface-raised))",
+      border: selected
+        ? "2px solid hsl(var(--accent))"
+        : "1px solid hsl(var(--border-subtle))",
+    }}
+  >
+    <div>
+      <div className="text-[16px] font-medium text-text-primary">{preset.title}</div>
+      <div className="mt-1 font-mono text-[12px] text-text-secondary">{preset.desc}</div>
+    </div>
+    <div className="mt-3 font-mono text-[11px] text-text-tertiary">{preset.sub}</div>
+  </button>
+);
+
+/* ───────── Field ───────── */
+
+const NumberField: React.FC<{
+  label: string;
+  value: number | "";
+  onChange: (v: number | "") => void;
+  min: number;
+  max: number;
+  step?: number;
+  suffix: string;
+  helper?: string;
+}> = ({ label, value, onChange, min, max, step, suffix, helper }) => (
+  <div className="flex flex-col gap-1.5" style={{ width: 140 }}>
+    <div className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">
+      {label}
+    </div>
+    <div className="flex items-center gap-2">
+      <div style={{ width: 90 }}>
+        <ClampedNumberInput
+          value={value}
+          onChange={onChange}
+          min={min}
+          max={max}
+          step={step}
+          ariaLabel={label}
+        />
+      </div>
+      <span className="font-mono text-[12px] text-text-secondary">{suffix}</span>
+    </div>
+    {helper && (
+      <div className="font-mono text-[11px] text-text-tertiary">{helper}</div>
+    )}
+  </div>
+);
+
+/* ───────── Action rows ───────── */
+
+const AvailableActionRow: React.FC<{
+  action: Action;
+  goalColor: string;
+  goalTitle?: string;
+  projectTitle?: string;
+  selected: boolean;
+  onToggle: () => void;
+}> = ({ action, goalColor, goalTitle, projectTitle, selected, onToggle }) => {
+  const breadcrumb = [goalTitle, projectTitle].filter(Boolean).join(" › ");
+  return (
+    <div
+      onClick={onToggle}
+      className="flex items-stretch h-10 cursor-pointer transition-colors hover:bg-surface-hover border-b border-border-subtle"
+      style={{ opacity: selected ? 0.5 : 1 }}
+    >
+      <span className="w-[3px] shrink-0" style={{ background: goalColor }} />
+      <div className="flex-1 min-w-0 flex items-center gap-3 pl-3 pr-3">
+        <span
+          className="inline-flex items-center justify-center w-4 h-4 shrink-0 rounded-[3px] border"
+          style={{
+            borderColor: selected ? "hsl(var(--accent))" : "hsl(var(--border-default))",
+            background: selected ? "hsl(var(--accent))" : "transparent",
+            color: "hsl(var(--accent-foreground))",
+            fontSize: 10,
+            lineHeight: 1,
+          }}
+        >
+          {selected ? "✓" : ""}
+        </span>
+        <div className="flex-1 min-w-0">
+          <div className="text-[13px] text-text-primary truncate">{action.title}</div>
+          {breadcrumb && (
+            <div className="font-mono text-[11px] text-text-secondary truncate">
+              {breadcrumb}
+            </div>
+          )}
+        </div>
+        <div className="shrink-0 flex items-center gap-2 font-mono text-[12px] tabular-nums">
+          {action.timeEstimateMinutes ? (
+            <span className="text-text-secondary">{action.timeEstimateMinutes}m</span>
+          ) : null}
+          <span style={{ color: "hsl(var(--accent))" }}>I{action.impact ?? 0}</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const SelectedRow: React.FC<{
+  index: number;
+  action: Action;
+  goalColor: string;
+  onRemove: () => void;
+  draggable: boolean;
+  onDragStart: () => void;
+  onDragOver: (e: React.DragEvent) => void;
+  onDrop: () => void;
+  isDragging: boolean;
+}> = ({ index, action, goalColor, onRemove, draggable, onDragStart, onDragOver, onDrop, isDragging }) => (
+  <div
+    draggable={draggable}
+    onDragStart={onDragStart}
+    onDragOver={onDragOver}
+    onDrop={onDrop}
+    className="group flex items-stretch transition-colors hover:bg-surface-hover border-b border-border-subtle"
+    style={{ opacity: isDragging ? 0.4 : 1 }}
+  >
+    <span className="w-[3px] shrink-0" style={{ background: goalColor }} />
+    <div className="flex-1 min-w-0 flex items-center gap-2 pl-2 pr-2 py-2">
+      <span className="text-text-tertiary cursor-grab active:cursor-grabbing">
+        <GripVertical size={14} />
+      </span>
+      <span className="font-mono text-[11px] uppercase text-text-tertiary w-5 shrink-0">
+        {index + 1}.
+      </span>
+      <div className="flex-1 min-w-0 text-[13px] text-text-primary truncate">
+        {action.title}
+      </div>
+      <button
+        onClick={onRemove}
+        className="shrink-0 w-6 h-6 inline-flex items-center justify-center rounded-[3px] text-text-tertiary hover:text-text-primary hover:bg-surface-elevated transition-colors"
+        aria-label="Remove"
+      >
+        <XIcon size={14} />
+      </button>
+    </div>
+  </div>
+);
+
+/* ───────── Page ───────── */
+
+const SessionBuilder: React.FC = () => {
+  const navigate = useNavigate();
+  const isMobile = useIsMobile();
+  const goals = useStore((s) => s.goals);
+  const projects = useStore((s) => s.projects);
+  const actions = useStore((s) => s.actions);
+  const dayEntries = useStore((s) => s.dayEntries);
+  const settings = useStore((s) => s.settings);
+  const createDraftSession = useStore((s) => s.createDraftSession);
+  const sessions = useStore((s) => s.sessions);
+
+  const [mode, setMode] = useState<SessionMode | null>(null);
+  const [work, setWork] = useState<number | "">(25);
+  const [brk, setBrk] = useState<number | "">(5);
+  const [cycles, setCycles] = useState<number | "">(4);
+
+  const [goalFilter, setGoalFilter] = useState<string>("all");
+  const [projectFilter, setProjectFilter] = useState<string>("all");
+  const [todayOnly, setTodayOnly] = useState(false);
+
+  const [selectedIds, setSelectedIds] = useState<ID[]>([]);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+
+  const activeGoals = useMemo(() => goals.filter((g) => g.status === "active"), [goals]);
+  const activeGoalIds = useMemo(() => new Set(activeGoals.map((g) => g.id)), [activeGoals]);
+
+  const today = new Date().toISOString().slice(0, 10);
+  const todayEntry = dayEntries.find((d) => d.date === today);
+  const planActive = settings.layers.planAndReview && todayEntry?.isPlanned;
+  const todayPlannedIds = new Set(todayEntry?.plannedActionIds ?? []);
+
+  const pickPreset = (p: ModePreset) => {
+    setMode(p.key);
+    setWork(p.work);
+    setBrk(p.brk);
+    setCycles(p.cycles);
+  };
+
+  /* Available actions */
+  const available = useMemo(() => {
+    return actions
+      .filter((a) => (a.status === "backlog" || a.status === "planned") && activeGoalIds.has(a.goalId))
+      .filter((a) => {
+        if (a.projectId) {
+          const p = projects.find((x) => x.id === a.projectId);
+          if (!p || p.status !== "active") return false;
+        }
+        return true;
+      })
+      .filter((a) => (goalFilter === "all" ? true : a.goalId === goalFilter))
+      .filter((a) => {
+        if (projectFilter === "all") return true;
+        if (projectFilter === "__none") return a.projectId == null;
+        return a.projectId === projectFilter;
+      })
+      .filter((a) => (todayOnly ? todayPlannedIds.has(a.id) : true));
+  }, [actions, activeGoalIds, goalFilter, projectFilter, todayOnly, projects, todayPlannedIds]);
+
+  const selectedSet = useMemo(() => new Set(selectedIds), [selectedIds]);
+
+  const toggle = (id: ID) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
+  };
+
+  const remove = (id: ID) => setSelectedIds((prev) => prev.filter((x) => x !== id));
+
+  const handleDrop = (toIdx: number) => {
+    if (dragIndex == null || dragIndex === toIdx) {
+      setDragIndex(null);
+      return;
+    }
+    setSelectedIds((prev) => {
+      const next = prev.slice();
+      const [moved] = next.splice(dragIndex, 1);
+      next.splice(toIdx, 0, moved);
+      return next;
+    });
+    setDragIndex(null);
+  };
+
+  /* Totals */
+  const workN = typeof work === "number" ? work : 0;
+  const brkN = typeof brk === "number" ? brk : 0;
+  const cyclesN = typeof cycles === "number" ? cycles : 0;
+  const focusTotal = workN * cyclesN;
+  const breakTotal = brkN * Math.max(0, cyclesN - 1);
+  const grandTotal = focusTotal + breakTotal;
+
+  const totalLine =
+    cyclesN <= 1 && brkN === 0
+      ? `Total session: ${focusTotal}min`
+      : `Total session: ${focusTotal}min focus + ${breakTotal}min breaks = ${grandTotal}min`;
+
+  /* Selected stats */
+  const selectedActions = selectedIds
+    .map((id) => actions.find((a) => a.id === id))
+    .filter((a): a is Action => !!a);
+  const estimateSum = selectedActions.reduce((s, a) => s + (a.timeEstimateMinutes ?? 0), 0);
+  const diff = estimateSum - focusTotal;
+  let matchHint: { text: string; color: string } | null = null;
+  if (estimateSum > 0 && focusTotal > 0) {
+    if (Math.abs(diff) <= 5) matchHint = { text: "Well-matched", color: "hsl(var(--text-secondary))" };
+    else if (diff < 0) matchHint = { text: `+${-diff}min buffer`, color: "hsl(var(--state-active))" };
+    else matchHint = { text: `+${diff}min over`, color: "hsl(var(--text-warning))" };
+  }
+
+  /* Filters */
+  const goalOpts: FilterOption<string>[] = [
+    { value: "all", label: "All" },
+    ...activeGoals.map((g) => ({ value: g.id, label: g.title, dot: `hsl(var(--${g.color}))` })),
+  ];
+  const projectOpts: FilterOption<string>[] = useMemo(() => {
+    const scope =
+      goalFilter === "all"
+        ? projects.filter((p) => p.status === "active" && activeGoalIds.has(p.goalId))
+        : projects.filter((p) => p.status === "active" && p.goalId === goalFilter);
+    return [
+      { value: "all", label: "All" },
+      { value: "__none", label: "Goal-level (no project)" },
+      ...scope.map((p) => ({ value: p.id, label: p.title })),
+    ];
+  }, [projects, goalFilter, activeGoalIds]);
+
+  /* Validation */
+  const validNums =
+    typeof work === "number" && work >= 5 &&
+    typeof brk === "number" && brk >= 0 &&
+    typeof cycles === "number" && cycles >= 1;
+  const hasActiveSession = sessions.some((s) => s.status === "in_progress");
+  const canStart = selectedIds.length > 0 && validNums && !hasActiveSession;
+
+  const handleStart = () => {
+    if (!canStart || typeof work !== "number" || typeof brk !== "number" || typeof cycles !== "number") return;
+    const inferredMode: SessionMode = mode ?? (cycles === 1 && brk === 0 ? "continuous" : "custom");
+    const result = createDraftSession({
+      mode: inferredMode,
+      workDuration: work,
+      breakDuration: brk,
+      cyclesPlanned: cycles,
+      plannedActionIds: selectedIds,
+    });
+    if (!result.ok) {
+      toast.error("A session is already in progress");
+      return;
+    }
+    toast.success("Session started");
+    navigate("/sessions/active");
+  };
+
+  /* ─── Picker panes ─── */
+  const LeftPane = (
+    <div className="rounded-[6px] border border-border-subtle bg-surface-raised">
+      <div className="flex items-center gap-2 flex-wrap p-3 border-b border-border-subtle">
+        <FilterDropdown
+          label="GOAL"
+          value={goalFilter}
+          defaultValue="all"
+          options={goalOpts}
+          onChange={(v) => {
+            setGoalFilter(v);
+            setProjectFilter("all");
+          }}
+        />
+        <FilterDropdown
+          label="PROJECT"
+          value={projectFilter}
+          defaultValue="all"
+          options={projectOpts}
+          onChange={setProjectFilter}
+        />
+        {planActive && (
+          <button
+            type="button"
+            onClick={() => setTodayOnly((v) => !v)}
+            className="font-mono text-[10px] uppercase tracking-[0.06em] rounded-[4px] border transition-colors"
+            style={{
+              padding: "6px 10px",
+              borderColor: todayOnly ? "hsl(var(--accent))" : "hsl(var(--border-subtle))",
+              color: todayOnly ? "hsl(var(--accent))" : "hsl(var(--text-tertiary))",
+              background: todayOnly ? "hsl(var(--surface-hover))" : "transparent",
+            }}
+          >
+            TODAY'S PLANNED · {(todayEntry?.plannedActionIds ?? []).length}
+          </button>
+        )}
+      </div>
+      <div className="max-h-[440px] overflow-y-auto">
+        {available.length === 0 ? (
+          <div className="p-6 text-[13px] text-text-tertiary text-center">
+            No actions available. Create some first or pick a different goal/project filter.
+          </div>
+        ) : (
+          available.map((a) => {
+            const goal = goals.find((g) => g.id === a.goalId);
+            const project = a.projectId ? projects.find((p) => p.id === a.projectId) : undefined;
+            return (
+              <AvailableActionRow
+                key={a.id}
+                action={a}
+                goalColor={goal ? `hsl(var(--${goal.color}))` : "hsl(var(--border-default))"}
+                goalTitle={goal?.title}
+                projectTitle={project?.title}
+                selected={selectedSet.has(a.id)}
+                onToggle={() => toggle(a.id)}
+              />
+            );
+          })
+        )}
+      </div>
+    </div>
+  );
+
+  const RightPane = (
+    <div className="rounded-[6px] border border-border-subtle bg-surface-raised flex flex-col">
+      <div className="p-3 border-b border-border-subtle font-mono text-[11px] uppercase tracking-[0.06em] text-text-secondary">
+        SELECTED · {selectedIds.length}
+      </div>
+      <div className="max-h-[440px] overflow-y-auto flex-1">
+        {selectedIds.length === 0 ? (
+          <div
+            className="m-3 rounded-[4px] p-6 text-center text-[13px] text-text-tertiary"
+            style={{ border: "1px dashed hsl(var(--border-default))" }}
+          >
+            No actions selected yet. Pick from the list.
+          </div>
+        ) : (
+          selectedIds.map((id, idx) => {
+            const a = actions.find((x) => x.id === id);
+            if (!a) return null;
+            const goal = goals.find((g) => g.id === a.goalId);
+            return (
+              <SelectedRow
+                key={id}
+                index={idx}
+                action={a}
+                goalColor={goal ? `hsl(var(--${goal.color}))` : "hsl(var(--border-default))"}
+                onRemove={() => remove(id)}
+                draggable
+                onDragStart={() => setDragIndex(idx)}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={() => handleDrop(idx)}
+                isDragging={dragIndex === idx}
+              />
+            );
+          })
+        )}
+      </div>
+      {selectedIds.length > 0 && (
+        <div className="p-3 border-t border-border-subtle font-mono text-[12px] text-text-secondary flex flex-wrap items-center gap-x-3 gap-y-1">
+          <span>Estimated time: {estimateSum}min</span>
+          <span>·</span>
+          <span>Session work: {focusTotal}min</span>
+          {matchHint && (
+            <>
+              <span>·</span>
+              <span style={{ color: matchHint.color }}>{matchHint.text}</span>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-background text-text-primary">
+      <AppSidebar />
+      <main className="ml-[220px]">
+        <div className="max-w-[1100px] mx-auto px-8 py-8 pb-32">
+          {/* Header */}
+          <div className="pb-4 border-b border-border-subtle">
+            <Link
+              to="/sessions"
+              className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary hover:text-text-secondary transition-colors"
+            >
+              ← Sessions
+            </Link>
+            <h1 className="mt-2 text-[28px] font-medium tracking-tight">New Session</h1>
+          </div>
+
+          {/* MODE */}
+          <section className="mt-8">
+            <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-3">
+              MODE
+            </div>
+            <div className={`flex ${isMobile ? "flex-col" : "flex-row"} gap-3`}>
+              {PRESETS.map((p) => (
+                <ModeCard
+                  key={p.key}
+                  preset={p}
+                  selected={mode === p.key}
+                  onClick={() => pickPreset(p)}
+                />
+              ))}
+            </div>
+          </section>
+
+          {/* DURATION */}
+          <section className="mt-8">
+            <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-3">
+              DURATION
+            </div>
+            <div className={`flex ${isMobile ? "flex-col" : "flex-row"} gap-6`}>
+              <NumberField
+                label="WORK BLOCK"
+                value={work}
+                onChange={setWork}
+                min={5}
+                max={180}
+                step={5}
+                suffix="min"
+              />
+              <NumberField
+                label="BREAK"
+                value={brk}
+                onChange={setBrk}
+                min={0}
+                max={30}
+                suffix="min"
+                helper="0 = no breaks"
+              />
+              <NumberField
+                label="CYCLES"
+                value={cycles}
+                onChange={setCycles}
+                min={1}
+                max={12}
+                suffix="blocks"
+              />
+            </div>
+            <div className="mt-4 text-[13px] text-text-secondary tabular-nums">{totalLine}</div>
+          </section>
+
+          {/* ACTIONS */}
+          <section className="mt-8">
+            <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-1">
+              ACTIONS · {selectedIds.length} SELECTED
+            </div>
+            <div className="text-[13px] text-text-secondary mb-3">
+              Pick what you'll work on. The session will guide you through them in order.
+            </div>
+            {isMobile ? (
+              <div className="flex flex-col gap-4">
+                {LeftPane}
+                {RightPane}
+              </div>
+            ) : (
+              <div className="grid gap-4" style={{ gridTemplateColumns: "60% 40%" }}>
+                {LeftPane}
+                {RightPane}
+              </div>
+            )}
+          </section>
+        </div>
+
+        {/* Sticky action bar */}
+        <div
+          className="fixed bottom-0 left-[220px] right-0 border-t border-border-subtle"
+          style={{ background: "hsl(var(--surface-raised))" }}
+        >
+          <div className="max-w-[1100px] mx-auto px-8 py-4 flex items-center justify-between">
+            <Link
+              to="/sessions"
+              className="text-[13px] text-text-tertiary hover:text-text-secondary transition-colors"
+            >
+              Cancel
+            </Link>
+            <button
+              type="button"
+              onClick={handleStart}
+              disabled={!canStart}
+              title={
+                hasActiveSession
+                  ? "A session is already in progress"
+                  : selectedIds.length === 0
+                  ? "Select at least one action"
+                  : ""
+              }
+              className="text-[15px] font-medium rounded-[4px] transition-colors disabled:cursor-not-allowed"
+              style={{
+                padding: "12px 32px",
+                background: canStart ? "hsl(var(--accent))" : "hsl(var(--surface-hover))",
+                color: canStart ? "hsl(var(--accent-foreground))" : "hsl(var(--text-tertiary))",
+              }}
+            >
+              Start session
+            </button>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+};
+
+export default SessionBuilder;

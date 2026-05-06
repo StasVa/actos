@@ -493,7 +493,7 @@ function GoalEditorPanel({
         onCancel={() => setConfirmComplete(false)}
         onConfirm={handleConfirmComplete}
       />
-    </aside>
+    </EditorShell>
   );
 }
 

@@ -410,13 +410,7 @@ export const SessionsSection: React.FC<Props> = ({
   // Build per-week rows using yearWeek bucketing.
   const weekSet = new Set<string>();
   for (const s of sessions) {
-    const yw = (function () {
-      // Local helper to avoid circular import; mirrors yearWeekFromDate.
-      // Use the lib helper for correctness.
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      return require("@/lib/weekUtils").yearWeekFromDate(new Date(s.startedAt)) as string;
-    })();
-    weekSet.add(yw);
+    weekSet.add(yearWeekFromDate(new Date(s.startedAt)));
   }
   const weekRows = Array.from(weekSet)
     .sort()
@@ -450,7 +444,6 @@ export const SessionsSection: React.FC<Props> = ({
       )}
       <div className="rounded-[6px] border border-border-subtle overflow-hidden">
         {weekRows.map((r) => {
-          const { weekRange, formatWeekLabel } = require("@/lib/weekUtils") as typeof import("@/lib/weekUtils");
           const range = weekRange(r.yearWeek);
           const label = range
             ? `Week of ${format(range.start, "MMM d")} – ${format(range.end, "MMM d")}`

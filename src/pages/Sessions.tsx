@@ -320,7 +320,7 @@ const ActiveSessionBanner: React.FC<{ session: Session }> = ({ session }) => {
         </div>
       </div>
       <Link
-        to="/sessions"
+        to="/sessions/active"
         className="h-9 px-4 inline-flex items-center text-[13px] font-medium rounded-[4px] transition-colors"
         style={{
           background: "hsl(var(--accent))",

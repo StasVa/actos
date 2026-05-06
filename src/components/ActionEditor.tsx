@@ -426,16 +426,24 @@ function ActionEditorPanel({
   return (
     <EditorShell mode={mode} dirty={dirty} onClose={onClose}>
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-border-subtle">
-        <div className="font-mono text-[11px] uppercase tracking-[0.08em] text-text-tertiary">
-          {mode === "new" ? "New action" : "Edit action"}
-        </div>
-        <button
-          onClick={onClose}
-          className="w-7 h-7 inline-flex items-center justify-center rounded-[4px] text-text-tertiary hover:bg-surface-hover hover:text-text-primary transition-colors"
-        >
-          ✕
-        </button>
+      <div className="flex items-center justify-between px-6 py-4 border-b border-border-subtle shrink-0">
+        {mode === "new" ? (
+          <div className="text-[18px] font-medium text-text-primary">New action</div>
+        ) : (
+          <div className="font-mono text-[11px] uppercase tracking-[0.08em] text-text-tertiary">
+            Edit action
+          </div>
+        )}
+        {mode === "new" ? (
+          <EditorCloseX />
+        ) : (
+          <button
+            onClick={onClose}
+            className="w-7 h-7 inline-flex items-center justify-center rounded-[4px] text-text-tertiary hover:bg-surface-hover hover:text-text-primary transition-colors"
+          >
+            ✕
+          </button>
+        )}
       </div>
 
       {/* Body */}

@@ -183,6 +183,25 @@ export interface DayEntry {
   isClosed?: boolean;
 }
 
+// ───────── Sessions ─────────
+export type SessionStatus = "in_progress" | "completed" | "aborted";
+export type SessionMode = "pomodoro" | "continuous" | "custom";
+
+export interface Session {
+  id: ID;
+  status: SessionStatus;
+  startedAt: ISODateTime;
+  endedAt: ISODateTime | null;
+  mode: SessionMode;
+  workDuration: number; // minutes per work block
+  breakDuration: number; // minutes per break (0 for continuous)
+  cyclesPlanned: number;
+  plannedActionIds: ID[];
+  completedActionIds: ID[];
+  droppedActionIds: ID[];
+  cyclesCompleted: number;
+}
+
 // ───────── Settings ─────────
 export interface UserSettings {
   layers: {

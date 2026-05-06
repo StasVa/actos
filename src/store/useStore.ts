@@ -283,10 +283,11 @@ export const useStore = create<StoreState>()(
           id,
           goalId: payload.goalId,
           title: payload.title,
-          status: "active",
+          status: payload.status ?? "active",
           description: payload.description,
           references: payload.references ?? [],
           createdAt: nowISO(),
+          isDraft: payload.isDraft ?? false,
         };
         set({ projects: [...get().projects, project] });
         return id;
@@ -793,7 +794,10 @@ export const selectors = {
   ritualById: (s: StoreState, id: ID) => s.rituals.find((r) => r.id === id),
   ideaById: (s: StoreState, id: ID) => s.ideas.find((i) => i.id === id),
 
-  projectsByGoal: (s: StoreState, goalId: ID) => s.projects.filter((p) => p.goalId === goalId),
+  projectsByGoal: (s: StoreState, goalId: ID) =>
+    s.projects.filter((p) => p.goalId === goalId && !p.isDraft),
+  /** All projects excluding drafts. */
+  visibleProjects: (s: StoreState) => s.projects.filter((p) => !p.isDraft),
   actionsByProject: (s: StoreState, projectId: ID) =>
     s.actions.filter((a) => a.projectId === projectId),
   actionsByGoal: (s: StoreState, goalId: ID) => s.actions.filter((a) => a.goalId === goalId),

@@ -79,6 +79,7 @@ export function CommandPalette() {
   const settings = useStore((s) => s.settings);
   const openPanel = useStore((s) => s.openPanel);
   const createAction = useStore((s) => s.createAction);
+  const createProject = useStore((s) => s.createProject);
 
   // Open/close listener
   React.useEffect(() => {
@@ -133,7 +134,7 @@ export function CommandPalette() {
   };
 
   const openEditor = (
-    kind: "action" | "project" | "goal" | "ritual",
+    kind: "action" | "goal" | "ritual",
     id: string,
     recentKind: RecentKind,
   ) => {
@@ -189,7 +190,15 @@ export function CommandPalette() {
         title: "Create new project",
         iconChar: "+",
         onSelect: () => {
-          openPanel({ kind: "project", mode: "new" });
+          const goalId =
+            goals.find((g) => g.status === "active")?.id ?? goals[0]?.id;
+          if (!goalId) {
+            toast.error("Create an active goal first");
+            close();
+            return;
+          }
+          const id = createProject({ title: "", goalId, isDraft: true });
+          navigate(`/projects/${id}`);
           close();
         },
       },
@@ -365,7 +374,7 @@ export function CommandPalette() {
       }));
 
     const projectRows: Row[] = projects
-      .filter((p) => p.title.toLowerCase().includes(q))
+      .filter((p) => !p.isDraft && p.title.toLowerCase().includes(q))
       .slice(0, 12)
       .map((p) => {
         const g = goalById[p.goalId];

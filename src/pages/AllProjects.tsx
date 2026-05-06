@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Tooltip } from "@/components/Tooltip";
 import { LifetimeCounters } from "@/components/LifetimeCounters";
 import { FilterDropdown, FilterOption } from "@/components/FilterDropdown";
@@ -64,7 +64,6 @@ const StateTooltip: React.FC<{ p: Project }> = ({ p }) => (
 
 /* ===== Project card (active grid) — navigates to /projects/:id ===== */
 const ProjectCard: React.FC<{ p: Project }> = ({ p }) => {
-  const openPanel = useStore((s) => s.openPanel);
   const markProjectComplete = useStore((s) => s.markProjectComplete);
   const dropProject = useStore((s) => s.dropProject);
   const deleteProject = useStore((s) => s.deleteProject);
@@ -97,7 +96,6 @@ const ProjectCard: React.FC<{ p: Project }> = ({ p }) => {
               <CardMenu
                 ariaLabel="Project menu"
                 items={[
-                  { label: "Edit", onSelect: () => openPanel({ kind: "project", mode: "edit", id: p.id }) },
                   { label: "Mark complete", onSelect: () => { markProjectComplete(p.id); toast("Project completed"); } },
                   { label: "Drop", destructive: true, onSelect: () => setConfirmDrop(true) },
                   { label: "Delete", destructive: true, onSelect: () => setConfirmDelete(true) },
@@ -302,6 +300,8 @@ const AllProjects: React.FC = () => {
   const storeGoals = useStore((s) => s.goals);
   const storeActions = useStore((s) => s.actions);
   const openPanel = useStore((s) => s.openPanel);
+  const createProject = useStore((s) => s.createProject);
+  const navigate = useNavigate();
 
   // Derive the visual project rows from the live store (preserves the existing
   // renderer shape so the rest of the page stays unchanged).
@@ -319,7 +319,7 @@ const AllProjects: React.FC = () => {
   };
 
   const livePROJECTS: Project[] = useMemo(() => {
-    return storeProjects.map((p) => {
+    return storeProjects.filter((p) => !p.isDraft).map((p) => {
       const acts = storeActions.filter(
         (a) => a.projectId === p.id && a.status !== "dropped" && a.status !== "cancelled",
       );
@@ -371,11 +371,13 @@ const AllProjects: React.FC = () => {
 
 
   const handleNewProject = () => {
-    openPanel({
-      kind: "project",
-      mode: "new",
-      prefill: { goalId: storeGoals.find((g) => g.status === "active")?.id },
-    });
+    const goalId = storeGoals.find((g) => g.status === "active")?.id ?? storeGoals[0]?.id;
+    if (!goalId) {
+      toast.error("Create an active goal first");
+      return;
+    }
+    const id = createProject({ title: "", goalId, isDraft: true });
+    navigate(`/projects/${id}`);
   };
 
   const handleNewGoal = () => {

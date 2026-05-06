@@ -420,7 +420,6 @@ type ActiveProjectMeta = {
 };
 
 const ActiveProjectCard: React.FC<{ p: ActiveProjectMeta; pct: number }> = ({ p, pct }) => {
-  const openPanel = useStore((s) => s.openPanel);
   const markProjectComplete = useStore((s) => s.markProjectComplete);
   const dropProject = useStore((s) => s.dropProject);
   const deleteProject = useStore((s) => s.deleteProject);
@@ -448,7 +447,6 @@ const ActiveProjectCard: React.FC<{ p: ActiveProjectMeta; pct: number }> = ({ p,
               <CardMenu
                 ariaLabel="Project menu"
                 items={[
-                  { label: "Edit", onSelect: () => openPanel({ kind: "project", mode: "edit", id: p.id }) },
                   { label: "Mark complete", onSelect: () => { markProjectComplete(p.id); toast("Project completed"); } },
                   { label: "Drop", destructive: true, onSelect: () => setConfirmDrop(true) },
                   { label: "Delete", destructive: true, onSelect: () => setConfirmDelete(true) },
@@ -505,7 +503,7 @@ export const ActiveProjects: React.FC = () => {
   const projects = useStore((s) => s.projects);
   const actions = useStore((s) => s.actions);
 
-  const activeProjects = projects.filter((p) => p.status === "active");
+  const activeProjects = projects.filter((p) => p.status === "active" && !p.isDraft);
   const projectsWithMeta = activeProjects.map((p) => {
     const goal = goals.find((g) => g.id === p.goalId);
     const projActions = actions.filter(

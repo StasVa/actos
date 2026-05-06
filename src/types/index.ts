@@ -44,6 +44,12 @@ export interface Project {
   updatedAt?: ISODateTime;
   completedAt?: ISODateTime;
   droppedAt?: ISODateTime;
+  /**
+   * Draft mode — true while the user is still creating the project on the
+   * Project page and hasn't entered any meaningful content yet. Drafts are
+   * hidden from all lists/counts and silently deleted if abandoned.
+   */
+  isDraft?: boolean;
 }
 
 // ───────── Actions ─────────
@@ -191,7 +197,6 @@ export interface UserSettings {
 export interface UIState {
   activePanel:
     | { kind: "action"; mode: "edit" | "new"; id?: ID; prefill?: Partial<Action> }
-    | { kind: "project"; mode: "edit" | "new"; id?: ID; prefill?: Partial<Project> }
     | { kind: "goal"; mode: "edit" | "new"; id?: ID; prefill?: Partial<Goal> }
     | { kind: "ritual"; mode: "edit" | "new"; id?: ID; prefill?: Partial<Ritual> }
     | null;

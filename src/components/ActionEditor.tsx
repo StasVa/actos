@@ -105,32 +105,16 @@ export function ActionEditor() {
 
   const open = panel?.kind === "action";
 
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") closePanel();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [open, closePanel]);
-
   if (!open || panel?.kind !== "action") return null;
 
   return (
-    <>
-      <div
-        className="fixed inset-0 z-[80]"
-        style={{ background: "rgba(0,0,0,0.4)" }}
-        onClick={closePanel}
-      />
-      <ActionEditorPanel
-        key={(panel.mode === "edit" ? panel.id : "new") ?? "new"}
-        mode={panel.mode}
-        actionId={panel.id}
-        prefill={panel.prefill}
-        onClose={closePanel}
-      />
-    </>
+    <ActionEditorPanel
+      key={(panel.mode === "edit" ? panel.id : "new") ?? "new"}
+      mode={panel.mode}
+      actionId={panel.id}
+      prefill={panel.prefill}
+      onClose={closePanel}
+    />
   );
 }
 

@@ -5,10 +5,8 @@
 
 import React from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Switch } from "@/components/ui/switch";
 import { useStore } from "@/store/useStore";
 import { toast } from "sonner";
-import type { UserSettings } from "@/types";
 
 const STORAGE_KEY = "actos-store";
 
@@ -29,15 +27,9 @@ interface SettingsPanelProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const LAYERS: { key: keyof UserSettings["layers"]; label: string; hint: string }[] = [
-  { key: "planAndReview", label: "Plan and review your days", hint: "Show daily intent / reflection panel." },
-  { key: "logTime", label: "Log time", hint: "Capture per-action time estimates." },
-];
-
 export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
   const settings = useStore((s) => s.settings);
   const goals = useStore((s) => s.goals);
-  const toggleLayer = useStore((s) => s.toggleLayer);
   const setDefaultGoal = useStore((s) => s.setDefaultGoal);
   const resetToSeed = useStore((s) => s.resetToSeed);
 
@@ -94,29 +86,6 @@ export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
         </SheetHeader>
 
         <div className="mt-6 space-y-8">
-          {/* Layers */}
-          <section>
-            <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-3">
-              LAYERS
-            </div>
-            <div className="space-y-3">
-              {LAYERS.map((l) => (
-                <div
-                  key={l.key}
-                  className="flex items-start justify-between gap-3 py-2"
-                >
-                  <div className="min-w-0">
-                    <div className="text-[13px] text-text-primary">{l.label}</div>
-                    <div className="text-[11px] text-text-tertiary mt-0.5">{l.hint}</div>
-                  </div>
-                  <Switch
-                    checked={settings.layers[l.key]}
-                    onCheckedChange={(v) => toggleLayer(l.key, v)}
-                  />
-                </div>
-              ))}
-            </div>
-          </section>
 
           {/* Default goal */}
           <section>

@@ -21,6 +21,7 @@ import type {
   Ritual,
 } from "@/types";
 import { yearWeekFromDate } from "./weekUtils";
+import { timeInvestedMinutes } from "./timeStats";
 
 const ISO_DATE = (d: Date): ISODate => format(d, "yyyy-MM-dd");
 
@@ -202,7 +203,8 @@ export function getMonthSummary(
     if (e?.dayType) dayTypeDistribution[e.dayType]++;
   }
 
-  const totalTimeMinutes = doneActions.reduce((s, a) => s + (a.timeEstimateMinutes ?? 0), 0);
+  const investedActions = [...doneActions, ...delegatedActions];
+  const totalTimeMinutes = investedActions.reduce((s, a) => s + timeInvestedMinutes(a), 0);
 
   const morningScores: number[] = [];
   const eveningScores: number[] = [];
@@ -230,12 +232,12 @@ export function getMonthSummary(
   const perGoalTime: MonthPerGoalTimeRow[] = data.goals
     .filter((g) => g.status === "active")
     .map((g) => {
-      const goalActs = doneActions.filter((a) => a.goalId === g.id);
-      const minutes = goalActs.reduce((s, a) => s + (a.timeEstimateMinutes ?? 0), 0);
+      const goalActs = investedActions.filter((a) => a.goalId === g.id);
+      const minutes = goalActs.reduce((s, a) => s + timeInvestedMinutes(a), 0);
       const byProject = new Map<ID, number>();
       for (const a of goalActs) {
         if (!a.projectId) continue;
-        const m = a.timeEstimateMinutes ?? 0;
+        const m = timeInvestedMinutes(a);
         if (m <= 0) continue;
         byProject.set(a.projectId, (byProject.get(a.projectId) ?? 0) + m);
       }

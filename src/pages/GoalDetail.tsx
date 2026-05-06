@@ -213,15 +213,17 @@ const HeroState: React.FC<{
 
 /* ===== Resources block ===== */
 const ResourcesBlock: React.FC<{ actions: Action[] }> = ({ actions }) => {
-  const layers = useStore((s) => s.settings.layers);
-
   const done = actions.filter((a) => a.status === "done");
+  const delegated = actions.filter((a) => a.status === "delegated");
   const pending = actions.filter((a) => a.status === "backlog" || a.status === "planned");
 
-  const timeSpent = done.reduce((s, a) => s + (a.timeEstimateMinutes ?? 0), 0);
+  // Time invested = full Done time + 20% Delegated time.
+  const timeSpent =
+    done.reduce((s, a) => s + (a.timeEstimateMinutes ?? 0), 0) +
+    Math.round(delegated.reduce((s, a) => s + (a.timeEstimateMinutes ?? 0), 0) * 0.2);
   const timeRemaining = pending.reduce((s, a) => s + (a.timeEstimateMinutes ?? 0), 0);
 
-  const showTime = layers.logTime && timeSpent > 0;
+  const showTime = timeSpent > 0;
 
   if (!showTime) return null;
 

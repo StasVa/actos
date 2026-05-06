@@ -118,18 +118,27 @@ const DayRowItem: React.FC<{
   const ritualCount = entry
     ? Math.max(0, (entry.plannedRitualIds?.length ?? 0) - (entry.skippedRitualIds?.length ?? 0))
     : 0;
-  const totalMin = doneActions.reduce((s, a) => s + (a.timeEstimateMinutes ?? 0), 0);
+  // Time invested = full Done time + 20% Delegated time.
+  const investedMin = (a: Action) => {
+    const t = a.timeEstimateMinutes ?? 0;
+    if (t <= 0) return 0;
+    if (a.status === "done") return t;
+    if (a.status === "delegated") return Math.round(t * 0.2);
+    return 0;
+  };
+  const investedAll = [...doneActions, ...delegatedActions];
+  const totalMin = investedAll.reduce((s, a) => s + investedMin(a), 0);
 
   const dt = entry?.dayType;
   const noPlan = !entry?.isPlanned && doneActions.length > 0 ? "(no plan)" : null;
 
-  // Per-goal effort
+  // Per-goal time invested
   const perGoal = goals
     .filter((g) => g.status === "active")
     .map((g) => {
-      const min = doneActions
+      const min = investedAll
         .filter((a) => a.goalId === g.id)
-        .reduce((s, a) => s + (a.timeEstimateMinutes ?? 0), 0);
+        .reduce((s, a) => s + investedMin(a), 0);
       return { g, min };
     });
 

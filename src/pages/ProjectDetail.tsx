@@ -502,9 +502,14 @@ const ProjectDetail: React.FC = () => {
   const totalMinutes = actions
     .filter((a) => a.status !== "dropped" && a.status !== "cancelled")
     .reduce((s, a) => s + (a.timeEstimateMinutes ?? 0), 0);
-  const doneMinutes = actions
-    .filter((a) => a.status === "done")
-    .reduce((s, a) => s + (a.timeEstimateMinutes ?? 0), 0);
+  // Time spent = full Done time + 20% Delegated time.
+  const doneMinutes = actions.reduce((s, a) => {
+    const t = a.timeEstimateMinutes ?? 0;
+    if (t <= 0) return s;
+    if (a.status === "done") return s + t;
+    if (a.status === "delegated") return s + Math.round(t * 0.2);
+    return s;
+  }, 0);
   const fmtHM = (m: number) => {
     if (m === 0) return "0h";
     const h = Math.floor(m / 60);

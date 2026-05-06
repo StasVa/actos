@@ -208,17 +208,25 @@ const ReviewDayDetail: React.FC = () => {
     })
     .sort((a, b) => a.at.localeCompare(b.at));
 
-  // Time per goal (with per-project breakdown)
+  // Time per goal (with per-project breakdown).
+  // Time invested = full Done time + 20% Delegated time.
+  const investedToday = [...doneToday, ...delegatedToday];
+  const investedMin = (a: typeof actions[number]) => {
+    const t = a.timeEstimateMinutes ?? 0;
+    if (t <= 0) return 0;
+    if (a.status === "done") return t;
+    if (a.status === "delegated") return Math.round(t * 0.2);
+    return 0;
+  };
   const perGoal = goals
     .filter((g) => g.status === "active")
     .map((g) => {
-      const goalDone = doneToday.filter((a) => a.goalId === g.id);
-      const min = goalDone.reduce((s, a) => s + (a.timeEstimateMinutes ?? 0), 0);
-      // Aggregate by project (skip null projectId — those are goal-level backlog).
+      const goalActs = investedToday.filter((a) => a.goalId === g.id);
+      const min = goalActs.reduce((s, a) => s + investedMin(a), 0);
       const byProject = new Map<string, number>();
-      for (const a of goalDone) {
+      for (const a of goalActs) {
         if (!a.projectId) continue;
-        const t = a.timeEstimateMinutes ?? 0;
+        const t = investedMin(a);
         if (t <= 0) continue;
         byProject.set(a.projectId, (byProject.get(a.projectId) ?? 0) + t);
       }
@@ -323,7 +331,7 @@ const ReviewDayDetail: React.FC = () => {
     (droppedToday.length > 0 ? 1 : 0) +
     (cancelledToday.length > 0 ? 1 : 0) +
     (notCompleted.length > 0 ? 1 : 0);
-  const actionTimeMin = doneToday.reduce((s, a) => s + (a.timeEstimateMinutes ?? 0), 0);
+  const actionTimeMin = investedToday.reduce((s, a) => s + investedMin(a), 0);
   const showActionTimeMeta = settings.layers.logTime && actionTimeMin > 0;
 
   const ritualTotal = plannedRituals.length;

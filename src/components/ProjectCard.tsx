@@ -6,6 +6,7 @@ import { CardMenu } from "@/components/CardMenu";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { useStore, selectors } from "@/store/useStore";
 import { formatTime } from "@/lib/format";
+import { timeInvestedMinutes } from "@/lib/timeStats";
 
 /* ===== MeasureBar (matches Index/Goals variant) ===== */
 const MeasureBar: React.FC<{
@@ -65,7 +66,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ projectId, goalLabel, 
     () => allActions.filter((a) => a.projectId === projectId),
     [allActions, projectId],
   );
-  const logTime = useStore((s) => s.settings.layers.logTime);
+  // Time tracking is always on; layer references kept for transitional safety.
 
   const markProjectComplete = useStore((s) => s.markProjectComplete);
   const dropProject = useStore((s) => s.dropProject);
@@ -92,10 +93,8 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ projectId, goalLabel, 
       .at(-1);
     const ago = fmtAgo(lastIso ?? undefined);
 
-    // Time investment (estimate-based; logged time would replace estimate when available)
-    const investedMin = liveActs
-      .filter((a) => a.status === "done" || a.status === "delegated")
-      .reduce((sum, a) => sum + (a.timeEstimateMinutes ?? 0), 0);
+    // Time investment: full time for Done + 20% of time for Delegated.
+    const investedMin = liveActs.reduce((sum, a) => sum + timeInvestedMinutes(a), 0);
     const remainingMin = liveActs
       .filter((a) => a.status === "planned" || a.status === "backlog")
       .reduce((sum, a) => sum + (a.timeEstimateMinutes ?? 0), 0);
@@ -144,7 +143,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ projectId, goalLabel, 
     );
   }
 
-  const showTimeRow = logTime && meta.hasTimeData;
+  const showTimeRow = meta.hasTimeData;
 
   return (
     <>

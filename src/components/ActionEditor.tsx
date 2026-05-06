@@ -208,7 +208,7 @@ function ActionEditorPanel({
   // ─── Required-field validation ───
   const impactNum = impact === "" ? 0 : Number(impact);
   const timeNum = timeMin === "" ? 0 : Number(timeMin);
-  const requireTime = layers.logTime;
+  const requireTime = true; // Time is now a required core field.
 
   const missingForCreate = useMemo(() => {
     const missing: string[] = [];
@@ -252,7 +252,7 @@ function ActionEditorPanel({
         return;
       }
       if (requireTime && !(timeNum > 0)) {
-        setTimeError("Time estimate required when Log Time is on.");
+        setTimeError("Set time estimate first.");
         toast.error("Set Time estimate to mark Done");
         return;
       }
@@ -625,28 +625,26 @@ function ActionEditorPanel({
               />
               {impactError && <InlineError text={impactError} />}
             </FieldRow>
-            {layers.logTime && (
-              <FieldRow label="Time (min) · required">
-                <ClampedNumberInput
-                  value={timeMin}
-                  min={1}
-                  max={600}
-                  step={5}
-                  placeholder="e.g. 30"
-                  required
-                  requiredMessage="Time estimate is required."
-                  ariaLabel="Time in minutes"
-                  onChange={(v) => {
-                    setTimeMin(v);
-                    if (v !== "" && typeof v === "number" && v > 0) setTimeError(null);
-                  }}
-                  onCommit={(v) =>
-                    persistField("timeEstimateMinutes", v === "" ? undefined : v)
-                  }
-                />
-                {timeError && <InlineError text={timeError} />}
-              </FieldRow>
-            )}
+            <FieldRow label="Time (min) · required">
+              <ClampedNumberInput
+                value={timeMin}
+                min={1}
+                max={600}
+                step={5}
+                placeholder="e.g. 30"
+                required
+                requiredMessage="Time estimate is required."
+                ariaLabel="Time in minutes"
+                onChange={(v) => {
+                  setTimeMin(v);
+                  if (v !== "" && typeof v === "number" && v > 0) setTimeError(null);
+                }}
+                onCommit={(v) =>
+                  persistField("timeEstimateMinutes", v === "" ? undefined : v)
+                }
+              />
+              {timeError && <InlineError text={timeError} />}
+            </FieldRow>
           </div>
         </div>
 

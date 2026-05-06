@@ -769,11 +769,13 @@ export const useStore = create<StoreState>()(
       getDayEntry: (date) => get().dayEntries.find((d) => d.date === date),
 
       // ───────── Settings ─────────
-      toggleLayer: (layerName, enabled) => {
+      // Layer toggles removed — Plan & Review and Log Time are now always-on
+      // core mechanics. The setter is kept as a no-op for compatibility.
+      toggleLayer: (_layerName, _enabled) => {
         set({
           settings: {
             ...get().settings,
-            layers: { ...get().settings.layers, [layerName]: enabled },
+            layers: { planAndReview: true, logTime: true },
           },
         });
       },
@@ -893,7 +895,7 @@ export const useStore = create<StoreState>()(
     }),
     {
       name: "actos-store",
-      version: 1,
+      version: 2,
       storage: createJSONStorage(() => localStorage),
       // Persist everything except transient UI state.
       partialize: (state) => ({
@@ -906,6 +908,18 @@ export const useStore = create<StoreState>()(
         sessions: state.sessions,
         settings: state.settings,
       }),
+      // v2: layer toggles removed — both layers permanently true.
+      migrate: (persisted: any, _version: number) => {
+        if (persisted?.settings) {
+          persisted.settings.layers = { planAndReview: true, logTime: true };
+        }
+        return persisted;
+      },
+      onRehydrateStorage: () => (state) => {
+        if (state?.settings) {
+          state.settings.layers = { planAndReview: true, logTime: true };
+        }
+      },
     },
   ),
 );

@@ -1,7 +1,30 @@
-// Time investment helpers — derive per-goal time aggregates and per-day series
-// from Done actions' timeEstimateMinutes.
+// Time investment helpers — derive per-goal time aggregates and per-day series.
+// Time Invested formula:
+//   • Done       → time × 1.0
+//   • Delegated  → time × 0.2 (symmetric with Effort discount)
+//   • Other      → 0
+// Use timeInvestedMinutes(action) for any "time invested" calculation.
 
 import type { Action, Goal, ID, ISODate } from "@/types";
+
+/** Delegation discount factor for time invested (matches Effort discount). */
+export const DELEGATION_TIME_FACTOR = 0.2;
+
+/** Minutes of time-invested credit a single action contributes. */
+export function timeInvestedMinutes(a: Action): number {
+  const t = a.timeEstimateMinutes ?? 0;
+  if (t <= 0) return 0;
+  if (a.status === "done") return t;
+  if (a.status === "delegated") return Math.round(t * DELEGATION_TIME_FACTOR);
+  return 0;
+}
+
+/** Sum of time-invested across a list of actions. */
+export function sumTimeInvested(actions: Action[]): number {
+  let total = 0;
+  for (const a of actions) total += timeInvestedMinutes(a);
+  return total;
+}
 
 export interface PerGoalTimeStats {
   goal: Goal;
@@ -38,17 +61,22 @@ export function computeTimeStats(
 
   const perGoal: PerGoalTimeStats[] = activeGoals.map((g) => {
     const goalActions = actions.filter(
-      (a) => a.goalId === g.id && a.status === "done" && (a.timeEstimateMinutes ?? 0) > 0,
+      (a) =>
+        a.goalId === g.id &&
+        (a.status === "done" || a.status === "delegated") &&
+        (a.timeEstimateMinutes ?? 0) > 0,
     );
     const series = new Array(days).fill(0);
     let total30d = 0;
     let totalAllTime = 0;
     for (const a of goalActions) {
-      const min = a.timeEstimateMinutes ?? 0;
+      const min = timeInvestedMinutes(a);
+      if (min <= 0) continue;
       totalAllTime += min;
       hasAny = true;
-      if (!a.completedAt) continue;
-      const d = startOfDay(new Date(a.completedAt));
+      const stamp = a.status === "done" ? a.completedAt : a.delegatedAt;
+      if (!stamp) continue;
+      const d = startOfDay(new Date(stamp));
       const daysAgo = Math.round((today.getTime() - d.getTime()) / MS_DAY);
       if (daysAgo < 0 || daysAgo >= days) continue;
       const idx = days - 1 - daysAgo;

@@ -42,11 +42,9 @@ const TimeSparkline: React.FC<{
 };
 
 export const TimeInvestmentSection: React.FC = () => {
-  const settings = useStore((s) => s.settings);
   const actions = useStore((s) => s.actions);
   const goals = useStore((s) => s.goals);
 
-  if (!settings.layers.logTime) return null;
   const stats = React.useMemo(() => computeTimeStats(actions, goals, 30), [actions, goals]);
   if (!stats.hasAny) return null;
 

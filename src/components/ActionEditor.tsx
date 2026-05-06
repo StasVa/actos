@@ -353,7 +353,108 @@ function ActionEditorPanel({
           />
         </div>
 
-        {/* Parent */}
+        {/* STATE */}
+        <div className="mb-6">
+          <SectionHead>State</SectionHead>
+
+          <StatusDropdown
+            current={status}
+            isGoalLevel={isGoalLevel}
+            onPick={handleStatusChange}
+          />
+
+          {/* Contextual timestamp line — moved directly below dropdown */}
+          {action && <TimestampLine action={action} onClose={onClose} />}
+
+          {/* Inline scheduled-date picker (when Planned needs a date) */}
+          {status === "planned" && (needsScheduledDate || !scheduledDate) && (
+            <div className="mt-2 p-3 rounded-[4px] bg-surface-raised border border-border-subtle">
+              <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-2">
+                Pick a scheduled date
+              </div>
+              <div className="flex flex-wrap gap-1.5 mb-2">
+                <QuickDateBtn label="Today" onClick={() => applyScheduledDate(TODAY_ISO())} />
+                <QuickDateBtn
+                  label="Tomorrow"
+                  onClick={() => applyScheduledDate(addDaysISO(TODAY_ISO(), 1))}
+                />
+                <QuickDateBtn label="Next Mon" onClick={() => applyScheduledDate(nextMondayISO())} />
+              </div>
+              <input
+                type="date"
+                value={scheduledDate}
+                onChange={(e) => {
+                  if (e.target.value) applyScheduledDate(e.target.value);
+                }}
+                className="bg-surface-base border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
+              />
+            </div>
+          )}
+
+          {/* Editable scheduled-date when Planned + already set */}
+          {status === "planned" && scheduledDate && !needsScheduledDate && (
+            <div className="mt-2">
+              <FieldRow label="Scheduled">
+                <input
+                  type="date"
+                  value={scheduledDate}
+                  onChange={(e) => {
+                    setScheduledDate(e.target.value);
+                    if (mode === "edit") persistField("scheduledDate", e.target.value || undefined);
+                  }}
+                  className="bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
+                />
+              </FieldRow>
+            </div>
+          )}
+
+          {/* Delegation block */}
+          {status === "delegated" && (
+            <div className="mt-2 p-3 rounded-[4px] bg-surface-raised border border-border-subtle space-y-3">
+              <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
+                Delegation
+              </div>
+              <FieldRow label="Delegate name">
+                <input
+                  value={delegateName}
+                  onChange={(e) => setDelegateName(e.target.value)}
+                  onBlur={() => persistField("delegateName", delegateName || undefined)}
+                  placeholder="Maria, AI, etc."
+                  list="delegate-names"
+                  className="w-full bg-surface-base border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
+                />
+                <datalist id="delegate-names">
+                  {delegateSuggestions.map((n) => (
+                    <option key={n} value={n} />
+                  ))}
+                </datalist>
+              </FieldRow>
+              <FieldRow label="Expected return">
+                <input
+                  type="date"
+                  value={expectedReturn}
+                  onChange={(e) => setExpectedReturn(e.target.value)}
+                  onBlur={() =>
+                    persistField("expectedReturnDate", expectedReturn || undefined)
+                  }
+                  className="bg-surface-base border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
+                />
+              </FieldRow>
+              <FieldRow label="Delegate note">
+                <textarea
+                  value={delegateNote}
+                  onChange={(e) => setDelegateNote(e.target.value)}
+                  onBlur={() => persistField("delegateNote", delegateNote || undefined)}
+                  rows={2}
+                  className="w-full bg-surface-base border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none resize-y"
+                />
+              </FieldRow>
+            </div>
+          )}
+
+        </div>
+
+        {/* PARENT */}
         <div className="mb-6">
           <SectionHead>Parent</SectionHead>
           <div className="flex flex-col gap-2">
@@ -461,106 +562,6 @@ function ActionEditorPanel({
               </FieldRow>
             )}
           </div>
-        </div>
-
-        {/* STATE */}
-        <div className="mb-6">
-          <SectionHead>State</SectionHead>
-
-          <StatusDropdown
-            current={status}
-            isGoalLevel={isGoalLevel}
-            onPick={handleStatusChange}
-          />
-
-          {/* Inline scheduled-date picker (when Planned needs a date) */}
-          {status === "planned" && (needsScheduledDate || !scheduledDate) && (
-            <div className="mt-2 p-3 rounded-[4px] bg-surface-raised border border-border-subtle">
-              <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-2">
-                Pick a scheduled date
-              </div>
-              <div className="flex flex-wrap gap-1.5 mb-2">
-                <QuickDateBtn label="Today" onClick={() => applyScheduledDate(TODAY_ISO())} />
-                <QuickDateBtn
-                  label="Tomorrow"
-                  onClick={() => applyScheduledDate(addDaysISO(TODAY_ISO(), 1))}
-                />
-                <QuickDateBtn label="Next Mon" onClick={() => applyScheduledDate(nextMondayISO())} />
-              </div>
-              <input
-                type="date"
-                value={scheduledDate}
-                onChange={(e) => {
-                  if (e.target.value) applyScheduledDate(e.target.value);
-                }}
-                className="bg-surface-base border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
-              />
-            </div>
-          )}
-
-          {/* Editable scheduled-date when Planned + already set */}
-          {status === "planned" && scheduledDate && !needsScheduledDate && (
-            <div className="mt-2">
-              <FieldRow label="Scheduled">
-                <input
-                  type="date"
-                  value={scheduledDate}
-                  onChange={(e) => {
-                    setScheduledDate(e.target.value);
-                    if (mode === "edit") persistField("scheduledDate", e.target.value || undefined);
-                  }}
-                  className="bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
-                />
-              </FieldRow>
-            </div>
-          )}
-
-          {/* Delegation block */}
-          {status === "delegated" && (
-            <div className="mt-2 p-3 rounded-[4px] bg-surface-raised border border-border-subtle space-y-3">
-              <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
-                Delegation
-              </div>
-              <FieldRow label="Delegate name">
-                <input
-                  value={delegateName}
-                  onChange={(e) => setDelegateName(e.target.value)}
-                  onBlur={() => persistField("delegateName", delegateName || undefined)}
-                  placeholder="Maria, AI, etc."
-                  list="delegate-names"
-                  className="w-full bg-surface-base border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
-                />
-                <datalist id="delegate-names">
-                  {delegateSuggestions.map((n) => (
-                    <option key={n} value={n} />
-                  ))}
-                </datalist>
-              </FieldRow>
-              <FieldRow label="Expected return">
-                <input
-                  type="date"
-                  value={expectedReturn}
-                  onChange={(e) => setExpectedReturn(e.target.value)}
-                  onBlur={() =>
-                    persistField("expectedReturnDate", expectedReturn || undefined)
-                  }
-                  className="bg-surface-base border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
-                />
-              </FieldRow>
-              <FieldRow label="Delegate note">
-                <textarea
-                  value={delegateNote}
-                  onChange={(e) => setDelegateNote(e.target.value)}
-                  onBlur={() => persistField("delegateNote", delegateNote || undefined)}
-                  rows={2}
-                  className="w-full bg-surface-base border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none resize-y"
-                />
-              </FieldRow>
-            </div>
-          )}
-
-          {/* Contextual timestamp line */}
-          {action && <TimestampLine action={action} onClose={onClose} />}
         </div>
 
         {/* NOTES */}

@@ -421,6 +421,51 @@ const SessionActive: React.FC = () => {
     .map((id) => actions.find((a) => a.id === id)?.impact ?? 0)
     .reduce((s, n) => s + n, 0);
 
+  // Total session remaining minutes (rough, friendly format) for empty-state copy.
+  const remainingCyclesAfterCurrent = Math.max(0, session.cyclesPlanned - timer.cycleIndex - 1);
+  const remainingMinutesTotal = (() => {
+    const cur = isWorking || isBreak ? Math.ceil(remainingMs / 60_000) : 0;
+    const future = remainingCyclesAfterCurrent * (session.workDuration + session.breakDuration);
+    return Math.max(0, cur + future);
+  })();
+  const minutesLabel = `${remainingMinutesTotal} ${remainingMinutesTotal === 1 ? "minute" : "minutes"}`;
+
+  // Actions available for in-session add (exclude already in this session).
+  const sessionActionIdSet = new Set(session.plannedActionIds);
+  const activeGoalIds = new Set(goals.filter((g) => g.status === "active").map((g) => g.id));
+  const pickerAvailable = actions.filter((a) => {
+    if (sessionActionIdSet.has(a.id)) return false;
+    if (a.status !== "backlog" && a.status !== "planned") return false;
+    if (!activeGoalIds.has(a.goalId)) return false;
+    if (a.projectId) {
+      const p = projects.find((x) => x.id === a.projectId);
+      if (!p || p.status !== "active") return false;
+    }
+    return true;
+  });
+
+  const handleConfirmAddActions = () => {
+    if (pickerSelected.length === 0) {
+      setPickerOpen(false);
+      return;
+    }
+    addPlannedActionsToSession(session.id, pickerSelected);
+    toast.success(`Added ${pickerSelected.length} action${pickerSelected.length === 1 ? "" : "s"}.`);
+    setPickerSelected([]);
+    setPickerOpen(false);
+  };
+
+  const handleEndSessionEarly = () => {
+    setConfirmEndEarly(false);
+    handleSessionComplete();
+  };
+
+  const actualFocusedMinutes = (() => {
+    const start = new Date(session.startedAt).getTime();
+    return Math.max(0, Math.round((Date.now() - start) / 60_000));
+  })();
+  const plannedFocusMinutes = session.workDuration * session.cyclesPlanned;
+
   /* ─── Render ─── */
   return (
     <div className="min-h-screen bg-background text-text-primary">

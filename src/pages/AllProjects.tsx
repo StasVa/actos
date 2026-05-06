@@ -117,13 +117,15 @@ const ProjectCard: React.FC<{ p: Project }> = ({ p }) => {
 
           <div className="flex items-center justify-between font-mono text-[11px] tabular-nums">
             <div>
-              <span className="text-text-primary">
+              <span className="text-text-secondary">
                 {p.done}/{p.total}
               </span>
-              <span className="text-text-tertiary"> · {pct}%</span>
+              <span className="text-text-tertiary"> · </span>
+              <span className="text-text-secondary">{pct}%</span>
             </div>
-            <div className="text-text-secondary">
-              Last: <span className={warnLast ? "text-text-warning" : "text-text-secondary"}>{p.last}</span>
+            <div>
+              <span className="text-text-tertiary">Last: </span>
+              <span className={warnLast ? "text-text-warning" : "text-text-secondary"}>{p.last}</span>
             </div>
           </div>
         </div>

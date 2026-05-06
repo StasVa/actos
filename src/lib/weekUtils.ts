@@ -13,6 +13,7 @@ import {
   differenceInCalendarWeeks,
 } from "date-fns";
 import type { Action, DayEntry, DayType, Goal, ID, ISODate, Project, Ritual } from "@/types";
+import { timeInvestedMinutes } from "@/lib/timeStats";
 
 const ISO_DATE = (d: Date): ISODate => format(d, "yyyy-MM-dd");
 

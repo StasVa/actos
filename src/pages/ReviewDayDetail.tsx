@@ -10,7 +10,9 @@ import { DAY_TYPE_LABELS } from "./Index";
 import { ActionRow as SharedActionRow } from "@/components/ActionRow";
 import { AccomplishmentsSection, type AccomplishmentTile } from "@/components/AccomplishmentsSection";
 import { OutcomeAddedSection } from "@/components/OutcomeAddedSection";
+import { SessionsSection } from "@/components/SessionsSection";
 import { getOutcomeSummary } from "@/lib/outcomeUtils";
+import { getSessionsForDay, sessionDurationMinutes } from "@/lib/sessionUtils";
 
 const longDate = (iso: string) =>
   new Date(iso + "T00:00:00").toLocaleDateString("en-US", {

@@ -75,8 +75,10 @@ export interface Action {
   scheduledDate?: ISODate;
   notes?: string;
   impact: number; // 0..10
-  energyCost?: number; // 1..10
-  focusCost?: number; // 1..10
+  /** @deprecated Energy/Focus tracking removed; field kept to tolerate legacy data. */
+  energyCost?: number;
+  /** @deprecated Energy/Focus tracking removed; field kept to tolerate legacy data. */
+  focusCost?: number;
   timeEstimateMinutes?: number;
   delegateName?: string;
   delegateNote?: string;
@@ -120,7 +122,9 @@ export interface Ritual {
   scheduleConfig?: RitualScheduleConfig;
   baseImpact: number;
   notes?: string;
+  /** @deprecated removed from UI; legacy field. */
   energyCost?: number;
+  /** @deprecated removed from UI; legacy field. */
   focusCost?: number;
   timeEstimateMinutes?: number;
   totalCompletions: number;
@@ -169,8 +173,10 @@ export interface DayEntry {
   date: ISODate;
   dayType?: DayType;
   mainTaskActionId?: ID;
-  morningEnergyScore?: number; // 1..10
+  /** @deprecated Energy tracking removed; field kept to tolerate legacy data. */
+  morningEnergyScore?: number;
   morningIntentNote?: string;
+  /** @deprecated Energy tracking removed; field kept to tolerate legacy data. */
   eveningEnergyScore?: number;
   reflectionText?: string;
   startedAt?: ISODateTime;
@@ -208,8 +214,6 @@ export interface Session {
 export interface UserSettings {
   layers: {
     planAndReview: boolean;
-    logEnergy: boolean;
-    logFocus: boolean;
     logTime: boolean;
   };
   defaultGoalId?: ID;

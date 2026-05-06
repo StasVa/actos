@@ -82,8 +82,6 @@ function RitualEditorPanel({
   const [baseImpact, setBaseImpact] = useState<number>(seed.baseImpact ?? 5);
   const [notes, setNotes] = useState<string>(seed.notes ?? "");
   const [timeMin, setTimeMin] = useState<number | "">(seed.timeEstimateMinutes ?? "");
-  const [energy, setEnergy] = useState<number | "">(seed.energyCost ?? "");
-  const [focus, setFocus] = useState<number | "">(seed.focusCost ?? "");
 
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmArchive, setConfirmArchive] = useState(false);
@@ -145,8 +143,6 @@ function RitualEditorPanel({
       baseImpact,
       notes: notes || undefined,
       timeEstimateMinutes: timeMin === "" ? undefined : Number(timeMin),
-      energyCost: energy === "" ? undefined : Number(energy),
-      focusCost: focus === "" ? undefined : Number(focus),
     });
     toast("Ritual created");
     useStore.getState().openPanel({ kind: "ritual", mode: "edit", id: newId });
@@ -201,9 +197,7 @@ function RitualEditorPanel({
     mode === "new" &&
     (!!title.trim() ||
       !!notes.trim() ||
-      timeMin !== "" ||
-      energy !== "" ||
-      focus !== "");
+      timeMin !== "");
 
   return (
     <EditorShell mode={mode} dirty={dirty} onClose={onClose}>
@@ -458,34 +452,7 @@ function RitualEditorPanel({
               />
             </FieldRow>
           )}
-          {layers.logEnergy && (
-            <FieldRow label="Energy (1-10)">
-              <input
-                type="number"
-                min={1}
-                max={10}
-                value={energy}
-                onChange={(e) => setEnergy(e.target.value === "" ? "" : Number(e.target.value))}
-                onBlur={() =>
-                  persistField("energyCost", energy === "" ? undefined : Number(energy))
-                }
-                className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
-              />
-            </FieldRow>
-          )}
-          {layers.logFocus && (
-            <FieldRow label="Focus (1-10)">
-              <input
-                type="number"
-                min={1}
-                max={10}
-                value={focus}
-                onChange={(e) => setFocus(e.target.value === "" ? "" : Number(e.target.value))}
-                onBlur={() => persistField("focusCost", focus === "" ? undefined : Number(focus))}
-                className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
-              />
-            </FieldRow>
-          )}
+          {/* Energy and Focus fields removed */}
         </div>
 
         {/* Status indicator (archived) */}

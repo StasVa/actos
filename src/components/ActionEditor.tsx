@@ -157,8 +157,6 @@ function ActionEditorPanel({
   const [timeError, setTimeError] = useState<string | null>(null);
   const [delegateError, setDelegateError] = useState<string | null>(null);
   const [timeMin, setTimeMin] = useState<number | "">(seed.timeEstimateMinutes ?? "");
-  const [energy, setEnergy] = useState<number | "">(seed.energyCost ?? "");
-  const [focus, setFocus] = useState<number | "">(seed.focusCost ?? "");
   const [delegateName, setDelegateName] = useState<string>(seed.delegateName ?? "");
   const [delegateNote, setDelegateNote] = useState<string>(seed.delegateNote ?? "");
   const [expectedReturn, setExpectedReturn] = useState<string>(seed.expectedReturnDate ?? "");
@@ -371,8 +369,6 @@ function ActionEditorPanel({
       notes: notes || undefined,
       impact: impactNum,
       timeEstimateMinutes: timeMin === "" ? undefined : Number(timeMin),
-      energyCost: energy === "" ? undefined : Number(energy),
-      focusCost: focus === "" ? undefined : Number(focus),
       delegateName: delegateName || undefined,
       delegateNote: delegateNote || undefined,
       expectedReturnDate: expectedReturn || undefined,
@@ -395,8 +391,6 @@ function ActionEditorPanel({
       notes: action.notes,
       impact: action.impact,
       timeEstimateMinutes: action.timeEstimateMinutes,
-      energyCost: action.energyCost,
-      focusCost: action.focusCost,
       status: "backlog",
     });
     toast("Action duplicated");
@@ -417,8 +411,6 @@ function ActionEditorPanel({
       !!notes.trim() ||
       impact !== "" ||
       timeMin !== "" ||
-      energy !== "" ||
-      focus !== "" ||
       !!scheduledDate ||
       !!delegateName.trim() ||
       !!delegateNote.trim());
@@ -633,36 +625,6 @@ function ActionEditorPanel({
               />
               {impactError && <InlineError text={impactError} />}
             </FieldRow>
-            {layers.logEnergy && (
-              <FieldRow label="Energy (1-10)">
-                <ClampedNumberInput
-                  value={energy}
-                  min={1}
-                  max={10}
-                  step={1}
-                  ariaLabel="Energy"
-                  onChange={setEnergy}
-                  onCommit={(v) =>
-                    persistField("energyCost", v === "" ? undefined : v)
-                  }
-                />
-              </FieldRow>
-            )}
-            {layers.logFocus && (
-              <FieldRow label="Focus (1-10)">
-                <ClampedNumberInput
-                  value={focus}
-                  min={1}
-                  max={10}
-                  step={1}
-                  ariaLabel="Focus"
-                  onChange={setFocus}
-                  onCommit={(v) =>
-                    persistField("focusCost", v === "" ? undefined : v)
-                  }
-                />
-              </FieldRow>
-            )}
             {layers.logTime && (
               <FieldRow label="Time (min) · required">
                 <ClampedNumberInput

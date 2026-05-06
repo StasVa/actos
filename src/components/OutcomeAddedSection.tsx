@@ -27,11 +27,11 @@ export const OutcomeAddedSection: React.FC<Props> = ({ outcome, period }) => {
   const projectById = (id: string) => projects.find((p) => p.id === id);
 
   // Hide when zero outcome and no fallback message needed.
-  if (outcome.outcomeAdded === 0 && !outcome.hadOutcomeButNoneOnActiveGoals) return null;
+  if (outcome.valueAdded === 0 && !outcome.hadOutcomeButNoneOnActiveGoals) return null;
 
   return (
     <section>
-      <SectionHead meta={`+${outcome.outcomeAdded} TOTAL`}>Outcome added</SectionHead>
+      <SectionHead meta={`+${outcome.valueAdded} TOTAL`}>Value added</SectionHead>
       {outcome.outcomePerGoal.length === 0 ? (
         <div className="text-[13px] text-text-tertiary italic">
           No outcome added to active goals this {period}.

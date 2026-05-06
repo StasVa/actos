@@ -30,9 +30,7 @@ interface SettingsPanelProps {
 }
 
 const LAYERS: { key: keyof UserSettings["layers"]; label: string; hint: string }[] = [
-  { key: "planAndReview", label: "Plan & Review", hint: "Show daily intent / reflection panel." },
-  { key: "logEnergy", label: "Log energy", hint: "Capture morning + evening energy scores (1–10)." },
-  { key: "logFocus", label: "Log focus", hint: "Capture per-action focus cost." },
+  { key: "planAndReview", label: "Plan and review your days", hint: "Show daily intent / reflection panel." },
   { key: "logTime", label: "Log time", hint: "Capture per-action time estimates." },
 ];
 

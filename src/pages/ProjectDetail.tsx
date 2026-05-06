@@ -608,7 +608,7 @@ const ProjectDetail: React.FC = () => {
                   <div className="mt-3 font-mono text-[12px] text-text-tertiary">
                     <span>PROGRESS </span>
                     <span className="text-text-primary">{progress.outcome}%</span>
-                    <span> · OUTCOME </span>
+                    <span> · VALUE </span>
                     <span className="text-text-primary">{progress.outcome}%</span>
                     <span> · EFFORT </span>
                     <span className="text-text-primary">{progress.effort}%</span>
@@ -816,7 +816,7 @@ const ProjectDetail: React.FC = () => {
                 </h3>
                 <div>
                   {[
-                    { label: "OUTCOME", value: `${progress.outcome}%`, pct: progress.outcome, opacity: 1 },
+                    { label: "VALUE", value: `${progress.outcome}%`, pct: progress.outcome, opacity: 1 },
                     { label: "EFFORT", value: `${progress.effort}%`, pct: progress.effort, opacity: 0.6 },
                   ].map((row, i) => (
                     <div

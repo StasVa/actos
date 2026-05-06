@@ -159,7 +159,7 @@ const HeroState: React.FC<{
             {progressOutcome}%
           </div>
           <div className="mt-1 font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
-            PROGRESS · OUTCOME
+            PROGRESS · VALUE
           </div>
           <div className="mt-3 font-mono text-[12px] text-text-secondary tabular-nums">
             {actionsDone} actions done · {projectsClosed} of {projectsTotal} projects closed · Active{" "}
@@ -195,7 +195,7 @@ const HeroState: React.FC<{
           STATE
         </div>
         <div className="space-y-1">
-          <StateBarRow label="OUTCOME" pct={progressOutcome} value={`${progressOutcome}%`} color={color} />
+          <StateBarRow label="VALUE" pct={progressOutcome} value={`${progressOutcome}%`} color={color} />
           <StateBarRow label="EFFORT" pct={progressEffort} value={`${progressEffort}%`} color={color} opacity={0.6} />
         </div>
         <div className="mt-3 font-mono text-[11px] italic text-text-tertiary">
@@ -220,16 +220,10 @@ const ResourcesBlock: React.FC<{ actions: Action[] }> = ({ actions }) => {
 
   const timeSpent = done.reduce((s, a) => s + (a.timeEstimateMinutes ?? 0), 0);
   const timeRemaining = pending.reduce((s, a) => s + (a.timeEstimateMinutes ?? 0), 0);
-  const energyLogged = done.reduce((s, a) => s + (a.energyCost ?? 0), 0);
-  const energyEstimated = pending.reduce((s, a) => s + (a.energyCost ?? 0), 0);
-  const focusLogged = done.reduce((s, a) => s + (a.focusCost ?? 0), 0);
-  const focusEstimated = pending.reduce((s, a) => s + (a.focusCost ?? 0), 0);
 
   const showTime = layers.logTime && timeSpent > 0;
-  const showEnergy = layers.logEnergy && energyLogged > 0;
-  const showFocus = layers.logFocus && focusLogged > 0;
 
-  if (!showTime && !showEnergy && !showFocus) return null;
+  if (!showTime) return null;
 
   const fmtH = (m: number) => {
     if (m < 60) return `${m}m`;
@@ -245,16 +239,6 @@ const ResourcesBlock: React.FC<{ actions: Action[] }> = ({ actions }) => {
         {showTime && (
           <div className="font-mono text-[13px] text-text-secondary tabular-nums">
             Time spent: {fmtH(timeSpent)} · Time remaining: {fmtH(timeRemaining)} estimated
-          </div>
-        )}
-        {showEnergy && (
-          <div className="font-mono text-[13px] text-text-secondary tabular-nums">
-            Energy logged: {energyLogged} · Energy estimated: {energyEstimated}
-          </div>
-        )}
-        {showFocus && (
-          <div className="font-mono text-[13px] text-text-secondary tabular-nums">
-            Focus logged: {focusLogged} · Focus estimated: {focusEstimated}
           </div>
         )}
       </div>

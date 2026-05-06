@@ -345,8 +345,6 @@ export const SEED_DAY_ENTRIES: DayEntry[] = [];
 export const SEED_SETTINGS: UserSettings = {
   layers: {
     planAndReview: true,
-    logEnergy: true,
-    logFocus: false,
     logTime: true,
   },
   defaultGoalId: GOAL_IDS.g1,

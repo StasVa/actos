@@ -138,3 +138,8 @@
   margin: 0.5em 0;
 }
 .tiptap-editor strong { font-weight: 600; }
+
+/* Sidebar Search row keyboard hint pill — keep visible on hover */
+.search-row:hover .kbd-hint {
+  background: hsl(var(--surface-base));
+}

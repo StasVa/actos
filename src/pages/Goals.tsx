@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { selectors, useStore, ritualMultiplier } from "@/store/useStore";
+import { useStore, ritualMultiplier } from "@/store/useStore";
 import { AppSidebar } from "@/components/AppSidebar";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { CardMenu } from "@/components/CardMenu";
@@ -367,7 +367,7 @@ const Goals: React.FC = () => {
 
   const goals = useStore((s) => s.goals);
   const storeProjects = useStore((s) => s.projects);
-  const projects = useMemo(() => selectors.visibleProjects({ ...useStore.getState(), projects: storeProjects }), [storeProjects]);
+  const projects = useMemo(() => storeProjects.filter((p) => !p.isDraft), [storeProjects]);
   const actions = useStore((s) => s.actions);
   const rituals = useStore((s) => s.rituals);
   const settings = useStore((s) => s.settings);

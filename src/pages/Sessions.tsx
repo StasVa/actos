@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useStore } from "@/store/useStore";
 import { AppSidebar } from "@/components/AppSidebar";
@@ -353,6 +353,7 @@ const PrimaryButton: React.FC<{ onClick?: () => void; children: React.ReactNode 
 );
 
 const Sessions: React.FC = () => {
+  const navigate = useNavigate();
   const sessions = useStore((s) => s.sessions);
   const actions = useStore((s) => s.actions);
   const deleteSession = useStore((s) => s.deleteSession);
@@ -393,7 +394,7 @@ const Sessions: React.FC = () => {
   const hasHistory = history.length > 0;
 
   const handleStart = () => {
-    toast.info("Session builder coming soon");
+    navigate("/sessions/new");
   };
 
   return (

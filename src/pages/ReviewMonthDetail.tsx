@@ -9,6 +9,8 @@ import {
   formatMonthLabel,
   formatMonthDayTypeDistribution,
   getMonthSummary,
+  yearMonthFromDate,
+  dateFromYearMonth,
 } from "@/lib/monthUtils";
 import {
   formatWeekLabel,
@@ -16,6 +18,8 @@ import {
   weekRange,
 } from "@/lib/weekUtils";
 import { ActionRow } from "@/components/ActionRow";
+import { AccomplishmentsSection, type AccomplishmentTile } from "@/components/AccomplishmentsSection";
+import { addMonths } from "date-fns";
 import { DAY_TYPE_LABELS } from "./Index";
 import type { Action } from "@/types";
 

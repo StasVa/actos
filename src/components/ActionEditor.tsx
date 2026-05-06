@@ -227,6 +227,32 @@ function ActionEditorPanel({
     status === "done" || status === "dropped" || status === "cancelled";
   const isGoalLevel = !projectId;
 
+  // ─── Required-field validation ───
+  const impactNum = impact === "" ? 0 : Number(impact);
+  const timeNum = timeMin === "" ? 0 : Number(timeMin);
+  const requireTime = layers.logTime;
+
+  const missingForCreate = useMemo(() => {
+    const missing: string[] = [];
+    if (!title.trim()) missing.push("Title");
+    if (!goalId) missing.push("Goal");
+    if (!(impactNum > 0)) missing.push("Impact");
+    if (requireTime && !(timeNum > 0)) missing.push("Time estimate");
+    if (newStatus === "planned" && !scheduledDate) missing.push("Scheduled date");
+    if (newStatus === "delegated" && !delegateName.trim()) missing.push("Delegate name");
+    return missing;
+  }, [title, goalId, impactNum, requireTime, timeNum, newStatus, scheduledDate, delegateName]);
+
+  const canCreate = missingForCreate.length === 0;
+  const createTooltip =
+    missingForCreate.length === 0
+      ? ""
+      : `Set ${missingForCreate.join(" and ")} to create`;
+
+  // Existing-action migration warning: action exists with no impact value.
+  const hasMigrationWarning =
+    mode === "edit" && !!action && (action.impact === undefined || action.impact === null || action.impact <= 0);
+
   // ─── Status transitions (edit mode) ───
   const handleStatusChange = (next: ActionStatus) => {
     if (isGoalLevel && next !== "backlog") {
@@ -241,7 +267,29 @@ function ActionEditorPanel({
     }
     if (!actionId) return;
     if (next === status) return;
+    // Block Done if Impact / Time missing
+    if (next === "done") {
+      if (!(impactNum > 0)) {
+        setImpactError("Impact is required to mark this action Done.");
+        toast.error("Set Impact to mark Done");
+        return;
+      }
+      if (requireTime && !(timeNum > 0)) {
+        setTimeError("Time estimate required when Log Time is on.");
+        toast.error("Set Time estimate to mark Done");
+        return;
+      }
+    }
     if (next === "delegated") {
+      if (!delegateName.trim()) {
+        setDelegateError("Enter delegate name.");
+        // Switch UI into delegated state so the field appears
+        changeActionStatus(actionId, "delegated", {
+          delegateName: "",
+        });
+        toast.error("Enter delegate name");
+        return;
+      }
       changeActionStatus(actionId, "delegated", {
         delegateName: delegateName || "",
         delegateNote: delegateNote || undefined,
@@ -257,7 +305,7 @@ function ActionEditorPanel({
     if (next === "planned") {
       if (!scheduledDate) {
         setNeedsScheduledDate(true);
-        toast.error("Pick a scheduled date");
+        toast.error("Pick a date to plan this action.");
         return;
       }
       changeActionStatus(actionId, "planned", { scheduledDate });
@@ -265,6 +313,8 @@ function ActionEditorPanel({
       toast("Action scheduled");
       return;
     }
+    setImpactError(null);
+    setTimeError(null);
     changeActionStatus(actionId, next);
     if (next === "done") toast("Action marked done");
     if (next === "backlog") toast("Action re-opened");

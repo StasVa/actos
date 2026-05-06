@@ -582,7 +582,7 @@ function RitualEditorPanel({
         onCancel={() => setConfirmDelete(false)}
         onConfirm={handleDelete}
       />
-    </aside>
+    </EditorShell>
   );
 }
 

@@ -895,10 +895,12 @@ function StatusDropdown({
                 key={s}
                 type="button"
                 disabled={disabled}
-                onClick={() => {
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
                   if (disabled) return;
-                  setOpen(false);
                   onPick(s);
+                  setOpen(false);
                 }}
                 className={`w-full flex items-center justify-between gap-2 px-3 py-2 text-[13px] rounded-[3px] transition-colors ${
                   disabled

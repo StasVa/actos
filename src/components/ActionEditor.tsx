@@ -895,10 +895,10 @@ function StatusDropdown({
                 key={s}
                 type="button"
                 disabled={disabled}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
+                onClick={() => {
                   if (disabled) return;
+                  // Fire the picker first so any state updates / modals open
+                  // before the popover unmounts; then close the popover.
                   onPick(s);
                   setOpen(false);
                 }}

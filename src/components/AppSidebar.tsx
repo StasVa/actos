@@ -221,13 +221,20 @@ export const AppSidebar: React.FC<{ onOpenSettings?: () => void }> = ({ onOpenSe
             <button
               type="button"
               onClick={openSearch}
-              className="w-full group flex items-center gap-2 pl-2.5 pr-2 py-2 rounded-[4px] text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-colors"
+              className="search-row w-full group flex items-center gap-2 pl-2.5 pr-2 py-2 rounded-[4px] text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-colors"
             >
               <Search size={16} className="shrink-0" />
               <span className="text-[14px] font-medium flex-1 text-left">Search</span>
               <span
-                className="font-mono text-[10px] text-text-tertiary"
-                style={{ background: "hsl(var(--surface-hover))", padding: "2px 6px", borderRadius: 2 }}
+                className="kbd-hint inline-flex items-center justify-center font-mono text-text-secondary group-hover:text-text-primary transition-colors mr-2"
+                style={{
+                  fontSize: 11,
+                  letterSpacing: 0,
+                  background: "hsl(var(--surface-elevated))",
+                  border: "1px solid hsl(var(--border-subtle))",
+                  padding: "2px 6px",
+                  borderRadius: 3,
+                }}
               >
                 ⌘K
               </span>

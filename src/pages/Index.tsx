@@ -465,11 +465,11 @@ const ActiveProjectCard: React.FC<{ p: ActiveProjectMeta; pct: number }> = ({ p,
           </div>
           <div className="flex items-center justify-between font-mono text-[11px] tabular-nums">
             <div>
-              <span className="text-text-primary">{p.done}/{p.hasActions ? p.total : 0}</span>
+              <span className="text-text-secondary">{p.done}/{p.hasActions ? p.total : 0}</span>
               <span className="text-text-tertiary"> actions</span>
             </div>
-            <div className="text-text-secondary">
-              Last:{" "}
+            <div>
+              <span className="text-text-tertiary">Last: </span>
               <span className={p.warnLast ? "text-text-warning" : "text-text-secondary"}>{p.last}</span>
             </div>
           </div>

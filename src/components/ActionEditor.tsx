@@ -882,9 +882,21 @@ export function StatusDropdown({
           <ChevronDown size={14} className="text-text-tertiary" />
         </button>
       </PopoverTrigger>
+      {/*
+        Z-INDEX HIERARCHY (app-wide):
+          0-10  Sidebar / regular page content
+          90    Slide-in panel (Sheet / ActionEditorPanel)
+          100   Content inside slide-in panel (this popover, dropdowns)
+          200   Modals (Plan today, Close day, confirmations)
+          250   Command Palette
+          300   Toasts
+        This popover lives inside the z-90 ActionEditorPanel and is portaled
+        to <body>, so it must explicitly sit above 90. We override locally
+        instead of bumping the shared PopoverContent default.
+      */}
       <PopoverContent
         align="start"
-        className="w-[280px] p-1 bg-surface-raised border border-border-default"
+        className="z-[100] w-[280px] p-1 bg-surface-raised border border-border-default"
       >
         <TooltipProvider delayDuration={200}>
           {STATUS_ORDER.map((s) => {

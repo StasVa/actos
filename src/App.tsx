@@ -8,6 +8,8 @@ import Progress from "./pages/Progress.tsx";
 import Goals from "./pages/Goals.tsx";
 import Reviews from "./pages/Reviews.tsx";
 import ReviewsDays from "./pages/ReviewsDays.tsx";
+import ReviewsWeeks from "./pages/ReviewsWeeks.tsx";
+import ReviewWeekDetail from "./pages/ReviewWeekDetail.tsx";
 import ReviewDayDetail from "./pages/ReviewDayDetail.tsx";
 import GoalDetail from "./pages/GoalDetail.tsx";
 import ProjectDetail from "./pages/ProjectDetail.tsx";

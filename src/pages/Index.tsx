@@ -1181,6 +1181,9 @@ const YesterdayCard: React.FC = () => {
 
   // Stats
   const yActions = actions.filter((a) => a.completedAt?.slice(0, 10) === YESTERDAY_ISO && a.status === "done");
+  const yDelegated = actions.filter(
+    (a) => a.delegatedAt?.slice(0, 10) === YESTERDAY_ISO && a.status === "delegated",
+  );
   const actionsDone = yActions.length;
   const ritualsDone = rituals.reduce(
     (n, r) =>
@@ -1192,16 +1195,25 @@ const YesterdayCard: React.FC = () => {
         : 0),
     0,
   );
-  const totalMin = yActions.reduce((sum, a) => sum + (a.timeEstimateMinutes ?? 0), 0);
+  // Time invested = full Done time + 20% Delegated time.
+  const investedMinFor = (a: typeof actions[number]) => {
+    const t = a.timeEstimateMinutes ?? 0;
+    if (t <= 0) return 0;
+    if (a.status === "done") return t;
+    if (a.status === "delegated") return Math.round(t * 0.2);
+    return 0;
+  };
+  const investedAll = [...yActions, ...yDelegated];
+  const totalMin = investedAll.reduce((sum, a) => sum + investedMinFor(a), 0);
   const hours = totalMin >= 60 ? `${(totalMin / 60).toFixed(1)}h` : `${totalMin}m`;
 
-  // Per-goal effort
+  // Per-goal time invested
   const perGoal = goals
     .filter((g) => g.status === "active")
     .map((g) => {
-      const min = yActions
+      const min = investedAll
         .filter((a) => a.goalId === g.id)
-        .reduce((s, a) => s + (a.timeEstimateMinutes ?? 0), 0);
+        .reduce((s, a) => s + investedMinFor(a), 0);
       return { g, min };
     })
     .filter((x) => x.min > 0);

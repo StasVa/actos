@@ -380,6 +380,8 @@ export const useStore = create<StoreState>()(
           payload.droppedAt ?? (status === "dropped" ? at : undefined);
         const cancelledAt =
           payload.cancelledAt ?? (status === "cancelled" ? at : undefined);
+        const plannedAt =
+          (payload as Partial<Action>).plannedAt ?? (status === "planned" ? at : undefined);
         const createdLabel: Record<ActionStatus, string> = {
           backlog: "Backlog",
           planned: "Planned",
@@ -403,6 +405,7 @@ export const useStore = create<StoreState>()(
           delegateName: payload.delegateName,
           delegateNote: payload.delegateNote,
           expectedReturnDate: payload.expectedReturnDate,
+          plannedAt,
           completedAt,
           delegatedAt,
           droppedAt,

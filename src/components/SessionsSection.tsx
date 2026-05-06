@@ -267,10 +267,7 @@ export const SessionDetailPanel: React.FC<{
 
 export type SessionsSectionVariant = "flat" | "by-day" | "by-week";
 
-export interface PerProjectSubset {
-  /** Set of action ids belonging to the entity (project or goal). */
-  entityActionIds: Set<ID>;
-}
+
 
 interface Props {
   sessions: Session[];

@@ -96,6 +96,9 @@ export interface WeekSummary {
   days: ISODate[];
   dayEntriesByDate: Record<ISODate, DayEntry | undefined>;
   doneActions: Action[];
+  delegatedActions: Action[];
+  droppedActions: Action[];
+  cancelledActions: Action[];
   reflections: { date: ISODate; entry: DayEntry }[];
   closedProjects: ClosedEntity<Project>[];
   closedGoals: ClosedEntity<Goal>[];

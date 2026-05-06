@@ -357,16 +357,14 @@ export const SessionsSection: React.FC<Props> = ({
 
   /* ─── by-day (Week drill-down) ─── */
   if (variant === "by-day") {
-    const groups = useMemo(() => {
-      const map = new Map<string, Session[]>();
-      for (const s of sessions) {
-        const d = s.startedAt.slice(0, 10);
-        const arr = map.get(d) ?? [];
-        arr.push(s);
-        map.set(d, arr);
-      }
-      return Array.from(map.entries()).sort((a, b) => b[0].localeCompare(a[0]));
-    }, [sessions]);
+    const map = new Map<string, Session[]>();
+    for (const s of sessions) {
+      const d = s.startedAt.slice(0, 10);
+      const arr = map.get(d) ?? [];
+      arr.push(s);
+      map.set(d, arr);
+    }
+    const groups = Array.from(map.entries()).sort((a, b) => b[0].localeCompare(a[0]));
 
     return (
       <>

@@ -208,8 +208,6 @@ export interface Session {
 export interface UserSettings {
   layers: {
     planAndReview: boolean;
-    logEnergy: boolean;
-    logFocus: boolean;
     logTime: boolean;
   };
   defaultGoalId?: ID;

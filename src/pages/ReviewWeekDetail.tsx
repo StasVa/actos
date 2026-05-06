@@ -326,56 +326,7 @@ const ReviewWeekDetail: React.FC = () => {
           {/* VALUE ADDED */}
           <OutcomeAddedSection outcome={outcome} period="week" />
 
-          {/* ENERGY */}
-          {settings.layers.logEnergy &&
-            (summary.morningEnergyAvg != null || summary.eveningEnergyAvg != null) && (
-              <section>
-                <SectionHead meta="AVG MORNING / EVENING">Energy</SectionHead>
-                <div className="flex items-baseline gap-8 mb-4">
-                  <div>
-                    <div className="font-mono text-[10px] uppercase text-text-tertiary">Morning</div>
-                    <div className="text-[24px] tabular-nums text-text-primary">
-                      {summary.morningEnergyAvg != null ? summary.morningEnergyAvg.toFixed(1) : "—"}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="font-mono text-[10px] uppercase text-text-tertiary">Evening</div>
-                    <div className="text-[24px] tabular-nums text-text-primary">
-                      {summary.eveningEnergyAvg != null ? summary.eveningEnergyAvg.toFixed(1) : "—"}
-                    </div>
-                  </div>
-                </div>
-                <div className="grid grid-cols-7 gap-2">
-                  {energyBars.map((b) => (
-                    <div key={b.date} className="flex flex-col items-center gap-1">
-                      <div className="flex items-end gap-1 h-[60px]">
-                        <div
-                          title={b.morning != null ? `Morning ${b.morning}` : "no morning"}
-                          className="w-2 rounded-sm"
-                          style={{
-                            height: `${((b.morning ?? 0) / 10) * 60}px`,
-                            background: "hsl(var(--accent))",
-                            opacity: b.morning == null ? 0.15 : 1,
-                          }}
-                        />
-                        <div
-                          title={b.evening != null ? `Evening ${b.evening}` : "no evening"}
-                          className="w-2 rounded-sm"
-                          style={{
-                            height: `${((b.evening ?? 0) / 10) * 60}px`,
-                            background: "hsl(var(--text-secondary))",
-                            opacity: b.evening == null ? 0.15 : 1,
-                          }}
-                        />
-                      </div>
-                      <div className="font-mono text-[10px] text-text-tertiary">
-                        {format(parseISO(b.date), "EEEEE")}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
+          {/* ENERGY section removed */}
 
           {/* TIME INVESTED */}
           {settings.layers.logTime && totalMin > 0 && (

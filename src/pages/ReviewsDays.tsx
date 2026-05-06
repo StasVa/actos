@@ -112,8 +112,7 @@ const DayRowItem: React.FC<{
   projects: Project[];
   allActions: Action[];
   logTime: boolean;
-  logEnergy: boolean;
-}> = ({ row, goals, projects, allActions, logTime, logEnergy }) => {
+}> = ({ row, goals, projects, allActions, logTime }) => {
   const { date, entry, doneActions, delegatedActions } = row;
   // Approximate ritual count via plannedRitualIds minus skipped
   const ritualCount = entry
@@ -137,14 +136,10 @@ const DayRowItem: React.FC<{
   const outcome = getOutcomeSummary(doneActions, delegatedActions, goals, projects, allActions);
 
   const stats: string[] = [];
-  if (outcome.outcomeAdded > 0) stats.push(`+${outcome.outcomeAdded} outcome`);
+  if (outcome.outcomeAdded > 0) stats.push(`+${outcome.outcomeAdded} value`);
   stats.push(`${doneActions.length} actions done`);
   if (ritualCount > 0) stats.push(`${ritualCount} rituals`);
   if (logTime && totalMin > 0) stats.push(`${formatHM(totalMin)} invested`);
-  if (logEnergy && entry?.morningEnergyScore != null) {
-    const evening = entry.eveningEnergyScore != null ? ` / evening ${entry.eveningEnergyScore}` : "";
-    stats.push(`Energy: morning ${entry.morningEnergyScore}${evening}`);
-  }
   let mainPrefix = "";
   if (entry?.mainTaskActionId) {
     const main = doneActions.find((a) => a.id === entry.mainTaskActionId);
@@ -306,7 +301,6 @@ const ReviewsDays: React.FC = () => {
                 projects={projects}
                 allActions={actions}
                 logTime={settings.layers.logTime}
-                logEnergy={settings.layers.logEnergy}
               />
             ))
           )}

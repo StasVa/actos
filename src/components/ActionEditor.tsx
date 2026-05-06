@@ -448,45 +448,23 @@ function ActionEditorPanel({
           {/* Contextual timestamp line — moved directly below dropdown */}
           {action && <TimestampLine action={action} onClose={onClose} />}
 
-          {/* Inline scheduled-date picker (when Planned needs a date) */}
-          {status === "planned" && (needsScheduledDate || !scheduledDate) && (
-            <div className="mt-2 p-3 rounded-[4px] bg-surface-raised border border-border-subtle">
-              <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-2">
-                Pick a scheduled date
+          {/* Scheduled date — required when Planned */}
+          {status === "planned" && (
+            <div className="mt-3">
+              <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-2">
+                Scheduled date · required
               </div>
-              <div className="flex flex-wrap gap-1.5 mb-2">
-                <QuickDateBtn label="Today" onClick={() => applyScheduledDate(TODAY_ISO())} />
-                <QuickDateBtn
-                  label="Tomorrow"
-                  onClick={() => applyScheduledDate(addDaysISO(TODAY_ISO(), 1))}
-                />
-                <QuickDateBtn label="Next Mon" onClick={() => applyScheduledDate(nextMondayISO())} />
-              </div>
-              <input
-                type="date"
+              <DateChipPicker
                 value={scheduledDate}
-                onChange={(e) => {
-                  if (e.target.value) applyScheduledDate(e.target.value);
+                onChange={(iso) => {
+                  if (iso) {
+                    applyScheduledDate(iso);
+                  } else {
+                    setScheduledDate("");
+                    if (mode === "edit") persistField("scheduledDate", undefined);
+                  }
                 }}
-                className="bg-surface-base border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
               />
-            </div>
-          )}
-
-          {/* Editable scheduled-date when Planned + already set */}
-          {status === "planned" && scheduledDate && !needsScheduledDate && (
-            <div className="mt-2">
-              <FieldRow label="Scheduled">
-                <input
-                  type="date"
-                  value={scheduledDate}
-                  onChange={(e) => {
-                    setScheduledDate(e.target.value);
-                    if (mode === "edit") persistField("scheduledDate", e.target.value || undefined);
-                  }}
-                  className="bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
-                />
-              </FieldRow>
             </div>
           )}
 

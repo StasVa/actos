@@ -36,7 +36,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-const STATUS_ORDER: ActionStatus[] = [
+export const STATUS_ORDER: ActionStatus[] = [
   "backlog",
   "planned",
   "done",
@@ -44,7 +44,7 @@ const STATUS_ORDER: ActionStatus[] = [
   "dropped",
   "cancelled",
 ];
-const STATUS_LABEL: Record<ActionStatus, string> = {
+export const STATUS_LABEL: Record<ActionStatus, string> = {
   backlog: "Backlog",
   planned: "Planned",
   done: "Done",
@@ -858,7 +858,7 @@ function StatusDot({ status }: { status: ActionStatus }) {
   );
 }
 
-function StatusDropdown({
+export function StatusDropdown({
   current,
   isGoalLevel,
   onPick,

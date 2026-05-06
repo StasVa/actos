@@ -34,32 +34,16 @@ export function GoalEditor() {
   const closePanel = useStore((s) => s.closePanel);
   const open = panel?.kind === "goal";
 
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") closePanel();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [open, closePanel]);
-
   if (!open || panel?.kind !== "goal") return null;
 
   return (
-    <>
-      <div
-        className="fixed inset-0 z-[80]"
-        style={{ background: "rgba(0,0,0,0.4)" }}
-        onClick={closePanel}
-      />
-      <GoalEditorPanel
-        key={(panel.mode === "edit" ? panel.id : "new") ?? "new"}
-        mode={panel.mode}
-        goalId={panel.id}
-        prefill={panel.prefill}
-        onClose={closePanel}
-      />
-    </>
+    <GoalEditorPanel
+      key={(panel.mode === "edit" ? panel.id : "new") ?? "new"}
+      mode={panel.mode}
+      goalId={panel.id}
+      prefill={panel.prefill}
+      onClose={closePanel}
+    />
   );
 }
 

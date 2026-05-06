@@ -5,7 +5,7 @@
 //   • Other      → 0
 // Use timeInvestedMinutes(action) for any "time invested" calculation.
 
-import type { Action, Goal, ID, ISODate } from "@/types";
+import type { Action, Goal, Project, ID, ISODate } from "@/types";
 
 /** Delegation discount factor for time invested (matches Effort discount). */
 export const DELEGATION_TIME_FACTOR = 0.2;
@@ -26,11 +26,19 @@ export function sumTimeInvested(actions: Action[]): number {
   return total;
 }
 
+export interface PerProjectTimeStats {
+  project: Project;
+  total30d: number;
+  totalAllTime: number;
+}
+
 export interface PerGoalTimeStats {
   goal: Goal;
   totalAllTime: number; // minutes
   total30d: number; // minutes
   series30d: number[]; // length 30, oldest → today
+  perProject: PerProjectTimeStats[]; // sorted by total30d desc, 0-time filtered out
+  isClosed: boolean; // goal is completed/dropped (within recent window)
 }
 
 export interface TimeStatsResult {

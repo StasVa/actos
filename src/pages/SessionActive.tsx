@@ -666,21 +666,7 @@ const SessionActive: React.FC = () => {
                 <div className="mt-6 flex items-center justify-end gap-3">
                   <button
                     onClick={handleSessionComplete}
-                    className="text-[13px] font-medium px-3 py-1.5 text-text-secondary hover:text-text-primary"
-                  >
-                    Done
-                  </button>
-                  <button
-                    onClick={() => {
-                      const id = session.id;
-                      completeSession(session.id);
-                      saveTimer(null);
-                      navigate(`/sessions`);
-                      // Sessions page handles selection via row click; surface via toast.
-                      toast.success("Session saved");
-                      void id;
-                    }}
-                    className="text-[13px] font-medium px-4 py-2 rounded-[4px]"
+                    className="text-[14px] font-medium px-4 py-2 rounded-[4px]"
                     style={{
                       background: "hsl(var(--accent))",
                       color: "hsl(var(--accent-foreground))",

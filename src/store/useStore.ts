@@ -428,9 +428,9 @@ export const useStore = create<StoreState>()(
           actions: get().actions.map((a) => {
             if (a.id !== id) return a;
             const next: Action = { ...a, status: newStatus, updatedAt: at };
-            // Clear all terminal timestamps first; we'll set the right one below.
+            // Clear only the *terminal* timestamps; keep plannedAt and
+            // delegatedAt as historical breadcrumbs across re-opens.
             next.completedAt = undefined;
-            next.delegatedAt = undefined;
             next.droppedAt = undefined;
             next.cancelledAt = undefined;
             let text = `Status → ${newStatus}`;
@@ -457,10 +457,11 @@ export const useStore = create<StoreState>()(
                 break;
               case "planned":
                 if (statusPayload?.scheduledDate) next.scheduledDate = statusPayload.scheduledDate;
+                if (!next.plannedAt) next.plannedAt = at;
                 text = `Scheduled${next.scheduledDate ? ` for ${next.scheduledDate}` : ""} (Planned)`;
                 break;
               case "backlog":
-                next.scheduledDate = undefined;
+                // Keep scheduledDate & plannedAt as history.
                 text = "Re-opened in Backlog";
                 break;
             }

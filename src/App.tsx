@@ -64,7 +64,11 @@ const App = () => (
           <Route path="/reviews" element={<Navigate to="/reviews/days" replace />} />
           <Route path="/reviews/days" element={<ReviewsDays />} />
           <Route path="/reviews/days/:date" element={<ReviewDayDetail />} />
-          <Route path="/reviews/weeks" element={<Reviews />} />
+          <Route path="/reviews" element={<Navigate to="/reviews/days" replace />} />
+          <Route path="/reviews/days" element={<ReviewsDays />} />
+          <Route path="/reviews/days/:date" element={<ReviewDayDetail />} />
+          <Route path="/reviews/weeks" element={<ReviewsWeeks />} />
+          <Route path="/reviews/weeks/:yearWeek" element={<ReviewWeekDetail />} />
           <Route path="/reviews/months" element={<Reviews />} />
 
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

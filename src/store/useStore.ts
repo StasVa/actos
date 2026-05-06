@@ -283,10 +283,11 @@ export const useStore = create<StoreState>()(
           id,
           goalId: payload.goalId,
           title: payload.title,
-          status: "active",
+          status: payload.status ?? "active",
           description: payload.description,
           references: payload.references ?? [],
           createdAt: nowISO(),
+          isDraft: payload.isDraft ?? false,
         };
         set({ projects: [...get().projects, project] });
         return id;

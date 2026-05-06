@@ -11,6 +11,7 @@ import { CardMenu } from "@/components/CardMenu";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { PlanTodayModal, CloseDayModal, ClosePlanModal } from "@/components/PlanCloseModals";
 import { ActionRow as SharedActionRow } from "@/components/ActionRow";
+import { ProjectCard as SharedProjectCard } from "@/components/ProjectCard";
 import { toast } from "sonner";
 import { subscribeAppEvent } from "@/lib/appEvents";
 

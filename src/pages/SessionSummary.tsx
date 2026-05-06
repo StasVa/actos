@@ -385,8 +385,6 @@ const SessionSummary: React.FC = () => {
               Done
             </button>
           </footer>
-          {/* prevent unused warning */}
-          <span className="hidden">{formatTime(dur)}</span>
         </div>
       </main>
     </div>

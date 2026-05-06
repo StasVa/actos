@@ -11,6 +11,7 @@ import { useStore } from "@/store/useStore";
 import type { ID, Ritual, RitualSchedule } from "@/types";
 import { ConfirmModal } from "./ConfirmModal";
 import { ritualMultiplier } from "@/store/useStore";
+import { EditorShell, EditorCloseX, EditorCancelButton } from "./EditorShell";
 
 const SCHEDULE_OPTIONS: { value: RitualSchedule; label: string }[] = [
   { value: "daily", label: "Daily" },

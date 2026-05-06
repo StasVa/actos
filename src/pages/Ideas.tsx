@@ -60,66 +60,89 @@ const FilterGroup: React.FC<{ label: string; children: React.ReactNode }> = ({ l
   </div>
 );
 
-/* ===== Capture input — live wired ===== */
-const CaptureInput: React.FC<{ subHint?: string; defaultGoalTitle?: string }> = ({
-  subHint,
-  defaultGoalTitle,
-}) => {
-  const [value, setValue] = useState("");
-  const [focused, setFocused] = useState(false);
-  const [hovered, setHovered] = useState(false);
+/* ===== Small id helper for refs/attachments ===== */
+const localId = () =>
+  (typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID()
+    : `id-${Math.random().toString(36).slice(2)}-${Date.now().toString(36)}`);
+
+/* ===== New idea form — inline panel below page header ===== */
+const NewIdeaForm: React.FC<{
+  defaultGoalId?: ID;
+  onClose: () => void;
+}> = ({ defaultGoalId, onClose }) => {
+  const goals = useStore((s) => s.goals);
+  const activeGoals = useMemo(() => goals.filter((g) => g.status === "active"), [goals]);
   const captureIdea = useStore((s) => s.captureIdea);
   const selectIdea = useStore((s) => s.selectIdea);
-  const active = focused || hovered;
+
+  const [goalId, setGoalId] = useState<ID>(
+    defaultGoalId ?? activeGoals[0]?.id ?? goals[0]?.id ?? "",
+  );
+  const [title, setTitle] = useState("");
+  const inputRef = React.useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
+  const canSubmit = title.trim().length > 0 && !!goalId;
 
   const submit = () => {
-    const title = value.trim();
-    if (!title) return;
-    const id = captureIdea({ title });
+    if (!canSubmit) return;
+    const id = captureIdea({ title: title.trim(), goalId });
     selectIdea(id);
-    setValue("");
     toast.success("Idea captured");
+    onClose();
   };
 
-  const hint = subHint ?? (defaultGoalTitle
-    ? `Captured ideas land in your default goal — ${defaultGoalTitle}.`
-    : "Captured ideas land in your default goal.");
-
   return (
-    <div>
-      <div
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-        className="flex items-center gap-3 bg-surface-elevated rounded-[4px] px-4 transition-colors"
-        style={{
-          height: 52,
-          border: `1px dashed ${active ? "hsl(var(--accent))" : "hsl(var(--border-default))"}`,
-          borderStyle: active ? "solid" : "dashed",
-        }}
-      >
-        <span
-          className="font-mono text-[16px] leading-none shrink-0"
-          style={{ color: active ? "hsl(var(--text-secondary))" : "hsl(var(--text-tertiary))" }}
+    <div
+      id="ideas-new-form"
+      className="bg-surface-elevated border border-border-default rounded-[4px] p-4"
+    >
+      <div className="flex items-center gap-3">
+        <select
+          value={goalId}
+          onChange={(e) => setGoalId(e.target.value)}
+          className="bg-surface-hover rounded-[4px] px-2 py-2 text-[12px] text-text-secondary outline-none border border-transparent focus:border-border-default cursor-pointer"
         >
-          +
-        </span>
+          {activeGoals.map((g) => (
+            <option key={g.id} value={g.id}>
+              {g.title}
+            </option>
+          ))}
+        </select>
         <input
           id="ideas-capture-input"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          onFocus={() => setFocused(true)}
-          onBlur={() => setFocused(false)}
+          ref={inputRef}
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter") submit();
+            if (e.key === "Escape") onClose();
           }}
-          placeholder="Capture an idea..."
+          placeholder="Idea title…"
           className="flex-1 bg-transparent outline-none text-[14px] text-text-primary placeholder:text-text-tertiary"
         />
-        {focused && (
-          <span className="font-mono text-[10px] text-text-tertiary shrink-0">⏎</span>
-        )}
+        <button
+          onClick={submit}
+          disabled={!canSubmit}
+          className="h-9 px-4 text-[13px] font-medium rounded-[4px] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          style={{
+            background: "hsl(var(--accent))",
+            color: "hsl(var(--accent-foreground))",
+          }}
+        >
+          Save
+        </button>
+        <button
+          onClick={onClose}
+          className="h-9 px-2 text-[13px] text-text-tertiary hover:text-text-secondary transition-colors"
+        >
+          Cancel
+        </button>
       </div>
-      <div className="mt-2 text-[12px] text-text-tertiary">{hint}</div>
     </div>
   );
 };

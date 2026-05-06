@@ -263,13 +263,13 @@ const GoalCard: React.FC<{ m: GoalMeta; logTimeOn: boolean }> = ({ m, logTimeOn 
               {progress}%
             </div>
             <div className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary mt-1">
-              PROGRESS · OUTCOME
+              PROGRESS · VALUE
             </div>
           </div>
 
           {/* Section 3 — Bars */}
           <div className="flex flex-col gap-2">
-            <MeasureBar label="OUTCOME" percentage={outcome} color={color} />
+            <MeasureBar label="VALUE" percentage={outcome} color={color} />
             <MeasureBar label="EFFORT" percentage={effort} color={color} opacity={0.6} />
           </div>
 

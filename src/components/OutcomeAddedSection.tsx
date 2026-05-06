@@ -31,7 +31,7 @@ export const OutcomeAddedSection: React.FC<Props> = ({ outcome, period }) => {
 
   return (
     <section>
-      <SectionHead meta={`+${outcome.valueAdded} TOTAL`}>Outcome added</SectionHead>
+      <SectionHead meta={`+${outcome.valueAdded} TOTAL`}>Value added</SectionHead>
       {outcome.outcomePerGoal.length === 0 ? (
         <div className="text-[13px] text-text-tertiary italic">
           No outcome added to active goals this {period}.

@@ -138,7 +138,7 @@ const MeasureBar: React.FC<{
 
 const DualBars: React.FC<{ outcome: number; effort: number; color: string }> = ({ outcome, effort, color }) => (
   <div className="flex min-w-0 flex-col gap-2">
-    <MeasureBar label="OUTCOME" percentage={outcome} color={color} />
+    <MeasureBar label="VALUE" percentage={outcome} color={color} />
     <MeasureBar label="EFFORT" percentage={effort} color={color} opacity={0.6} />
   </div>
 );

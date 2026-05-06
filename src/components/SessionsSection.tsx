@@ -72,7 +72,7 @@ const SessionRow: React.FC<RowProps> = ({ session, outcome, subExtra, leftLabel,
   }
 
   const stats: string[] = [];
-  if (outcome > 0) stats.push(`+${outcome} outcome`);
+  if (outcome > 0) stats.push(`+${outcome} value`);
   if (doneCount > 0) stats.push(`${doneCount} done`);
   if (droppedCount > 0) stats.push(`${droppedCount} dropped`);
 

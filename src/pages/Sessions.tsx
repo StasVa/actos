@@ -92,7 +92,7 @@ const SessionRow: React.FC<{
   }
 
   const stats: string[] = [];
-  if (outcome > 0) stats.push(`+${outcome} outcome`);
+  if (outcome > 0) stats.push(`+${outcome} value`);
   if (doneCount > 0) stats.push(`${doneCount} done`);
   if (droppedCount > 0) stats.push(`${droppedCount} dropped`);
 
@@ -453,7 +453,7 @@ const Sessions: React.FC = () => {
                 <>
                   <div className="font-mono text-[12px] text-text-secondary tabular-nums">
                     {stats.count} sessions · {formatTime(stats.totalMinutes)} focused time ·{" "}
-                    +{stats.totalOutcome} outcome added · {stats.completionRate}% completion rate
+                    +{stats.totalOutcome} value added · {stats.completionRate}% completion rate
                   </div>
 
                   <div>

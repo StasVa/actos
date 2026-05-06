@@ -192,7 +192,7 @@ const ReviewWeekDetail: React.FC = () => {
                 tiles.push({
                   key: "outcome",
                   value: `+${outcome.valueAdded}`,
-                  label: "Outcome added",
+                  label: "Value added",
                   delta:
                     prevOutcome != null
                       ? outcome.valueAdded - prevOutcome.valueAdded

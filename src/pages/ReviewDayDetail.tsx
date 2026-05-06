@@ -387,7 +387,7 @@ const ReviewDayDetail: React.FC = () => {
                 (settings.layers.logTime && actionTimeMin > 0);
               if (hasAny) {
                 if (outcome.valueAdded > 0)
-                  tiles.push({ key: "outcome", value: `+${outcome.valueAdded}`, label: "Outcome added" });
+                  tiles.push({ key: "outcome", value: `+${outcome.valueAdded}`, label: "Value added" });
                 tiles.push({ key: "actions", value: String(doneToday.length), label: "Actions done" });
                 tiles.push({ key: "rituals", value: String(ritualsDone.length), label: "Rituals done" });
                 if (settings.layers.logTime && actionTimeMin > 0)

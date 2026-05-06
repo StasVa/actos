@@ -733,7 +733,7 @@ const SessionActive: React.FC = () => {
                 </h2>
                 <div className="mt-3 font-mono text-[13px] text-text-secondary">
                   {session.completedActionIds.length} actions done ·{" "}
-                  {session.droppedActionIds.length} dropped · +{sessionOutcome} outcome added
+                  {session.droppedActionIds.length} dropped · +{sessionOutcome} value added
                 </div>
                 <div className="mt-6 flex items-center justify-end gap-3">
                   <button
@@ -808,7 +808,7 @@ const SessionActive: React.FC = () => {
       <ConfirmModal
         open={confirmDrop != null}
         title="Drop this action?"
-        body="It won't count toward outcome."
+        body="It won't count toward value."
         confirmLabel="Drop"
         destructive
         onCancel={() => setConfirmDrop(null)}

@@ -159,7 +159,7 @@ const HeroState: React.FC<{
             {progressOutcome}%
           </div>
           <div className="mt-1 font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
-            PROGRESS · OUTCOME
+            PROGRESS · VALUE
           </div>
           <div className="mt-3 font-mono text-[12px] text-text-secondary tabular-nums">
             {actionsDone} actions done · {projectsClosed} of {projectsTotal} projects closed · Active{" "}
@@ -195,7 +195,7 @@ const HeroState: React.FC<{
           STATE
         </div>
         <div className="space-y-1">
-          <StateBarRow label="OUTCOME" pct={progressOutcome} value={`${progressOutcome}%`} color={color} />
+          <StateBarRow label="VALUE" pct={progressOutcome} value={`${progressOutcome}%`} color={color} />
           <StateBarRow label="EFFORT" pct={progressEffort} value={`${progressEffort}%`} color={color} opacity={0.6} />
         </div>
         <div className="mt-3 font-mono text-[11px] italic text-text-tertiary">

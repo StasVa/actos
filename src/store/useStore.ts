@@ -181,6 +181,7 @@ export interface StoreState {
   addDroppedActionToSession: (sessionId: ID, actionId: ID) => void;
   incrementSessionCycles: (sessionId: ID) => void;
   deleteSession: (sessionId: ID) => void;
+  setSessionReflection: (sessionId: ID, reflection: string) => void;
   getActiveSession: () => Session | null;
 
   // ─── UI ───
@@ -857,6 +858,14 @@ export const useStore = create<StoreState>()(
 
       deleteSession: (sessionId) => {
         set({ sessions: get().sessions.filter((s) => s.id !== sessionId) });
+      },
+
+      setSessionReflection: (sessionId, reflection) => {
+        set({
+          sessions: get().sessions.map((s) =>
+            s.id === sessionId ? { ...s, reflection } : s,
+          ),
+        });
       },
 
       getActiveSession: () => get().sessions.find((s) => s.status === "in_progress") ?? null,

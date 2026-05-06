@@ -780,6 +780,87 @@ export const useStore = create<StoreState>()(
         set({ settings: { ...get().settings, defaultGoalId: goalId } });
       },
 
+      // ───────── Sessions ─────────
+      createDraftSession: (config) => {
+        const state = get();
+        if (state.sessions.some((s) => s.status === "in_progress")) {
+          return { ok: false, reason: "active-exists" };
+        }
+        const id = uid();
+        const session: Session = {
+          id,
+          status: "in_progress",
+          startedAt: nowISO(),
+          endedAt: null,
+          mode: config.mode,
+          workDuration: config.workDuration,
+          breakDuration: config.breakDuration,
+          cyclesPlanned: config.cyclesPlanned,
+          plannedActionIds: [...config.plannedActionIds],
+          completedActionIds: [],
+          droppedActionIds: [],
+          cyclesCompleted: 0,
+        };
+        set({ sessions: [...state.sessions, session] });
+        return { ok: true, id };
+      },
+
+      completeSession: (sessionId) => {
+        set({
+          sessions: get().sessions.map((s) =>
+            s.id === sessionId && s.status === "in_progress"
+              ? { ...s, status: "completed", endedAt: nowISO() }
+              : s,
+          ),
+        });
+      },
+
+      abortSession: (sessionId) => {
+        set({
+          sessions: get().sessions.map((s) =>
+            s.id === sessionId && s.status === "in_progress"
+              ? { ...s, status: "aborted", endedAt: nowISO() }
+              : s,
+          ),
+        });
+      },
+
+      addCompletedActionToSession: (sessionId, actionId) => {
+        set({
+          sessions: get().sessions.map((s) =>
+            s.id === sessionId && s.status === "in_progress" && !s.completedActionIds.includes(actionId)
+              ? { ...s, completedActionIds: [...s.completedActionIds, actionId] }
+              : s,
+          ),
+        });
+      },
+
+      addDroppedActionToSession: (sessionId, actionId) => {
+        set({
+          sessions: get().sessions.map((s) =>
+            s.id === sessionId && s.status === "in_progress" && !s.droppedActionIds.includes(actionId)
+              ? { ...s, droppedActionIds: [...s.droppedActionIds, actionId] }
+              : s,
+          ),
+        });
+      },
+
+      incrementSessionCycles: (sessionId) => {
+        set({
+          sessions: get().sessions.map((s) =>
+            s.id === sessionId && s.status === "in_progress"
+              ? { ...s, cyclesCompleted: s.cyclesCompleted + 1 }
+              : s,
+          ),
+        });
+      },
+
+      deleteSession: (sessionId) => {
+        set({ sessions: get().sessions.filter((s) => s.id !== sessionId) });
+      },
+
+      getActiveSession: () => get().sessions.find((s) => s.status === "in_progress") ?? null,
+
       // ───────── UI ─────────
       openPanel: (panel) => set({ ui: { ...get().ui, activePanel: panel } }),
       closePanel: () => set({ ui: { ...get().ui, activePanel: null } }),
@@ -800,6 +881,7 @@ export const useStore = create<StoreState>()(
         rituals: state.rituals,
         ideas: state.ideas,
         dayEntries: state.dayEntries,
+        sessions: state.sessions,
         settings: state.settings,
       }),
     },

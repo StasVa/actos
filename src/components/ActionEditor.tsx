@@ -897,8 +897,10 @@ function StatusDropdown({
                 disabled={disabled}
                 onClick={() => {
                   if (disabled) return;
-                  setOpen(false);
+                  // Fire the picker first so any state updates / modals open
+                  // before the popover unmounts; then close the popover.
                   onPick(s);
+                  setOpen(false);
                 }}
                 className={`w-full flex items-center justify-between gap-2 px-3 py-2 text-[13px] rounded-[3px] transition-colors ${
                   disabled
@@ -917,7 +919,7 @@ function StatusDropdown({
               return (
                 <Tooltip key={s}>
                   <TooltipTrigger asChild>
-                    <div>{item}</div>
+                    <span className="block">{item}</span>
                   </TooltipTrigger>
                   <TooltipContent side="left" className="text-[12px]">
                     Assign to a Project to plan or complete this action.

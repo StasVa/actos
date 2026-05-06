@@ -414,12 +414,15 @@ const ProjectDetail: React.FC = () => {
   })();
 
   // Auto-promote when draft acquires meaningful content.
+  const projectId = project?.id;
+  const goalTitle = goal?.title;
   useEffect(() => {
-    if (isDraft && hasMeaningfulContent && project && goal) {
-      updateProject(project.id, { isDraft: false });
-      toast(`Project created in “${goal.title}”`);
+    if (isDraft && hasMeaningfulContent && projectId) {
+      updateProject(projectId, { isDraft: false });
+      if (goalTitle) toast(`Project created in “${goalTitle}”`);
     }
-  }, [isDraft, hasMeaningfulContent, project, goal, updateProject]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isDraft, hasMeaningfulContent, projectId]);
 
   // Confirm-on-leave for partial drafts (some content but no title).
   const [confirmLeave, setConfirmLeave] = useState<null | (() => void)>(null);

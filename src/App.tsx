@@ -18,6 +18,7 @@ import ProjectDetail from "./pages/ProjectDetail.tsx";
 import Ideas from "./pages/Ideas.tsx";
 import Sessions from "./pages/Sessions.tsx";
 import SessionBuilder from "./pages/SessionBuilder.tsx";
+import SessionActive from "./pages/SessionActive.tsx";
 import Rituals from "./pages/Rituals.tsx";
 import AllActions from "./pages/AllActions.tsx";
 import AllDelegated from "./pages/AllDelegated.tsx";
@@ -66,6 +67,7 @@ const App = () => (
           <Route path="/ideas" element={<Ideas />} />
           <Route path="/sessions" element={<Sessions />} />
           <Route path="/sessions/new" element={<SessionBuilder />} />
+          <Route path="/sessions/active" element={<SessionActive />} />
           <Route path="/reviews" element={<Navigate to="/reviews/days" replace />} />
           <Route path="/reviews/days" element={<ReviewsDays />} />
           <Route path="/reviews/days/:date" element={<ReviewDayDetail />} />

@@ -780,7 +780,7 @@ const IdeaDetail: React.FC<{ idea: Idea }> = ({ idea }) => {
 const EmptyDetail: React.FC = () => (
   <div className="h-full flex flex-col items-center justify-center text-center px-10">
     <div className="text-[14px] text-text-secondary">Select an idea to view details</div>
-    <div className="mt-1 font-mono text-[11px] text-text-tertiary">or capture a new one above</div>
+    <div className="mt-1 font-mono text-[11px] text-text-tertiary">or click "+ New idea" to capture one</div>
   </div>
 );
 

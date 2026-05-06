@@ -366,7 +366,7 @@ const Goals: React.FC = () => {
   const [query, setQuery] = useState("");
 
   const goals = useStore((s) => s.goals);
-  const projects = useStore((s) => s.projects);
+  const projects = useStore((s) => s.projects.filter((p) => !p.isDraft));
   const actions = useStore((s) => s.actions);
   const rituals = useStore((s) => s.rituals);
   const settings = useStore((s) => s.settings);

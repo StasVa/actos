@@ -8,6 +8,8 @@ import Progress from "./pages/Progress.tsx";
 import Goals from "./pages/Goals.tsx";
 import Reviews from "./pages/Reviews.tsx";
 import ReviewsDays from "./pages/ReviewsDays.tsx";
+import ReviewsWeeks from "./pages/ReviewsWeeks.tsx";
+import ReviewWeekDetail from "./pages/ReviewWeekDetail.tsx";
 import ReviewDayDetail from "./pages/ReviewDayDetail.tsx";
 import GoalDetail from "./pages/GoalDetail.tsx";
 import ProjectDetail from "./pages/ProjectDetail.tsx";
@@ -62,7 +64,8 @@ const App = () => (
           <Route path="/reviews" element={<Navigate to="/reviews/days" replace />} />
           <Route path="/reviews/days" element={<ReviewsDays />} />
           <Route path="/reviews/days/:date" element={<ReviewDayDetail />} />
-          <Route path="/reviews/weeks" element={<Reviews />} />
+          <Route path="/reviews/weeks" element={<ReviewsWeeks />} />
+          <Route path="/reviews/weeks/:yearWeek" element={<ReviewWeekDetail />} />
           <Route path="/reviews/months" element={<Reviews />} />
 
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

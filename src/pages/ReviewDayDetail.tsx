@@ -331,7 +331,7 @@ const ReviewDayDetail: React.FC = () => {
     (droppedToday.length > 0 ? 1 : 0) +
     (cancelledToday.length > 0 ? 1 : 0) +
     (notCompleted.length > 0 ? 1 : 0);
-  const actionTimeMin = doneToday.reduce((s, a) => s + (a.timeEstimateMinutes ?? 0), 0);
+  const actionTimeMin = investedToday.reduce((s, a) => s + investedMin(a), 0);
   const showActionTimeMeta = settings.layers.logTime && actionTimeMin > 0;
 
   const ritualTotal = plannedRituals.length;

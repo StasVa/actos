@@ -445,6 +445,9 @@ const ReviewDayDetail: React.FC = () => {
               </section>
             )}
 
+            {/* OUTCOME ADDED */}
+            <OutcomeAddedSection outcome={outcome} period="day" />
+
             {/* ENERGY */}
             {settings.layers.logEnergy &&
               (dayEntry?.morningEnergyScore != null || dayEntry?.eveningEnergyScore != null) && (

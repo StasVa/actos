@@ -499,17 +499,26 @@ function ActionEditorPanel({
               <FieldRow label="Delegate name">
                 <input
                   value={delegateName}
-                  onChange={(e) => setDelegateName(e.target.value)}
+                  onChange={(e) => {
+                    setDelegateName(e.target.value);
+                    if (e.target.value.trim()) setDelegateError(null);
+                  }}
                   onBlur={() => persistField("delegateName", delegateName || undefined)}
                   placeholder="Maria, AI, etc."
                   list="delegate-names"
-                  className="w-full bg-surface-base border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
+                  className="w-full bg-surface-base border rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
+                  style={{
+                    borderColor: delegateError
+                      ? "hsl(var(--text-warning))"
+                      : "hsl(var(--border-subtle))",
+                  }}
                 />
                 <datalist id="delegate-names">
                   {delegateSuggestions.map((n) => (
                     <option key={n} value={n} />
                   ))}
                 </datalist>
+                {delegateError && <InlineError text={delegateError} />}
               </FieldRow>
               <FieldRow label="Expected return">
                 <input

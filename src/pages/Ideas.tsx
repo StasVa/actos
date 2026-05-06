@@ -822,10 +822,12 @@ const Ideas: React.FC = () => {
     initialGoalParam && goals.some((g) => g.id === initialGoalParam) ? initialGoalParam : "all",
   );
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("captured");
+  const [showNewForm, setShowNewForm] = useState(false);
 
-  // Focus the inline capture input when triggered from the ⌘K palette.
+  // Open the inline new-idea form when triggered from the ⌘K palette.
   useEffect(() => {
     return subscribeAppEvent("focus-idea-capture", () => {
+      setShowNewForm(true);
       requestAnimationFrame(() => {
         const el = document.getElementById("ideas-capture-input") as HTMLInputElement | null;
         el?.focus();

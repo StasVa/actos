@@ -53,44 +53,8 @@ const ModeCard: React.FC<{
   </button>
 );
 
-/* ───────── Field ───────── */
-
-const NumberField: React.FC<{
-  label: string;
-  value: number | "";
-  onChange: (v: number | "") => void;
-  min: number;
-  max: number;
-  step?: number;
-  suffix: string;
-  helper?: string;
-}> = ({ label, value, onChange, min, max, step, suffix, helper }) => (
-  <div className="flex flex-col gap-1.5" style={{ width: 140 }}>
-    <div className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">
-      {label}
-    </div>
-    <div className="flex items-center gap-2">
-      <div style={{ width: 90 }}>
-        <ClampedNumberInput
-          value={value}
-          onChange={onChange}
-          min={min}
-          max={max}
-          step={step}
-          ariaLabel={label}
-        />
-      </div>
-      <span className="font-mono text-[12px] text-text-secondary">{suffix}</span>
-    </div>
-    {helper && (
-      <div className="font-mono text-[11px] text-text-tertiary">{helper}</div>
-    )}
-  </div>
-);
-
 /* ───────── Stepper number control (Duration centerpiece) ───────── */
 
-import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const StepperField: React.FC<{
   label: string;

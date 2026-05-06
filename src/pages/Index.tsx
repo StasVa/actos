@@ -379,9 +379,9 @@ export const Hero: React.FC = () => {
             target={targetLabel}
             progress={progress}
             meta={[
-              `${projectsClosed} of ${projectsTotal} projects ${projectsTotal === 1 ? "closed" : "closed"}`,
-              `${actionsDone} actions done`,
-              `Last activity: ${lastLabel}`,
+              <><span className="text-text-primary tabular-nums">{projectsClosed}</span> of <span className="text-text-primary tabular-nums">{projectsTotal}</span> projects closed</>,
+              <><span className="text-text-primary tabular-nums">{actionsDone}</span> actions done</>,
+              <><span className="text-text-tertiary">Last activity:</span> <span className="text-text-primary">{lastLabel}</span></>,
             ]}
             outcome={outcome}
             effort={effort}
@@ -392,7 +392,16 @@ export const Hero: React.FC = () => {
             color={`hsl(var(--${g.color}))`}
             recent={
               recentDone.length > 0 ? (
-                <>Recent: {recentDone.map((t) => `✓ ${t}`).join(" · ")}</>
+                <>
+                  <span className="text-text-tertiary">Recent: </span>
+                  {recentDone.map((t, i) => (
+                    <React.Fragment key={i}>
+                      {i > 0 && <span className="text-text-tertiary"> · </span>}
+                      <span className="text-text-tertiary">✓ </span>
+                      <span className="text-text-secondary">{t}</span>
+                    </React.Fragment>
+                  ))}
+                </>
               ) : (
                 <>No closed actions yet.</>
               )

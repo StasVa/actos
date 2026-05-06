@@ -55,6 +55,19 @@ const ReviewWeekDetail: React.FC = () => {
     [yearWeek, actions, dayEntries, goals, projects, rituals],
   );
 
+  const prevYearWeek = React.useMemo(() => {
+    const d = dateFromYearWeek(yearWeek);
+    if (!d) return null;
+    return yearWeekFromDate(addDays(d, -7));
+  }, [yearWeek]);
+  const prevSummary = React.useMemo(
+    () =>
+      prevYearWeek
+        ? getWeekSummary(prevYearWeek, { actions, dayEntries, goals, projects, rituals })
+        : null,
+    [prevYearWeek, actions, dayEntries, goals, projects, rituals],
+  );
+
   if (!summary) {
     return (
       <div className="min-h-screen bg-surface-base text-text-primary">

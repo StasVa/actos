@@ -109,7 +109,7 @@ export const AppSidebar: React.FC<{ onOpenSettings?: () => void }> = ({ onOpenSe
         <Divider />
         <NavGroup items={GROUP_ENTITIES} pathname={pathname} />
         <Divider />
-        <NavGroup items={GROUP_ARCHIVE} pathname={pathname} />
+        <ReviewsGroup pathname={pathname} />
       </div>
 
       <div className="flex-1" />

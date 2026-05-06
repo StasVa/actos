@@ -361,6 +361,301 @@ const ConvertProjectOverlay: React.FC<{ idea: Idea; onDone: () => void }> = ({ i
   );
 };
 
+/* ===== References section ===== */
+const ReferencesSection: React.FC<{ idea: Idea }> = ({ idea }) => {
+  const updateIdea = useStore((s) => s.updateIdea);
+  const refs = idea.references ?? [];
+  const [adding, setAdding] = useState(false);
+  const [url, setUrl] = useState("");
+  const [refTitle, setRefTitle] = useState("");
+  const [editingId, setEditingId] = useState<ID | null>(null);
+  const [openMenuId, setOpenMenuId] = useState<ID | null>(null);
+
+  const resetForm = () => {
+    setUrl("");
+    setRefTitle("");
+    setAdding(false);
+    setEditingId(null);
+  };
+
+  const startEdit = (id: ID) => {
+    const r = refs.find((x) => x.id === id);
+    if (!r) return;
+    setUrl(r.url);
+    setRefTitle(r.title ?? "");
+    setEditingId(id);
+    setAdding(true);
+    setOpenMenuId(null);
+  };
+
+  const submit = () => {
+    const u = url.trim();
+    if (!u) return;
+    const t = refTitle.trim() || undefined;
+    if (editingId) {
+      updateIdea(idea.id, {
+        references: refs.map((r) => (r.id === editingId ? { ...r, url: u, title: t } : r)),
+      });
+    } else {
+      updateIdea(idea.id, {
+        references: [...refs, { id: localId(), url: u, title: t }],
+      });
+    }
+    resetForm();
+  };
+
+  const remove = (id: ID) => {
+    updateIdea(idea.id, { references: refs.filter((r) => r.id !== id) });
+    setOpenMenuId(null);
+  };
+
+  return (
+    <div>
+      <SectionHeading
+        action={
+          !adding && (
+            <button
+              onClick={() => setAdding(true)}
+              className="text-[12px] text-[hsl(var(--accent))] hover:underline"
+            >
+              + Add reference
+            </button>
+          )
+        }
+      >
+        {`REFERENCES · ${refs.length}`}
+      </SectionHeading>
+
+      {refs.length === 0 && !adding && (
+        <div className="text-[12px] text-text-tertiary">
+          No references yet. Add links to videos, articles, designs.
+        </div>
+      )}
+
+      {refs.length > 0 && (
+        <div>
+          {refs.map((r, i) => (
+            <div
+              key={r.id}
+              className={`group relative flex items-start gap-3 py-2 px-2 -mx-2 rounded-[3px] hover:bg-surface-hover transition-colors ${
+                i < refs.length - 1 ? "border-b border-border-subtle" : ""
+              }`}
+            >
+              <span className="text-text-tertiary text-[13px] leading-[1.4]">↗</span>
+              <div className="min-w-0 flex-1">
+                <a
+                  href={r.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block text-[13px] text-text-primary hover:text-[hsl(var(--accent))] transition-colors truncate"
+                >
+                  {r.title || r.url}
+                </a>
+                <div className="mt-1 font-mono text-[11px] text-text-tertiary truncate">
+                  {r.url}
+                </div>
+              </div>
+              <div className="relative shrink-0">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setOpenMenuId(openMenuId === r.id ? null : r.id);
+                  }}
+                  className="opacity-0 group-hover:opacity-100 inline-flex items-center justify-center w-6 h-6 rounded-[3px] text-text-tertiary hover:bg-surface-elevated hover:text-text-primary transition-colors leading-none"
+                  aria-label="Reference options"
+                >
+                  <span className="text-[14px] -mt-1">⋯</span>
+                </button>
+                {openMenuId === r.id && (
+                  <div className="absolute right-0 top-[calc(100%+4px)] z-10 w-32 rounded-[4px] border border-border-subtle bg-surface-elevated p-1 shadow-md">
+                    <button
+                      onClick={() => startEdit(r.id)}
+                      className="block w-full text-left text-[12px] px-2 py-1.5 rounded-[3px] hover:bg-surface-hover text-text-primary"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => remove(r.id)}
+                      className="block w-full text-left text-[12px] px-2 py-1.5 rounded-[3px] hover:bg-surface-hover text-text-warning"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {adding && (
+        <div className="mt-3 bg-surface-hover rounded-[4px] p-3 flex flex-col gap-2">
+          <input
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") submit();
+              if (e.key === "Escape") resetForm();
+            }}
+            autoFocus
+            placeholder="https://..."
+            className="bg-surface-elevated rounded-[4px] px-3 py-2 text-[13px] text-text-primary outline-none border border-transparent focus:border-border-default placeholder:text-text-tertiary"
+          />
+          <input
+            value={refTitle}
+            onChange={(e) => setRefTitle(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") submit();
+              if (e.key === "Escape") resetForm();
+            }}
+            placeholder="Optional title"
+            className="bg-surface-elevated rounded-[4px] px-3 py-2 text-[13px] text-text-primary outline-none border border-transparent focus:border-border-default placeholder:text-text-tertiary"
+          />
+          <div className="flex items-center gap-2">
+            <button
+              onClick={submit}
+              disabled={!url.trim()}
+              className="h-8 px-3 text-[12px] font-medium rounded-[4px] border border-[hsl(var(--accent))] text-[hsl(var(--accent))] hover:bg-surface-elevated transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {editingId ? "Save" : "Add"}
+            </button>
+            <button
+              onClick={resetForm}
+              className="h-8 px-2 text-[12px] text-text-tertiary hover:text-text-secondary transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+/* ===== Attachments section ===== */
+const AttachmentsSection: React.FC<{ idea: Idea }> = ({ idea }) => {
+  const updateIdea = useStore((s) => s.updateIdea);
+  const atts = idea.imageAttachments ?? [];
+  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
+  const [dragOver, setDragOver] = useState(false);
+  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+
+  const ALLOWED = /^image\/(png|jpe?g|gif|webp)$/i;
+
+  const addFiles = async (files: FileList | File[]) => {
+    const list = Array.from(files).filter((f) => ALLOWED.test(f.type));
+    if (list.length === 0) {
+      toast.error("Only PNG, JPG, GIF, or WebP images are accepted.");
+      return;
+    }
+    const readAsDataUrl = (file: File) =>
+      new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(file);
+      });
+    try {
+      const newAtts = await Promise.all(
+        list.map(async (f) => ({ id: localId(), dataUrl: await readAsDataUrl(f) })),
+      );
+      updateIdea(idea.id, { imageAttachments: [...atts, ...newAtts] });
+      toast.success(newAtts.length === 1 ? "Image attached" : `${newAtts.length} images attached`);
+    } catch {
+      toast.error("Failed to read image.");
+    }
+  };
+
+  const remove = (id: ID) => {
+    updateIdea(idea.id, { imageAttachments: atts.filter((a) => a.id !== id) });
+  };
+
+  const onDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+    if (e.dataTransfer?.files?.length) addFiles(e.dataTransfer.files);
+  };
+
+  return (
+    <div
+      onDragOver={(e) => {
+        e.preventDefault();
+        setDragOver(true);
+      }}
+      onDragLeave={() => setDragOver(false)}
+      onDrop={onDrop}
+      className={`rounded-[4px] transition-colors ${
+        dragOver ? "outline outline-1 outline-[hsl(var(--accent))] bg-surface-hover/30" : ""
+      }`}
+    >
+      <SectionHeading
+        action={
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="text-[12px] text-[hsl(var(--accent))] hover:underline"
+          >
+            + Upload
+          </button>
+        }
+      >
+        {`ATTACHMENTS · ${atts.length}`}
+      </SectionHeading>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/png,image/jpeg,image/gif,image/webp"
+        multiple
+        className="hidden"
+        onChange={(e) => {
+          if (e.target.files) addFiles(e.target.files);
+          e.target.value = "";
+        }}
+      />
+
+      {atts.length === 0 ? (
+        <div className="text-[12px] text-text-tertiary">
+          No attachments yet. Upload images for visual references.
+        </div>
+      ) : (
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(80px,80px))] gap-2">
+          {atts.map((a) => (
+            <div
+              key={a.id}
+              className="group relative w-20 h-20 rounded-[4px] overflow-hidden bg-surface-hover cursor-pointer"
+              onClick={() => setLightboxUrl(a.dataUrl)}
+            >
+              <img src={a.dataUrl} alt={a.caption ?? ""} className="w-full h-full object-cover" />
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  remove(a.id);
+                }}
+                className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 text-white text-[11px] leading-none opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                aria-label="Remove image"
+              >
+                ×
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {lightboxUrl && (
+        <div
+          onClick={() => setLightboxUrl(null)}
+          className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-8 cursor-zoom-out"
+        >
+          <img
+            src={lightboxUrl}
+            alt=""
+            className="max-w-full max-h-full object-contain rounded-[4px]"
+          />
+        </div>
+      )}
+    </div>
+  );
+};
+
 /* ===== Detail panel ===== */
 const IdeaDetail: React.FC<{ idea: Idea }> = ({ idea }) => {
   const [overlay, setOverlay] = useState<OverlayMode>(null);
@@ -439,39 +734,15 @@ const IdeaDetail: React.FC<{ idea: Idea }> = ({ idea }) => {
           className="w-full bg-surface-hover rounded-[4px] px-3 py-2 text-[14px] text-text-primary leading-[1.6] outline-none border border-transparent focus:border-border-default resize-none placeholder:text-text-tertiary"
         />
 
-        {idea.references && idea.references.length > 0 && (
-          <>
-            <div className="h-6" />
-            <SectionHeading>{`REFERENCES · ${idea.references.length}`}</SectionHeading>
-            <div>
-              {idea.references.map((r, i) => (
-                <div
-                  key={r.id}
-                  className={`flex items-start gap-3 py-2 ${
-                    i < idea.references.length - 1 ? "border-b border-border-subtle" : ""
-                  }`}
-                >
-                  <span className="text-text-tertiary text-[13px] leading-[1.4]">↗</span>
-                  <div className="min-w-0">
-                    <a
-                      href={r.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="block text-[13px] text-text-primary hover:text-[hsl(var(--accent))] transition-colors"
-                    >
-                      {r.title || r.url}
-                    </a>
-                    <div className="mt-1 font-mono text-[11px] text-text-tertiary truncate">
-                      {r.url}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </>
-        )}
+        <div className="h-6" />
+        <ReferencesSection idea={idea} />
 
-        <div className="h-8" />
+        <div className="h-6" />
+        <AttachmentsSection idea={idea} />
+
+        <div className="h-6" />
+        <div className="border-t border-border-subtle" />
+        <div className="h-4" />
 
         {idea.status === "captured" && overlay === null && (
           <div className="flex items-center gap-3">

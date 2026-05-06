@@ -88,6 +88,169 @@ const NumberField: React.FC<{
   </div>
 );
 
+/* ───────── Big editable number (Duration centerpiece) ───────── */
+
+const BigNumberField: React.FC<{
+  label: string;
+  value: number | "";
+  onChange: (v: number | "") => void;
+  min: number;
+  max: number;
+  step?: number;
+  suffix: string;
+  helper?: string;
+  isMobile: boolean;
+}> = ({ label, value, onChange, min, max, suffix, helper, isMobile }) => {
+  const [focused, setFocused] = useState(false);
+  const [flash, setFlash] = useState(false);
+  const flashTimer = React.useRef<number | null>(null);
+
+  React.useEffect(
+    () => () => {
+      if (flashTimer.current) window.clearTimeout(flashTimer.current);
+    },
+    [],
+  );
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const allowed = ["Backspace", "Delete", "Tab", "Enter", "Escape", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"];
+    if (allowed.includes(e.key)) return;
+    if (e.metaKey || e.ctrlKey) return;
+    if (/^[0-9]$/.test(e.key)) return;
+    e.preventDefault();
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value;
+    if (raw === "") {
+      onChange("");
+      return;
+    }
+    const n = Number(raw);
+    if (Number.isNaN(n)) return;
+    onChange(n);
+  };
+
+  const handleBlur = () => {
+    setFocused(false);
+    if (value === "") return;
+    let n = Math.round(Number(value));
+    if (!Number.isFinite(n)) {
+      onChange("");
+      return;
+    }
+    let clamped = false;
+    if (n > max) {
+      n = max;
+      clamped = true;
+    } else if (n < min) {
+      n = min;
+      clamped = true;
+    }
+    if (clamped) {
+      setFlash(true);
+      if (flashTimer.current) window.clearTimeout(flashTimer.current);
+      flashTimer.current = window.setTimeout(() => setFlash(false), 600);
+    }
+    onChange(n);
+  };
+
+  const display = value === "" ? "" : String(value);
+  const charCount = Math.max(display.length, 1);
+  const fontSize = isMobile ? 32 : 40;
+  // Approximate width per digit at given font size
+  const inputWidth = `${charCount * (fontSize * 0.6)}px`;
+
+  const underlineColor = flash
+    ? "hsl(var(--text-warning))"
+    : focused
+    ? "hsl(var(--accent))"
+    : "hsl(var(--border-subtle))";
+
+  return (
+    <div className={`flex-1 flex flex-col items-center ${isMobile ? "py-2" : ""}`}>
+      <div className="font-mono text-[10px] uppercase text-text-tertiary mb-3" style={{ letterSpacing: "0.08em" }}>
+        {label}
+      </div>
+      <div className="flex items-baseline gap-2">
+        <input
+          type="number"
+          inputMode="numeric"
+          value={display}
+          min={min}
+          max={max}
+          onKeyDown={handleKeyDown}
+          onChange={handleChange}
+          onFocus={(e) => {
+            setFocused(true);
+            e.currentTarget.select();
+          }}
+          onBlur={handleBlur}
+          aria-label={label}
+          className="bg-transparent outline-none text-text-primary font-medium tabular-nums text-center transition-colors"
+          style={{
+            fontSize,
+            lineHeight: 1.1,
+            width: inputWidth,
+            minWidth: fontSize * 0.7,
+            borderBottom: `2px solid ${underlineColor}`,
+            paddingBottom: 2,
+          }}
+        />
+        <span className="font-mono text-[14px] text-text-secondary">{suffix}</span>
+      </div>
+      <div className="mt-2 font-mono text-[11px] text-text-tertiary h-4">
+        {helper ?? ""}
+      </div>
+    </div>
+  );
+};
+
+/* ───────── Session timeline visualization bar ───────── */
+
+const SessionTimelineBar: React.FC<{ work: number; brk: number; cycles: number }> = ({
+  work,
+  brk,
+  cycles,
+}) => {
+  const c = Math.max(1, cycles);
+  const blocks: { kind: "work" | "break"; mins: number }[] = [];
+  for (let i = 0; i < c; i++) {
+    blocks.push({ kind: "work", mins: work });
+    if (i < c - 1 && brk > 0) blocks.push({ kind: "break", mins: brk });
+  }
+  const total = blocks.reduce((s, b) => s + b.mins, 0) || 1;
+
+  return (
+    <div className="mt-8">
+      <div
+        className="flex w-full overflow-hidden"
+        style={{
+          height: 24,
+          borderRadius: 2,
+          background: "hsl(var(--surface-hover))",
+        }}
+      >
+        {blocks.map((b, i) => (
+          <div
+            key={i}
+            className="transition-all duration-200 ease-out"
+            style={{
+              width: `${(b.mins / total) * 100}%`,
+              background:
+                b.kind === "work" ? "hsl(var(--accent))" : "hsl(var(--surface-hover))",
+              borderRight:
+                i < blocks.length - 1 && b.kind === "work"
+                  ? "1px solid hsl(var(--surface-base))"
+                  : undefined,
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
 /* ───────── Action rows ───────── */
 
 const ImpactPill: React.FC<{ impact: number; goalColor: string }> = ({ impact, goalColor }) => (

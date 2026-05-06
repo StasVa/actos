@@ -185,6 +185,7 @@ function ActionEditorPanel({
 
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmDrop, setConfirmDrop] = useState<ActionStatus | null>(null);
+  const [confirmPastDate, setConfirmPastDate] = useState<string | null>(null);
   const titleRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {

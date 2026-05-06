@@ -454,7 +454,7 @@ const AllProjects: React.FC = () => {
                 count={groups.near.length}
                 meta="≥ 75% DONE"
               />
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {groups.near.map((p) => (
                   <ProjectCard key={p.id} p={p} />
                 ))}
@@ -465,7 +465,7 @@ const AllProjects: React.FC = () => {
           {groups.active.length > 0 && (
             <section>
               <SectionHeader label="ACTIVE" count={groups.active.length} meta="MOVING THIS WEEK" />
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {groups.active.map((p) => (
                   <ProjectCard key={p.id} p={p} />
                 ))}
@@ -481,7 +481,7 @@ const AllProjects: React.FC = () => {
                 meta="NO ACTIVITY ≥ 7 DAYS"
                 warning
               />
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {groups.stalled.map((p) => (
                   <ProjectCard key={p.id} p={p} />
                 ))}

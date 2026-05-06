@@ -452,8 +452,6 @@ function ActionEditorPanel({
             </div>
           )}
 
-          {/* Contextual timestamp line */}
-          {action && <TimestampLine action={action} onClose={onClose} />}
         </div>
 
         {/* NOTES */}

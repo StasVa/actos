@@ -234,10 +234,9 @@ function ActionEditorPanel({
     if (!goalId) missing.push("Goal");
     if (!(impactNum > 0)) missing.push("Impact");
     if (requireTime && !(timeNum > 0)) missing.push("Time estimate");
-    if (newStatus === "planned" && !scheduledDate) missing.push("Scheduled date");
     if (newStatus === "delegated" && !delegateName.trim()) missing.push("Delegate name");
     return missing;
-  }, [title, goalId, impactNum, requireTime, timeNum, newStatus, scheduledDate, delegateName]);
+  }, [title, goalId, impactNum, requireTime, timeNum, newStatus, delegateName]);
 
   const canCreate = missingForCreate.length === 0;
   const createTooltip =

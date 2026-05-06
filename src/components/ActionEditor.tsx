@@ -249,6 +249,8 @@ function ActionEditorPanel({
     mode === "edit" && !!action && (action.impact === undefined || action.impact === null || action.impact <= 0);
 
   // ─── Status transitions (edit mode) ───
+  // Note: "planned" is never passed here from the dropdown (it's not an
+  // option). Planned transitions are handled by handleScheduledDateChange.
   const handleStatusChange = (next: ActionStatus) => {
     if (isGoalLevel && next !== "backlog") {
       toast.error("Assign to a Project to plan or complete this action.");
@@ -256,8 +258,6 @@ function ActionEditorPanel({
     }
     if (mode === "new") {
       setNewStatus(next);
-      if (next === "planned" && !scheduledDate) setNeedsScheduledDate(true);
-      else setNeedsScheduledDate(false);
       return;
     }
     if (!actionId) return;
@@ -297,17 +297,6 @@ function ActionEditorPanel({
       setConfirmDrop(next);
       return;
     }
-    if (next === "planned") {
-      if (!scheduledDate) {
-        setNeedsScheduledDate(true);
-        toast.error("Pick a date to plan this action.");
-        return;
-      }
-      changeActionStatus(actionId, "planned", { scheduledDate });
-      setNeedsScheduledDate(false);
-      toast("Action scheduled");
-      return;
-    }
     setImpactError(null);
     setTimeError(null);
     changeActionStatus(actionId, next);
@@ -322,13 +311,27 @@ function ActionEditorPanel({
     setConfirmDrop(null);
   };
 
-  // Apply the picked scheduled date (after status=Planned was selected without date).
-  const applyScheduledDate = (iso: string) => {
+  // Setting a scheduled date auto-derives status to "Planned".
+  // Clearing it returns to "Backlog". plannedAt history is preserved by
+  // the store transition logic.
+  const handleScheduledDateChange = (iso: string) => {
+    if (isGoalLevel && iso) {
+      toast.error("Assign to a Project to schedule this action.");
+      return;
+    }
     setScheduledDate(iso);
-    setNeedsScheduledDate(false);
-    if (mode === "edit" && actionId) {
+    if (mode === "new") {
+      setNewStatus(iso ? "planned" : "backlog");
+      return;
+    }
+    if (!actionId) return;
+    if (iso) {
       changeActionStatus(actionId, "planned", { scheduledDate: iso });
       toast("Action scheduled");
+    } else {
+      changeActionStatus(actionId, "backlog");
+      persistField("scheduledDate", undefined);
+      toast("Action moved to Backlog");
     }
   };
 

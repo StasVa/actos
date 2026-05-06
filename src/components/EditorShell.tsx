@@ -1,0 +1,139 @@
+// Shared shell for entity editors.
+// `new` mode → centered modal (640px desktop, bottom sheet < 768px).
+// `edit` mode → slide-in panel from the right (480px), legacy behavior.
+//
+// Includes a discard guard: if the user attempts to close while `dirty` is
+// true, an inline confirmation appears in-place (no nested modal).
+
+import { useEffect, useState } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
+
+export function EditorShell({
+  mode,
+  dirty,
+  onClose,
+  children,
+}: {
+  mode: "new" | "edit";
+  dirty: boolean;
+  onClose: () => void;
+  children: React.ReactNode;
+}) {
+  const isMobile = useIsMobile();
+  const [confirmDiscard, setConfirmDiscard] = useState(false);
+
+  const requestClose = () => {
+    if (dirty && mode === "new") {
+      setConfirmDiscard(true);
+      return;
+    }
+    onClose();
+  };
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.stopPropagation();
+        if (confirmDiscard) {
+          setConfirmDiscard(false);
+        } else {
+          requestClose();
+        }
+      }
+    };
+    document.addEventListener("keydown", onKey, true);
+    return () => document.removeEventListener("keydown", onKey, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dirty, mode, confirmDiscard]);
+
+  // ── EDIT mode → slide-in panel (legacy)
+  if (mode === "edit") {
+    return (
+      <>
+        <div
+          className="fixed inset-0 z-[80]"
+          style={{ background: "rgba(0,0,0,0.4)" }}
+          onClick={requestClose}
+        />
+        <aside
+          className="fixed top-0 right-0 bottom-0 z-[90] w-[480px] max-w-[100vw] bg-surface-base border-l border-border-subtle flex flex-col"
+          style={{ boxShadow: "-8px 0 24px rgba(0,0,0,0.3)" }}
+        >
+          {typeof children === "function"
+            ? (children as (ctx: { requestClose: () => void }) => React.ReactNode)({ requestClose })
+            : children}
+        </aside>
+      </>
+    );
+  }
+
+  // ── NEW mode → centered modal (or bottom sheet on mobile)
+  return (
+    <>
+      <div
+        className="fixed inset-0 z-[190]"
+        style={{
+          background: "rgba(0,0,0,0.5)",
+          backdropFilter: "blur(2px)",
+          WebkitBackdropFilter: "blur(2px)",
+        }}
+        onClick={requestClose}
+      />
+      <div
+        className={
+          isMobile
+            ? "fixed inset-x-0 bottom-0 z-[200] max-h-[90vh] bg-surface-elevated border-t border-border-subtle rounded-t-[12px] flex flex-col"
+            : "fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[200] w-[640px] max-w-[calc(100vw-32px)] max-h-[85vh] bg-surface-elevated border border-border-subtle rounded-[6px] flex flex-col"
+        }
+        style={{ boxShadow: "0 24px 48px rgba(0,0,0,0.4)" }}
+        role="dialog"
+        aria-modal="true"
+      >
+        {isMobile && (
+          <div className="flex justify-center pt-2 pb-1">
+            <div className="h-1 w-10 rounded-full bg-border-default" />
+          </div>
+        )}
+        {children}
+
+        {/* Inline discard confirmation (covers panel) */}
+        {confirmDiscard && (
+          <div
+            className="absolute inset-0 z-[10] flex items-center justify-center rounded-[6px]"
+            style={{ background: "hsl(var(--surface-elevated) / 0.96)" }}
+          >
+            <div className="text-center px-6 max-w-[420px]">
+              <div className="text-[15px] font-medium text-text-primary mb-1">
+                Discard unsaved changes?
+              </div>
+              <div className="text-[13px] text-text-secondary mb-5">
+                Your input will be lost.
+              </div>
+              <div className="flex items-center justify-center gap-3">
+                <button
+                  onClick={() => setConfirmDiscard(false)}
+                  className="text-[13px] text-text-secondary hover:text-text-primary px-3 py-1.5"
+                >
+                  Keep editing
+                </button>
+                <button
+                  onClick={() => {
+                    setConfirmDiscard(false);
+                    onClose();
+                  }}
+                  className="text-[13px] font-medium px-3 py-1.5 rounded-[4px]"
+                  style={{
+                    color: "hsl(var(--text-warning))",
+                    background: "hsl(var(--surface-hover))",
+                  }}
+                >
+                  Discard
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </>
+  );
+}

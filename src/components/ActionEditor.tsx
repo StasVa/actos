@@ -223,8 +223,6 @@ function ActionEditorPanel({
   }, [allActions]);
 
   const status: ActionStatus = mode === "edit" ? action?.status ?? "backlog" : newStatus;
-  const isTerminal =
-    status === "done" || status === "dropped" || status === "cancelled";
   const isGoalLevel = !projectId;
 
   // ─── Required-field validation ───

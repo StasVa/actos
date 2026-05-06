@@ -121,7 +121,7 @@ const StatRow: React.FC<{ label: string; value: React.ReactNode }> = ({ label, v
     <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary shrink-0">
       {label}
     </span>
-    <span className="text-[13px] text-text-secondary text-right truncate min-w-0">{value}</span>
+    <span className="font-mono text-[12px] tabular-nums text-text-primary text-right truncate min-w-0">{value}</span>
   </div>
 );
 

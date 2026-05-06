@@ -18,8 +18,9 @@ const GROUP_ENTITIES: NavItem[] = [
   { label: "Ideas", href: "/ideas" },
 ];
 
-const GROUP_ARCHIVE: NavItem[] = [
-  { label: "Reviews", href: "/reviews" },
+const REVIEWS_SUB: NavItem[] = [
+  { label: "Days", href: "/reviews/days" },
+  { label: "Weeks", href: "/reviews/weeks" },
 ];
 
 function isActive(pathname: string, href: string): boolean {

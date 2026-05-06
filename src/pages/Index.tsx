@@ -1269,7 +1269,7 @@ const Index: React.FC = () => {
 
   // Auto-open Plan or Combined modal once per day on first visit.
   useEffect(() => {
-    if (!settings.layers.planAndReview) return;
+    // Plan & Review is now always-on; no layer gate.
     const flagKey = `actos-day-prompt-${TODAY_ISO}`;
     if (sessionStorage.getItem(flagKey)) return;
     if (todayEntry?.isPlanned) return;

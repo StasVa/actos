@@ -21,6 +21,7 @@ import type {
   Ritual,
 } from "@/types";
 import { yearWeekFromDate } from "./weekUtils";
+import { timeInvestedMinutes } from "./timeStats";
 
 const ISO_DATE = (d: Date): ISODate => format(d, "yyyy-MM-dd");
 

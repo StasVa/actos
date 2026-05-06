@@ -652,62 +652,6 @@ const ReviewDayDetail: React.FC = () => {
                 </span>
               </button>
             </section>
-
-            {/* PROJECTS CLOSED */}
-            {closedProjects.length > 0 && (
-              <section>
-                <SectionHead>Projects closed · {closedProjects.length}</SectionHead>
-                <div className="space-y-1">
-                  {closedProjects.map(({ entity: p, type }) => {
-                    const g = goalById(p.goalId);
-                    const goalColor = `hsl(var(--${g?.color ?? "goal-1"}))`;
-                    return (
-                      <ClosedRow
-                        key={p.id}
-                        title={p.title}
-                        stripeColor={goalColor}
-                        pillLabel={type === "completed" ? "COMPLETED" : "DROPPED"}
-                        subline={
-                          <span className="inline-flex items-center gap-1.5">
-                            <span
-                              className="w-1.5 h-1.5 rounded-full"
-                              style={{ background: goalColor }}
-                            />
-                            {g?.title ?? "—"}
-                          </span>
-                        }
-                        onClick={() => navigate(`/projects/${p.id}`)}
-                      />
-                    );
-                  })}
-                </div>
-              </section>
-            )}
-
-            {/* GOALS CLOSED */}
-            {closedGoals.length > 0 && (
-              <section>
-                <SectionHead>Goals closed · {closedGoals.length}</SectionHead>
-                <div className="space-y-1">
-                  {closedGoals.map(({ entity: g, type }) => {
-                    const goalColor = `hsl(var(--${g.color}))`;
-                    const typeBadge = g.type === "mid-term" ? "MID-TERM" : "SHORT-TERM";
-                    const days = daysActive(g);
-                    return (
-                      <ClosedRow
-                        key={g.id}
-                        title={g.title}
-                        stripeColor={goalColor}
-                        pillLabel={type === "completed" ? "COMPLETED" : "DROPPED"}
-                        subline={`${typeBadge} · ${days} day${days === 1 ? "" : "s"} active`}
-                        onClick={() => navigate(`/goals/${g.id}`)}
-                      />
-                    );
-                  })}
-                </div>
-              </section>
-            )}
-
             {/* RITUALS */}
             {plannedRituals.length > 0 && (
               <section>

@@ -4,8 +4,9 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { useStore } from "@/store/useStore";
 import { formatHM } from "@/lib/timeStats";
-import type { Action, DayEntry, Goal, ID, ISODate } from "@/types";
+import type { Action, DayEntry, Goal, ID, ISODate, Project } from "@/types";
 import { DAY_TYPE_LABELS } from "./Index";
+import { getOutcomeSummary } from "@/lib/outcomeUtils";
 
 const TODAY = new Date();
 TODAY.setHours(0, 0, 0, 0);

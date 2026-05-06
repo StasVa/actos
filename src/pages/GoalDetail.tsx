@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { useStore, selectors } from "@/store/useStore";
 import type { Action, Goal, Project, Ritual, GoalColorVar } from "@/types";
 import { AppSidebar } from "@/components/AppSidebar";
+import { ProjectCard as SharedProjectCard } from "@/components/ProjectCard";
 
 const COLOR_VAR: Record<GoalColorVar, string> = {
   "goal-1": "hsl(var(--goal-1))",

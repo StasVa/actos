@@ -11,6 +11,7 @@ import { CardMenu } from "@/components/CardMenu";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { PlanTodayModal, CloseDayModal, ClosePlanModal } from "@/components/PlanCloseModals";
 import { ActionRow as SharedActionRow } from "@/components/ActionRow";
+import { ProjectCard as SharedProjectCard } from "@/components/ProjectCard";
 import { toast } from "sonner";
 import { subscribeAppEvent } from "@/lib/appEvents";
 
@@ -563,17 +564,15 @@ export const ActiveProjects: React.FC = () => {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-          {projectsWithMeta.map((p) => {
-            const pct = p.hasActions ? Math.round((p.done / p.total) * 100) : 0;
-            return (
-              <ActiveProjectCard
-                key={p.id}
-                p={p}
-                pct={pct}
-              />
-            );
-          })}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))" }}>
+          {projectsWithMeta.map((p) => (
+            <SharedProjectCard
+              key={p.id}
+              projectId={p.id}
+              goalLabel={p.goalLabel}
+              goalColor={p.goalColor}
+            />
+          ))}
         </div>
       )}
     </section>

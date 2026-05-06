@@ -37,9 +37,13 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
+// "planned" is intentionally excluded from the dropdown — it's a derived
+// state from the presence of `scheduledDate`. Users transition into Planned
+// by picking a date in the SCHEDULED DATE section, not by selecting an
+// option here. The trigger still displays "Planned" via STATUS_LABEL when
+// the action is in that state.
 export const STATUS_ORDER: ActionStatus[] = [
   "backlog",
-  "planned",
   "done",
   "delegated",
   "dropped",
@@ -177,9 +181,7 @@ function ActionEditorPanel({
   // For new-mode local status selection.
   const [newStatus, setNewStatus] = useState<ActionStatus>(seed.status ?? "backlog");
 
-  // When user picks Planned via dropdown but no scheduledDate yet, expose
-  // an inline date picker just below.
-  const [needsScheduledDate, setNeedsScheduledDate] = useState(false);
+  // (Planned is derived from scheduledDate — no separate "needs date" state.)
 
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmDrop, setConfirmDrop] = useState<ActionStatus | null>(null);
@@ -230,10 +232,9 @@ function ActionEditorPanel({
     if (!goalId) missing.push("Goal");
     if (!(impactNum > 0)) missing.push("Impact");
     if (requireTime && !(timeNum > 0)) missing.push("Time estimate");
-    if (newStatus === "planned" && !scheduledDate) missing.push("Scheduled date");
     if (newStatus === "delegated" && !delegateName.trim()) missing.push("Delegate name");
     return missing;
-  }, [title, goalId, impactNum, requireTime, timeNum, newStatus, scheduledDate, delegateName]);
+  }, [title, goalId, impactNum, requireTime, timeNum, newStatus, delegateName]);
 
   const canCreate = missingForCreate.length === 0;
   const createTooltip =
@@ -246,6 +247,8 @@ function ActionEditorPanel({
     mode === "edit" && !!action && (action.impact === undefined || action.impact === null || action.impact <= 0);
 
   // ─── Status transitions (edit mode) ───
+  // Note: "planned" is never passed here from the dropdown (it's not an
+  // option). Planned transitions are handled by handleScheduledDateChange.
   const handleStatusChange = (next: ActionStatus) => {
     if (isGoalLevel && next !== "backlog") {
       toast.error("Assign to a Project to plan or complete this action.");
@@ -253,8 +256,6 @@ function ActionEditorPanel({
     }
     if (mode === "new") {
       setNewStatus(next);
-      if (next === "planned" && !scheduledDate) setNeedsScheduledDate(true);
-      else setNeedsScheduledDate(false);
       return;
     }
     if (!actionId) return;
@@ -294,17 +295,6 @@ function ActionEditorPanel({
       setConfirmDrop(next);
       return;
     }
-    if (next === "planned") {
-      if (!scheduledDate) {
-        setNeedsScheduledDate(true);
-        toast.error("Pick a date to plan this action.");
-        return;
-      }
-      changeActionStatus(actionId, "planned", { scheduledDate });
-      setNeedsScheduledDate(false);
-      toast("Action scheduled");
-      return;
-    }
     setImpactError(null);
     setTimeError(null);
     changeActionStatus(actionId, next);
@@ -319,13 +309,27 @@ function ActionEditorPanel({
     setConfirmDrop(null);
   };
 
-  // Apply the picked scheduled date (after status=Planned was selected without date).
-  const applyScheduledDate = (iso: string) => {
+  // Setting a scheduled date auto-derives status to "Planned".
+  // Clearing it returns to "Backlog". plannedAt history is preserved by
+  // the store transition logic.
+  const handleScheduledDateChange = (iso: string) => {
+    if (isGoalLevel && iso) {
+      toast.error("Assign to a Project to schedule this action.");
+      return;
+    }
     setScheduledDate(iso);
-    setNeedsScheduledDate(false);
-    if (mode === "edit" && actionId) {
+    if (mode === "new") {
+      setNewStatus(iso ? "planned" : "backlog");
+      return;
+    }
+    if (!actionId) return;
+    if (iso) {
       changeActionStatus(actionId, "planned", { scheduledDate: iso });
       toast("Action scheduled");
+    } else {
+      changeActionStatus(actionId, "backlog");
+      persistField("scheduledDate", undefined);
+      toast("Action moved to Backlog");
     }
   };
 
@@ -440,22 +444,18 @@ function ActionEditorPanel({
           {/* Contextual timestamp line — moved directly below dropdown */}
           {action && <TimestampLine action={action} onClose={onClose} />}
 
-          {/* Scheduled date — required when Planned */}
-          {status === "planned" && (
+          {/* Scheduled date — always visible for non-terminal statuses.
+              Picking a date auto-derives status to Planned; clearing
+              returns to Backlog. */}
+          {status !== "done" && status !== "dropped" && status !== "cancelled" && status !== "delegated" && (
             <div className="mt-3">
               <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-2">
-                Scheduled date · required
+                Scheduled date
               </div>
               <DateChipPicker
                 value={scheduledDate}
-                onChange={(iso) => {
-                  if (iso) {
-                    applyScheduledDate(iso);
-                  } else {
-                    setScheduledDate("");
-                    if (mode === "edit") persistField("scheduledDate", undefined);
-                  }
-                }}
+                optional
+                onChange={handleScheduledDateChange}
               />
             </div>
           )}

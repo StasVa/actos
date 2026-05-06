@@ -202,7 +202,7 @@ const GoalColumn: React.FC<{
       <Sparkline data={spark} color={color} tips={sparkTips} />
     </div>
 
-    <div className="font-mono text-[11px] text-text-secondary leading-relaxed">{recent}</div>
+    <div className="font-mono text-[11px] text-text-tertiary leading-relaxed">{recent}</div>
     </div>
   );
   if (href) {

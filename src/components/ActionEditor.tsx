@@ -338,17 +338,8 @@ function ActionEditorPanel({
   };
 
   const handleSaveNew = () => {
-    if (!title.trim()) {
-      toast.error("Title is required");
-      return;
-    }
-    if (newStatus === "planned" && !scheduledDate) {
-      toast.error("Pick a scheduled date");
-      setNeedsScheduledDate(true);
-      return;
-    }
-    if (newStatus === "delegated" && !delegateName.trim()) {
-      toast.error("Delegate name is required");
+    if (!canCreate) {
+      toast.error(createTooltip || "Required fields missing");
       return;
     }
     const newId = createAction({
@@ -357,7 +348,7 @@ function ActionEditorPanel({
       goalId,
       scheduledDate: scheduledDate || undefined,
       notes: notes || undefined,
-      impact: Number(impact) || 0,
+      impact: impactNum,
       timeEstimateMinutes: timeMin === "" ? undefined : Number(timeMin),
       energyCost: energy === "" ? undefined : Number(energy),
       focusCost: focus === "" ? undefined : Number(focus),
@@ -371,6 +362,23 @@ function ActionEditorPanel({
       cancelledAt: prefill?.cancelledAt,
     });
     toast("Action created");
+    useStore.getState().openPanel({ kind: "action", mode: "edit", id: newId });
+  };
+
+  const handleDuplicate = () => {
+    if (!action) return;
+    const newId = createAction({
+      title: action.title + " (copy)",
+      projectId: action.projectId,
+      goalId: action.goalId,
+      notes: action.notes,
+      impact: action.impact,
+      timeEstimateMinutes: action.timeEstimateMinutes,
+      energyCost: action.energyCost,
+      focusCost: action.focusCost,
+      status: "backlog",
+    });
+    toast("Action duplicated");
     useStore.getState().openPanel({ kind: "action", mode: "edit", id: newId });
   };
 

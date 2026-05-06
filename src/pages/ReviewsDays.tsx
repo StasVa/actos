@@ -303,6 +303,8 @@ const ReviewsDays: React.FC = () => {
                 key={row.date}
                 row={row}
                 goals={goals}
+                projects={projects}
+                allActions={actions}
                 logTime={settings.layers.logTime}
                 logEnergy={settings.layers.logEnergy}
               />

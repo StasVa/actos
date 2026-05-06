@@ -56,17 +56,26 @@ const ModeCard: React.FC<{
 /* ───────── Stepper number control (Duration centerpiece) ───────── */
 
 
+type StepperSize = "xl" | "md" | "sm";
+
+const SIZE_SPEC: Record<StepperSize, { font: number; suffixSize: number; btnPad: string; iconSize: number }> = {
+  xl: { font: 48, suffixSize: 14, btnPad: "10px 14px", iconSize: 18 },
+  md: { font: 20, suffixSize: 13, btnPad: "6px 8px", iconSize: 14 },
+  sm: { font: 16, suffixSize: 12, btnPad: "4px 6px", iconSize: 12 },
+};
+
 const StepperField: React.FC<{
-  label: string;
+  label?: string;
   value: number | "";
   onChange: (v: number | "") => void;
   min: number;
   max: number;
   step: number;
   suffix: string;
-  helper?: string;
-  isMobile: boolean;
-}> = ({ label, value, onChange, min, max, step, suffix, helper, isMobile }) => {
+  size?: StepperSize;
+  isMobile?: boolean;
+  ariaLabel?: string;
+}> = ({ label, value, onChange, min, max, step, suffix, size = "xl", isMobile, ariaLabel }) => {
   const [focused, setFocused] = useState(false);
   const [flash, setFlash] = useState(false);
   const flashTimer = React.useRef<number | null>(null);
@@ -101,10 +110,7 @@ const StepperField: React.FC<{
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value;
-    if (raw === "") {
-      onChange("");
-      return;
-    }
+    if (raw === "") { onChange(""); return; }
     const n = Number(raw);
     if (Number.isNaN(n)) return;
     onChange(n);
@@ -114,18 +120,10 @@ const StepperField: React.FC<{
     setFocused(false);
     if (value === "") return;
     let n = Math.round(Number(value));
-    if (!Number.isFinite(n)) {
-      onChange("");
-      return;
-    }
+    if (!Number.isFinite(n)) { onChange(""); return; }
     let clamped = false;
-    if (n > max) {
-      n = max;
-      clamped = true;
-    } else if (n < min) {
-      n = min;
-      clamped = true;
-    }
+    if (n > max) { n = max; clamped = true; }
+    else if (n < min) { n = min; clamped = true; }
     if (clamped) {
       setFlash(true);
       if (flashTimer.current) window.clearTimeout(flashTimer.current);
@@ -135,7 +133,8 @@ const StepperField: React.FC<{
   };
 
   const display = value === "" ? "" : String(value);
-  const fontSize = isMobile ? 28 : 36;
+  const spec = SIZE_SPEC[size];
+  const fontSize = size === "xl" && isMobile ? 36 : spec.font;
   const charCount = Math.max(display.length, 1);
   const inputWidth = `${charCount * (fontSize * 0.62)}px`;
 
@@ -145,33 +144,24 @@ const StepperField: React.FC<{
     ? "hsl(var(--accent))"
     : "transparent";
 
-  const StepBtn: React.FC<{ disabled: boolean; onClick: () => void; children: React.ReactNode; ariaLabel: string }> = ({
-    disabled,
-    onClick,
-    children,
-    ariaLabel,
-  }) => (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      aria-label={ariaLabel}
-      className="inline-flex items-center justify-center rounded-[4px] transition-colors text-text-secondary hover:text-text-primary hover:bg-surface-hover disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-text-secondary disabled:cursor-not-allowed"
-      style={{ padding: "8px 12px" }}
-    >
-      {children}
-    </button>
-  );
-
   return (
-    <div className={`flex-1 flex flex-col items-center ${isMobile ? "py-2" : ""}`}>
-      <div className="font-mono text-[10px] uppercase text-text-tertiary mb-3" style={{ letterSpacing: "0.08em" }}>
-        {label}
-      </div>
-      <div className="flex items-center gap-2">
-        <StepBtn disabled={atMin} onClick={dec} ariaLabel={`Decrease ${label}`}>
-          <ChevronLeft size={16} />
-        </StepBtn>
+    <div className="flex flex-col items-center">
+      {label && (
+        <div className="font-mono text-[10px] uppercase text-text-tertiary mb-3" style={{ letterSpacing: "0.08em" }}>
+          {label}
+        </div>
+      )}
+      <div className="flex items-center gap-1">
+        <button
+          type="button"
+          onClick={dec}
+          disabled={atMin}
+          aria-label={`Decrease ${ariaLabel ?? label ?? ""}`}
+          className="inline-flex items-center justify-center rounded-[4px] transition-colors text-text-secondary hover:text-text-primary hover:bg-surface-hover disabled:opacity-30 disabled:hover:bg-transparent disabled:cursor-not-allowed"
+          style={{ padding: spec.btnPad }}
+        >
+          <ChevronLeft size={spec.iconSize} />
+        </button>
         <div className="flex items-baseline gap-2">
           <input
             type="number"
@@ -181,12 +171,9 @@ const StepperField: React.FC<{
             max={max}
             onKeyDown={handleKeyDown}
             onChange={handleChange}
-            onFocus={(e) => {
-              setFocused(true);
-              e.currentTarget.select();
-            }}
+            onFocus={(e) => { setFocused(true); e.currentTarget.select(); }}
             onBlur={handleBlur}
-            aria-label={label}
+            aria-label={ariaLabel ?? label}
             className="bg-transparent outline-none text-text-primary font-medium tabular-nums text-center transition-colors"
             style={{
               fontSize,
@@ -197,14 +184,18 @@ const StepperField: React.FC<{
               paddingBottom: 2,
             }}
           />
-          <span className="font-mono text-[14px] text-text-secondary">{suffix}</span>
+          <span className="font-mono text-text-secondary" style={{ fontSize: spec.suffixSize }}>{suffix}</span>
         </div>
-        <StepBtn disabled={atMax} onClick={inc} ariaLabel={`Increase ${label}`}>
-          <ChevronRight size={16} />
-        </StepBtn>
-      </div>
-      <div className="mt-2 font-mono text-[11px] text-text-tertiary h-4">
-        {helper ?? ""}
+        <button
+          type="button"
+          onClick={inc}
+          disabled={atMax}
+          aria-label={`Increase ${ariaLabel ?? label ?? ""}`}
+          className="inline-flex items-center justify-center rounded-[4px] transition-colors text-text-secondary hover:text-text-primary hover:bg-surface-hover disabled:opacity-30 disabled:hover:bg-transparent disabled:cursor-not-allowed"
+          style={{ padding: spec.btnPad }}
+        >
+          <ChevronRight size={spec.iconSize} />
+        </button>
       </div>
     </div>
   );

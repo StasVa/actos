@@ -37,9 +37,13 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
+// "planned" is intentionally excluded from the dropdown — it's a derived
+// state from the presence of `scheduledDate`. Users transition into Planned
+// by picking a date in the SCHEDULED DATE section, not by selecting an
+// option here. The trigger still displays "Planned" via STATUS_LABEL when
+// the action is in that state.
 export const STATUS_ORDER: ActionStatus[] = [
   "backlog",
-  "planned",
   "done",
   "delegated",
   "dropped",

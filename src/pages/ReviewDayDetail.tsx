@@ -136,21 +136,33 @@ const ReviewDayDetail: React.FC = () => {
   const goalColorOf = (a: Action | Ritual) =>
     `hsl(var(--${goalById((a as any).goalId)?.color ?? "goal-1"}))`;
 
-  // Done actions on this day
-  const doneToday = actions.filter(
-    (a) => a.status === "done" && a.completedAt?.slice(0, 10) === date,
+  // Status transitions on this day
+  const sameDay = (iso?: string) => !!iso && iso.slice(0, 10) === date;
+
+  const doneToday = actions.filter((a) => a.status === "done" && sameDay(a.completedAt));
+  const delegatedToday = actions.filter(
+    (a) => a.status === "delegated" && sameDay(a.delegatedAt),
+  );
+  const droppedToday = actions.filter(
+    (a) => a.status === "dropped" && sameDay(a.droppedAt),
+  );
+  const cancelledToday = actions.filter(
+    (a) => a.status === "cancelled" && sameDay(a.cancelledAt),
   );
 
   const planned = (dayEntry?.plannedActionIds ?? [])
     .map((id) => actions.find((a) => a.id === id))
     .filter(Boolean) as Action[];
 
-  const doneIds = new Set(doneToday.map((a) => a.id));
-  const skipped = planned.filter(
-    (a) => !doneIds.has(a.id) && (a.status === "dropped" || a.status === "cancelled"),
+  const transitionedIds = new Set([
+    ...doneToday.map((a) => a.id),
+    ...delegatedToday.map((a) => a.id),
+    ...droppedToday.map((a) => a.id),
+    ...cancelledToday.map((a) => a.id),
+  ]);
+  const notCompleted = planned.filter(
+    (a) => !transitionedIds.has(a.id) && a.status !== "done",
   );
-  const skippedIds = new Set(skipped.map((a) => a.id));
-  const notCompleted = planned.filter((a) => !doneIds.has(a.id) && !skippedIds.has(a.id));
 
   // Rituals
   const plannedRituals = (dayEntry?.plannedRitualIds ?? [])

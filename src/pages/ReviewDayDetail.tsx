@@ -238,6 +238,13 @@ const ReviewDayDetail: React.FC = () => {
     [doneToday, delegatedToday, goals, projects, actions],
   );
 
+  // Sessions started on this day
+  const allSessions = useStore((s) => s.sessions);
+  const sessionsForDay = React.useMemo(
+    () => getSessionsForDay(allSessions, date),
+    [allSessions, date],
+  );
+
   // No data at all (closed entities also count as data)
   const hasAnyData =
     !!dayEntry ||

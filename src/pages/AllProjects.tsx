@@ -97,7 +97,6 @@ const ProjectCard: React.FC<{ p: Project }> = ({ p }) => {
               <CardMenu
                 ariaLabel="Project menu"
                 items={[
-                  { label: "Edit", onSelect: () => openPanel({ kind: "project", mode: "edit", id: p.id }) },
                   { label: "Mark complete", onSelect: () => { markProjectComplete(p.id); toast("Project completed"); } },
                   { label: "Drop", destructive: true, onSelect: () => setConfirmDrop(true) },
                   { label: "Delete", destructive: true, onSelect: () => setConfirmDelete(true) },

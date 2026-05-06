@@ -1,12 +1,14 @@
-import React, { useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Link, useParams, useNavigate, useBeforeUnload } from "react-router-dom";
+import { toast } from "sonner";
 import { Tooltip, StateDotTooltip } from "@/components/Tooltip";
 import { useStore, selectors } from "@/store/useStore";
-import type { Action, ActionStatus, GoalColorVar, Project, ProjectReference } from "@/types";
+import type { Action, ActionStatus, GoalColorVar, Project, ProjectReference, ProjectStatus } from "@/types";
 import { AppSidebar } from "@/components/AppSidebar";
 import { ActionRow as SharedActionRow } from "@/components/ActionRow";
 import { RichTextEditor } from "@/components/RichTextEditor";
 import { CardMenu } from "@/components/CardMenu";
+import { ConfirmModal } from "@/components/ConfirmModal";
 
 const COLOR_VAR: Record<GoalColorVar, string> = {
   "goal-1": "hsl(var(--goal-1))",

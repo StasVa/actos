@@ -457,26 +457,8 @@ const ReviewDayDetail: React.FC = () => {
               </section>
             )}
 
-            {/* OUTCOME ADDED */}
+            {/* VALUE ADDED */}
             <OutcomeAddedSection outcome={outcome} period="day" />
-
-            {/* ENERGY */}
-            {settings.layers.logEnergy &&
-              (dayEntry?.morningEnergyScore != null || dayEntry?.eveningEnergyScore != null) && (
-                <section>
-                  <SectionHead>Energy</SectionHead>
-                  <div className="space-y-1 text-[14px] text-text-primary">
-                    <div>
-                      Morning:{" "}
-                      {dayEntry?.morningEnergyScore != null ? `${dayEntry.morningEnergyScore}/10` : "not logged"}
-                    </div>
-                    <div>
-                      Evening:{" "}
-                      {dayEntry?.eveningEnergyScore != null ? `${dayEntry.eveningEnergyScore}/10` : "not logged"}
-                    </div>
-                  </div>
-                </section>
-              )}
 
             {/* TIME INVESTED */}
             {settings.layers.logTime && totalMin > 0 && (

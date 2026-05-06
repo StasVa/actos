@@ -323,7 +323,7 @@ const ReviewWeekDetail: React.FC = () => {
             </section>
           )}
 
-          {/* OUTCOME ADDED */}
+          {/* VALUE ADDED */}
           <OutcomeAddedSection outcome={outcome} period="week" />
 
           {/* ENERGY */}

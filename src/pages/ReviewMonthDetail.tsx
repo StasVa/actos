@@ -318,7 +318,7 @@ const ReviewMonthDetail: React.FC = () => {
             </section>
           )}
 
-          {/* OUTCOME ADDED */}
+          {/* VALUE ADDED */}
           <OutcomeAddedSection outcome={outcome} period="month" />
 
           {/* ENERGY */}

@@ -62,94 +62,9 @@ const StateTooltip: React.FC<{ p: Project }> = ({ p }) => (
 );
 
 /* ===== Project card (active grid) — navigates to /projects/:id ===== */
-const ProjectCard: React.FC<{ p: Project }> = ({ p }) => {
-  const markProjectComplete = useStore((s) => s.markProjectComplete);
-  const dropProject = useStore((s) => s.dropProject);
-  const deleteProject = useStore((s) => s.deleteProject);
-  const [confirmDrop, setConfirmDrop] = useState(false);
-  const [confirmDelete, setConfirmDelete] = useState(false);
-
-  const pct = Math.round((p.done / p.total) * 100);
-  const stateColor =
-    p.state === "stalled"
-      ? "hsl(var(--state-stalled))"
-      : p.state === "near"
-      ? "hsl(var(--accent))"
-      : "hsl(var(--state-active))";
-  const warnLast = p.lastDays >= 7;
-  return (
-    <>
-      <Link to={`/projects/${p.id}`} className="block text-left w-full">
-        <div className="group h-[124px] p-3 flex flex-col gap-2 rounded-[6px] bg-surface-raised border border-border-subtle hover:bg-surface-hover hover:border-accent cursor-pointer transition-colors duration-100">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5 min-w-0">
-              <span className="w-2 h-2 rounded-full shrink-0" style={{ background: p.goalColor }} />
-              <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary truncate">
-                {p.goalLabel}
-              </span>
-            </div>
-            <div className="flex items-center gap-1 shrink-0">
-              <Tooltip content={<StateTooltip p={p} />}>
-                <span className="w-2 h-2 rounded-full shrink-0" style={{ background: stateColor }} />
-              </Tooltip>
-              <CardMenu
-                ariaLabel="Project menu"
-                items={[
-                  { label: "Mark complete", onSelect: () => { markProjectComplete(p.id); toast("Project completed"); } },
-                  { label: "Drop", destructive: true, onSelect: () => setConfirmDrop(true) },
-                  { label: "Delete", destructive: true, onSelect: () => setConfirmDelete(true) },
-                ]}
-              />
-            </div>
-          </div>
-
-          <div
-            className="flex-1 text-[15px] font-medium text-text-primary leading-[1.3] overflow-hidden"
-            style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}
-          >
-            {p.title}
-          </div>
-
-          <div className="h-1 w-full bg-surface-hover rounded-[2px] overflow-hidden">
-            <div className="h-full rounded-[2px]" style={{ width: `${pct}%`, background: p.goalColor }} />
-          </div>
-
-          <div className="flex items-center justify-between font-mono text-[11px] tabular-nums">
-            <div>
-              <span className="text-text-secondary">
-                {p.done}/{p.total}
-              </span>
-              <span className="text-text-tertiary"> · </span>
-              <span className="text-text-secondary">{pct}%</span>
-            </div>
-            <div>
-              <span className="text-text-tertiary">Last: </span>
-              <span className={warnLast ? "text-text-warning" : "text-text-secondary"}>{p.last}</span>
-            </div>
-          </div>
-        </div>
-      </Link>
-      <ConfirmModal
-        open={confirmDrop}
-        title="Drop this project?"
-        body="Open actions in this project will be dropped. You can re-open it later."
-        confirmLabel="Drop project"
-        destructive
-        onCancel={() => setConfirmDrop(false)}
-        onConfirm={() => { dropProject(p.id); toast("Project dropped"); setConfirmDrop(false); }}
-      />
-      <ConfirmModal
-        open={confirmDelete}
-        title="Delete this project?"
-        body="This permanently removes the project and all its actions. This cannot be undone."
-        confirmLabel="Delete"
-        destructive
-        onCancel={() => setConfirmDelete(false)}
-        onConfirm={() => { deleteProject(p.id); toast("Project deleted"); setConfirmDelete(false); }}
-      />
-    </>
-  );
-};
+const ProjectCard: React.FC<{ p: Project }> = ({ p }) => (
+  <SharedProjectCard projectId={p.id} goalLabel={p.goalLabel} goalColor={p.goalColor} />
+);
 
 /* ===== Closed list row (denser, history) — navigates ===== */
 const ClosedRow: React.FC<{ p: Project }> = ({ p }) => {

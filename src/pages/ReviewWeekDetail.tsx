@@ -14,6 +14,8 @@ import {
 } from "@/lib/weekUtils";
 import { ActionRow } from "@/components/ActionRow";
 import { AccomplishmentsSection, type AccomplishmentTile } from "@/components/AccomplishmentsSection";
+import { OutcomeAddedSection } from "@/components/OutcomeAddedSection";
+import { getOutcomeSummary } from "@/lib/outcomeUtils";
 import { addDays } from "date-fns";
 import { DAY_TYPE_LABELS } from "./Index";
 import type { Action } from "@/types";
@@ -100,6 +102,23 @@ const ReviewWeekDetail: React.FC = () => {
   const totalMin = summary.totalTimeMinutes;
   const yMaxGoal = Math.max(1, ...summary.perGoalTime.map((p) => p.minutes));
 
+  const outcome = getOutcomeSummary(
+    summary.doneActions,
+    summary.delegatedActions,
+    goals,
+    projects,
+    actions,
+  );
+  const prevOutcome = prevSummary
+    ? getOutcomeSummary(
+        prevSummary.doneActions,
+        prevSummary.delegatedActions,
+        goals,
+        projects,
+        actions,
+      )
+    : null;
+
   // Top contributing actions: Done, sorted by impact desc, top 10, grouped by goal
   const topActions = [...summary.doneActions]
     .sort((a, b) => (b.impact ?? 0) - (a.impact ?? 0))
@@ -159,12 +178,24 @@ const ReviewWeekDetail: React.FC = () => {
               prevSummary?.ritualWeek.reduce((s, r) => s + r.doneCount, 0) ?? null;
             const prevTime = prevSummary?.totalTimeMinutes ?? null;
             const hasAny =
+              outcome.outcomeAdded > 0 ||
               actionsCount > 0 ||
               ritualsCount > 0 ||
               summary.closedProjects.length > 0 ||
               summary.closedGoals.length > 0 ||
               (settings.layers.logTime && totalMin > 0);
             if (hasAny) {
+              if (outcome.outcomeAdded > 0)
+                tiles.push({
+                  key: "outcome",
+                  value: `+${outcome.outcomeAdded}`,
+                  label: "Outcome added",
+                  delta:
+                    prevOutcome != null
+                      ? outcome.outcomeAdded - prevOutcome.outcomeAdded
+                      : null,
+                  deltaLabel: "vs last week",
+                });
               tiles.push({
                 key: "actions",
                 value: String(actionsCount),
@@ -179,18 +210,6 @@ const ReviewWeekDetail: React.FC = () => {
                 delta: prevRitualsCount != null ? ritualsCount - prevRitualsCount : null,
                 deltaLabel: "vs last week",
               });
-              if (summary.closedProjects.length > 0)
-                tiles.push({
-                  key: "projects",
-                  value: String(summary.closedProjects.length),
-                  label: "Projects closed",
-                });
-              if (summary.closedGoals.length > 0)
-                tiles.push({
-                  key: "goals",
-                  value: String(summary.closedGoals.length),
-                  label: "Goals closed",
-                });
               if (settings.layers.logTime && totalMin > 0) {
                 const deltaH =
                   prevTime != null
@@ -204,6 +223,18 @@ const ReviewWeekDetail: React.FC = () => {
                   deltaLabel: "h vs last week",
                 });
               }
+              if (summary.closedProjects.length > 0)
+                tiles.push({
+                  key: "projects",
+                  value: String(summary.closedProjects.length),
+                  label: "Projects closed",
+                });
+              if (summary.closedGoals.length > 0)
+                tiles.push({
+                  key: "goals",
+                  value: String(summary.closedGoals.length),
+                  label: "Goals closed",
+                });
             }
             return <AccomplishmentsSection tiles={tiles} period="week" />;
           })()}
@@ -288,6 +319,9 @@ const ReviewWeekDetail: React.FC = () => {
               </div>
             </section>
           )}
+
+          {/* OUTCOME ADDED */}
+          <OutcomeAddedSection outcome={outcome} period="week" />
 
           {/* ENERGY */}
           {settings.layers.logEnergy &&

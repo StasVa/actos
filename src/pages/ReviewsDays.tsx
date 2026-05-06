@@ -4,8 +4,9 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { useStore } from "@/store/useStore";
 import { formatHM } from "@/lib/timeStats";
-import type { Action, DayEntry, Goal, ID, ISODate } from "@/types";
+import type { Action, DayEntry, Goal, ID, ISODate, Project } from "@/types";
 import { DAY_TYPE_LABELS } from "./Index";
+import { getOutcomeSummary } from "@/lib/outcomeUtils";
 
 const TODAY = new Date();
 TODAY.setHours(0, 0, 0, 0);
@@ -39,6 +40,7 @@ interface DayRow {
   date: ISODate;
   entry?: DayEntry;
   doneActions: Action[];
+  delegatedActions: Action[];
 }
 
 function buildDayRows(
@@ -48,16 +50,18 @@ function buildDayRows(
   const dates = new Set<ISODate>();
   for (const e of entries) dates.add(e.date);
   for (const a of actions) {
-    if (a.status === "done" && a.completedAt) {
-      dates.add(a.completedAt.slice(0, 10));
-    }
+    if (a.status === "done" && a.completedAt) dates.add(a.completedAt.slice(0, 10));
+    if (a.status === "delegated" && a.delegatedAt) dates.add(a.delegatedAt.slice(0, 10));
   }
   const rows: DayRow[] = Array.from(dates).map((date) => {
     const entry = entries.find((e) => e.date === date);
     const doneActions = actions.filter(
       (a) => a.status === "done" && a.completedAt?.slice(0, 10) === date,
     );
-    return { date, entry, doneActions };
+    const delegatedActions = actions.filter(
+      (a) => a.status === "delegated" && a.delegatedAt?.slice(0, 10) === date,
+    );
+    return { date, entry, doneActions, delegatedActions };
   });
   rows.sort((a, b) => b.date.localeCompare(a.date));
   return rows;
@@ -102,17 +106,15 @@ const FilterDD: React.FC<{
   </div>
 );
 
-const DayRowItem: React.FC<{ row: DayRow; goals: Goal[]; logTime: boolean; logEnergy: boolean }> = ({
-  row,
-  goals,
-  logTime,
-  logEnergy,
-}) => {
-  const { date, entry, doneActions } = row;
-  const ritualsDone =
-    entry?.plannedRitualIds?.length != null
-      ? Math.min(entry.plannedRitualIds.length, entry.plannedRitualIds.length)
-      : 0;
+const DayRowItem: React.FC<{
+  row: DayRow;
+  goals: Goal[];
+  projects: Project[];
+  allActions: Action[];
+  logTime: boolean;
+  logEnergy: boolean;
+}> = ({ row, goals, projects, allActions, logTime, logEnergy }) => {
+  const { date, entry, doneActions, delegatedActions } = row;
   // Approximate ritual count via plannedRitualIds minus skipped
   const ritualCount = entry
     ? Math.max(0, (entry.plannedRitualIds?.length ?? 0) - (entry.skippedRitualIds?.length ?? 0))
@@ -132,7 +134,10 @@ const DayRowItem: React.FC<{ row: DayRow; goals: Goal[]; logTime: boolean; logEn
       return { g, min };
     });
 
+  const outcome = getOutcomeSummary(doneActions, delegatedActions, goals, projects, allActions);
+
   const stats: string[] = [];
+  if (outcome.outcomeAdded > 0) stats.push(`+${outcome.outcomeAdded} outcome`);
   stats.push(`${doneActions.length} actions done`);
   if (ritualCount > 0) stats.push(`${ritualCount} rituals`);
   if (logTime && totalMin > 0) stats.push(`${formatHM(totalMin)} invested`);
@@ -196,6 +201,7 @@ const ReviewsDays: React.FC = () => {
   const dayEntries = useStore((s) => s.dayEntries);
   const actions = useStore((s) => s.actions);
   const goals = useStore((s) => s.goals);
+  const projects = useStore((s) => s.projects);
   const settings = useStore((s) => s.settings);
 
   const [dayType, setDayType] = React.useState("all");
@@ -297,6 +303,8 @@ const ReviewsDays: React.FC = () => {
                 key={row.date}
                 row={row}
                 goals={goals}
+                projects={projects}
+                allActions={actions}
                 logTime={settings.layers.logTime}
                 logEnergy={settings.layers.logEnergy}
               />

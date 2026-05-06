@@ -27,8 +27,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-type IconType = React.ComponentType<{ size?: number; className?: string }>;
-type NavItem = { label: string; href: string; icon: IconType };
+import type { LucideIcon } from "lucide-react";
+type NavItem = { label: string; href: string; icon: LucideIcon };
 
 const GROUP_EXECUTION: NavItem[] = [
   { label: "Today", href: "/today", icon: Sun },

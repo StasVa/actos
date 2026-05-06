@@ -93,10 +93,8 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ projectId, goalLabel, 
       .at(-1);
     const ago = fmtAgo(lastIso ?? undefined);
 
-    // Time investment (estimate-based; logged time would replace estimate when available)
-    const investedMin = liveActs
-      .filter((a) => a.status === "done" || a.status === "delegated")
-      .reduce((sum, a) => sum + (a.timeEstimateMinutes ?? 0), 0);
+    // Time investment: full time for Done + 20% of time for Delegated.
+    const investedMin = liveActs.reduce((sum, a) => sum + timeInvestedMinutes(a), 0);
     const remainingMin = liveActs
       .filter((a) => a.status === "planned" || a.status === "backlog")
       .reduce((sum, a) => sum + (a.timeEstimateMinutes ?? 0), 0);

@@ -18,7 +18,7 @@ import AllDelegated from "./pages/AllDelegated.tsx";
 import AllProjects from "./pages/AllProjects.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import { ActionEditor } from "./components/ActionEditor";
-import { ProjectEditor } from "./components/ProjectEditor";
+
 import { GoalEditor } from "./components/GoalEditor";
 import { RitualEditor } from "./components/RitualEditor";
 import { CommandPalette } from "./components/CommandPalette";
@@ -33,7 +33,7 @@ const App = () => (
       <Toaster />
       <Sonner position="bottom-right" />
       <ActionEditor />
-      <ProjectEditor />
+      
       <GoalEditor />
       <RitualEditor />
       <GlobalSettingsHost />

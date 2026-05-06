@@ -19,6 +19,7 @@ import { useStore } from "@/store/useStore";
 import type { Action, ActionStatus, ID } from "@/types";
 import { ConfirmModal } from "./ConfirmModal";
 import { ClampedNumberInput } from "./ClampedNumberInput";
+import { EditorShell, EditorCloseX, EditorCancelButton } from "./EditorShell";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -104,32 +105,16 @@ export function ActionEditor() {
 
   const open = panel?.kind === "action";
 
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") closePanel();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [open, closePanel]);
-
   if (!open || panel?.kind !== "action") return null;
 
   return (
-    <>
-      <div
-        className="fixed inset-0 z-[80]"
-        style={{ background: "rgba(0,0,0,0.4)" }}
-        onClick={closePanel}
-      />
-      <ActionEditorPanel
-        key={(panel.mode === "edit" ? panel.id : "new") ?? "new"}
-        mode={panel.mode}
-        actionId={panel.id}
-        prefill={panel.prefill}
-        onClose={closePanel}
-      />
-    </>
+    <ActionEditorPanel
+      key={(panel.mode === "edit" ? panel.id : "new") ?? "new"}
+      mode={panel.mode}
+      actionId={panel.id}
+      prefill={panel.prefill}
+      onClose={closePanel}
+    />
   );
 }
 
@@ -426,22 +411,39 @@ function ActionEditorPanel({
     onClose();
   };
 
+  const dirty =
+    mode === "new" &&
+    (!!title.trim() ||
+      !!notes.trim() ||
+      impact !== "" ||
+      timeMin !== "" ||
+      energy !== "" ||
+      focus !== "" ||
+      !!scheduledDate ||
+      !!delegateName.trim() ||
+      !!delegateNote.trim());
+
   return (
-    <aside
-      className="fixed top-0 right-0 bottom-0 z-[90] w-[480px] max-w-[100vw] bg-surface-base border-l border-border-subtle flex flex-col"
-      style={{ boxShadow: "-8px 0 24px rgba(0,0,0,0.3)" }}
-    >
+    <EditorShell mode={mode} dirty={dirty} onClose={onClose}>
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-border-subtle">
-        <div className="font-mono text-[11px] uppercase tracking-[0.08em] text-text-tertiary">
-          {mode === "new" ? "New action" : "Edit action"}
-        </div>
-        <button
-          onClick={onClose}
-          className="w-7 h-7 inline-flex items-center justify-center rounded-[4px] text-text-tertiary hover:bg-surface-hover hover:text-text-primary transition-colors"
-        >
-          ✕
-        </button>
+      <div className="flex items-center justify-between px-6 py-4 border-b border-border-subtle shrink-0">
+        {mode === "new" ? (
+          <div className="text-[18px] font-medium text-text-primary">New action</div>
+        ) : (
+          <div className="font-mono text-[11px] uppercase tracking-[0.08em] text-text-tertiary">
+            Edit action
+          </div>
+        )}
+        {mode === "new" ? (
+          <EditorCloseX />
+        ) : (
+          <button
+            onClick={onClose}
+            className="w-7 h-7 inline-flex items-center justify-center rounded-[4px] text-text-tertiary hover:bg-surface-hover hover:text-text-primary transition-colors"
+          >
+            ✕
+          </button>
+        )}
       </div>
 
       {/* Body */}
@@ -702,7 +704,7 @@ function ActionEditorPanel({
 
       {/* Footer */}
       <div
-        className="px-6 flex items-center justify-between"
+        className="px-6 flex items-center justify-between shrink-0"
         style={{
           borderTop: "1px solid hsl(var(--border-subtle))",
           paddingTop: 16,
@@ -711,12 +713,7 @@ function ActionEditorPanel({
       >
         {mode === "new" ? (
           <>
-            <button
-              onClick={onClose}
-              className="text-[13px] text-text-secondary hover:text-text-primary px-3 py-1.5"
-            >
-              Cancel
-            </button>
+            <EditorCancelButton />
             <button
               onClick={handleSaveNew}
               disabled={!canCreate}
@@ -728,7 +725,7 @@ function ActionEditorPanel({
                 cursor: canCreate ? "pointer" : "not-allowed",
               }}
             >
-              Create
+              Create action
             </button>
           </>
         ) : (
@@ -821,7 +818,7 @@ function ActionEditorPanel({
         onCancel={() => setConfirmPastDate(null)}
         onConfirm={confirmMarkDoneOnPast}
       />
-    </aside>
+    </EditorShell>
   );
 }
 

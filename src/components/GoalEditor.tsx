@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { useStore } from "@/store/useStore";
 import type { Goal, GoalType, GoalStatus, ID } from "@/types";
 import { ConfirmModal } from "./ConfirmModal";
+import { EditorShell, EditorCloseX, EditorCancelButton } from "./EditorShell";
 
 const STATUS_ORDER: GoalStatus[] = ["active", "completed", "dropped"];
 const STATUS_LABEL: Record<GoalStatus, string> = {
@@ -33,32 +34,16 @@ export function GoalEditor() {
   const closePanel = useStore((s) => s.closePanel);
   const open = panel?.kind === "goal";
 
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") closePanel();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [open, closePanel]);
-
   if (!open || panel?.kind !== "goal") return null;
 
   return (
-    <>
-      <div
-        className="fixed inset-0 z-[80]"
-        style={{ background: "rgba(0,0,0,0.4)" }}
-        onClick={closePanel}
-      />
-      <GoalEditorPanel
-        key={(panel.mode === "edit" ? panel.id : "new") ?? "new"}
-        mode={panel.mode}
-        goalId={panel.id}
-        prefill={panel.prefill}
-        onClose={closePanel}
-      />
-    </>
+    <GoalEditorPanel
+      key={(panel.mode === "edit" ? panel.id : "new") ?? "new"}
+      mode={panel.mode}
+      goalId={panel.id}
+      prefill={panel.prefill}
+      onClose={closePanel}
+    />
   );
 }
 
@@ -215,27 +200,36 @@ function GoalEditorPanel({
 
   const goalColor = goal?.color ? `hsl(var(--${goal.color}))` : "hsl(var(--text-tertiary))";
 
+  const dirty =
+    mode === "new" &&
+    (!!title.trim() || !!description.trim() || !!targetDate || criteria.length > 0);
+
   return (
-    <aside
-      className="fixed top-0 right-0 bottom-0 z-[90] w-[480px] max-w-[100vw] bg-surface-base border-l border-border-subtle flex flex-col"
-      style={{ boxShadow: "-8px 0 24px rgba(0,0,0,0.3)" }}
-    >
+    <EditorShell mode={mode} dirty={dirty} onClose={onClose}>
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-border-subtle">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-border-subtle shrink-0">
         <div className="flex items-center gap-2">
           {goal && (
             <span className="w-2 h-2 rounded-full" style={{ background: goalColor }} />
           )}
-          <div className="font-mono text-[11px] uppercase tracking-[0.08em] text-text-tertiary">
-            {mode === "new" ? "New goal" : "Edit goal"}
-          </div>
+          {mode === "new" ? (
+            <div className="text-[18px] font-medium text-text-primary">New goal</div>
+          ) : (
+            <div className="font-mono text-[11px] uppercase tracking-[0.08em] text-text-tertiary">
+              Edit goal
+            </div>
+          )}
         </div>
-        <button
-          onClick={onClose}
-          className="w-7 h-7 inline-flex items-center justify-center rounded-[4px] text-text-tertiary hover:bg-surface-hover hover:text-text-primary transition-colors"
-        >
-          ✕
-        </button>
+        {mode === "new" ? (
+          <EditorCloseX />
+        ) : (
+          <button
+            onClick={onClose}
+            className="w-7 h-7 inline-flex items-center justify-center rounded-[4px] text-text-tertiary hover:bg-surface-hover hover:text-text-primary transition-colors"
+          >
+            ✕
+          </button>
+        )}
       </div>
 
       {/* Body */}
@@ -418,15 +412,10 @@ function GoalEditorPanel({
       </div>
 
       {/* Footer */}
-      <div className="border-t border-border-subtle px-6 py-3 flex items-center justify-between">
+      <div className="border-t border-border-subtle px-6 py-3 flex items-center justify-between shrink-0">
         {mode === "new" ? (
           <>
-            <button
-              onClick={onClose}
-              className="text-[13px] text-text-secondary hover:text-text-primary px-3 py-1.5"
-            >
-              Cancel
-            </button>
+            <EditorCancelButton />
             <button
               onClick={handleSaveNew}
               disabled={activeCount >= 3}
@@ -436,7 +425,7 @@ function GoalEditorPanel({
                 color: "hsl(var(--surface-base))",
               }}
             >
-              Save goal
+              Create goal
             </button>
           </>
         ) : (
@@ -499,7 +488,7 @@ function GoalEditorPanel({
         onCancel={() => setConfirmComplete(false)}
         onConfirm={handleConfirmComplete}
       />
-    </aside>
+    </EditorShell>
   );
 }
 

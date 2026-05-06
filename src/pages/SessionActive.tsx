@@ -584,11 +584,34 @@ const SessionActive: React.FC = () => {
                 className="w-full max-w-[640px] rounded-[8px] border border-border-subtle p-8 text-center"
                 style={{ background: "hsl(var(--surface-raised))" }}
               >
-                <div className="text-[15px] text-text-primary font-medium">
+                <div className="text-[18px] text-text-primary font-medium">
                   All planned actions completed.
                 </div>
-                <div className="mt-2 text-[13px] text-text-secondary">
-                  Add another or end session.
+                <div className="mt-2 text-[14px] text-text-secondary">
+                  You still have {minutesLabel} of focus time.
+                </div>
+                <div className="mt-4 flex flex-col items-center gap-3">
+                  <button
+                    onClick={() => {
+                      setPickerSelected([]);
+                      setPickerOpen(true);
+                    }}
+                    className="text-[14px] font-medium rounded-[4px] transition-colors"
+                    style={{
+                      padding: "10px 20px",
+                      background: "hsl(var(--accent))",
+                      color: "hsl(var(--accent-foreground))",
+                    }}
+                  >
+                    + Add action
+                  </button>
+                  <button
+                    onClick={() => setConfirmEndEarly(true)}
+                    className="text-[13px] hover:underline"
+                    style={{ color: "hsl(var(--text-warning))" }}
+                  >
+                    End session
+                  </button>
                 </div>
               </div>
             )}

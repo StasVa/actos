@@ -412,15 +412,10 @@ function GoalEditorPanel({
       </div>
 
       {/* Footer */}
-      <div className="border-t border-border-subtle px-6 py-3 flex items-center justify-between">
+      <div className="border-t border-border-subtle px-6 py-3 flex items-center justify-between shrink-0">
         {mode === "new" ? (
           <>
-            <button
-              onClick={onClose}
-              className="text-[13px] text-text-secondary hover:text-text-primary px-3 py-1.5"
-            >
-              Cancel
-            </button>
+            <EditorCancelButton />
             <button
               onClick={handleSaveNew}
               disabled={activeCount >= 3}
@@ -430,7 +425,7 @@ function GoalEditorPanel({
                 color: "hsl(var(--surface-base))",
               }}
             >
-              Save goal
+              Create goal
             </button>
           </>
         ) : (

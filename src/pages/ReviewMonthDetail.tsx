@@ -51,6 +51,7 @@ const ReviewMonthDetail: React.FC = () => {
   const rituals = useStore((s) => s.rituals);
   const settings = useStore((s) => s.settings);
   const openPanel = useStore((s) => s.openPanel);
+  const allSessions = useStore((s) => s.sessions);
 
   const summary = React.useMemo(
     () => getMonthSummary(yearMonth, { actions, dayEntries, goals, projects, rituals }),

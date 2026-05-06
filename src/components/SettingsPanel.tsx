@@ -27,15 +27,9 @@ interface SettingsPanelProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const LAYERS: { key: keyof UserSettings["layers"]; label: string; hint: string }[] = [
-  { key: "planAndReview", label: "Plan and review your days", hint: "Show daily intent / reflection panel." },
-  { key: "logTime", label: "Log time", hint: "Capture per-action time estimates." },
-];
-
 export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
   const settings = useStore((s) => s.settings);
   const goals = useStore((s) => s.goals);
-  const toggleLayer = useStore((s) => s.toggleLayer);
   const setDefaultGoal = useStore((s) => s.setDefaultGoal);
   const resetToSeed = useStore((s) => s.resetToSeed);
 

@@ -542,20 +542,22 @@ const Goals: React.FC = () => {
                 <button
                   type="button"
                   disabled
-                  className="inline-flex items-center gap-1 rounded-[4px] bg-surface-hover text-text-secondary px-[14px] py-[8px] text-[13px] font-medium cursor-not-allowed"
+                  aria-label="New goal"
+                  className="inline-flex items-center justify-center gap-1 rounded-[4px] bg-surface-hover text-text-secondary min-w-[40px] min-h-[40px] sm:min-h-0 sm:min-w-0 sm:px-[16px] sm:py-[8px] text-[13px] font-medium cursor-not-allowed"
                 >
                   <span className="text-[15px] leading-none">+</span>
-                  <span>New goal</span>
+                  <span className="hidden sm:inline">New goal</span>
                 </button>
               </Tooltip>
             ) : (
               <button
                 type="button"
+                aria-label="New goal"
                 onClick={() => useStore.getState().openPanel({ kind: "goal", mode: "new" })}
-                className="inline-flex items-center gap-1 rounded-[4px] bg-accent hover:bg-accent-hover text-white px-[14px] py-[8px] text-[13px] font-medium transition-colors"
+                className="inline-flex items-center justify-center gap-1 rounded-[4px] bg-accent hover:bg-accent-hover text-white min-w-[40px] min-h-[40px] sm:min-h-0 sm:min-w-0 sm:px-[16px] sm:py-[8px] text-[13px] font-medium transition-colors"
               >
                 <span className="text-[15px] leading-none">+</span>
-                <span>New goal</span>
+                <span className="hidden sm:inline">New goal</span>
               </button>
             )}
           </div>

@@ -410,6 +410,19 @@ function ActionEditorPanel({
 
       {/* Body */}
       <div className="flex-1 overflow-y-auto px-6 py-5">
+        {hasMigrationWarning && (
+          <div
+            className="mb-4 p-3 rounded-[4px] text-[12px]"
+            style={{
+              background: "hsl(var(--surface-raised))",
+              border: "1px solid hsl(var(--text-warning) / 0.4)",
+              color: "hsl(var(--text-warning))",
+              fontFamily: "Inter, sans-serif",
+            }}
+          >
+            This action has no Impact set. Set a value to include it in progress calculations.
+          </div>
+        )}
         {/* Title */}
         <div className="mb-6">
           <input

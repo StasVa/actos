@@ -953,10 +953,6 @@ const Ideas: React.FC = () => {
               </div>
             </div>
             {/* Search removed — global ⌘K palette handles search. */}
-            {/* Capture input */}
-            <div className="pl-8 pr-4 pb-3 border-b border-border-subtle shrink-0">
-              <CaptureInput defaultGoalTitle={defaultGoal?.title} />
-            </div>
             {/* Sort row */}
             <div className="flex items-center justify-end pl-8 pr-4 py-2">
               <span className="font-mono text-[11px] text-text-secondary">

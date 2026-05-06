@@ -10,7 +10,6 @@
 //   destructive: true, onSelect: ... }]} />
 
 import * as React from "react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 export type CardMenuItem = {
   label: string;
@@ -24,14 +23,38 @@ export const CardMenu: React.FC<{
   ariaLabel?: string;
 }> = ({ items, ariaLabel = "More" }) => {
   const [open, setOpen] = React.useState(false);
+  const rootRef = React.useRef<HTMLDivElement | null>(null);
 
   const stop = (e: React.SyntheticEvent) => {
     e.stopPropagation();
   };
 
+  React.useEffect(() => {
+    if (!open) return;
+
+    const handlePointerDown = (event: MouseEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [open]);
+
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
+    <div ref={rootRef} className="relative" onClick={stop} onMouseDown={stop} onPointerDown={stop}>
         <button
           type="button"
           aria-label={ariaLabel}
@@ -46,40 +69,40 @@ export const CardMenu: React.FC<{
         >
           <span className="text-[14px] -mt-1">⋯</span>
         </button>
-      </PopoverTrigger>
-      <PopoverContent
-        align="end"
-        sideOffset={4}
-        onClick={stop}
-        onMouseDown={stop}
-        onPointerDown={stop}
-        className="w-44 p-1 bg-surface-elevated border-border-subtle"
-      >
-        <div className="flex flex-col">
-          {items.map((it, i) => (
-            <button
-              key={i}
-              type="button"
-              disabled={it.disabled}
-              onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                if (it.disabled) return;
-                setOpen(false);
-                it.onSelect();
-              }}
-              className="text-left text-[12px] px-2 py-1.5 rounded-[3px] hover:bg-surface-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-              style={{
-                color: it.destructive
-                  ? "hsl(var(--text-warning))"
-                  : "hsl(var(--text-primary))",
-              }}
-            >
-              {it.label}
-            </button>
-          ))}
+
+      {open && (
+        <div
+          className="absolute right-0 top-[calc(100%+4px)] z-50 w-44 rounded-[6px] border border-border-subtle bg-surface-elevated p-1 shadow-md"
+          onClick={stop}
+          onMouseDown={stop}
+          onPointerDown={stop}
+        >
+          <div className="flex flex-col">
+            {items.map((it, i) => (
+              <button
+                key={i}
+                type="button"
+                disabled={it.disabled}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  if (it.disabled) return;
+                  setOpen(false);
+                  it.onSelect();
+                }}
+                className="text-left text-[12px] px-2 py-1.5 rounded-[3px] hover:bg-surface-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                style={{
+                  color: it.destructive
+                    ? "hsl(var(--text-warning))"
+                    : "hsl(var(--text-primary))",
+                }}
+              >
+                {it.label}
+              </button>
+            ))}
+          </div>
         </div>
-      </PopoverContent>
-    </Popover>
+      )}
+    </div>
   );
 };

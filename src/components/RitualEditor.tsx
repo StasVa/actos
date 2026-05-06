@@ -435,23 +435,21 @@ function RitualEditorPanel({
               className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
             />
           </FieldRow>
-          {layers.logTime && (
-            <FieldRow label="Time (min)">
-              <input
-                type="number"
-                min={0}
-                value={timeMin}
-                onChange={(e) => setTimeMin(e.target.value === "" ? "" : Number(e.target.value))}
-                onBlur={() =>
-                  persistField(
-                    "timeEstimateMinutes",
-                    timeMin === "" ? undefined : Number(timeMin),
-                  )
-                }
-                className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
-              />
-            </FieldRow>
-          )}
+          <FieldRow label="Time (min)">
+            <input
+              type="number"
+              min={0}
+              value={timeMin}
+              onChange={(e) => setTimeMin(e.target.value === "" ? "" : Number(e.target.value))}
+              onBlur={() =>
+                persistField(
+                  "timeEstimateMinutes",
+                  timeMin === "" ? undefined : Number(timeMin),
+                )
+              }
+              className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
+            />
+          </FieldRow>
           {/* Energy and Focus fields removed */}
         </div>
 

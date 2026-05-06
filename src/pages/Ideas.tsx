@@ -321,6 +321,7 @@ const ConvertProjectOverlay: React.FC<{ idea: Idea; onDone: () => void }> = ({ i
       title: title.trim(),
       goalId: idea.goalId,
       description: (desc.trim() || notes.trim() || undefined),
+      references: (idea.references ?? []).map((r) => ({ ...r })),
     });
     toast.success("Idea converted to project");
     onDone();

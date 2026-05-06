@@ -106,17 +106,15 @@ const FilterDD: React.FC<{
   </div>
 );
 
-const DayRowItem: React.FC<{ row: DayRow; goals: Goal[]; logTime: boolean; logEnergy: boolean }> = ({
-  row,
-  goals,
-  logTime,
-  logEnergy,
-}) => {
-  const { date, entry, doneActions } = row;
-  const ritualsDone =
-    entry?.plannedRitualIds?.length != null
-      ? Math.min(entry.plannedRitualIds.length, entry.plannedRitualIds.length)
-      : 0;
+const DayRowItem: React.FC<{
+  row: DayRow;
+  goals: Goal[];
+  projects: Project[];
+  allActions: Action[];
+  logTime: boolean;
+  logEnergy: boolean;
+}> = ({ row, goals, projects, allActions, logTime, logEnergy }) => {
+  const { date, entry, doneActions, delegatedActions } = row;
   // Approximate ritual count via plannedRitualIds minus skipped
   const ritualCount = entry
     ? Math.max(0, (entry.plannedRitualIds?.length ?? 0) - (entry.skippedRitualIds?.length ?? 0))
@@ -136,7 +134,10 @@ const DayRowItem: React.FC<{ row: DayRow; goals: Goal[]; logTime: boolean; logEn
       return { g, min };
     });
 
+  const outcome = getOutcomeSummary(doneActions, delegatedActions, goals, projects, allActions);
+
   const stats: string[] = [];
+  if (outcome.outcomeAdded > 0) stats.push(`+${outcome.outcomeAdded} outcome`);
   stats.push(`${doneActions.length} actions done`);
   if (ritualCount > 0) stats.push(`${ritualCount} rituals`);
   if (logTime && totalMin > 0) stats.push(`${formatHM(totalMin)} invested`);

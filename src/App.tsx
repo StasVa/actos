@@ -34,12 +34,11 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner position="bottom-right" />
-      <ActionEditor />
-      
-      <GoalEditor />
-      <RitualEditor />
-      <GlobalSettingsHost />
       <BrowserRouter>
+        <ActionEditor />
+        <GoalEditor />
+        <RitualEditor />
+        <GlobalSettingsHost />
         <CommandPalette />
         <KeyboardShortcuts />
         <Routes>

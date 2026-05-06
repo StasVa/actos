@@ -411,11 +411,23 @@ function ActionEditorPanel({
     onClose();
   };
 
+  const dirty =
+    mode === "new" &&
+    (!!title.trim() ||
+      !!notes.trim() ||
+      impact !== "" ||
+      timeMin !== "" ||
+      energy !== "" ||
+      focus !== "" ||
+      !!scheduledDate ||
+      !!delegateName.trim() ||
+      !!delegateNote.trim());
+
   return (
-    <aside
-      className="fixed top-0 right-0 bottom-0 z-[90] w-[480px] max-w-[100vw] bg-surface-base border-l border-border-subtle flex flex-col"
-      style={{ boxShadow: "-8px 0 24px rgba(0,0,0,0.3)" }}
-    >
+    <EditorShell mode={mode} dirty={dirty} onClose={onClose}>
+      <div className="flex flex-col h-full max-h-inherit"
+        style={mode === "new" ? { boxShadow: "none" } : undefined}
+      >
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-border-subtle">
         <div className="font-mono text-[11px] uppercase tracking-[0.08em] text-text-tertiary">

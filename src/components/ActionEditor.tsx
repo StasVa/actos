@@ -185,6 +185,7 @@ function ActionEditorPanel({
 
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmDrop, setConfirmDrop] = useState<ActionStatus | null>(null);
+  const [confirmPastDate, setConfirmPastDate] = useState<string | null>(null);
   const titleRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -312,9 +313,15 @@ function ActionEditorPanel({
   // Setting a scheduled date auto-derives status to "Planned".
   // Clearing it returns to "Backlog". plannedAt history is preserved by
   // the store transition logic.
+  // Past dates trigger a confirmation modal — "planned in the past" is
+  // semantically wrong, so we offer to mark the action Done on that date.
   const handleScheduledDateChange = (iso: string) => {
     if (isGoalLevel && iso) {
       toast.error("Assign to a Project to schedule this action.");
+      return;
+    }
+    if (iso && iso < TODAY_ISO()) {
+      setConfirmPastDate(iso);
       return;
     }
     setScheduledDate(iso);
@@ -331,6 +338,39 @@ function ActionEditorPanel({
       persistField("scheduledDate", undefined);
       toast("Action moved to Backlog");
     }
+  };
+
+  const confirmMarkDoneOnPast = () => {
+    const iso = confirmPastDate;
+    if (!iso) return;
+    const shortLabel = new Date(iso + "T00:00:00").toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    });
+    // Build a completedAt timestamp anchored at noon on the picked date so
+    // it lands cleanly inside the local day for review drill-downs.
+    const completedAt = new Date(iso + "T12:00:00").toISOString();
+    setScheduledDate(iso);
+    if (mode === "new") {
+      setNewStatus("done");
+      setConfirmPastDate(null);
+      toast(`Marked done on ${shortLabel}`);
+      return;
+    }
+    if (!actionId) {
+      setConfirmPastDate(null);
+      return;
+    }
+    changeActionStatus(actionId, "done");
+    // Override timestamps: completedAt = picked date, scheduledDate kept
+    // as historical record, plannedAt cleared (never genuinely planned).
+    updateAction(actionId, {
+      completedAt,
+      scheduledDate: iso,
+      plannedAt: undefined,
+    });
+    setConfirmPastDate(null);
+    toast(`Marked done on ${shortLabel}`);
   };
 
   const handleSaveNew = () => {
@@ -776,7 +816,51 @@ function ActionEditorPanel({
         onCancel={() => setConfirmDrop(null)}
         onConfirm={confirmDropAction}
       />
+      <PastDateConfirmModal
+        iso={confirmPastDate}
+        onCancel={() => setConfirmPastDate(null)}
+        onConfirm={confirmMarkDoneOnPast}
+      />
     </aside>
+  );
+}
+
+function PastDateConfirmModal({
+  iso,
+  onCancel,
+  onConfirm,
+}: {
+  iso: string | null;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  if (!iso) return null;
+  const d = new Date(iso + "T00:00:00");
+  const fullLabel = d.toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+  const shortLabel = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  return (
+    <ConfirmModal
+      open={true}
+      title="Schedule for past date?"
+      body={
+        <>
+          You picked <strong>{fullLabel}</strong> ({relDays(iso)}), which is in
+          the past.
+          <div className="mt-2">
+            This action will be marked as Done on that date and included in
+            progress calculations and reviews.
+          </div>
+        </>
+      }
+      confirmLabel={`Mark as Done on ${shortLabel}`}
+      onCancel={onCancel}
+      onConfirm={onConfirm}
+    />
   );
 }
 

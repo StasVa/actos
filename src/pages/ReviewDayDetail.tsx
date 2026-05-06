@@ -533,7 +533,20 @@ const ReviewDayDetail: React.FC = () => {
               </section>
             )}
 
-            {/* MAIN TASK */}
+            {/* SESSIONS */}
+            {sessionsForDay.length > 0 && (
+              <section>
+                <SectionHead
+                  meta={`${formatHM(
+                    sessionsForDay.reduce((s, x) => s + sessionDurationMinutes(x), 0),
+                  ).toUpperCase()} FOCUSED`}
+                >
+                  Sessions · {sessionsForDay.length}
+                </SectionHead>
+                <SessionsSection sessions={sessionsForDay} variant="flat" />
+              </section>
+            )}
+
             {main && (
               <section>
                 <SectionHead>Main task</SectionHead>

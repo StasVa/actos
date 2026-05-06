@@ -207,9 +207,7 @@ interface ActionSuggestions {
 }
 
 function effortFor(a: Action): number {
-  // Composite effort signal — prefer focusCost, then energyCost, then time bucket.
-  if (a.focusCost != null) return a.focusCost;
-  if (a.energyCost != null) return a.energyCost;
+  // Effort signal — time bucket (Energy/Focus removed).
   if (a.timeEstimateMinutes != null) return Math.min(10, Math.ceil(a.timeEstimateMinutes / 30));
   return 5;
 }
@@ -420,16 +418,7 @@ const PlanForm: React.FC<{
         </div>
       </section>
 
-      {/* MORNING ENERGY */}
-      {settings.layers.logEnergy && (
-        <section>
-          <SectionHead>MORNING ENERGY</SectionHead>
-          <EnergyPicker
-            value={state.morningEnergy}
-            onChange={(v) => setState((s) => ({ ...s, morningEnergy: v }))}
-          />
-        </section>
-      )}
+      {/* Morning Energy section removed */}
 
       {/* ACTIONS */}
       <section>
@@ -766,15 +755,7 @@ const CloseForm: React.FC<{
   return (
     <div className="space-y-6">
       <CloseSummary date={date} />
-      {settings.layers.logEnergy && !compact && (
-        <section>
-          <SectionHead>EVENING ENERGY</SectionHead>
-          <EnergyPicker
-            value={state.eveningEnergy}
-            onChange={(v) => setState((s) => ({ ...s, eveningEnergy: v }))}
-          />
-        </section>
-      )}
+      {/* Evening Energy section removed */}
       <section>
         <SectionHead>REFLECTION</SectionHead>
         <textarea

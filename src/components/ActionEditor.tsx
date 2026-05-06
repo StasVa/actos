@@ -181,9 +181,7 @@ function ActionEditorPanel({
   // For new-mode local status selection.
   const [newStatus, setNewStatus] = useState<ActionStatus>(seed.status ?? "backlog");
 
-  // When user picks Planned via dropdown but no scheduledDate yet, expose
-  // an inline date picker just below.
-  const [needsScheduledDate, setNeedsScheduledDate] = useState(false);
+  // (Planned is derived from scheduledDate — no separate "needs date" state.)
 
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmDrop, setConfirmDrop] = useState<ActionStatus | null>(null);

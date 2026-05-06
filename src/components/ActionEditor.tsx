@@ -12,7 +12,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { ChevronDown, Check, MoreHorizontal } from "lucide-react";
+import { ChevronDown, Check, MoreHorizontal, Calendar as CalendarIcon } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
 import { toast } from "sonner";
 import { useStore } from "@/store/useStore";
 import type { Action, ActionStatus, ID } from "@/types";
@@ -66,14 +67,6 @@ function addDaysISO(iso: string, n: number): string {
   const d = new Date(iso + "T00:00:00");
   d.setDate(d.getDate() + n);
   return d.toISOString().slice(0, 10);
-}
-function nextMondayISO(): string {
-  const t = new Date();
-  t.setHours(0, 0, 0, 0);
-  const day = t.getDay(); // 0=Sun..6=Sat
-  const diff = day === 0 ? 1 : (8 - day) % 7 || 7;
-  t.setDate(t.getDate() + diff);
-  return t.toISOString().slice(0, 10);
 }
 
 function fmtRelDate(iso: string): string {
@@ -447,45 +440,23 @@ function ActionEditorPanel({
           {/* Contextual timestamp line — moved directly below dropdown */}
           {action && <TimestampLine action={action} onClose={onClose} />}
 
-          {/* Inline scheduled-date picker (when Planned needs a date) */}
-          {status === "planned" && (needsScheduledDate || !scheduledDate) && (
-            <div className="mt-2 p-3 rounded-[4px] bg-surface-raised border border-border-subtle">
-              <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-2">
-                Pick a scheduled date
+          {/* Scheduled date — required when Planned */}
+          {status === "planned" && (
+            <div className="mt-3">
+              <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-2">
+                Scheduled date · required
               </div>
-              <div className="flex flex-wrap gap-1.5 mb-2">
-                <QuickDateBtn label="Today" onClick={() => applyScheduledDate(TODAY_ISO())} />
-                <QuickDateBtn
-                  label="Tomorrow"
-                  onClick={() => applyScheduledDate(addDaysISO(TODAY_ISO(), 1))}
-                />
-                <QuickDateBtn label="Next Mon" onClick={() => applyScheduledDate(nextMondayISO())} />
-              </div>
-              <input
-                type="date"
+              <DateChipPicker
                 value={scheduledDate}
-                onChange={(e) => {
-                  if (e.target.value) applyScheduledDate(e.target.value);
+                onChange={(iso) => {
+                  if (iso) {
+                    applyScheduledDate(iso);
+                  } else {
+                    setScheduledDate("");
+                    if (mode === "edit") persistField("scheduledDate", undefined);
+                  }
                 }}
-                className="bg-surface-base border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
               />
-            </div>
-          )}
-
-          {/* Editable scheduled-date when Planned + already set */}
-          {status === "planned" && scheduledDate && !needsScheduledDate && (
-            <div className="mt-2">
-              <FieldRow label="Scheduled">
-                <input
-                  type="date"
-                  value={scheduledDate}
-                  onChange={(e) => {
-                    setScheduledDate(e.target.value);
-                    if (mode === "edit") persistField("scheduledDate", e.target.value || undefined);
-                  }}
-                  className="bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
-                />
-              </FieldRow>
             </div>
           )}
 
@@ -519,17 +490,21 @@ function ActionEditorPanel({
                 </datalist>
                 {delegateError && <InlineError text={delegateError} />}
               </FieldRow>
-              <FieldRow label="Expected return">
-                <input
-                  type="date"
+              <div>
+                <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-2">
+                  Expected back
+                </div>
+                <DateChipPicker
                   value={expectedReturn}
-                  onChange={(e) => setExpectedReturn(e.target.value)}
-                  onBlur={() =>
-                    persistField("expectedReturnDate", expectedReturn || undefined)
-                  }
-                  className="bg-surface-base border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
+                  optional
+                  onChange={(iso) => {
+                    setExpectedReturn(iso);
+                    if (mode === "edit") {
+                      persistField("expectedReturnDate", iso || undefined);
+                    }
+                  }}
                 />
-              </FieldRow>
+              </div>
               <FieldRow label="Delegate note">
                 <textarea
                   value={delegateNote}
@@ -837,17 +812,165 @@ function FieldRow({ label, children }: { label: string; children: React.ReactNod
   );
 }
 
-function QuickDateBtn({ label, onClick }: { label: string; onClick: () => void }) {
+function DateChip({
+  label,
+  selected,
+  onClick,
+}: {
+  label: string;
+  selected: boolean;
+  onClick: () => void;
+}) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="text-[12px] px-2 py-1 rounded-[4px] border border-border-subtle text-text-secondary hover:text-text-primary hover:border-border-default transition-colors"
+      className="inline-flex items-center px-3 py-1.5 rounded-[4px] text-[13px] transition-colors"
+      style={{
+        background: selected ? "hsl(var(--accent))" : "hsl(var(--surface-raised))",
+        color: selected ? "white" : "hsl(var(--text-primary))",
+        border: selected ? "1px solid transparent" : "1px solid hsl(var(--border-subtle))",
+      }}
+      onMouseEnter={(e) => {
+        if (!selected) {
+          e.currentTarget.style.background = "hsl(var(--surface-hover))";
+          e.currentTarget.style.borderColor = "hsl(var(--border-default))";
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!selected) {
+          e.currentTarget.style.background = "hsl(var(--surface-raised))";
+          e.currentTarget.style.borderColor = "hsl(var(--border-subtle))";
+        }
+      }}
     >
       {label}
     </button>
   );
 }
+
+function relDays(iso: string): string {
+  const today = TODAY_ISO();
+  const days = Math.round(
+    (new Date(iso + "T00:00:00").getTime() -
+      new Date(today + "T00:00:00").getTime()) /
+      86400000,
+  );
+  if (days === 0) return "today";
+  if (days === 1) return "tomorrow";
+  if (days === -1) return "yesterday";
+  if (days > 0) return `in ${days} days`;
+  return `${Math.abs(days)} days ago`;
+}
+
+export function DateChipPicker({
+  value,
+  onChange,
+  optional = false,
+}: {
+  value: string;
+  onChange: (iso: string) => void;
+  optional?: boolean;
+}) {
+  const [showCalendar, setShowCalendar] = useState(false);
+  const today = TODAY_ISO();
+  const tomorrow = addDaysISO(today, 1);
+  const isToday = value === today;
+  const isTomorrow = value === tomorrow;
+  const isCustom = !!value && !isToday && !isTomorrow;
+
+  // Summary view when a custom date is set
+  if (isCustom && !showCalendar) {
+    const d = new Date(value + "T00:00:00");
+    const label = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    return (
+      <div className="flex items-center gap-2">
+        <span className="text-[13px] text-text-primary">{label}</span>
+        <span className="text-[13px] text-text-secondary">({relDays(value)})</span>
+        <button
+          type="button"
+          onClick={() => setShowCalendar(true)}
+          className="ml-2 text-[13px] text-text-secondary hover:text-text-primary transition-colors"
+        >
+          Change
+        </button>
+        {optional && (
+          <button
+            type="button"
+            onClick={() => onChange("")}
+            className="text-[13px] text-text-secondary hover:text-text-primary transition-colors"
+          >
+            Clear
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div className="flex items-center gap-2 flex-wrap">
+        <DateChip
+          label="Today"
+          selected={isToday}
+          onClick={() => {
+            onChange(today);
+            setShowCalendar(false);
+          }}
+        />
+        <DateChip
+          label="Tomorrow"
+          selected={isTomorrow}
+          onClick={() => {
+            onChange(tomorrow);
+            setShowCalendar(false);
+          }}
+        />
+        <span className="w-3" />
+        <button
+          type="button"
+          onClick={() => setShowCalendar((s) => !s)}
+          className="inline-flex items-center gap-1.5 text-[13px] text-text-secondary hover:text-text-primary transition-colors"
+        >
+          <CalendarIcon size={12} />
+          Pick another date
+        </button>
+        {optional && value && (
+          <button
+            type="button"
+            onClick={() => {
+              onChange("");
+              setShowCalendar(false);
+            }}
+            className="text-[13px] text-text-secondary hover:text-text-primary transition-colors"
+          >
+            Clear
+          </button>
+        )}
+      </div>
+      {showCalendar && (
+        <div
+          className="mt-2 inline-block rounded-[4px] border p-2"
+          style={{ borderColor: "hsl(var(--border-subtle))", background: "hsl(var(--surface-raised))" }}
+        >
+          <Calendar
+            mode="single"
+            selected={value ? new Date(value + "T00:00:00") : undefined}
+            onSelect={(d) => {
+              if (!d) return;
+              const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+              onChange(iso);
+              setShowCalendar(false);
+            }}
+            initialFocus
+            className="p-2 pointer-events-auto"
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
 
 function StatusDot({ status }: { status: ActionStatus }) {
   return (

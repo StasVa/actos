@@ -446,22 +446,18 @@ function ActionEditorPanel({
           {/* Contextual timestamp line — moved directly below dropdown */}
           {action && <TimestampLine action={action} onClose={onClose} />}
 
-          {/* Scheduled date — required when Planned */}
-          {status === "planned" && (
+          {/* Scheduled date — always visible for non-terminal statuses.
+              Picking a date auto-derives status to Planned; clearing
+              returns to Backlog. */}
+          {status !== "done" && status !== "dropped" && status !== "cancelled" && status !== "delegated" && (
             <div className="mt-3">
               <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-2">
-                Scheduled date · required
+                Scheduled date
               </div>
               <DateChipPicker
                 value={scheduledDate}
-                onChange={(iso) => {
-                  if (iso) {
-                    applyScheduledDate(iso);
-                  } else {
-                    setScheduledDate("");
-                    if (mode === "edit") persistField("scheduledDate", undefined);
-                  }
-                }}
+                optional
+                onChange={handleScheduledDateChange}
               />
             </div>
           )}

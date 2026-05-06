@@ -454,7 +454,116 @@ function ActionEditorPanel({
 
         </div>
 
-        {/* NOTES */}
+        {/* PARENT */}
+        <div className="mb-6">
+          <SectionHead>Parent</SectionHead>
+          <div className="flex flex-col gap-2">
+            <select
+              value={goalId}
+              onChange={(e) => {
+                setGoalId(e.target.value);
+                setProjectId(null);
+                if (mode === "edit") {
+                  persistField("goalId", e.target.value);
+                  persistField("projectId", null);
+                }
+              }}
+              className="bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
+            >
+              {goals
+                .filter((g) => g.status === "active")
+                .map((g) => (
+                  <option key={g.id} value={g.id}>
+                    {g.title}
+                  </option>
+                ))}
+            </select>
+            <select
+              value={projectId ?? ""}
+              onChange={(e) => {
+                const v = e.target.value || null;
+                setProjectId(v);
+                if (mode === "edit") persistField("projectId", v);
+              }}
+              className="bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
+            >
+              <option value="">— Goal-level backlog —</option>
+              {(projectsByGoal.find((g) => g.goal.id === goalId)?.projects ?? []).map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.title}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* ESTIMATES */}
+        <div className="mb-6">
+          <SectionHead>Estimates</SectionHead>
+          <div className="grid grid-cols-2 gap-3">
+            <FieldRow label="Impact (0-10)">
+              <input
+                type="number"
+                min={0}
+                max={10}
+                value={impact}
+                onChange={(e) => setImpact(Number(e.target.value))}
+                onBlur={() => persistField("impact", Number(impact) || 0)}
+                className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
+              />
+            </FieldRow>
+            {layers.logEnergy && (
+              <FieldRow label="Energy (1-10)">
+                <input
+                  type="number"
+                  min={1}
+                  max={10}
+                  value={energy}
+                  onChange={(e) => setEnergy(e.target.value === "" ? "" : Number(e.target.value))}
+                  onBlur={() =>
+                    persistField("energyCost", energy === "" ? undefined : Number(energy))
+                  }
+                  className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
+                />
+              </FieldRow>
+            )}
+            {layers.logFocus && (
+              <FieldRow label="Focus (1-10)">
+                <input
+                  type="number"
+                  min={1}
+                  max={10}
+                  value={focus}
+                  onChange={(e) => setFocus(e.target.value === "" ? "" : Number(e.target.value))}
+                  onBlur={() =>
+                    persistField("focusCost", focus === "" ? undefined : Number(focus))
+                  }
+                  className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
+                />
+              </FieldRow>
+            )}
+            {layers.logTime && (
+              <FieldRow label="Time (min)">
+                <input
+                  type="number"
+                  min={0}
+                  value={timeMin}
+                  onChange={(e) =>
+                    setTimeMin(e.target.value === "" ? "" : Number(e.target.value))
+                  }
+                  onBlur={() =>
+                    persistField(
+                      "timeEstimateMinutes",
+                      timeMin === "" ? undefined : Number(timeMin),
+                    )
+                  }
+                  className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
+                />
+              </FieldRow>
+            )}
+          </div>
+        </div>
+
         <div>
           <SectionHead>Notes</SectionHead>
           <textarea

@@ -326,7 +326,6 @@ const ProjectCard: React.FC<{ p: Project; color: string; goalLabel: string }> = 
               <CardMenu
                 ariaLabel="Project menu"
                 items={[
-                  { label: "Edit", onSelect: () => openPanel({ kind: "project", mode: "edit", id: p.id }) },
                   { label: "Mark complete", onSelect: () => { markProjectComplete(p.id); toast("Project completed"); } },
                   { label: "Drop", destructive: true, onSelect: () => setConfirmDrop(true) },
                   { label: "Delete", destructive: true, onSelect: () => setConfirmDelete(true) },
@@ -547,7 +546,7 @@ const GoalDetail: React.FC = () => {
   );
 
   const projects = useMemo(
-    () => allProjects.filter((p) => p.goalId === id),
+    () => allProjects.filter((p) => p.goalId === id && !p.isDraft),
     [allProjects, id],
   );
   const rituals = useMemo(
@@ -650,13 +649,14 @@ const GoalDetail: React.FC = () => {
               </div>
             )}
             <GhostAddButton
-              onClick={() =>
-                openPanel({
-                  kind: "project",
-                  mode: "new",
-                  prefill: { goalId: goal.id } as Partial<Project>,
-                })
-              }
+              onClick={() => {
+                const newId = useStore.getState().createProject({
+                  title: "",
+                  goalId: goal.id,
+                  isDraft: true,
+                });
+                navigate(`/projects/${newId}`);
+              }}
             >
               + Add project to this goal
             </GhostAddButton>

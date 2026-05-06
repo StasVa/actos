@@ -460,7 +460,7 @@ export const SessionsSection: React.FC<Props> = ({
                 {r.outcome > 0 && (
                   <>
                     <span className="text-text-tertiary"> · </span>
-                    <span className="text-text-primary">+{r.outcome}</span> outcome
+                    <span className="text-text-primary">+{r.outcome}</span> value
                   </>
                 )}
               </span>

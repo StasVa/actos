@@ -816,7 +816,7 @@ const ProjectDetail: React.FC = () => {
                 </h3>
                 <div>
                   {[
-                    { label: "OUTCOME", value: `${progress.outcome}%`, pct: progress.outcome, opacity: 1 },
+                    { label: "VALUE", value: `${progress.outcome}%`, pct: progress.outcome, opacity: 1 },
                     { label: "EFFORT", value: `${progress.effort}%`, pct: progress.effort, opacity: 0.6 },
                   ].map((row, i) => (
                     <div

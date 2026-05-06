@@ -192,7 +192,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ projectId, goalLabel, 
 
           {/* Measure bars */}
           <div className="mt-4 flex flex-col gap-2 min-w-0">
-            <MeasureBar label="OUTCOME" percentage={progress.outcome} color={goalColor} />
+            <MeasureBar label="VALUE" percentage={progress.outcome} color={goalColor} />
             <MeasureBar label="EFFORT" percentage={progress.effort} color={goalColor} opacity={0.6} />
           </div>
 

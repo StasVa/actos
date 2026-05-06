@@ -470,7 +470,7 @@ const ProjectDetail: React.FC = () => {
     return (
       <div className="min-h-screen bg-surface-base text-text-primary">
         <AppSidebar />
-        <main className="ml-[220px] p-10">
+        <main className="ml-[var(--sidebar-w,220px)] p-10">
           <div className="text-[14px] text-text-secondary">Project not found.</div>
           <Link to="/" className="mt-4 inline-block text-[13px] text-accent hover:underline">
             ← Back to home
@@ -555,7 +555,7 @@ const ProjectDetail: React.FC = () => {
   return (
     <div className="min-h-screen bg-surface-base text-text-primary">
       <AppSidebar />
-      <div className="ml-[220px] min-h-screen flex">
+      <div className="ml-[var(--sidebar-w,220px)] min-h-screen flex">
         {/* Left column */}
         <div className="flex-1 min-w-0 flex flex-col">
           <div className="h-12 px-8 flex items-center justify-between border-b border-border-subtle">

@@ -465,7 +465,7 @@ const GoalDetail: React.FC = () => {
     return (
       <div className="min-h-screen bg-surface-base text-text-primary">
         <AppSidebar />
-        <main className="ml-[220px] p-10">
+        <main className="ml-[var(--sidebar-w,220px)] p-10">
           <div className="text-[14px] text-text-secondary">Goal not found.</div>
           <Link to="/" className="mt-4 inline-block text-[13px] text-accent hover:underline">
             ← Back to home
@@ -482,7 +482,7 @@ const GoalDetail: React.FC = () => {
   return (
     <div className="min-h-screen bg-surface-base text-text-primary">
       <AppSidebar />
-      <main className="ml-[220px] flex justify-center">
+      <main className="ml-[var(--sidebar-w,220px)] flex justify-center">
         <div className="w-full max-w-[1000px] px-10 pt-8 pb-16">
           <div>
             <Link

@@ -1,209 +1,305 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { ChevronDown } from "lucide-react";
+import {
+  Search,
+  Calendar,
+  TrendingUp,
+  CheckSquare,
+  Repeat,
+  Target,
+  FolderKanban,
+  Lightbulb,
+  Timer,
+  Sun,
+  CalendarDays,
+  CalendarRange,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Settings as SettingsIcon,
+} from "lucide-react";
 import { LifetimeCounters } from "@/components/LifetimeCounters";
 import { emitAppEvent } from "@/lib/appEvents";
+import { useIsMobile } from "@/hooks/use-mobile";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
-type NavItem = { label: string; href: string };
+import type { LucideIcon } from "lucide-react";
+type NavItem = { label: string; href: string; icon: LucideIcon };
 
-const GROUP_TEMPORAL: NavItem[] = [
-  { label: "Today", href: "/today" },
-  { label: "Progress", href: "/progress" },
+const GROUP_EXECUTION: NavItem[] = [
+  { label: "Today", href: "/today", icon: Sun },
+  { label: "Progress", href: "/progress", icon: TrendingUp },
+  { label: "Actions", href: "/actions", icon: CheckSquare },
+  { label: "Rituals", href: "/rituals", icon: Repeat },
 ];
 
-const GROUP_ENTITIES: NavItem[] = [
-  { label: "Goals", href: "/goals" },
-  { label: "Projects", href: "/projects" },
-  { label: "Actions", href: "/actions" },
-  { label: "Rituals", href: "/rituals" },
-  { label: "Ideas", href: "/ideas" },
-  { label: "Sessions", href: "/sessions" },
+const GROUP_STRATEGY: NavItem[] = [
+  { label: "Goals", href: "/goals", icon: Target },
+  { label: "Projects", href: "/projects", icon: FolderKanban },
+  { label: "Ideas", href: "/ideas", icon: Lightbulb },
+  { label: "Sessions", href: "/sessions", icon: Timer },
 ];
 
-const REVIEWS_SUB: NavItem[] = [
-  { label: "Days", href: "/reviews/days" },
-  { label: "Weeks", href: "/reviews/weeks" },
-  { label: "Months", href: "/reviews/months" },
+const GROUP_REVIEWS: NavItem[] = [
+  { label: "Days", href: "/reviews/days", icon: Calendar },
+  { label: "Weeks", href: "/reviews/weeks", icon: CalendarDays },
+  { label: "Months", href: "/reviews/months", icon: CalendarRange },
 ];
 
 function isActive(pathname: string, href: string): boolean {
   if (href === "/today") {
     return pathname === "/" || pathname === "/today" || pathname === "/home";
   }
-  if (href === "/goals") {
-    // /goals list — exclude /goals/:id detail
-    return pathname === "/goals";
-  }
-  if (href === "/projects") {
-    return pathname === "/projects" || pathname === "/all-projects";
-  }
-  if (href === "/actions") {
-    return pathname === "/actions" || pathname === "/all-actions";
-  }
+  if (href === "/goals") return pathname === "/goals";
+  if (href === "/projects") return pathname === "/projects" || pathname === "/all-projects";
+  if (href === "/actions") return pathname === "/actions" || pathname === "/all-actions";
   return pathname === href || pathname.startsWith(href + "/");
 }
 
-const NavGroup: React.FC<{ items: NavItem[]; pathname: string }> = ({ items, pathname }) => (
-  <nav className="flex flex-col gap-1">
-    {items.map((item) => {
-      const active = isActive(pathname, item.href);
-      return (
-        <Link
-          key={item.label}
-          to={item.href}
-          className={`relative pl-2.5 pr-2.5 py-1.5 rounded-[4px] text-[13px] transition-colors ${
-            active
-              ? "bg-surface-hover text-text-primary font-medium"
-              : "text-text-secondary font-normal hover:text-text-primary"
-          }`}
-          style={
-            active
-              ? { boxShadow: "inset 2px 0 0 0 hsl(var(--accent))" }
-              : undefined
-          }
-        >
-          {item.label}
-        </Link>
-      );
-    })}
-  </nav>
-);
+const COLLAPSE_KEY = "sidebarCollapsed";
+const EXPANDED_W = 220;
+const COLLAPSED_W = 64;
 
-const Divider: React.FC = () => (
-  <div className="my-4 border-t border-border-subtle" />
-);
+const NavRow: React.FC<{
+  item: NavItem;
+  pathname: string;
+  collapsed: boolean;
+}> = ({ item, pathname, collapsed }) => {
+  const active = isActive(pathname, item.href);
+  const Icon = item.icon;
+  const link = (
+    <Link
+      to={item.href}
+      className={`relative flex items-center rounded-[4px] text-[13px] transition-colors ${
+        collapsed ? "justify-center mx-auto w-10 h-10" : "gap-2 pl-2.5 pr-2.5 py-1.5"
+      } ${
+        active
+          ? "bg-surface-hover text-text-primary font-medium"
+          : "text-text-secondary font-normal hover:text-text-primary hover:bg-surface-hover"
+      }`}
+      style={
+        active && !collapsed
+          ? { boxShadow: "inset 2px 0 0 0 hsl(var(--accent))" }
+          : active && collapsed
+          ? { boxShadow: "inset 2px 0 0 0 hsl(var(--accent))" }
+          : undefined
+      }
+      aria-label={item.label}
+    >
+      <Icon size={16} className="shrink-0" />
+      {!collapsed && <span className="truncate">{item.label}</span>}
+    </Link>
+  );
 
-const REVIEWS_LS_KEY = "sidebarReviewsExpanded";
-
-const ReviewsGroup: React.FC<{ pathname: string }> = ({ pathname }) => {
-  const [expanded, setExpanded] = React.useState<boolean>(() => {
-    if (typeof window === "undefined") return true;
-    const v = window.localStorage.getItem(REVIEWS_LS_KEY);
-    return v === null ? true : v === "true";
-  });
-  // Auto-expand whenever a sub-route is active so the active item is visible.
-  const childActive = REVIEWS_SUB.some((i) => isActive(pathname, i.href));
-  React.useEffect(() => {
-    if (childActive && !expanded) {
-      setExpanded(true);
-      window.localStorage.setItem(REVIEWS_LS_KEY, "true");
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [childActive]);
-  const toggle = () => {
-    setExpanded((v) => {
-      const next = !v;
-      window.localStorage.setItem(REVIEWS_LS_KEY, String(next));
-      return next;
-    });
-  };
+  if (!collapsed) return link;
   return (
-    <div className="flex flex-col gap-1">
-      <button
-        type="button"
-        onClick={toggle}
-        aria-expanded={expanded}
-        className="flex items-center justify-between pl-2.5 pr-3 py-1.5 rounded-[4px] text-[13px] text-text-secondary font-normal hover:text-text-primary hover:bg-surface-hover transition-colors text-left"
-      >
-        <span>Reviews</span>
-        <ChevronDown
-          size={12}
-          className={`text-text-tertiary transition-transform duration-150 ease-out ${
-            expanded ? "rotate-0" : "-rotate-90"
-          }`}
-        />
-      </button>
-      {expanded && (
-        <nav className="flex flex-col gap-1">
-          {REVIEWS_SUB.map((item) => {
-            const active = isActive(pathname, item.href);
-            return (
-              <Link
-                key={item.label}
-                to={item.href}
-                className={`relative py-1.5 rounded-[4px] text-[13px] transition-colors ${
-                  active
-                    ? "bg-surface-hover text-text-primary font-medium"
-                    : "text-text-secondary font-normal hover:text-text-primary"
-                }`}
-                style={{
-                  paddingLeft: 32,
-                  paddingRight: 10,
-                  ...(active ? { boxShadow: "inset 2px 0 0 0 hsl(var(--accent))" } : {}),
-                }}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
-      )}
-    </div>
+    <Tooltip delayDuration={150}>
+      <TooltipTrigger asChild>{link}</TooltipTrigger>
+      <TooltipContent side="right" className="text-[12px]">
+        {item.label}
+      </TooltipContent>
+    </Tooltip>
   );
 };
 
+const NavGroup: React.FC<{
+  items: NavItem[];
+  pathname: string;
+  collapsed: boolean;
+}> = ({ items, pathname, collapsed }) => (
+  <nav className="flex flex-col gap-1">
+    {items.map((item) => (
+      <NavRow key={item.href} item={item} pathname={pathname} collapsed={collapsed} />
+    ))}
+  </nav>
+);
+
+const Divider: React.FC = () => <div className="my-4 border-t border-border-subtle" />;
+
 export const AppSidebar: React.FC<{ onOpenSettings?: () => void }> = ({ onOpenSettings }) => {
   const { pathname } = useLocation();
+  const isMobile = useIsMobile();
   const handleSettings = onOpenSettings ?? (() => emitAppEvent("open-settings"));
+
+  const [collapsed, setCollapsed] = React.useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    return window.localStorage.getItem(COLLAPSE_KEY) === "true";
+  });
+
+  // Mobile never collapsed
+  const effectiveCollapsed = !isMobile && collapsed;
+  const width = effectiveCollapsed ? COLLAPSED_W : EXPANDED_W;
+
+  // Sync CSS variable so page main margins follow
+  React.useEffect(() => {
+    document.documentElement.style.setProperty("--sidebar-w", `${width}px`);
+  }, [width]);
+
+  // Cmd+\ keyboard toggle
+  React.useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "\\") {
+        e.preventDefault();
+        setCollapsed((v) => {
+          const next = !v;
+          window.localStorage.setItem(COLLAPSE_KEY, String(next));
+          return next;
+        });
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, []);
+
+  const toggle = () => {
+    setCollapsed((v) => {
+      const next = !v;
+      window.localStorage.setItem(COLLAPSE_KEY, String(next));
+      return next;
+    });
+  };
+
+  const openSearch = () => {
+    const ev = new KeyboardEvent("keydown", { key: "k", metaKey: true, bubbles: true });
+    document.dispatchEvent(ev);
+  };
+
   return (
-    <aside className="fixed left-0 top-0 bottom-0 w-[220px] bg-surface-raised border-r border-border-subtle p-4 flex flex-col">
-      <Link to="/today" className="px-1 py-1 text-[17px] font-semibold text-text-primary tracking-tight">
-        ActOS
-      </Link>
-
-      {/* Top-level Search — opens Command Palette */}
-      <button
-        type="button"
-        onClick={() => {
-          const ev = new KeyboardEvent("keydown", { key: "k", metaKey: true, bubbles: true });
-          document.dispatchEvent(ev);
-        }}
-        className="mt-8 group flex items-center gap-2 pl-2.5 pr-2 py-2 rounded-[4px] text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-colors"
+    <TooltipProvider>
+      <aside
+        className="fixed left-0 top-0 bottom-0 bg-surface-raised border-r border-border-subtle flex flex-col transition-[width] duration-200 ease-out overflow-hidden"
+        style={{ width }}
       >
-        <span className="text-[16px] leading-none w-4 text-center">⌕</span>
-        <span className="text-[14px] font-medium flex-1 text-left">Search</span>
-        <span
-          className="font-mono text-[10px] text-text-tertiary"
-          style={{
-            background: "hsl(var(--surface-hover))",
-            padding: "2px 6px",
-            borderRadius: 2,
-          }}
-        >
-          ⌘K
-        </span>
-      </button>
+        <div className={`flex items-center ${effectiveCollapsed ? "justify-center px-0" : "justify-between px-4"} pt-4`}>
+          {!effectiveCollapsed && (
+            <Link to="/today" className="px-1 py-1 text-[17px] font-semibold text-text-primary tracking-tight">
+              ActOS
+            </Link>
+          )}
+          {!isMobile && (
+            <Tooltip delayDuration={150}>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  onClick={toggle}
+                  className="p-1.5 rounded-[4px] text-text-tertiary hover:text-text-primary hover:bg-surface-hover transition-colors"
+                  aria-label={effectiveCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+                >
+                  {effectiveCollapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="right" className="text-[12px]">
+                {effectiveCollapsed ? "Expand sidebar" : "Collapse sidebar"} <span className="text-text-tertiary ml-1">⌘\</span>
+              </TooltipContent>
+            </Tooltip>
+          )}
+        </div>
 
-      <div className="mt-2 mb-3 border-t border-border-subtle" />
+        {/* Search */}
+        <div className={`mt-6 ${effectiveCollapsed ? "px-2" : "px-4"}`}>
+          {effectiveCollapsed ? (
+            <Tooltip delayDuration={150}>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  onClick={openSearch}
+                  className="flex items-center justify-center w-10 h-10 mx-auto rounded-[4px] text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-colors"
+                  aria-label="Search"
+                >
+                  <Search size={16} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="right" className="text-[12px]">
+                Search <span className="text-text-tertiary ml-1">⌘K</span>
+              </TooltipContent>
+            </Tooltip>
+          ) : (
+            <button
+              type="button"
+              onClick={openSearch}
+              className="w-full group flex items-center gap-2 pl-2.5 pr-2 py-2 rounded-[4px] text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-colors"
+            >
+              <Search size={16} className="shrink-0" />
+              <span className="text-[14px] font-medium flex-1 text-left">Search</span>
+              <span
+                className="font-mono text-[10px] text-text-tertiary"
+                style={{ background: "hsl(var(--surface-hover))", padding: "2px 6px", borderRadius: 2 }}
+              >
+                ⌘K
+              </span>
+            </button>
+          )}
+        </div>
 
-      <div className="flex flex-col">
-        <NavGroup items={GROUP_TEMPORAL} pathname={pathname} />
-        <Divider />
-        <NavGroup items={GROUP_ENTITIES} pathname={pathname} />
-        <Divider />
-        <ReviewsGroup pathname={pathname} />
-      </div>
+        <div className={`mt-2 mb-3 border-t border-border-subtle ${effectiveCollapsed ? "mx-2" : "mx-4"}`} />
 
-      <div className="flex-1" />
+        <div className={`flex flex-col ${effectiveCollapsed ? "px-2" : "px-4"}`}>
+          <NavGroup items={GROUP_EXECUTION} pathname={pathname} collapsed={effectiveCollapsed} />
+          <Divider />
+          <NavGroup items={GROUP_STRATEGY} pathname={pathname} collapsed={effectiveCollapsed} />
+          <Divider />
+          {!effectiveCollapsed && (
+            <div
+              className="font-mono uppercase text-text-tertiary mb-1"
+              style={{
+                fontSize: 11,
+                letterSpacing: "0.06em",
+                padding: "8px 12px",
+              }}
+            >
+              Reviews
+            </div>
+          )}
+          <NavGroup items={GROUP_REVIEWS} pathname={pathname} collapsed={effectiveCollapsed} />
+        </div>
 
-      <button
-        type="button"
-        onClick={handleSettings}
-        className="text-left px-2.5 py-1.5 rounded-[4px] text-[13px] text-text-tertiary hover:text-text-primary hover:bg-surface-hover transition-colors mb-2"
-      >
-        Settings
-      </button>
-      <div className="font-mono text-[11px] text-text-tertiary px-1">?   Shortcuts</div>
-      <div className="mt-4 font-mono text-[11px] text-text-secondary px-1 leading-[1.7]">
-        <LifetimeCounters />
-      </div>
-      <div className="mt-3 flex items-center gap-2 p-1 rounded-[4px] hover:bg-surface-hover cursor-pointer">
-        <span className="w-7 h-7 rounded-full bg-surface-hover flex items-center justify-center font-mono text-[11px] text-text-primary">
-          AK
-        </span>
-        <span className="font-mono text-[11px] text-text-secondary truncate">ak@email</span>
-      </div>
-    </aside>
+        <div className="flex-1" />
+
+        <div className={`${effectiveCollapsed ? "px-2" : "px-4"} pb-4 flex flex-col`}>
+          {effectiveCollapsed ? (
+            <Tooltip delayDuration={150}>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  onClick={handleSettings}
+                  className="flex items-center justify-center w-10 h-10 mx-auto rounded-[4px] text-text-tertiary hover:text-text-primary hover:bg-surface-hover transition-colors mb-2"
+                  aria-label="Settings"
+                >
+                  <SettingsIcon size={16} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="right" className="text-[12px]">
+                Settings
+              </TooltipContent>
+            </Tooltip>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={handleSettings}
+                className="text-left px-2.5 py-1.5 rounded-[4px] text-[13px] text-text-tertiary hover:text-text-primary hover:bg-surface-hover transition-colors mb-2"
+              >
+                Settings
+              </button>
+              <div className="font-mono text-[11px] text-text-tertiary px-1">?   Shortcuts</div>
+              <div className="mt-4 font-mono text-[11px] text-text-secondary px-1 leading-[1.7]">
+                <LifetimeCounters />
+              </div>
+              <div className="mt-3 flex items-center gap-2 p-1 rounded-[4px] hover:bg-surface-hover cursor-pointer">
+                <span className="w-7 h-7 rounded-full bg-surface-hover flex items-center justify-center font-mono text-[11px] text-text-primary">
+                  AK
+                </span>
+                <span className="font-mono text-[11px] text-text-secondary truncate">ak@email</span>
+              </div>
+            </>
+          )}
+        </div>
+      </aside>
+    </TooltipProvider>
   );
 };
 

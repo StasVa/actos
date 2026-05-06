@@ -8,7 +8,7 @@ const Reviews: React.FC = () => {
     <div className="min-h-screen bg-surface-base text-text-primary">
       <AppSidebar onOpenSettings={() => setSettingsOpen(true)} />
       <SettingsPanel open={settingsOpen} onOpenChange={setSettingsOpen} />
-      <main className="ml-[220px] px-8 py-6 max-w-[1200px]">
+      <main className="ml-[var(--sidebar-w,220px)] px-8 py-6 max-w-[1200px]">
         <header className="mb-8">
           <h1 className="text-[24px] font-medium text-text-primary leading-tight">Reviews</h1>
         </header>

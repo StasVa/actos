@@ -482,7 +482,7 @@ const AllDelegated: React.FC = () => {
   return (
     <div className="min-h-screen bg-surface-base text-text-primary">
       <AppSidebar />
-      <main className="ml-[220px] flex flex-col h-screen">
+      <main className="ml-[var(--sidebar-w,220px)] flex flex-col h-screen">
         {/* Page header */}
         <div className="px-10 pt-6 pb-3 shrink-0">
           <div className="flex items-baseline justify-between">

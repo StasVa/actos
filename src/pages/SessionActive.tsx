@@ -388,18 +388,15 @@ const SessionActive: React.FC = () => {
   };
 
   const handleConfirmAbort = () => {
-    const startMs = new Date(session.startedAt).getTime();
-    const elapsed = Math.max(0, Math.round((Date.now() - startMs) / 60_000));
     abortSession(session.id);
     saveTimer(null);
-    toast(`Session ended early. ${elapsed}min focused.`);
-    navigate("/sessions");
+    navigate(`/sessions/${session.id}/summary`);
   };
 
   const handleSessionComplete = () => {
     completeSession(session.id);
     saveTimer(null);
-    navigate("/sessions");
+    navigate(`/sessions/${session.id}/summary`);
   };
 
   /* ─── Labels ─── */

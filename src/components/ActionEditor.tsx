@@ -12,11 +12,17 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { ChevronDown, Check } from "lucide-react";
+import { ChevronDown, Check, MoreHorizontal } from "lucide-react";
 import { toast } from "sonner";
 import { useStore } from "@/store/useStore";
 import type { Action, ActionStatus, ID } from "@/types";
 import { ConfirmModal } from "./ConfirmModal";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 import {
   Popover,
   PopoverTrigger,
@@ -161,7 +167,12 @@ function ActionEditorPanel({
   );
   const [scheduledDate, setScheduledDate] = useState<string>(seed.scheduledDate ?? "");
   const [notes, setNotes] = useState<string>(seed.notes ?? "");
-  const [impact, setImpact] = useState<number>(seed.impact ?? 0);
+  const [impact, setImpact] = useState<number | "">(
+    seed.impact === undefined || seed.impact === null ? "" : (seed.impact as number),
+  );
+  const [impactError, setImpactError] = useState<string | null>(null);
+  const [timeError, setTimeError] = useState<string | null>(null);
+  const [delegateError, setDelegateError] = useState<string | null>(null);
   const [timeMin, setTimeMin] = useState<number | "">(seed.timeEstimateMinutes ?? "");
   const [energy, setEnergy] = useState<number | "">(seed.energyCost ?? "");
   const [focus, setFocus] = useState<number | "">(seed.focusCost ?? "");
@@ -212,9 +223,33 @@ function ActionEditorPanel({
   }, [allActions]);
 
   const status: ActionStatus = mode === "edit" ? action?.status ?? "backlog" : newStatus;
-  const isTerminal =
-    status === "done" || status === "dropped" || status === "cancelled";
   const isGoalLevel = !projectId;
+
+  // ─── Required-field validation ───
+  const impactNum = impact === "" ? 0 : Number(impact);
+  const timeNum = timeMin === "" ? 0 : Number(timeMin);
+  const requireTime = layers.logTime;
+
+  const missingForCreate = useMemo(() => {
+    const missing: string[] = [];
+    if (!title.trim()) missing.push("Title");
+    if (!goalId) missing.push("Goal");
+    if (!(impactNum > 0)) missing.push("Impact");
+    if (requireTime && !(timeNum > 0)) missing.push("Time estimate");
+    if (newStatus === "planned" && !scheduledDate) missing.push("Scheduled date");
+    if (newStatus === "delegated" && !delegateName.trim()) missing.push("Delegate name");
+    return missing;
+  }, [title, goalId, impactNum, requireTime, timeNum, newStatus, scheduledDate, delegateName]);
+
+  const canCreate = missingForCreate.length === 0;
+  const createTooltip =
+    missingForCreate.length === 0
+      ? ""
+      : `Set ${missingForCreate.join(" and ")} to create`;
+
+  // Existing-action migration warning: action exists with no impact value.
+  const hasMigrationWarning =
+    mode === "edit" && !!action && (action.impact === undefined || action.impact === null || action.impact <= 0);
 
   // ─── Status transitions (edit mode) ───
   const handleStatusChange = (next: ActionStatus) => {
@@ -230,7 +265,29 @@ function ActionEditorPanel({
     }
     if (!actionId) return;
     if (next === status) return;
+    // Block Done if Impact / Time missing
+    if (next === "done") {
+      if (!(impactNum > 0)) {
+        setImpactError("Impact is required to mark this action Done.");
+        toast.error("Set Impact to mark Done");
+        return;
+      }
+      if (requireTime && !(timeNum > 0)) {
+        setTimeError("Time estimate required when Log Time is on.");
+        toast.error("Set Time estimate to mark Done");
+        return;
+      }
+    }
     if (next === "delegated") {
+      if (!delegateName.trim()) {
+        setDelegateError("Enter delegate name.");
+        // Switch UI into delegated state so the field appears
+        changeActionStatus(actionId, "delegated", {
+          delegateName: "",
+        });
+        toast.error("Enter delegate name");
+        return;
+      }
       changeActionStatus(actionId, "delegated", {
         delegateName: delegateName || "",
         delegateNote: delegateNote || undefined,
@@ -246,7 +303,7 @@ function ActionEditorPanel({
     if (next === "planned") {
       if (!scheduledDate) {
         setNeedsScheduledDate(true);
-        toast.error("Pick a scheduled date");
+        toast.error("Pick a date to plan this action.");
         return;
       }
       changeActionStatus(actionId, "planned", { scheduledDate });
@@ -254,6 +311,8 @@ function ActionEditorPanel({
       toast("Action scheduled");
       return;
     }
+    setImpactError(null);
+    setTimeError(null);
     changeActionStatus(actionId, next);
     if (next === "done") toast("Action marked done");
     if (next === "backlog") toast("Action re-opened");
@@ -277,17 +336,8 @@ function ActionEditorPanel({
   };
 
   const handleSaveNew = () => {
-    if (!title.trim()) {
-      toast.error("Title is required");
-      return;
-    }
-    if (newStatus === "planned" && !scheduledDate) {
-      toast.error("Pick a scheduled date");
-      setNeedsScheduledDate(true);
-      return;
-    }
-    if (newStatus === "delegated" && !delegateName.trim()) {
-      toast.error("Delegate name is required");
+    if (!canCreate) {
+      toast.error(createTooltip || "Required fields missing");
       return;
     }
     const newId = createAction({
@@ -296,7 +346,7 @@ function ActionEditorPanel({
       goalId,
       scheduledDate: scheduledDate || undefined,
       notes: notes || undefined,
-      impact: Number(impact) || 0,
+      impact: impactNum,
       timeEstimateMinutes: timeMin === "" ? undefined : Number(timeMin),
       energyCost: energy === "" ? undefined : Number(energy),
       focusCost: focus === "" ? undefined : Number(focus),
@@ -310,6 +360,23 @@ function ActionEditorPanel({
       cancelledAt: prefill?.cancelledAt,
     });
     toast("Action created");
+    useStore.getState().openPanel({ kind: "action", mode: "edit", id: newId });
+  };
+
+  const handleDuplicate = () => {
+    if (!action) return;
+    const newId = createAction({
+      title: action.title + " (copy)",
+      projectId: action.projectId,
+      goalId: action.goalId,
+      notes: action.notes,
+      impact: action.impact,
+      timeEstimateMinutes: action.timeEstimateMinutes,
+      energyCost: action.energyCost,
+      focusCost: action.focusCost,
+      status: "backlog",
+    });
+    toast("Action duplicated");
     useStore.getState().openPanel({ kind: "action", mode: "edit", id: newId });
   };
 
@@ -341,6 +408,19 @@ function ActionEditorPanel({
 
       {/* Body */}
       <div className="flex-1 overflow-y-auto px-6 py-5">
+        {hasMigrationWarning && (
+          <div
+            className="mb-4 p-3 rounded-[4px] text-[12px]"
+            style={{
+              background: "hsl(var(--surface-raised))",
+              border: "1px solid hsl(var(--text-warning) / 0.4)",
+              color: "hsl(var(--text-warning))",
+              fontFamily: "Inter, sans-serif",
+            }}
+          >
+            This action has no Impact set. Set a value to include it in progress calculations.
+          </div>
+        )}
         {/* Title */}
         <div className="mb-6">
           <input
@@ -417,17 +497,26 @@ function ActionEditorPanel({
               <FieldRow label="Delegate name">
                 <input
                   value={delegateName}
-                  onChange={(e) => setDelegateName(e.target.value)}
+                  onChange={(e) => {
+                    setDelegateName(e.target.value);
+                    if (e.target.value.trim()) setDelegateError(null);
+                  }}
                   onBlur={() => persistField("delegateName", delegateName || undefined)}
                   placeholder="Maria, AI, etc."
                   list="delegate-names"
-                  className="w-full bg-surface-base border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
+                  className="w-full bg-surface-base border rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
+                  style={{
+                    borderColor: delegateError
+                      ? "hsl(var(--text-warning))"
+                      : "hsl(var(--border-subtle))",
+                  }}
                 />
                 <datalist id="delegate-names">
                   {delegateSuggestions.map((n) => (
                     <option key={n} value={n} />
                   ))}
                 </datalist>
+                {delegateError && <InlineError text={delegateError} />}
               </FieldRow>
               <FieldRow label="Expected return">
                 <input
@@ -501,16 +590,40 @@ function ActionEditorPanel({
         <div className="mb-6">
           <SectionHead>Estimates</SectionHead>
           <div className="grid grid-cols-2 gap-3">
-            <FieldRow label="Impact (0-10)">
+            <FieldRow label="Impact (1-10) · required">
               <input
                 type="number"
-                min={0}
+                min={1}
                 max={10}
                 value={impact}
-                onChange={(e) => setImpact(Number(e.target.value))}
-                onBlur={() => persistField("impact", Number(impact) || 0)}
-                className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
+                placeholder="1–10"
+                onChange={(e) => {
+                  const v = e.target.value;
+                  if (v === "") {
+                    setImpact("");
+                    setImpactError(null);
+                    return;
+                  }
+                  const n = Number(v);
+                  setImpact(n);
+                  if (n <= 0) setImpactError("Impact must be 1 or higher.");
+                  else setImpactError(null);
+                }}
+                onBlur={() => {
+                  if (impact === "") {
+                    persistField("impact", 0);
+                    return;
+                  }
+                  persistField("impact", Number(impact) || 0);
+                }}
+                className="w-full bg-surface-raised border rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
+                style={{
+                  borderColor: impactError
+                    ? "hsl(var(--text-warning))"
+                    : "hsl(var(--border-subtle))",
+                }}
               />
+              {impactError && <InlineError text={impactError} />}
             </FieldRow>
             {layers.logEnergy && (
               <FieldRow label="Energy (1-10)">
@@ -543,22 +656,31 @@ function ActionEditorPanel({
               </FieldRow>
             )}
             {layers.logTime && (
-              <FieldRow label="Time (min)">
+              <FieldRow label="Time (min) · required">
                 <input
                   type="number"
-                  min={0}
+                  min={1}
                   value={timeMin}
-                  onChange={(e) =>
-                    setTimeMin(e.target.value === "" ? "" : Number(e.target.value))
-                  }
+                  placeholder="e.g. 30"
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setTimeMin(v === "" ? "" : Number(v));
+                    if (v !== "" && Number(v) > 0) setTimeError(null);
+                  }}
                   onBlur={() =>
                     persistField(
                       "timeEstimateMinutes",
                       timeMin === "" ? undefined : Number(timeMin),
                     )
                   }
-                  className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
+                  className="w-full bg-surface-raised border rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
+                  style={{
+                    borderColor: timeError
+                      ? "hsl(var(--text-warning))"
+                      : "hsl(var(--border-subtle))",
+                  }}
                 />
+                {timeError && <InlineError text={timeError} />}
               </FieldRow>
             )}
           </div>
@@ -579,7 +701,14 @@ function ActionEditorPanel({
       </div>
 
       {/* Footer */}
-      <div className="border-t border-border-subtle px-6 py-3 flex items-center justify-between">
+      <div
+        className="px-6 flex items-center justify-between"
+        style={{
+          borderTop: "1px solid hsl(var(--border-subtle))",
+          paddingTop: 16,
+          paddingBottom: 16,
+        }}
+      >
         {mode === "new" ? (
           <>
             <button
@@ -590,25 +719,41 @@ function ActionEditorPanel({
             </button>
             <button
               onClick={handleSaveNew}
-              className="text-[13px] font-medium px-3 py-1.5 rounded-[4px]"
+              disabled={!canCreate}
+              title={canCreate ? "" : createTooltip}
+              className="text-[13px] font-medium px-3 py-1.5 rounded-[4px] transition-colors"
               style={{
-                background: "hsl(var(--accent))",
-                color: "hsl(var(--surface-base))",
+                background: canCreate ? "hsl(var(--accent))" : "hsl(var(--surface-hover))",
+                color: canCreate ? "hsl(var(--surface-base))" : "hsl(var(--text-tertiary))",
+                cursor: canCreate ? "pointer" : "not-allowed",
               }}
             >
-              Save action
+              Create
             </button>
           </>
         ) : (
           <>
-            <button
-              onClick={() => setConfirmDelete(true)}
-              className="text-[13px] text-text-tertiary hover:text-text-warning px-3 py-1.5"
-            >
-              Delete
-            </button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  className="w-8 h-8 inline-flex items-center justify-center rounded-[4px] text-text-tertiary hover:bg-surface-hover hover:text-text-primary transition-colors"
+                  aria-label="More actions"
+                >
+                  <MoreHorizontal size={16} />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="bg-surface-raised border border-border-default">
+                <DropdownMenuItem onSelect={handleDuplicate}>Duplicate</DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={() => setConfirmDelete(true)}
+                  className="text-[hsl(var(--text-warning))] focus:text-[hsl(var(--text-warning))]"
+                >
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <div className="flex items-center gap-2">
-              {!isTerminal && status !== "delegated" && !isGoalLevel && (
+              {(status === "backlog" || status === "planned") && !isGoalLevel && (
                 <button
                   onClick={() => handleStatusChange("done")}
                   className="text-[13px] font-medium px-3 py-1.5 rounded-[4px]"
@@ -620,7 +765,27 @@ function ActionEditorPanel({
                   Mark done
                 </button>
               )}
-              {isTerminal && (
+              {status === "delegated" && (
+                <>
+                  <button
+                    onClick={() => handleStatusChange("backlog")}
+                    className="text-[13px] px-3 py-1.5 rounded-[4px] border border-border-subtle text-text-secondary hover:text-text-primary"
+                  >
+                    Re-open
+                  </button>
+                  <button
+                    onClick={() => handleStatusChange("done")}
+                    className="text-[13px] font-medium px-3 py-1.5 rounded-[4px]"
+                    style={{
+                      background: "hsl(var(--accent))",
+                      color: "hsl(var(--surface-base))",
+                    }}
+                  >
+                    Mark done
+                  </button>
+                </>
+              )}
+              {(status === "done" || status === "dropped" || status === "cancelled") && (
                 <button
                   onClick={() => handleStatusChange("backlog")}
                   className="text-[13px] px-3 py-1.5 rounded-[4px] border border-border-subtle text-text-secondary hover:text-text-primary"
@@ -661,6 +826,17 @@ function SectionHead({ children }: { children: React.ReactNode }) {
   return (
     <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-3">
       {children}
+    </div>
+  );
+}
+
+function InlineError({ text }: { text: string }) {
+  return (
+    <div
+      className="mt-1 text-[12px]"
+      style={{ color: "hsl(var(--text-warning))", fontFamily: "Inter, sans-serif" }}
+    >
+      {text}
     </div>
   );
 }

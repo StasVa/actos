@@ -129,7 +129,7 @@ const MeasureBar: React.FC<{
         style={{ width: `${Math.max(0, Math.min(100, percentage))}%`, background: color, opacity }}
       />
     </div>
-    <div className="w-[36px] shrink-0 whitespace-nowrap text-right font-mono text-[11px] tabular-nums text-text-secondary leading-none">
+    <div className="w-[36px] shrink-0 whitespace-nowrap text-right font-mono text-[11px] tabular-nums text-text-primary leading-none">
       {percentage}%
     </div>
   </div>

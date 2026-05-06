@@ -76,7 +76,7 @@ const ReviewMonthDetail: React.FC = () => {
       <div className="min-h-screen bg-surface-base text-text-primary">
         <AppSidebar onOpenSettings={() => setSettingsOpen(true)} />
         <SettingsPanel open={settingsOpen} onOpenChange={setSettingsOpen} />
-        <main className="ml-[220px] px-8 py-6 max-w-[900px]">
+        <main className="ml-[var(--sidebar-w,220px)] px-8 py-6 max-w-[900px]">
           <Link
             to="/reviews/months"
             className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary hover:text-text-primary transition-colors"
@@ -144,7 +144,7 @@ const ReviewMonthDetail: React.FC = () => {
     <div className="min-h-screen bg-surface-base text-text-primary">
       <AppSidebar onOpenSettings={() => setSettingsOpen(true)} />
       <SettingsPanel open={settingsOpen} onOpenChange={setSettingsOpen} />
-      <main className="ml-[220px] px-8 py-6 max-w-[900px]">
+      <main className="ml-[var(--sidebar-w,220px)] px-8 py-6 max-w-[900px]">
         <Link
           to="/reviews/months"
           className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary hover:text-text-primary transition-colors"

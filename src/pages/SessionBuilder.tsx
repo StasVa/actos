@@ -726,7 +726,7 @@ const SessionBuilder: React.FC = () => {
   return (
     <div className="min-h-screen bg-background text-text-primary">
       <AppSidebar />
-      <main className="ml-[220px]">
+      <main className="ml-[var(--sidebar-w,220px)]">
         <div className="max-w-[1100px] mx-auto px-8 py-8 pb-32">
           {/* Header */}
           <div className="pb-4 border-b border-border-subtle">

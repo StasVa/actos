@@ -530,7 +530,7 @@ const Goals: React.FC = () => {
     <div className="min-h-screen bg-surface-base text-text-primary">
       <AppSidebar onOpenSettings={() => setSettingsOpen(true)} />
       <SettingsPanel open={settingsOpen} onOpenChange={setSettingsOpen} />
-      <main className="ml-[220px] px-8 py-6 max-w-[1400px]">
+      <main className="ml-[var(--sidebar-w,220px)] px-8 py-6 max-w-[1400px]">
         <header className="mb-6 flex items-center justify-between gap-4">
           <h1 className="text-[24px] font-medium text-text-primary leading-tight">Goals</h1>
           <div className="flex items-center gap-4">

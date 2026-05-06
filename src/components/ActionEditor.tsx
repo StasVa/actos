@@ -5,14 +5,29 @@
 // Status changes route through changeActionStatus so timeline events,
 // timestamps and cascades stay correct.
 //
-// Visible fields are gated by settings.layers (planAndReview, logTime,
-// logEnergy, logFocus) to match the spec's tracking layers.
+// Field order (top → bottom):
+//   Title → Parent (Goal+Project) → ESTIMATES (Impact, Energy, Focus, Time)
+//   → STATE (Status dropdown, Scheduled date when Planned, Delegation block
+//   when Delegated, contextual timestamp line) → NOTES.
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import { ChevronDown, Check } from "lucide-react";
 import { toast } from "sonner";
 import { useStore } from "@/store/useStore";
 import type { Action, ActionStatus, ID } from "@/types";
 import { ConfirmModal } from "./ConfirmModal";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const STATUS_ORDER: ActionStatus[] = [
   "backlog",
@@ -30,6 +45,54 @@ const STATUS_LABEL: Record<ActionStatus, string> = {
   dropped: "Dropped",
   cancelled: "Cancelled",
 };
+const STATUS_COLOR: Record<ActionStatus, string> = {
+  backlog: "hsl(var(--text-tertiary))",
+  planned: "hsl(var(--accent))",
+  done: "hsl(var(--state-active))",
+  delegated: "hsl(var(--text-secondary))",
+  dropped: "hsl(var(--state-stalled))",
+  cancelled: "hsl(var(--state-stalled))",
+};
+
+const TODAY_ISO = () => new Date().toISOString().slice(0, 10);
+function addDaysISO(iso: string, n: number): string {
+  const d = new Date(iso + "T00:00:00");
+  d.setDate(d.getDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+function nextMondayISO(): string {
+  const t = new Date();
+  t.setHours(0, 0, 0, 0);
+  const day = t.getDay(); // 0=Sun..6=Sat
+  const diff = day === 0 ? 1 : (8 - day) % 7 || 7;
+  t.setDate(t.getDate() + diff);
+  return t.toISOString().slice(0, 10);
+}
+
+function fmtRelDate(iso: string): string {
+  const today = TODAY_ISO();
+  if (iso === today) return "today";
+  if (iso === addDaysISO(today, 1)) return "tomorrow";
+  if (iso === addDaysISO(today, -1)) return "yesterday";
+  const d = new Date(iso + "T00:00:00");
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+function fmtRelFromNow(isoTime: string): string {
+  const dDate = isoTime.slice(0, 10);
+  const today = TODAY_ISO();
+  const days = Math.round(
+    (new Date(today + "T00:00:00").getTime() -
+      new Date(dDate + "T00:00:00").getTime()) /
+      86400000,
+  );
+  if (days <= 0) return "today";
+  if (days === 1) return "yesterday";
+  if (days < 30) return `${days} days ago`;
+  return new Date(dDate + "T00:00:00").toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
+}
 
 export function ActionEditor() {
   const panel = useStore((s) => s.ui.activePanel);
@@ -37,7 +100,6 @@ export function ActionEditor() {
 
   const open = panel?.kind === "action";
 
-  // Esc to close
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -83,6 +145,7 @@ function ActionEditorPanel({
   );
   const projects = useStore((s) => s.projects);
   const goals = useStore((s) => s.goals);
+  const allActions = useStore((s) => s.actions);
   const layers = useStore((s) => s.settings.layers);
 
   const updateAction = useStore((s) => s.updateAction);
@@ -90,7 +153,6 @@ function ActionEditorPanel({
   const changeActionStatus = useStore((s) => s.changeActionStatus);
   const deleteAction = useStore((s) => s.deleteAction);
 
-  // Local form state (edit mode mirrors store, new mode is local-only).
   const seed: Partial<Action> = mode === "edit" && action ? action : prefill ?? {};
   const [title, setTitle] = useState(seed.title ?? "");
   const [projectId, setProjectId] = useState<ID | null>(seed.projectId ?? null);
@@ -107,6 +169,13 @@ function ActionEditorPanel({
   const [delegateNote, setDelegateNote] = useState<string>(seed.delegateNote ?? "");
   const [expectedReturn, setExpectedReturn] = useState<string>(seed.expectedReturnDate ?? "");
 
+  // For new-mode local status selection.
+  const [newStatus, setNewStatus] = useState<ActionStatus>(seed.status ?? "backlog");
+
+  // When user picks Planned via dropdown but no scheduledDate yet, expose
+  // an inline date picker just below.
+  const [needsScheduledDate, setNeedsScheduledDate] = useState(false);
+
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmDrop, setConfirmDrop] = useState<ActionStatus | null>(null);
   const titleRef = useRef<HTMLInputElement>(null);
@@ -116,7 +185,6 @@ function ActionEditorPanel({
     if (mode === "new") titleRef.current?.select();
   }, [mode]);
 
-  // ─── Save helpers ───
   const persistField = <K extends keyof Action>(field: K, value: Action[K]) => {
     if (mode !== "edit" || !actionId) return;
     updateAction(actionId, { [field]: value } as Partial<Action>);
@@ -134,26 +202,41 @@ function ActionEditorPanel({
       .map((g) => ({ goal: g, projects: groups.get(g.id) ?? [] }));
   }, [projects, goals]);
 
-  const status = action?.status ?? "backlog";
+  // Autocomplete for delegate names from existing actions.
+  const delegateSuggestions = useMemo(() => {
+    const set = new Set<string>();
+    for (const a of allActions) {
+      if (a.delegateName) set.add(a.delegateName);
+    }
+    return Array.from(set).sort();
+  }, [allActions]);
+
+  const status: ActionStatus = mode === "edit" ? action?.status ?? "backlog" : newStatus;
   const isTerminal =
     status === "done" || status === "dropped" || status === "cancelled";
+  const isGoalLevel = !projectId;
 
-  // ─── Status changes ───
+  // ─── Status transitions (edit mode) ───
   const handleStatusChange = (next: ActionStatus) => {
-    if (!actionId || mode !== "edit") {
-      // In new mode the status is just local — applied on Save.
+    if (isGoalLevel && next !== "backlog") {
+      toast.error("Assign to a Project to plan or complete this action.");
       return;
     }
+    if (mode === "new") {
+      setNewStatus(next);
+      if (next === "planned" && !scheduledDate) setNeedsScheduledDate(true);
+      else setNeedsScheduledDate(false);
+      return;
+    }
+    if (!actionId) return;
     if (next === status) return;
     if (next === "delegated") {
-      // Need delegate name; if not yet present, just set status — the inline
-      // delegate section appears below to capture the name, then we re-save.
       changeActionStatus(actionId, "delegated", {
-        delegateName: delegateName || "Maria",
+        delegateName: delegateName || "",
         delegateNote: delegateNote || undefined,
         expectedReturnDate: expectedReturn || undefined,
       });
-      toast(`Delegated to ${delegateName || "Maria"}`);
+      toast(`Delegated${delegateName ? ` to ${delegateName}` : ""}`);
       return;
     }
     if (next === "dropped" || next === "cancelled") {
@@ -161,8 +244,13 @@ function ActionEditorPanel({
       return;
     }
     if (next === "planned") {
-      const date = scheduledDate || new Date().toISOString().slice(0, 10);
-      changeActionStatus(actionId, "planned", { scheduledDate: date });
+      if (!scheduledDate) {
+        setNeedsScheduledDate(true);
+        toast.error("Pick a scheduled date");
+        return;
+      }
+      changeActionStatus(actionId, "planned", { scheduledDate });
+      setNeedsScheduledDate(false);
       toast("Action scheduled");
       return;
     }
@@ -178,10 +266,28 @@ function ActionEditorPanel({
     setConfirmDrop(null);
   };
 
-  // ─── Save (new mode) ───
+  // Apply the picked scheduled date (after status=Planned was selected without date).
+  const applyScheduledDate = (iso: string) => {
+    setScheduledDate(iso);
+    setNeedsScheduledDate(false);
+    if (mode === "edit" && actionId) {
+      changeActionStatus(actionId, "planned", { scheduledDate: iso });
+      toast("Action scheduled");
+    }
+  };
+
   const handleSaveNew = () => {
     if (!title.trim()) {
       toast.error("Title is required");
+      return;
+    }
+    if (newStatus === "planned" && !scheduledDate) {
+      toast.error("Pick a scheduled date");
+      setNeedsScheduledDate(true);
+      return;
+    }
+    if (newStatus === "delegated" && !delegateName.trim()) {
+      toast.error("Delegate name is required");
       return;
     }
     const newId = createAction({
@@ -194,16 +300,16 @@ function ActionEditorPanel({
       timeEstimateMinutes: timeMin === "" ? undefined : Number(timeMin),
       energyCost: energy === "" ? undefined : Number(energy),
       focusCost: focus === "" ? undefined : Number(focus),
-      // Honor a prefilled terminal status (e.g. retro-logging a Done action
-      // against a past day from the Reviews drill-down).
-      status: prefill?.status,
+      delegateName: delegateName || undefined,
+      delegateNote: delegateNote || undefined,
+      expectedReturnDate: expectedReturn || undefined,
+      status: prefill?.status ?? newStatus,
       completedAt: prefill?.completedAt,
       delegatedAt: prefill?.delegatedAt,
       droppedAt: prefill?.droppedAt,
       cancelledAt: prefill?.cancelledAt,
     });
     toast("Action created");
-    // Re-open as edit so user can keep tweaking the saved record.
     useStore.getState().openPanel({ kind: "action", mode: "edit", id: newId });
   };
 
@@ -214,10 +320,6 @@ function ActionEditorPanel({
     setConfirmDelete(false);
     onClose();
   };
-
-  const projectTitle = projectId
-    ? projects.find((p) => p.id === projectId)?.title ?? "—"
-    : "Goal-level backlog";
 
   return (
     <aside
@@ -238,9 +340,9 @@ function ActionEditorPanel({
       </div>
 
       {/* Body */}
-      <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+      <div className="flex-1 overflow-y-auto px-6 py-5">
         {/* Title */}
-        <div>
+        <div className="mb-6">
           <input
             ref={titleRef}
             value={title}
@@ -251,38 +353,9 @@ function ActionEditorPanel({
           />
         </div>
 
-        {/* Status */}
-        {mode === "edit" && (
-          <div>
-            <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-2">
-              Status
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {STATUS_ORDER.map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  onClick={() => handleStatusChange(s)}
-                  className="text-[12px] px-2.5 py-1 rounded-[4px] border transition-colors"
-                  style={{
-                    background: s === status ? "hsl(var(--surface-elevated))" : "transparent",
-                    borderColor:
-                      s === status ? "hsl(var(--accent))" : "hsl(var(--border-subtle))",
-                    color: s === status ? "hsl(var(--text-primary))" : "hsl(var(--text-secondary))",
-                  }}
-                >
-                  {STATUS_LABEL[s]}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Parent (goal + project) */}
-        <div>
-          <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-2">
-            Parent
-          </div>
+        {/* Parent */}
+        <div className="mb-6">
+          <SectionHead>Parent</SectionHead>
           <div className="flex flex-col gap-2">
             <select
               value={goalId}
@@ -320,30 +393,179 @@ function ActionEditorPanel({
                 </option>
               ))}
             </select>
-            <div className="font-mono text-[10px] text-text-tertiary">{projectTitle}</div>
           </div>
         </div>
 
-        {/* Scheduled date (only when planAndReview is on) */}
-        {layers.planAndReview && (
-          <FieldRow label="Scheduled">
-            <input
-              type="date"
-              value={scheduledDate}
-              onChange={(e) => {
-                setScheduledDate(e.target.value);
-                if (mode === "edit") persistField("scheduledDate", e.target.value || undefined);
-              }}
-              className="bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
-            />
-          </FieldRow>
-        )}
-
-        {/* Notes */}
-        <div>
-          <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-2">
-            Notes
+        {/* ESTIMATES */}
+        <div className="mb-6">
+          <SectionHead>Estimates</SectionHead>
+          <div className="grid grid-cols-2 gap-3">
+            <FieldRow label="Impact (0-10)">
+              <input
+                type="number"
+                min={0}
+                max={10}
+                value={impact}
+                onChange={(e) => setImpact(Number(e.target.value))}
+                onBlur={() => persistField("impact", Number(impact) || 0)}
+                className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
+              />
+            </FieldRow>
+            {layers.logEnergy && (
+              <FieldRow label="Energy (1-10)">
+                <input
+                  type="number"
+                  min={1}
+                  max={10}
+                  value={energy}
+                  onChange={(e) => setEnergy(e.target.value === "" ? "" : Number(e.target.value))}
+                  onBlur={() =>
+                    persistField("energyCost", energy === "" ? undefined : Number(energy))
+                  }
+                  className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
+                />
+              </FieldRow>
+            )}
+            {layers.logFocus && (
+              <FieldRow label="Focus (1-10)">
+                <input
+                  type="number"
+                  min={1}
+                  max={10}
+                  value={focus}
+                  onChange={(e) => setFocus(e.target.value === "" ? "" : Number(e.target.value))}
+                  onBlur={() =>
+                    persistField("focusCost", focus === "" ? undefined : Number(focus))
+                  }
+                  className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
+                />
+              </FieldRow>
+            )}
+            {layers.logTime && (
+              <FieldRow label="Time (min)">
+                <input
+                  type="number"
+                  min={0}
+                  value={timeMin}
+                  onChange={(e) =>
+                    setTimeMin(e.target.value === "" ? "" : Number(e.target.value))
+                  }
+                  onBlur={() =>
+                    persistField(
+                      "timeEstimateMinutes",
+                      timeMin === "" ? undefined : Number(timeMin),
+                    )
+                  }
+                  className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
+                />
+              </FieldRow>
+            )}
           </div>
+        </div>
+
+        {/* STATE */}
+        <div className="mb-6">
+          <SectionHead>State</SectionHead>
+
+          <StatusDropdown
+            current={status}
+            isGoalLevel={isGoalLevel}
+            onPick={handleStatusChange}
+          />
+
+          {/* Inline scheduled-date picker (when Planned needs a date) */}
+          {status === "planned" && (needsScheduledDate || !scheduledDate) && (
+            <div className="mt-2 p-3 rounded-[4px] bg-surface-raised border border-border-subtle">
+              <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-2">
+                Pick a scheduled date
+              </div>
+              <div className="flex flex-wrap gap-1.5 mb-2">
+                <QuickDateBtn label="Today" onClick={() => applyScheduledDate(TODAY_ISO())} />
+                <QuickDateBtn
+                  label="Tomorrow"
+                  onClick={() => applyScheduledDate(addDaysISO(TODAY_ISO(), 1))}
+                />
+                <QuickDateBtn label="Next Mon" onClick={() => applyScheduledDate(nextMondayISO())} />
+              </div>
+              <input
+                type="date"
+                value={scheduledDate}
+                onChange={(e) => {
+                  if (e.target.value) applyScheduledDate(e.target.value);
+                }}
+                className="bg-surface-base border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
+              />
+            </div>
+          )}
+
+          {/* Editable scheduled-date when Planned + already set */}
+          {status === "planned" && scheduledDate && !needsScheduledDate && (
+            <div className="mt-2">
+              <FieldRow label="Scheduled">
+                <input
+                  type="date"
+                  value={scheduledDate}
+                  onChange={(e) => {
+                    setScheduledDate(e.target.value);
+                    if (mode === "edit") persistField("scheduledDate", e.target.value || undefined);
+                  }}
+                  className="bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
+                />
+              </FieldRow>
+            </div>
+          )}
+
+          {/* Delegation block */}
+          {status === "delegated" && (
+            <div className="mt-2 p-3 rounded-[4px] bg-surface-raised border border-border-subtle space-y-3">
+              <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
+                Delegation
+              </div>
+              <FieldRow label="Delegate name">
+                <input
+                  value={delegateName}
+                  onChange={(e) => setDelegateName(e.target.value)}
+                  onBlur={() => persistField("delegateName", delegateName || undefined)}
+                  placeholder="Maria, AI, etc."
+                  list="delegate-names"
+                  className="w-full bg-surface-base border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
+                />
+                <datalist id="delegate-names">
+                  {delegateSuggestions.map((n) => (
+                    <option key={n} value={n} />
+                  ))}
+                </datalist>
+              </FieldRow>
+              <FieldRow label="Expected return">
+                <input
+                  type="date"
+                  value={expectedReturn}
+                  onChange={(e) => setExpectedReturn(e.target.value)}
+                  onBlur={() =>
+                    persistField("expectedReturnDate", expectedReturn || undefined)
+                  }
+                  className="bg-surface-base border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
+                />
+              </FieldRow>
+              <FieldRow label="Delegate note">
+                <textarea
+                  value={delegateNote}
+                  onChange={(e) => setDelegateNote(e.target.value)}
+                  onBlur={() => persistField("delegateNote", delegateNote || undefined)}
+                  rows={2}
+                  className="w-full bg-surface-base border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none resize-y"
+                />
+              </FieldRow>
+            </div>
+          )}
+
+          {/* Contextual timestamp line */}
+          {action && <TimestampLine action={action} onClose={onClose} />}
+        </div>
+
+        {/* NOTES */}
+        <div>
+          <SectionHead>Notes</SectionHead>
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
@@ -353,111 +575,9 @@ function ActionEditorPanel({
             className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary placeholder:text-text-tertiary outline-none resize-y"
           />
         </div>
-
-        {/* Impact + costs */}
-        <div className="grid grid-cols-2 gap-3">
-          <FieldRow label="Impact (0-10)">
-            <input
-              type="number"
-              min={0}
-              max={10}
-              value={impact}
-              onChange={(e) => setImpact(Number(e.target.value))}
-              onBlur={() => persistField("impact", Number(impact) || 0)}
-              className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
-            />
-          </FieldRow>
-          {layers.logTime && (
-            <FieldRow label="Time (min)">
-              <input
-                type="number"
-                min={0}
-                value={timeMin}
-                onChange={(e) =>
-                  setTimeMin(e.target.value === "" ? "" : Number(e.target.value))
-                }
-                onBlur={() =>
-                  persistField(
-                    "timeEstimateMinutes",
-                    timeMin === "" ? undefined : Number(timeMin),
-                  )
-                }
-                className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
-              />
-            </FieldRow>
-          )}
-          {layers.logEnergy && (
-            <FieldRow label="Energy (1-10)">
-              <input
-                type="number"
-                min={1}
-                max={10}
-                value={energy}
-                onChange={(e) => setEnergy(e.target.value === "" ? "" : Number(e.target.value))}
-                onBlur={() =>
-                  persistField("energyCost", energy === "" ? undefined : Number(energy))
-                }
-                className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
-              />
-            </FieldRow>
-          )}
-          {layers.logFocus && (
-            <FieldRow label="Focus (1-10)">
-              <input
-                type="number"
-                min={1}
-                max={10}
-                value={focus}
-                onChange={(e) => setFocus(e.target.value === "" ? "" : Number(e.target.value))}
-                onBlur={() =>
-                  persistField("focusCost", focus === "" ? undefined : Number(focus))
-                }
-                className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
-              />
-            </FieldRow>
-          )}
-        </div>
-
-        {/* Delegation section (only when delegated) */}
-        {status === "delegated" && mode === "edit" && (
-          <div className="border border-border-subtle rounded-[4px] p-3 space-y-3">
-            <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
-              Delegation
-            </div>
-            <FieldRow label="Delegate name">
-              <input
-                value={delegateName}
-                onChange={(e) => setDelegateName(e.target.value)}
-                onBlur={() => persistField("delegateName", delegateName || undefined)}
-                placeholder="Maria, AI, etc."
-                className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
-              />
-            </FieldRow>
-            <FieldRow label="Expected return">
-              <input
-                type="date"
-                value={expectedReturn}
-                onChange={(e) => setExpectedReturn(e.target.value)}
-                onBlur={() =>
-                  persistField("expectedReturnDate", expectedReturn || undefined)
-                }
-                className="bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
-              />
-            </FieldRow>
-            <FieldRow label="Delegate note">
-              <textarea
-                value={delegateNote}
-                onChange={(e) => setDelegateNote(e.target.value)}
-                onBlur={() => persistField("delegateNote", delegateNote || undefined)}
-                rows={2}
-                className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none resize-y"
-              />
-            </FieldRow>
-          </div>
-        )}
       </div>
 
-      {/* Footer / actions */}
+      {/* Footer */}
       <div className="border-t border-border-subtle px-6 py-3 flex items-center justify-between">
         {mode === "new" ? (
           <>
@@ -487,7 +607,7 @@ function ActionEditorPanel({
               Delete
             </button>
             <div className="flex items-center gap-2">
-              {!isTerminal && status !== "delegated" && (
+              {!isTerminal && status !== "delegated" && !isGoalLevel && (
                 <button
                   onClick={() => handleStatusChange("done")}
                   className="text-[13px] font-medium px-3 py-1.5 rounded-[4px]"
@@ -534,6 +654,16 @@ function ActionEditorPanel({
   );
 }
 
+// ──────────── Sub-components ────────────
+
+function SectionHead({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-3">
+      {children}
+    </div>
+  );
+}
+
 function FieldRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
@@ -543,4 +673,181 @@ function FieldRow({ label, children }: { label: string; children: React.ReactNod
       {children}
     </div>
   );
+}
+
+function QuickDateBtn({ label, onClick }: { label: string; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="text-[12px] px-2 py-1 rounded-[4px] border border-border-subtle text-text-secondary hover:text-text-primary hover:border-border-default transition-colors"
+    >
+      {label}
+    </button>
+  );
+}
+
+function StatusDot({ status }: { status: ActionStatus }) {
+  return (
+    <span
+      className="inline-block w-2 h-2 rounded-full shrink-0"
+      style={{ background: STATUS_COLOR[status] }}
+    />
+  );
+}
+
+function StatusDropdown({
+  current,
+  isGoalLevel,
+  onPick,
+}: {
+  current: ActionStatus;
+  isGoalLevel: boolean;
+  onPick: (s: ActionStatus) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          className="w-full max-w-[280px] flex items-center justify-between gap-2 bg-surface-raised border border-border-default rounded-[4px] px-3 py-2 text-[13px] text-text-primary hover:bg-surface-hover transition-colors"
+        >
+          <span className="flex items-center gap-2">
+            <StatusDot status={current} />
+            <span>{STATUS_LABEL[current]}</span>
+          </span>
+          <ChevronDown size={14} className="text-text-tertiary" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent
+        align="start"
+        className="w-[280px] p-1 bg-surface-raised border border-border-default"
+      >
+        <TooltipProvider delayDuration={200}>
+          {STATUS_ORDER.map((s) => {
+            const disabled = isGoalLevel && s !== "backlog";
+            const selected = s === current;
+            const item = (
+              <button
+                key={s}
+                type="button"
+                disabled={disabled}
+                onClick={() => {
+                  if (disabled) return;
+                  setOpen(false);
+                  onPick(s);
+                }}
+                className={`w-full flex items-center justify-between gap-2 px-3 py-2 text-[13px] rounded-[3px] transition-colors ${
+                  disabled
+                    ? "opacity-40 cursor-not-allowed"
+                    : "hover:bg-surface-hover cursor-pointer"
+                } ${selected ? "text-[hsl(var(--accent))]" : "text-text-primary"}`}
+              >
+                <span className="flex items-center gap-2">
+                  <StatusDot status={s} />
+                  <span>{STATUS_LABEL[s]}</span>
+                </span>
+                {selected && <Check size={14} className="text-[hsl(var(--accent))]" />}
+              </button>
+            );
+            if (disabled) {
+              return (
+                <Tooltip key={s}>
+                  <TooltipTrigger asChild>
+                    <div>{item}</div>
+                  </TooltipTrigger>
+                  <TooltipContent side="left" className="text-[12px]">
+                    Assign to a Project to plan or complete this action.
+                  </TooltipContent>
+                </Tooltip>
+              );
+            }
+            return item;
+          })}
+        </TooltipProvider>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+function TimestampLine({ action, onClose }: { action: Action; onClose: () => void }) {
+  const status = action.status;
+  if (status === "backlog") return null;
+
+  const linkDate = (iso: string, label: string) => (
+    <Link
+      to={`/reviews/days/${iso}`}
+      onClick={onClose}
+      className="underline-offset-2 hover:underline hover:text-[hsl(var(--accent))] transition-colors cursor-pointer"
+    >
+      {label}
+    </Link>
+  );
+
+  if (status === "planned") {
+    const sd = action.scheduledDate;
+    if (!sd) return null;
+    const today = TODAY_ISO();
+    const overdue = sd < today;
+    const label = fmtRelDate(sd);
+    return (
+      <div
+        className="mt-3 font-mono text-[12px]"
+        style={{ color: overdue ? "hsl(var(--state-stalled))" : "hsl(var(--text-secondary))" }}
+      >
+        {overdue ? "Overdue · scheduled for " : "Scheduled for "}
+        {linkDate(sd, label)}
+      </div>
+    );
+  }
+
+  if (status === "done" && action.completedAt) {
+    const cDate = action.completedAt.slice(0, 10);
+    const cLabel = fmtRelFromNow(action.completedAt);
+    const sd = action.scheduledDate;
+    const showOriginal = sd && sd !== cDate;
+    return (
+      <div className="mt-3 space-y-0.5">
+        <div className="font-mono text-[12px] text-text-secondary">
+          Completed {linkDate(cDate, cLabel)}
+        </div>
+        {showOriginal && (
+          <div className="font-mono text-[12px] text-text-tertiary">
+            Originally scheduled for {fmtRelDate(sd!)}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  if (status === "delegated" && action.delegatedAt) {
+    const dDate = action.delegatedAt.slice(0, 10);
+    return (
+      <div className="mt-3 font-mono text-[12px] text-text-secondary">
+        Delegated{action.delegateName ? ` to ${action.delegateName}` : ""} ·{" "}
+        {linkDate(dDate, fmtRelFromNow(action.delegatedAt))}
+      </div>
+    );
+  }
+
+  if (status === "dropped" && action.droppedAt) {
+    const dDate = action.droppedAt.slice(0, 10);
+    return (
+      <div className="mt-3 font-mono text-[12px] text-text-secondary">
+        Dropped on {linkDate(dDate, fmtRelDate(dDate))}
+      </div>
+    );
+  }
+
+  if (status === "cancelled" && action.cancelledAt) {
+    const dDate = action.cancelledAt.slice(0, 10);
+    return (
+      <div className="mt-3 font-mono text-[12px] text-text-secondary">
+        Cancelled on {linkDate(dDate, fmtRelDate(dDate))}
+      </div>
+    );
+  }
+
+  return null;
 }

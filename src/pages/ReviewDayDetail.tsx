@@ -136,21 +136,33 @@ const ReviewDayDetail: React.FC = () => {
   const goalColorOf = (a: Action | Ritual) =>
     `hsl(var(--${goalById((a as any).goalId)?.color ?? "goal-1"}))`;
 
-  // Done actions on this day
-  const doneToday = actions.filter(
-    (a) => a.status === "done" && a.completedAt?.slice(0, 10) === date,
+  // Status transitions on this day
+  const sameDay = (iso?: string) => !!iso && iso.slice(0, 10) === date;
+
+  const doneToday = actions.filter((a) => a.status === "done" && sameDay(a.completedAt));
+  const delegatedToday = actions.filter(
+    (a) => a.status === "delegated" && sameDay(a.delegatedAt),
+  );
+  const droppedToday = actions.filter(
+    (a) => a.status === "dropped" && sameDay(a.droppedAt),
+  );
+  const cancelledToday = actions.filter(
+    (a) => a.status === "cancelled" && sameDay(a.cancelledAt),
   );
 
   const planned = (dayEntry?.plannedActionIds ?? [])
     .map((id) => actions.find((a) => a.id === id))
     .filter(Boolean) as Action[];
 
-  const doneIds = new Set(doneToday.map((a) => a.id));
-  const skipped = planned.filter(
-    (a) => !doneIds.has(a.id) && (a.status === "dropped" || a.status === "cancelled"),
+  const transitionedIds = new Set([
+    ...doneToday.map((a) => a.id),
+    ...delegatedToday.map((a) => a.id),
+    ...droppedToday.map((a) => a.id),
+    ...cancelledToday.map((a) => a.id),
+  ]);
+  const notCompleted = planned.filter(
+    (a) => !transitionedIds.has(a.id) && a.status !== "done",
   );
-  const skippedIds = new Set(skipped.map((a) => a.id));
-  const notCompleted = planned.filter((a) => !doneIds.has(a.id) && !skippedIds.has(a.id));
 
   // Rituals
   const plannedRituals = (dayEntry?.plannedRitualIds ?? [])
@@ -281,9 +293,18 @@ const ReviewDayDetail: React.FC = () => {
   };
 
   // Stats helpers (Part 5)
-  const actionTotal = doneToday.length + skipped.length + notCompleted.length;
+  const actionTotal =
+    doneToday.length +
+    delegatedToday.length +
+    droppedToday.length +
+    cancelledToday.length +
+    notCompleted.length;
   const actionSubgroupCount =
-    (doneToday.length > 0 ? 1 : 0) + (skipped.length > 0 ? 1 : 0) + (notCompleted.length > 0 ? 1 : 0);
+    (doneToday.length > 0 ? 1 : 0) +
+    (delegatedToday.length > 0 ? 1 : 0) +
+    (droppedToday.length > 0 ? 1 : 0) +
+    (cancelledToday.length > 0 ? 1 : 0) +
+    (notCompleted.length > 0 ? 1 : 0);
   const actionTimeMin = doneToday.reduce((s, a) => s + (a.timeEstimateMinutes ?? 0), 0);
   const showActionTimeMeta = settings.layers.logTime && actionTimeMin > 0;
 
@@ -455,14 +476,34 @@ const ReviewDayDetail: React.FC = () => {
                       ))}
                     </>
                   )}
-                  {skipped.length > 0 && (
+                  {delegatedToday.length > 0 && (
                     <>
                       {actionSubgroupCount > 1 && (
                         <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mt-3 mb-1">
-                          Skipped · {skipped.length}
+                          Delegated · {delegatedToday.length}
                         </div>
                       )}
-                      {skipped.map((a) => (
+                      {delegatedToday.map((a) => (
+                        <ActionLine
+                          key={a.id}
+                          a={a}
+                          icon="→"
+                          goalColor={goalColorOf(a)}
+                          parent={breadcrumb(a)}
+                          showTime={settings.layers.logTime}
+                          onClick={() => openActionEdit(a.id)}
+                        />
+                      ))}
+                    </>
+                  )}
+                  {droppedToday.length > 0 && (
+                    <>
+                      {actionSubgroupCount > 1 && (
+                        <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mt-3 mb-1">
+                          Dropped · {droppedToday.length}
+                        </div>
+                      )}
+                      {droppedToday.map((a) => (
                         <ActionLine
                           key={a.id}
                           a={a}
@@ -475,6 +516,27 @@ const ReviewDayDetail: React.FC = () => {
                       ))}
                     </>
                   )}
+                  {cancelledToday.length > 0 && (
+                    <>
+                      {actionSubgroupCount > 1 && (
+                        <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mt-3 mb-1">
+                          Cancelled · {cancelledToday.length}
+                        </div>
+                      )}
+                      {cancelledToday.map((a) => (
+                        <ActionLine
+                          key={a.id}
+                          a={a}
+                          icon="✗"
+                          goalColor={goalColorOf(a)}
+                          parent={breadcrumb(a)}
+                          showTime={settings.layers.logTime}
+                          onClick={() => openActionEdit(a.id)}
+                        />
+                      ))}
+                    </>
+                  )}
+
                   {notCompleted.length > 0 && (
                     <>
                       {actionSubgroupCount > 1 && (

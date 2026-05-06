@@ -96,6 +96,9 @@ export interface WeekSummary {
   days: ISODate[];
   dayEntriesByDate: Record<ISODate, DayEntry | undefined>;
   doneActions: Action[];
+  delegatedActions: Action[];
+  droppedActions: Action[];
+  cancelledActions: Action[];
   reflections: { date: ISODate; entry: DayEntry }[];
   closedProjects: ClosedEntity<Project>[];
   closedGoals: ClosedEntity<Goal>[];
@@ -130,6 +133,15 @@ export function getWeekSummary(
   for (const d of days) dayEntriesByDate[d] = data.dayEntries.find((e) => e.date === d);
 
   const doneActions = data.actions.filter((a) => a.status === "done" && inWeek(a.completedAt));
+  const delegatedActions = data.actions.filter(
+    (a) => a.status === "delegated" && inWeek(a.delegatedAt),
+  );
+  const droppedActions = data.actions.filter(
+    (a) => a.status === "dropped" && inWeek(a.droppedAt),
+  );
+  const cancelledActions = data.actions.filter(
+    (a) => a.status === "cancelled" && inWeek(a.cancelledAt),
+  );
 
   const reflections = days
     .map((d) => ({ date: d, entry: dayEntriesByDate[d] }))
@@ -225,6 +237,9 @@ export function getWeekSummary(
     days,
     dayEntriesByDate,
     doneActions,
+    delegatedActions,
+    droppedActions,
+    cancelledActions,
     reflections,
     closedProjects,
     closedGoals,

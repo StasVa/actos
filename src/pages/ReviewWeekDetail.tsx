@@ -312,37 +312,99 @@ const ReviewWeekDetail: React.FC = () => {
             </div>
           </section>
 
-          {/* TOP CONTRIBUTING ACTIONS */}
-          {topActions.length > 0 && (
+          {/* ACTIONS THIS WEEK */}
+          {(topActions.length > 0 ||
+            summary.delegatedActions.length > 0 ||
+            summary.droppedActions.length > 0 ||
+            summary.cancelledActions.length > 0) && (
             <section>
-              <SectionHead meta={`${topActions.length}`}>Top contributing actions</SectionHead>
-              <div className="space-y-4">
-                {Array.from(topByGoal.entries()).map(([gid, list]) => {
-                  const g = goalById(gid);
-                  return (
-                    <div key={gid}>
-                      <div className="flex items-center gap-2 mb-1.5">
-                        <span
-                          className="w-1.5 h-1.5 rounded-full"
-                          style={{ background: `hsl(var(--${g?.color ?? "goal-1"}))` }}
-                        />
-                        <span className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
-                          {g?.title ?? "—"} · {list.length} action{list.length === 1 ? "" : "s"}
-                        </span>
-                      </div>
-                      {list.map((a) => (
-                        <ActionRow
-                          key={a.id}
-                          action={a}
-                          hideCheckbox
-                          terminal
-                          rightPill={{ kind: "done" }}
-                          onClick={() => openActionEdit(a.id)}
-                        />
-                      ))}
+              <SectionHead
+                meta={`${topActions.length + summary.delegatedActions.length + summary.droppedActions.length + summary.cancelledActions.length}`}
+              >
+                Actions this week
+              </SectionHead>
+              <div className="space-y-5">
+                {topActions.length > 0 && (
+                  <div>
+                    <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-1.5">
+                      Done · {topActions.length}{topActions.length === summary.doneActions.length ? "" : ` (top ${topActions.length})`}
                     </div>
-                  );
-                })}
+                    {Array.from(topByGoal.entries()).map(([gid, list]) => {
+                      const g = goalById(gid);
+                      return (
+                        <div key={gid} className="mb-2">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span
+                              className="w-1.5 h-1.5 rounded-full"
+                              style={{ background: `hsl(var(--${g?.color ?? "goal-1"}))` }}
+                            />
+                            <span className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
+                              {g?.title ?? "—"} · {list.length}
+                            </span>
+                          </div>
+                          {list.map((a) => (
+                            <ActionRow
+                              key={a.id}
+                              action={a}
+                              hideCheckbox
+                              terminal
+                              rightPill={{ kind: "done" }}
+                              onClick={() => openActionEdit(a.id)}
+                            />
+                          ))}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+                {summary.delegatedActions.length > 0 && (
+                  <div>
+                    <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-1.5">
+                      Delegated · {summary.delegatedActions.length}
+                    </div>
+                    {summary.delegatedActions.map((a) => (
+                      <ActionRow
+                        key={a.id}
+                        action={a}
+                        hideCheckbox
+                        terminal
+                        onClick={() => openActionEdit(a.id)}
+                      />
+                    ))}
+                  </div>
+                )}
+                {summary.droppedActions.length > 0 && (
+                  <div>
+                    <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-1.5">
+                      Dropped · {summary.droppedActions.length}
+                    </div>
+                    {summary.droppedActions.map((a) => (
+                      <ActionRow
+                        key={a.id}
+                        action={a}
+                        hideCheckbox
+                        terminal
+                        onClick={() => openActionEdit(a.id)}
+                      />
+                    ))}
+                  </div>
+                )}
+                {summary.cancelledActions.length > 0 && (
+                  <div>
+                    <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-1.5">
+                      Cancelled · {summary.cancelledActions.length}
+                    </div>
+                    {summary.cancelledActions.map((a) => (
+                      <ActionRow
+                        key={a.id}
+                        action={a}
+                        hideCheckbox
+                        terminal
+                        onClick={() => openActionEdit(a.id)}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             </section>
           )}

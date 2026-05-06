@@ -84,6 +84,7 @@ export interface Action {
   timeline: ActionTimelineEvent[];
   createdAt: ISODateTime;
   updatedAt?: ISODateTime;
+  plannedAt?: ISODateTime;
   completedAt?: ISODateTime;
   delegatedAt?: ISODateTime;
   droppedAt?: ISODateTime;

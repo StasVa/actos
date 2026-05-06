@@ -815,7 +815,7 @@ function ActionEditorPanel({
         onCancel={() => setConfirmPastDate(null)}
         onConfirm={confirmMarkDoneOnPast}
       />
-    </aside>
+    </EditorShell>
   );
 }
 

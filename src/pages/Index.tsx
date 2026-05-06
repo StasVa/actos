@@ -148,7 +148,7 @@ const GoalColumn: React.FC<{
   type: string;
   target?: string;
   progress: number;
-  meta: string[];
+  meta: React.ReactNode[];
   outcome: number;
   effort: number;
   spark: number[];

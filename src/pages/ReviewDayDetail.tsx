@@ -293,9 +293,18 @@ const ReviewDayDetail: React.FC = () => {
   };
 
   // Stats helpers (Part 5)
-  const actionTotal = doneToday.length + skipped.length + notCompleted.length;
+  const actionTotal =
+    doneToday.length +
+    delegatedToday.length +
+    droppedToday.length +
+    cancelledToday.length +
+    notCompleted.length;
   const actionSubgroupCount =
-    (doneToday.length > 0 ? 1 : 0) + (skipped.length > 0 ? 1 : 0) + (notCompleted.length > 0 ? 1 : 0);
+    (doneToday.length > 0 ? 1 : 0) +
+    (delegatedToday.length > 0 ? 1 : 0) +
+    (droppedToday.length > 0 ? 1 : 0) +
+    (cancelledToday.length > 0 ? 1 : 0) +
+    (notCompleted.length > 0 ? 1 : 0);
   const actionTimeMin = doneToday.reduce((s, a) => s + (a.timeEstimateMinutes ?? 0), 0);
   const showActionTimeMeta = settings.layers.logTime && actionTimeMin > 0;
 

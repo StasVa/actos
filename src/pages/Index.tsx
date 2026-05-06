@@ -748,11 +748,6 @@ export const TodayZone: React.FC<{
           <div className="font-mono text-[12px] text-text-secondary">
             {todays.filter((a) => a.status === "done").length} of {todays.length} actions done · {todaysRituals.filter((r) => r.completionHistory.some((c) => c.date === TODAY_ISO && (c.status === "done" || !c.status))).length} of {todaysRituals.length} rituals
           </div>
-          {dayEntry?.eveningEnergyScore && (
-            <div className="font-mono text-[12px] text-text-secondary">
-              Evening energy: {dayEntry.eveningEnergyScore}/10
-            </div>
-          )}
           {dayEntry?.reflectionText && (
             <div className="text-[13px] text-text-primary leading-[1.5] border-l-2 border-border-default pl-3">
               {dayEntry.reflectionText}

@@ -904,7 +904,9 @@ export const TodayZone: React.FC<{
         </div>
 
         {/* INLINE-ADD — sticky at bottom of viewport on mobile */}
-        <div className="flex items-center gap-2 bg-surface-raised border border-dashed border-border-subtle rounded-[4px] px-3 py-2 max-md:fixed max-md:left-0 max-md:right-0 max-md:bottom-0 max-md:z-40 max-md:bg-surface-base max-md:border-x-0 max-md:border-b-0 max-md:border-dashed-0 max-md:border-t max-md:border-t-border-subtle max-md:rounded-none max-md:px-4 max-md:py-3">
+        <div
+          className="flex items-center gap-2 rounded-[4px] px-3 py-2 bg-surface-raised border border-dashed border-border-subtle md:static max-md:fixed max-md:left-0 max-md:right-0 max-md:bottom-0 max-md:z-40 max-md:bg-surface-base max-md:border-0 max-md:border-t max-md:border-solid max-md:border-border-subtle max-md:rounded-none max-md:px-4 max-md:py-3"
+        >
           <input
             value={quickAdd}
             onChange={(e) => setQuickAdd(e.target.value)}

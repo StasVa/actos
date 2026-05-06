@@ -12,6 +12,7 @@ import {
   getMonthSummary,
   getMonthsWithActivity,
 } from "@/lib/monthUtils";
+import { getOutcomeSummary } from "@/lib/outcomeUtils";
 
 const RANGE_OPTIONS = [
   { value: "12m", label: "Last 12 months" },

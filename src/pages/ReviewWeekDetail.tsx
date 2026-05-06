@@ -14,6 +14,8 @@ import {
 } from "@/lib/weekUtils";
 import { ActionRow } from "@/components/ActionRow";
 import { AccomplishmentsSection, type AccomplishmentTile } from "@/components/AccomplishmentsSection";
+import { OutcomeAddedSection } from "@/components/OutcomeAddedSection";
+import { getOutcomeSummary } from "@/lib/outcomeUtils";
 import { addDays } from "date-fns";
 import { DAY_TYPE_LABELS } from "./Index";
 import type { Action } from "@/types";

@@ -319,7 +319,7 @@ const AllProjects: React.FC = () => {
   };
 
   const livePROJECTS: Project[] = useMemo(() => {
-    return storeProjects.map((p) => {
+    return storeProjects.filter((p) => !p.isDraft).map((p) => {
       const acts = storeActions.filter(
         (a) => a.projectId === p.id && a.status !== "dropped" && a.status !== "cancelled",
       );

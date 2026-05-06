@@ -276,7 +276,6 @@ const ProjectCard: React.FC<{ p: Project; color: string; goalLabel: string }> = 
   color,
   goalLabel,
 }) => {
-  const openPanel = useStore((s) => s.openPanel);
   const markProjectComplete = useStore((s) => s.markProjectComplete);
   const dropProject = useStore((s) => s.dropProject);
   const deleteProject = useStore((s) => s.deleteProject);

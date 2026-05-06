@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useStore } from "@/store/useStore";
 import { AppSidebar } from "@/components/AppSidebar";
@@ -393,7 +393,7 @@ const Sessions: React.FC = () => {
   const hasHistory = history.length > 0;
 
   const handleStart = () => {
-    toast.info("Session builder coming soon");
+    navigate("/sessions/new");
   };
 
   return (

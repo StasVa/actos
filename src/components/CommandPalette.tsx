@@ -79,6 +79,7 @@ export function CommandPalette() {
   const settings = useStore((s) => s.settings);
   const openPanel = useStore((s) => s.openPanel);
   const createAction = useStore((s) => s.createAction);
+  const createProject = useStore((s) => s.createProject);
 
   // Open/close listener
   React.useEffect(() => {
@@ -189,7 +190,15 @@ export function CommandPalette() {
         title: "Create new project",
         iconChar: "+",
         onSelect: () => {
-          openPanel({ kind: "project", mode: "new" });
+          const goalId =
+            goals.find((g) => g.status === "active")?.id ?? goals[0]?.id;
+          if (!goalId) {
+            toast.error("Create an active goal first");
+            close();
+            return;
+          }
+          const id = createProject({ title: "", goalId, isDraft: true });
+          navigate(`/projects/${id}`);
           close();
         },
       },

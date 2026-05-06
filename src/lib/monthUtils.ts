@@ -203,7 +203,8 @@ export function getMonthSummary(
     if (e?.dayType) dayTypeDistribution[e.dayType]++;
   }
 
-  const totalTimeMinutes = doneActions.reduce((s, a) => s + (a.timeEstimateMinutes ?? 0), 0);
+  const investedActions = [...doneActions, ...delegatedActions];
+  const totalTimeMinutes = investedActions.reduce((s, a) => s + timeInvestedMinutes(a), 0);
 
   const morningScores: number[] = [];
   const eveningScores: number[] = [];

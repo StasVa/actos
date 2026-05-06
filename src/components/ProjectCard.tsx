@@ -66,7 +66,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ projectId, goalLabel, 
     () => allActions.filter((a) => a.projectId === projectId),
     [allActions, projectId],
   );
-  const logTime = useStore((s) => s.settings.layers.logTime);
+  // Time tracking is always on; layer references kept for transitional safety.
 
   const markProjectComplete = useStore((s) => s.markProjectComplete);
   const dropProject = useStore((s) => s.dropProject);

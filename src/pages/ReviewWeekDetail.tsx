@@ -10,8 +10,11 @@ import {
   formatDayTypeDistribution,
   getWeekSummary,
   dateFromYearWeek,
+  yearWeekFromDate,
 } from "@/lib/weekUtils";
 import { ActionRow } from "@/components/ActionRow";
+import { AccomplishmentsSection, type AccomplishmentTile } from "@/components/AccomplishmentsSection";
+import { addDays } from "date-fns";
 import { DAY_TYPE_LABELS } from "./Index";
 import type { Action } from "@/types";
 

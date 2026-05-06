@@ -816,7 +816,51 @@ function ActionEditorPanel({
         onCancel={() => setConfirmDrop(null)}
         onConfirm={confirmDropAction}
       />
+      <PastDateConfirmModal
+        iso={confirmPastDate}
+        onCancel={() => setConfirmPastDate(null)}
+        onConfirm={confirmMarkDoneOnPast}
+      />
     </aside>
+  );
+}
+
+function PastDateConfirmModal({
+  iso,
+  onCancel,
+  onConfirm,
+}: {
+  iso: string | null;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  if (!iso) return null;
+  const d = new Date(iso + "T00:00:00");
+  const fullLabel = d.toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+  const shortLabel = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  return (
+    <ConfirmModal
+      open={true}
+      title="Schedule for past date?"
+      body={
+        <>
+          You picked <strong>{fullLabel}</strong> ({relDays(iso)}), which is in
+          the past.
+          <div className="mt-2">
+            This action will be marked as Done on that date and included in
+            progress calculations and reviews.
+          </div>
+        </>
+      }
+      confirmLabel={`Mark as Done on ${shortLabel}`}
+      onCancel={onCancel}
+      onConfirm={onConfirm}
+    />
   );
 }
 

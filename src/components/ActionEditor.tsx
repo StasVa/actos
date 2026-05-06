@@ -564,6 +564,7 @@ function ActionEditorPanel({
           </div>
         </div>
 
+        {/* NOTES */}
         <div>
           <SectionHead>Notes</SectionHead>
           <textarea

@@ -649,22 +649,31 @@ function ActionEditorPanel({
               </FieldRow>
             )}
             {layers.logTime && (
-              <FieldRow label="Time (min)">
+              <FieldRow label="Time (min) · required">
                 <input
                   type="number"
-                  min={0}
+                  min={1}
                   value={timeMin}
-                  onChange={(e) =>
-                    setTimeMin(e.target.value === "" ? "" : Number(e.target.value))
-                  }
+                  placeholder="e.g. 30"
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setTimeMin(v === "" ? "" : Number(v));
+                    if (v !== "" && Number(v) > 0) setTimeError(null);
+                  }}
                   onBlur={() =>
                     persistField(
                       "timeEstimateMinutes",
                       timeMin === "" ? undefined : Number(timeMin),
                     )
                   }
-                  className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
+                  className="w-full bg-surface-raised border rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
+                  style={{
+                    borderColor: timeError
+                      ? "hsl(var(--text-warning))"
+                      : "hsl(var(--border-subtle))",
+                  }}
                 />
+                {timeError && <InlineError text={timeError} />}
               </FieldRow>
             )}
           </div>

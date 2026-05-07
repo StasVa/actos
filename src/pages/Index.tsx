@@ -833,29 +833,168 @@ export const TodayZone: React.FC<{
   return (
     <section>
       <div className="space-y-6">
-        {mainTask && (
-          <div>
-            <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-2">
-              MAIN TASK
-            </div>
-            <div
-              onClick={() => openPanel({ kind: "action", mode: "edit", id: mainTask.id })}
-              className="flex items-center gap-3 px-4 py-3 bg-surface-elevated border border-border-subtle rounded-[6px] cursor-pointer hover:bg-surface-hover transition-colors"
-            >
-              <span className="text-[18px] font-medium text-text-primary truncate">{mainTask.title}</span>
-              <span className="font-mono text-[12px] text-text-secondary truncate">
-                {breadcrumb(mainTask.goalId, mainTask.projectId)}
-              </span>
-              <div className="flex-1" />
-              {mainTask.impact > 0 && (
-                <span className="font-mono text-[11px] text-text-secondary">I{mainTask.impact}</span>
-              )}
-              {fmtTime(mainTask.timeEstimateMinutes) && (
-                <TimePill>{fmtTime(mainTask.timeEstimateMinutes)}</TimePill>
-              )}
-            </div>
+        {/* MAIN TASK */}
+        <div>
+          <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-2">
+            MAIN TASK
           </div>
-        )}
+          {mainTask ? (
+            (() => {
+              const mtDone = mainTask.status === "done";
+              const stripe = colorVar(mainTask.goalId);
+              const g = goalById(mainTask.goalId);
+              const p = projectById(mainTask.projectId);
+              const parentLabel = [g?.title, p?.title].filter(Boolean).join(" · ");
+              const doneAtLabel = mtDone && mainTask.completedAt
+                ? new Date(mainTask.completedAt).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
+                : null;
+              return (
+                <div
+                  onClick={() => openPanel({ kind: "action", mode: "edit", id: mainTask.id })}
+                  className="relative flex items-center gap-3 px-5 py-4 bg-surface-raised rounded-[6px] cursor-pointer hover:bg-surface-hover transition-colors overflow-hidden"
+                  style={{
+                    border: "1px solid hsl(var(--accent))",
+                  }}
+                >
+                  <span
+                    className="absolute left-0 top-0 bottom-0"
+                    style={{ background: stripe, width: 3 }}
+                  />
+                  {/* Checkbox */}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (!mtDone) handleToggleDone(mainTask.id);
+                    }}
+                    aria-label={mtDone ? "Done" : "Mark done"}
+                    className="inline-flex items-center justify-center rounded-[2px] border shrink-0 ml-1"
+                    style={{
+                      width: 16,
+                      height: 16,
+                      background: mtDone ? stripe : "transparent",
+                      borderColor: mtDone ? stripe : "hsl(var(--text-tertiary))",
+                      color: "hsl(var(--surface-base))",
+                      fontSize: 11,
+                      lineHeight: 1,
+                    }}
+                  >
+                    {mtDone ? "✓" : ""}
+                  </button>
+                  <Star
+                    size={14}
+                    className="shrink-0"
+                    style={{ color: "hsl(var(--accent))", fill: "hsl(var(--accent))" }}
+                  />
+                  <div className="flex flex-col min-w-0 flex-1">
+                    <span
+                      className={`text-[16px] font-medium truncate ${
+                        mtDone ? "text-text-secondary line-through" : "text-text-primary"
+                      }`}
+                    >
+                      {mainTask.title}
+                    </span>
+                    <span
+                      className={`font-mono text-[12px] truncate ${
+                        mtDone ? "text-text-tertiary" : "text-text-secondary"
+                      }`}
+                    >
+                      {doneAtLabel ? `Done at ${doneAtLabel}` : null}
+                      {doneAtLabel && parentLabel ? " · " : null}
+                      {parentLabel}
+                    </span>
+                  </div>
+                  {mtDone && (
+                    <span
+                      className="font-mono text-[11px] uppercase tracking-[0.06em] shrink-0"
+                      style={{ color: "hsl(var(--accent))" }}
+                    >
+                      ✓ Day's win
+                    </span>
+                  )}
+                  {mainTask.impact > 0 && (
+                    <span className="font-mono text-[11px] text-text-secondary shrink-0">
+                      I{mainTask.impact}
+                    </span>
+                  )}
+                  {fmtTime(mainTask.timeEstimateMinutes) && (
+                    <TimePill>{fmtTime(mainTask.timeEstimateMinutes)}</TimePill>
+                  )}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setClearMainTaskOpen(true);
+                    }}
+                    aria-label="Clear Main Task"
+                    className="shrink-0 text-text-tertiary hover:text-text-primary transition-colors p-1 -mr-1"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              );
+            })()
+          ) : (
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setPickMainTaskOpen((v) => !v)}
+                disabled={others.length === 0 && todays.length === 0}
+                className="w-full flex items-center justify-center gap-2 px-5 py-4 rounded-[6px] border border-dashed border-border-default hover:border-[hsl(var(--accent))] transition-colors disabled:cursor-not-allowed"
+              >
+                <Star size={16} className="text-text-tertiary" />
+                <span className="text-[14px] text-text-tertiary">
+                  {todays.length === 0
+                    ? "No actions planned · add some first"
+                    : "Pick a Main Task"}
+                </span>
+              </button>
+              {pickMainTaskOpen && todays.length > 0 && (
+                <div className="absolute left-0 right-0 mt-1 z-30 bg-surface-raised border border-border-default rounded-[6px] shadow-lg max-h-[280px] overflow-y-auto">
+                  {todays
+                    .filter((a) => a.status !== "done" && a.status !== "dropped" && a.status !== "cancelled")
+                    .map((a) => {
+                      const g = goalById(a.goalId);
+                      const p = projectById(a.projectId);
+                      return (
+                        <button
+                          key={a.id}
+                          type="button"
+                          onClick={() => {
+                            updateDayEntry(TODAY_ISO, { mainTaskActionId: a.id });
+                            setPickMainTaskOpen(false);
+                            toast.success("Main Task set");
+                          }}
+                          className="w-full text-left px-4 py-2.5 hover:bg-surface-hover transition-colors border-b border-border-subtle last:border-b-0"
+                        >
+                          <div className="text-[14px] text-text-primary truncate">{a.title}</div>
+                          <div className="font-mono text-[11px] text-text-tertiary truncate">
+                            {[g?.title, p?.title].filter(Boolean).join(" · ")}
+                          </div>
+                        </button>
+                      );
+                    })}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        <ConfirmModal
+          open={clearMainTaskOpen}
+          title="Clear Main Task?"
+          body="You can pick another from today's actions."
+          confirmLabel="Clear"
+          onCancel={() => setClearMainTaskOpen(false)}
+          onConfirm={() => {
+            updateDayEntry(TODAY_ISO, { mainTaskActionId: null });
+            setClearMainTaskOpen(false);
+            toast("Main Task cleared");
+          }}
+        />
 
         {/* ACTIONS GROUP */}
         <div>

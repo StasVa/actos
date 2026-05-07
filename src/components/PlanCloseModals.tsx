@@ -6,7 +6,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { X, Zap, Leaf, Sun, Thermometer, GripVertical, type LucideIcon } from "lucide-react";
+import { X, Zap, Leaf, Sun, Thermometer, GripVertical, Star, type LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 import { useStore, ritualMultiplier } from "@/store/useStore";
 import type { Action, DayType, ID, Ritual } from "@/types";
@@ -218,6 +218,17 @@ const PlanForm: React.FC<{
   const rituals = useStore((s) => s.rituals);
   const goals = useStore((s) => s.goals);
   const projects = useStore((s) => s.projects);
+  const createAction = useStore((s) => s.createAction);
+
+  // Inline-add state
+  const firstActiveGoal = goals.find((g) => g.status === "active");
+  const firstProjectForGoal = (gid?: ID) =>
+    gid ? projects.find((p) => p.status === "active" && p.goalId === gid) : undefined;
+  const initialGoal = firstActiveGoal?.id;
+  const initialProject = firstProjectForGoal(initialGoal)?.id;
+  const [quickTitle, setQuickTitle] = useState("");
+  const [quickGoalId, setQuickGoalId] = useState<ID | undefined>(initialGoal);
+  const [quickProjectId, setQuickProjectId] = useState<ID | undefined>(initialProject);
 
   const dueRituals = useMemo(
     () => rituals.filter((r) => r.status === "active" && ritualDueOn(r, date)),
@@ -327,7 +338,7 @@ const PlanForm: React.FC<{
         key={a.id}
         type="button"
         onClick={() => toggleAction(a.id)}
-        className="relative w-full flex items-center gap-2 pr-2 hover:bg-surface-hover transition-colors text-left"
+        className={`relative w-full flex items-center gap-2 pr-2 hover:bg-surface-hover transition-colors text-left ${checked ? "opacity-50" : ""}`}
         style={{ minHeight: 40 }}
       >
         <span
@@ -486,39 +497,48 @@ const PlanForm: React.FC<{
               ACTIONS
             </SectionHead>
 
-            {/* Quick-start presets */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">
-              <button
-                type="button"
-                onClick={() => addMany(heavySuggestions.map((a) => a.id))}
-                disabled={heavySuggestions.length === 0}
-                className="text-left p-3 rounded-[6px] bg-surface-raised border border-border-subtle hover:border-[hsl(var(--accent))] disabled:opacity-50 disabled:hover:border-border-subtle transition-colors"
-              >
-                <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-[hsl(var(--accent))]">
-                  + Add Heavy Lift
-                </div>
-                <div className="text-[12px] text-text-secondary mt-1">{heavyDescription}</div>
-              </button>
-              <button
-                type="button"
-                onClick={() => addMany(quickSuggestions.map((a) => a.id))}
-                disabled={quickSuggestions.length === 0}
-                className="text-left p-3 rounded-[6px] bg-surface-raised border border-border-subtle hover:border-[hsl(var(--accent))] disabled:opacity-50 disabled:hover:border-border-subtle transition-colors"
-              >
-                <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-[hsl(var(--accent))]">
-                  + Add Quick Moves
-                </div>
-                <div className="text-[12px] text-text-secondary mt-1">{quickDescription}</div>
-              </button>
-            </div>
-
-            <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary text-center my-3">
-              ── or pick manually ↓ ──
-            </div>
-
             <div className="grid grid-cols-1 md:grid-cols-[3fr_2fr] gap-3">
               {/* LEFT: available */}
               <div className="border border-border-subtle rounded-[6px] bg-surface-base flex flex-col min-h-[280px]">
+                {/* Quick Start strip */}
+                <div
+                  className="flex items-center gap-3 px-3 border-b border-border-subtle bg-surface-elevated rounded-t-[6px]"
+                  style={{ minHeight: 32 }}
+                >
+                  <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">
+                    QUICK START:
+                  </span>
+                  <button
+                    type="button"
+                    disabled={heavySuggestions.length === 0}
+                    title={heavySuggestions.length === 0 ? "No heavy-lift candidates available" : undefined}
+                    onClick={() => {
+                      const pick = heavySuggestions[0];
+                      if (!pick) return;
+                      addMany([pick.id]);
+                      toast.success(`Heavy Lift added: ${pick.title}`);
+                    }}
+                    className="text-[13px] font-medium text-[hsl(var(--accent))] hover:text-text-primary hover:underline disabled:text-text-tertiary disabled:no-underline disabled:cursor-not-allowed"
+                  >
+                    + Heavy Lift
+                  </button>
+                  <span className="text-text-tertiary">·</span>
+                  <button
+                    type="button"
+                    disabled={quickSuggestions.length === 0}
+                    title={quickSuggestions.length === 0 ? "No quick-move candidates available" : undefined}
+                    onClick={() => {
+                      const ids = quickSuggestions.map((a) => a.id);
+                      if (ids.length === 0) return;
+                      addMany(ids);
+                      toast.success(`${ids.length} Quick Move${ids.length > 1 ? "s" : ""} added`);
+                    }}
+                    className="text-[13px] font-medium text-[hsl(var(--accent))] hover:text-text-primary hover:underline disabled:text-text-tertiary disabled:no-underline disabled:cursor-not-allowed"
+                  >
+                    + Quick Moves
+                  </button>
+                </div>
+
                 <div className="flex items-center gap-1.5 p-2 border-b border-border-subtle flex-wrap">
                   <select
                     value={filterGoal}
@@ -585,6 +605,72 @@ const PlanForm: React.FC<{
                     )
                   )}
                 </div>
+
+                {/* Inline-add input */}
+                <div className="p-2 border-t border-border-subtle bg-surface-base rounded-b-[6px]">
+                  <div
+                    className="flex items-center gap-2 px-3 rounded-[4px] border border-dashed border-border-default"
+                    style={{ height: 40 }}
+                  >
+                    <span className="font-mono text-[14px] text-text-tertiary leading-none">+</span>
+                    <input
+                      value={quickTitle}
+                      onChange={(e) => setQuickTitle(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key !== "Enter") return;
+                        e.preventDefault();
+                        const title = quickTitle.trim();
+                        if (!title || !quickGoalId) return;
+                        const newId = createAction({
+                          title,
+                          goalId: quickGoalId,
+                          projectId: quickProjectId ?? null,
+                        });
+                        addMany([newId]);
+                        setQuickTitle("");
+                        toast.success("Action created and added to today");
+                      }}
+                      placeholder="Quick add new action..."
+                      className="flex-1 bg-transparent text-[13px] text-text-primary outline-none placeholder:text-text-tertiary"
+                    />
+                    <select
+                      value={quickGoalId ?? ""}
+                      onChange={(e) => {
+                        const gid = e.target.value || undefined;
+                        setQuickGoalId(gid);
+                        const proj = firstProjectForGoal(gid);
+                        setQuickProjectId(proj?.id);
+                      }}
+                      className="bg-surface-hover text-[11px] text-text-secondary rounded-[3px] px-1.5 py-1 outline-none border border-transparent focus:border-border-default max-w-[110px]"
+                      title="Goal"
+                    >
+                      {goals
+                        .filter((g) => g.status === "active")
+                        .map((g) => (
+                          <option key={g.id} value={g.id}>
+                            {g.title}
+                          </option>
+                        ))}
+                    </select>
+                    <select
+                      value={quickProjectId ?? ""}
+                      onChange={(e) => setQuickProjectId(e.target.value || undefined)}
+                      className="bg-surface-hover text-[11px] text-text-secondary rounded-[3px] px-1.5 py-1 outline-none border border-transparent focus:border-border-default max-w-[110px]"
+                      title="Project"
+                    >
+                      <option value="">No project</option>
+                      {projects
+                        .filter(
+                          (p) => p.status === "active" && (!quickGoalId || p.goalId === quickGoalId),
+                        )
+                        .map((p) => (
+                          <option key={p.id} value={p.id}>
+                            {p.title}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+                </div>
               </div>
 
               {/* RIGHT: selected */}
@@ -614,21 +700,85 @@ const PlanForm: React.FC<{
 
           {/* MAIN TASK */}
           <section>
-            <SectionHead sub="What single thing makes today a win?">MAIN TASK</SectionHead>
-            <select
-              value={state.mainTaskId ?? ""}
-              onChange={(e) =>
-                setState((s) => ({ ...s, mainTaskId: e.target.value || undefined }))
+            <div className="mb-2">
+              <div className="flex items-center gap-2">
+                <Star size={16} className="text-text-tertiary" />
+                <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
+                  MAIN TASK
+                </div>
+              </div>
+              <div className="text-[13px] text-text-secondary mt-1">
+                What single thing makes today a win?
+              </div>
+            </div>
+            {(() => {
+              const mt = state.mainTaskId
+                ? selectedActions.find((a) => a.id === state.mainTaskId)
+                : undefined;
+              if (mt) {
+                const g = goalById(mt.goalId);
+                const p = projectById(mt.projectId);
+                return (
+                  <div
+                    className="relative rounded-[6px] bg-surface-raised overflow-hidden"
+                    style={{ border: "1px solid hsl(var(--accent))", padding: "16px 20px" }}
+                  >
+                    <span
+                      className="absolute left-0 top-0 bottom-0"
+                      style={{ background: goalColor(mt.goalId), width: 3 }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setState((s) => ({ ...s, mainTaskId: undefined }))}
+                      aria-label="Clear main task"
+                      className="absolute top-2 right-2 text-text-tertiary hover:text-text-primary text-[14px] px-1"
+                    >
+                      ×
+                    </button>
+                    <div className="flex items-center gap-2 pr-6">
+                      <Star
+                        size={14}
+                        className="text-[hsl(var(--accent))] shrink-0"
+                        fill="hsl(var(--accent))"
+                      />
+                      <span className="text-[15px] font-medium text-text-primary truncate">
+                        {mt.title}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 mt-1.5 font-mono text-[12px] text-text-secondary">
+                      <span className="truncate">
+                        {g?.title ?? ""}
+                        {p ? ` · ${p.title}` : ""}
+                      </span>
+                      {mt.impact ? <span className="tabular-nums">· I{mt.impact}</span> : null}
+                      {mt.timeEstimateMinutes ? (
+                        <span className="tabular-nums">· {formatTimeMin(mt.timeEstimateMinutes)}</span>
+                      ) : null}
+                    </div>
+                  </div>
+                );
               }
-              className="w-full bg-surface-hover rounded-[4px] px-3 py-2 text-[13px] text-text-primary outline-none border border-transparent focus:border-border-default"
-            >
-              <option value="">— None —</option>
-              {selectedActions.map((a) => (
-                <option key={a.id} value={a.id}>
-                  {a.title}
-                </option>
-              ))}
-            </select>
+              const disabled = selectedActions.length === 0;
+              return (
+                <select
+                  value=""
+                  disabled={disabled}
+                  onChange={(e) =>
+                    setState((s) => ({ ...s, mainTaskId: e.target.value || undefined }))
+                  }
+                  className="w-full appearance-none bg-transparent rounded-[4px] px-4 py-3 text-[14px] text-text-tertiary outline-none border border-dashed border-border-default cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <option value="">
+                    {disabled ? "Add actions first" : "Pick from selected actions ▾"}
+                  </option>
+                  {selectedActions.map((a) => (
+                    <option key={a.id} value={a.id}>
+                      {a.title}
+                    </option>
+                  ))}
+                </select>
+              );
+            })()}
           </section>
 
           {/* RITUALS */}
@@ -675,17 +825,6 @@ const PlanForm: React.FC<{
             </div>
           </section>
 
-          {/* INTENT */}
-          <section>
-            <SectionHead>INTENT</SectionHead>
-            <textarea
-              value={state.intent}
-              onChange={(e) => setState((s) => ({ ...s, intent: e.target.value }))}
-              rows={2}
-              placeholder="Today I will…"
-              className="w-full bg-surface-hover rounded-[4px] px-3 py-2 text-[14px] text-text-primary outline-none border border-transparent focus:border-border-default placeholder:text-text-tertiary resize-none"
-            />
-          </section>
         </>
       )}
     </div>
@@ -734,18 +873,25 @@ export const PlanTodayModal: React.FC<{ open: boolean; onClose: () => void }> = 
 }) => {
   const date = todayISO();
   const startDayPlan = useStore((s) => s.startDayPlan);
+  const updateAction = useStore((s) => s.updateAction);
+  const actions = useStore((s) => s.actions);
   const [state, setState] = usePrefilledPlanState(date);
 
   const canSubmit = !!state.dayType && state.selectedActionIds.length > 0;
 
   const handleSubmit = () => {
     if (!canSubmit) return;
+    // Clear scheduledDate on any pre-scheduled actions that the user un-selected.
+    const selectedSet = new Set(state.selectedActionIds);
+    actions
+      .filter((a) => a.scheduledDate === date && !selectedSet.has(a.id))
+      .forEach((a) => updateAction(a.id, { scheduledDate: undefined }));
     startDayPlan({
       date,
       dayType: state.dayType,
       mainTaskActionId: state.mainTaskId,
       morningEnergyScore: undefined,
-      morningIntentNote: state.intent || undefined,
+      morningIntentNote: undefined,
       plannedActionIds: state.selectedActionIds,
       plannedRitualIds: Array.from(state.keptRitualIds),
       skippedRitualIds: Array.from(state.skippedRitualIds),
@@ -932,15 +1078,22 @@ export const ClosePlanModal: React.FC<{ open: boolean; onClose: () => void }> = 
 
   const canSubmit = !!planState.dayType && planState.selectedActionIds.length > 0;
 
+  const updateAction = useStore((s) => s.updateAction);
+  const allActions = useStore((s) => s.actions);
+
   const handleSubmit = () => {
     if (!canSubmit) return;
     closeDay(yesterday, closeState.eveningEnergy, closeState.reflection || undefined);
+    const selectedSet = new Set(planState.selectedActionIds);
+    allActions
+      .filter((a) => a.scheduledDate === today && !selectedSet.has(a.id))
+      .forEach((a) => updateAction(a.id, { scheduledDate: undefined }));
     startDayPlan({
       date: today,
       dayType: planState.dayType,
       mainTaskActionId: planState.mainTaskId,
       morningEnergyScore: undefined,
-      morningIntentNote: planState.intent || undefined,
+      morningIntentNote: undefined,
       plannedActionIds: planState.selectedActionIds,
       plannedRitualIds: Array.from(planState.keptRitualIds),
       skippedRitualIds: Array.from(planState.skippedRitualIds),

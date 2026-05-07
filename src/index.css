@@ -173,6 +173,8 @@ body {
   padding-top: 24px;
   padding-bottom: 32px;
   min-height: 100vh;
+}
+.page-narrow { --page-max: 720px; }
 .page-medium { --page-max: 1024px; }
 .page-wide   { --page-max: 1280px; }
 @media (min-width: 769px)  { .app-main { --page-pad: 24px; } }

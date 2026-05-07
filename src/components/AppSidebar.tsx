@@ -217,9 +217,20 @@ export const AppSidebar: React.FC<{ onOpenSettings?: () => void }> = ({ onOpenSe
 
   return (
     <TooltipProvider>
+      {isMobile && mobileOpen && (
+        <div
+          className="mobile-drawer-backdrop"
+          onClick={() => setMobileOpen(false)}
+          aria-hidden
+        />
+      )}
       <aside
-        className="fixed left-0 top-0 bottom-0 bg-surface-raised border-r border-border-subtle flex flex-col transition-[width] duration-200 ease-out overflow-hidden"
-        style={{ width }}
+        className="fixed left-0 top-0 bottom-0 bg-surface-raised border-r border-border-subtle flex flex-col transition-transform duration-200 ease-out overflow-hidden"
+        style={{
+          width: isMobile ? 260 : desktopWidth,
+          zIndex: isMobile ? 70 : 30,
+          transform: isMobile && !mobileOpen ? "translateX(-100%)" : "translateX(0)",
+        }}
       >
         <div className={`flex items-center ${effectiveCollapsed ? "justify-center px-0" : "justify-between px-4"} pt-4`}>
           {!effectiveCollapsed && (

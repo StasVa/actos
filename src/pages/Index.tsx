@@ -766,13 +766,23 @@ export const TodayZone: React.FC<{
   const handleToggleDone = (id: string) => {
     const a = actions.find((x) => x.id === id);
     if (!a) return;
+    if (a.status === "done") {
+      changeActionStatus(id, "planned", { scheduledDate: TODAY_ISO });
+      toast.dismiss();
+      toast.success("Action re-opened");
+      return;
+    }
+    if (a.status === "delegated" || a.status === "dropped" || a.status === "cancelled") {
+      return;
+    }
     if (!a.impact || !a.timeEstimateMinutes) {
       toast.error("Set Impact and Time before marking done");
       openPanel({ kind: "action", mode: "edit", id });
       return;
     }
     changeActionStatus(id, "done");
-    toast.success("Action completed");
+    toast.dismiss();
+    toast.success("Action marked done");
   };
 
   const handleQuickAdd = () => {
@@ -907,9 +917,9 @@ export const TodayZone: React.FC<{
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (!mtDone) handleToggleDone(mainTask.id);
+                      handleToggleDone(mainTask.id);
                     }}
-                    aria-label={mtDone ? "Done" : "Mark done"}
+                    aria-label={mtDone ? "Re-open" : "Mark done"}
                     className="inline-flex items-center justify-center rounded-[2px] border shrink-0 ml-1"
                     style={{
                       width: 16,
@@ -1071,9 +1081,7 @@ export const TodayZone: React.FC<{
                     rightPill={{ kind: "custom", node: <ImpactPill impact={a.impact} color={colorVar(a.goalId)} /> }}
                     bottomSegments={bottom}
                     onClick={() => openPanel({ kind: "action", mode: "edit", id: a.id })}
-                    onToggleDone={() => {
-                      if (a.status !== "done") handleToggleDone(a.id);
-                    }}
+                    onToggleDone={() => handleToggleDone(a.id)}
                   />
                 );
               })}

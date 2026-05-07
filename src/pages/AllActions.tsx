@@ -73,8 +73,37 @@ const ActionRow: React.FC<{ action: Action; selected: boolean; onSelect: () => v
   selected,
   onSelect,
 }) => {
+  const changeStatus = useStore((s) => s.changeActionStatus);
+  const storeAction = useStore((s) => s.actions.find((x) => x.id === action.id));
+  const openPanel = useStore((s) => s.openPanel);
   const goal = GOALS[action.goal];
   const isTerminal = !isActive(action.status);
+  const isDone = action.status === "done";
+  const checkboxDisabled =
+    action.status === "delegated" ||
+    action.status === "dropped" ||
+    action.status === "cancelled";
+
+  const handleToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (checkboxDisabled) return;
+    if (isDone) {
+      const today = new Date().toISOString().slice(0, 10);
+      changeStatus(action.id, "planned", { scheduledDate: today });
+      toast.dismiss();
+      toast.success("Action re-opened");
+      return;
+    }
+    if (!storeAction?.impact || !storeAction?.timeEstimateMinutes) {
+      toast.error("Set Impact and Time before marking done");
+      openPanel({ kind: "action", mode: "edit", id: action.id });
+      return;
+    }
+    changeStatus(action.id, "done");
+    toast.dismiss();
+    toast.success("Action marked done");
+  };
+
   const bottomBits: React.ReactNode[] = [];
   bottomBits.push(<span key="goal">{goal.name}</span>);
   bottomBits.push(<span key="proj">{action.project}</span>);
@@ -102,21 +131,27 @@ const ActionRow: React.FC<{ action: Action; selected: boolean; onSelect: () => v
         {/* Top row */}
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
-            <span
+            <button
+              type="button"
+              onClick={handleToggle}
+              disabled={checkboxDisabled}
+              title={checkboxDisabled ? "Re-open this action via the editor" : undefined}
+              aria-label={isDone ? "Re-open" : "Mark done"}
               className="inline-flex items-center justify-center rounded-[2px] border shrink-0"
               style={{
                 width: 16,
                 height: 16,
-                background: action.status === "done" ? goal.color : "transparent",
-                borderColor:
-                  action.status === "done" ? goal.color : "hsl(var(--text-tertiary))",
+                background: isDone ? goal.color : "transparent",
+                borderColor: isDone ? goal.color : "hsl(var(--text-tertiary))",
                 color: "hsl(var(--surface-base))",
                 fontSize: 11,
                 lineHeight: 1,
+                opacity: checkboxDisabled ? 0.4 : 1,
+                cursor: checkboxDisabled ? "not-allowed" : "pointer",
               }}
             >
-              {action.status === "done" ? "✓" : ""}
-            </span>
+              {isDone ? "✓" : ""}
+            </button>
             <span
               className={`text-[15px] font-medium truncate ${
                 isTerminal ? "text-text-secondary line-through" : "text-text-primary"

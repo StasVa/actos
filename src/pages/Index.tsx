@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { Zap, Leaf, Sun, Thermometer, type LucideIcon } from "lucide-react";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Tooltip, SparkTooltipContent, StateDotTooltip } from "@/components/Tooltip";
 import { LifetimeCounters } from "@/components/LifetimeCounters";
@@ -27,6 +28,25 @@ export const DAY_TYPE_LABELS: Record<string, string> = {
   recovery: "Recovery",
   "day-off": "Day Off",
   sick: "Sick",
+};
+
+export const DAY_TYPE_ICONS: Record<string, LucideIcon> = {
+  execution: Zap,
+  recovery: Leaf,
+  "day-off": Sun,
+  sick: Thermometer,
+};
+
+export const DayTypeIndicator: React.FC<{ dayType?: string }> = ({ dayType }) => {
+  if (!dayType) return null;
+  const Icon = DAY_TYPE_ICONS[dayType];
+  const label = (DAY_TYPE_LABELS[dayType] ?? "").toUpperCase() + " DAY";
+  return (
+    <div className="flex items-center text-text-secondary mt-2">
+      {Icon && <Icon size={12} className="mr-1.5" />}
+      <span className="font-mono text-[11px] uppercase tracking-[0.06em]">{label}</span>
+    </div>
+  );
 };
 
 
@@ -609,7 +629,7 @@ export const TodayZone: React.FC<{
   const skipRitualInstance = useStore((s) => s.skipRitualInstance);
 
   const [quickAdd, setQuickAdd] = useState("");
-  const [showSkipped, setShowSkipped] = useState(false);
+  
 
   const goalById = (id: string) => goals.find((g) => g.id === id);
   const projectById = (id: string | null) =>
@@ -632,24 +652,35 @@ export const TodayZone: React.FC<{
 
   // ─── STATE A: today not yet planned ───
   if (!isPlanned) {
+    const preScheduledCount = actions.filter(
+      (a) =>
+        a.scheduledDate === TODAY_ISO &&
+        (a.status === "planned" || a.status === "backlog"),
+    ).length;
     return (
       <section>
-        <SectionLabel>Today</SectionLabel>
-        <div className="flex items-start justify-between gap-6 bg-surface-elevated border border-border-subtle rounded-[6px] py-5 px-6">
-          <div className="min-w-0">
-            <div className="text-[18px] font-medium text-text-primary leading-snug">
-              What are you doing today?
-            </div>
-            <div className="text-[14px] text-text-secondary mt-1">
-              Pick today's actions to start.
-            </div>
+        <div
+          className="bg-surface-elevated border border-border-subtle rounded-[8px] text-center"
+          style={{ padding: "32px 40px" }}
+        >
+          <div className="text-[20px] font-medium text-text-primary leading-snug">
+            What are you doing today?
           </div>
+          <div className="text-[14px] text-text-secondary mt-2">
+            Pick today's actions to start.
+          </div>
+          {preScheduledCount > 0 && (
+            <div className="font-mono text-[12px] text-text-tertiary mt-3 tabular-nums">
+              {preScheduledCount} action{preScheduledCount === 1 ? "" : "s"} already scheduled for today
+            </div>
+          )}
           <button
             type="button"
             onClick={onPlanClick}
-            className="shrink-0 px-5 py-2 rounded-[4px] bg-[hsl(var(--accent))] text-white text-[13px] font-medium hover:brightness-110 transition"
+            className="mt-6 inline-block rounded-[4px] bg-[hsl(var(--accent))] text-white font-medium hover:brightness-110 transition"
+            style={{ padding: "12px 32px", fontSize: 15 }}
           >
-            Plan today →
+            Start your day →
           </button>
         </div>
       </section>
@@ -667,25 +698,27 @@ export const TodayZone: React.FC<{
   const todays = actions
     .filter((a) => includeAction(a))
     .filter((a) => a.status !== "dropped" && a.status !== "cancelled")
-    .sort((a, b) => (b.impact ?? 0) - (a.impact ?? 0));
+    .sort((a, b) => {
+      const aDone = a.status === "done" ? 1 : 0;
+      const bDone = b.status === "done" ? 1 : 0;
+      if (aDone !== bDone) return aDone - bDone; // active first
+      return (b.impact ?? 0) - (a.impact ?? 0);
+    });
 
   const mainTaskId = dayEntry?.mainTaskActionId;
   const mainTask = mainTaskId ? actions.find((a) => a.id === mainTaskId) : undefined;
   const others = todays.filter((a) => a.id !== mainTaskId);
 
-  // Rituals: when planned, use kept (skipped excluded). Otherwise show all due.
+  // Rituals: show all rituals due today (kept + skipped, with skipped visually faded).
   const skippedRitualSet = new Set(dayEntry?.skippedRitualIds ?? []);
   const plannedRitualSet = new Set(dayEntry?.plannedRitualIds ?? []);
   const todaysRituals = rituals.filter((r) => {
     if (r.status !== "active") return false;
     if (planAndReview && isPlanned) {
-      return plannedRitualSet.has(r.id);
+      return plannedRitualSet.has(r.id) || skippedRitualSet.has(r.id);
     }
     return true;
   });
-  const skippedRituals = rituals.filter(
-    (r) => r.status === "active" && skippedRitualSet.has(r.id),
-  );
   const ritualsTotal = todaysRituals.length;
 
   const handleToggleDone = (id: string) => {
@@ -714,15 +747,28 @@ export const TodayZone: React.FC<{
     toast.success("Ritual logged");
   };
 
-  const handleRitualSkip = (ritualId: string) => {
-    skipRitualInstance(ritualId);
-    if (isPlanned) {
-      updateDayEntry(TODAY_ISO, {
-        plannedRitualIds: (dayEntry?.plannedRitualIds ?? []).filter((id) => id !== ritualId),
-        skippedRitualIds: [...(dayEntry?.skippedRitualIds ?? []), ritualId],
-      });
+  const unskipRitualInstance = useStore((s) => s.unskipRitualInstance);
+
+  const handleRitualSkipToggle = (ritualId: string, currentlySkipped: boolean) => {
+    if (currentlySkipped) {
+      unskipRitualInstance(ritualId);
+      if (isPlanned) {
+        updateDayEntry(TODAY_ISO, {
+          plannedRitualIds: [...(dayEntry?.plannedRitualIds ?? []), ritualId],
+          skippedRitualIds: (dayEntry?.skippedRitualIds ?? []).filter((id) => id !== ritualId),
+        });
+      }
+      toast("Ritual restored");
+    } else {
+      skipRitualInstance(ritualId);
+      if (isPlanned) {
+        updateDayEntry(TODAY_ISO, {
+          plannedRitualIds: (dayEntry?.plannedRitualIds ?? []).filter((id) => id !== ritualId),
+          skippedRitualIds: [...(dayEntry?.skippedRitualIds ?? []), ritualId],
+        });
+      }
+      toast("Ritual skipped today");
     }
-    toast("Ritual skipped today");
   };
 
   const handleReopen = () => {
@@ -732,38 +778,37 @@ export const TodayZone: React.FC<{
 
   // ─── STATE C: closed ───
   if (planAndReview && isClosed) {
-    const dt = dayEntry?.dayType ? DAY_TYPE_LABELS[dayEntry.dayType] : "—";
-    const closedTime = dayEntry?.closedAt
-      ? new Date(dayEntry.closedAt).toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        })
-      : "—";
+    const doneActions = todays.filter((a) => a.status === "done").length;
+    const ritualsDoneCount = todaysRituals.filter((r) =>
+      r.completionHistory.some(
+        (c) => c.date === TODAY_ISO && (c.status === "done" || !c.status),
+      ),
+    ).length;
+    const valueAdded = todays
+      .filter((a) => a.status === "done")
+      .reduce((s, a) => s + (a.impact ?? 0), 0);
+    const minutes = todays
+      .filter((a) => a.status === "done")
+      .reduce((s, a) => s + (a.timeEstimateMinutes ?? 0), 0);
+    const focusH = (minutes / 60).toFixed(1);
     return (
       <section>
-        <SectionLabel meta={`Closed at ${closedTime} · ${dt}`}>Today</SectionLabel>
-        <div className="bg-surface-elevated border border-border-subtle rounded-[6px] p-5 space-y-4">
-          {mainTask && (
-            <div className="text-[13px]">
-              <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary mr-2">MAIN</span>
-              <span className="text-text-primary">{mainTask.title}</span>
-              <span className="text-text-secondary ml-1">
-                {mainTask.status === "done" ? "✓ done" : "· not completed"}
-              </span>
-            </div>
-          )}
-          <div className="font-mono text-[12px] text-text-secondary">
-            {todays.filter((a) => a.status === "done").length} of {todays.length} actions done · {todaysRituals.filter((r) => r.completionHistory.some((c) => c.date === TODAY_ISO && (c.status === "done" || !c.status))).length} of {todaysRituals.length} rituals
+        <div className="bg-surface-elevated border border-border-subtle rounded-[6px] p-5 space-y-3">
+          <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
+            DAY CLOSED
+          </div>
+          <div className="font-mono text-[13px] text-text-secondary tabular-nums">
+            {doneActions} actions done · {ritualsDoneCount} rituals done · +{valueAdded} value · {focusH}h focused
           </div>
           {dayEntry?.reflectionText && (
-            <div className="text-[13px] text-text-primary leading-[1.5] border-l-2 border-border-default pl-3">
+            <div className="text-[13px] text-text-primary leading-[1.5] border-l-2 border-border-default pl-3 italic">
               {dayEntry.reflectionText}
             </div>
           )}
           <button
             type="button"
             onClick={handleReopen}
-            className="text-[12px] text-text-secondary hover:text-text-primary transition"
+            className="text-[12px] text-text-warning hover:brightness-110 transition"
           >
             Re-open day
           </button>
@@ -773,52 +818,53 @@ export const TodayZone: React.FC<{
   }
 
   // ─── STATE B (or planAndReview off): in-progress ───
-  const startedTime = dayEntry?.startedAt
-    ? new Date(dayEntry.startedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-    : null;
-  const dayTypeLabel = dayEntry?.dayType ? DAY_TYPE_LABELS[dayEntry.dayType] : null;
-  const meta =
-    planAndReview && isPlanned
-      ? [startedTime ? `Started ${startedTime}` : null, dayTypeLabel].filter(Boolean).join(" · ")
-      : `${todays.length} ACTIONS · ${ritualsTotal} RITUALS`;
+  const doneActionsCount = todays.filter((a) => a.status === "done").length;
+  const remainingActionsCount = todays.length - doneActionsCount;
 
   return (
     <section>
-      <SectionLabel meta={meta}>Today</SectionLabel>
-      <div className="space-y-4">
+      <div className="space-y-6">
         {mainTask && (
-          <div
-            onClick={() => openPanel({ kind: "action", mode: "edit", id: mainTask.id })}
-            className="flex items-center gap-3 px-3 py-2 bg-surface-raised rounded-[4px] cursor-pointer hover:bg-surface-hover transition-colors"
-          >
-            <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">MAIN</span>
-            <span className="text-[13px] font-medium text-text-primary">{mainTask.title}</span>
-            <span className="text-[12px] text-text-secondary">{breadcrumb(mainTask.goalId, mainTask.projectId)}</span>
-            <div className="flex-1" />
-            {fmtTime(mainTask.timeEstimateMinutes) && (
-              <TimePill>{fmtTime(mainTask.timeEstimateMinutes)}</TimePill>
-            )}
-            <button
-              onClick={(e) => { e.stopPropagation(); handleToggleDone(mainTask.id); }}
-              className="inline-block rounded-[2px] border border-text-tertiary hover:border-accent shrink-0"
-              style={{ width: 14, height: 14 }}
-              aria-label="Mark done"
-            />
+          <div>
+            <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-2">
+              MAIN TASK
+            </div>
+            <div
+              onClick={() => openPanel({ kind: "action", mode: "edit", id: mainTask.id })}
+              className="flex items-center gap-3 px-4 py-3 bg-surface-elevated border border-border-subtle rounded-[6px] cursor-pointer hover:bg-surface-hover transition-colors"
+            >
+              <span className="text-[18px] font-medium text-text-primary truncate">{mainTask.title}</span>
+              <span className="font-mono text-[12px] text-text-secondary truncate">
+                {breadcrumb(mainTask.goalId, mainTask.projectId)}
+              </span>
+              <div className="flex-1" />
+              {mainTask.impact > 0 && (
+                <span className="font-mono text-[11px] text-text-secondary">I{mainTask.impact}</span>
+              )}
+              {fmtTime(mainTask.timeEstimateMinutes) && (
+                <TimePill>{fmtTime(mainTask.timeEstimateMinutes)}</TimePill>
+              )}
+            </div>
           </div>
         )}
 
         {/* ACTIONS GROUP */}
         <div>
-          <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-2">
-            ACTIONS · {others.length}
+          <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
+            TODAY'S ACTIONS · {todays.length}
           </div>
-          {others.length === 0 ? (
+          {todays.length > 0 && (
+            <div className="font-mono text-[12px] text-text-secondary mt-1 mb-2 tabular-nums">
+              {doneActionsCount} done · {remainingActionsCount} remaining
+            </div>
+          )}
+          {todays.length === 0 ? (
             <div className="px-3 py-4 text-center font-mono text-[11px] text-text-tertiary border border-dashed border-border-subtle rounded-[4px]">
               No actions for today.
             </div>
           ) : (
             <div>
-              {others.map((a) => (
+              {todays.map((a) => (
                 <SharedActionRow
                   key={a.id}
                   action={a}
@@ -834,9 +880,27 @@ export const TodayZone: React.FC<{
 
         {/* RITUALS GROUP */}
         <div>
-          <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-2">
-            RITUALS · {ritualsTotal}
-          </div>
+          {(() => {
+            const doneCount = todaysRituals.filter((r) =>
+              r.completionHistory.some(
+                (c) => c.date === TODAY_ISO && (c.status === "done" || !c.status),
+              ),
+            ).length;
+            const skippedCount = todaysRituals.filter((r) => skippedRitualSet.has(r.id)).length;
+            const pendingCount = ritualsTotal - doneCount - skippedCount;
+            return (
+              <>
+                <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
+                  TODAY'S RITUALS · {ritualsTotal}
+                </div>
+                {ritualsTotal > 0 && (
+                  <div className="font-mono text-[12px] text-text-secondary mb-2 mt-1 tabular-nums">
+                    {doneCount} done · {pendingCount} pending · {skippedCount} skipped
+                  </div>
+                )}
+              </>
+            );
+          })()}
           {todaysRituals.length === 0 ? (
             <div className="font-mono text-[11px] text-text-tertiary px-3 py-2">No rituals today.</div>
           ) : (
@@ -845,62 +909,48 @@ export const TodayZone: React.FC<{
                 const doneToday = r.completionHistory.some(
                   (c) => c.date === TODAY_ISO && (c.status === "done" || !c.status),
                 );
+                const isSkipped = skippedRitualSet.has(r.id);
                 const mult = ritualMultiplier(r.totalCompletions);
                 const color = colorVar(r.goalId);
                 return (
                   <div
                     key={r.id}
-                    className="flex items-center gap-2 pr-3 h-8 rounded-[2px] hover:bg-surface-hover transition-colors group"
+                    className={`flex items-center gap-2 pr-3 h-8 rounded-[2px] hover:bg-surface-hover transition-colors group ${
+                      isSkipped ? "opacity-50" : ""
+                    }`}
                   >
                     <button
-                      onClick={() => handleRitualDone(r.id, doneToday)}
-                      className="ml-2 w-2.5 h-2.5 rounded-full border transition-colors shrink-0"
+                      onClick={() => !isSkipped && handleRitualDone(r.id, doneToday)}
+                      disabled={isSkipped}
+                      className="ml-2 w-2.5 h-2.5 rounded-full border transition-colors shrink-0 disabled:cursor-not-allowed"
                       style={{ borderColor: color, background: doneToday ? color : "transparent" }}
                       aria-label={doneToday ? "Done today" : "Mark ritual done"}
                     />
                     <span
-                      className={`text-[13px] truncate cursor-pointer ${doneToday ? "text-text-tertiary" : "text-text-primary"}`}
+                      className={`text-[13px] truncate cursor-pointer ${
+                        doneToday || isSkipped ? "text-text-tertiary line-through" : "text-text-primary"
+                      }`}
                       onClick={() => openPanel({ kind: "ritual", mode: "edit", id: r.id })}
                     >
                       {r.title}
                     </span>
                     <span className="font-mono text-[11px] text-text-tertiary truncate">
-                      {r.schedule[0].toUpperCase() + r.schedule.slice(1)} · {r.totalCompletions} done · ×{mult.toFixed(2)}
+                      {r.schedule[0].toUpperCase() + r.schedule.slice(1)} · ×{mult.toFixed(2)}
                     </span>
                     <div className="flex-1" />
                     {doneToday ? (
                       <span className="font-mono text-[11px] text-text-secondary">✓ Done</span>
                     ) : (
                       <button
-                        onClick={() => handleRitualSkip(r.id)}
-                        className="text-[11px] text-text-tertiary hover:text-text-primary opacity-0 group-hover:opacity-100 transition"
+                        onClick={() => handleRitualSkipToggle(r.id, isSkipped)}
+                        className="text-[11px] text-text-tertiary hover:text-text-primary transition"
                       >
-                        Skip
+                        {isSkipped ? "Restore" : "Skip"}
                       </button>
                     )}
                   </div>
                 );
               })}
-            </div>
-          )}
-          {skippedRituals.length > 0 && (
-            <button
-              type="button"
-              onClick={() => setShowSkipped((v) => !v)}
-              className="mt-2 text-[12px] text-text-tertiary hover:text-text-primary transition"
-            >
-              {showSkipped ? "Hide" : "Show"} skipped ({skippedRituals.length})
-            </button>
-          )}
-          {showSkipped && skippedRituals.length > 0 && (
-            <div className="mt-2 space-y-1">
-              {skippedRituals.map((r) => (
-                <div key={r.id} className="flex items-center gap-2 pl-2 text-[12px] text-text-tertiary">
-                  <span className="w-2 h-2 rounded-full" style={{ background: colorVar(r.goalId), opacity: 0.5 }} />
-                  <span className="line-through">{r.title}</span>
-                  <span className="font-mono text-[11px]">· skipped</span>
-                </div>
-              ))}
             </div>
           )}
         </div>
@@ -1166,36 +1216,67 @@ const UtilityRow: React.FC = () => (
 );
 
 /* ===== Yesterday review card ===== */
-const YesterdayCard: React.FC = () => {
+/** Find most recent ACTIVE day with activity (skip Day Off / Sick / zero-activity). */
+function selectLookingBackDate(
+  dayEntries: import("@/types").DayEntry[],
+  actions: import("@/types").Action[],
+  rituals: import("@/types").Ritual[],
+): string | null {
+  const sorted = [...dayEntries]
+    .filter((d) => d.date < TODAY_ISO)
+    .sort((a, b) => b.date.localeCompare(a.date));
+  for (const d of sorted) {
+    if (d.dayType !== "execution" && d.dayType !== "recovery") continue;
+    const hasActions = actions.some(
+      (a) => a.completedAt?.slice(0, 10) === d.date && a.status === "done",
+    );
+    const hasRituals = rituals.some((r) =>
+      r.completionHistory.some(
+        (c) => c.date === d.date && (c.status === "done" || !c.status),
+      ),
+    );
+    if (hasActions || hasRituals || (d.reflectionText && d.reflectionText.trim())) {
+      return d.date;
+    }
+  }
+  return null;
+}
+
+const LookingBackCard: React.FC<{ date: string }> = ({ date }) => {
   const goals = useStore((s) => s.goals);
   const actions = useStore((s) => s.actions);
   const rituals = useStore((s) => s.rituals);
-  const yEntry = useStore((s) => s.dayEntries.find((d) => d.date === YESTERDAY_ISO));
+  const yEntry = useStore((s) => s.dayEntries.find((d) => d.date === date));
 
-  const yDate = new Date(YESTERDAY_ISO + "T00:00:00");
-  const headerDate = yDate
+  const dObj = new Date(date + "T00:00:00");
+  const fullDate = dObj
     .toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
     .toUpperCase();
+  const daysAgo = Math.round((Date.now() - dObj.getTime()) / 86400000);
+  const relLabel =
+    daysAgo <= 1 ? "YESTERDAY" : `${daysAgo} DAYS AGO`;
 
-  const dtLabel = yEntry?.dayType ? `${DAY_TYPE_LABELS[yEntry.dayType]} day` : "Not planned";
+  const dayType = yEntry?.dayType;
+  const Icon = dayType ? DAY_TYPE_ICONS[dayType] : null;
+  const dtLabel = dayType ? `${DAY_TYPE_LABELS[dayType]} day` : "Active day";
 
-  // Stats
-  const yActions = actions.filter((a) => a.completedAt?.slice(0, 10) === YESTERDAY_ISO && a.status === "done");
+  const yActions = actions.filter(
+    (a) => a.completedAt?.slice(0, 10) === date && a.status === "done",
+  );
   const yDelegated = actions.filter(
-    (a) => a.delegatedAt?.slice(0, 10) === YESTERDAY_ISO && a.status === "delegated",
+    (a) => a.delegatedAt?.slice(0, 10) === date && a.status === "delegated",
   );
   const actionsDone = yActions.length;
   const ritualsDone = rituals.reduce(
     (n, r) =>
       n +
       (r.completionHistory.some(
-        (c) => c.date === YESTERDAY_ISO && (c.status === "done" || !c.status),
+        (c) => c.date === date && (c.status === "done" || !c.status),
       )
         ? 1
         : 0),
     0,
   );
-  // Time invested = full Done time + 20% Delegated time.
   const investedMinFor = (a: typeof actions[number]) => {
     const t = a.timeEstimateMinutes ?? 0;
     if (t <= 0) return 0;
@@ -1204,64 +1285,70 @@ const YesterdayCard: React.FC = () => {
     return 0;
   };
   const investedAll = [...yActions, ...yDelegated];
-  const totalMin = investedAll.reduce((sum, a) => sum + investedMinFor(a), 0);
+  const totalMin = investedAll.reduce((s, a) => s + investedMinFor(a), 0);
   const hours = totalMin >= 60 ? `${(totalMin / 60).toFixed(1)}h` : `${totalMin}m`;
 
-  // Per-goal time invested
   const perGoal = goals
     .filter((g) => g.status === "active")
-    .map((g) => {
-      const min = investedAll
-        .filter((a) => a.goalId === g.id)
-        .reduce((s, a) => s + investedMinFor(a), 0);
-      return { g, min };
-    })
+    .map((g) => ({
+      g,
+      min: investedAll.filter((a) => a.goalId === g.id).reduce((s, a) => s + investedMinFor(a), 0),
+    }))
     .filter((x) => x.min > 0);
 
-  // Last activity
-  const lastIso = yActions
-    .map((a) => a.completedAt)
-    .filter(Boolean)
-    .sort()
-    .at(-1);
+  const lastIso = yActions.map((a) => a.completedAt).filter(Boolean).sort().at(-1);
   const lastTime = lastIso
     ? new Date(lastIso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
     : null;
 
   return (
-    <section className="bg-surface-elevated border border-border-subtle rounded-[6px] p-6">
-      <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
-        YESTERDAY · {headerDate}
+    <section>
+      <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-3">
+        LOOKING BACK
       </div>
-      <div className="mt-2 text-[14px] text-text-primary">{dtLabel}</div>
-      <div className="mt-1 font-mono text-[13px] text-text-secondary tabular-nums">
-        {actionsDone} actions done · {ritualsDone} rituals · {hours} invested
+      <div className="bg-surface-elevated border border-border-subtle rounded-[6px] p-6">
+        <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
+          {relLabel} · {fullDate}
+        </div>
+        <div className="mt-2 flex items-center gap-1.5 text-[14px] text-text-primary">
+          {Icon && <Icon size={14} className="text-text-secondary" />}
+          <span>{dtLabel}</span>
+        </div>
+        <div className="mt-2 font-mono text-[13px] text-text-secondary tabular-nums">
+          {actionsDone} actions done · {ritualsDone} rituals · {hours} invested
+        </div>
+        {perGoal.length > 0 && (
+          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5">
+            {perGoal.map(({ g, min }) => (
+              <div
+                key={g.id}
+                className="flex items-center gap-1.5 font-mono text-[12px] text-text-secondary"
+              >
+                <span
+                  className="w-2 h-2 rounded-full"
+                  style={{ background: `hsl(var(--${g.color}))` }}
+                />
+                <span className="text-text-primary">{g.title}</span>
+                <span className="text-text-tertiary">·</span>
+                <span className="tabular-nums">
+                  {min >= 60 ? `${(min / 60).toFixed(1)}h` : `${min}m`}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+        {lastTime && (
+          <div className="mt-3 font-mono text-[11px] text-text-tertiary">
+            Last activity: {lastTime}
+          </div>
+        )}
+        <Link
+          to={`/reviews/days/${date}`}
+          className="inline-block mt-4 text-[12px] text-[hsl(var(--accent))] hover:brightness-110 transition-colors"
+        >
+          View full review →
+        </Link>
       </div>
-      {perGoal.length > 0 && (
-        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5">
-          {perGoal.map(({ g, min }) => (
-            <div key={g.id} className="flex items-center gap-1.5 font-mono text-[12px] text-text-secondary">
-              <span className="w-2 h-2 rounded-full" style={{ background: `hsl(var(--${g.color}))` }} />
-              <span className="text-text-primary">{g.title}</span>
-              <span className="text-text-tertiary">·</span>
-              <span className="tabular-nums">
-                {min >= 60 ? `${(min / 60).toFixed(1)}h` : `${min}m`}
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
-      {lastTime && (
-        <div className="mt-3 font-mono text-[12px] text-text-tertiary">
-          Last activity: {lastTime}
-        </div>
-      )}
-      <Link
-        to={`/reviews/days/${YESTERDAY_ISO}`}
-        className="inline-block mt-4 text-[12px] text-text-secondary hover:text-text-primary transition-colors"
-      >
-        View full review →
-      </Link>
     </section>
   );
 };
@@ -1315,14 +1402,6 @@ const Index: React.FC = () => {
     month: "long",
     day: "numeric",
   });
-  const startedTime = todayEntry?.startedAt
-    ? new Date(todayEntry.startedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-    : null;
-  const dayTypeLabel = todayEntry?.dayType ? `${DAY_TYPE_LABELS[todayEntry.dayType]} day` : null;
-  const subLine =
-    isPlanned && dayTypeLabel
-      ? `${dayTypeLabel}${startedTime ? ` · Started ${startedTime}` : ""}`
-      : "";
 
   // Aggregate stats for header right
   const plannedSet = new Set(todayEntry?.plannedActionIds ?? []);
@@ -1340,10 +1419,9 @@ const Index: React.FC = () => {
   ).length;
   const aggMeta = isPlanned ? `${todaysActionCount} actions · ${todaysRitualCount} rituals` : "";
 
-  // Yesterday card visibility: show if yesterday wasn't closed OR today isn't planned
-  const showYesterday = (!yesterdayEntry?.isClosed || !isPlanned) && !!(
-    yesterdayEntry || actions.some((a) => a.completedAt?.slice(0, 10) === YESTERDAY_ISO)
-  );
+  // Looking-back date selector (most recent ACTIVE day with activity)
+  const dayEntries = useStore((s) => s.dayEntries);
+  const lookingBackDate = selectLookingBackDate(dayEntries, actions, rituals);
 
   return (
     <div className="min-h-screen bg-surface-base text-text-primary">
@@ -1353,31 +1431,29 @@ const Index: React.FC = () => {
       <CloseDayModal open={closeOpen} onClose={() => setCloseOpen(false)} />
       <ClosePlanModal open={combinedOpen} onClose={() => setCombinedOpen(false)} />
       <main className="ml-[var(--sidebar-w,220px)] px-8 py-6 max-w-[1200px]">
-        <header className="mb-8 flex items-start justify-between gap-4">
-          <div>
-            <h1 className="text-[24px] font-medium text-text-primary leading-tight">{headerDate}</h1>
-            {subLine && (
-              <div className="font-mono text-[13px] text-text-tertiary mt-1">{subLine}</div>
+        <header className="mb-8">
+          <div className="flex items-start justify-between gap-4">
+            <h1 className="text-[28px] font-medium text-text-primary leading-tight">{headerDate}</h1>
+            {aggMeta && (
+              <div className="font-mono text-[13px] text-text-tertiary tabular-nums pt-2">
+                {aggMeta}
+              </div>
             )}
           </div>
-          {aggMeta && (
-            <div className="font-mono text-[13px] text-text-tertiary tabular-nums pt-2">
-              {aggMeta}
-            </div>
-          )}
+          {todayEntry?.dayType && <DayTypeIndicator dayType={todayEntry.dayType} />}
         </header>
-
-        {showYesterday && !isClosed && (
-          <>
-            <YesterdayCard />
-            <div className="h-8" />
-          </>
-        )}
 
         <TodayZone
           onPlanClick={() => setPlanOpen(true)}
           onCloseClick={() => setCloseOpen(true)}
         />
+
+        {lookingBackDate && (
+          <>
+            <div className="h-10" />
+            <LookingBackCard date={lookingBackDate} />
+          </>
+        )}
 
         <div className="h-12" />
       </main>

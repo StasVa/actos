@@ -693,19 +693,16 @@ export const TodayZone: React.FC<{
   const mainTask = mainTaskId ? actions.find((a) => a.id === mainTaskId) : undefined;
   const others = todays.filter((a) => a.id !== mainTaskId);
 
-  // Rituals: when planned, use kept (skipped excluded). Otherwise show all due.
+  // Rituals: show all rituals due today (kept + skipped, with skipped visually faded).
   const skippedRitualSet = new Set(dayEntry?.skippedRitualIds ?? []);
   const plannedRitualSet = new Set(dayEntry?.plannedRitualIds ?? []);
   const todaysRituals = rituals.filter((r) => {
     if (r.status !== "active") return false;
     if (planAndReview && isPlanned) {
-      return plannedRitualSet.has(r.id);
+      return plannedRitualSet.has(r.id) || skippedRitualSet.has(r.id);
     }
     return true;
   });
-  const skippedRituals = rituals.filter(
-    (r) => r.status === "active" && skippedRitualSet.has(r.id),
-  );
   const ritualsTotal = todaysRituals.length;
 
   const handleToggleDone = (id: string) => {

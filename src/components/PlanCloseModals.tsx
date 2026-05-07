@@ -267,14 +267,17 @@ const PlanForm: React.FC<{
       .sort((a, b) => (b.impact ?? 0) - (a.impact ?? 0));
   }, [eligible, date, filterGoal, filterProject, filterStatus]);
 
-  const heavySuggestions = useMemo(
-    () => pickHeavyLift(eligible.filter((a) => !selectedSet.has(a.id))),
-    [eligible, selectedSet],
+  const suggestionPool = useMemo(
+    () =>
+      eligible.filter((a) => {
+        if (selectedSet.has(a.id)) return false;
+        const g = goals.find((x) => x.id === a.goalId);
+        return g?.status === "active";
+      }),
+    [eligible, selectedSet, goals],
   );
-  const quickSuggestions = useMemo(
-    () => pickQuickMoves(eligible.filter((a) => !selectedSet.has(a.id))),
-    [eligible, selectedSet],
-  );
+  const heavySuggestions = useMemo(() => pickHeavyLift(suggestionPool), [suggestionPool]);
+  const quickSuggestions = useMemo(() => pickQuickMoves(suggestionPool), [suggestionPool]);
 
   const toggleAction = (id: ID) =>
     setState((s) => {

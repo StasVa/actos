@@ -308,7 +308,7 @@ const AllDelegated: React.FC = () => {
     <div className="min-h-screen bg-surface-base text-text-primary">
       <AppSidebar />
       <MobileHeader />
-      <main className="pl-[var(--sidebar-w,220px)] max-md:pl-0 mx-auto flex flex-col h-screen">
+      <main className="app-main page-medium flex flex-col h-screen">
         {/* Header */}
         <div className="px-10 pt-6 pb-3 shrink-0">
           <div className="flex items-center justify-between gap-4">

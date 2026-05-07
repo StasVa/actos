@@ -207,7 +207,7 @@ const SessionSummary: React.FC = () => {
       <div className="min-h-screen bg-background text-text-primary">
         <AppSidebar />
         <MobileHeader />
-      <main className="pl-[var(--sidebar-w,220px)] max-md:pl-0 mx-auto">
+      <main className="app-main page-medium">
           <div className="max-w-[760px] mx-auto px-8 py-16 text-center">
             <h1 className="text-[20px] font-medium">Session not found</h1>
             <p className="mt-2 text-[13px] text-text-secondary">
@@ -247,7 +247,7 @@ const SessionSummary: React.FC = () => {
   return (
     <div className="min-h-screen bg-background text-text-primary">
       <AppSidebar />
-      <main className="pl-[var(--sidebar-w,220px)] max-md:pl-0 mx-auto">
+      <main className="app-main page-medium">
         <div className="max-w-[760px] mx-auto px-6 md:px-8 py-10 pb-24">
           {/* Header */}
           <header className="pb-5 border-b border-border-subtle">

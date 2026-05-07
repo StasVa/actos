@@ -878,7 +878,7 @@ const Ideas: React.FC = () => {
     <div className="min-h-screen bg-surface-base text-text-primary">
       <AppSidebar />
       <MobileHeader />
-      <main className="pl-[var(--sidebar-w,220px)] max-md:pl-0 mx-auto flex flex-col h-screen">
+      <main className="app-main page-medium flex flex-col h-screen">
         {/* Page header */}
         <div className="px-8 py-6 border-b border-border-subtle shrink-0">
           <div className="flex items-center justify-between gap-4">

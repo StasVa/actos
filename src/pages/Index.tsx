@@ -1747,7 +1747,7 @@ const Index: React.FC = () => {
       <PlanTodayModal open={planOpen} onClose={() => setPlanOpen(false)} />
       <CloseDayModal open={closeOpen} onClose={() => setCloseOpen(false)} />
       <ClosePlanModal open={combinedOpen} onClose={() => setCombinedOpen(false)} />
-      <main className="pl-[var(--sidebar-w,220px)] max-md:pl-0 mx-auto px-8 py-6 max-w-[1024px]">
+      <main className="app-main page-medium">
         <header className="mb-8">
           <div className="flex items-start justify-between gap-4">
             <h1 className="text-[28px] font-medium text-text-primary leading-tight">{headerDate}</h1>

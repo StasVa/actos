@@ -402,7 +402,7 @@ const Sessions: React.FC = () => {
     <div className="min-h-screen bg-background text-text-primary">
       <AppSidebar />
       <MobileHeader />
-      <main className="pl-[var(--sidebar-w,220px)] max-md:pl-0 mx-auto">
+      <main className="app-main page-medium">
         <div className="max-w-[960px] mx-auto px-8 py-8">
           {/* Header */}
           <div className="flex items-end justify-between gap-4 pb-4 border-b border-border-subtle">

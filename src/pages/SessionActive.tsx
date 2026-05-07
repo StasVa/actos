@@ -472,7 +472,7 @@ const SessionActive: React.FC = () => {
     <div className="min-h-screen bg-background text-text-primary">
       {!focusMode && <AppSidebar /><MobileHeader />
       }
-      <main className={focusMode ? "" : "pl-[var(--sidebar-w,220px)] max-md:pl-0"}>
+      <main className={focusMode ? "" : "app-main page-medium"}>
         <div className="relative max-w-[760px] mx-auto px-6 md:px-8 py-10 pb-32">
           {/* Top-right controls */}
           <div className="absolute right-6 top-6 flex items-center gap-2">

@@ -605,6 +605,72 @@ const PlanForm: React.FC<{
                     )
                   )}
                 </div>
+
+                {/* Inline-add input */}
+                <div className="p-2 border-t border-border-subtle bg-surface-base rounded-b-[6px]">
+                  <div
+                    className="flex items-center gap-2 px-3 rounded-[4px] border border-dashed border-border-default"
+                    style={{ height: 40 }}
+                  >
+                    <span className="font-mono text-[14px] text-text-tertiary leading-none">+</span>
+                    <input
+                      value={quickTitle}
+                      onChange={(e) => setQuickTitle(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key !== "Enter") return;
+                        e.preventDefault();
+                        const title = quickTitle.trim();
+                        if (!title || !quickGoalId) return;
+                        const newId = createAction({
+                          title,
+                          goalId: quickGoalId,
+                          projectId: quickProjectId ?? null,
+                        });
+                        addMany([newId]);
+                        setQuickTitle("");
+                        toast.success("Action created and added to today");
+                      }}
+                      placeholder="Quick add new action..."
+                      className="flex-1 bg-transparent text-[13px] text-text-primary outline-none placeholder:text-text-tertiary"
+                    />
+                    <select
+                      value={quickGoalId ?? ""}
+                      onChange={(e) => {
+                        const gid = e.target.value || undefined;
+                        setQuickGoalId(gid);
+                        const proj = firstProjectForGoal(gid);
+                        setQuickProjectId(proj?.id);
+                      }}
+                      className="bg-surface-hover text-[11px] text-text-secondary rounded-[3px] px-1.5 py-1 outline-none border border-transparent focus:border-border-default max-w-[110px]"
+                      title="Goal"
+                    >
+                      {goals
+                        .filter((g) => g.status === "active")
+                        .map((g) => (
+                          <option key={g.id} value={g.id}>
+                            {g.title}
+                          </option>
+                        ))}
+                    </select>
+                    <select
+                      value={quickProjectId ?? ""}
+                      onChange={(e) => setQuickProjectId(e.target.value || undefined)}
+                      className="bg-surface-hover text-[11px] text-text-secondary rounded-[3px] px-1.5 py-1 outline-none border border-transparent focus:border-border-default max-w-[110px]"
+                      title="Project"
+                    >
+                      <option value="">No project</option>
+                      {projects
+                        .filter(
+                          (p) => p.status === "active" && (!quickGoalId || p.goalId === quickGoalId),
+                        )
+                        .map((p) => (
+                          <option key={p.id} value={p.id}>
+                            {p.title}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+                </div>
               </div>
 
               {/* RIGHT: selected */}

@@ -6,7 +6,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { X, Zap, Leaf, Sun, Thermometer, GripVertical } from "lucide-react";
+import { X, Zap, Leaf, Sun, Thermometer, GripVertical, type LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 import { useStore, ritualMultiplier } from "@/store/useStore";
 import type { Action, DayType, ID, Ritual } from "@/types";
@@ -33,7 +33,7 @@ const formatShort = (iso: string) =>
     day: "numeric",
   });
 
-const DAY_TYPE_OPTIONS: { value: DayType; label: string; Icon: React.ComponentType<{ size?: number; className?: string }> }[] = [
+const DAY_TYPE_OPTIONS: { value: DayType; label: string; Icon: LucideIcon }[] = [
   { value: "execution", label: "Execution", Icon: Zap },
   { value: "recovery", label: "Recovery", Icon: Leaf },
   { value: "day-off", label: "Day Off", Icon: Sun },

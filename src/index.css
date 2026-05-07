@@ -156,35 +156,34 @@ body {
    .page-shell  → sits to the right of the sidebar, applies responsive padding
    .page-narrow / .page-medium / .page-wide → max-width tier on inner column
 */
-/* Tier model:
-   <main class="page-shell">
-     <div class="page-container page-medium">…</div>
-   </main>
-   .page-shell offsets for the sidebar; .page-container caps width + centers
-   within the remaining viewport and applies responsive horizontal padding.
+/* Tier model
+   Add `app-main page-{narrow|medium|wide}` to the page <main>.
+   The main is capped at the tier max-width and centered within the
+   remaining viewport (right of the sidebar). On mobile (<768px) the
+   sidebar offset collapses to 0 and the main fills the viewport.
 */
-.page-shell {
-  padding-left: var(--sidebar-w, 220px);
+.app-main {
+  --page-max: 1024px;
+  --page-pad: 16px;
+  max-width: var(--page-max);
+  margin-left: max(var(--sidebar-w, 220px), calc((100vw - var(--page-max)) / 2));
+  margin-right: auto;
+  padding-left: var(--page-pad);
+  padding-right: var(--page-pad);
   min-height: 100vh;
 }
-.page-container {
-  width: 100%;
-  margin-left: auto;
-  margin-right: auto;
-  padding-left: 16px;
-  padding-right: 16px;
-}
-.page-narrow { max-width: 720px; }
-.page-medium { max-width: 1024px; }
-.page-wide   { max-width: 1280px; }
-@media (min-width: 769px) {
-  .page-container { padding-left: 24px; padding-right: 24px; }
-}
-@media (min-width: 1025px) {
-  .page-container { padding-left: 32px; padding-right: 32px; }
-}
+.page-narrow { --page-max: 720px; }
+.page-medium { --page-max: 1024px; }
+.page-wide   { --page-max: 1280px; }
+@media (min-width: 769px)  { .app-main { --page-pad: 24px; } }
+@media (min-width: 1025px) { .app-main { --page-pad: 32px; } }
 @media (max-width: 767px) {
-  .page-shell { padding-left: 0; padding-top: env(safe-area-inset-top, 0); }
+  .app-main {
+    margin-left: 0;
+    margin-right: 0;
+    max-width: 100%;
+    padding-top: env(safe-area-inset-top, 0);
+  }
 }
 
 /* Mobile typography down-tune */

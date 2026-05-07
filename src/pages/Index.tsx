@@ -864,9 +864,27 @@ export const TodayZone: React.FC<{
 
         {/* RITUALS GROUP */}
         <div>
-          <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-2">
-            RITUALS · {ritualsTotal}
-          </div>
+          {(() => {
+            const doneCount = todaysRituals.filter((r) =>
+              r.completionHistory.some(
+                (c) => c.date === TODAY_ISO && (c.status === "done" || !c.status),
+              ),
+            ).length;
+            const skippedCount = todaysRituals.filter((r) => skippedRitualSet.has(r.id)).length;
+            const pendingCount = ritualsTotal - doneCount - skippedCount;
+            return (
+              <>
+                <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
+                  TODAY'S RITUALS · {ritualsTotal}
+                </div>
+                {ritualsTotal > 0 && (
+                  <div className="font-mono text-[12px] text-text-secondary mb-2 mt-1 tabular-nums">
+                    {doneCount} done · {pendingCount} pending · {skippedCount} skipped
+                  </div>
+                )}
+              </>
+            );
+          })()}
           {todaysRituals.length === 0 ? (
             <div className="font-mono text-[11px] text-text-tertiary px-3 py-2">No rituals today.</div>
           ) : (
@@ -875,62 +893,48 @@ export const TodayZone: React.FC<{
                 const doneToday = r.completionHistory.some(
                   (c) => c.date === TODAY_ISO && (c.status === "done" || !c.status),
                 );
+                const isSkipped = skippedRitualSet.has(r.id);
                 const mult = ritualMultiplier(r.totalCompletions);
                 const color = colorVar(r.goalId);
                 return (
                   <div
                     key={r.id}
-                    className="flex items-center gap-2 pr-3 h-8 rounded-[2px] hover:bg-surface-hover transition-colors group"
+                    className={`flex items-center gap-2 pr-3 h-8 rounded-[2px] hover:bg-surface-hover transition-colors group ${
+                      isSkipped ? "opacity-50" : ""
+                    }`}
                   >
                     <button
-                      onClick={() => handleRitualDone(r.id, doneToday)}
-                      className="ml-2 w-2.5 h-2.5 rounded-full border transition-colors shrink-0"
+                      onClick={() => !isSkipped && handleRitualDone(r.id, doneToday)}
+                      disabled={isSkipped}
+                      className="ml-2 w-2.5 h-2.5 rounded-full border transition-colors shrink-0 disabled:cursor-not-allowed"
                       style={{ borderColor: color, background: doneToday ? color : "transparent" }}
                       aria-label={doneToday ? "Done today" : "Mark ritual done"}
                     />
                     <span
-                      className={`text-[13px] truncate cursor-pointer ${doneToday ? "text-text-tertiary" : "text-text-primary"}`}
+                      className={`text-[13px] truncate cursor-pointer ${
+                        doneToday || isSkipped ? "text-text-tertiary line-through" : "text-text-primary"
+                      }`}
                       onClick={() => openPanel({ kind: "ritual", mode: "edit", id: r.id })}
                     >
                       {r.title}
                     </span>
                     <span className="font-mono text-[11px] text-text-tertiary truncate">
-                      {r.schedule[0].toUpperCase() + r.schedule.slice(1)} · {r.totalCompletions} done · ×{mult.toFixed(2)}
+                      {r.schedule[0].toUpperCase() + r.schedule.slice(1)} · ×{mult.toFixed(2)}
                     </span>
                     <div className="flex-1" />
                     {doneToday ? (
                       <span className="font-mono text-[11px] text-text-secondary">✓ Done</span>
                     ) : (
                       <button
-                        onClick={() => handleRitualSkip(r.id)}
-                        className="text-[11px] text-text-tertiary hover:text-text-primary opacity-0 group-hover:opacity-100 transition"
+                        onClick={() => handleRitualSkipToggle(r.id, isSkipped)}
+                        className="text-[11px] text-text-tertiary hover:text-text-primary transition"
                       >
-                        Skip
+                        {isSkipped ? "Restore" : "Skip"}
                       </button>
                     )}
                   </div>
                 );
               })}
-            </div>
-          )}
-          {skippedRituals.length > 0 && (
-            <button
-              type="button"
-              onClick={() => setShowSkipped((v) => !v)}
-              className="mt-2 text-[12px] text-text-tertiary hover:text-text-primary transition"
-            >
-              {showSkipped ? "Hide" : "Show"} skipped ({skippedRituals.length})
-            </button>
-          )}
-          {showSkipped && skippedRituals.length > 0 && (
-            <div className="mt-2 space-y-1">
-              {skippedRituals.map((r) => (
-                <div key={r.id} className="flex items-center gap-2 pl-2 text-[12px] text-text-tertiary">
-                  <span className="w-2 h-2 rounded-full" style={{ background: colorVar(r.goalId), opacity: 0.5 }} />
-                  <span className="line-through">{r.title}</span>
-                  <span className="font-mono text-[11px]">· skipped</span>
-                </div>
-              ))}
             </div>
           )}
         </div>

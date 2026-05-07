@@ -58,14 +58,30 @@ const STATUS_LABEL: Record<ActionStatus, string> = {
 const ActionRow: React.FC<{ a: Action; color: string }> = ({ a, color }) => {
   const openPanel = useStore((s) => s.openPanel);
   const changeStatus = useStore((s) => s.changeActionStatus);
+  const handleToggle = () => {
+    if (a.status === "delegated" || a.status === "dropped" || a.status === "cancelled") return;
+    if (a.status === "done") {
+      const today = new Date().toISOString().slice(0, 10);
+      changeStatus(a.id, "planned", { scheduledDate: today });
+      toast.dismiss();
+      toast.success("Action re-opened");
+      return;
+    }
+    if (!a.impact || !a.timeEstimateMinutes) {
+      toast.error("Set Impact and Time before marking done");
+      openPanel({ kind: "action", mode: "edit", id: a.id });
+      return;
+    }
+    changeStatus(a.id, "done");
+    toast.dismiss();
+    toast.success("Action marked done");
+  };
   return (
     <SharedActionRow
       action={a}
       goalColor={color}
       onClick={() => openPanel({ kind: "action", mode: "edit", id: a.id })}
-      onToggleDone={() =>
-        changeStatus(a.id, a.status === "done" ? "backlog" : "done")
-      }
+      onToggleDone={handleToggle}
     />
   );
 };

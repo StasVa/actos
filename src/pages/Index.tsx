@@ -698,7 +698,12 @@ export const TodayZone: React.FC<{
   const todays = actions
     .filter((a) => includeAction(a))
     .filter((a) => a.status !== "dropped" && a.status !== "cancelled")
-    .sort((a, b) => (b.impact ?? 0) - (a.impact ?? 0));
+    .sort((a, b) => {
+      const aDone = a.status === "done" ? 1 : 0;
+      const bDone = b.status === "done" ? 1 : 0;
+      if (aDone !== bDone) return aDone - bDone; // active first
+      return (b.impact ?? 0) - (a.impact ?? 0);
+    });
 
   const mainTaskId = dayEntry?.mainTaskActionId;
   const mainTask = mainTaskId ? actions.find((a) => a.id === mainTaskId) : undefined;

@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, GripVertical, X as XIcon } from "lucide-reac
 import { toast } from "sonner";
 import { useStore } from "@/store/useStore";
 import { AppSidebar } from "@/components/AppSidebar";
+import { MobileHeader } from "@/components/MobileHeader";
 import { Switch } from "@/components/ui/switch";
 import { FilterDropdown, FilterOption } from "@/components/FilterDropdown";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -726,8 +727,9 @@ const SessionBuilder: React.FC = () => {
   return (
     <div className="min-h-screen bg-background text-text-primary">
       <AppSidebar />
-      <main className="ml-[var(--sidebar-w,220px)]">
-        <div className="max-w-[1100px] mx-auto px-8 py-8 pb-32">
+      <MobileHeader />
+      <main className="pl-[var(--sidebar-w,220px)] max-md:pl-0 mx-auto">
+        <div className="max-w-[1024px] mx-auto px-8 py-8 pb-32">
           {/* Header */}
           <div className="pb-4 border-b border-border-subtle">
             <Link
@@ -875,7 +877,7 @@ const SessionBuilder: React.FC = () => {
           className="fixed bottom-0 left-[220px] right-0 border-t border-border-subtle"
           style={{ background: "hsl(var(--surface-raised))" }}
         >
-          <div className="max-w-[1100px] mx-auto px-8 py-4 flex items-center justify-between">
+          <div className="max-w-[1024px] mx-auto px-8 py-4 flex items-center justify-between">
             <Link
               to="/sessions"
               className="text-[13px] text-text-tertiary hover:text-text-secondary transition-colors"

@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { AppSidebar } from "@/components/AppSidebar";
+import { MobileHeader } from "@/components/MobileHeader";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { useStore } from "@/store/useStore";
 import { formatHM } from "@/lib/timeStats";
@@ -108,7 +109,7 @@ const ReviewsWeeks: React.FC = () => {
     <div className="min-h-screen bg-surface-base text-text-primary">
       <AppSidebar onOpenSettings={() => setSettingsOpen(true)} />
       <SettingsPanel open={settingsOpen} onOpenChange={setSettingsOpen} />
-      <main className="ml-[var(--sidebar-w,220px)] px-8 py-6 max-w-[1100px]">
+      <main className="pl-[var(--sidebar-w,220px)] max-md:pl-0 mx-auto px-8 py-6 max-w-[1024px]">
         <header className="mb-6 flex items-end justify-between gap-4">
           <h1 className="text-[24px] font-medium text-text-primary leading-tight">Weeks</h1>
           <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary tabular-nums">

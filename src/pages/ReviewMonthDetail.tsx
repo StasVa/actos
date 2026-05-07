@@ -2,6 +2,7 @@ import React from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { format, parseISO } from "date-fns";
 import { AppSidebar } from "@/components/AppSidebar";
+import { MobileHeader } from "@/components/MobileHeader";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { useStore, ritualMultiplier } from "@/store/useStore";
 import { formatHM } from "@/lib/timeStats";
@@ -76,7 +77,7 @@ const ReviewMonthDetail: React.FC = () => {
       <div className="min-h-screen bg-surface-base text-text-primary">
         <AppSidebar onOpenSettings={() => setSettingsOpen(true)} />
         <SettingsPanel open={settingsOpen} onOpenChange={setSettingsOpen} />
-        <main className="ml-[var(--sidebar-w,220px)] px-8 py-6 max-w-[900px]">
+        <main className="pl-[var(--sidebar-w,220px)] max-md:pl-0 mx-auto px-8 py-6 max-w-[1024px]">
           <Link
             to="/reviews/months"
             className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary hover:text-text-primary transition-colors"
@@ -144,7 +145,7 @@ const ReviewMonthDetail: React.FC = () => {
     <div className="min-h-screen bg-surface-base text-text-primary">
       <AppSidebar onOpenSettings={() => setSettingsOpen(true)} />
       <SettingsPanel open={settingsOpen} onOpenChange={setSettingsOpen} />
-      <main className="ml-[var(--sidebar-w,220px)] px-8 py-6 max-w-[900px]">
+      <main className="pl-[var(--sidebar-w,220px)] max-md:pl-0 mx-auto px-8 py-6 max-w-[1024px]">
         <Link
           to="/reviews/months"
           className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary hover:text-text-primary transition-colors"

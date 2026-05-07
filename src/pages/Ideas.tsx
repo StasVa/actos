@@ -5,6 +5,7 @@ import type { Idea, IdeaStatus, ID } from "@/types";
 import { toast } from "sonner";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { AppSidebar } from "@/components/AppSidebar";
+import { MobileHeader } from "@/components/MobileHeader";
 import { subscribeAppEvent } from "@/lib/appEvents";
 
  function relativeAgo(iso: string): { label: string; full: string; sort: number } {
@@ -876,7 +877,8 @@ const Ideas: React.FC = () => {
   return (
     <div className="min-h-screen bg-surface-base text-text-primary">
       <AppSidebar />
-      <main className="ml-[var(--sidebar-w,220px)] flex flex-col h-screen">
+      <MobileHeader />
+      <main className="pl-[var(--sidebar-w,220px)] max-md:pl-0 mx-auto flex flex-col h-screen">
         {/* Page header */}
         <div className="px-8 py-6 border-b border-border-subtle shrink-0">
           <div className="flex items-center justify-between gap-4">

@@ -5,6 +5,7 @@ import { Tooltip, StateDotTooltip } from "@/components/Tooltip";
 import { useStore, selectors } from "@/store/useStore";
 import type { Action, ActionStatus, GoalColorVar, Project, ProjectReference, ProjectStatus } from "@/types";
 import { AppSidebar } from "@/components/AppSidebar";
+import { MobileHeader } from "@/components/MobileHeader";
 import { ActionRow as SharedActionRow } from "@/components/ActionRow";
 import { RichTextEditor } from "@/components/RichTextEditor";
 import { CardMenu } from "@/components/CardMenu";
@@ -486,7 +487,8 @@ const ProjectDetail: React.FC = () => {
     return (
       <div className="min-h-screen bg-surface-base text-text-primary">
         <AppSidebar />
-        <main className="ml-[var(--sidebar-w,220px)] p-10">
+        <MobileHeader />
+      <main className="pl-[var(--sidebar-w,220px)] max-md:pl-0 mx-auto p-10">
           <div className="text-[14px] text-text-secondary">Project not found.</div>
           <Link to="/" className="mt-4 inline-block text-[13px] text-accent hover:underline">
             ← Back to home
@@ -576,7 +578,7 @@ const ProjectDetail: React.FC = () => {
   return (
     <div className="min-h-screen bg-surface-base text-text-primary">
       <AppSidebar />
-      <div className="ml-[var(--sidebar-w,220px)] min-h-screen flex">
+      <div className="pl-[var(--sidebar-w,220px)] max-md:pl-0 min-h-screen flex">
         {/* Left column */}
         <div className="flex-1 min-w-0 flex flex-col">
           <div className="h-12 px-8 flex items-center justify-between border-b border-border-subtle">

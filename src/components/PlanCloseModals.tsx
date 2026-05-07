@@ -784,6 +784,7 @@ const PlanForm: React.FC<{
                     </div>
                   </div>
                 </div>
+              </div>
 
               {/* RIGHT: selected */}
               <div className="border border-border-subtle rounded-[6px] bg-surface-base flex flex-col min-h-[280px] flex-1 min-w-0 md:basis-[40%]">

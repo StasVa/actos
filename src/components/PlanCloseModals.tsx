@@ -686,17 +686,6 @@ const PlanForm: React.FC<{
             </div>
           </section>
 
-          {/* INTENT */}
-          <section>
-            <SectionHead>INTENT</SectionHead>
-            <textarea
-              value={state.intent}
-              onChange={(e) => setState((s) => ({ ...s, intent: e.target.value }))}
-              rows={2}
-              placeholder="Today I will…"
-              className="w-full bg-surface-hover rounded-[4px] px-3 py-2 text-[14px] text-text-primary outline-none border border-transparent focus:border-border-default placeholder:text-text-tertiary resize-none"
-            />
-          </section>
         </>
       )}
     </div>

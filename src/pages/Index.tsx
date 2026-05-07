@@ -629,7 +629,7 @@ export const TodayZone: React.FC<{
   const skipRitualInstance = useStore((s) => s.skipRitualInstance);
 
   const [quickAdd, setQuickAdd] = useState("");
-  const [showSkipped, setShowSkipped] = useState(false);
+  
 
   const goalById = (id: string) => goals.find((g) => g.id === id);
   const projectById = (id: string | null) =>

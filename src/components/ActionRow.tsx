@@ -35,6 +35,8 @@ export interface ActionRowProps {
   hideCheckbox?: boolean;
   /** Force the title to render as terminal (line-through, dim). */
   terminal?: boolean;
+  /** Show inline Star marker before title (Main Task indicator). */
+  isMainTask?: boolean;
   onClick?: () => void;
   onToggleDone?: () => void;
 }

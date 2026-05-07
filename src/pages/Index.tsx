@@ -1427,10 +1427,9 @@ const Index: React.FC = () => {
   ).length;
   const aggMeta = isPlanned ? `${todaysActionCount} actions · ${todaysRitualCount} rituals` : "";
 
-  // Yesterday card visibility: show if yesterday wasn't closed OR today isn't planned
-  const showYesterday = (!yesterdayEntry?.isClosed || !isPlanned) && !!(
-    yesterdayEntry || actions.some((a) => a.completedAt?.slice(0, 10) === YESTERDAY_ISO)
-  );
+  // Looking-back date selector (most recent ACTIVE day with activity)
+  const dayEntries = useStore((s) => s.dayEntries);
+  const lookingBackDate = selectLookingBackDate(dayEntries, actions, rituals);
 
   return (
     <div className="min-h-screen bg-surface-base text-text-primary">
@@ -1440,31 +1439,29 @@ const Index: React.FC = () => {
       <CloseDayModal open={closeOpen} onClose={() => setCloseOpen(false)} />
       <ClosePlanModal open={combinedOpen} onClose={() => setCombinedOpen(false)} />
       <main className="ml-[var(--sidebar-w,220px)] px-8 py-6 max-w-[1200px]">
-        <header className="mb-8 flex items-start justify-between gap-4">
-          <div>
-            <h1 className="text-[24px] font-medium text-text-primary leading-tight">{headerDate}</h1>
-            {subLine && (
-              <div className="font-mono text-[13px] text-text-tertiary mt-1">{subLine}</div>
+        <header className="mb-8">
+          <div className="flex items-start justify-between gap-4">
+            <h1 className="text-[28px] font-medium text-text-primary leading-tight">{headerDate}</h1>
+            {aggMeta && (
+              <div className="font-mono text-[13px] text-text-tertiary tabular-nums pt-2">
+                {aggMeta}
+              </div>
             )}
           </div>
-          {aggMeta && (
-            <div className="font-mono text-[13px] text-text-tertiary tabular-nums pt-2">
-              {aggMeta}
-            </div>
-          )}
+          {todayEntry?.dayType && <DayTypeIndicator dayType={todayEntry.dayType} />}
         </header>
-
-        {showYesterday && !isClosed && (
-          <>
-            <YesterdayCard />
-            <div className="h-8" />
-          </>
-        )}
 
         <TodayZone
           onPlanClick={() => setPlanOpen(true)}
           onCloseClick={() => setCloseOpen(true)}
         />
+
+        {lookingBackDate && (
+          <>
+            <div className="h-10" />
+            <LookingBackCard date={lookingBackDate} />
+          </>
+        )}
 
         <div className="h-12" />
       </main>

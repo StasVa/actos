@@ -5,6 +5,7 @@ import { useStore } from "@/store/useStore";
 import { AppSidebar } from "@/components/AppSidebar";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { TimeInvestmentSection } from "@/components/TimeInvestmentSection";
+import { ReturnDatePill } from "@/components/ReturnDatePill";
 import { timeInvestedMinutes, formatHM } from "@/lib/timeStats";
 import type { Action, Goal, Project } from "@/types";
 import {

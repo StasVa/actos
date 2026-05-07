@@ -152,6 +152,13 @@ export const ActionRow: React.FC<ActionRowProps> = ({
                 {isDone ? "✓" : ""}
               </button>
             )}
+            {isMainTask && (
+              <Star
+                size={12}
+                className="shrink-0"
+                style={{ color: "hsl(var(--accent))", fill: "hsl(var(--accent))" }}
+              />
+            )}
             <span
               className={`text-[15px] font-medium truncate ${
                 isTerminal ? "text-text-secondary line-through" : "text-text-primary"

@@ -156,28 +156,40 @@ body {
    .page-shell  → sits to the right of the sidebar, applies responsive padding
    .page-narrow / .page-medium / .page-wide → max-width tier on inner column
 */
+/* Tier model:
+   .page-shell sets the left offset for the sidebar and base horizontal padding.
+   It also recenters the column. Add .page-narrow / .page-medium / .page-wide
+   to cap the inner content width.
+*/
 .page-shell {
   margin-left: var(--sidebar-w, 220px);
   min-height: 100vh;
-}
-.page-tier {
-  width: 100%;
-  margin-left: auto;
-  margin-right: auto;
   padding-left: 16px;
   padding-right: 16px;
 }
-.page-narrow { max-width: 720px; }
-.page-medium { max-width: 1024px; }
-.page-wide   { max-width: 1280px; }
+.page-shell.page-narrow,
+.page-shell.page-medium,
+.page-shell.page-wide {
+  /* Center the page within the remaining viewport (right of the sidebar) */
+  margin-right: auto;
+}
+.page-shell.page-narrow { max-width: calc(720px + 32px); }
+.page-shell.page-medium { max-width: calc(1024px + 64px); }
+.page-shell.page-wide   { max-width: calc(1280px + 64px); }
 @media (min-width: 769px) {
-  .page-tier { padding-left: 24px; padding-right: 24px; }
+  .page-shell { padding-left: 24px; padding-right: 24px; }
+  .page-shell.page-narrow { max-width: calc(720px + 48px); }
+  .page-shell.page-medium { max-width: calc(1024px + 48px); }
+  .page-shell.page-wide   { max-width: calc(1280px + 48px); }
 }
 @media (min-width: 1025px) {
-  .page-tier { padding-left: 32px; padding-right: 32px; }
+  .page-shell { padding-left: 32px; padding-right: 32px; }
+  .page-shell.page-narrow { max-width: calc(720px + 64px); }
+  .page-shell.page-medium { max-width: calc(1024px + 64px); }
+  .page-shell.page-wide   { max-width: calc(1280px + 64px); }
 }
 @media (max-width: 767px) {
-  .page-shell { margin-left: 0; padding-top: env(safe-area-inset-top, 0); }
+  .page-shell { margin-left: 0; padding-top: env(safe-area-inset-top, 0); max-width: 100%; }
 }
 
 /* Mobile typography down-tune */

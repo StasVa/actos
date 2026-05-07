@@ -50,6 +50,7 @@ export const ActionRow: React.FC<ActionRowProps> = ({
   rightPill,
   hideCheckbox = false,
   terminal,
+  isMainTask = false,
   onClick,
   onToggleDone,
 }) => {

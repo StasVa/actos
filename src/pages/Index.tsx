@@ -773,38 +773,37 @@ export const TodayZone: React.FC<{
 
   // ─── STATE C: closed ───
   if (planAndReview && isClosed) {
-    const dt = dayEntry?.dayType ? DAY_TYPE_LABELS[dayEntry.dayType] : "—";
-    const closedTime = dayEntry?.closedAt
-      ? new Date(dayEntry.closedAt).toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        })
-      : "—";
+    const doneActions = todays.filter((a) => a.status === "done").length;
+    const ritualsDoneCount = todaysRituals.filter((r) =>
+      r.completionHistory.some(
+        (c) => c.date === TODAY_ISO && (c.status === "done" || !c.status),
+      ),
+    ).length;
+    const valueAdded = todays
+      .filter((a) => a.status === "done")
+      .reduce((s, a) => s + (a.impact ?? 0), 0);
+    const minutes = todays
+      .filter((a) => a.status === "done")
+      .reduce((s, a) => s + (a.timeEstimateMinutes ?? 0), 0);
+    const focusH = (minutes / 60).toFixed(1);
     return (
       <section>
-        <SectionLabel meta={`Closed at ${closedTime} · ${dt}`}>Today</SectionLabel>
-        <div className="bg-surface-elevated border border-border-subtle rounded-[6px] p-5 space-y-4">
-          {mainTask && (
-            <div className="text-[13px]">
-              <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary mr-2">MAIN</span>
-              <span className="text-text-primary">{mainTask.title}</span>
-              <span className="text-text-secondary ml-1">
-                {mainTask.status === "done" ? "✓ done" : "· not completed"}
-              </span>
-            </div>
-          )}
-          <div className="font-mono text-[12px] text-text-secondary">
-            {todays.filter((a) => a.status === "done").length} of {todays.length} actions done · {todaysRituals.filter((r) => r.completionHistory.some((c) => c.date === TODAY_ISO && (c.status === "done" || !c.status))).length} of {todaysRituals.length} rituals
+        <div className="bg-surface-elevated border border-border-subtle rounded-[6px] p-5 space-y-3">
+          <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
+            DAY CLOSED
+          </div>
+          <div className="font-mono text-[13px] text-text-secondary tabular-nums">
+            {doneActions} actions done · {ritualsDoneCount} rituals done · +{valueAdded} value · {focusH}h focused
           </div>
           {dayEntry?.reflectionText && (
-            <div className="text-[13px] text-text-primary leading-[1.5] border-l-2 border-border-default pl-3">
+            <div className="text-[13px] text-text-primary leading-[1.5] border-l-2 border-border-default pl-3 italic">
               {dayEntry.reflectionText}
             </div>
           )}
           <button
             type="button"
             onClick={handleReopen}
-            className="text-[12px] text-text-secondary hover:text-text-primary transition"
+            className="text-[12px] text-text-warning hover:brightness-110 transition"
           >
             Re-open day
           </button>

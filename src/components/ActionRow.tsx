@@ -130,28 +130,39 @@ export const ActionRow: React.FC<ActionRowProps> = ({
         {/* Top line */}
         <div className="flex items-center justify-between gap-3 min-w-0">
           <div className="flex items-center gap-3 min-w-0 flex-1">
-            {!hideCheckbox && (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onToggleDone?.();
-                }}
-                aria-label={isDone ? "Mark not done" : "Mark done"}
-                className="inline-flex items-center justify-center rounded-[2px] border shrink-0"
-                style={{
-                  width: 16,
-                  height: 16,
-                  background: isDone ? color : "transparent",
-                  borderColor: isDone ? color : "hsl(var(--text-tertiary))",
-                  color: "hsl(var(--surface-base))",
-                  fontSize: 11,
-                  lineHeight: 1,
-                }}
-              >
-                {isDone ? "✓" : ""}
-              </button>
-            )}
+            {!hideCheckbox && (() => {
+              const disabled =
+                action.status === "delegated" ||
+                action.status === "dropped" ||
+                action.status === "cancelled";
+              return (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (disabled) return;
+                    onToggleDone?.();
+                  }}
+                  disabled={disabled}
+                  title={disabled ? "Re-open this action via the editor" : undefined}
+                  aria-label={isDone ? "Re-open" : "Mark done"}
+                  className="inline-flex items-center justify-center rounded-[2px] border shrink-0"
+                  style={{
+                    width: 16,
+                    height: 16,
+                    background: isDone ? color : "transparent",
+                    borderColor: isDone ? color : "hsl(var(--text-tertiary))",
+                    color: "hsl(var(--surface-base))",
+                    fontSize: 11,
+                    lineHeight: 1,
+                    opacity: disabled ? 0.4 : 1,
+                    cursor: disabled ? "not-allowed" : "pointer",
+                  }}
+                >
+                  {isDone ? "✓" : ""}
+                </button>
+              );
+            })()}
             {isMainTask && (
               <Star
                 size={12}

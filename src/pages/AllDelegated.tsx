@@ -371,7 +371,7 @@ const AllDelegated: React.FC = () => {
                 value={dateRange}
                 defaultValue="all"
                 options={DATE_OPTIONS}
-                onChange={setDateRange}
+                onChange={(v) => setDateRange(v as DateRange)}
               />
             )}
             {anyFilter && (

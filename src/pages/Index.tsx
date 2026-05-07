@@ -630,6 +630,8 @@ export const TodayZone: React.FC<{
   const unskipRitualInstance = useStore((s) => s.unskipRitualInstance);
 
   const [quickAdd, setQuickAdd] = useState("");
+  const [clearMainTaskOpen, setClearMainTaskOpen] = useState(false);
+  const [pickMainTaskOpen, setPickMainTaskOpen] = useState(false);
   
 
   const goalById = (id: string) => goals.find((g) => g.id === id);

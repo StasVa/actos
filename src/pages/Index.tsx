@@ -917,9 +917,9 @@ export const TodayZone: React.FC<{
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (!mtDone) handleToggleDone(mainTask.id);
+                      handleToggleDone(mainTask.id);
                     }}
-                    aria-label={mtDone ? "Done" : "Mark done"}
+                    aria-label={mtDone ? "Re-open" : "Mark done"}
                     className="inline-flex items-center justify-center rounded-[2px] border shrink-0 ml-1"
                     style={{
                       width: 16,

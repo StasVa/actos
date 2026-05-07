@@ -37,6 +37,8 @@ export type Action = {
   expectedReturnLabel?: string;
   /** Days until expected return: negative = overdue, 0 = today, positive = future, undefined = no date */
   expectedReturnDelta?: number;
+  /** ISO date YYYY-MM-DD if delegated. */
+  expectedReturnDate?: string;
   /** When delegated, e.g. "Apr 25" */
   delegatedLabel?: string;
   /** Days ago since delegated, for detail copy */

@@ -92,6 +92,7 @@ export function toLegacyAction(
     delegate: (a.delegateName as LegacyAction["delegate"]) ?? undefined,
     expectedReturnLabel: expectedLabel(a.expectedReturnDate),
     expectedReturnDelta: expectedDelta,
+    expectedReturnDate: a.expectedReturnDate,
     delegatedLabel: a.delegatedAt ? shortLabel(a.delegatedAt.slice(0, 10)) : undefined,
     delegatedAgoDays: delegatedDelta,
     delegationNote: a.delegateNote,

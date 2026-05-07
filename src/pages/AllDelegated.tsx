@@ -12,6 +12,7 @@ import {
 } from "@/lib/actionsData";
 import { LifetimeCounters } from "@/components/LifetimeCounters";
 import { formatTime } from "@/lib/format";
+import { ReturnDatePill } from "@/components/ReturnDatePill";
 import { FilterDropdown, FilterOption } from "@/components/FilterDropdown";
 import { SortDropdown } from "@/components/SortDropdown";
 import { useStore } from "@/store/useStore";
@@ -96,32 +97,7 @@ const DelegationRow: React.FC<{ action: Action; selected: boolean; onSelect: () 
   onSelect,
 }) => {
   const goal = GOALS[action.goal];
-  const ret = returnLabelFor(action);
-  const overdueDays =
-    action.expectedReturnDelta !== undefined && action.expectedReturnDelta < 0
-      ? Math.abs(action.expectedReturnDelta)
-      : 0;
-  // Right side label for top row
-  let topRight: React.ReactNode = null;
-  if (overdueDays > 0) {
-    topRight = (
-      <span
-        className="font-mono uppercase tracking-[0.06em]"
-        style={{ fontSize: 11, color: "hsl(var(--text-warning))" }}
-      >
-        {overdueDays}d OVERDUE
-      </span>
-    );
-  } else if (ret) {
-    topRight = (
-      <span
-        className="font-mono uppercase tracking-[0.06em] text-text-secondary bg-surface-hover"
-        style={{ fontSize: 11, padding: "2px 8px", borderRadius: 2 }}
-      >
-        {ret.text}
-      </span>
-    );
-  }
+  const topRight: React.ReactNode = <ReturnDatePill expectedReturnDate={action.expectedReturnDate} />;
 
   const bottomBits: React.ReactNode[] = [
     <span key="goal">{goal.name}</span>,

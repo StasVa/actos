@@ -5,6 +5,7 @@ import { useStore } from "@/store/useStore";
 import { AppSidebar } from "@/components/AppSidebar";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { TimeInvestmentSection } from "@/components/TimeInvestmentSection";
+import { ReturnDatePill } from "@/components/ReturnDatePill";
 import { timeInvestedMinutes, formatHM } from "@/lib/timeStats";
 import type { Action, Goal, Project } from "@/types";
 import {
@@ -403,11 +404,7 @@ const DelegatedSection: React.FC = () => {
                 <span className="font-mono text-[11px] text-text-tertiary truncate">· → {a.delegateName}</span>
               )}
               <div className="flex-1" />
-              {a.expectedReturnDate && (
-                <span className="font-mono text-[11px] text-text-tertiary tabular-nums whitespace-nowrap">
-                  return {a.expectedReturnDate}
-                </span>
-              )}
+              <ReturnDatePill expectedReturnDate={a.expectedReturnDate} />
             </button>
           ))}
         </div>

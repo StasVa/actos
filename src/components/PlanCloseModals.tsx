@@ -500,46 +500,100 @@ const PlanForm: React.FC<{
               ACTIONS
             </SectionHead>
 
-            <div className="grid grid-cols-1 md:grid-cols-[3fr_2fr] gap-3">
+            <div className="flex flex-col md:flex-row gap-3 min-w-0">
               {/* LEFT: available */}
-              <div className="border border-border-subtle rounded-[6px] bg-surface-base flex flex-col min-h-[280px]">
-                {/* Quick Start strip */}
-                <div
-                  className="flex items-center gap-3 px-3 border-b border-border-subtle bg-surface-elevated rounded-t-[6px]"
-                  style={{ minHeight: 32 }}
-                >
-                  <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">
-                    QUICK START:
-                  </span>
-                  <button
-                    type="button"
-                    disabled={heavySuggestions.length === 0}
-                    title={heavySuggestions.length === 0 ? "No heavy-lift candidates available" : undefined}
-                    onClick={() => {
-                      const pick = heavySuggestions[0];
-                      if (!pick) return;
-                      addMany([pick.id]);
-                      toast.success(`Heavy Lift added: ${pick.title}`);
-                    }}
-                    className="text-[13px] font-medium text-[hsl(var(--accent))] hover:text-text-primary hover:underline disabled:text-text-tertiary disabled:no-underline disabled:cursor-not-allowed"
-                  >
-                    + Heavy Lift
-                  </button>
-                  <span className="text-text-tertiary">·</span>
-                  <button
-                    type="button"
-                    disabled={quickSuggestions.length === 0}
-                    title={quickSuggestions.length === 0 ? "No quick-move candidates available" : undefined}
-                    onClick={() => {
-                      const ids = quickSuggestions.map((a) => a.id);
-                      if (ids.length === 0) return;
-                      addMany(ids);
-                      toast.success(`${ids.length} Quick Move${ids.length > 1 ? "s" : ""} added`);
-                    }}
-                    className="text-[13px] font-medium text-[hsl(var(--accent))] hover:text-text-primary hover:underline disabled:text-text-tertiary disabled:no-underline disabled:cursor-not-allowed"
-                  >
-                    + Quick Moves
-                  </button>
+              <div className="border border-border-subtle rounded-[6px] bg-surface-base flex flex-col min-h-[280px] flex-1 min-w-0 md:basis-[60%]">
+                {/* Quick Start cards */}
+                <div className="px-3 pt-3 pb-2 border-b border-border-subtle bg-surface-elevated rounded-t-[6px] min-w-0">
+                  <div className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary mb-2">
+                    QUICK START
+                  </div>
+                  <div className="flex items-stretch gap-3 min-w-0">
+                    {(() => {
+                      const heavy = heavySuggestions[0];
+                      const disabled = !heavy;
+                      const totalQuickMin = quickSuggestions.reduce(
+                        (s, a) => s + (a.timeEstimateMinutes ?? 0),
+                        0,
+                      );
+                      const qDisabled = quickSuggestions.length === 0;
+                      return (
+                        <>
+                          <button
+                            type="button"
+                            disabled={disabled}
+                            onClick={() => {
+                              if (!heavy) return;
+                              addMany([heavy.id]);
+                              toast.success(`Heavy Lift added: ${heavy.title}`);
+                            }}
+                            className={`flex-1 min-w-0 text-left rounded-[6px] border px-4 py-3 transition-colors ${
+                              disabled
+                                ? "bg-surface-elevated border-border-subtle opacity-60 cursor-not-allowed"
+                                : "bg-surface-elevated border-border-subtle hover:bg-surface-hover hover:border-[hsl(var(--accent))]"
+                            }`}
+                            style={{ minHeight: 68 }}
+                          >
+                            <div className="font-mono text-[11px] uppercase tracking-[0.06em] font-medium text-[hsl(var(--accent))]">
+                              + HEAVY LIFT
+                            </div>
+                            {heavy ? (
+                              <>
+                                <div className="text-[13px] text-text-primary truncate mt-1">
+                                  {heavy.title}
+                                </div>
+                                <div className="font-mono text-[11px] text-text-secondary tabular-nums mt-0.5">
+                                  {heavy.impact ? `I${heavy.impact}` : "—"}
+                                  {heavy.timeEstimateMinutes
+                                    ? ` · ${formatTimeMin(heavy.timeEstimateMinutes)}`
+                                    : ""}
+                                </div>
+                              </>
+                            ) : (
+                              <div className="text-[12px] italic text-text-tertiary mt-1">
+                                No candidates available
+                              </div>
+                            )}
+                          </button>
+                          <button
+                            type="button"
+                            disabled={qDisabled}
+                            onClick={() => {
+                              const ids = quickSuggestions.map((a) => a.id);
+                              if (ids.length === 0) return;
+                              addMany(ids);
+                              toast.success(`${ids.length} Quick Move${ids.length > 1 ? "s" : ""} added`);
+                            }}
+                            className={`flex-1 min-w-0 text-left rounded-[6px] border px-4 py-3 transition-colors ${
+                              qDisabled
+                                ? "bg-surface-elevated border-border-subtle opacity-60 cursor-not-allowed"
+                                : "bg-surface-elevated border-border-subtle hover:bg-surface-hover hover:border-[hsl(var(--accent))]"
+                            }`}
+                            style={{ minHeight: 68 }}
+                          >
+                            <div className="font-mono text-[11px] uppercase tracking-[0.06em] font-medium text-[hsl(var(--accent))]">
+                              + QUICK MOVES
+                            </div>
+                            {quickSuggestions.length > 0 ? (
+                              <>
+                                <div className="text-[13px] text-text-primary truncate mt-1">
+                                  {quickSuggestions.length} action{quickSuggestions.length > 1 ? "s" : ""}
+                                  {totalQuickMin > 0 ? ` · ~${formatTimeMin(totalQuickMin)}` : ""}
+                                </div>
+                                <div className="font-mono text-[11px] text-text-secondary mt-0.5">
+                                  Top {quickSuggestions.length} easy win{quickSuggestions.length > 1 ? "s" : ""}
+                                </div>
+                              </>
+                            ) : (
+                              <div className="text-[12px] italic text-text-tertiary mt-1">
+                                No candidates available
+                              </div>
+                            )}
+                          </button>
+                        </>
+                      );
+                    })()}
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-1.5 p-2 border-b border-border-subtle flex-wrap">

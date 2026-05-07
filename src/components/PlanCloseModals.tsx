@@ -497,39 +497,48 @@ const PlanForm: React.FC<{
               ACTIONS
             </SectionHead>
 
-            {/* Quick-start presets */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">
-              <button
-                type="button"
-                onClick={() => addMany(heavySuggestions.map((a) => a.id))}
-                disabled={heavySuggestions.length === 0}
-                className="text-left p-3 rounded-[6px] bg-surface-raised border border-border-subtle hover:border-[hsl(var(--accent))] disabled:opacity-50 disabled:hover:border-border-subtle transition-colors"
-              >
-                <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-[hsl(var(--accent))]">
-                  + Add Heavy Lift
-                </div>
-                <div className="text-[12px] text-text-secondary mt-1">{heavyDescription}</div>
-              </button>
-              <button
-                type="button"
-                onClick={() => addMany(quickSuggestions.map((a) => a.id))}
-                disabled={quickSuggestions.length === 0}
-                className="text-left p-3 rounded-[6px] bg-surface-raised border border-border-subtle hover:border-[hsl(var(--accent))] disabled:opacity-50 disabled:hover:border-border-subtle transition-colors"
-              >
-                <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-[hsl(var(--accent))]">
-                  + Add Quick Moves
-                </div>
-                <div className="text-[12px] text-text-secondary mt-1">{quickDescription}</div>
-              </button>
-            </div>
-
-            <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary text-center my-3">
-              ── or pick manually ↓ ──
-            </div>
-
             <div className="grid grid-cols-1 md:grid-cols-[3fr_2fr] gap-3">
               {/* LEFT: available */}
               <div className="border border-border-subtle rounded-[6px] bg-surface-base flex flex-col min-h-[280px]">
+                {/* Quick Start strip */}
+                <div
+                  className="flex items-center gap-3 px-3 border-b border-border-subtle bg-surface-elevated rounded-t-[6px]"
+                  style={{ minHeight: 32 }}
+                >
+                  <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">
+                    QUICK START:
+                  </span>
+                  <button
+                    type="button"
+                    disabled={heavySuggestions.length === 0}
+                    title={heavySuggestions.length === 0 ? "No heavy-lift candidates available" : undefined}
+                    onClick={() => {
+                      const pick = heavySuggestions[0];
+                      if (!pick) return;
+                      addMany([pick.id]);
+                      toast.success(`Heavy Lift added: ${pick.title}`);
+                    }}
+                    className="text-[13px] font-medium text-[hsl(var(--accent))] hover:text-text-primary hover:underline disabled:text-text-tertiary disabled:no-underline disabled:cursor-not-allowed"
+                  >
+                    + Heavy Lift
+                  </button>
+                  <span className="text-text-tertiary">·</span>
+                  <button
+                    type="button"
+                    disabled={quickSuggestions.length === 0}
+                    title={quickSuggestions.length === 0 ? "No quick-move candidates available" : undefined}
+                    onClick={() => {
+                      const ids = quickSuggestions.map((a) => a.id);
+                      if (ids.length === 0) return;
+                      addMany(ids);
+                      toast.success(`${ids.length} Quick Move${ids.length > 1 ? "s" : ""} added`);
+                    }}
+                    className="text-[13px] font-medium text-[hsl(var(--accent))] hover:text-text-primary hover:underline disabled:text-text-tertiary disabled:no-underline disabled:cursor-not-allowed"
+                  >
+                    + Quick Moves
+                  </button>
+                </div>
+
                 <div className="flex items-center gap-1.5 p-2 border-b border-border-subtle flex-wrap">
                   <select
                     value={filterGoal}

@@ -229,6 +229,14 @@ const PlanForm: React.FC<{
   const [quickTitle, setQuickTitle] = useState("");
   const [quickGoalId, setQuickGoalId] = useState<ID | undefined>(initialGoal);
   const [quickProjectId, setQuickProjectId] = useState<ID | undefined>(initialProject);
+  const [quickShowPickers, setQuickShowPickers] = useState(false);
+
+  const activeGoals = goals.filter((g) => g.status === "active");
+  const projectsForQuickGoal = projects.filter(
+    (p) => p.status === "active" && (!quickGoalId || p.goalId === quickGoalId),
+  );
+  const isSmartDefault =
+    activeGoals.length === 1 && projectsForQuickGoal.length <= 1 && !quickShowPickers;
 
   const dueRituals = useMemo(
     () => rituals.filter((r) => r.status === "active" && ritualDueOn(r, date)),

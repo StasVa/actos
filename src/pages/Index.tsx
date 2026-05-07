@@ -1402,14 +1402,6 @@ const Index: React.FC = () => {
     month: "long",
     day: "numeric",
   });
-  const startedTime = todayEntry?.startedAt
-    ? new Date(todayEntry.startedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-    : null;
-  const dayTypeLabel = todayEntry?.dayType ? `${DAY_TYPE_LABELS[todayEntry.dayType]} day` : null;
-  const subLine =
-    isPlanned && dayTypeLabel
-      ? `${dayTypeLabel}${startedTime ? ` · Started ${startedTime}` : ""}`
-      : "";
 
   // Aggregate stats for header right
   const plannedSet = new Set(todayEntry?.plannedActionIds ?? []);

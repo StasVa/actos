@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { AppSidebar } from "@/components/AppSidebar";
+import { MobileHeader } from "@/components/MobileHeader";
 import {
   Action,
   ActionStatus,
@@ -504,7 +505,8 @@ const AllActions: React.FC = () => {
   return (
     <div className="min-h-screen bg-surface-base text-text-primary">
       <AppSidebar />
-      <main className="ml-[var(--sidebar-w,220px)] flex flex-col h-screen">
+      <MobileHeader />
+      <main className="app-main page-medium flex flex-col h-screen">
         {/* Page header */}
         <div className="px-10 pt-6 pb-3 shrink-0">
           <div className="flex items-center justify-between gap-4">

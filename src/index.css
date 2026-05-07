@@ -143,3 +143,96 @@
 .search-row:hover .kbd-hint {
   background: hsl(var(--surface-base));
 }
+
+/* ───────── Global responsive baseline ───────── */
+html, body { overflow-x: hidden; }
+body {
+  -webkit-overflow-scrolling: touch;
+  /* iOS notch top-safe; bottom safe handled per sticky element */
+  padding-top: env(safe-area-inset-top, 0);
+}
+
+/* ───────── Page width tier system ─────────
+   .page-shell  → sits to the right of the sidebar, applies responsive padding
+   .page-narrow / .page-medium / .page-wide → max-width tier on inner column
+*/
+/* Tier model
+   Add `app-main page-{narrow|medium|wide}` to the page <main>.
+   The main is capped at the tier max-width and centered within the
+   remaining viewport (right of the sidebar). On mobile (<768px) the
+   sidebar offset collapses to 0 and the main fills the viewport.
+*/
+.app-main {
+  --page-max: 1024px;
+  --page-pad: 16px;
+  max-width: var(--page-max);
+  margin-left: max(var(--sidebar-w, 220px), calc((100vw - var(--page-max)) / 2));
+  margin-right: auto;
+  padding-left: var(--page-pad);
+  padding-right: var(--page-pad);
+  padding-top: 24px;
+  padding-bottom: 32px;
+  min-height: 100vh;
+}
+.page-narrow { --page-max: 720px; }
+.page-medium { --page-max: 1024px; }
+.page-wide   { --page-max: 1280px; }
+@media (min-width: 769px)  { .app-main { --page-pad: 24px; } }
+@media (min-width: 1025px) { .app-main { --page-pad: 32px; } }
+@media (max-width: 767px) {
+  .app-main {
+    margin-left: 0;
+    margin-right: 0;
+    max-width: 100%;
+    padding-top: env(safe-area-inset-top, 0);
+  }
+}
+
+/* Mobile typography down-tune */
+@media (max-width: 767px) {
+  .app-main h1 { font-size: 22px; line-height: 1.2; }
+  .stat-big { font-size: 26px !important; }
+}
+
+/* Mobile drawer backdrop helper */
+.mobile-drawer-backdrop {
+  position: fixed; inset: 0; z-index: 60;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+/* Mobile hamburger */
+.mobile-hamburger {
+  position: sticky; top: 0; z-index: 40;
+  display: none;
+  align-items: center; gap: 8px;
+  padding: 10px 4px;
+  background: hsl(var(--surface-base));
+}
+@media (max-width: 767px) {
+  .mobile-hamburger { display: flex; }
+}
+
+/* Touch target floor on mobile for tap-sized controls */
+@media (max-width: 767px) {
+  .tap-target { min-width: 44px; min-height: 44px; }
+}
+
+/* Floating Action Button */
+.fab {
+  position: fixed;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  width: 56px; height: 56px;
+  border-radius: 9999px;
+  background: hsl(var(--accent));
+  color: white;
+  z-index: 50;
+  display: none;
+  align-items: center; justify-content: center;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+}
+@media (max-width: 767px) {
+  .fab { display: flex; }
+}

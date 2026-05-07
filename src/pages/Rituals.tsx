@@ -5,6 +5,7 @@ import { Tooltip } from "@/components/Tooltip";
 import { useStore } from "@/store/useStore";
 import { toast } from "sonner";
 import { AppSidebar } from "@/components/AppSidebar";
+import { MobileHeader } from "@/components/MobileHeader";
 
 const G1 = "hsl(var(--goal-1))";
 const G2 = "hsl(var(--goal-2))";
@@ -595,7 +596,8 @@ const Rituals: React.FC = () => {
   return (
     <div className="min-h-screen bg-surface-base text-text-primary">
       <AppSidebar />
-      <main className="ml-[var(--sidebar-w,220px)]" style={{ padding: "32px 40px" }}>
+      <MobileHeader />
+      <main className="app-main page-medium">
         <div className="mx-auto" style={{ maxWidth: 1100 }}>
           <div className="flex items-center justify-between gap-4">
             <h1 className="text-[24px] font-medium text-text-primary" style={{ fontWeight: 500 }}>

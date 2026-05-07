@@ -7,6 +7,7 @@ import { SortDropdown } from "@/components/SortDropdown";
 import { toast } from "sonner";
 import { useStore } from "@/store/useStore";
 import { AppSidebar } from "@/components/AppSidebar";
+import { MobileHeader } from "@/components/MobileHeader";
 import { ProjectCard as SharedProjectCard } from "@/components/ProjectCard";
 
 const G1 = "hsl(var(--goal-1))";
@@ -369,7 +370,8 @@ const AllProjects: React.FC = () => {
   return (
     <div className="min-h-screen bg-surface-base text-text-primary">
       <AppSidebar />
-      <main className="ml-[var(--sidebar-w,220px)] flex flex-col min-h-screen">
+      <MobileHeader />
+      <main className="app-main page-medium flex flex-col min-h-screen">
         {/* Page header */}
         <div className="px-10 pt-6 pb-3 shrink-0">
           <div className="flex items-baseline justify-between">

@@ -129,23 +129,64 @@ export const AppSidebar: React.FC<{ onOpenSettings?: () => void }> = ({ onOpenSe
 
   const [collapsed, setCollapsed] = React.useState<boolean>(() => {
     if (typeof window === "undefined") return false;
-    return window.localStorage.getItem(COLLAPSE_KEY) === "true";
+    const stored = window.localStorage.getItem(COLLAPSE_KEY);
+    if (stored === null) {
+      // Auto-collapse on first load when viewport is narrow
+      const auto = window.innerWidth < 1100;
+      window.localStorage.setItem(COLLAPSE_KEY, String(auto));
+      return auto;
+    }
+    return stored === "true";
   });
+
+  // Mobile drawer open state
+  const [mobileOpen, setMobileOpen] = React.useState(false);
+  React.useEffect(() => {
+    const off = (window as any).__subAppEvent
+      ? null
+      : (() => {
+          // lazy listen via DOM event
+          const handler = () => setMobileOpen(true);
+          document.addEventListener("open-mobile-sidebar", handler);
+          return () => document.removeEventListener("open-mobile-sidebar", handler);
+        })();
+    return off ?? undefined;
+  }, []);
+  // Use the appEvents bus
+  React.useEffect(() => {
+    import("@/lib/appEvents").then(({ subscribeAppEvent }) => {
+      subscribeAppEvent("open-mobile-sidebar", () => setMobileOpen(true));
+    });
+  }, []);
+  React.useEffect(() => {
+    if (!isMobile) setMobileOpen(false);
+  }, [isMobile]);
+  React.useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
 
   // Mobile never collapsed
   const effectiveCollapsed = !isMobile && collapsed;
-  const width = effectiveCollapsed ? COLLAPSED_W : EXPANDED_W;
+  const desktopWidth = effectiveCollapsed ? COLLAPSED_W : EXPANDED_W;
+  const width = isMobile ? (mobileOpen ? 260 : 0) : desktopWidth;
 
-  // Sync CSS variable so page main margins follow
+  // Sync CSS variable so page main margins follow (always 0 on mobile)
   React.useEffect(() => {
-    document.documentElement.style.setProperty("--sidebar-w", `${width}px`);
-  }, [width]);
+    document.documentElement.style.setProperty(
+      "--sidebar-w",
+      `${isMobile ? 0 : desktopWidth}px`,
+    );
+  }, [desktopWidth, isMobile]);
 
-  // Cmd+\ keyboard toggle
+  // Cmd+\ keyboard toggle (desktop only)
   React.useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "\\") {
         e.preventDefault();
+        if (isMobile) {
+          setMobileOpen((v) => !v);
+          return;
+        }
         setCollapsed((v) => {
           const next = !v;
           window.localStorage.setItem(COLLAPSE_KEY, String(next));
@@ -155,9 +196,13 @@ export const AppSidebar: React.FC<{ onOpenSettings?: () => void }> = ({ onOpenSe
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, []);
+  }, [isMobile]);
 
   const toggle = () => {
+    if (isMobile) {
+      setMobileOpen((v) => !v);
+      return;
+    }
     setCollapsed((v) => {
       const next = !v;
       window.localStorage.setItem(COLLAPSE_KEY, String(next));
@@ -172,9 +217,20 @@ export const AppSidebar: React.FC<{ onOpenSettings?: () => void }> = ({ onOpenSe
 
   return (
     <TooltipProvider>
+      {isMobile && mobileOpen && (
+        <div
+          className="mobile-drawer-backdrop"
+          onClick={() => setMobileOpen(false)}
+          aria-hidden
+        />
+      )}
       <aside
-        className="fixed left-0 top-0 bottom-0 bg-surface-raised border-r border-border-subtle flex flex-col transition-[width] duration-200 ease-out overflow-hidden"
-        style={{ width }}
+        className="fixed left-0 top-0 bottom-0 bg-surface-raised border-r border-border-subtle flex flex-col transition-transform duration-200 ease-out overflow-hidden"
+        style={{
+          width: isMobile ? 260 : desktopWidth,
+          zIndex: isMobile ? 70 : 30,
+          transform: isMobile && !mobileOpen ? "translateX(-100%)" : "translateX(0)",
+        }}
       >
         <div className={`flex items-center ${effectiveCollapsed ? "justify-center px-0" : "justify-between px-4"} pt-4`}>
           {!effectiveCollapsed && (

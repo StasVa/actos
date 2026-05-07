@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Zap, Leaf, Sun, Thermometer, Star, X, type LucideIcon } from "lucide-react";
 import { AppSidebar } from "@/components/AppSidebar";
+import { MobileHeader } from "@/components/MobileHeader";
 import { Tooltip, SparkTooltipContent, StateDotTooltip } from "@/components/Tooltip";
 import { LifetimeCounters } from "@/components/LifetimeCounters";
 import { buildYouTubeTooltips, buildFitnessTooltips, buildReadingTooltips } from "@/lib/sparkTooltips";
@@ -1746,7 +1747,7 @@ const Index: React.FC = () => {
       <PlanTodayModal open={planOpen} onClose={() => setPlanOpen(false)} />
       <CloseDayModal open={closeOpen} onClose={() => setCloseOpen(false)} />
       <ClosePlanModal open={combinedOpen} onClose={() => setCombinedOpen(false)} />
-      <main className="ml-[var(--sidebar-w,220px)] px-8 py-6 max-w-[1200px]">
+      <main className="app-main page-medium">
         <header className="mb-8">
           <div className="flex items-start justify-between gap-4">
             <h1 className="text-[28px] font-medium text-text-primary leading-tight">{headerDate}</h1>

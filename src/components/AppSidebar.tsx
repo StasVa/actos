@@ -6,6 +6,7 @@ import {
   TrendingUp,
   CheckSquare,
   Repeat,
+  Send,
   Target,
   FolderKanban,
   Lightbulb,
@@ -34,6 +35,7 @@ const GROUP_EXECUTION: NavItem[] = [
   { label: "Today", href: "/today", icon: Sun },
   { label: "Progress", href: "/progress", icon: TrendingUp },
   { label: "Actions", href: "/actions", icon: CheckSquare },
+  { label: "Delegated", href: "/delegated", icon: Send },
   { label: "Rituals", href: "/rituals", icon: Repeat },
 ];
 

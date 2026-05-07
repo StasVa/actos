@@ -54,6 +54,7 @@ const NAV_ITEMS: { label: string; path: string }[] = [
   { label: "Goals", path: "/goals" },
   { label: "Projects", path: "/projects" },
   { label: "Actions", path: "/actions" },
+  { label: "Delegated", path: "/delegated" },
   { label: "Rituals", path: "/rituals" },
   { label: "Ideas", path: "/ideas" },
   { label: "Reviews/Days", path: "/reviews/days" },

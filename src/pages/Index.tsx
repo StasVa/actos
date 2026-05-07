@@ -1073,6 +1073,20 @@ export const TodayZone: React.FC<{
           )}
         </div>
 
+        {/* INLINE-ADD — inside Actions section, sticky at bottom on mobile */}
+        <div
+          className="flex items-center gap-2 rounded-[4px] px-3 py-2 bg-surface-raised border border-dashed border-border-subtle md:static max-md:fixed max-md:left-0 max-md:right-0 max-md:bottom-0 max-md:z-40 max-md:bg-surface-base max-md:border-0 max-md:border-t max-md:border-solid max-md:border-border-subtle max-md:rounded-none max-md:px-4 max-md:py-3"
+        >
+          <input
+            value={quickAdd}
+            onChange={(e) => setQuickAdd(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") handleQuickAdd(); }}
+            className="flex-1 bg-transparent text-[13px] text-text-primary placeholder:text-text-tertiary focus:outline-none"
+            placeholder="+ Add action for today…"
+          />
+          <span className="font-mono text-[11px] text-text-tertiary">⏎</span>
+        </div>
+
         {/* RITUALS GROUP */}
         <div>
           {(() => {
@@ -1099,50 +1113,154 @@ export const TodayZone: React.FC<{
           {todaysRituals.length === 0 ? (
             <div className="font-mono text-[11px] text-text-tertiary px-3 py-2">No rituals today.</div>
           ) : (
-            <div className="space-y-1">
+            <div>
               {todaysRituals.map((r) => {
-                const doneToday = r.completionHistory.some(
+                const doneEntry = r.completionHistory.find(
                   (c) => c.date === TODAY_ISO && (c.status === "done" || !c.status),
                 );
+                const doneToday = !!doneEntry;
                 const isSkipped = skippedRitualSet.has(r.id);
                 const mult = ritualMultiplier(r.totalCompletions);
                 const color = colorVar(r.goalId);
+                const streak = computeRitualStreak(r);
+                const scheduleLabel = r.schedule[0].toUpperCase() + r.schedule.slice(1);
+                const metaParts: string[] = [scheduleLabel];
+                if (r.totalCompletions === 0) {
+                  metaParts.push("brand new");
+                } else {
+                  metaParts.push(`${streak}d streak`);
+                  metaParts.push(`${r.totalCompletions} done`);
+                }
+                if (doneToday && doneEntry?.at) {
+                  const t = new Date(doneEntry.at);
+                  const hh = String(t.getHours()).padStart(2, "0");
+                  const mm = String(t.getMinutes()).padStart(2, "0");
+                  metaParts.push(`✓ Done at ${hh}:${mm}`);
+                }
+                const isTerminal = doneToday || isSkipped;
+                const reopenRitual = () => {
+                  const newHistory = r.completionHistory.filter(
+                    (c) => !(c.date === TODAY_ISO && (c.status === "done" || !c.status)),
+                  );
+                  useStore.getState().updateRitual(r.id, {
+                    completionHistory: newHistory,
+                    totalCompletions: Math.max(0, r.totalCompletions - 1),
+                  });
+                  toast("Ritual re-opened");
+                };
                 return (
                   <div
                     key={r.id}
-                    className={`flex items-center gap-2 pr-3 h-8 rounded-[2px] hover:bg-surface-hover transition-colors group ${
+                    onClick={() => openPanel({ kind: "ritual", mode: "edit", id: r.id })}
+                    className={`relative flex items-stretch transition-colors cursor-pointer hover:bg-surface-hover border-b border-border-subtle ${
                       isSkipped ? "opacity-50" : ""
                     }`}
+                    style={{ minHeight: 56 }}
                   >
-                    <button
-                      onClick={() => !isSkipped && handleRitualDone(r.id, doneToday)}
-                      disabled={isSkipped}
-                      className="ml-2 w-2.5 h-2.5 rounded-full border transition-colors shrink-0 disabled:cursor-not-allowed"
-                      style={{ borderColor: color, background: doneToday ? color : "transparent" }}
-                      aria-label={doneToday ? "Done today" : "Mark ritual done"}
-                    />
                     <span
-                      className={`text-[13px] truncate cursor-pointer ${
-                        doneToday || isSkipped ? "text-text-tertiary line-through" : "text-text-primary"
-                      }`}
-                      onClick={() => openPanel({ kind: "ritual", mode: "edit", id: r.id })}
+                      className="absolute left-0 top-0 bottom-0"
+                      style={{ background: color, width: 3 }}
+                    />
+                    <div
+                      className="flex items-center gap-3 py-3 pr-4 w-full min-w-0"
+                      style={{ paddingLeft: 19 }}
                     >
-                      {r.title}
-                    </span>
-                    <span className="font-mono text-[11px] text-text-tertiary truncate">
-                      {r.schedule[0].toUpperCase() + r.schedule.slice(1)} · ×{mult.toFixed(2)}
-                    </span>
-                    <div className="flex-1" />
-                    {doneToday ? (
-                      <span className="font-mono text-[11px] text-text-secondary">✓ Done</span>
-                    ) : (
                       <button
-                        onClick={() => handleRitualSkipToggle(r.id, isSkipped)}
-                        className="text-[11px] text-text-tertiary hover:text-text-primary transition"
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (isSkipped) return;
+                          if (doneToday) {
+                            reopenRitual();
+                          } else {
+                            if (!r.baseImpact || !r.timeEstimateMinutes) {
+                              toast.error("Set base impact and time before marking done");
+                              openPanel({ kind: "ritual", mode: "edit", id: r.id });
+                              return;
+                            }
+                            handleRitualDone(r.id, false);
+                            const newMult = ritualMultiplier(r.totalCompletions + 1);
+                            toast.success(`Ritual marked done — multiplier now ×${newMult.toFixed(2)}`);
+                          }
+                        }}
+                        disabled={isSkipped}
+                        aria-label={doneToday ? "Re-open ritual" : "Mark ritual done"}
+                        className="inline-flex items-center justify-center rounded-[2px] border shrink-0 disabled:cursor-not-allowed"
+                        style={{
+                          width: 16,
+                          height: 16,
+                          background: doneToday ? color : "transparent",
+                          borderColor: doneToday ? color : "hsl(var(--text-tertiary))",
+                          color: "hsl(var(--surface-base))",
+                          fontSize: 11,
+                          lineHeight: 1,
+                        }}
                       >
-                        {isSkipped ? "Restore" : "Skip"}
+                        {doneToday ? "✓" : ""}
                       </button>
-                    )}
+                      <div className="flex flex-col gap-1 min-w-0 flex-1">
+                        <div
+                          className={`text-[15px] font-medium truncate ${
+                            isTerminal ? "text-text-secondary line-through" : "text-text-primary"
+                          }`}
+                        >
+                          {r.title}
+                        </div>
+                        <div
+                          className={`flex items-center font-mono text-[12px] tabular-nums truncate ${
+                            isTerminal ? "text-text-tertiary" : "text-text-secondary"
+                          }`}
+                        >
+                          <span
+                            className="inline-block w-1.5 h-1.5 rounded-full mr-1.5 shrink-0"
+                            style={{ background: color }}
+                          />
+                          <span className="truncate">
+                            {metaParts.map((m, i) => (
+                              <React.Fragment key={i}>
+                                {i > 0 && <span className="mx-1.5 text-text-tertiary">·</span>}
+                                {m}
+                              </React.Fragment>
+                            ))}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 shrink-0">
+                        <span
+                          className="font-medium tabular-nums text-center"
+                          style={{
+                            padding: "4px 10px",
+                            borderRadius: 4,
+                            fontSize: 13,
+                            minWidth: 52,
+                            background: `color-mix(in srgb, ${color}, transparent 85%)`,
+                            color: color,
+                          }}
+                        >
+                          ×{mult.toFixed(2)}
+                        </span>
+                        {doneToday ? (
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); reopenRitual(); }}
+                            className="text-[11px] text-text-tertiary hover:text-text-primary transition"
+                          >
+                            Re-open
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRitualSkipToggle(r.id, isSkipped);
+                            }}
+                            className="text-[11px] text-text-tertiary hover:text-text-primary transition"
+                          >
+                            {isSkipped ? "Restore" : "Skip"}
+                          </button>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 );
               })}
@@ -1150,19 +1268,6 @@ export const TodayZone: React.FC<{
           )}
         </div>
 
-        {/* INLINE-ADD — sticky at bottom of viewport on mobile */}
-        <div
-          className="flex items-center gap-2 rounded-[4px] px-3 py-2 bg-surface-raised border border-dashed border-border-subtle md:static max-md:fixed max-md:left-0 max-md:right-0 max-md:bottom-0 max-md:z-40 max-md:bg-surface-base max-md:border-0 max-md:border-t max-md:border-solid max-md:border-border-subtle max-md:rounded-none max-md:px-4 max-md:py-3"
-        >
-          <input
-            value={quickAdd}
-            onChange={(e) => setQuickAdd(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter") handleQuickAdd(); }}
-            className="flex-1 bg-transparent text-[13px] text-text-primary placeholder:text-text-tertiary focus:outline-none"
-            placeholder="+ Add action for today…"
-          />
-          <span className="font-mono text-[11px] text-text-tertiary">⏎</span>
-        </div>
 
         {/* CLOSE DAY */}
         {planAndReview && (

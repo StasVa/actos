@@ -627,6 +627,27 @@ export function fmtTime(min?: number): string | null {
   return `${m}m`;
 }
 
+/** Consecutive-day done streak ending today (or yesterday if not yet done today). */
+function computeRitualStreak(r: { completionHistory: { date: string; status?: string }[] }): number {
+  const doneDates = new Set(
+    r.completionHistory
+      .filter((c) => c.status === "done" || !c.status)
+      .map((c) => c.date),
+  );
+  let streak = 0;
+  const today = new Date(TODAY_ISO + "T00:00:00");
+  // Start from today; if not done today, start from yesterday.
+  let cursor = new Date(today);
+  if (!doneDates.has(cursor.toISOString().slice(0, 10))) {
+    cursor = new Date(cursor.getTime() - 86400000);
+  }
+  while (doneDates.has(cursor.toISOString().slice(0, 10))) {
+    streak++;
+    cursor = new Date(cursor.getTime() - 86400000);
+  }
+  return streak;
+}
+
 export const TodayZone: React.FC<{
   onPlanClick: () => void;
   onCloseClick: () => void;

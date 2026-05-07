@@ -470,8 +470,12 @@ const SessionActive: React.FC = () => {
   /* ─── Render ─── */
   return (
     <div className="min-h-screen bg-background text-text-primary">
-      {!focusMode && <AppSidebar /><MobileHeader />
-      }
+      {!focusMode && (
+        <>
+          <AppSidebar />
+          <MobileHeader />
+        </>
+      )}
       <main className={focusMode ? "" : "app-main page-medium"}>
         <div className="relative max-w-[760px] mx-auto px-6 md:px-8 py-10 pb-32">
           {/* Top-right controls */}

@@ -453,7 +453,7 @@ const GoalDetail: React.FC = () => {
       <div className="min-h-screen bg-surface-base text-text-primary">
         <AppSidebar />
         <MobileHeader />
-      <main className="app-main page-medium p-10">
+      <main className="app-main page-medium">
           <div className="text-[14px] text-text-secondary">Goal not found.</div>
           <Link to="/" className="mt-4 inline-block text-[13px] text-accent hover:underline">
             ← Back to home

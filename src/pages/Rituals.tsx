@@ -597,7 +597,7 @@ const Rituals: React.FC = () => {
     <div className="min-h-screen bg-surface-base text-text-primary">
       <AppSidebar />
       <MobileHeader />
-      <main className="app-main page-medium" style={{ padding: "32px 40px" }}>
+      <main className="app-main page-medium">
         <div className="mx-auto" style={{ maxWidth: 1100 }}>
           <div className="flex items-center justify-between gap-4">
             <h1 className="text-[24px] font-medium text-text-primary" style={{ fontWeight: 500 }}>

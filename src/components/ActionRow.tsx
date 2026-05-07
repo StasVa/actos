@@ -9,6 +9,7 @@
 // equivalent display by passing pre-built bottom segments via `bottomSegments`.
 
 import React from "react";
+import { Star } from "lucide-react";
 import { useStore } from "@/store/useStore";
 import type { Action } from "@/types";
 import { formatTime } from "@/lib/format";

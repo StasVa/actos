@@ -627,6 +627,7 @@ export const TodayZone: React.FC<{
   const updateDayEntry = useStore((s) => s.updateDayEntry);
   const markRitualInstanceDone = useStore((s) => s.markRitualInstanceDone);
   const skipRitualInstance = useStore((s) => s.skipRitualInstance);
+  const unskipRitualInstance = useStore((s) => s.unskipRitualInstance);
 
   const [quickAdd, setQuickAdd] = useState("");
   

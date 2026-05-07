@@ -7,7 +7,8 @@ export type AppEventName =
   | "open-plan-today"
   | "open-close-day"
   | "open-settings"
-  | "focus-idea-capture";
+  | "focus-idea-capture"
+  | "open-mobile-sidebar";
 
 type Pending = { name: AppEventName; at: number };
 const PENDING_TTL_MS = 1500;

@@ -652,24 +652,35 @@ export const TodayZone: React.FC<{
 
   // ─── STATE A: today not yet planned ───
   if (!isPlanned) {
+    const preScheduledCount = actions.filter(
+      (a) =>
+        a.scheduledDate === TODAY_ISO &&
+        (a.status === "planned" || a.status === "backlog"),
+    ).length;
     return (
       <section>
-        <SectionLabel>Today</SectionLabel>
-        <div className="flex items-start justify-between gap-6 bg-surface-elevated border border-border-subtle rounded-[6px] py-5 px-6">
-          <div className="min-w-0">
-            <div className="text-[18px] font-medium text-text-primary leading-snug">
-              What are you doing today?
-            </div>
-            <div className="text-[14px] text-text-secondary mt-1">
-              Pick today's actions to start.
-            </div>
+        <div
+          className="bg-surface-elevated border border-border-subtle rounded-[8px] text-center"
+          style={{ padding: "32px 40px" }}
+        >
+          <div className="text-[20px] font-medium text-text-primary leading-snug">
+            What are you doing today?
           </div>
+          <div className="text-[14px] text-text-secondary mt-2">
+            Pick today's actions to start.
+          </div>
+          {preScheduledCount > 0 && (
+            <div className="font-mono text-[12px] text-text-tertiary mt-3 tabular-nums">
+              {preScheduledCount} action{preScheduledCount === 1 ? "" : "s"} already scheduled for today
+            </div>
+          )}
           <button
             type="button"
             onClick={onPlanClick}
-            className="shrink-0 px-5 py-2 rounded-[4px] bg-[hsl(var(--accent))] text-white text-[13px] font-medium hover:brightness-110 transition"
+            className="mt-6 inline-block rounded-[4px] bg-[hsl(var(--accent))] text-white font-medium hover:brightness-110 transition"
+            style={{ padding: "12px 32px", fontSize: 15 }}
           >
-            Plan today →
+            Start your day →
           </button>
         </div>
       </section>

@@ -731,15 +731,28 @@ export const TodayZone: React.FC<{
     toast.success("Ritual logged");
   };
 
-  const handleRitualSkip = (ritualId: string) => {
-    skipRitualInstance(ritualId);
-    if (isPlanned) {
-      updateDayEntry(TODAY_ISO, {
-        plannedRitualIds: (dayEntry?.plannedRitualIds ?? []).filter((id) => id !== ritualId),
-        skippedRitualIds: [...(dayEntry?.skippedRitualIds ?? []), ritualId],
-      });
+  const unskipRitualInstance = useStore((s) => s.unskipRitualInstance);
+
+  const handleRitualSkipToggle = (ritualId: string, currentlySkipped: boolean) => {
+    if (currentlySkipped) {
+      unskipRitualInstance(ritualId);
+      if (isPlanned) {
+        updateDayEntry(TODAY_ISO, {
+          plannedRitualIds: [...(dayEntry?.plannedRitualIds ?? []), ritualId],
+          skippedRitualIds: (dayEntry?.skippedRitualIds ?? []).filter((id) => id !== ritualId),
+        });
+      }
+      toast("Ritual restored");
+    } else {
+      skipRitualInstance(ritualId);
+      if (isPlanned) {
+        updateDayEntry(TODAY_ISO, {
+          plannedRitualIds: (dayEntry?.plannedRitualIds ?? []).filter((id) => id !== ritualId),
+          skippedRitualIds: [...(dayEntry?.skippedRitualIds ?? []), ritualId],
+        });
+      }
+      toast("Ritual skipped today");
     }
-    toast("Ritual skipped today");
   };
 
   const handleReopen = () => {

@@ -873,18 +873,25 @@ export const PlanTodayModal: React.FC<{ open: boolean; onClose: () => void }> = 
 }) => {
   const date = todayISO();
   const startDayPlan = useStore((s) => s.startDayPlan);
+  const updateAction = useStore((s) => s.updateAction);
+  const actions = useStore((s) => s.actions);
   const [state, setState] = usePrefilledPlanState(date);
 
   const canSubmit = !!state.dayType && state.selectedActionIds.length > 0;
 
   const handleSubmit = () => {
     if (!canSubmit) return;
+    // Clear scheduledDate on any pre-scheduled actions that the user un-selected.
+    const selectedSet = new Set(state.selectedActionIds);
+    actions
+      .filter((a) => a.scheduledDate === date && !selectedSet.has(a.id))
+      .forEach((a) => updateAction(a.id, { scheduledDate: undefined }));
     startDayPlan({
       date,
       dayType: state.dayType,
       mainTaskActionId: state.mainTaskId,
       morningEnergyScore: undefined,
-      morningIntentNote: state.intent || undefined,
+      morningIntentNote: undefined,
       plannedActionIds: state.selectedActionIds,
       plannedRitualIds: Array.from(state.keptRitualIds),
       skippedRitualIds: Array.from(state.skippedRitualIds),

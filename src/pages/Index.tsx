@@ -77,6 +77,23 @@ const TimePill: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   </span>
 );
 
+const ImpactPill: React.FC<{ impact: number; color: string }> = ({ impact, color }) => (
+  <span
+    className="inline-flex items-center justify-center font-medium tabular-nums"
+    style={{
+      padding: "4px 10px",
+      borderRadius: 4,
+      fontSize: 13,
+      minWidth: 36,
+      textAlign: "center",
+      background: `color-mix(in srgb, ${color}, transparent 85%)`,
+      color,
+    }}
+  >
+    I{impact}
+  </span>
+);
+
 const Strip: React.FC<{ color: string }> = ({ color }) => (
   <span className="self-stretch w-[3px] shrink-0" style={{ background: color }} />
 );
@@ -1013,17 +1030,45 @@ export const TodayZone: React.FC<{
             </div>
           ) : (
             <div>
-              {todays.map((a) => (
-                <SharedActionRow
-                  key={a.id}
-                  action={a}
-                  isMainTask={a.id === mainTaskId}
-                  onClick={() => openPanel({ kind: "action", mode: "edit", id: a.id })}
-                  onToggleDone={() => {
-                    if (a.status !== "done") handleToggleDone(a.id);
-                  }}
-                />
-              ))}
+              {todays.map((a) => {
+                const goal = goalById(a.goalId);
+                const project = projectById(a.projectId);
+                const bottom: React.ReactNode[] = [];
+                if (goal) bottom.push(<span key="g">{goal.title}</span>);
+                if (project) bottom.push(<span key="p">{project.title}</span>);
+                if (a.timeEstimateMinutes && a.timeEstimateMinutes > 0)
+                  bottom.push(
+                    <span key="t" className="tabular-nums">
+                      {formatTime(a.timeEstimateMinutes)}
+                    </span>,
+                  );
+                if (a.scheduledDate && a.scheduledDate < TODAY_ISO) {
+                  const days = Math.floor(
+                    (new Date(TODAY_ISO + "T00:00:00").getTime() -
+                      new Date(a.scheduledDate + "T00:00:00").getTime()) /
+                      86400000,
+                  );
+                  bottom.push(
+                    <span key="o" className="flex items-center gap-1 text-text-warning" style={{ fontSize: 11 }}>
+                      <CircleDot size={8} fill="currentColor" className="shrink-0" />
+                      <span>{days}d overdue</span>
+                    </span>,
+                  );
+                }
+                return (
+                  <SharedActionRow
+                    key={a.id}
+                    action={a}
+                    isMainTask={a.id === mainTaskId}
+                    rightPill={{ kind: "custom", node: <ImpactPill impact={a.impact} color={colorVar(a.goalId)} /> }}
+                    bottomSegments={bottom}
+                    onClick={() => openPanel({ kind: "action", mode: "edit", id: a.id })}
+                    onToggleDone={() => {
+                      if (a.status !== "done") handleToggleDone(a.id);
+                    }}
+                  />
+                );
+              })}
             </div>
           )}
         </div>

@@ -9,6 +9,7 @@
 // equivalent display by passing pre-built bottom segments via `bottomSegments`.
 
 import React from "react";
+import { Star } from "lucide-react";
 import { useStore } from "@/store/useStore";
 import type { Action } from "@/types";
 import { formatTime } from "@/lib/format";
@@ -34,6 +35,8 @@ export interface ActionRowProps {
   hideCheckbox?: boolean;
   /** Force the title to render as terminal (line-through, dim). */
   terminal?: boolean;
+  /** Show inline Star marker before title (Main Task indicator). */
+  isMainTask?: boolean;
   onClick?: () => void;
   onToggleDone?: () => void;
 }
@@ -47,6 +50,7 @@ export const ActionRow: React.FC<ActionRowProps> = ({
   rightPill,
   hideCheckbox = false,
   terminal,
+  isMainTask = false,
   onClick,
   onToggleDone,
 }) => {
@@ -147,6 +151,13 @@ export const ActionRow: React.FC<ActionRowProps> = ({
               >
                 {isDone ? "✓" : ""}
               </button>
+            )}
+            {isMainTask && (
+              <Star
+                size={12}
+                className="shrink-0"
+                style={{ color: "hsl(var(--accent))", fill: "hsl(var(--accent))" }}
+              />
             )}
             <span
               className={`text-[15px] font-medium truncate ${

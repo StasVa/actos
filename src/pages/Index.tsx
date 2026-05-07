@@ -818,52 +818,53 @@ export const TodayZone: React.FC<{
   }
 
   // ─── STATE B (or planAndReview off): in-progress ───
-  const startedTime = dayEntry?.startedAt
-    ? new Date(dayEntry.startedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-    : null;
-  const dayTypeLabel = dayEntry?.dayType ? DAY_TYPE_LABELS[dayEntry.dayType] : null;
-  const meta =
-    planAndReview && isPlanned
-      ? [startedTime ? `Started ${startedTime}` : null, dayTypeLabel].filter(Boolean).join(" · ")
-      : `${todays.length} ACTIONS · ${ritualsTotal} RITUALS`;
+  const doneActionsCount = todays.filter((a) => a.status === "done").length;
+  const remainingActionsCount = todays.length - doneActionsCount;
 
   return (
     <section>
-      <SectionLabel meta={meta}>Today</SectionLabel>
-      <div className="space-y-4">
+      <div className="space-y-6">
         {mainTask && (
-          <div
-            onClick={() => openPanel({ kind: "action", mode: "edit", id: mainTask.id })}
-            className="flex items-center gap-3 px-3 py-2 bg-surface-raised rounded-[4px] cursor-pointer hover:bg-surface-hover transition-colors"
-          >
-            <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">MAIN</span>
-            <span className="text-[13px] font-medium text-text-primary">{mainTask.title}</span>
-            <span className="text-[12px] text-text-secondary">{breadcrumb(mainTask.goalId, mainTask.projectId)}</span>
-            <div className="flex-1" />
-            {fmtTime(mainTask.timeEstimateMinutes) && (
-              <TimePill>{fmtTime(mainTask.timeEstimateMinutes)}</TimePill>
-            )}
-            <button
-              onClick={(e) => { e.stopPropagation(); handleToggleDone(mainTask.id); }}
-              className="inline-block rounded-[2px] border border-text-tertiary hover:border-accent shrink-0"
-              style={{ width: 14, height: 14 }}
-              aria-label="Mark done"
-            />
+          <div>
+            <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-2">
+              MAIN TASK
+            </div>
+            <div
+              onClick={() => openPanel({ kind: "action", mode: "edit", id: mainTask.id })}
+              className="flex items-center gap-3 px-4 py-3 bg-surface-elevated border border-border-subtle rounded-[6px] cursor-pointer hover:bg-surface-hover transition-colors"
+            >
+              <span className="text-[18px] font-medium text-text-primary truncate">{mainTask.title}</span>
+              <span className="font-mono text-[12px] text-text-secondary truncate">
+                {breadcrumb(mainTask.goalId, mainTask.projectId)}
+              </span>
+              <div className="flex-1" />
+              {mainTask.impact > 0 && (
+                <span className="font-mono text-[11px] text-text-secondary">I{mainTask.impact}</span>
+              )}
+              {fmtTime(mainTask.timeEstimateMinutes) && (
+                <TimePill>{fmtTime(mainTask.timeEstimateMinutes)}</TimePill>
+              )}
+            </div>
           </div>
         )}
 
         {/* ACTIONS GROUP */}
         <div>
-          <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-2">
-            ACTIONS · {others.length}
+          <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
+            TODAY'S ACTIONS · {todays.length}
           </div>
-          {others.length === 0 ? (
+          {todays.length > 0 && (
+            <div className="font-mono text-[12px] text-text-secondary mt-1 mb-2 tabular-nums">
+              {doneActionsCount} done · {remainingActionsCount} remaining
+            </div>
+          )}
+          {todays.length === 0 ? (
             <div className="px-3 py-4 text-center font-mono text-[11px] text-text-tertiary border border-dashed border-border-subtle rounded-[4px]">
               No actions for today.
             </div>
           ) : (
             <div>
-              {others.map((a) => (
+              {todays.map((a) => (
                 <SharedActionRow
                   key={a.id}
                   action={a}

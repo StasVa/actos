@@ -725,6 +725,13 @@ export const TodayZone: React.FC<{
   const ritualsTotal = todaysRituals.length;
 
   const handleToggleDone = (id: string) => {
+    const a = actions.find((x) => x.id === id);
+    if (!a) return;
+    if (!a.impact || !a.timeEstimateMinutes) {
+      toast.error("Set Impact and Time before marking done");
+      openPanel({ kind: "action", mode: "edit", id });
+      return;
+    }
     changeActionStatus(id, "done");
     toast.success("Action completed");
   };

@@ -1016,6 +1016,7 @@ export const TodayZone: React.FC<{
                 <SharedActionRow
                   key={a.id}
                   action={a}
+                  isMainTask={a.id === mainTaskId}
                   onClick={() => openPanel({ kind: "action", mode: "edit", id: a.id })}
                   onToggleDone={() => {
                     if (a.status !== "done") handleToggleDone(a.id);

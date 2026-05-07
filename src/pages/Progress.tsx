@@ -386,9 +386,23 @@ const DelegatedSection: React.FC = () => {
   const openPanel = useStore((s) => s.openPanel);
   const items = actions.filter((a) => a.status === "delegated");
 
+  const TODAY_ISO = "2026-05-05";
+  const todayMs = new Date(TODAY_ISO + "T00:00:00.000Z").getTime();
+  let overdue = 0;
+  let dueToday = 0;
+  for (const a of items) {
+    if (!a.expectedReturnDate) continue;
+    const d = Math.round(
+      (new Date(a.expectedReturnDate + "T00:00:00.000Z").getTime() - todayMs) / 86400000,
+    );
+    if (d < 0) overdue++;
+    else if (d === 0) dueToday++;
+  }
+  const meta = `${items.length} ACTIVE · ${overdue} OVERDUE · ${dueToday} DUE TODAY`;
+
   return (
     <section>
-      <SectionLabel meta={`${items.length} ACTIVE`}>Delegated · {items.length}</SectionLabel>
+      <SectionLabel meta={meta}>Delegated · {items.length}</SectionLabel>
       {items.length === 0 ? (
         <div className="font-mono text-[11px] text-text-tertiary px-3 py-2">No active delegations.</div>
       ) : (

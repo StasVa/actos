@@ -229,6 +229,14 @@ const PlanForm: React.FC<{
   const [quickTitle, setQuickTitle] = useState("");
   const [quickGoalId, setQuickGoalId] = useState<ID | undefined>(initialGoal);
   const [quickProjectId, setQuickProjectId] = useState<ID | undefined>(initialProject);
+  const [quickShowPickers, setQuickShowPickers] = useState(false);
+
+  const activeGoals = goals.filter((g) => g.status === "active");
+  const projectsForQuickGoal = projects.filter(
+    (p) => p.status === "active" && (!quickGoalId || p.goalId === quickGoalId),
+  );
+  const isSmartDefault =
+    activeGoals.length === 1 && projectsForQuickGoal.length <= 1 && !quickShowPickers;
 
   const dueRituals = useMemo(
     () => rituals.filter((r) => r.status === "active" && ritualDueOn(r, date)),
@@ -665,67 +673,115 @@ const PlanForm: React.FC<{
 
                 {/* Inline-add input */}
                 <div className="p-2 border-t border-border-subtle bg-surface-base rounded-b-[6px]">
-                  <div
-                    className="flex items-center gap-2 px-3 rounded-[4px] border border-dashed border-border-default"
-                    style={{ height: 40 }}
-                  >
-                    <span className="font-mono text-[14px] text-text-tertiary leading-none">+</span>
-                    <input
-                      value={quickTitle}
-                      onChange={(e) => setQuickTitle(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key !== "Enter") return;
-                        e.preventDefault();
-                        const title = quickTitle.trim();
-                        if (!title || !quickGoalId) return;
-                        const newId = createAction({
-                          title,
-                          goalId: quickGoalId,
-                          projectId: quickProjectId ?? null,
-                        });
-                        addMany([newId]);
-                        setQuickTitle("");
-                        toast.success("Action created and added to today");
-                      }}
-                      placeholder="Quick add new action..."
-                      className="flex-1 bg-transparent text-[13px] text-text-primary outline-none placeholder:text-text-tertiary"
-                    />
-                    <select
-                      value={quickGoalId ?? ""}
-                      onChange={(e) => {
-                        const gid = e.target.value || undefined;
-                        setQuickGoalId(gid);
-                        const proj = firstProjectForGoal(gid);
-                        setQuickProjectId(proj?.id);
-                      }}
-                      className="bg-surface-hover text-[11px] text-text-secondary rounded-[3px] px-1.5 py-1 outline-none border border-transparent focus:border-border-default max-w-[110px]"
-                      title="Goal"
-                    >
-                      {goals
-                        .filter((g) => g.status === "active")
-                        .map((g) => (
-                          <option key={g.id} value={g.id}>
-                            {g.title}
-                          </option>
-                        ))}
-                    </select>
-                    <select
-                      value={quickProjectId ?? ""}
-                      onChange={(e) => setQuickProjectId(e.target.value || undefined)}
-                      className="bg-surface-hover text-[11px] text-text-secondary rounded-[3px] px-1.5 py-1 outline-none border border-transparent focus:border-border-default max-w-[110px]"
-                      title="Project"
-                    >
-                      <option value="">No project</option>
-                      {projects
-                        .filter(
-                          (p) => p.status === "active" && (!quickGoalId || p.goalId === quickGoalId),
-                        )
-                        .map((p) => (
-                          <option key={p.id} value={p.id}>
-                            {p.title}
-                          </option>
-                        ))}
-                    </select>
+                  <div className="flex flex-col gap-1.5 px-3 py-2.5 rounded-[6px] border border-dashed border-border-default hover:border-[hsl(var(--accent))] transition-colors">
+                    {/* Line 1: title */}
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-[14px] text-text-tertiary leading-none">+</span>
+                      <input
+                        value={quickTitle}
+                        onChange={(e) => setQuickTitle(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key !== "Enter") return;
+                          e.preventDefault();
+                          const title = quickTitle.trim();
+                          if (!title || !quickGoalId) return;
+                          const newId = createAction({
+                            title,
+                            goalId: quickGoalId,
+                            projectId: quickProjectId ?? null,
+                          });
+                          addMany([newId]);
+                          setQuickTitle("");
+                          toast.success("Action created and added to today");
+                        }}
+                        placeholder="Quick add new action..."
+                        className="flex-1 min-w-0 bg-transparent text-[14px] text-text-primary outline-none placeholder:text-text-tertiary"
+                      />
+                    </div>
+                    {/* Line 2: parent picker */}
+                    <div className="flex items-center gap-2 pl-[22px] flex-wrap">
+                      <span className="text-[12px] text-text-tertiary">in</span>
+                      {isSmartDefault ? (
+                        <>
+                          {quickGoalId && (
+                            <span className="flex items-center gap-1.5 min-w-0">
+                              <span
+                                className="inline-block rounded-full shrink-0"
+                                style={{
+                                  width: 8,
+                                  height: 8,
+                                  background: goalColor(quickGoalId),
+                                }}
+                              />
+                              <span
+                                className="font-mono text-[12px] text-text-secondary truncate"
+                                style={{ maxWidth: 120 }}
+                                title={goalById(quickGoalId)?.title}
+                              >
+                                {goalById(quickGoalId)?.title}
+                              </span>
+                            </span>
+                          )}
+                          {quickProjectId && (
+                            <>
+                              <span className="text-text-tertiary">·</span>
+                              <span
+                                className="font-mono text-[12px] text-text-secondary truncate"
+                                style={{ maxWidth: 120 }}
+                                title={projectById(quickProjectId)?.title}
+                              >
+                                {projectById(quickProjectId)?.title}
+                              </span>
+                            </>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => setQuickShowPickers(true)}
+                            className="ml-auto font-mono text-[11px] text-text-tertiary hover:text-text-secondary hover:underline"
+                          >
+                            Change
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <select
+                            value={quickGoalId ?? ""}
+                            onChange={(e) => {
+                              const gid = e.target.value || undefined;
+                              setQuickGoalId(gid);
+                              const proj = firstProjectForGoal(gid);
+                              setQuickProjectId(proj?.id);
+                            }}
+                            className="bg-transparent text-[12px] text-text-secondary rounded-[4px] px-2 py-1 outline-none border border-border-subtle hover:border-border-default focus:border-border-default"
+                            style={{ maxWidth: 140 }}
+                            title={quickGoalId ? goalById(quickGoalId)?.title : "Goal"}
+                          >
+                            {activeGoals.map((g) => (
+                              <option key={g.id} value={g.id}>
+                                {g.title}
+                              </option>
+                            ))}
+                          </select>
+                          <span className="text-text-tertiary">·</span>
+                          <select
+                            value={quickProjectId ?? ""}
+                            onChange={(e) => setQuickProjectId(e.target.value || undefined)}
+                            className="bg-transparent text-[12px] text-text-secondary rounded-[4px] px-2 py-1 outline-none border border-border-subtle hover:border-border-default focus:border-border-default"
+                            style={{ maxWidth: 140 }}
+                            title={
+                              quickProjectId ? projectById(quickProjectId)?.title : "Project"
+                            }
+                          >
+                            <option value="">No project</option>
+                            {projectsForQuickGoal.map((p) => (
+                              <option key={p.id} value={p.id}>
+                                {p.title}
+                              </option>
+                            ))}
+                          </select>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>

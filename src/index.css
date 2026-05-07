@@ -190,7 +190,7 @@ body {
 
 /* Mobile typography down-tune */
 @media (max-width: 767px) {
-  .page-shell h1 { font-size: 22px; line-height: 1.2; }
+  .app-main h1 { font-size: 22px; line-height: 1.2; }
   .stat-big { font-size: 26px !important; }
 }
 

@@ -33,6 +33,15 @@ import { CommandPalette } from "./components/CommandPalette";
 import { KeyboardShortcuts } from "./components/KeyboardShortcuts";
 import { GlobalSettingsHost } from "./components/GlobalSettingsHost";
 import { ActiveSessionGuard } from "./components/ActiveSessionGuard";
+import { AdminLayout } from "./admin/AdminLayout";
+import AdminDashboard from "./admin/pages/AdminDashboard";
+import AdminUsers from "./admin/pages/AdminUsers";
+import AdminUserDetail from "./admin/pages/AdminUserDetail";
+import AdminFeedback from "./admin/pages/AdminFeedback";
+import AdminBilling from "./admin/pages/AdminBilling";
+import AdminAudit from "./admin/pages/AdminAudit";
+import AdminAnnouncements from "./admin/pages/AdminAnnouncements";
+import { ImpersonationBanner } from "./admin/ImpersonationBanner";
 
 const queryClient = new QueryClient();
 
@@ -49,7 +58,19 @@ const App = () => (
         <CommandPalette />
         <KeyboardShortcuts />
         <ActiveSessionGuard />
+        <ImpersonationBanner />
         <Routes>
+          {/* Admin */}
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<AdminDashboard />} />
+            <Route path="users" element={<AdminUsers />} />
+            <Route path="users/:userId" element={<AdminUserDetail />} />
+            <Route path="feedback" element={<AdminFeedback />} />
+            <Route path="billing" element={<AdminBilling />} />
+            <Route path="audit" element={<AdminAudit />} />
+            <Route path="announcements" element={<AdminAnnouncements />} />
+          </Route>
+
           {/* Default + legacy redirects */}
           <Route path="/" element={<Navigate to="/today" replace />} />
           <Route path="/home" element={<Navigate to="/today" replace />} />

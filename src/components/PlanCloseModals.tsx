@@ -1078,15 +1078,22 @@ export const ClosePlanModal: React.FC<{ open: boolean; onClose: () => void }> = 
 
   const canSubmit = !!planState.dayType && planState.selectedActionIds.length > 0;
 
+  const updateAction = useStore((s) => s.updateAction);
+  const allActions = useStore((s) => s.actions);
+
   const handleSubmit = () => {
     if (!canSubmit) return;
     closeDay(yesterday, closeState.eveningEnergy, closeState.reflection || undefined);
+    const selectedSet = new Set(planState.selectedActionIds);
+    allActions
+      .filter((a) => a.scheduledDate === today && !selectedSet.has(a.id))
+      .forEach((a) => updateAction(a.id, { scheduledDate: undefined }));
     startDayPlan({
       date: today,
       dayType: planState.dayType,
       mainTaskActionId: planState.mainTaskId,
       morningEnergyScore: undefined,
-      morningIntentNote: planState.intent || undefined,
+      morningIntentNote: undefined,
       plannedActionIds: planState.selectedActionIds,
       plannedRitualIds: Array.from(planState.keptRitualIds),
       skippedRitualIds: Array.from(planState.skippedRitualIds),

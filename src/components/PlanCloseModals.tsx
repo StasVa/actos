@@ -4,11 +4,11 @@
 // bottom sheet on mobile). Forms are uncontrolled-ish: local state, submit
 // commits to the store via startDayPlan / closeDay.
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { X } from "lucide-react";
+import { X, Zap, Leaf, Sun, Thermometer, GripVertical } from "lucide-react";
 import { toast } from "sonner";
-import { useStore } from "@/store/useStore";
+import { useStore, ritualMultiplier } from "@/store/useStore";
 import type { Action, DayType, ID, Ritual } from "@/types";
 import { formatTime as formatTimeMin } from "@/lib/format";
 
@@ -33,63 +33,29 @@ const formatShort = (iso: string) =>
     day: "numeric",
   });
 
-const DAY_TYPE_OPTIONS: { value: DayType; label: string }[] = [
-  { value: "execution", label: "Execution" },
-  { value: "recovery", label: "Recovery" },
-  { value: "day-off", label: "Day Off" },
-  { value: "sick", label: "Sick" },
+const DAY_TYPE_OPTIONS: { value: DayType; label: string; Icon: React.ComponentType<{ size?: number; className?: string }> }[] = [
+  { value: "execution", label: "Execution", Icon: Zap },
+  { value: "recovery", label: "Recovery", Icon: Leaf },
+  { value: "day-off", label: "Day Off", Icon: Sun },
+  { value: "sick", label: "Sick", Icon: Thermometer },
 ];
 
 /* ───────── primitives ───────── */
-const SectionHead: React.FC<{ children: React.ReactNode; sub?: string }> = ({ children, sub }) => (
-  <div className="mb-2">
-    <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
-      {children}
-    </div>
-    {sub && <div className="font-mono text-[11px] text-text-tertiary mt-0.5">{sub}</div>}
-  </div>
-);
-
-const Pill: React.FC<{
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-  variant?: "default" | "muted";
-}> = ({ active, onClick, children, variant = "default" }) => (
-  <button
-    type="button"
-    onClick={onClick}
-    className={`px-2.5 py-1 rounded-[4px] text-[12px] border transition-colors ${
-      active
-        ? variant === "muted"
-          ? "bg-surface-hover text-text-secondary border-border-default"
-          : "bg-[hsl(var(--accent))] text-white border-[hsl(var(--accent))]"
-        : "bg-transparent text-text-secondary border-border-default hover:text-text-primary hover:border-border-default"
-    }`}
-  >
-    {children}
-  </button>
-);
-
-const EnergyPicker: React.FC<{ value?: number; onChange: (v: number) => void }> = ({
-  value,
-  onChange,
+const SectionHead: React.FC<{ children: React.ReactNode; sub?: string; meta?: React.ReactNode }> = ({
+  children,
+  sub,
+  meta,
 }) => (
-  <div className="flex items-center gap-1 flex-wrap">
-    {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
-      <button
-        key={n}
-        type="button"
-        onClick={() => onChange(n)}
-        className={`w-7 h-7 rounded-[3px] font-mono text-[11px] transition-colors ${
-          value === n
-            ? "bg-[hsl(var(--accent))] text-white"
-            : "bg-surface-hover text-text-tertiary hover:text-text-primary"
-        }`}
-      >
-        {n}
-      </button>
-    ))}
+  <div className="mb-2 flex items-baseline justify-between gap-3">
+    <div>
+      <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
+        {children}
+      </div>
+      {sub && <div className="text-[13px] text-text-secondary mt-1">{sub}</div>}
+    </div>
+    {meta && (
+      <div className="font-mono text-[11px] text-text-tertiary tabular-nums">{meta}</div>
+    )}
   </div>
 );
 
@@ -121,9 +87,10 @@ const ModalShell: React.FC<{
   onClose: () => void;
   title: string;
   subtitle?: string;
+  width?: number;
   footer: React.ReactNode;
   children: React.ReactNode;
-}> = ({ open, onClose, title, subtitle, footer, children }) => {
+}> = ({ open, onClose, title, subtitle, footer, children, width = 560 }) => {
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -138,18 +105,21 @@ const ModalShell: React.FC<{
   }, [open, onClose]);
   if (!open) return null;
   return createPortal(
-    <div className="fixed inset-0 z-[90] flex items-end md:items-center justify-center">
+    <div className="fixed inset-0 z-[200] flex items-end md:items-center justify-center">
       <div
         className="absolute inset-0"
         style={{ background: "rgba(0,0,0,0.5)" }}
         onClick={onClose}
       />
-      <div className="relative w-full md:w-[560px] max-h-[90vh] md:max-h-[80vh] bg-surface-elevated border border-border-subtle md:rounded-[8px] rounded-t-[12px] flex flex-col shadow-2xl animate-in slide-in-from-bottom-4 md:slide-in-from-bottom-0 md:fade-in">
+      <div
+        className="relative w-full max-h-[90vh] md:max-h-[85vh] bg-surface-elevated border border-border-subtle md:rounded-[8px] rounded-t-[12px] flex flex-col shadow-2xl animate-in slide-in-from-bottom-4 md:slide-in-from-bottom-0 md:fade-in"
+        style={{ maxWidth: width }}
+      >
         <div className="flex items-start justify-between px-6 pt-5 pb-4 border-b border-border-subtle shrink-0">
           <div>
-            <h2 className="text-[18px] font-medium text-text-primary leading-tight">{title}</h2>
+            <h2 className="text-[20px] font-medium text-text-primary leading-tight">{title}</h2>
             {subtitle && (
-              <div className="font-mono text-[12px] text-text-tertiary mt-0.5">{subtitle}</div>
+              <div className="text-[14px] text-text-secondary mt-0.5">{subtitle}</div>
             )}
           </div>
           <button
@@ -162,7 +132,7 @@ const ModalShell: React.FC<{
           </button>
         </div>
         <div className="px-6 py-5 overflow-y-auto flex-1">{children}</div>
-        <div className="px-6 py-4 border-t border-border-subtle flex items-center justify-end gap-3 shrink-0">
+        <div className="px-6 py-4 border-t border-border-subtle flex items-center justify-between gap-3 shrink-0">
           {footer}
         </div>
       </div>
@@ -192,7 +162,7 @@ function ritualDueOn(r: Ritual, iso: string): boolean {
   }
 }
 
-/* ───────── suggestion logic ───────── */
+/* ───────── suggestion logic (Heavy Lift / Quick Moves) ───────── */
 function quantile(vals: number[], q: number): number {
   if (vals.length === 0) return 0;
   const sorted = [...vals].sort((a, b) => a - b);
@@ -200,67 +170,39 @@ function quantile(vals: number[], q: number): number {
   return sorted[idx];
 }
 
-interface ActionSuggestions {
-  scheduled: Action[];
-  heavyLift: Action[];
-  quickMoves: Action[];
-}
-
 function effortFor(a: Action): number {
-  // Effort signal — time bucket (Energy/Focus removed).
   if (a.timeEstimateMinutes != null) return Math.min(10, Math.ceil(a.timeEstimateMinutes / 30));
   return 5;
 }
 
-function buildActionSuggestions(actions: Action[], date: string): ActionSuggestions {
-  const scheduled = actions.filter(
-    (a) => a.scheduledDate === date && (a.status === "planned" || a.status === "backlog"),
-  );
-  const scheduledIds = new Set(scheduled.map((a) => a.id));
-  const backlog = actions.filter(
-    (a) => a.status === "backlog" && !scheduledIds.has(a.id),
-  );
-
-  if (backlog.length === 0) return { scheduled, heavyLift: [], quickMoves: [] };
-
-  const impacts = backlog.map((a) => a.impact ?? 0);
-  const efforts = backlog.map((a) => effortFor(a));
-  const impactP75 = quantile(impacts, 0.75);
-  const effortP75 = quantile(efforts, 0.75);
-  const impactMedian = quantile(impacts, 0.5);
-  const effortP30 = quantile(efforts, 0.3);
-
-  const heavyLift = backlog
+function pickHeavyLift(pool: Action[]): Action[] {
+  if (pool.length === 0) return [];
+  const impactP75 = quantile(pool.map((a) => a.impact ?? 0), 0.75);
+  const effortP75 = quantile(pool.map(effortFor), 0.75);
+  return pool
     .filter((a) => (a.impact ?? 0) >= impactP75 && effortFor(a) >= effortP75)
     .sort((a, b) => (b.impact ?? 0) - (a.impact ?? 0))
     .slice(0, 3);
-  const heavyIds = new Set(heavyLift.map((a) => a.id));
-
-  const quickMoves = backlog
-    .filter((a) => !heavyIds.has(a.id))
-    .filter((a) => {
-      const imp = a.impact ?? 0;
-      const eff = effortFor(a);
-      const timeOk =
-        (a.timeEstimateMinutes != null && a.timeEstimateMinutes <= 60) || eff <= effortP30;
-      return imp >= impactMedian && timeOk;
-    })
-    .sort((a, b) => {
-      const di = (b.impact ?? 0) - (a.impact ?? 0);
-      if (di !== 0) return di;
-      return effortFor(a) - effortFor(b);
-    })
-    .slice(0, 5);
-
-  return { scheduled, heavyLift, quickMoves };
 }
 
-/* ═════════════ Plan Today form (re-usable inside Plan and Combined modals) ═════════════ */
+function pickQuickMoves(pool: Action[]): Action[] {
+  if (pool.length === 0) return [];
+  const impactMedian = quantile(pool.map((a) => a.impact ?? 0), 0.5);
+  return pool
+    .filter((a) => {
+      const imp = a.impact ?? 0;
+      const tOk = (a.timeEstimateMinutes ?? 9999) <= 60;
+      return imp >= impactMedian && tOk;
+    })
+    .sort((a, b) => (b.impact ?? 0) - (a.impact ?? 0) || (a.timeEstimateMinutes ?? 0) - (b.timeEstimateMinutes ?? 0))
+    .slice(0, 5);
+}
+
+/* ═════════════ Plan Today form ═════════════ */
 
 interface PlanFormState {
   dayType?: DayType;
-  morningEnergy?: number;
-  selectedActionIds: Set<ID>;
+  selectedActionIds: ID[]; // ordered
   keptRitualIds: Set<ID>;
   skippedRitualIds: Set<ID>;
   mainTaskId?: ID;
@@ -276,35 +218,85 @@ const PlanForm: React.FC<{
   const rituals = useStore((s) => s.rituals);
   const goals = useStore((s) => s.goals);
   const projects = useStore((s) => s.projects);
-  const settings = useStore((s) => s.settings);
-  const createAction = useStore((s) => s.createAction);
 
-  const suggestions = useMemo(() => buildActionSuggestions(actions, date), [actions, date]);
   const dueRituals = useMemo(
     () => rituals.filter((r) => r.status === "active" && ritualDueOn(r, date)),
     [rituals, date],
   );
 
-  const [showAdd, setShowAdd] = useState(false);
-  const [newTitle, setNewTitle] = useState("");
-  const [newProjectId, setNewProjectId] = useState<string>("");
-
   const goalById = (id: ID) => goals.find((g) => g.id === id);
   const projectById = (id: ID | null) => (id ? projects.find((p) => p.id === id) : undefined);
-  const breadcrumb = (a: Action) => {
-    const g = goalById(a.goalId);
-    const p = projectById(a.projectId);
-    if (g && p) return `${g.title} · ${p.title}`;
-    return g?.title ?? "";
-  };
+
+  // Filters for left pane
+  const [filterGoal, setFilterGoal] = useState<string>("all");
+  const [filterProject, setFilterProject] = useState<string>("all");
+  const [filterStatus, setFilterStatus] = useState<"all" | "backlog" | "planned">("all");
+
+  const selectedSet = useMemo(() => new Set(state.selectedActionIds), [state.selectedActionIds]);
+
+  const eligible = useMemo(
+    () =>
+      actions.filter(
+        (a) => a.status === "backlog" || a.status === "planned",
+      ),
+    [actions],
+  );
+
+  const preScheduled = useMemo(
+    () => eligible.filter((a) => a.scheduledDate === date),
+    [eligible, date],
+  );
+
+  const filteredAvailable = useMemo(() => {
+    return eligible
+      .filter((a) => a.scheduledDate !== date) // pre-scheduled shown separately
+      .filter((a) => (filterGoal === "all" ? true : a.goalId === filterGoal))
+      .filter((a) => (filterProject === "all" ? true : a.projectId === filterProject))
+      .filter((a) => (filterStatus === "all" ? true : a.status === filterStatus))
+      .sort((a, b) => (b.impact ?? 0) - (a.impact ?? 0));
+  }, [eligible, date, filterGoal, filterProject, filterStatus]);
+
+  const heavySuggestions = useMemo(
+    () => pickHeavyLift(eligible.filter((a) => !selectedSet.has(a.id))),
+    [eligible, selectedSet],
+  );
+  const quickSuggestions = useMemo(
+    () => pickQuickMoves(eligible.filter((a) => !selectedSet.has(a.id))),
+    [eligible, selectedSet],
+  );
 
   const toggleAction = (id: ID) =>
     setState((s) => {
-      const next = new Set(s.selectedActionIds);
-      next.has(id) ? next.delete(id) : next.add(id);
-      // If main task gets deselected, clear it.
-      const mainTaskId = next.has(s.mainTaskId ?? "") ? s.mainTaskId : undefined;
+      const has = s.selectedActionIds.includes(id);
+      const next = has
+        ? s.selectedActionIds.filter((x) => x !== id)
+        : [...s.selectedActionIds, id];
+      const mainTaskId = next.includes(s.mainTaskId ?? "") ? s.mainTaskId : undefined;
       return { ...s, selectedActionIds: next, mainTaskId };
+    });
+
+  const addMany = (ids: ID[]) =>
+    setState((s) => {
+      const next = [...s.selectedActionIds];
+      for (const id of ids) if (!next.includes(id)) next.push(id);
+      return { ...s, selectedActionIds: next };
+    });
+
+  const removeAction = (id: ID) =>
+    setState((s) => ({
+      ...s,
+      selectedActionIds: s.selectedActionIds.filter((x) => x !== id),
+      mainTaskId: s.mainTaskId === id ? undefined : s.mainTaskId,
+    }));
+
+  const moveSelected = (from: number, to: number) =>
+    setState((s) => {
+      if (from === to || from < 0 || to < 0 || from >= s.selectedActionIds.length || to >= s.selectedActionIds.length)
+        return s;
+      const next = [...s.selectedActionIds];
+      const [item] = next.splice(from, 1);
+      next.splice(to, 0, item);
+      return { ...s, selectedActionIds: next };
     });
 
   const toggleRitualSkip = (id: ID, skip: boolean) =>
@@ -321,280 +313,388 @@ const PlanForm: React.FC<{
       return { ...s, keptRitualIds: kept, skippedRitualIds: skipped };
     });
 
-  const handleAddNew = () => {
-    const t = newTitle.trim();
-    if (!t) return;
-    const id = createAction({
-      title: t,
-      projectId: newProjectId || null,
-      scheduledDate: date,
-    });
-    setState((s) => ({
-      ...s,
-      selectedActionIds: new Set([...s.selectedActionIds, id]),
-    }));
-    setNewTitle("");
-    setNewProjectId("");
-    setShowAdd(false);
+  const goalColor = (goalId: ID) => {
+    const g = goalById(goalId);
+    return g ? `hsl(var(--${g.color}))` : "hsl(var(--text-tertiary))";
   };
 
-  const allSuggestionIds = new Set<string>([
-    ...suggestions.scheduled.map((a) => a.id),
-    ...suggestions.heavyLift.map((a) => a.id),
-    ...suggestions.quickMoves.map((a) => a.id),
-  ]);
-  // Selected actions includes anything ticked in the form, even if it's no
-  // longer in suggestions (e.g. just-added action).
-  const selectedActions = actions.filter((a) => state.selectedActionIds.has(a.id));
-
-  const renderRow = (a: Action, opts: { showImpactBadge?: boolean } = {}) => {
-    const checked = state.selectedActionIds.has(a.id);
-    const g = goals.find((gg) => gg.id === a.goalId);
-    const p = a.projectId ? projects.find((pp) => pp.id === a.projectId) : undefined;
-    const color = g ? `hsl(var(--${g.color}))` : "hsl(var(--text-tertiary))";
+  const renderAvailableRow = (a: Action) => {
+    const g = goalById(a.goalId);
+    const p = projectById(a.projectId);
+    const checked = selectedSet.has(a.id);
     return (
-      <label
+      <button
         key={a.id}
-        className="relative flex items-stretch hover:bg-surface-hover cursor-pointer transition-colors"
-        style={{ minHeight: 56 }}
+        type="button"
+        onClick={() => toggleAction(a.id)}
+        className="relative w-full flex items-center gap-2 pr-2 hover:bg-surface-hover transition-colors text-left"
+        style={{ minHeight: 40 }}
       >
         <span
           className="absolute left-0 top-0 bottom-0"
-          style={{ background: color, width: 3 }}
+          style={{ background: goalColor(a.goalId), width: 3 }}
         />
-        <div className="flex items-center gap-3 py-3 pr-3 w-full min-w-0" style={{ paddingLeft: 19 }}>
-          <input
-            type="checkbox"
-            checked={checked}
-            onChange={() => toggleAction(a.id)}
-            className="accent-[hsl(var(--accent))] shrink-0"
-            style={{ width: 16, height: 16 }}
-          />
-          {opts.showImpactBadge && (
-            <span className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary w-[26px] shrink-0 tabular-nums">
-              I{a.impact ?? 0}
-            </span>
-          )}
-          <div className="flex flex-col gap-1 min-w-0 flex-1">
-            <span className="text-[15px] font-medium text-text-primary truncate">{a.title}</span>
-            <span className="font-mono text-[12px] text-text-secondary tabular-nums truncate">
-              {g?.title ?? ""}
-              {p ? ` · ${p.title}` : ""}
-              {a.impact ? ` · I${a.impact}` : ""}
-              {a.timeEstimateMinutes ? ` · ${formatTimeMin(a.timeEstimateMinutes)}` : ""}
-            </span>
+        <span style={{ paddingLeft: 11 }} />
+        <span
+          className="inline-flex items-center justify-center rounded-[2px] border shrink-0"
+          style={{
+            width: 14,
+            height: 14,
+            background: checked ? goalColor(a.goalId) : "transparent",
+            borderColor: checked ? goalColor(a.goalId) : "hsl(var(--text-tertiary))",
+            color: "hsl(var(--surface-base))",
+            fontSize: 10,
+            lineHeight: 1,
+          }}
+        >
+          {checked ? "✓" : ""}
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="text-[13px] text-text-primary truncate">{a.title}</div>
+          <div className="font-mono text-[11px] text-text-tertiary truncate">
+            {g?.title ?? ""}
+            {p ? ` · ${p.title}` : ""}
           </div>
         </div>
-      </label>
+        <div className="font-mono text-[11px] text-text-tertiary tabular-nums shrink-0">
+          {a.impact ? `I${a.impact}` : ""}
+          {a.timeEstimateMinutes ? ` · ${formatTimeMin(a.timeEstimateMinutes)}` : ""}
+        </div>
+      </button>
     );
   };
 
-  const SubHeading: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-    <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mt-3 mb-1">
-      {children}
-    </div>
+  const dragIdx = useRef<number | null>(null);
+  const handleDragStart = (i: number) => () => {
+    dragIdx.current = i;
+  };
+  const handleDragOver = (i: number) => (e: React.DragEvent) => {
+    e.preventDefault();
+    if (dragIdx.current !== null && dragIdx.current !== i) {
+      moveSelected(dragIdx.current, i);
+      dragIdx.current = i;
+    }
+  };
+  const handleDragEnd = () => {
+    dragIdx.current = null;
+  };
+
+  const renderSelectedRow = (id: ID, i: number) => {
+    const a = actions.find((x) => x.id === id);
+    if (!a) return null;
+    const g = goalById(a.goalId);
+    return (
+      <div
+        key={id}
+        draggable
+        onDragStart={handleDragStart(i)}
+        onDragOver={handleDragOver(i)}
+        onDragEnd={handleDragEnd}
+        className="group relative flex items-center gap-2 pr-2 bg-surface-raised border border-border-subtle rounded-[3px] hover:bg-surface-hover transition-colors"
+        style={{ minHeight: 38 }}
+      >
+        <span
+          className="absolute left-0 top-0 bottom-0"
+          style={{ background: goalColor(a.goalId), width: 3 }}
+        />
+        <span style={{ paddingLeft: 8 }} />
+        <GripVertical size={12} className="text-text-tertiary cursor-grab shrink-0" />
+        <span className="font-mono text-[11px] text-text-tertiary tabular-nums w-4 shrink-0">
+          {i + 1}.
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="text-[13px] text-text-primary truncate">{a.title}</div>
+          <div className="font-mono text-[11px] text-text-tertiary truncate">
+            {g?.title ?? ""}
+            {a.timeEstimateMinutes ? ` · ${formatTimeMin(a.timeEstimateMinutes)}` : ""}
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => removeAction(id)}
+          aria-label="Remove"
+          className="text-text-tertiary hover:text-text-primary text-[14px] px-1 shrink-0"
+        >
+          ×
+        </button>
+      </div>
+    );
+  };
+
+  const selectedActions = state.selectedActionIds
+    .map((id) => actions.find((a) => a.id === id))
+    .filter(Boolean) as Action[];
+
+  const totalEstMin = selectedActions.reduce(
+    (s, a) => s + (a.timeEstimateMinutes ?? 0),
+    0,
   );
 
-  const noneAtAll =
-    suggestions.scheduled.length === 0 &&
-    suggestions.heavyLift.length === 0 &&
-    suggestions.quickMoves.length === 0;
+  const heavyDescription =
+    heavySuggestions.length === 0
+      ? "No heavy-lift candidates available."
+      : `${heavySuggestions.length} high-impact action${heavySuggestions.length > 1 ? "s" : ""}` +
+        (heavySuggestions[0]?.timeEstimateMinutes
+          ? ` (${formatTimeMin(heavySuggestions.reduce((s, a) => s + (a.timeEstimateMinutes ?? 0), 0))})`
+          : "");
+  const quickDescription =
+    quickSuggestions.length === 0
+      ? "No quick wins available."
+      : `${quickSuggestions.length} quick win${quickSuggestions.length > 1 ? "s" : ""}` +
+        (quickSuggestions.some((a) => a.timeEstimateMinutes)
+          ? ` (~${formatTimeMin(quickSuggestions.reduce((s, a) => s + (a.timeEstimateMinutes ?? 0), 0))} total)`
+          : "");
+
+  const dayTypeChosen = !!state.dayType;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-7">
       {/* DAY TYPE */}
       <section>
         <SectionHead>DAY TYPE</SectionHead>
-        <div className="flex flex-wrap gap-1.5">
-          {DAY_TYPE_OPTIONS.map((opt) => (
-            <Pill
-              key={opt.value}
-              active={state.dayType === opt.value}
-              onClick={() => setState((s) => ({ ...s, dayType: opt.value }))}
-            >
-              {opt.label}
-            </Pill>
-          ))}
-        </div>
-      </section>
-
-      {/* Morning Energy section removed */}
-
-      {/* ACTIONS */}
-      <section>
-        <SectionHead sub="Pick what you'll work on today. Suggestions help you find what's worth doing.">
-          ACTIONS FOR TODAY
-        </SectionHead>
-
-        {noneAtAll ? (
-          <div className="font-mono text-[11px] text-text-tertiary py-2">
-            No suggestions yet. Add an action to start your day.
-          </div>
-        ) : (
-          <>
-            {suggestions.scheduled.length > 0 && (
-              <>
-                <SubHeading>SCHEDULED FOR TODAY · {suggestions.scheduled.length}</SubHeading>
-                <div className="space-y-1">
-                  {suggestions.scheduled.map((a) => renderRow(a))}
-                </div>
-              </>
-            )}
-            {suggestions.heavyLift.length > 0 && (
-              <>
-                <SubHeading>
-                  HEAVY LIFT TODAY · <span className="text-text-tertiary/70">HIGH IMPACT · HIGH EFFORT</span>
-                </SubHeading>
-                <div className="space-y-1">
-                  {suggestions.heavyLift.map((a) => renderRow(a, { showImpactBadge: true }))}
-                </div>
-              </>
-            )}
-            {suggestions.quickMoves.length > 0 && (
-              <>
-                <SubHeading>
-                  QUICK MOVES · <span className="text-text-tertiary/70">HIGH IMPACT · LOW EFFORT</span>
-                </SubHeading>
-                <div className="space-y-1">
-                  {suggestions.quickMoves.map((a) => renderRow(a, { showImpactBadge: true }))}
-                </div>
-              </>
-            )}
-          </>
-        )}
-
-        {showAdd ? (
-          <div className="mt-2 flex items-center gap-2 p-2 bg-surface-raised rounded-[4px] border border-border-subtle">
-            <input
-              autoFocus
-              value={newTitle}
-              onChange={(e) => setNewTitle(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleAddNew()}
-              placeholder="Action title…"
-              className="flex-1 bg-transparent text-[13px] text-text-primary placeholder:text-text-tertiary focus:outline-none"
-            />
-            <select
-              value={newProjectId}
-              onChange={(e) => setNewProjectId(e.target.value)}
-              className="bg-surface-hover text-[12px] text-text-secondary rounded-[3px] px-2 py-1 outline-none border border-transparent focus:border-border-default"
-            >
-              <option value="">No project</option>
-              {projects
-                .filter((p) => p.status === "active")
-                .map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.title}
-                  </option>
-                ))}
-            </select>
-            <button
-              type="button"
-              onClick={handleAddNew}
-              className="text-[12px] text-[hsl(var(--accent))] font-medium"
-            >
-              Add
-            </button>
-            <button
-              type="button"
-              onClick={() => { setShowAdd(false); setNewTitle(""); }}
-              className="text-[12px] text-text-tertiary hover:text-text-primary"
-            >
-              Cancel
-            </button>
-          </div>
-        ) : (
-          <button
-            type="button"
-            onClick={() => setShowAdd(true)}
-            className="mt-2 text-[12px] text-[hsl(var(--accent))] hover:brightness-110"
-          >
-            + Add another action
-          </button>
-        )}
-      </section>
-
-      {/* RITUALS */}
-      <section>
-        <SectionHead>RITUALS TODAY</SectionHead>
-        <div className="space-y-1">
-          {dueRituals.length === 0 && (
-            <div className="font-mono text-[11px] text-text-tertiary py-2">
-              No rituals scheduled for today.
-            </div>
-          )}
-          {dueRituals.map((r) => {
-            const skipped = state.skippedRitualIds.has(r.id);
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+          {DAY_TYPE_OPTIONS.map(({ value, label, Icon }) => {
+            const active = state.dayType === value;
             return (
-              <div
-                key={r.id}
-                className="flex items-center gap-2 px-2 py-1.5 rounded-[3px] hover:bg-surface-hover"
+              <button
+                key={value}
+                type="button"
+                onClick={() => setState((s) => ({ ...s, dayType: value }))}
+                className={`flex items-center gap-2 px-3 py-2.5 rounded-[6px] transition-colors ${
+                  active
+                    ? "bg-surface-hover border-2 border-[hsl(var(--accent))]"
+                    : "bg-surface-raised border border-border-subtle hover:border-border-default"
+                }`}
+                style={active ? { padding: "calc(0.625rem - 1px) calc(0.75rem - 1px)" } : undefined}
               >
-                <span
-                  className="w-2 h-2 rounded-full shrink-0"
-                  style={{ background: `hsl(var(--${goalById(r.goalId)?.color ?? "goal-1"}))` }}
-                />
-                <span className={`text-[13px] truncate ${skipped ? "text-text-tertiary line-through" : "text-text-primary"}`}>
-                  {r.title}
-                </span>
-                <span className="font-mono text-[11px] text-text-tertiary truncate">
-                  · {r.schedule}
-                </span>
-                <div className="flex-1" />
-                <div className="flex items-center gap-1">
-                  <Pill active={!skipped} onClick={() => toggleRitualSkip(r.id, false)}>
-                    Keep
-                  </Pill>
-                  <Pill
-                    active={skipped}
-                    variant="muted"
-                    onClick={() => toggleRitualSkip(r.id, true)}
-                  >
-                    Skip
-                  </Pill>
-                </div>
-              </div>
+                <Icon size={14} className={active ? "text-[hsl(var(--accent))]" : "text-text-secondary"} />
+                <span className="text-[13px] text-text-primary">{label}</span>
+              </button>
             );
           })}
         </div>
       </section>
 
-      {/* MAIN TASK */}
-      <section>
-        <SectionHead sub="What single thing makes today a win?">MAIN TASK</SectionHead>
-        <select
-          value={state.mainTaskId ?? ""}
-          onChange={(e) =>
-            setState((s) => ({ ...s, mainTaskId: e.target.value || undefined }))
-          }
-          className="w-full bg-surface-hover rounded-[4px] px-3 py-2 text-[13px] text-text-primary outline-none border border-transparent focus:border-border-default"
-        >
-          <option value="">— None —</option>
-          {selectedActions.map((a) => (
-            <option key={a.id} value={a.id}>
-              {a.title}
-            </option>
-          ))}
-        </select>
-      </section>
+      {dayTypeChosen && (
+        <>
+          {/* ACTIONS */}
+          <section>
+            <SectionHead
+              sub="Pick what you'll work on today."
+              meta={`${state.selectedActionIds.length} selected`}
+            >
+              ACTIONS
+            </SectionHead>
 
-      {/* INTENT */}
-      <section>
-        <SectionHead>INTENT</SectionHead>
-        <input
-          value={state.intent}
-          onChange={(e) => setState((s) => ({ ...s, intent: e.target.value }))}
-          placeholder="Today I will…"
-          className="w-full bg-surface-hover rounded-[4px] px-3 py-2 text-[13px] text-text-primary outline-none border border-transparent focus:border-border-default placeholder:text-text-tertiary"
-        />
-      </section>
+            {/* Quick-start presets */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">
+              <button
+                type="button"
+                onClick={() => addMany(heavySuggestions.map((a) => a.id))}
+                disabled={heavySuggestions.length === 0}
+                className="text-left p-3 rounded-[6px] bg-surface-raised border border-border-subtle hover:border-[hsl(var(--accent))] disabled:opacity-50 disabled:hover:border-border-subtle transition-colors"
+              >
+                <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-[hsl(var(--accent))]">
+                  + Add Heavy Lift
+                </div>
+                <div className="text-[12px] text-text-secondary mt-1">{heavyDescription}</div>
+              </button>
+              <button
+                type="button"
+                onClick={() => addMany(quickSuggestions.map((a) => a.id))}
+                disabled={quickSuggestions.length === 0}
+                className="text-left p-3 rounded-[6px] bg-surface-raised border border-border-subtle hover:border-[hsl(var(--accent))] disabled:opacity-50 disabled:hover:border-border-subtle transition-colors"
+              >
+                <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-[hsl(var(--accent))]">
+                  + Add Quick Moves
+                </div>
+                <div className="text-[12px] text-text-secondary mt-1">{quickDescription}</div>
+              </button>
+            </div>
+
+            <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary text-center my-3">
+              ── or pick manually ↓ ──
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-[3fr_2fr] gap-3">
+              {/* LEFT: available */}
+              <div className="border border-border-subtle rounded-[6px] bg-surface-base flex flex-col min-h-[280px]">
+                <div className="flex items-center gap-1.5 p-2 border-b border-border-subtle flex-wrap">
+                  <select
+                    value={filterGoal}
+                    onChange={(e) => setFilterGoal(e.target.value)}
+                    className="bg-surface-hover text-[11px] text-text-secondary rounded-[3px] px-1.5 py-1 outline-none border border-transparent focus:border-border-default"
+                  >
+                    <option value="all">All goals</option>
+                    {goals
+                      .filter((g) => g.status === "active")
+                      .map((g) => (
+                        <option key={g.id} value={g.id}>
+                          {g.title}
+                        </option>
+                      ))}
+                  </select>
+                  <select
+                    value={filterProject}
+                    onChange={(e) => setFilterProject(e.target.value)}
+                    className="bg-surface-hover text-[11px] text-text-secondary rounded-[3px] px-1.5 py-1 outline-none border border-transparent focus:border-border-default"
+                  >
+                    <option value="all">All projects</option>
+                    {projects
+                      .filter((p) => p.status === "active")
+                      .map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.title}
+                        </option>
+                      ))}
+                  </select>
+                  <select
+                    value={filterStatus}
+                    onChange={(e) => setFilterStatus(e.target.value as any)}
+                    className="bg-surface-hover text-[11px] text-text-secondary rounded-[3px] px-1.5 py-1 outline-none border border-transparent focus:border-border-default"
+                  >
+                    <option value="all">All</option>
+                    <option value="backlog">Backlog</option>
+                    <option value="planned">Planned</option>
+                  </select>
+                </div>
+
+                <div className="flex-1 overflow-y-auto max-h-[360px]">
+                  {preScheduled.length > 0 && (
+                    <>
+                      <div className="px-2 py-1.5 font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary border-b border-border-subtle bg-surface-elevated">
+                        Already scheduled · {preScheduled.length}
+                      </div>
+                      <div>{preScheduled.map(renderAvailableRow)}</div>
+                    </>
+                  )}
+                  {filteredAvailable.length > 0 ? (
+                    <>
+                      {preScheduled.length > 0 && (
+                        <div className="px-2 py-1.5 font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary border-y border-border-subtle bg-surface-elevated">
+                          Available · {filteredAvailable.length}
+                        </div>
+                      )}
+                      <div>{filteredAvailable.map(renderAvailableRow)}</div>
+                    </>
+                  ) : (
+                    preScheduled.length === 0 && (
+                      <div className="px-3 py-8 text-center text-[12px] text-text-tertiary">
+                        No actions match.
+                      </div>
+                    )
+                  )}
+                </div>
+              </div>
+
+              {/* RIGHT: selected */}
+              <div className="border border-border-subtle rounded-[6px] bg-surface-base flex flex-col min-h-[280px]">
+                <div className="px-3 py-2 border-b border-border-subtle font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">
+                  Selected · {state.selectedActionIds.length}
+                </div>
+                <div className="flex-1 overflow-y-auto p-2 space-y-1.5 max-h-[360px]">
+                  {state.selectedActionIds.length === 0 ? (
+                    <div className="h-full min-h-[200px] flex items-center justify-center text-center px-4 border border-dashed border-border-subtle rounded-[4px]">
+                      <span className="text-[12px] text-text-tertiary">
+                        No actions selected. Pick from the list or use Quick-start presets.
+                      </span>
+                    </div>
+                  ) : (
+                    state.selectedActionIds.map((id, i) => renderSelectedRow(id, i))
+                  )}
+                </div>
+                {state.selectedActionIds.length > 0 && totalEstMin > 0 && (
+                  <div className="px-3 py-2 border-t border-border-subtle font-mono text-[11px] text-text-secondary tabular-nums">
+                    Estimated time: {formatTimeMin(totalEstMin)}
+                  </div>
+                )}
+              </div>
+            </div>
+          </section>
+
+          {/* MAIN TASK */}
+          <section>
+            <SectionHead sub="What single thing makes today a win?">MAIN TASK</SectionHead>
+            <select
+              value={state.mainTaskId ?? ""}
+              onChange={(e) =>
+                setState((s) => ({ ...s, mainTaskId: e.target.value || undefined }))
+              }
+              className="w-full bg-surface-hover rounded-[4px] px-3 py-2 text-[13px] text-text-primary outline-none border border-transparent focus:border-border-default"
+            >
+              <option value="">— None —</option>
+              {selectedActions.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.title}
+                </option>
+              ))}
+            </select>
+          </section>
+
+          {/* RITUALS */}
+          <section>
+            <SectionHead meta={`${dueRituals.length}`}>RITUALS TODAY</SectionHead>
+            <div className="space-y-1">
+              {dueRituals.length === 0 && (
+                <div className="font-mono text-[11px] text-text-tertiary py-2">
+                  No rituals scheduled for today.
+                </div>
+              )}
+              {dueRituals.map((r) => {
+                const skipped = state.skippedRitualIds.has(r.id);
+                return (
+                  <div
+                    key={r.id}
+                    className={`relative flex items-center gap-2 pr-2 rounded-[3px] hover:bg-surface-hover transition-colors ${
+                      skipped ? "opacity-50" : ""
+                    }`}
+                    style={{ minHeight: 40 }}
+                  >
+                    <span
+                      className="absolute left-0 top-0 bottom-0"
+                      style={{ background: goalColor(r.goalId), width: 3 }}
+                    />
+                    <span style={{ paddingLeft: 11 }} />
+                    <span className={`text-[13px] truncate ${skipped ? "line-through text-text-tertiary" : "text-text-primary"}`}>
+                      {r.title}
+                    </span>
+                    <span className="font-mono text-[11px] text-text-tertiary truncate">
+                      · {r.schedule}
+                    </span>
+                    <div className="flex-1" />
+                    <button
+                      type="button"
+                      onClick={() => toggleRitualSkip(r.id, !skipped)}
+                      className="text-[12px] text-text-tertiary hover:text-text-primary transition shrink-0 px-2"
+                    >
+                      {skipped ? "Restore" : "Skip"}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+
+          {/* INTENT */}
+          <section>
+            <SectionHead>INTENT</SectionHead>
+            <textarea
+              value={state.intent}
+              onChange={(e) => setState((s) => ({ ...s, intent: e.target.value }))}
+              rows={2}
+              placeholder="Today I will…"
+              className="w-full bg-surface-hover rounded-[4px] px-3 py-2 text-[14px] text-text-primary outline-none border border-transparent focus:border-border-default placeholder:text-text-tertiary resize-none"
+            />
+          </section>
+        </>
+      )}
     </div>
   );
 };
 
 const initialPlanState = (): PlanFormState => ({
   dayType: undefined,
-  morningEnergy: undefined,
-  selectedActionIds: new Set(),
+  selectedActionIds: [],
   keptRitualIds: new Set(),
   skippedRitualIds: new Set(),
   mainTaskId: undefined,
@@ -602,18 +702,21 @@ const initialPlanState = (): PlanFormState => ({
 });
 
 /* Pre-fill scheduled-today actions and all due rituals as 'kept'. */
-function usePrefilledPlanState(date: string): [PlanFormState, React.Dispatch<React.SetStateAction<PlanFormState>>] {
+function usePrefilledPlanState(
+  date: string,
+): [PlanFormState, React.Dispatch<React.SetStateAction<PlanFormState>>] {
   const actions = useStore((s) => s.actions);
   const rituals = useStore((s) => s.rituals);
   const [state, setState] = useState<PlanFormState>(initialPlanState);
   useEffect(() => {
     const scheduled = actions.filter(
-      (a) => a.scheduledDate === date && (a.status === "planned" || a.status === "backlog"),
+      (a) =>
+        a.scheduledDate === date && (a.status === "planned" || a.status === "backlog"),
     );
     const due = rituals.filter((r) => r.status === "active" && ritualDueOn(r, date));
     setState((s) => ({
       ...s,
-      selectedActionIds: new Set(scheduled.map((a) => a.id)),
+      selectedActionIds: scheduled.map((a) => a.id),
       keptRitualIds: new Set(due.map((r) => r.id)),
       skippedRitualIds: new Set(),
     }));
@@ -633,7 +736,7 @@ export const PlanTodayModal: React.FC<{ open: boolean; onClose: () => void }> = 
   const startDayPlan = useStore((s) => s.startDayPlan);
   const [state, setState] = usePrefilledPlanState(date);
 
-  const canSubmit = !!state.dayType;
+  const canSubmit = !!state.dayType && state.selectedActionIds.length > 0;
 
   const handleSubmit = () => {
     if (!canSubmit) return;
@@ -641,13 +744,15 @@ export const PlanTodayModal: React.FC<{ open: boolean; onClose: () => void }> = 
       date,
       dayType: state.dayType,
       mainTaskActionId: state.mainTaskId,
-      morningEnergyScore: state.morningEnergy,
+      morningEnergyScore: undefined,
       morningIntentNote: state.intent || undefined,
-      plannedActionIds: Array.from(state.selectedActionIds),
+      plannedActionIds: state.selectedActionIds,
       plannedRitualIds: Array.from(state.keptRitualIds),
       skippedRitualIds: Array.from(state.skippedRitualIds),
     });
-    toast.success("Day planned");
+    toast.success(
+      `Day planned. ${state.selectedActionIds.length} action${state.selectedActionIds.length > 1 ? "s" : ""}, ${state.keptRitualIds.size} ritual${state.keptRitualIds.size === 1 ? "" : "s"}.`,
+    );
     onClose();
   };
 
@@ -657,6 +762,7 @@ export const PlanTodayModal: React.FC<{ open: boolean; onClose: () => void }> = 
       onClose={onClose}
       title="Plan today"
       subtitle={formatLong(date)}
+      width={720}
       footer={
         <>
           <LinkButton onClick={onClose}>Plan later</LinkButton>
@@ -686,9 +792,9 @@ const CloseSummary: React.FC<{ date: string }> = ({ date }) => {
     );
   }
 
-  const planned = (dayEntry.plannedActionIds ?? []).map((id) =>
-    actions.find((a) => a.id === id),
-  ).filter(Boolean) as Action[];
+  const planned = (dayEntry.plannedActionIds ?? [])
+    .map((id) => actions.find((a) => a.id === id))
+    .filter(Boolean) as Action[];
   const done = planned.filter((a) => a.status === "done").length;
   const skipped = planned.filter(
     (a) => a.status === "dropped" || a.status === "cancelled",
@@ -699,11 +805,13 @@ const CloseSummary: React.FC<{ date: string }> = ({ date }) => {
     ? actions.find((a) => a.id === dayEntry.mainTaskActionId)
     : undefined;
 
-  const plannedRituals = (dayEntry.plannedRitualIds ?? []).map((id) =>
-    rituals.find((r) => r.id === id),
-  ).filter(Boolean) as Ritual[];
+  const plannedRituals = (dayEntry.plannedRitualIds ?? [])
+    .map((id) => rituals.find((r) => r.id === id))
+    .filter(Boolean) as Ritual[];
   const ritualsDone = plannedRituals.filter((r) =>
-    r.completionHistory.some((c) => c.date === date && (c.status === "done" || !c.status)),
+    r.completionHistory.some(
+      (c) => c.date === date && (c.status === "done" || !c.status),
+    ),
   ).length;
   const ritualsSkipped = (dayEntry.skippedRitualIds ?? []).length;
   const ritualsMissed = plannedRituals.length - ritualsDone;
@@ -751,11 +859,9 @@ const CloseForm: React.FC<{
   setState: React.Dispatch<React.SetStateAction<CloseFormState>>;
   compact?: boolean;
 }> = ({ date, state, setState, compact }) => {
-  const settings = useStore((s) => s.settings);
   return (
     <div className="space-y-6">
       <CloseSummary date={date} />
-      {/* Evening Energy section removed */}
       <section>
         <SectionHead>REFLECTION</SectionHead>
         <textarea
@@ -824,7 +930,7 @@ export const ClosePlanModal: React.FC<{ open: boolean; onClose: () => void }> = 
     if (open) setCloseState({ reflection: "" });
   }, [open]);
 
-  const canSubmit = !!planState.dayType;
+  const canSubmit = !!planState.dayType && planState.selectedActionIds.length > 0;
 
   const handleSubmit = () => {
     if (!canSubmit) return;
@@ -833,9 +939,9 @@ export const ClosePlanModal: React.FC<{ open: boolean; onClose: () => void }> = 
       date: today,
       dayType: planState.dayType,
       mainTaskActionId: planState.mainTaskId,
-      morningEnergyScore: planState.morningEnergy,
+      morningEnergyScore: undefined,
       morningIntentNote: planState.intent || undefined,
-      plannedActionIds: Array.from(planState.selectedActionIds),
+      plannedActionIds: planState.selectedActionIds,
       plannedRitualIds: Array.from(planState.keptRitualIds),
       skippedRitualIds: Array.from(planState.skippedRitualIds),
     });
@@ -849,6 +955,7 @@ export const ClosePlanModal: React.FC<{ open: boolean; onClose: () => void }> = 
       onClose={onClose}
       title="Close yesterday and plan today"
       subtitle={`Yesterday: ${formatShort(yesterday)} · Today: ${formatShort(today)}`}
+      width={720}
       footer={
         <>
           <LinkButton onClick={onClose}>Skip for now</LinkButton>

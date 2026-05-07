@@ -625,21 +625,85 @@ const PlanForm: React.FC<{
 
           {/* MAIN TASK */}
           <section>
-            <SectionHead sub="What single thing makes today a win?">MAIN TASK</SectionHead>
-            <select
-              value={state.mainTaskId ?? ""}
-              onChange={(e) =>
-                setState((s) => ({ ...s, mainTaskId: e.target.value || undefined }))
+            <div className="mb-2">
+              <div className="flex items-center gap-2">
+                <Star size={16} className="text-text-tertiary" />
+                <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
+                  MAIN TASK
+                </div>
+              </div>
+              <div className="text-[13px] text-text-secondary mt-1">
+                What single thing makes today a win?
+              </div>
+            </div>
+            {(() => {
+              const mt = state.mainTaskId
+                ? selectedActions.find((a) => a.id === state.mainTaskId)
+                : undefined;
+              if (mt) {
+                const g = goalById(mt.goalId);
+                const p = projectById(mt.projectId);
+                return (
+                  <div
+                    className="relative rounded-[6px] bg-surface-raised overflow-hidden"
+                    style={{ border: "1px solid hsl(var(--accent))", padding: "16px 20px" }}
+                  >
+                    <span
+                      className="absolute left-0 top-0 bottom-0"
+                      style={{ background: goalColor(mt.goalId), width: 3 }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setState((s) => ({ ...s, mainTaskId: undefined }))}
+                      aria-label="Clear main task"
+                      className="absolute top-2 right-2 text-text-tertiary hover:text-text-primary text-[14px] px-1"
+                    >
+                      ×
+                    </button>
+                    <div className="flex items-center gap-2 pr-6">
+                      <Star
+                        size={14}
+                        className="text-[hsl(var(--accent))] shrink-0"
+                        fill="hsl(var(--accent))"
+                      />
+                      <span className="text-[15px] font-medium text-text-primary truncate">
+                        {mt.title}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 mt-1.5 font-mono text-[12px] text-text-secondary">
+                      <span className="truncate">
+                        {g?.title ?? ""}
+                        {p ? ` · ${p.title}` : ""}
+                      </span>
+                      {mt.impact ? <span className="tabular-nums">· I{mt.impact}</span> : null}
+                      {mt.timeEstimateMinutes ? (
+                        <span className="tabular-nums">· {formatTimeMin(mt.timeEstimateMinutes)}</span>
+                      ) : null}
+                    </div>
+                  </div>
+                );
               }
-              className="w-full bg-surface-hover rounded-[4px] px-3 py-2 text-[13px] text-text-primary outline-none border border-transparent focus:border-border-default"
-            >
-              <option value="">— None —</option>
-              {selectedActions.map((a) => (
-                <option key={a.id} value={a.id}>
-                  {a.title}
-                </option>
-              ))}
-            </select>
+              const disabled = selectedActions.length === 0;
+              return (
+                <select
+                  value=""
+                  disabled={disabled}
+                  onChange={(e) =>
+                    setState((s) => ({ ...s, mainTaskId: e.target.value || undefined }))
+                  }
+                  className="w-full appearance-none bg-transparent rounded-[4px] px-4 py-3 text-[14px] text-text-tertiary outline-none border border-dashed border-border-default cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <option value="">
+                    {disabled ? "Add actions first" : "Pick from selected actions ▾"}
+                  </option>
+                  {selectedActions.map((a) => (
+                    <option key={a.id} value={a.id}>
+                      {a.title}
+                    </option>
+                  ))}
+                </select>
+              );
+            })()}
           </section>
 
           {/* RITUALS */}

@@ -131,7 +131,7 @@ const ModalShell: React.FC<{
             <X size={18} />
           </button>
         </div>
-        <div className="px-6 py-5 overflow-y-auto flex-1">{children}</div>
+        <div className="px-6 py-5 overflow-y-auto overflow-x-hidden flex-1 min-w-0">{children}</div>
         <div className="px-6 py-4 border-t border-border-subtle flex items-center justify-between gap-3 shrink-0">
           {footer}
         </div>

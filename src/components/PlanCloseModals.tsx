@@ -6,7 +6,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { X, Zap, Leaf, Sun, Thermometer, GripVertical, type LucideIcon } from "lucide-react";
+import { X, Zap, Leaf, Sun, Thermometer, GripVertical, Star, type LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 import { useStore, ritualMultiplier } from "@/store/useStore";
 import type { Action, DayType, ID, Ritual } from "@/types";

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Zap, Leaf, Sun, Thermometer, Star, X, type LucideIcon } from "lucide-react";
+import { Zap, Leaf, Sun, Thermometer, Star, X, CircleDot, type LucideIcon } from "lucide-react";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Tooltip, SparkTooltipContent, StateDotTooltip } from "@/components/Tooltip";
 import { LifetimeCounters } from "@/components/LifetimeCounters";
@@ -15,6 +15,7 @@ import { ActionRow as SharedActionRow } from "@/components/ActionRow";
 import { ProjectCard as SharedProjectCard } from "@/components/ProjectCard";
 import { toast } from "sonner";
 import { subscribeAppEvent } from "@/lib/appEvents";
+import { formatTime } from "@/lib/format";
 
 export const TODAY_ISO = new Date().toISOString().slice(0, 10);
 export const YESTERDAY_ISO = (() => {

@@ -123,6 +123,7 @@ export interface StoreState {
   updateRitual: (id: ID, partial: Partial<Ritual>) => void;
   markRitualInstanceDone: (ritualId: ID, date?: ISODate) => void;
   skipRitualInstance: (ritualId: ID, date?: ISODate) => void;
+  unskipRitualInstance: (ritualId: ID, date?: ISODate) => void;
   archiveRitual: (id: ID) => void;
   restoreRitual: (id: ID) => void;
   deleteRitual: (id: ID) => void;
@@ -564,6 +565,22 @@ export const useStore = create<StoreState>()(
                     ...r.completionHistory.filter((c) => c.date !== day),
                     { date: day, at, status: "skipped" },
                   ],
+                }
+              : r,
+          ),
+        });
+      },
+
+      unskipRitualInstance: (ritualId, date) => {
+        const day = date ?? todayISO();
+        set({
+          rituals: get().rituals.map((r) =>
+            r.id === ritualId
+              ? {
+                  ...r,
+                  completionHistory: r.completionHistory.filter(
+                    (c) => !(c.date === day && c.status === "skipped"),
+                  ),
                 }
               : r,
           ),

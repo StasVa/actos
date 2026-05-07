@@ -340,7 +340,7 @@ const PlanForm: React.FC<{
         onClick={() => toggleAction(a.id)}
         className={`relative w-full flex items-center gap-2 pr-2 hover:bg-surface-hover transition-colors text-left ${checked ? "opacity-50" : ""}`}
         style={{ minHeight: 40 }}
-      ></button>{/*placeholder closes*/}
+      >
         <span
           className="absolute left-0 top-0 bottom-0"
           style={{ background: goalColor(a.goalId), width: 3 }}

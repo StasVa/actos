@@ -182,7 +182,7 @@ function pickHeavyLift(pool: Action[]): Action[] {
   return pool
     .filter((a) => (a.impact ?? 0) >= impactP75 && effortFor(a) >= effortP75)
     .sort((a, b) => (b.impact ?? 0) - (a.impact ?? 0))
-    .slice(0, 3);
+    .slice(0, 1);
 }
 
 function pickQuickMoves(pool: Action[]): Action[] {
@@ -195,7 +195,7 @@ function pickQuickMoves(pool: Action[]): Action[] {
       return imp >= impactMedian && tOk;
     })
     .sort((a, b) => (b.impact ?? 0) - (a.impact ?? 0) || (a.timeEstimateMinutes ?? 0) - (b.timeEstimateMinutes ?? 0))
-    .slice(0, 5);
+    .slice(0, 3);
 }
 
 /* ═════════════ Plan Today form ═════════════ */

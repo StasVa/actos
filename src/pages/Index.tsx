@@ -748,7 +748,6 @@ export const TodayZone: React.FC<{
     toast.success("Ritual logged");
   };
 
-  const unskipRitualInstance = useStore((s) => s.unskipRitualInstance);
 
   const handleRitualSkipToggle = (ritualId: string, currentlySkipped: boolean) => {
     if (currentlySkipped) {

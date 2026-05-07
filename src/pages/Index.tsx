@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Zap, Leaf, Sun, Thermometer, Star, X, CircleDot, type LucideIcon } from "lucide-react";
+import { Zap, Leaf, Sun, Thermometer, Star, X, type LucideIcon } from "lucide-react";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Tooltip, SparkTooltipContent, StateDotTooltip } from "@/components/Tooltip";
 import { LifetimeCounters } from "@/components/LifetimeCounters";
@@ -1063,19 +1063,6 @@ export const TodayZone: React.FC<{
                       {formatTime(a.timeEstimateMinutes)}
                     </span>,
                   );
-                if (a.scheduledDate && a.scheduledDate < TODAY_ISO) {
-                  const days = Math.floor(
-                    (new Date(TODAY_ISO + "T00:00:00").getTime() -
-                      new Date(a.scheduledDate + "T00:00:00").getTime()) /
-                      86400000,
-                  );
-                  bottom.push(
-                    <span key="o" className="flex items-center gap-1 text-text-warning" style={{ fontSize: 11 }}>
-                      <CircleDot size={8} fill="currentColor" className="shrink-0" />
-                      <span>{days}d overdue</span>
-                    </span>,
-                  );
-                }
                 return (
                   <SharedActionRow
                     key={a.id}

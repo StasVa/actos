@@ -1,570 +1,468 @@
 import React, { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
-import { toast } from "sonner";
+import { Plus } from "lucide-react";
 import { AppSidebar } from "@/components/AppSidebar";
-import {
-  Action,
-  Delegate,
-  GoalKey,
-  GOALS,
-  STATUS_LABEL,
-  statusColorVar,
-} from "@/lib/actionsData";
-import { LifetimeCounters } from "@/components/LifetimeCounters";
-import { formatTime } from "@/lib/format";
 import { ReturnDatePill } from "@/components/ReturnDatePill";
 import { FilterDropdown, FilterOption } from "@/components/FilterDropdown";
-import { SortDropdown } from "@/components/SortDropdown";
 import { useStore } from "@/store/useStore";
-import { toLegacyActions } from "@/lib/actionsAdapter";
-/* ===== Filter chips ===== */
-const Chip: React.FC<{
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-  dot?: string;
-}> = ({ active, onClick, children, dot }) => (
-  <button
-    onClick={onClick}
-    className={`inline-flex items-center gap-1.5 px-[10px] py-1 rounded-[4px] border text-[12px] transition-colors ${
-      active
-        ? "bg-surface-hover text-text-primary border-accent"
-        : "bg-transparent text-text-secondary border-border-default hover:text-text-primary"
-    }`}
-  >
-    {dot && <span className="w-2 h-2 rounded-full" style={{ background: dot }} />}
-    {children}
-  </button>
-);
+import type { Action, Goal, Project } from "@/types";
 
-const FilterGroup: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
-  <div className="flex items-center gap-2">
-    <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">{label}</span>
-    <div className="flex items-center gap-1.5 flex-wrap">{children}</div>
-  </div>
-);
+/* ===== helpers ===== */
+const TODAY_ISO = "2026-05-05";
 
-const GhostButton: React.FC<{
-  children: React.ReactNode;
-  onClick?: () => void;
-  accent?: boolean;
-}> = ({ children, onClick, accent }) => (
-  <button
-    onClick={onClick}
-    className={`h-9 px-4 text-[13px] font-medium rounded-[4px] border bg-transparent transition-colors ${
-      accent
-        ? "text-text-primary border-[hsl(var(--accent))] hover:bg-surface-hover"
-        : "text-text-primary border-border-default hover:border-[hsl(var(--accent))] hover:bg-surface-hover"
-    }`}
-  >
-    {children}
-  </button>
-);
-
-const TertiaryLink: React.FC<{ children: React.ReactNode; onClick?: () => void }> = ({ children, onClick }) => (
-  <button
-    onClick={onClick}
-    className="h-9 px-2 text-[13px] text-text-tertiary hover:text-text-secondary transition-colors"
-  >
-    {children}
-  </button>
-);
-
-
-/* ===== Bucket logic ===== */
-type Bucket = "overdue" | "upcoming" | "nodate";
-
-function bucketFor(a: Action): Bucket {
-  if (a.expectedReturnDelta === undefined) return "nodate";
-  if (a.expectedReturnDelta < 0) return "overdue";
-  return "upcoming";
+function daysBetween(a: string, b: string): number {
+  const ta = new Date(a + "T00:00:00.000Z").getTime();
+  const tb = new Date(b + "T00:00:00.000Z").getTime();
+  return Math.round((ta - tb) / 86400000);
 }
 
-function returnLabelFor(a: Action): { text: string; color?: string } | null {
-  const d = a.expectedReturnDelta;
-  if (d === undefined) return null;
-  if (d < 0) {
-    return { text: `OVERDUE ${Math.abs(d)}d`, color: "hsl(var(--text-warning))" };
-  }
-  if (d === 0) return { text: "TODAY", color: "hsl(var(--text-primary))" };
-  return { text: a.expectedReturnLabel ?? "", color: "hsl(var(--text-secondary))" };
+function relativeShort(iso: string): string {
+  const d = daysBetween(iso, TODAY_ISO);
+  if (d === 0) return "today";
+  if (d === -1) return "1d ago";
+  if (d < 0) return `${-d}d ago`;
+  if (d === 1) return "in 1d";
+  return `in ${d}d`;
 }
+
+/* ===== Pills ===== */
+const ImpactPill: React.FC<{ impact?: number; color: string }> = ({ impact, color }) =>
+  impact ? (
+    <span
+      className="inline-flex items-center justify-center font-medium tabular-nums shrink-0"
+      style={{
+        padding: "4px 10px",
+        borderRadius: 4,
+        fontSize: 13,
+        minWidth: 36,
+        textAlign: "center",
+        background: `color-mix(in srgb, ${color}, transparent 85%)`,
+        color,
+      }}
+    >
+      I{impact}
+    </span>
+  ) : null;
+
+const ReturnedPill: React.FC<{ completedAt?: string }> = ({ completedAt }) => {
+  if (!completedAt) return null;
+  const iso = completedAt.slice(0, 10);
+  return (
+    <span
+      className="font-mono tabular-nums shrink-0"
+      style={{
+        fontSize: 12,
+        color: "hsl(var(--text-tertiary))",
+        background: "hsl(var(--surface-hover))",
+        padding: "3px 8px",
+        borderRadius: 3,
+        whiteSpace: "nowrap",
+      }}
+    >
+      returned {relativeShort(iso)}
+    </span>
+  );
+};
 
 /* ===== Row ===== */
-const DelegationRow: React.FC<{ action: Action; selected: boolean; onSelect: () => void }> = ({
-  action,
-  selected,
-  onSelect,
-}) => {
-  const goal = GOALS[action.goal];
-  const topRight: React.ReactNode = <ReturnDatePill expectedReturnDate={action.expectedReturnDate} />;
-
-  const bottomBits: React.ReactNode[] = [
-    <span key="goal">{goal.name}</span>,
-    <span key="proj">{action.project}</span>,
-    <span key="del">→ {action.delegate ?? ""}</span>,
-  ];
-  if (action.impact) bottomBits.push(<span key="imp" className="tabular-nums">I{action.impact}</span>);
-  if (action.timeMinutes) bottomBits.push(<span key="time" className="tabular-nums">{formatTime(action.timeMinutes)}</span>);
-
+type RowVariant = "active" | "returned";
+const DelegationRow: React.FC<{
+  action: Action;
+  goal?: Goal;
+  project?: Project;
+  variant: RowVariant;
+  onClick: () => void;
+}> = ({ action, goal, project, variant, onClick }) => {
+  const color = goal?.color ?? "hsl(var(--text-tertiary))";
   return (
     <div
-      onClick={onSelect}
-      className={`relative flex items-stretch cursor-pointer border-b border-border-subtle transition-colors ${
-        selected ? "bg-surface-elevated" : "hover:bg-surface-hover"
-      }`}
-      style={{ minHeight: 56 }}
+      onClick={onClick}
+      className="relative flex items-center cursor-pointer border-b border-border-subtle hover:bg-surface-hover transition-colors"
+      style={{ minHeight: 58 }}
     >
       <span
         className="absolute left-0 top-0 bottom-0"
-        style={{
-          background: selected ? "hsl(var(--accent))" : goal.color,
-          width: selected ? 2 : 3,
-        }}
+        style={{ background: color, width: 3 }}
       />
-      <div
-        className="flex flex-col gap-1 py-3 pr-4 w-full"
-        style={{ paddingLeft: 16 + (selected ? 2 : 3) }}
-      >
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0">
-            <span
-              className="inline-block rounded-[2px] border shrink-0"
-              style={{
-                width: 16,
-                height: 16,
-                borderColor: "hsl(var(--text-tertiary))",
-              }}
-            />
-            <span className="text-[15px] font-medium text-text-primary truncate">
-              {action.title}
-            </span>
+      <div className="flex items-center gap-3 py-2.5 pr-4 w-full" style={{ paddingLeft: 16 }}>
+        <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+          <div className="text-[14px] font-medium text-text-primary truncate">
+            {action.title}
           </div>
-          <div className="shrink-0">{topRight}</div>
+          <div className="font-mono text-[12px] text-text-secondary tabular-nums truncate">
+            <span className="text-text-tertiary">→ </span>
+            <span className="text-text-primary">{action.delegateName ?? "—"}</span>
+            {goal && (
+              <>
+                <span className="mx-1.5 text-text-tertiary">·</span>
+                <span>{goal.title}</span>
+              </>
+            )}
+            {project && (
+              <>
+                <span className="mx-1.5 text-text-tertiary">·</span>
+                <span>{project.title}</span>
+              </>
+            )}
+          </div>
         </div>
-        <div className="flex items-center font-mono text-[12px] text-text-secondary tabular-nums truncate">
-          <span
-            className="inline-block w-1.5 h-1.5 rounded-full mr-1.5 shrink-0"
-            style={{ background: goal.color }}
-          />
-          <span className="truncate">
-            {bottomBits.map((b, i) => (
-              <React.Fragment key={i}>
-                {i > 0 && <span className="mx-1.5 text-text-tertiary">·</span>}
-                {b}
-              </React.Fragment>
-            ))}
-          </span>
+        <div className="flex items-center gap-3 shrink-0">
+          {variant === "active" ? (
+            <ReturnDatePill expectedReturnDate={action.expectedReturnDate} />
+          ) : (
+            <ReturnedPill completedAt={action.completedAt} />
+          )}
+          <ImpactPill impact={action.impact} color={color} />
         </div>
       </div>
     </div>
   );
 };
 
-const GroupHeader: React.FC<{ label: string; count: number; warning?: boolean }> = ({
+/* ===== Aggregate counts ===== */
+const Counter: React.FC<{ label: string; count: number; color?: string }> = ({
   label,
   count,
-  warning,
+  color,
 }) => (
-  <div
-    className="flex items-center px-3 h-8 bg-surface-raised border-b border-border-subtle"
-    style={{ color: warning ? "hsl(var(--text-warning))" : undefined }}
-  >
-    <span
-      className={`font-mono text-[11px] uppercase tracking-[0.08em] ${
-        warning ? "font-medium" : "text-text-tertiary"
-      }`}
-      style={warning ? { color: "hsl(var(--text-warning))" } : undefined}
-    >
-      {label} · {count}
-    </span>
-  </div>
-);
-
-/* ===== Detail ===== */
-const StatusPill: React.FC<{ status: Action["status"] }> = ({ status }) => (
-  <span
-    className="inline-flex items-center font-mono uppercase tracking-[0.08em] rounded-[4px]"
-    style={{
-      padding: "4px 8px",
-      fontSize: 10,
-      background: "hsl(var(--surface-hover))",
-      color: statusColorVar(status),
-    }}
-  >
-    {STATUS_LABEL[status]}
-  </span>
-);
-
-const InfoRow: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
-  <div className="flex items-baseline gap-3 py-1.5 border-b border-border-subtle last:border-0">
-    <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-text-tertiary w-[160px] shrink-0">
+  <div className="flex items-baseline gap-2">
+    <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-text-tertiary">
       {label}
     </span>
-    <span className="text-[13px] text-text-primary">{children}</span>
+    <span
+      className="font-mono text-[13px] tabular-nums"
+      style={{ color: color ?? "hsl(var(--text-primary))" }}
+    >
+      {count}
+    </span>
   </div>
 );
 
-const DelegationDetail: React.FC<{ action: Action }> = ({ action }) => {
-  const openPanel = useStore((s) => s.openPanel);
-  const changeActionStatus = useStore((s) => s.changeActionStatus);
-  const handleEdit = () =>
-    openPanel({ kind: "action", mode: "edit", id: action.id });
-  const handleMarkDone = () => {
-    changeActionStatus(action.id, "done");
-    toast.success("Marked done");
-  };
-  const handleReopen = () => {
-    changeActionStatus(action.id, "planned");
-    toast.success("Re-opened");
-  };
-  const goal = GOALS[action.goal];
-  const overdueDays =
-    action.expectedReturnDelta !== undefined && action.expectedReturnDelta < 0
-      ? Math.abs(action.expectedReturnDelta)
-      : 0;
-  const isToday = action.expectedReturnDelta === 0;
-
-  return (
-    <div className="px-10 py-8">
-      <div className="max-w-[540px] mx-auto">
-      <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
-        <span className="w-2 h-2 rounded-full" style={{ background: goal.color }} />
-        <span className="hover:text-text-secondary cursor-pointer transition-colors">
-          {goal.name}
-        </span>
-        <span>·</span>
-        <span className="hover:text-text-secondary cursor-pointer transition-colors">
-          {action.project}
-        </span>
-      </div>
-
-      <div className="h-3" />
-      <StatusPill status={action.status} />
-
-      <div className="h-4" />
-      <h1 className="text-[22px] font-medium text-text-primary leading-tight">{action.title}</h1>
-
-      <div className="h-8" />
-      <div className="font-mono text-[13px] text-text-tertiary tabular-nums">
-        IMPACT {action.impact} · {formatTime(action.timeMinutes)} · CREATED{" "}
-        {action.createdLabel.toUpperCase()}
-      </div>
-
-      <div className="h-8" />
-      <div className="font-mono text-[11px] uppercase tracking-[0.08em] text-text-secondary">
-        DELEGATION
-      </div>
-      <div className="h-3" />
-      <div className="border-t border-border-subtle">
-        <InfoRow label="DELEGATE">{action.delegate}</InfoRow>
-        <InfoRow label="EXPECTED RETURN">
-          {action.expectedReturnLabel ? (
-            <>
-              {action.expectedReturnLabel}
-              {overdueDays > 0 && (
-                <>
-                  <span className="text-text-tertiary"> — </span>
-                  <span style={{ color: "hsl(var(--text-warning))" }}>
-                    OVERDUE {overdueDays} {overdueDays === 1 ? "DAY" : "DAYS"}
-                  </span>
-                </>
-              )}
-              {isToday && (
-                <>
-                  <span className="text-text-tertiary"> — </span>
-                  <span className="text-text-primary">DUE TODAY</span>
-                </>
-              )}
-            </>
-          ) : (
-            <span className="text-text-tertiary">No date set</span>
-          )}
-        </InfoRow>
-        <InfoRow label="DELEGATED">
-          {action.delegatedLabel}
-          {action.delegatedAgoDays !== undefined && (
-            <span className="text-text-tertiary">
-              {" "}
-              ({action.delegatedAgoDays} {action.delegatedAgoDays === 1 ? "day" : "days"} ago)
-            </span>
-          )}
-        </InfoRow>
-        {action.delegationNote && (
-          <InfoRow label="DELEGATION NOTE">{action.delegationNote}</InfoRow>
-        )}
-      </div>
-
-      {action.notes && (
-        <>
-          <div className="h-8" />
-          <div className="font-mono text-[11px] uppercase tracking-[0.08em] text-text-secondary">
-            NOTES
-          </div>
-          <div className="h-3" />
-          <p className="text-[14px] text-text-primary leading-[1.6]">{action.notes}</p>
-        </>
-      )}
-
-      <div className="h-12" />
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <GhostButton accent onClick={handleMarkDone}>
-            Mark done
-          </GhostButton>
-          <GhostButton onClick={handleReopen}>Re-open</GhostButton>
-          <TertiaryLink onClick={handleEdit}>Edit action</TertiaryLink>
-        </div>
+/* ===== Tabs ===== */
+type TabKey = "active" | "returned";
+const TabBar: React.FC<{ value: TabKey; onChange: (v: TabKey) => void }> = ({
+  value,
+  onChange,
+}) => (
+  <div className="flex items-center gap-6 border-b border-border-subtle">
+    {(["active", "returned"] as TabKey[]).map((k) => {
+      const active = value === k;
+      return (
         <button
-          onClick={handleEdit}
-          className="w-6 h-6 inline-flex items-center justify-center rounded-[4px] text-text-tertiary hover:bg-surface-hover hover:text-text-secondary transition-colors"
+          key={k}
+          onClick={() => onChange(k)}
+          className="relative pb-2 text-[14px] font-medium transition-colors"
+          style={{
+            color: active ? "hsl(var(--text-primary))" : "hsl(var(--text-secondary))",
+          }}
         >
-          ···
+          {k === "active" ? "Active" : "Returned"}
+          {active && (
+            <span
+              className="absolute left-0 right-0 -bottom-px h-[2px]"
+              style={{ background: "hsl(var(--accent))" }}
+            />
+          )}
         </button>
-      </div>
-      </div>
-    </div>
-  );
-};
-
-/* ===== Empty states ===== */
-const EmptyFiltered: React.FC<{ onClear: () => void }> = ({ onClear }) => (
-  <div className="h-full flex flex-col items-center justify-center text-center px-10">
-    <div className="text-[14px] text-text-secondary">No delegations match these filters</div>
-    <div className="mt-1 font-mono text-[11px] text-text-tertiary">
-      Clear filters or change them above.
-    </div>
-    <div className="mt-4">
-      <GhostButton onClick={onClear}>Clear filters</GhostButton>
-    </div>
+      );
+    })}
   </div>
 );
+
+/* ===== Date range ===== */
+type DateRange = "all" | "30" | "90" | "365";
+const DATE_OPTIONS: FilterOption<DateRange>[] = [
+  { value: "all", label: "All time" },
+  { value: "30", label: "Last 30 days" },
+  { value: "90", label: "Last 90 days" },
+  { value: "365", label: "Last year" },
+];
 
 /* ===== Page ===== */
-type DateFilter = "all" | "overdue" | "upcoming" | "nodate";
-type DelegateFilter = "all" | Delegate;
-type GoalFilter = "all" | GoalKey;
-type SortKey = "overdue" | "recent" | "delegate";
-
-const RETURN_OPTIONS: FilterOption<DateFilter>[] = [
-  { value: "all", label: "All" },
-  { value: "overdue", label: "Overdue" },
-  { value: "upcoming", label: "Upcoming" },
-  { value: "nodate", label: "No date" },
-];
-
-const GOAL_OPTIONS: FilterOption<GoalFilter>[] = [
-  { value: "all", label: "All" },
-  { value: "g1", label: "Launch YouTube", dot: GOALS.g1.color },
-  { value: "g2", label: "Lose 5 kg", dot: GOALS.g2.color },
-  { value: "g3", label: "Read 24 books", dot: GOALS.g3.color },
-];
-
-const DELEGATE_OPTIONS: FilterOption<DelegateFilter>[] = [
-  { value: "all", label: "All" },
-  { value: "Maria", label: "Maria" },
-  { value: "AI", label: "AI" },
-];
-
-const SORT_OPTIONS: FilterOption<SortKey>[] = [
-  { value: "overdue", label: "Most overdue first" },
-  { value: "recent", label: "Most recent" },
-  { value: "delegate", label: "By delegate" },
-];
-
 const AllDelegated: React.FC = () => {
-  const [dateFilter, setDateFilter] = useState<DateFilter>("all");
-  const [delegateFilter, setDelegateFilter] = useState<DelegateFilter>("all");
-  const [goalFilter, setGoalFilter] = useState<GoalFilter>("all");
-  const [sortKey, setSortKey] = useState<SortKey>("overdue");
-  const [query, setQuery] = useState("");
-
-  // Live store data → legacy renderer shape.
-  const storeActions = useStore((s) => s.actions);
-  const storeProjects = useStore((s) => s.projects);
+  const actions = useStore((s) => s.actions);
+  const goals = useStore((s) => s.goals);
+  const projects = useStore((s) => s.projects);
   const openPanel = useStore((s) => s.openPanel);
-  const ACTIONS = useMemo(
-    () => toLegacyActions(storeActions, storeProjects),
-    [storeActions, storeProjects],
+
+  const goalById = useMemo(() => {
+    const m = new Map<string, Goal>();
+    for (const g of goals) m.set(g.id, g);
+    return m;
+  }, [goals]);
+  const projectById = useMemo(() => {
+    const m = new Map<string, Project>();
+    for (const p of projects) m.set(p.id, p);
+    return m;
+  }, [projects]);
+
+  const [tab, setTab] = useState<TabKey>("active");
+  const [delegateFilter, setDelegateFilter] = useState<string>("all");
+  const [goalFilter, setGoalFilter] = useState<string>("all");
+  const [dateRange, setDateRange] = useState<DateRange>("all");
+
+  // Active = currently delegated. Returned = done with delegate name (was returned).
+  const allActive = useMemo(
+    () => actions.filter((a) => a.status === "delegated"),
+    [actions],
+  );
+  const allReturned = useMemo(
+    () => actions.filter((a) => a.status === "done" && !!a.delegateName),
+    [actions],
   );
 
-  const allDelegated = useMemo(
-    () => ACTIONS.filter((a) => a.status === "delegated"),
-    [ACTIONS],
+  const aggregates = useMemo(() => {
+    let overdue = 0;
+    let today = 0;
+    for (const a of allActive) {
+      if (!a.expectedReturnDate) continue;
+      const d = daysBetween(a.expectedReturnDate, TODAY_ISO);
+      if (d < 0) overdue++;
+      else if (d === 0) today++;
+    }
+    return { active: allActive.length, overdue, today };
+  }, [allActive]);
+
+  const delegateOptions = useMemo<FilterOption<string>[]>(() => {
+    const set = new Set<string>();
+    for (const a of actions) if (a.delegateName) set.add(a.delegateName);
+    return [
+      { value: "all", label: "All" },
+      ...Array.from(set)
+        .sort()
+        .map((n) => ({ value: n, label: n })),
+    ];
+  }, [actions]);
+
+  const goalOptions = useMemo<FilterOption<string>[]>(
+    () => [
+      { value: "all", label: "All" },
+      ...goals
+        .filter((g) => g.status === "active")
+        .map((g) => ({ value: g.id, label: g.title, dot: g.color })),
+    ],
+    [goals],
   );
 
-  const filtered = useMemo(() => {
-    return allDelegated.filter((a) => {
-      const b = bucketFor(a);
-      if (dateFilter !== "all" && b !== dateFilter) return false;
-      if (delegateFilter !== "all" && a.delegate !== delegateFilter) return false;
-      if (goalFilter !== "all" && a.goal !== goalFilter) return false;
-      const q = query.trim().toLowerCase();
-      if (q) {
-        const titleMatch = a.title.toLowerCase().includes(q);
-        const delegateMatch = (a.delegate ?? "").toLowerCase().includes(q);
-        if (!titleMatch && !delegateMatch) return false;
+  const applyFilters = (list: Action[], useDate: boolean): Action[] => {
+    return list.filter((a) => {
+      if (delegateFilter !== "all" && a.delegateName !== delegateFilter) return false;
+      if (goalFilter !== "all" && a.goalId !== goalFilter) return false;
+      if (useDate && dateRange !== "all") {
+        const stamp = a.completedAt ?? a.delegatedAt;
+        if (!stamp) return false;
+        const days = -daysBetween(stamp.slice(0, 10), TODAY_ISO);
+        if (days > parseInt(dateRange, 10)) return false;
       }
       return true;
     });
-  }, [allDelegated, dateFilter, delegateFilter, goalFilter, query]);
-
-  const sortFn = useMemo(() => {
-    return (a: Action, b: Action) => {
-      switch (sortKey) {
-        case "recent":
-          return b.changedSort - a.changedSort;
-        case "delegate":
-          return (a.delegate ?? "").localeCompare(b.delegate ?? "");
-        case "overdue":
-        default:
-          return (a.expectedReturnDelta ?? Number.POSITIVE_INFINITY) - (b.expectedReturnDelta ?? Number.POSITIVE_INFINITY);
-      }
-    };
-  }, [sortKey]);
-
-  const groups = useMemo(() => {
-    const overdue = filtered.filter((a) => bucketFor(a) === "overdue").sort(sortFn);
-    const upcoming = filtered.filter((a) => bucketFor(a) === "upcoming").sort(sortFn);
-    const nodate = filtered.filter((a) => bucketFor(a) === "nodate").sort(sortFn);
-    return { overdue, upcoming, nodate };
-  }, [filtered, sortFn]);
-
-  const meta = useMemo(() => {
-    const total = allDelegated.length;
-    const overdue = allDelegated.filter((a) => bucketFor(a) === "overdue").length;
-    const upcoming = allDelegated.filter((a) => bucketFor(a) === "upcoming").length;
-    const nodate = allDelegated.filter((a) => bucketFor(a) === "nodate").length;
-    return `${total} DELEGATED · ${overdue} OVERDUE · ${upcoming} UPCOMING · ${nodate} NO DATE`;
-  }, [allDelegated]);
-
-  const anyApplied =
-    dateFilter !== "all" ||
-    delegateFilter !== "all" ||
-    goalFilter !== "all" ||
-    sortKey !== "overdue" ||
-    query.trim() !== "";
-
-  const clearFilters = () => {
-    setDateFilter("all");
-    setDelegateFilter("all");
-    setGoalFilter("all");
-    setSortKey("overdue");
-    setQuery("");
   };
 
-  const openAction = (id: string) => openPanel({ kind: "action", mode: "edit", id });
+  const activeList = useMemo(() => {
+    const filtered = applyFilters(allActive, false);
+    return filtered.sort((a, b) => {
+      const da = a.expectedReturnDate
+        ? daysBetween(a.expectedReturnDate, TODAY_ISO)
+        : Number.POSITIVE_INFINITY;
+      const db = b.expectedReturnDate
+        ? daysBetween(b.expectedReturnDate, TODAY_ISO)
+        : Number.POSITIVE_INFINITY;
+      return da - db;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allActive, delegateFilter, goalFilter]);
+
+  const returnedList = useMemo(() => {
+    const filtered = applyFilters(allReturned, true);
+    return filtered.sort((a, b) => {
+      const ta = a.completedAt ?? "";
+      const tb = b.completedAt ?? "";
+      return tb.localeCompare(ta);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allReturned, delegateFilter, goalFilter, dateRange]);
+
+  const list = tab === "active" ? activeList : returnedList;
+
+  const openAction = (id: string) =>
+    openPanel({ kind: "action", mode: "edit", id });
+
+  const newDelegated = () =>
+    openPanel({
+      kind: "action",
+      mode: "new",
+      prefill: { status: "delegated" },
+    });
+
+  const clearFilters = () => {
+    setDelegateFilter("all");
+    setGoalFilter("all");
+    setDateRange("all");
+  };
+  const anyFilter =
+    delegateFilter !== "all" ||
+    goalFilter !== "all" ||
+    (tab === "returned" && dateRange !== "all");
 
   return (
     <div className="min-h-screen bg-surface-base text-text-primary">
       <AppSidebar />
       <main className="ml-[var(--sidebar-w,220px)] flex flex-col h-screen">
-        {/* Page header */}
+        {/* Header */}
         <div className="px-10 pt-6 pb-3 shrink-0">
-          <div className="flex items-baseline justify-between">
-            <h1 className="text-[24px] font-medium text-text-primary">All delegated</h1>
-            <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary tabular-nums">
-              {meta}
-            </div>
+          <div className="flex items-center justify-between gap-4">
+            <h1 className="text-[24px] font-medium text-text-primary">Delegated</h1>
+            <button
+              onClick={newDelegated}
+              className="inline-flex items-center gap-1.5 h-9 px-3 rounded-[4px] text-[13px] font-medium text-white transition-colors"
+              style={{ background: "hsl(var(--accent))" }}
+            >
+              <Plus size={14} />
+              New delegated action
+            </button>
           </div>
 
-          {/* Filters row */}
-          <div className="mt-3 flex items-center justify-between gap-3 flex-wrap">
-            <div className="flex items-center gap-2 flex-wrap">
-              <FilterDropdown
-                label="RETURN"
-                value={dateFilter}
-                defaultValue="all"
-                options={RETURN_OPTIONS}
-                onChange={(v) => setDateFilter(v)}
-              />
-              <FilterDropdown
-                label="GOAL"
-                value={goalFilter}
-                defaultValue="all"
-                options={GOAL_OPTIONS}
-                onChange={(v) => setGoalFilter(v)}
-              />
-              <FilterDropdown
-                label="DELEGATE"
-                value={delegateFilter}
-                defaultValue="all"
-                options={DELEGATE_OPTIONS}
-                onChange={(v) => setDelegateFilter(v)}
-              />
-              {anyApplied && (
-                <button
-                  onClick={clearFilters}
-                  className="ml-1 text-[12px] text-text-tertiary hover:text-text-secondary transition-colors"
-                >
-                  Clear filters
-                </button>
-              )}
-            </div>
-            <SortDropdown
-              value={sortKey}
-              options={SORT_OPTIONS}
-              onChange={(v) => setSortKey(v)}
+          {/* Aggregate counts */}
+          <div className="flex items-center gap-6 py-3">
+            <Counter label="ACTIVE" count={aggregates.active} />
+            <span className="text-text-tertiary">·</span>
+            <Counter
+              label="OVERDUE"
+              count={aggregates.overdue}
+              color={
+                aggregates.overdue > 0
+                  ? "hsl(var(--text-warning))"
+                  : "hsl(var(--text-tertiary))"
+              }
+            />
+            <span className="text-text-tertiary">·</span>
+            <Counter
+              label="DUE TODAY"
+              count={aggregates.today}
+              color={
+                aggregates.today > 0
+                  ? "hsl(var(--accent))"
+                  : "hsl(var(--text-tertiary))"
+              }
             />
           </div>
 
-          {/* Search removed — global ⌘K palette handles search. */}
+          {/* Tabs */}
+          <TabBar value={tab} onChange={setTab} />
+
+          {/* Filters */}
+          <div className="mt-3 flex items-center gap-2 flex-wrap">
+            <FilterDropdown
+              label="DELEGATE"
+              value={delegateFilter}
+              defaultValue="all"
+              options={delegateOptions}
+              onChange={setDelegateFilter}
+            />
+            <FilterDropdown
+              label="GOAL"
+              value={goalFilter}
+              defaultValue="all"
+              options={goalOptions}
+              onChange={setGoalFilter}
+            />
+            {tab === "returned" && (
+              <FilterDropdown
+                label="RANGE"
+                value={dateRange}
+                defaultValue="all"
+                options={DATE_OPTIONS}
+                onChange={setDateRange}
+              />
+            )}
+            {anyFilter && (
+              <button
+                onClick={clearFilters}
+                className="ml-1 text-[12px] text-text-tertiary hover:text-text-secondary transition-colors"
+              >
+                Clear filters
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="border-t border-border-subtle" />
 
-        {/* Navigational hint */}
-        <div className="px-10 pt-6">
-          <div className="text-center text-[13px] text-text-tertiary py-4">
-            To delegate work, change an action's status to Delegated from{" "}
-            <button
-              type="button"
-              onClick={(e) => e.preventDefault()}
-              className="transition-colors hover:text-text-primary"
-              style={{ color: "hsl(var(--accent))" }}
-            >
-              any action editor
-            </button>
-            .
-          </div>
-        </div>
-
-        {/* Full-width list */}
-        <div className="flex-1 overflow-y-auto min-h-0 pt-2 pl-8">
-          {filtered.length === 0 ? (
-            <div className="p-8 text-center font-mono text-[11px] text-text-tertiary">
-              No delegations match these filters.
-            </div>
+        {/* List */}
+        <div className="flex-1 overflow-y-auto min-h-0">
+          {list.length === 0 ? (
+            <EmptyState
+              tab={tab}
+              filtered={anyFilter}
+              onClear={clearFilters}
+              onCreate={newDelegated}
+            />
           ) : (
-            <>
-              {groups.overdue.length > 0 && (
-                <>
-                  <GroupHeader label="OVERDUE" count={groups.overdue.length} warning />
-                  {groups.overdue.map((a) => (
-                    <DelegationRow key={a.id} action={a} selected={false} onSelect={() => openAction(a.id)} />
-                  ))}
-                </>
-              )}
-              {groups.upcoming.length > 0 && (
-                <>
-                  <GroupHeader label="UPCOMING" count={groups.upcoming.length} />
-                  {groups.upcoming.map((a) => (
-                    <DelegationRow key={a.id} action={a} selected={false} onSelect={() => openAction(a.id)} />
-                  ))}
-                </>
-              )}
-              {groups.nodate.length > 0 && (
-                <>
-                  <GroupHeader label="NO RETURN DATE" count={groups.nodate.length} />
-                  {groups.nodate.map((a) => (
-                    <DelegationRow key={a.id} action={a} selected={false} onSelect={() => openAction(a.id)} />
-                  ))}
-                </>
-              )}
-            </>
+            list.map((a) => (
+              <DelegationRow
+                key={a.id}
+                action={a}
+                goal={goalById.get(a.goalId)}
+                project={a.projectId ? projectById.get(a.projectId) : undefined}
+                variant={tab}
+                onClick={() => openAction(a.id)}
+              />
+            ))
           )}
         </div>
       </main>
+    </div>
+  );
+};
+
+const EmptyState: React.FC<{
+  tab: TabKey;
+  filtered: boolean;
+  onClear: () => void;
+  onCreate: () => void;
+}> = ({ tab, filtered, onClear, onCreate }) => {
+  if (filtered) {
+    return (
+      <div className="h-full flex flex-col items-center justify-center text-center px-10 py-16">
+        <div className="text-[14px] text-text-secondary">
+          No delegations match these filters.
+        </div>
+        <button
+          onClick={onClear}
+          className="mt-3 text-[13px] transition-colors hover:opacity-80"
+          style={{ color: "hsl(var(--accent))" }}
+        >
+          Clear filters
+        </button>
+      </div>
+    );
+  }
+  if (tab === "active") {
+    return (
+      <div className="h-full flex flex-col items-center justify-center text-center px-10 py-16">
+        <div className="text-[15px] text-text-primary">Nothing delegated yet.</div>
+        <div className="mt-2 text-[13px] text-text-secondary max-w-[420px]">
+          When you delegate an action, it appears here. Click "New delegated action"
+          or change an existing action's status to Delegated.
+        </div>
+        <button
+          onClick={onCreate}
+          className="inline-flex items-center gap-1.5 mt-4 h-9 px-3 rounded-[4px] text-[13px] font-medium text-white transition-colors"
+          style={{ background: "hsl(var(--accent))" }}
+        >
+          <Plus size={14} />
+          New delegated action
+        </button>
+      </div>
+    );
+  }
+  return (
+    <div className="h-full flex flex-col items-center justify-center text-center px-10 py-16">
+      <div className="text-[15px] text-text-primary">
+        No returned delegations in this date range.
+      </div>
+      <div className="mt-2 text-[13px] text-text-secondary max-w-[420px]">
+        Adjust filters or select a wider range to see history.
+      </div>
     </div>
   );
 };

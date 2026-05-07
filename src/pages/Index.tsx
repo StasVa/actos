@@ -1216,36 +1216,67 @@ const UtilityRow: React.FC = () => (
 );
 
 /* ===== Yesterday review card ===== */
-const YesterdayCard: React.FC = () => {
+/** Find most recent ACTIVE day with activity (skip Day Off / Sick / zero-activity). */
+function selectLookingBackDate(
+  dayEntries: import("@/types").DayEntry[],
+  actions: import("@/types").Action[],
+  rituals: import("@/types").Ritual[],
+): string | null {
+  const sorted = [...dayEntries]
+    .filter((d) => d.date < TODAY_ISO)
+    .sort((a, b) => b.date.localeCompare(a.date));
+  for (const d of sorted) {
+    if (d.dayType !== "execution" && d.dayType !== "recovery") continue;
+    const hasActions = actions.some(
+      (a) => a.completedAt?.slice(0, 10) === d.date && a.status === "done",
+    );
+    const hasRituals = rituals.some((r) =>
+      r.completionHistory.some(
+        (c) => c.date === d.date && (c.status === "done" || !c.status),
+      ),
+    );
+    if (hasActions || hasRituals || (d.reflectionText && d.reflectionText.trim())) {
+      return d.date;
+    }
+  }
+  return null;
+}
+
+const LookingBackCard: React.FC<{ date: string }> = ({ date }) => {
   const goals = useStore((s) => s.goals);
   const actions = useStore((s) => s.actions);
   const rituals = useStore((s) => s.rituals);
-  const yEntry = useStore((s) => s.dayEntries.find((d) => d.date === YESTERDAY_ISO));
+  const yEntry = useStore((s) => s.dayEntries.find((d) => d.date === date));
 
-  const yDate = new Date(YESTERDAY_ISO + "T00:00:00");
-  const headerDate = yDate
+  const dObj = new Date(date + "T00:00:00");
+  const fullDate = dObj
     .toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
     .toUpperCase();
+  const daysAgo = Math.round((Date.now() - dObj.getTime()) / 86400000);
+  const relLabel =
+    daysAgo <= 1 ? "YESTERDAY" : `${daysAgo} DAYS AGO`;
 
-  const dtLabel = yEntry?.dayType ? `${DAY_TYPE_LABELS[yEntry.dayType]} day` : "Not planned";
+  const dayType = yEntry?.dayType;
+  const Icon = dayType ? DAY_TYPE_ICONS[dayType] : null;
+  const dtLabel = dayType ? `${DAY_TYPE_LABELS[dayType]} day` : "Active day";
 
-  // Stats
-  const yActions = actions.filter((a) => a.completedAt?.slice(0, 10) === YESTERDAY_ISO && a.status === "done");
+  const yActions = actions.filter(
+    (a) => a.completedAt?.slice(0, 10) === date && a.status === "done",
+  );
   const yDelegated = actions.filter(
-    (a) => a.delegatedAt?.slice(0, 10) === YESTERDAY_ISO && a.status === "delegated",
+    (a) => a.delegatedAt?.slice(0, 10) === date && a.status === "delegated",
   );
   const actionsDone = yActions.length;
   const ritualsDone = rituals.reduce(
     (n, r) =>
       n +
       (r.completionHistory.some(
-        (c) => c.date === YESTERDAY_ISO && (c.status === "done" || !c.status),
+        (c) => c.date === date && (c.status === "done" || !c.status),
       )
         ? 1
         : 0),
     0,
   );
-  // Time invested = full Done time + 20% Delegated time.
   const investedMinFor = (a: typeof actions[number]) => {
     const t = a.timeEstimateMinutes ?? 0;
     if (t <= 0) return 0;
@@ -1254,64 +1285,70 @@ const YesterdayCard: React.FC = () => {
     return 0;
   };
   const investedAll = [...yActions, ...yDelegated];
-  const totalMin = investedAll.reduce((sum, a) => sum + investedMinFor(a), 0);
+  const totalMin = investedAll.reduce((s, a) => s + investedMinFor(a), 0);
   const hours = totalMin >= 60 ? `${(totalMin / 60).toFixed(1)}h` : `${totalMin}m`;
 
-  // Per-goal time invested
   const perGoal = goals
     .filter((g) => g.status === "active")
-    .map((g) => {
-      const min = investedAll
-        .filter((a) => a.goalId === g.id)
-        .reduce((s, a) => s + investedMinFor(a), 0);
-      return { g, min };
-    })
+    .map((g) => ({
+      g,
+      min: investedAll.filter((a) => a.goalId === g.id).reduce((s, a) => s + investedMinFor(a), 0),
+    }))
     .filter((x) => x.min > 0);
 
-  // Last activity
-  const lastIso = yActions
-    .map((a) => a.completedAt)
-    .filter(Boolean)
-    .sort()
-    .at(-1);
+  const lastIso = yActions.map((a) => a.completedAt).filter(Boolean).sort().at(-1);
   const lastTime = lastIso
     ? new Date(lastIso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
     : null;
 
   return (
-    <section className="bg-surface-elevated border border-border-subtle rounded-[6px] p-6">
-      <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
-        YESTERDAY · {headerDate}
+    <section>
+      <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-3">
+        LOOKING BACK
       </div>
-      <div className="mt-2 text-[14px] text-text-primary">{dtLabel}</div>
-      <div className="mt-1 font-mono text-[13px] text-text-secondary tabular-nums">
-        {actionsDone} actions done · {ritualsDone} rituals · {hours} invested
+      <div className="bg-surface-elevated border border-border-subtle rounded-[6px] p-6">
+        <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
+          {relLabel} · {fullDate}
+        </div>
+        <div className="mt-2 flex items-center gap-1.5 text-[14px] text-text-primary">
+          {Icon && <Icon size={14} className="text-text-secondary" />}
+          <span>{dtLabel}</span>
+        </div>
+        <div className="mt-2 font-mono text-[13px] text-text-secondary tabular-nums">
+          {actionsDone} actions done · {ritualsDone} rituals · {hours} invested
+        </div>
+        {perGoal.length > 0 && (
+          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5">
+            {perGoal.map(({ g, min }) => (
+              <div
+                key={g.id}
+                className="flex items-center gap-1.5 font-mono text-[12px] text-text-secondary"
+              >
+                <span
+                  className="w-2 h-2 rounded-full"
+                  style={{ background: `hsl(var(--${g.color}))` }}
+                />
+                <span className="text-text-primary">{g.title}</span>
+                <span className="text-text-tertiary">·</span>
+                <span className="tabular-nums">
+                  {min >= 60 ? `${(min / 60).toFixed(1)}h` : `${min}m`}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+        {lastTime && (
+          <div className="mt-3 font-mono text-[11px] text-text-tertiary">
+            Last activity: {lastTime}
+          </div>
+        )}
+        <Link
+          to={`/reviews/days/${date}`}
+          className="inline-block mt-4 text-[12px] text-[hsl(var(--accent))] hover:brightness-110 transition-colors"
+        >
+          View full review →
+        </Link>
       </div>
-      {perGoal.length > 0 && (
-        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5">
-          {perGoal.map(({ g, min }) => (
-            <div key={g.id} className="flex items-center gap-1.5 font-mono text-[12px] text-text-secondary">
-              <span className="w-2 h-2 rounded-full" style={{ background: `hsl(var(--${g.color}))` }} />
-              <span className="text-text-primary">{g.title}</span>
-              <span className="text-text-tertiary">·</span>
-              <span className="tabular-nums">
-                {min >= 60 ? `${(min / 60).toFixed(1)}h` : `${min}m`}
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
-      {lastTime && (
-        <div className="mt-3 font-mono text-[12px] text-text-tertiary">
-          Last activity: {lastTime}
-        </div>
-      )}
-      <Link
-        to={`/reviews/days/${YESTERDAY_ISO}`}
-        className="inline-block mt-4 text-[12px] text-text-secondary hover:text-text-primary transition-colors"
-      >
-        View full review →
-      </Link>
     </section>
   );
 };

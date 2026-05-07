@@ -218,6 +218,17 @@ const PlanForm: React.FC<{
   const rituals = useStore((s) => s.rituals);
   const goals = useStore((s) => s.goals);
   const projects = useStore((s) => s.projects);
+  const createAction = useStore((s) => s.createAction);
+
+  // Inline-add state
+  const firstActiveGoal = goals.find((g) => g.status === "active");
+  const firstProjectForGoal = (gid?: ID) =>
+    gid ? projects.find((p) => p.status === "active" && p.goalId === gid) : undefined;
+  const initialGoal = firstActiveGoal?.id;
+  const initialProject = firstProjectForGoal(initialGoal)?.id;
+  const [quickTitle, setQuickTitle] = useState("");
+  const [quickGoalId, setQuickGoalId] = useState<ID | undefined>(initialGoal);
+  const [quickProjectId, setQuickProjectId] = useState<ID | undefined>(initialProject);
 
   const dueRituals = useMemo(
     () => rituals.filter((r) => r.status === "active" && ritualDueOn(r, date)),

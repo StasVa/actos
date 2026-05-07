@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { Zap, Leaf, Sun, Thermometer, type LucideIcon } from "lucide-react";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Tooltip, SparkTooltipContent, StateDotTooltip } from "@/components/Tooltip";
 import { LifetimeCounters } from "@/components/LifetimeCounters";
@@ -27,6 +28,25 @@ export const DAY_TYPE_LABELS: Record<string, string> = {
   recovery: "Recovery",
   "day-off": "Day Off",
   sick: "Sick",
+};
+
+export const DAY_TYPE_ICONS: Record<string, LucideIcon> = {
+  execution: Zap,
+  recovery: Leaf,
+  "day-off": Sun,
+  sick: Thermometer,
+};
+
+export const DayTypeIndicator: React.FC<{ dayType?: string }> = ({ dayType }) => {
+  if (!dayType) return null;
+  const Icon = DAY_TYPE_ICONS[dayType];
+  const label = (DAY_TYPE_LABELS[dayType] ?? "").toUpperCase() + " DAY";
+  return (
+    <div className="flex items-center text-text-secondary mt-2">
+      {Icon && <Icon size={12} className="mr-1.5" />}
+      <span className="font-mono text-[11px] uppercase tracking-[0.06em]">{label}</span>
+    </div>
+  );
 };
 
 

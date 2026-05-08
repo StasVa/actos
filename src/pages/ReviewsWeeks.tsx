@@ -15,7 +15,7 @@ import {
 } from "@/lib/weekUtils";
 import { getOutcomeSummary } from "@/lib/outcomeUtils";
 import { PageHeader } from "@/components/PageHeader";
-import { FilterDropdown, FilterOption } from "@/components/FilterDropdown";
+import { FilterDropdown } from "@/components/FilterDropdown";
 import { SortDropdown } from "@/components/SortDropdown";
 
 const RANGE_OPTIONS = [

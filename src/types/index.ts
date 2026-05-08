@@ -224,6 +224,8 @@ export interface UserSettings {
   userName?: string;
   userEmail?: string;
   subscriptionTier?: SubscriptionTier;
+  /** Demo flag — exposes /admin/components and tier toggle. Will be removed when real auth lands. */
+  showAdminTools?: boolean;
 }
 
 // ───────── UI state ─────────

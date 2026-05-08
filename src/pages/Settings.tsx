@@ -19,10 +19,54 @@ function downloadJSON(filename: string, data: unknown) {
   URL.revokeObjectURL(url);
 }
 
+const ToggleRow: React.FC<{
+  label: string;
+  description?: string;
+  checked: boolean;
+  onChange: (v: boolean) => void;
+}> = ({ label, description, checked, onChange }) => (
+  <label className="flex items-start gap-3 cursor-pointer">
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      onClick={() => onChange(!checked)}
+      className="mt-0.5 shrink-0 rounded-full transition-colors"
+      style={{
+        width: 32,
+        height: 18,
+        background: checked ? "hsl(var(--accent))" : "hsl(var(--surface-hover))",
+        border: "1px solid hsl(var(--border-subtle))",
+        position: "relative",
+      }}
+    >
+      <span
+        className="block rounded-full bg-white transition-transform"
+        style={{
+          width: 12,
+          height: 12,
+          position: "absolute",
+          top: 2,
+          left: 2,
+          transform: checked ? "translateX(14px)" : "translateX(0)",
+        }}
+      />
+    </button>
+    <div className="flex-1">
+      <div className="text-[13px] text-text-primary">{label}</div>
+      {description && (
+        <div className="text-[12px] text-text-tertiary mt-0.5">{description}</div>
+      )}
+    </div>
+  </label>
+);
+
 export default function Settings() {
   const settings = useStore((s) => s.settings);
   const goals = useStore((s) => s.goals);
   const setDefaultGoal = useStore((s) => s.setDefaultGoal);
+  const setShowAdminTools = useStore((s) => s.setShowAdminTools);
+  const setSubscriptionTier = useStore((s) => s.setSubscriptionTier);
   const resetToSeed = useStore((s) => s.resetToSeed);
   const activeGoals = goals.filter((g) => g.status === "active");
   const fileRef = React.useRef<HTMLInputElement>(null);
@@ -74,8 +118,31 @@ export default function Settings() {
             <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-3">
               ACCOUNT
             </div>
-            <div className="text-[13px] text-text-secondary mb-2">
+            <div className="text-[13px] text-text-secondary mb-4">
               Signed in as <span className="text-text-primary">{settings.userEmail ?? "ak@email"}</span>
+            </div>
+
+            {/* Demo controls */}
+            <div
+              className="rounded-[6px] bg-surface-raised"
+              style={{ padding: 16, border: "1px solid hsl(var(--border-subtle))" }}
+            >
+              <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-3">
+                DEMO CONTROLS (WILL BE REMOVED)
+              </div>
+
+              <ToggleRow
+                label="Pro tier (preview Pro UI)"
+                checked={settings.subscriptionTier === "pro"}
+                onChange={(v) => setSubscriptionTier(v ? "pro" : "free")}
+              />
+              <div className="my-3 border-t border-border-subtle" />
+              <ToggleRow
+                label="Show admin tools"
+                description="Adds /admin/components link to the user menu."
+                checked={!!settings.showAdminTools}
+                onChange={(v) => setShowAdminTools(v)}
+              />
             </div>
           </section>
 

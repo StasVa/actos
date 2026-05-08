@@ -169,6 +169,8 @@ export interface StoreState {
   // ─── Settings ───
   toggleLayer: (layerName: keyof UserSettings["layers"], enabled: boolean) => void;
   setDefaultGoal: (goalId: ID) => void;
+  setShowAdminTools: (enabled: boolean) => void;
+  setSubscriptionTier: (tier: "free" | "pro") => void;
 
   // ─── Sessions ───
   createDraftSession: (config: {
@@ -808,6 +810,14 @@ export const useStore = create<StoreState>()(
 
       setDefaultGoal: (goalId) => {
         set({ settings: { ...get().settings, defaultGoalId: goalId } });
+      },
+
+      setShowAdminTools: (enabled: boolean) => {
+        set({ settings: { ...get().settings, showAdminTools: enabled } });
+      },
+
+      setSubscriptionTier: (tier: "free" | "pro") => {
+        set({ settings: { ...get().settings, subscriptionTier: tier } });
       },
 
       // ───────── Sessions ─────────

@@ -43,6 +43,7 @@ import AdminFeedback from "./admin/pages/AdminFeedback";
 import AdminBilling from "./admin/pages/AdminBilling";
 import AdminAudit from "./admin/pages/AdminAudit";
 import AdminAnnouncements from "./admin/pages/AdminAnnouncements";
+import AdminComponents from "./admin/pages/AdminComponents";
 import { ImpersonationBanner } from "./admin/ImpersonationBanner";
 
 const queryClient = new QueryClient();
@@ -72,6 +73,7 @@ const App = () => (
             <Route path="audit" element={<AdminAudit />} />
             <Route path="announcements" element={<AdminAnnouncements />} />
           </Route>
+          <Route path="/admin/components" element={<AdminComponents />} />
 
           {/* Default + legacy redirects */}
           <Route path="/" element={<Navigate to="/today" replace />} />

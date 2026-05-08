@@ -6,6 +6,7 @@ import { ReturnDatePill } from "@/components/ReturnDatePill";
 import { FilterDropdown, FilterOption } from "@/components/FilterDropdown";
 import { useStore } from "@/store/useStore";
 import type { Action, Goal, Project } from "@/types";
+import { EmptyState as SharedEmptyState, FilteredEmpty } from "@/components/EmptyState";
 
 /* ===== helpers ===== */
 const TODAY_ISO = "2026-05-05";

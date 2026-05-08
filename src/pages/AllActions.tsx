@@ -166,23 +166,24 @@ const ActionRow: React.FC<{ action: Action; selected: boolean; onSelect: () => v
               {action.title}
             </span>
           </div>
-          <div className="shrink-0">
-            {action.status === "planned" && action.scheduledLabel && (
+          <div className="shrink-0 ml-3">
+            {action.impact ? (
               <span
-                className="font-mono uppercase tracking-[0.06em] text-text-secondary bg-surface-hover"
-                style={{ fontSize: 11, padding: "2px 8px", borderRadius: 2 }}
+                className="inline-flex items-center justify-center font-medium tabular-nums"
+                style={{
+                  background: impactBg,
+                  color: impactFg,
+                  fontSize: 13,
+                  padding: "4px 10px",
+                  borderRadius: 4,
+                  minWidth: 36,
+                  textAlign: "center",
+                  opacity: isTerminal ? 0.5 : 1,
+                }}
               >
-                {action.scheduledLabel}
+                I{action.impact}
               </span>
-            )}
-            {action.status === "done" && (
-              <span
-                className="font-mono"
-                style={{ color: "hsl(var(--state-active))", fontSize: 12 }}
-              >
-                ✓
-              </span>
-            )}
+            ) : null}
           </div>
         </div>
         {/* Bottom row */}

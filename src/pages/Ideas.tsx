@@ -824,6 +824,7 @@ const Ideas: React.FC = () => {
   const selectedIdeaId = useStore((s) => s.ui.selectedIdeaId);
   const selectIdea = useStore((s) => s.selectIdea);
   const location = useLocation();
+  const isMobile = useIsMobile();
 
   const activeGoals = useMemo(() => goals.filter((g) => g.status === "active"), [goals]);
   const defaultGoal =

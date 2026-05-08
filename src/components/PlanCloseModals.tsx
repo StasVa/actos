@@ -21,12 +21,6 @@ const formatLong = (iso: string) =>
     day: "numeric",
   });
 
-const DAY_TYPE_OPTIONS: { value: DayType; label: string; Icon: LucideIcon }[] = [
-  { value: "execution", label: "Execution", Icon: Zap },
-  { value: "recovery", label: "Recovery", Icon: Leaf },
-  { value: "day-off", label: "Day Off", Icon: Sun },
-  { value: "sick", label: "Sick", Icon: Thermometer },
-];
 
 /* ───────── primitives ───────── */
 const SectionHead: React.FC<{ children: React.ReactNode; sub?: string; meta?: React.ReactNode }> = ({

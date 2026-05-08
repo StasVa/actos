@@ -63,7 +63,7 @@ const EditorModal: React.FC<{ initial: Announcement; onClose: () => void; onSave
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center" style={{ background: "rgba(0,0,0,0.5)" }} onClick={onClose}>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center" style={{ background: "var(--backdrop)" }} onClick={onClose}>
       <div className="w-[640px] max-w-[95vw] max-h-[90vh] overflow-y-auto bg-surface-elevated border border-border-subtle rounded-[6px] p-6" onClick={(e) => e.stopPropagation()}>
         <h2 className="text-[16px] font-medium mb-4">{initial.title ? "Edit announcement" : "New announcement"}</h2>
 

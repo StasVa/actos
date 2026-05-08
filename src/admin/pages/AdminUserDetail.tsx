@@ -214,7 +214,7 @@ export default function AdminUserDetail() {
 
       {/* Impersonation modal */}
       {imperOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center" style={{ background: "rgba(0,0,0,0.5)" }} onClick={() => setImperOpen(false)}>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center" style={{ background: "var(--backdrop)" }} onClick={() => setImperOpen(false)}>
           <div className="w-[480px] max-w-[90vw] bg-surface-elevated border border-border-subtle rounded-[6px] p-6" onClick={(e) => e.stopPropagation()}>
             <h2 className="text-[16px] font-medium">View user account</h2>
             <p className="mt-3 text-[13px] text-text-secondary leading-[1.5]">

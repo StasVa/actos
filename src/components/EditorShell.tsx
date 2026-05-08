@@ -105,7 +105,7 @@ export function EditorShell({
       <div
         className="fixed inset-0 z-[190]"
         style={{
-          background: "rgba(0,0,0,0.5)",
+          background: "var(--backdrop)",
           backdropFilter: "blur(2px)",
           WebkitBackdropFilter: "blur(2px)",
         }}

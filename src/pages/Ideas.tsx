@@ -863,13 +863,15 @@ const Ideas: React.FC = () => {
       .sort((a, b) => new Date(b.capturedAt).getTime() - new Date(a.capturedAt).getTime());
   }, [ideas, goalFilter, statusFilter]);
 
-  const selected =
-    filtered.find((i) => i.id === selectedIdeaId) ?? filtered[0] ?? null;
+  const selected = isMobile
+    ? filtered.find((i) => i.id === selectedIdeaId) ?? null
+    : filtered.find((i) => i.id === selectedIdeaId) ?? filtered[0] ?? null;
 
   useEffect(() => {
+    if (isMobile) return;
     if (selected && selected.id !== selectedIdeaId) selectIdea(selected.id);
     if (!selected && selectedIdeaId) selectIdea(undefined);
-  }, [selected, selectedIdeaId, selectIdea]);
+  }, [selected, selectedIdeaId, selectIdea, isMobile]);
 
   const meta = useMemo(() => {
     const captured = ideas.filter((i) => i.status === "captured");

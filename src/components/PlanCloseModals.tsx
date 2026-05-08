@@ -64,42 +64,6 @@ function ritualDueOn(r: Ritual, iso: string): boolean {
   }
 }
 
-/* ───────── suggestion logic (Heavy Lift / Quick Moves) ───────── */
-function quantile(vals: number[], q: number): number {
-  if (vals.length === 0) return 0;
-  const sorted = [...vals].sort((a, b) => a - b);
-  const idx = Math.min(sorted.length - 1, Math.floor(q * sorted.length));
-  return sorted[idx];
-}
-
-function effortFor(a: Action): number {
-  if (a.timeEstimateMinutes != null) return Math.min(10, Math.ceil(a.timeEstimateMinutes / 30));
-  return 5;
-}
-
-function pickHeavyLift(pool: Action[]): Action[] {
-  if (pool.length === 0) return [];
-  const impactP75 = quantile(pool.map((a) => a.impact ?? 0), 0.75);
-  const effortP75 = quantile(pool.map(effortFor), 0.75);
-  return pool
-    .filter((a) => (a.impact ?? 0) >= impactP75 && effortFor(a) >= effortP75)
-    .sort((a, b) => (b.impact ?? 0) - (a.impact ?? 0))
-    .slice(0, 1);
-}
-
-function pickQuickMoves(pool: Action[]): Action[] {
-  if (pool.length === 0) return [];
-  const impactMedian = quantile(pool.map((a) => a.impact ?? 0), 0.5);
-  return pool
-    .filter((a) => {
-      const imp = a.impact ?? 0;
-      const tOk = (a.timeEstimateMinutes ?? 9999) <= 60;
-      return imp >= impactMedian && tOk;
-    })
-    .sort((a, b) => (b.impact ?? 0) - (a.impact ?? 0) || (a.timeEstimateMinutes ?? 0) - (b.timeEstimateMinutes ?? 0))
-    .slice(0, 3);
-}
-
 /* ═════════════ Plan Today form ═════════════ */
 
 interface PlanFormState {
@@ -176,18 +140,6 @@ const PlanForm: React.FC<{
       .filter((a) => (filterStatus === "all" ? true : a.status === filterStatus))
       .sort((a, b) => (b.impact ?? 0) - (a.impact ?? 0));
   }, [eligible, date, filterGoal, filterProject, filterStatus]);
-
-  const suggestionPool = useMemo(
-    () =>
-      eligible.filter((a) => {
-        if (selectedSet.has(a.id)) return false;
-        const g = goals.find((x) => x.id === a.goalId);
-        return g?.status === "active";
-      }),
-    [eligible, selectedSet, goals],
-  );
-  const heavySuggestions = useMemo(() => pickHeavyLift(suggestionPool), [suggestionPool]);
-  const quickSuggestions = useMemo(() => pickQuickMoves(suggestionPool), [suggestionPool]);
 
   const toggleAction = (id: ID) =>
     setState((s) => {
@@ -355,21 +307,6 @@ const PlanForm: React.FC<{
     0,
   );
 
-  const heavyDescription =
-    heavySuggestions.length === 0
-      ? "No heavy-lift candidates available."
-      : `${heavySuggestions.length} high-impact action${heavySuggestions.length > 1 ? "s" : ""}` +
-        (heavySuggestions[0]?.timeEstimateMinutes
-          ? ` (${formatTimeMin(heavySuggestions.reduce((s, a) => s + (a.timeEstimateMinutes ?? 0), 0))})`
-          : "");
-  const quickDescription =
-    quickSuggestions.length === 0
-      ? "No quick wins available."
-      : `${quickSuggestions.length} quick win${quickSuggestions.length > 1 ? "s" : ""}` +
-        (quickSuggestions.some((a) => a.timeEstimateMinutes)
-          ? ` (~${formatTimeMin(quickSuggestions.reduce((s, a) => s + (a.timeEstimateMinutes ?? 0), 0))} total)`
-          : "");
-
   return (
     <div className="space-y-7">
       {/* ACTIONS */}
@@ -384,100 +321,7 @@ const PlanForm: React.FC<{
             <div className="flex flex-col md:flex-row gap-3 min-w-0">
               {/* LEFT: available */}
               <div className="border border-border-subtle rounded-[6px] bg-surface-base flex flex-col min-h-[280px] flex-1 min-w-0 md:basis-[60%]">
-                {/* Quick Start cards */}
-                <div className="px-3 pt-3 pb-2 border-b border-border-subtle bg-surface-elevated rounded-t-[6px] min-w-0">
-                  <div className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary mb-2">
-                    QUICK START
-                  </div>
-                  <div className="flex items-stretch gap-3 min-w-0">
-                    {(() => {
-                      const heavy = heavySuggestions[0];
-                      const disabled = !heavy;
-                      const totalQuickMin = quickSuggestions.reduce(
-                        (s, a) => s + (a.timeEstimateMinutes ?? 0),
-                        0,
-                      );
-                      const qDisabled = quickSuggestions.length === 0;
-                      return (
-                        <>
-                          <button
-                            type="button"
-                            disabled={disabled}
-                            onClick={() => {
-                              if (!heavy) return;
-                              addMany([heavy.id]);
-                              toast.success(`Heavy Lift added: ${heavy.title}`);
-                            }}
-                            className={`flex-1 min-w-0 text-left rounded-[6px] border px-4 py-3 transition-colors ${
-                              disabled
-                                ? "bg-surface-elevated border-border-subtle opacity-60 cursor-not-allowed"
-                                : "bg-surface-elevated border-border-subtle hover:bg-surface-hover hover:border-[hsl(var(--accent))]"
-                            }`}
-                            style={{ minHeight: 68 }}
-                          >
-                            <div className="font-mono text-[11px] uppercase tracking-[0.06em] font-medium text-[hsl(var(--accent))]">
-                              + HEAVY LIFT
-                            </div>
-                            {heavy ? (
-                              <>
-                                <div className="text-[13px] text-text-primary truncate mt-1">
-                                  {heavy.title}
-                                </div>
-                                <div className="flex items-center gap-1 mt-1">
-                                  <ImpactPill
-                                    impact={heavy.impact}
-                                    goalColor={goalColor(heavy.goalId)}
-                                    size="mini"
-                                  />
-                                  <TimePill minutes={heavy.timeEstimateMinutes} size="mini" />
-                                </div>
-                              </>
-                            ) : (
-                              <div className="text-[12px] italic text-text-tertiary mt-1">
-                                No candidates available
-                              </div>
-                            )}
-                          </button>
-                          <button
-                            type="button"
-                            disabled={qDisabled}
-                            onClick={() => {
-                              const ids = quickSuggestions.map((a) => a.id);
-                              if (ids.length === 0) return;
-                              addMany(ids);
-                              toast.success(`${ids.length} Quick Move${ids.length > 1 ? "s" : ""} added`);
-                            }}
-                            className={`flex-1 min-w-0 text-left rounded-[6px] border px-4 py-3 transition-colors ${
-                              qDisabled
-                                ? "bg-surface-elevated border-border-subtle opacity-60 cursor-not-allowed"
-                                : "bg-surface-elevated border-border-subtle hover:bg-surface-hover hover:border-[hsl(var(--accent))]"
-                            }`}
-                            style={{ minHeight: 68 }}
-                          >
-                            <div className="font-mono text-[11px] uppercase tracking-[0.06em] font-medium text-[hsl(var(--accent))]">
-                              + QUICK MOVES
-                            </div>
-                            {quickSuggestions.length > 0 ? (
-                              <>
-                                <div className="text-[13px] text-text-primary truncate mt-1">
-                                  {quickSuggestions.length} action{quickSuggestions.length > 1 ? "s" : ""}
-                                  {totalQuickMin > 0 ? ` · ~${formatTimeMin(totalQuickMin)}` : ""}
-                                </div>
-                                <div className="font-mono text-[11px] text-text-secondary mt-0.5">
-                                  Top {quickSuggestions.length} easy win{quickSuggestions.length > 1 ? "s" : ""}
-                                </div>
-                              </>
-                            ) : (
-                              <div className="text-[12px] italic text-text-tertiary mt-1">
-                                No candidates available
-                              </div>
-                            )}
-                          </button>
-                        </>
-                      );
-                    })()}
-                  </div>
-                </div>
+                {/* Quick Start removed — pane is browse-only. */}
 
                 <div className="flex items-center gap-1.5 p-2 border-b border-border-subtle flex-wrap">
                   <select

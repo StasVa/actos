@@ -623,7 +623,9 @@ const PlanForm: React.FC<{
 
           {/* RITUALS */}
           <section>
-            <SectionHead meta={`${dueRituals.length}`}>RITUALS TODAY</SectionHead>
+            <SectionHead meta={`${dueRituals.length}`} sub="Mark anything you want to skip.">
+              RITUALS TODAY
+            </SectionHead>
             <div className="space-y-1">
               {dueRituals.length === 0 && (
                 <div className="font-mono text-[11px] text-text-tertiary py-2">
@@ -632,33 +634,56 @@ const PlanForm: React.FC<{
               )}
               {dueRituals.map((r) => {
                 const skipped = state.skippedRitualIds.has(r.id);
+                const mult = ritualMultiplier(r.totalCompletions);
+                const gColor = goalColor(r.goalId);
                 return (
                   <div
                     key={r.id}
                     className={`relative flex items-center gap-2 pr-2 rounded-[3px] hover:bg-surface-hover transition-colors ${
                       skipped ? "opacity-50" : ""
                     }`}
-                    style={{ minHeight: 40 }}
+                    style={{ minHeight: 54 }}
                   >
                     <span
                       className="absolute left-0 top-0 bottom-0"
-                      style={{ background: goalColor(r.goalId), width: 3 }}
+                      style={{ background: gColor, width: 3 }}
                     />
-                    <span style={{ paddingLeft: 11 }} />
-                    <span className={`text-[13px] truncate ${skipped ? "line-through text-text-tertiary" : "text-text-primary"}`}>
-                      {r.title}
-                    </span>
-                    <span className="font-mono text-[11px] text-text-tertiary truncate">
-                      · {r.schedule}
-                    </span>
-                    <div className="flex-1" />
-                    <button
-                      type="button"
-                      onClick={() => toggleRitualSkip(r.id, !skipped)}
-                      className="text-[12px] text-text-tertiary hover:text-text-primary transition shrink-0 px-2"
-                    >
-                      {skipped ? "Restore" : "Skip"}
-                    </button>
+                    <div className="min-w-0 flex-1" style={{ paddingLeft: 14 }}>
+                      <div
+                        className={`text-[14px] font-medium truncate ${
+                          skipped ? "line-through text-text-tertiary" : "text-text-primary"
+                        }`}
+                      >
+                        {r.title}
+                      </div>
+                      <div className="font-mono text-[12px] text-text-secondary truncate">
+                        {r.schedule}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0" style={{ marginLeft: 4 }}>
+                      <span
+                        className="inline-flex items-center justify-center font-medium tabular-nums shrink-0"
+                        style={{
+                          padding: "4px 10px",
+                          borderRadius: 4,
+                          fontSize: 13,
+                          minWidth: 52,
+                          textAlign: "center",
+                          background: `color-mix(in srgb, ${gColor} 15%, transparent)`,
+                          color: gColor,
+                        }}
+                      >
+                        ×{mult.toFixed(2)}
+                      </span>
+                      <TimePill minutes={r.timeEstimateMinutes} />
+                      <button
+                        type="button"
+                        onClick={() => toggleRitualSkip(r.id, !skipped)}
+                        className="text-[12px] text-text-tertiary hover:text-text-primary transition shrink-0 px-2"
+                      >
+                        {skipped ? "Restore" : "Skip"}
+                      </button>
+                    </div>
                   </div>
                 );
               })}

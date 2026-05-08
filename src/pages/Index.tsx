@@ -866,11 +866,7 @@ export const TodayZone: React.FC<{
           <div className="font-mono text-[13px] text-text-secondary tabular-nums">
             {doneActions} actions done · {ritualsDoneCount} rituals done · +{valueAdded} value · {focusH}h focused
           </div>
-          {dayEntry?.reflectionText && (
-            <div className="text-[13px] text-text-primary leading-[1.5] border-l-2 border-border-default pl-3 italic">
-              {dayEntry.reflectionText}
-            </div>
-          )}
+          {/* reflection removed */}
           <button
             type="button"
             onClick={handleReopen}

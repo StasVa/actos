@@ -356,8 +356,11 @@ export const Hero: React.FC = () => {
 
   return (
     <div
-      className="grid w-full divide-x divide-border-subtle rounded-[6px] border border-border-subtle bg-surface-elevated p-6"
-      style={{ gridTemplateColumns: `repeat(${activeGoals.length}, minmax(0, 1fr))` }}
+      className="grid w-full md:divide-x divide-y md:divide-y-0 divide-border-subtle rounded-[6px] border border-border-subtle bg-surface-elevated p-4 md:p-6 gap-4 md:gap-0"
+      style={{
+        gridTemplateColumns: `repeat(var(--hero-cols, 1), minmax(0, 1fr))`,
+        ['--hero-cols' as any]: 1,
+      }}
     >
       {activeGoals.map((g) => {
         const goalProjects = projects.filter((p) => p.goalId === g.id);

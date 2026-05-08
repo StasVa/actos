@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import { useStore } from "@/store/useStore";
 import type { Idea, IdeaStatus, ID } from "@/types";
 import { toast } from "sonner";
@@ -7,6 +8,7 @@ import { ConfirmModal } from "@/components/ConfirmModal";
 import { AppSidebar } from "@/components/AppSidebar";
 import { MobileHeader } from "@/components/MobileHeader";
 import { subscribeAppEvent } from "@/lib/appEvents";
+import { useIsMobile } from "@/hooks/use-mobile";
 
  function relativeAgo(iso: string): { label: string; full: string; sort: number } {
   const d = new Date(iso);
@@ -34,8 +36,8 @@ import { subscribeAppEvent } from "@/lib/appEvents";
   return { label, full, sort: d.getTime() };
 }
 
-/* ===== Chip / FilterGroup ===== */
-const Chip: React.FC<{
+/* ===== Pill / FilterPillRow ===== */
+const Pill: React.FC<{
   active: boolean;
   onClick: () => void;
   children: React.ReactNode;
@@ -43,21 +45,29 @@ const Chip: React.FC<{
 }> = ({ active, onClick, children, dot }) => (
   <button
     onClick={onClick}
-    className={`inline-flex items-center gap-1.5 px-[10px] py-1 rounded-[4px] border text-[12px] transition-colors ${
+    className={`inline-flex items-center gap-2 shrink-0 rounded-[4px] border transition-colors whitespace-nowrap ${
       active
-        ? "bg-surface-hover text-text-primary border-accent"
-        : "bg-transparent text-text-secondary border-border-default hover:text-text-primary"
+        ? "border-[hsl(var(--accent))] text-text-primary font-medium bg-transparent"
+        : "border-border-subtle text-text-secondary bg-transparent hover:bg-surface-hover hover:border-border-default"
     }`}
+    style={{ height: 32, padding: "6px 12px", fontSize: 13, lineHeight: "20px" }}
   >
-    {dot && <span className="w-2 h-2 rounded-full" style={{ background: dot }} />}
+    {dot && <span className="w-2 h-2 rounded-full shrink-0" style={{ background: dot }} />}
     {children}
   </button>
 );
 
-const FilterGroup: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
-  <div className="flex items-center gap-2">
-    <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">{label}</span>
-    <div className="flex items-center gap-1.5">{children}</div>
+const FilterPillRow: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
+  <div className="flex items-center gap-2 min-w-0">
+    <span className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary shrink-0">
+      {label}
+    </span>
+    <div
+      className="flex items-center gap-2 min-w-0 flex-nowrap md:flex-wrap overflow-x-auto md:overflow-visible scrollbar-hide"
+      style={{ WebkitOverflowScrolling: "touch" }}
+    >
+      {children}
+    </div>
   </div>
 );
 
@@ -658,7 +668,7 @@ const AttachmentsSection: React.FC<{ idea: Idea }> = ({ idea }) => {
 };
 
 /* ===== Detail panel ===== */
-const IdeaDetail: React.FC<{ idea: Idea }> = ({ idea }) => {
+const IdeaDetail: React.FC<{ idea: Idea; mobile?: boolean }> = ({ idea, mobile = false }) => {
   const [overlay, setOverlay] = useState<OverlayMode>(null);
   const [confirmDiscard, setConfirmDiscard] = useState(false);
   const goal = useStore((s) => s.goals.find((g) => g.id === idea.goalId));
@@ -687,8 +697,8 @@ const IdeaDetail: React.FC<{ idea: Idea }> = ({ idea }) => {
   };
 
   return (
-    <div className="px-10 py-8">
-      <div className="max-w-[540px] mx-auto">
+    <div className={mobile ? "px-4 py-4" : "px-10 py-8"}>
+      <div className={mobile ? "" : "max-w-[540px] mx-auto"}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 group">
             <span className="w-2 h-2 rounded-full" style={{ background: goalColor }} />
@@ -746,11 +756,34 @@ const IdeaDetail: React.FC<{ idea: Idea }> = ({ idea }) => {
         <div className="h-4" />
 
         {idea.status === "captured" && overlay === null && (
-          <div className="flex items-center gap-3">
-            <GhostButton onClick={() => setOverlay("action")}>Convert to action</GhostButton>
-            <GhostButton onClick={() => setOverlay("project")}>Convert to project</GhostButton>
-            <TertiaryLink onClick={() => setConfirmDiscard(true)}>Discard</TertiaryLink>
-          </div>
+          mobile ? (
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={() => setOverlay("action")}
+                className="w-full h-11 text-[14px] font-medium rounded-[4px] border border-border-default text-text-primary bg-transparent hover:bg-surface-hover transition-colors"
+              >
+                Convert to action
+              </button>
+              <button
+                onClick={() => setOverlay("project")}
+                className="w-full h-11 text-[14px] font-medium rounded-[4px] border border-border-default text-text-primary bg-transparent hover:bg-surface-hover transition-colors"
+              >
+                Convert to project
+              </button>
+              <button
+                onClick={() => setConfirmDiscard(true)}
+                className="mt-2 w-full h-11 text-[13px] text-text-tertiary hover:text-text-secondary transition-colors"
+              >
+                Discard
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3">
+              <GhostButton onClick={() => setOverlay("action")}>Convert to action</GhostButton>
+              <GhostButton onClick={() => setOverlay("project")}>Convert to project</GhostButton>
+              <TertiaryLink onClick={() => setConfirmDiscard(true)}>Discard</TertiaryLink>
+            </div>
+          )
         )}
         {overlay === "action" && (
           <ConvertActionOverlay idea={idea} onDone={() => setOverlay(null)} />
@@ -814,6 +847,7 @@ const Ideas: React.FC = () => {
   const selectedIdeaId = useStore((s) => s.ui.selectedIdeaId);
   const selectIdea = useStore((s) => s.selectIdea);
   const location = useLocation();
+  const isMobile = useIsMobile();
 
   const activeGoals = useMemo(() => goals.filter((g) => g.status === "active"), [goals]);
   const defaultGoal =
@@ -852,13 +886,15 @@ const Ideas: React.FC = () => {
       .sort((a, b) => new Date(b.capturedAt).getTime() - new Date(a.capturedAt).getTime());
   }, [ideas, goalFilter, statusFilter]);
 
-  const selected =
-    filtered.find((i) => i.id === selectedIdeaId) ?? filtered[0] ?? null;
+  const selected = isMobile
+    ? filtered.find((i) => i.id === selectedIdeaId) ?? null
+    : filtered.find((i) => i.id === selectedIdeaId) ?? filtered[0] ?? null;
 
   useEffect(() => {
+    if (isMobile) return;
     if (selected && selected.id !== selectedIdeaId) selectIdea(selected.id);
     if (!selected && selectedIdeaId) selectIdea(undefined);
-  }, [selected, selectedIdeaId, selectIdea]);
+  }, [selected, selectedIdeaId, selectIdea, isMobile]);
 
   const meta = useMemo(() => {
     const captured = ideas.filter((i) => i.status === "captured");
@@ -909,57 +945,55 @@ const Ideas: React.FC = () => {
           )}
         </div>
 
-        {/* Two-column body */}
-        <div className="flex-1 flex min-h-0">
+        {/* Two-column body (desktop) / list-then-drill (mobile) */}
+        <div className="flex-1 flex min-h-0 relative">
           {/* Left column */}
-          <div className="w-[42%] border-r border-border-subtle flex flex-col min-h-0">
-            <div style={{ padding: "16px 16px 12px 32px" }}>
-              <div className="flex items-center gap-4 flex-wrap">
-                <FilterGroup label="GOAL">
-                  <Chip active={goalFilter === "all"} onClick={() => setGoalFilter("all")}>
+          <div className="w-full md:w-[42%] md:border-r border-border-subtle flex flex-col min-h-0">
+            <div className="px-4 md:pl-8 md:pr-4 pt-4 pb-3">
+              <div className="flex flex-col gap-3">
+                <FilterPillRow label="GOAL">
+                  <Pill active={goalFilter === "all"} onClick={() => setGoalFilter("all")}>
                     All
-                  </Chip>
+                  </Pill>
                   {activeGoals.map((g) => (
-                    <Chip
+                    <Pill
                       key={g.id}
                       active={goalFilter === g.id}
                       onClick={() => setGoalFilter(g.id)}
                       dot={`hsl(var(--${g.color}))`}
                     >
                       {g.title}
-                    </Chip>
+                    </Pill>
                   ))}
-                </FilterGroup>
-                <FilterGroup label="STATUS">
-                  <Chip
+                </FilterPillRow>
+                <FilterPillRow label="STATUS">
+                  <Pill
                     active={statusFilter === "captured"}
                     onClick={() => setStatusFilter("captured")}
                   >
                     Captured
-                  </Chip>
-                  <Chip
+                  </Pill>
+                  <Pill
                     active={statusFilter === "converted"}
                     onClick={() => setStatusFilter("converted")}
                   >
                     Converted
-                  </Chip>
-                  <Chip
+                  </Pill>
+                  <Pill
                     active={statusFilter === "discarded"}
                     onClick={() => setStatusFilter("discarded")}
                   >
                     Discarded
-                  </Chip>
-                </FilterGroup>
+                  </Pill>
+                </FilterPillRow>
               </div>
             </div>
-            {/* Search removed — global ⌘K palette handles search. */}
-            {/* Sort row */}
-            <div className="flex items-center justify-end pl-8 pr-4 py-2">
+            <div className="hidden md:flex items-center justify-end pl-8 pr-4 py-2">
               <span className="font-mono text-[11px] text-text-secondary">
                 Sort: Recent first
               </span>
             </div>
-            <div className="flex-1 overflow-y-auto pl-8">
+            <div className="flex-1 overflow-y-auto md:pl-8">
               {filtered.length === 0 ? (
                 <div className="p-8 text-center font-mono text-[11px] text-text-tertiary">
                   No ideas match these filters.
@@ -973,7 +1007,7 @@ const Ideas: React.FC = () => {
                       key={idea.id}
                       idea={idea}
                       goalColor={color}
-                      selected={selected?.id === idea.id}
+                      selected={!isMobile && selected?.id === idea.id}
                       onSelect={() => selectIdea(idea.id)}
                     />
                   );
@@ -982,8 +1016,8 @@ const Ideas: React.FC = () => {
             </div>
           </div>
 
-          {/* Right column */}
-          <div className="flex-1 overflow-y-auto min-h-0">
+          {/* Right column — desktop only */}
+          <div className="hidden md:block flex-1 overflow-y-auto min-h-0">
             {filtered.length === 0 ? (
               <EmptyFiltered onClear={clearFilters} />
             ) : selected ? (
@@ -992,6 +1026,28 @@ const Ideas: React.FC = () => {
               <EmptyDetail />
             )}
           </div>
+
+          {/* Mobile drill-down full-screen detail */}
+          {isMobile && selected && selectedIdeaId && (
+            <div
+              className="fixed inset-0 z-50 overflow-y-auto"
+              style={{ background: "hsl(var(--surface-base))" }}
+            >
+              <div
+                className="sticky top-0 z-10 flex items-center px-2 py-2 border-b border-border-subtle"
+                style={{ background: "hsl(var(--surface-base))" }}
+              >
+                <button
+                  onClick={() => selectIdea(undefined)}
+                  aria-label="Back"
+                  className="inline-flex items-center justify-center text-text-secondary hover:text-text-primary tap-target rounded-[4px]"
+                >
+                  <ArrowLeft size={16} />
+                </button>
+              </div>
+              <IdeaDetail idea={selected} key={selected.id} mobile />
+            </div>
+          )}
         </div>
       </main>
     </div>

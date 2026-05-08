@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import { useStore } from "@/store/useStore";
 import type { Idea, IdeaStatus, ID } from "@/types";
 import { toast } from "sonner";
@@ -7,6 +8,7 @@ import { ConfirmModal } from "@/components/ConfirmModal";
 import { AppSidebar } from "@/components/AppSidebar";
 import { MobileHeader } from "@/components/MobileHeader";
 import { subscribeAppEvent } from "@/lib/appEvents";
+import { useIsMobile } from "@/hooks/use-mobile";
 
  function relativeAgo(iso: string): { label: string; full: string; sort: number } {
   const d = new Date(iso);

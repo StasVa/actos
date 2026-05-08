@@ -439,7 +439,7 @@ const AllDelegated: React.FC = () => {
               </>
             }
             sort={
-              <SortDropdown
+              <SortDropdown<SortKey>
                 value={sortKey}
                 options={tab === "active" ? ACTIVE_SORT_OPTIONS : RETURNED_SORT_OPTIONS}
                 onChange={setSortKey}

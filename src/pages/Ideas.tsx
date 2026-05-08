@@ -158,57 +158,90 @@ const NewIdeaForm: React.FC<{
   );
 };
 
-/* ===== Idea row ===== */
+/* ===== Idea row (matches /actions row pattern) ===== */
+const STATUS_PILL_LABEL: Record<IdeaStatus, string> = {
+  captured: "CAPTURED",
+  converted_to_action: "CONVERTED",
+  converted_to_project: "CONVERTED",
+  discarded: "DISCARDED",
+};
+
+const IdeaStatusPill: React.FC<{ status: IdeaStatus }> = ({ status }) => (
+  <span
+    className="inline-flex items-center font-mono uppercase tracking-[0.08em] rounded-[4px] border border-border-subtle text-text-secondary"
+    style={{ padding: "4px 8px", fontSize: 11, background: "transparent" }}
+  >
+    {STATUS_PILL_LABEL[status]}
+  </span>
+);
+
 const IdeaRow: React.FC<{
   idea: Idea;
   goalColor: string;
-  selected: boolean;
+  goalTitle: string;
+  metaSuffix: string;
   onSelect: () => void;
-}> = ({ idea, goalColor, selected, onSelect }) => {
-  const refCount = idea.references?.length ?? 0;
-  const imgCount = idea.imageAttachments?.length ?? 0;
-  const { label } = relativeAgo(idea.capturedAt);
+}> = ({ idea, goalColor, goalTitle, metaSuffix, onSelect }) => {
+  const isDiscarded = idea.status === "discarded";
+  const isConverted =
+    idea.status === "converted_to_action" || idea.status === "converted_to_project";
   return (
     <div
       onClick={onSelect}
-      className={`relative flex items-stretch h-14 cursor-pointer transition-colors ${
-        selected ? "bg-surface-elevated" : "hover:bg-surface-hover"
-      }`}
+      className="relative flex items-stretch cursor-pointer border-b border-border-subtle hover:bg-surface-hover transition-colors"
+      style={{ minHeight: 56, opacity: isDiscarded ? 0.6 : 1 }}
     >
-      <span className="w-[3px] shrink-0" style={{ background: goalColor }} />
-      {selected && (
-        <span
-          className="absolute left-0 top-0 bottom-0 w-[2px]"
-          style={{ background: "hsl(var(--accent))" }}
-        />
-      )}
-      <div className="flex-1 min-w-0 flex flex-col justify-center gap-1 pl-3 pr-4">
+      <span
+        className="absolute left-0 top-0 bottom-0"
+        style={{ background: goalColor, width: 3 }}
+      />
+      <div className="flex flex-col gap-1 py-3 pr-4 w-full" style={{ paddingLeft: 19 }}>
         <div className="flex items-center justify-between gap-3">
-          <div className="text-[14px] font-medium text-text-primary truncate max-w-[80%]">
+          <span
+            className={`text-[15px] font-medium truncate ${
+              isDiscarded || isConverted ? "text-text-secondary" : "text-text-primary"
+            }`}
+          >
             {idea.title}
+          </span>
+          <div className="shrink-0">
+            <IdeaStatusPill status={idea.status} />
           </div>
-          {(refCount > 0 || imgCount > 0) && (
-            <div className="flex items-center gap-1.5 shrink-0 font-mono text-[10px] text-text-tertiary">
-              {refCount > 0 && (
-                <span className="inline-flex items-center gap-0.5">
-                  <span style={{ color: goalColor }}>↗</span>
-                  {refCount}
-                </span>
-              )}
-              {imgCount > 0 && (
-                <span className="inline-flex items-center gap-0.5">
-                  <span style={{ color: goalColor }}>▣</span>
-                  {imgCount}
-                </span>
-              )}
-            </div>
-          )}
         </div>
-        <div className="font-mono text-[11px] text-text-tertiary">{label}</div>
+        <div className="flex items-center font-mono text-[12px] text-text-secondary truncate">
+          <span
+            className="inline-block w-1.5 h-1.5 rounded-full mr-1.5 shrink-0"
+            style={{ background: goalColor }}
+          />
+          <span className="truncate">
+            {goalTitle}
+            <span className="mx-1.5 text-text-tertiary">·</span>
+            {metaSuffix}
+          </span>
+        </div>
       </div>
     </div>
   );
 };
+
+/* ===== Group header (collapsible) ===== */
+const GroupHeader: React.FC<{
+  label: string;
+  count: number;
+  collapsed: boolean;
+  onToggle: () => void;
+}> = ({ label, count, collapsed, onToggle }) => (
+  <button
+    type="button"
+    onClick={onToggle}
+    className="w-full flex items-center gap-2 px-3 h-8 bg-surface-raised border-b border-border-subtle text-left cursor-pointer hover:bg-surface-hover"
+  >
+    <span className="font-mono text-[11px] text-text-tertiary">{collapsed ? "▸" : "▾"}</span>
+    <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-text-tertiary">
+      {label} · {count}
+    </span>
+  </button>
+);
 
 /* ===== Detail sub-components ===== */
 const SectionHeading: React.FC<{ children: React.ReactNode; action?: React.ReactNode }> = ({

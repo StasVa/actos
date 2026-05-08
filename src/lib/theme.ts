@@ -68,9 +68,6 @@ export function initTheme() {
 
 export function useThemeChoice(): [ThemeChoice, ResolvedTheme, (c: ThemeChoice) => void] {
   const [, force] = React.useReducer((x: number) => x + 1, 0);
-  React.useEffect(() => {
-    const unsub = themeStore.subscribe(() => force());
-    return () => { unsub; };
-  }, []);
+  React.useEffect(() => themeStore.subscribe(() => force()), []);
   return [themeStore.choice, themeStore.resolved, (c) => themeStore.set(c)];
 }

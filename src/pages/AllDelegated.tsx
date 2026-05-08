@@ -392,13 +392,22 @@ const AllDelegated: React.FC = () => {
 
         {/* List */}
         <div className="flex-1 overflow-y-auto min-h-0">
-          {list.length === 0 ? (
-            <EmptyState
-              tab={tab}
-              filtered={anyFilter}
-              onClear={clearFilters}
-              onCreate={newDelegated}
-            />
+          {(tab === "active" ? allActive.length === 0 : allReturned.length === 0) ? (
+            tab === "active" ? (
+              <SharedEmptyState
+                headline="Nothing delegated yet."
+                description="When you delegate an action to someone, it appears here with the expected return date so you can track what's outstanding."
+                ctaLabel="+ New delegated action"
+                onCta={newDelegated}
+              />
+            ) : (
+              <SharedEmptyState
+                headline="No returned delegations yet."
+                description="Once a delegated action is returned and marked done, it appears here as history."
+              />
+            )
+          ) : list.length === 0 ? (
+            <FilteredEmpty onClear={clearFilters} />
           ) : (
             list.map((a) => (
               <DelegationRow

@@ -253,7 +253,7 @@ body {
 /* Mobile drawer backdrop helper */
 .mobile-drawer-backdrop {
   position: fixed; inset: 0; z-index: 60;
-  background: rgba(0,0,0,0.5);
+  background: var(--backdrop);
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
 }

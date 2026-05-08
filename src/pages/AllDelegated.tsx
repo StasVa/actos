@@ -391,7 +391,10 @@ const AllDelegated: React.FC = () => {
           <TabBar value={tab} onChange={setTab} />
 
           {/* Filters */}
-          <div className="mt-3 flex items-center gap-2 flex-wrap">
+          <div
+            className="mt-3 flex items-center gap-2 md:flex-wrap flex-nowrap overflow-x-auto scrollbar-hide"
+            style={{ WebkitOverflowScrolling: "touch" }}
+          >
             <FilterDropdown
               label="DELEGATE"
               value={delegateFilter}

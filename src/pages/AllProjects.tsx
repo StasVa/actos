@@ -9,6 +9,7 @@ import { useStore } from "@/store/useStore";
 import { AppSidebar } from "@/components/AppSidebar";
 import { MobileHeader } from "@/components/MobileHeader";
 import { ProjectCard as SharedProjectCard } from "@/components/ProjectCard";
+import { EmptyState, FilteredEmpty } from "@/components/EmptyState";
 
 const G1 = "hsl(var(--goal-1))";
 const G2 = "hsl(var(--goal-2))";

@@ -1680,44 +1680,76 @@ const LookingBackCard: React.FC<{ date: string }> = ({ date }) => {
 /* ===== Page (Today) ===== */
 const Index: React.FC = () => {
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [planOpen, setPlanOpen] = useState(false);
-  const [closeOpen, setCloseOpen] = useState(false);
-  const [combinedOpen, setCombinedOpen] = useState(false);
+  const [planningMode, setPlanningMode] = useState(false);
 
   const settings = useStore((s) => s.settings);
   const todayEntry = useStore((s) => s.dayEntries.find((d) => d.date === TODAY_ISO));
-  const yesterdayEntry = useStore((s) => s.dayEntries.find((d) => d.date === YESTERDAY_ISO));
   const actions = useStore((s) => s.actions);
   const rituals = useStore((s) => s.rituals);
-
-  // Auto-open Plan or Combined modal once per day on first visit.
-  useEffect(() => {
-    // Plan & Review is now always-on; no layer gate.
-    const flagKey = `actos-day-prompt-${TODAY_ISO}`;
-    if (sessionStorage.getItem(flagKey)) return;
-    if (todayEntry?.isPlanned) return;
-    sessionStorage.setItem(flagKey, "1");
-    if (yesterdayEntry && !yesterdayEntry.isClosed && (yesterdayEntry.isPlanned || yesterdayEntry.startedAt)) {
-      setCombinedOpen(true);
-    } else {
-      setPlanOpen(true);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Listen for global Command Palette events (open Plan/Close/Settings).
-  useEffect(() => {
-    const unsubs = [
-      subscribeAppEvent("open-plan-today", () => setPlanOpen(true)),
-      subscribeAppEvent("open-close-day", () => setCloseOpen(true)),
-      subscribeAppEvent("open-settings", () => setSettingsOpen(true)),
-    ];
-    return () => unsubs.forEach((u) => u());
-  }, []);
+  const dayEntries = useStore((s) => s.dayEntries);
+  const closeDay = useStore((s) => s.closeDay);
+  const updateDayEntry = useStore((s) => s.updateDayEntry);
+  const skipRitualInstance = useStore((s) => s.skipRitualInstance);
 
   const isPlanned = !!todayEntry?.isPlanned;
   const isClosed = !!todayEntry?.isClosed;
   const planAndReview = settings.layers.planAndReview;
+
+  // Listen for global Command Palette events.
+  useEffect(() => {
+    const unsubs = [
+      subscribeAppEvent("open-plan-today", () => {
+        if (!isPlanned) setPlanningMode(true);
+      }),
+      subscribeAppEvent("open-close-day", () => {
+        if (isPlanned && !isClosed) {
+          closeDay(TODAY_ISO);
+          toast.success("Day closed");
+        }
+      }),
+      subscribeAppEvent("open-settings", () => setSettingsOpen(true)),
+    ];
+    return () => unsubs.forEach((u) => u());
+  }, [isPlanned, isClosed, closeDay]);
+
+  // Auto-close yesterday at midnight rollover.
+  useEffect(() => {
+    const sweep = () => {
+      const today = new Date().toISOString().slice(0, 10);
+      for (const d of dayEntries) {
+        if (d.date >= today) continue;
+        if (!d.isPlanned || d.isClosed) continue;
+        const eod = new Date(d.date + "T23:59:59").toISOString();
+        closeDay(d.date, { closedAt: eod });
+        // Mark missed rituals
+        for (const rid of d.plannedRitualIds ?? []) {
+          if ((d.skippedRitualIds ?? []).includes(rid)) continue;
+          const r = rituals.find((rr) => rr.id === rid);
+          if (!r) continue;
+          const has = r.completionHistory.some((c) => c.date === d.date);
+          if (!has) {
+            // Persist a 'missed' status. Use updateRitual via store directly.
+            useStore.getState().updateRitual(rid, {
+              completionHistory: [
+                ...r.completionHistory,
+                { date: d.date, at: eod, status: "missed" },
+              ],
+            });
+          }
+        }
+      }
+    };
+    sweep();
+    const onVis = () => {
+      if (document.visibilityState === "visible") sweep();
+    };
+    document.addEventListener("visibilitychange", onVis);
+    window.addEventListener("focus", sweep);
+    return () => {
+      document.removeEventListener("visibilitychange", onVis);
+      window.removeEventListener("focus", sweep);
+    };
+  }, [dayEntries, closeDay, rituals]);
 
   // Header date + meta
   const today = new Date();
@@ -1741,45 +1773,62 @@ const Index: React.FC = () => {
   const todaysRitualCount = rituals.filter(
     (r) => r.status === "active" && (planAndReview && isPlanned ? plannedRitualSet.has(r.id) : true),
   ).length;
-  const aggMeta = isPlanned ? `${todaysActionCount} actions · ${todaysRitualCount} rituals` : "";
+  const aggMeta = isPlanned && !isClosed && !planningMode
+    ? `${todaysActionCount} actions · ${todaysRitualCount} rituals`
+    : "";
 
-  // Looking-back date selector (most recent ACTIVE day with activity)
-  const dayEntries = useStore((s) => s.dayEntries);
   const lookingBackDate = selectLookingBackDate(dayEntries, actions, rituals);
+
+  // Determine which view to render in the main content area.
+  const showPlanning = planningMode && !isPlanned;
+  const showRecap = isClosed && !planningMode;
 
   return (
     <div className="min-h-screen bg-surface-base text-text-primary">
       <AppSidebar onOpenSettings={() => setSettingsOpen(true)} />
       <SettingsPanel open={settingsOpen} onOpenChange={setSettingsOpen} />
-      <PlanTodayModal open={planOpen} onClose={() => setPlanOpen(false)} />
-      <CloseDayModal open={closeOpen} onClose={() => setCloseOpen(false)} />
-      <ClosePlanModal open={combinedOpen} onClose={() => setCombinedOpen(false)} />
-      <main className="app-main page-medium">
-        <header className="mb-8">
-          <div className="flex items-start justify-between gap-4">
-            <h1 className="text-[28px] font-medium text-text-primary leading-tight">{headerDate}</h1>
-            {aggMeta && (
-              <div className="font-mono text-[13px] text-text-tertiary tabular-nums pt-2">
-                {aggMeta}
-              </div>
-            )}
-          </div>
-          {todayEntry?.dayType && <DayTypeIndicator dayType={todayEntry.dayType} />}
-        </header>
-
-        <TodayZone
-          onPlanClick={() => setPlanOpen(true)}
-          onCloseClick={() => setCloseOpen(true)}
-        />
-
-        {lookingBackDate && (
+      <main className={`app-main ${showPlanning ? "page-wide" : "page-medium"}`}>
+        {showPlanning ? (
+          <PlanTodayPage
+            onCancel={() => setPlanningMode(false)}
+            onComplete={() => setPlanningMode(false)}
+          />
+        ) : showRecap ? (
+          <CloseDayRecap />
+        ) : (
           <>
-            <div className="h-10" />
-            <LookingBackCard date={lookingBackDate} />
+            <header className="mb-8">
+              <div className="flex items-start justify-between gap-4">
+                <h1 className="text-[28px] font-medium text-text-primary leading-tight">
+                  {headerDate}
+                </h1>
+                {aggMeta && (
+                  <div className="font-mono text-[13px] text-text-tertiary tabular-nums pt-2">
+                    {aggMeta}
+                  </div>
+                )}
+              </div>
+              {todayEntry?.dayType && <DayTypeIndicator dayType={todayEntry.dayType} />}
+            </header>
+
+            <TodayZone
+              onPlanClick={() => setPlanningMode(true)}
+              onCloseClick={() => {
+                closeDay(TODAY_ISO);
+                toast.success("Day closed");
+              }}
+            />
+
+            {lookingBackDate && (
+              <>
+                <div className="h-10" />
+                <LookingBackCard date={lookingBackDate} />
+              </>
+            )}
+
+            <div className="h-12" />
           </>
         )}
-
-        <div className="h-12" />
       </main>
     </div>
   );

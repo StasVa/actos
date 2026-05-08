@@ -363,7 +363,7 @@ const AllDelegated: React.FC = () => {
           </div>
 
           {/* Aggregate counts */}
-          <div className="flex items-center gap-6 py-3">
+          <div className="flex items-center gap-x-6 gap-y-2 py-3 flex-wrap">
             <Counter label="ACTIVE" count={aggregates.active} />
             <span className="text-text-tertiary">·</span>
             <Counter

@@ -28,16 +28,24 @@ const SectionHead: React.FC<{ children: React.ReactNode; sub?: string; meta?: Re
   sub,
   meta,
 }) => (
-  <div className="mb-2 flex items-baseline justify-between gap-3">
+  <div className="mb-4 flex items-baseline justify-between gap-3">
     <div>
-      <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
-        {children}
+      <div className="flex items-baseline gap-2 flex-wrap">
+        <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
+          {children}
+        </div>
+        {meta && (
+          <div className="font-mono text-[11px] text-text-tertiary tabular-nums">
+            · {meta}
+          </div>
+        )}
       </div>
-      {sub && <div className="text-[13px] text-text-secondary mt-1">{sub}</div>}
+      {sub && (
+        <div className="text-[16px] md:text-[19px] font-medium text-text-primary mt-1 leading-snug">
+          {sub}
+        </div>
+      )}
     </div>
-    {meta && (
-      <div className="font-mono text-[11px] text-text-tertiary tabular-nums">{meta}</div>
-    )}
   </div>
 );
 

@@ -9,6 +9,7 @@ import { ConfirmModal } from "@/components/ConfirmModal";
 import { FilterDropdown, FilterOption } from "@/components/FilterDropdown";
 import { SortDropdown } from "@/components/SortDropdown";
 import { EmptyState, FilteredEmpty } from "@/components/EmptyState";
+import { PageHeader } from "@/components/PageHeader";
 import { Tooltip, SparkTooltipContent, StateDotTooltip, type DayInfo } from "@/components/Tooltip";
 import { toast } from "sonner";
 import type { Goal } from "@/types";
@@ -535,60 +536,42 @@ const Goals: React.FC = () => {
       <AppSidebar onOpenSettings={() => setSettingsOpen(true)} />
       <SettingsPanel open={settingsOpen} onOpenChange={setSettingsOpen} />
       <main className="app-main page-medium">
-        <header className="mb-6 flex items-center justify-between gap-4">
-          <h1 className="text-[24px] font-medium text-text-primary leading-tight">Goals</h1>
-          <div className="flex items-center gap-4">
-            <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary tabular-nums">
-              {totalAll} goals · {totalActive} active · {totalCompleted} completed
-            </div>
-            {ghostDisabled ? (
-              <Tooltip content="You have 3 active goals. Complete or drop one to add another.">
-                <button
-                  type="button"
-                  disabled
-                  aria-label="New goal"
-                  className="inline-flex items-center justify-center gap-1 rounded-[4px] bg-surface-hover text-text-secondary min-w-[40px] min-h-[40px] sm:min-h-0 sm:min-w-0 sm:px-[16px] sm:py-[8px] text-[13px] font-medium cursor-not-allowed"
-                >
-                  <span className="text-[15px] leading-none">+</span>
-                  <span className="hidden sm:inline">New goal</span>
-                </button>
-              </Tooltip>
-            ) : (
-              <button
-                type="button"
-                aria-label="New goal"
-                onClick={() => useStore.getState().openPanel({ kind: "goal", mode: "new" })}
-                className="inline-flex items-center justify-center gap-1 rounded-[4px] bg-accent hover:bg-accent-hover text-white min-w-[40px] min-h-[40px] sm:min-h-0 sm:min-w-0 sm:px-[16px] sm:py-[8px] text-[13px] font-medium transition-colors"
-              >
-                <span className="text-[15px] leading-none">+</span>
-                <span className="hidden sm:inline">New goal</span>
-              </button>
-            )}
-          </div>
-        </header>
+        <PageHeader
+          title="Goals"
+          meta={`${totalAll} GOALS · ${totalActive} ACTIVE · ${totalCompleted} COMPLETED`}
+          cta={{
+            label: "+ New goal",
+            onClick: () => useStore.getState().openPanel({ kind: "goal", mode: "new" }),
+            ariaLabel: "New goal",
+            disabled: ghostDisabled,
+            disabledTooltip: ghostDisabled
+              ? "You have 3 active goals. Complete or drop one to add another."
+              : undefined,
+          }}
+          filters={
+            <>
+              <FilterDropdown<StateFilter>
+                label="STATE"
+                value={stateFilter}
+                defaultValue="all"
+                options={STATE_OPTIONS}
+                onChange={setStateFilter}
+              />
+              <FilterDropdown<TypeFilter>
+                label="TYPE"
+                value={typeFilter}
+                defaultValue="all"
+                options={TYPE_OPTIONS}
+                onChange={setTypeFilter}
+              />
+            </>
+          }
+          sort={
+            <SortDropdown<SortKey> value={sortKey} options={SORT_OPTIONS} onChange={setSortKey} />
+          }
+        />
 
-        <div className="flex flex-wrap items-center gap-2 mb-4">
-          <FilterDropdown<StateFilter>
-            label="STATE"
-            value={stateFilter}
-            defaultValue="all"
-            options={STATE_OPTIONS}
-            onChange={setStateFilter}
-          />
-          <FilterDropdown<TypeFilter>
-            label="TYPE"
-            value={typeFilter}
-            defaultValue="all"
-            options={TYPE_OPTIONS}
-            onChange={setTypeFilter}
-          />
-          <div className="flex-1" />
-          <SortDropdown<SortKey> value={sortKey} options={SORT_OPTIONS} onChange={setSortKey} />
-        </div>
-
-        {/* Search removed — global ⌘K palette handles search. */}
-
-        <div className="my-6 border-t border-border-subtle" />
+        <div style={{ height: 24 }} />
 
         {noGoalsAtAll ? (
           <EmptyState

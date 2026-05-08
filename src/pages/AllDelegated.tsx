@@ -217,6 +217,19 @@ const DATE_OPTIONS: FilterOption<DateRange>[] = [
   { value: "365", label: "Last year" },
 ];
 
+type SortKey = "due" | "delegated" | "impact" | "title";
+const ACTIVE_SORT_OPTIONS: FilterOption<SortKey>[] = [
+  { value: "due", label: "By due date" },
+  { value: "delegated", label: "Recently delegated" },
+  { value: "impact", label: "By impact" },
+  { value: "title", label: "By title" },
+];
+const RETURNED_SORT_OPTIONS: FilterOption<SortKey>[] = [
+  { value: "delegated", label: "Recently returned" },
+  { value: "impact", label: "By impact" },
+  { value: "title", label: "By title" },
+];
+
 /* ===== Page ===== */
 const AllDelegated: React.FC = () => {
   const actions = useStore((s) => s.actions);
@@ -239,8 +252,8 @@ const AllDelegated: React.FC = () => {
   const [delegateFilter, setDelegateFilter] = useState<string>("all");
   const [goalFilter, setGoalFilter] = useState<string>("all");
   const [dateRange, setDateRange] = useState<DateRange>("all");
+  const [sortKey, setSortKey] = useState<SortKey>("due");
 
-  // Active = currently delegated. Returned = done with delegate name (was returned).
   const allActive = useMemo(
     () => actions.filter((a) => a.status === "delegated"),
     [actions],
@@ -297,29 +310,46 @@ const AllDelegated: React.FC = () => {
     });
   };
 
+  const sortFn = (a: Action, b: Action) => {
+    switch (sortKey) {
+      case "impact":
+        return (b.impact ?? 0) - (a.impact ?? 0);
+      case "title":
+        return a.title.localeCompare(b.title);
+      case "delegated": {
+        const ta = a.delegatedAt ?? a.completedAt ?? "";
+        const tb = b.delegatedAt ?? b.completedAt ?? "";
+        return tb.localeCompare(ta);
+      }
+      case "due":
+      default: {
+        const da = a.expectedReturnDate
+          ? daysBetween(a.expectedReturnDate, TODAY_ISO)
+          : Number.POSITIVE_INFINITY;
+        const db = b.expectedReturnDate
+          ? daysBetween(b.expectedReturnDate, TODAY_ISO)
+          : Number.POSITIVE_INFINITY;
+        return da - db;
+      }
+    }
+  };
+
   const activeList = useMemo(() => {
-    const filtered = applyFilters(allActive, false);
-    return filtered.sort((a, b) => {
-      const da = a.expectedReturnDate
-        ? daysBetween(a.expectedReturnDate, TODAY_ISO)
-        : Number.POSITIVE_INFINITY;
-      const db = b.expectedReturnDate
-        ? daysBetween(b.expectedReturnDate, TODAY_ISO)
-        : Number.POSITIVE_INFINITY;
-      return da - db;
-    });
+    return applyFilters(allActive, false).sort(sortFn);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allActive, delegateFilter, goalFilter]);
+  }, [allActive, delegateFilter, goalFilter, sortKey]);
 
   const returnedList = useMemo(() => {
-    const filtered = applyFilters(allReturned, true);
-    return filtered.sort((a, b) => {
-      const ta = a.completedAt ?? "";
-      const tb = b.completedAt ?? "";
-      return tb.localeCompare(ta);
+    return applyFilters(allReturned, true).sort((a, b) => {
+      if (sortKey === "due") {
+        const ta = a.completedAt ?? "";
+        const tb = b.completedAt ?? "";
+        return tb.localeCompare(ta);
+      }
+      return sortFn(a, b);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allReturned, delegateFilter, goalFilter, dateRange]);
+  }, [allReturned, delegateFilter, goalFilter, dateRange, sortKey]);
 
   const list = tab === "active" ? activeList : returnedList;
 
@@ -337,100 +367,86 @@ const AllDelegated: React.FC = () => {
     setDelegateFilter("all");
     setGoalFilter("all");
     setDateRange("all");
+    setSortKey("due");
   };
   const anyFilter =
     delegateFilter !== "all" ||
     goalFilter !== "all" ||
     (tab === "returned" && dateRange !== "all");
 
+  const metaLine = (
+    <>
+      <span>{aggregates.active} ACTIVE</span>
+      <span className="mx-1.5">·</span>
+      <span style={{ color: aggregates.overdue > 0 ? "hsl(var(--text-warning))" : undefined }}>
+        {aggregates.overdue} OVERDUE
+      </span>
+      <span className="mx-1.5">·</span>
+      <span style={{ color: aggregates.today > 0 ? "hsl(var(--accent))" : undefined }}>
+        {aggregates.today} DUE TODAY
+      </span>
+    </>
+  );
+
   return (
     <div className="min-h-screen bg-surface-base text-text-primary">
       <AppSidebar />
       <MobileHeader />
       <main className="app-main page-medium flex flex-col h-screen">
-        {/* Header */}
-        <div className="px-10 pt-6 pb-3 shrink-0">
-          <div className="flex items-center justify-between gap-4">
-            <h1 className="text-[24px] font-medium text-text-primary">Delegated</h1>
-            <button
-              onClick={newDelegated}
-              aria-label="Create a delegated action"
-              className="inline-flex items-center gap-1.5 h-9 px-3 rounded-[4px] text-[13px] font-medium text-white transition-colors"
-              style={{ background: "hsl(var(--accent))" }}
-            >
-              <Plus size={14} />
-              Delegate
-            </button>
-          </div>
-
-          {/* Aggregate counts */}
-          <div className="flex items-center gap-x-6 gap-y-2 py-3 flex-wrap">
-            <Counter label="ACTIVE" count={aggregates.active} />
-            <span className="text-text-tertiary">·</span>
-            <Counter
-              label="OVERDUE"
-              count={aggregates.overdue}
-              color={
-                aggregates.overdue > 0
-                  ? "hsl(var(--text-warning))"
-                  : "hsl(var(--text-tertiary))"
-              }
-            />
-            <span className="text-text-tertiary">·</span>
-            <Counter
-              label="DUE TODAY"
-              count={aggregates.today}
-              color={
-                aggregates.today > 0
-                  ? "hsl(var(--accent))"
-                  : "hsl(var(--text-tertiary))"
-              }
-            />
-          </div>
-
-          {/* Tabs */}
-          <TabBar value={tab} onChange={setTab} />
-
-          {/* Filters */}
-          <div
-            className="mt-3 flex items-center gap-2 md:flex-wrap flex-nowrap overflow-x-auto scrollbar-hide"
-            style={{ WebkitOverflowScrolling: "touch" }}
-          >
-            <FilterDropdown
-              label="DELEGATE"
-              value={delegateFilter}
-              defaultValue="all"
-              options={delegateOptions}
-              onChange={setDelegateFilter}
-            />
-            <FilterDropdown
-              label="GOAL"
-              value={goalFilter}
-              defaultValue="all"
-              options={goalOptions}
-              onChange={setGoalFilter}
-            />
-            {tab === "returned" && (
-              <FilterDropdown
-                label="RANGE"
-                value={dateRange}
-                defaultValue="all"
-                options={DATE_OPTIONS}
-                onChange={(v) => setDateRange(v as DateRange)}
+        <div className="px-4 md:px-10 pt-6 pb-4 shrink-0">
+          <PageHeader
+            title="Delegated"
+            meta={metaLine}
+            cta={{
+              label: "+ Delegate",
+              onClick: newDelegated,
+              ariaLabel: "Create a delegated action",
+            }}
+            belowMeta={<TabBar value={tab} onChange={setTab} />}
+            filters={
+              <>
+                <FilterDropdown
+                  label="DELEGATE"
+                  value={delegateFilter}
+                  defaultValue="all"
+                  options={delegateOptions}
+                  onChange={setDelegateFilter}
+                />
+                <FilterDropdown
+                  label="GOAL"
+                  value={goalFilter}
+                  defaultValue="all"
+                  options={goalOptions}
+                  onChange={setGoalFilter}
+                />
+                {tab === "returned" && (
+                  <FilterDropdown
+                    label="DATE"
+                    value={dateRange}
+                    defaultValue="all"
+                    options={DATE_OPTIONS}
+                    onChange={(v) => setDateRange(v as DateRange)}
+                  />
+                )}
+                {anyFilter && (
+                  <button
+                    onClick={clearFilters}
+                    className="ml-1 text-[12px] text-text-tertiary hover:text-text-secondary transition-colors shrink-0"
+                  >
+                    Clear filters
+                  </button>
+                )}
+              </>
+            }
+            sort={
+              <SortDropdown
+                value={sortKey}
+                options={tab === "active" ? ACTIVE_SORT_OPTIONS : RETURNED_SORT_OPTIONS}
+                onChange={setSortKey}
               />
-            )}
-            {anyFilter && (
-              <button
-                onClick={clearFilters}
-                className="ml-1 text-[12px] text-text-tertiary hover:text-text-secondary transition-colors"
-              >
-                Clear filters
-              </button>
-            )}
-          </div>
+            }
+          />
         </div>
-
-        <div className="border-t border-border-subtle" />
 
         {/* List */}
         <div className="flex-1 overflow-y-auto min-h-0">
@@ -467,6 +483,3 @@ const AllDelegated: React.FC = () => {
     </div>
   );
 };
-
-
-export default AllDelegated;

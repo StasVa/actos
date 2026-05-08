@@ -198,8 +198,12 @@ export const CloseDayRecap: React.FC = () => {
 
       <div className="border-t border-border-subtle" />
 
-      {/* Stat tiles */}
-      <section className="grid grid-cols-2 md:grid-cols-5 gap-3">
+      {/* Stat tiles — 5th SESSIONS tile shown only when there's at least 1 session today. */}
+      <section
+        className={`grid grid-cols-2 gap-3 ${
+          sessionsToday.length > 0 ? "md:grid-cols-5" : "md:grid-cols-4"
+        }`}
+      >
         <Tile value={`+${valueAdded}`} label="VALUE ADDED" />
         <Tile value={doneActions.length} label="ACTIONS DONE" />
         <Tile value={ritualsDoneCount} label="RITUALS DONE" />

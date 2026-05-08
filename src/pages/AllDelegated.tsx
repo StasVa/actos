@@ -1,13 +1,14 @@
 import React, { useMemo, useState } from "react";
-import { Plus } from "lucide-react";
 import { AppSidebar } from "@/components/AppSidebar";
 import { MobileHeader } from "@/components/MobileHeader";
 import { ReturnDatePill } from "@/components/ReturnDatePill";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { FilterDropdown, FilterOption } from "@/components/FilterDropdown";
+import { SortDropdown } from "@/components/SortDropdown";
 import { useStore } from "@/store/useStore";
 import type { Action, Goal, Project } from "@/types";
 import { EmptyState as SharedEmptyState, FilteredEmpty } from "@/components/EmptyState";
+import { PageHeader } from "@/components/PageHeader";
 
 /* ===== helpers ===== */
 const TODAY_ISO = "2026-05-05";

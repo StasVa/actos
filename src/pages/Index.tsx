@@ -17,6 +17,7 @@ import { ProjectCard as SharedProjectCard } from "@/components/ProjectCard";
 import { toast } from "sonner";
 import { subscribeAppEvent } from "@/lib/appEvents";
 import { formatTime } from "@/lib/format";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export const TODAY_ISO = new Date().toISOString().slice(0, 10);
 export const YESTERDAY_ISO = (() => {

@@ -73,7 +73,7 @@ const App = () => (
             <Route path="audit" element={<AdminAudit />} />
             <Route path="announcements" element={<AdminAnnouncements />} />
           </Route>
-          <Route path="/admin/components" element={<AdminComponents />}>{null}</Route>
+          <Route path="/admin/components" element={<AdminComponents />} />
 
           {/* Default + legacy redirects */}
           <Route path="/" element={<Navigate to="/today" replace />} />

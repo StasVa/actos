@@ -3,6 +3,7 @@ import { Plus } from "lucide-react";
 import { AppSidebar } from "@/components/AppSidebar";
 import { MobileHeader } from "@/components/MobileHeader";
 import { ReturnDatePill } from "@/components/ReturnDatePill";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { FilterDropdown, FilterOption } from "@/components/FilterDropdown";
 import { useStore } from "@/store/useStore";
 import type { Action, Goal, Project } from "@/types";
@@ -75,6 +76,42 @@ const DelegationRow: React.FC<{
   onClick: () => void;
 }> = ({ action, goal, project, variant, onClick }) => {
   const color = goal?.color ?? "hsl(var(--text-tertiary))";
+  const isMobile = useIsMobile();
+
+  if (isMobile) {
+    return (
+      <div
+        onClick={onClick}
+        className="relative flex cursor-pointer border-b border-border-subtle hover:bg-surface-hover transition-colors"
+        style={{ minHeight: 72 }}
+      >
+        <span
+          className="absolute left-0 top-0 bottom-0"
+          style={{ background: color, width: 3 }}
+        />
+        <div className="flex flex-col gap-1 w-full" style={{ padding: "12px 16px" }}>
+          <div className="flex items-center justify-between gap-2">
+            <div className="text-[15px] font-medium text-text-primary truncate min-w-0 flex-1">
+              {action.title}
+            </div>
+            <ImpactPill impact={action.impact} color={color} />
+          </div>
+          <div className="font-mono text-[12px] text-text-secondary tabular-nums truncate flex items-center gap-2">
+            <span className="text-text-primary truncate">
+              → {action.delegateName ?? "—"}
+            </span>
+            <span className="text-text-tertiary">·</span>
+            {variant === "active" ? (
+              <ReturnDatePill expectedReturnDate={action.expectedReturnDate} compact />
+            ) : (
+              <ReturnedPill completedAt={action.completedAt} />
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       onClick={onClick}
@@ -321,12 +358,12 @@ const AllDelegated: React.FC = () => {
               style={{ background: "hsl(var(--accent))" }}
             >
               <Plus size={14} />
-              + Delegate
+              Delegate
             </button>
           </div>
 
           {/* Aggregate counts */}
-          <div className="flex items-center gap-6 py-3">
+          <div className="flex items-center gap-x-6 gap-y-2 py-3 flex-wrap">
             <Counter label="ACTIVE" count={aggregates.active} />
             <span className="text-text-tertiary">·</span>
             <Counter
@@ -354,7 +391,10 @@ const AllDelegated: React.FC = () => {
           <TabBar value={tab} onChange={setTab} />
 
           {/* Filters */}
-          <div className="mt-3 flex items-center gap-2 flex-wrap">
+          <div
+            className="mt-3 flex items-center gap-2 md:flex-wrap flex-nowrap overflow-x-auto scrollbar-hide"
+            style={{ WebkitOverflowScrolling: "touch" }}
+          >
             <FilterDropdown
               label="DELEGATE"
               value={delegateFilter}

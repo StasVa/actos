@@ -110,10 +110,13 @@ const ActionRow: React.FC<{ action: Action; selected: boolean; onSelect: () => v
   const bottomBits: React.ReactNode[] = [];
   bottomBits.push(<span key="goal">{goal.name}</span>);
   bottomBits.push(<span key="proj">{action.project}</span>);
-  if (action.impact) bottomBits.push(<span key="imp" className="tabular-nums">I{action.impact}</span>);
   if (action.timeMinutes) bottomBits.push(<span key="time" className="tabular-nums">{formatTime(action.timeMinutes)}</span>);
   if (action.status === "delegated" && action.delegate)
     bottomBits.push(<span key="del">→ {action.delegate}</span>);
+
+  const goalVar = `--goal-${action.goal === "g1" ? 1 : action.goal === "g2" ? 2 : 3}`;
+  const impactBg = `color-mix(in srgb, hsl(var(${goalVar})) 15%, transparent)`;
+  const impactFg = `hsl(var(${goalVar}))`;
 
   return (
     <div

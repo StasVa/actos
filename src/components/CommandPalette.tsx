@@ -565,7 +565,7 @@ export function CommandPalette() {
     <div
       className="fixed inset-0 z-[100] flex justify-center"
       style={{
-        background: "rgba(0,0,0,0.5)",
+        background: "var(--backdrop)",
         paddingTop: isMobile ? "5vh" : "12vh",
         paddingLeft: isMobile ? "8px" : "16px",
         paddingRight: isMobile ? "8px" : "16px",

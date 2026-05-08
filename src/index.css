@@ -5,7 +5,8 @@
 /* ActOS dark workspace theme — Linear/Plane density */
 
 @layer base {
-  :root {
+  :root,
+  [data-theme="dark"] {
     --surface-base: 240 9% 6%;          /* #0F0F12 */
     --surface-raised: 240 8% 9%;        /* #16161A */
     --surface-hover: 240 8% 12%;        /* #1C1C22 */
@@ -32,7 +33,9 @@
     --status-done: 102 26% 48%;
     --status-delegated: 220 8% 53%;
     --status-dropped: 18 25% 50%;
+    --status-cancelled: 18 25% 50%;
     --text-warning: 28 78% 62%;         /* amber, clearly distinct from text-tertiary */
+    --backdrop: rgba(0, 0, 0, 0.5);
 
     /* shadcn aliases */
     --background: 240 9% 6%;
@@ -55,7 +58,60 @@
     --ring: 226 100% 64%;
     --radius: 0.25rem;
   }
+
+  [data-theme="light"] {
+    --surface-base: 240 6% 98%;
+    --surface-raised: 0 0% 100%;
+    --surface-hover: 220 7% 95%;
+    --surface-elevated: 0 0% 100%;
+
+    --text-primary: 240 8% 11%;
+    --text-secondary: 235 5% 37%;
+    --text-tertiary: 233 5% 56%;
+    --text-disabled: 220 7% 80%;
+
+    --border-subtle: 225 6% 91%;
+    --border-default: 220 7% 84%;
+
+    --accent: 226 100% 64%;
+    --accent-hover: 226 100% 58%;
+    --accent-muted: 228 53% 70%;
+
+    --goal-1: 202 43% 40%;
+    --goal-2: 26 59% 46%;
+    --goal-3: 277 22% 45%;
+
+    --state-active: 113 31% 39%;
+    --state-stalled: 233 5% 56%;
+    --status-done: 113 31% 39%;
+    --status-delegated: 219 11% 41%;
+    --status-dropped: 14 42% 38%;
+    --status-cancelled: 14 42% 38%;
+    --text-warning: 31 58% 40%;
+    --backdrop: rgba(20, 22, 28, 0.35);
+
+    --background: 240 6% 98%;
+    --foreground: 240 8% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 8% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 8% 11%;
+    --primary: 226 100% 64%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 7% 95%;
+    --secondary-foreground: 240 8% 11%;
+    --muted: 220 7% 95%;
+    --muted-foreground: 235 5% 37%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 14 42% 38%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 225 6% 91%;
+    --input: 220 7% 84%;
+    --ring: 226 100% 64%;
+    --radius: 0.25rem;
+  }
 }
+
 
 @layer base {
   * {
@@ -197,7 +253,7 @@ body {
 /* Mobile drawer backdrop helper */
 .mobile-drawer-backdrop {
   position: fixed; inset: 0; z-index: 60;
-  background: rgba(0,0,0,0.5);
+  background: var(--backdrop);
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
 }

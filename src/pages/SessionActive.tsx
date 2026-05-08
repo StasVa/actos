@@ -655,7 +655,7 @@ const SessionActive: React.FC = () => {
           {timer.phase === "workEnd" && (
             <div
               className="fixed inset-0 z-[80] flex items-center justify-center"
-              style={{ background: "rgba(0,0,0,0.5)" }}
+              style={{ background: "var(--backdrop)" }}
             >
               <div
                 className="w-[440px] max-w-[90vw] bg-surface-elevated border border-border-subtle rounded-[6px] p-6"
@@ -693,7 +693,7 @@ const SessionActive: React.FC = () => {
           {timer.phase === "breakEnd" && (
             <div
               className="fixed inset-0 z-[80] flex items-center justify-center"
-              style={{ background: "rgba(0,0,0,0.5)" }}
+              style={{ background: "var(--backdrop)" }}
             >
               <div
                 className="w-[440px] max-w-[90vw] bg-surface-elevated border border-border-subtle rounded-[6px] p-6"
@@ -728,7 +728,7 @@ const SessionActive: React.FC = () => {
           {timer.phase === "sessionEnd" && (
             <div
               className="fixed inset-0 z-[80] flex items-center justify-center"
-              style={{ background: "rgba(0,0,0,0.5)" }}
+              style={{ background: "var(--backdrop)" }}
             >
               <div
                 className="w-[480px] max-w-[90vw] bg-surface-elevated border border-border-subtle rounded-[6px] p-6"
@@ -857,7 +857,7 @@ const SessionActive: React.FC = () => {
       {pickerOpen && (
         <div
           className="fixed inset-0 z-[90] flex items-center justify-center"
-          style={{ background: "rgba(0,0,0,0.5)" }}
+          style={{ background: "var(--backdrop)" }}
           onClick={() => setPickerOpen(false)}
         >
           <div

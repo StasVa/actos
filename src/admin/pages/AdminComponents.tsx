@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { Plus, Search, ChevronDown } from "lucide-react";
 import { useStore } from "@/store/useStore";
+import { useThemeChoice } from "@/lib/theme";
 import { ImpactPill, TimePill } from "@/components/MetaPills";
 import { ActionRow } from "@/components/ActionRow";
 import { EmptyState, FilteredEmpty, ReviewEmpty } from "@/components/EmptyState";
@@ -122,12 +123,17 @@ const COLOR_TOKENS = [
   ["goal-3", "Goal 3"],
 ];
 
-const Atoms: React.FC = () => (
+const Atoms: React.FC = () => {
+  const [, resolved] = useThemeChoice();
+  return (
   <Section
     id="atoms"
     title="Atoms"
     description="Color tokens, typography scale, spacing scale."
   >
+    <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-4">
+      THEME: {resolved}
+    </div>
     <Sample name="Color tokens" spec="08-DESIGN-SYSTEM § 1">
       {COLOR_TOKENS.map(([token, name]) => (
         <Cell key={token} label={name}>
@@ -194,7 +200,8 @@ const Atoms: React.FC = () => (
       ))}
     </Sample>
   </Section>
-);
+  );
+};
 
 // ───────── Buttons ─────────
 const TierAButton: React.FC<{ label: string; disabled?: boolean }> = ({ label, disabled }) => (

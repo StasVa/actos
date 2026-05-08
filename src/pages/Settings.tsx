@@ -3,6 +3,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { MobileHeader } from "@/components/MobileHeader";
 import { PageHeader } from "@/components/PageHeader";
 import { useStore } from "@/store/useStore";
+import { useThemeChoice, type ThemeChoice } from "@/lib/theme";
 import { toast } from "sonner";
 
 const STORAGE_KEY = "actos-store";
@@ -69,6 +70,7 @@ export default function Settings() {
   const setSubscriptionTier = useStore((s) => s.setSubscriptionTier);
   const resetToSeed = useStore((s) => s.resetToSeed);
   const activeGoals = goals.filter((g) => g.status === "active");
+  const [themeChoice, , setThemeChoice] = useThemeChoice();
   const fileRef = React.useRef<HTMLInputElement>(null);
 
   const handleReset = () => {
@@ -143,6 +145,42 @@ export default function Settings() {
                 checked={!!settings.showAdminTools}
                 onChange={(v) => setShowAdminTools(v)}
               />
+            </div>
+
+            {/* Theme */}
+            <div className="mt-6">
+              <div className="text-[13px] text-text-primary mb-1">Theme</div>
+              <div className="text-[12px] text-text-tertiary mb-2">
+                Defaults to your system setting.
+              </div>
+              <div
+                role="radiogroup"
+                aria-label="Theme"
+                className="inline-flex items-stretch rounded-[4px] overflow-hidden"
+                style={{ border: "1px solid hsl(var(--border-default))", height: 32 }}
+              >
+                {(["system", "light", "dark"] as ThemeChoice[]).map((opt, i) => {
+                  const active = themeChoice === opt;
+                  return (
+                    <button
+                      key={opt}
+                      type="button"
+                      role="radio"
+                      aria-checked={active}
+                      onClick={() => setThemeChoice(opt)}
+                      className="px-4 text-[13px] capitalize transition-colors"
+                      style={{
+                        background: active ? "hsl(var(--surface-hover))" : "transparent",
+                        color: active ? "hsl(var(--text-primary))" : "hsl(var(--text-secondary))",
+                        borderLeft: i === 0 ? "none" : "1px solid hsl(var(--border-default))",
+                        minWidth: 80,
+                      }}
+                    >
+                      {opt}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </section>
 

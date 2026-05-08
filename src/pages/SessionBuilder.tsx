@@ -406,13 +406,9 @@ const SelectedRow: React.FC<{
               {action.title}
             </span>
           </div>
-          <div className="shrink-0 flex items-center gap-3">
-            {action.timeEstimateMinutes ? (
-              <span className="font-mono text-[12px] tabular-nums text-text-secondary">
-                {action.timeEstimateMinutes}m
-              </span>
-            ) : null}
+          <div className="shrink-0 flex items-center gap-2">
             {impact > 0 && <ImpactPill impact={impact} goalColor={goalColor} />}
+            <TimePill minutes={action.timeEstimateMinutes} />
             <span className="text-text-tertiary cursor-grab active:cursor-grabbing">
               <GripVertical size={14} />
             </span>

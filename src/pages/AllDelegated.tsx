@@ -426,57 +426,5 @@ const AllDelegated: React.FC = () => {
   );
 };
 
-const EmptyState: React.FC<{
-  tab: TabKey;
-  filtered: boolean;
-  onClear: () => void;
-  onCreate: () => void;
-}> = ({ tab, filtered, onClear, onCreate }) => {
-  if (filtered) {
-    return (
-      <div className="h-full flex flex-col items-center justify-center text-center px-10 py-16">
-        <div className="text-[14px] text-text-secondary">
-          No delegations match these filters.
-        </div>
-        <button
-          onClick={onClear}
-          className="mt-3 text-[13px] transition-colors hover:opacity-80"
-          style={{ color: "hsl(var(--accent))" }}
-        >
-          Clear filters
-        </button>
-      </div>
-    );
-  }
-  if (tab === "active") {
-    return (
-      <div className="h-full flex flex-col items-center justify-center text-center px-10 py-16">
-        <div className="text-[15px] text-text-primary">Nothing delegated yet.</div>
-        <div className="mt-2 text-[13px] text-text-secondary max-w-[420px]">
-          When you delegate an action, it appears here. Click "New delegated action"
-          or change an existing action's status to Delegated.
-        </div>
-        <button
-          onClick={onCreate}
-          className="inline-flex items-center gap-1.5 mt-4 h-9 px-3 rounded-[4px] text-[13px] font-medium text-white transition-colors"
-          style={{ background: "hsl(var(--accent))" }}
-        >
-          <Plus size={14} />
-          New delegated action
-        </button>
-      </div>
-    );
-  }
-  return (
-    <div className="h-full flex flex-col items-center justify-center text-center px-10 py-16">
-      <div className="text-[15px] text-text-primary">
-        No returned delegations in this date range.
-      </div>
-      <div className="mt-2 text-[13px] text-text-secondary max-w-[420px]">
-        Adjust filters or select a wider range to see history.
-      </div>
-    </div>
-  );
-};
 
 export default AllDelegated;

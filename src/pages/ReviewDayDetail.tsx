@@ -732,43 +732,7 @@ const ReviewDayDetail: React.FC = () => {
               </section>
             )}
 
-            {/* REFLECTION */}
-            <section>
-              <SectionHead>Reflection</SectionHead>
-              {editingReflection ? (
-                <>
-                  <textarea
-                    value={reflectionDraft}
-                    onChange={(e) => setReflectionDraft(e.target.value)}
-                    rows={4}
-                    className="w-full bg-surface-hover rounded-[4px] px-3 py-2 text-[13px] text-text-primary outline-none border border-transparent focus:border-border-default placeholder:text-text-tertiary resize-none"
-                    placeholder="What worked? What didn't?"
-                  />
-                  <div className="mt-2 flex gap-3">
-                    <button
-                      type="button"
-                      onClick={saveReflection}
-                      className="text-[12px] text-[hsl(var(--accent))] font-medium"
-                    >
-                      Save
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setEditingReflection(false)}
-                      className="text-[12px] text-text-tertiary hover:text-text-primary"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </>
-              ) : dayEntry?.reflectionText ? (
-                <div className="text-[14px] text-text-primary whitespace-pre-wrap">
-                  {dayEntry.reflectionText}
-                </div>
-              ) : (
-                <div className="text-[13px] text-text-tertiary italic">No reflection logged</div>
-              )}
-            </section>
+            {/* REFLECTION section removed */}
 
             {/* FOOTER */}
             <section className="pt-4 border-t border-border-subtle flex flex-wrap items-center gap-4">
@@ -779,15 +743,6 @@ const ReviewDayDetail: React.FC = () => {
                   className="text-[13px] text-text-secondary hover:text-text-primary transition-colors"
                 >
                   Re-open day
-                </button>
-              )}
-              {!editingReflection && (
-                <button
-                  type="button"
-                  onClick={startEditReflection}
-                  className="text-[13px] text-text-secondary hover:text-text-primary transition-colors"
-                >
-                  Edit reflection
                 </button>
               )}
             </section>

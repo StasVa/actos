@@ -1804,7 +1804,36 @@ const Index: React.FC = () => {
                   </div>
                 )}
               </div>
-              {todayEntry?.dayType && <DayTypeIndicator dayType={todayEntry.dayType} />}
+              {todayEntry?.dayType && (
+                <div className="flex items-center gap-3 mt-2">
+                  <DayTypeIndicator dayType={todayEntry.dayType} />
+                  {isPlanned && !isClosed && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (
+                          !confirm(
+                            "Switch day type? You'll need to plan your day again.",
+                          )
+                        )
+                          return;
+                        updateDayEntry(TODAY_ISO, {
+                          isPlanned: false,
+                          dayType: undefined,
+                          plannedActionIds: [],
+                          plannedRitualIds: [],
+                          skippedRitualIds: [],
+                          mainTaskActionId: undefined,
+                        });
+                        setPlanningMode(true);
+                      }}
+                      className="text-[12px] text-text-tertiary hover:text-text-primary underline-offset-2 hover:underline transition"
+                    >
+                      Change day type
+                    </button>
+                  )}
+                </div>
+              )}
             </header>
 
             <TodayZone

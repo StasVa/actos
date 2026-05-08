@@ -63,7 +63,7 @@ const FilterPillRow: React.FC<{ label: string; children: React.ReactNode }> = ({
       {label}
     </span>
     <div
-      className="flex items-center gap-2 min-w-0 flex-wrap md:flex-wrap overflow-x-auto md:overflow-visible scrollbar-hide"
+      className="flex items-center gap-2 min-w-0 flex-nowrap md:flex-wrap overflow-x-auto md:overflow-visible scrollbar-hide"
       style={{ WebkitOverflowScrolling: "touch" }}
     >
       {children}

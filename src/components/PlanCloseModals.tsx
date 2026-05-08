@@ -562,41 +562,35 @@ const PlanForm: React.FC<{
                         </>
                       ) : (
                         <>
-                          <select
+                          <MiniDropdown
                             value={quickGoalId ?? ""}
-                            onChange={(e) => {
-                              const gid = e.target.value || undefined;
+                            showDot
+                            placeholder="Goal"
+                            options={activeGoals.map((g) => ({
+                              value: g.id,
+                              label: g.title,
+                              dot: goalColor(g.id),
+                            }))}
+                            onChange={(v) => {
+                              const gid = v || undefined;
                               setQuickGoalId(gid);
                               const proj = firstProjectForGoal(gid);
                               setQuickProjectId(proj?.id);
                             }}
-                            className="bg-transparent text-[12px] text-text-secondary rounded-[4px] px-2 py-1 outline-none border border-border-subtle hover:border-border-default focus:border-border-default"
-                            style={{ maxWidth: 140 }}
-                            title={quickGoalId ? goalById(quickGoalId)?.title : "Goal"}
-                          >
-                            {activeGoals.map((g) => (
-                              <option key={g.id} value={g.id}>
-                                {g.title}
-                              </option>
-                            ))}
-                          </select>
+                          />
                           <span className="text-text-tertiary">·</span>
-                          <select
+                          <MiniDropdown
                             value={quickProjectId ?? ""}
-                            onChange={(e) => setQuickProjectId(e.target.value || undefined)}
-                            className="bg-transparent text-[12px] text-text-secondary rounded-[4px] px-2 py-1 outline-none border border-border-subtle hover:border-border-default focus:border-border-default"
-                            style={{ maxWidth: 140 }}
-                            title={
-                              quickProjectId ? projectById(quickProjectId)?.title : "Project"
-                            }
-                          >
-                            <option value="">No project</option>
-                            {projectsForQuickGoal.map((p) => (
-                              <option key={p.id} value={p.id}>
-                                {p.title}
-                              </option>
-                            ))}
-                          </select>
+                            placeholder="No project"
+                            options={[
+                              { value: "", label: "No project" },
+                              ...projectsForQuickGoal.map((p) => ({
+                                value: p.id,
+                                label: p.title,
+                              })),
+                            ]}
+                            onChange={(v) => setQuickProjectId(v || undefined)}
+                          />
                         </>
                       )}
                     </div>

@@ -575,10 +575,20 @@ const AllActions: React.FC = () => {
 
         {/* Full-width list */}
         <div className="flex-1 overflow-y-auto min-h-0 pt-2 pl-8">
-          {filtered.length === 0 ? (
-            <div className="p-8 text-center font-mono text-[11px] text-text-tertiary">
-              No actions match these filters.
-            </div>
+          {ACTIONS.length === 0 ? (
+            <EmptyState
+              headline="No actions yet."
+              description="Actions are the concrete next steps under your projects. Capture them here as you think of them, then mark them done as you complete them."
+              ctaLabel="+ New action"
+              onCta={() => openPanel({ kind: "action", mode: "new" })}
+              hint={
+                storeProjects.filter((p) => !p.isDraft && p.status === "active").length === 0
+                  ? "You'll need a goal and project first."
+                  : null
+              }
+            />
+          ) : filtered.length === 0 ? (
+            <FilteredEmpty onClear={clearFilters} />
           ) : "single" in grouped ? (
             grouped.single!.map((a) => (
               <ActionRow key={a.id} action={a} selected={false} onSelect={() => openAction(a.id)} />

@@ -5,6 +5,7 @@ import { useStore } from "@/store/useStore";
 import { AppSidebar } from "@/components/AppSidebar";
 import { MobileHeader } from "@/components/MobileHeader";
 import { ConfirmModal } from "@/components/ConfirmModal";
+import { EmptyState } from "@/components/EmptyState";
 import type { Action, Goal, ID, Session } from "@/types";
 import { formatTime } from "@/lib/format";
 
@@ -414,31 +415,17 @@ const Sessions: React.FC = () => {
 
           {/* States */}
           {!activeSession && !hasHistory && (
-            <div className="py-16 flex flex-col items-center text-center">
-              <div className="max-w-[640px] w-full flex flex-col items-center gap-6">
-                <PrimaryButton onClick={handleStart}>+ Start a session</PrimaryButton>
-                <p className="text-[14px] text-text-secondary leading-[1.6]">
-                  Sessions are focused work blocks where you commit to specific actions for a set
-                  time.
-                  <br />
-                  <br />
-                  Pick how long you want to work, what you want to do, and the timer keeps you on
-                  track. When time runs out, mark what you finished. The app records every session
-                  so you can see your real focused time and the value you created.
-                  <br />
-                  <br />
-                  Sessions are also visible on Day, Week, and Month reviews, and on individual
-                  project pages.
-                </p>
-                <button
-                  className="text-[13px] hover:underline"
-                  style={{ color: "hsl(var(--accent))" }}
-                  onClick={() => toast.info("Docs coming soon")}
-                >
-                  Learn more
-                </button>
-              </div>
-            </div>
+            <EmptyState
+              headline="No sessions yet."
+              description="Sessions are timed focus blocks where you commit to a specific list of actions. Use Pomodoro, continuous, or custom timing."
+              ctaLabel="+ Start a session"
+              onCta={handleStart}
+              hint={
+                actions.filter((a) => a.status === "backlog" || a.status === "planned").length === 0
+                  ? "You'll need at least one action in Backlog or Planned."
+                  : null
+              }
+            />
           )}
 
           {(activeSession || hasHistory) && (

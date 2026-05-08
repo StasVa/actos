@@ -6,6 +6,7 @@ import { ReturnDatePill } from "@/components/ReturnDatePill";
 import { FilterDropdown, FilterOption } from "@/components/FilterDropdown";
 import { useStore } from "@/store/useStore";
 import type { Action, Goal, Project } from "@/types";
+import { EmptyState as SharedEmptyState, FilteredEmpty } from "@/components/EmptyState";
 
 /* ===== helpers ===== */
 const TODAY_ISO = "2026-05-05";
@@ -391,13 +392,22 @@ const AllDelegated: React.FC = () => {
 
         {/* List */}
         <div className="flex-1 overflow-y-auto min-h-0">
-          {list.length === 0 ? (
-            <EmptyState
-              tab={tab}
-              filtered={anyFilter}
-              onClear={clearFilters}
-              onCreate={newDelegated}
-            />
+          {(tab === "active" ? allActive.length === 0 : allReturned.length === 0) ? (
+            tab === "active" ? (
+              <SharedEmptyState
+                headline="Nothing delegated yet."
+                description="When you delegate an action to someone, it appears here with the expected return date so you can track what's outstanding."
+                ctaLabel="+ New delegated action"
+                onCta={newDelegated}
+              />
+            ) : (
+              <SharedEmptyState
+                headline="No returned delegations yet."
+                description="Once a delegated action is returned and marked done, it appears here as history."
+              />
+            )
+          ) : list.length === 0 ? (
+            <FilteredEmpty onClear={clearFilters} />
           ) : (
             list.map((a) => (
               <DelegationRow
@@ -416,57 +426,5 @@ const AllDelegated: React.FC = () => {
   );
 };
 
-const EmptyState: React.FC<{
-  tab: TabKey;
-  filtered: boolean;
-  onClear: () => void;
-  onCreate: () => void;
-}> = ({ tab, filtered, onClear, onCreate }) => {
-  if (filtered) {
-    return (
-      <div className="h-full flex flex-col items-center justify-center text-center px-10 py-16">
-        <div className="text-[14px] text-text-secondary">
-          No delegations match these filters.
-        </div>
-        <button
-          onClick={onClear}
-          className="mt-3 text-[13px] transition-colors hover:opacity-80"
-          style={{ color: "hsl(var(--accent))" }}
-        >
-          Clear filters
-        </button>
-      </div>
-    );
-  }
-  if (tab === "active") {
-    return (
-      <div className="h-full flex flex-col items-center justify-center text-center px-10 py-16">
-        <div className="text-[15px] text-text-primary">Nothing delegated yet.</div>
-        <div className="mt-2 text-[13px] text-text-secondary max-w-[420px]">
-          When you delegate an action, it appears here. Click "New delegated action"
-          or change an existing action's status to Delegated.
-        </div>
-        <button
-          onClick={onCreate}
-          className="inline-flex items-center gap-1.5 mt-4 h-9 px-3 rounded-[4px] text-[13px] font-medium text-white transition-colors"
-          style={{ background: "hsl(var(--accent))" }}
-        >
-          <Plus size={14} />
-          New delegated action
-        </button>
-      </div>
-    );
-  }
-  return (
-    <div className="h-full flex flex-col items-center justify-center text-center px-10 py-16">
-      <div className="text-[15px] text-text-primary">
-        No returned delegations in this date range.
-      </div>
-      <div className="mt-2 text-[13px] text-text-secondary max-w-[420px]">
-        Adjust filters or select a wider range to see history.
-      </div>
-    </div>
-  );
-};
 
 export default AllDelegated;

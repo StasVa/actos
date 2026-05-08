@@ -282,11 +282,13 @@ const ReviewsDays: React.FC = () => {
         <div className="h-6" />
 
         <div className="bg-surface-elevated border border-border-subtle rounded-[6px] overflow-hidden">
-          {filtered.length === 0 ? (
+          {allRows.length === 0 ? (
+            <div className="text-center text-[14px] text-text-secondary" style={{ paddingTop: 80, paddingBottom: 80 }}>
+              No days tracked yet. Days appear here once you plan or close them.
+            </div>
+          ) : filtered.length === 0 ? (
             <div className="p-10 text-center">
-              <div className="font-mono text-[11px] text-text-tertiary">
-                No days with activity match these filters.
-              </div>
+              <div className="text-[14px] text-text-secondary">No items match these filters.</div>
               {hasFilters && (
                 <button
                   type="button"
@@ -296,7 +298,7 @@ const ReviewsDays: React.FC = () => {
                     setRange("30");
                     setSearch("");
                   }}
-                  className="mt-3 text-[12px] text-[hsl(var(--accent))] hover:brightness-110"
+                  className="mt-3 text-[13px] text-text-secondary hover:text-text-primary transition-colors"
                 >
                   Clear filters
                 </button>

@@ -8,6 +8,7 @@ import { CardMenu } from "@/components/CardMenu";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { FilterDropdown, FilterOption } from "@/components/FilterDropdown";
 import { SortDropdown } from "@/components/SortDropdown";
+import { EmptyState, FilteredEmpty } from "@/components/EmptyState";
 import { Tooltip, SparkTooltipContent, StateDotTooltip, type DayInfo } from "@/components/Tooltip";
 import { toast } from "sonner";
 import type { Goal } from "@/types";
@@ -590,19 +591,20 @@ const Goals: React.FC = () => {
         <div className="my-6 border-t border-border-subtle" />
 
         {noGoalsAtAll ? (
-          <div className="bg-surface-elevated border border-dashed border-border-subtle rounded-[6px] py-10 text-center">
-            <div className="text-[14px] text-text-secondary">No goals yet.</div>
-            <button
-              onClick={() => useStore.getState().openPanel({ kind: "goal", mode: "new" })}
-              className="mt-2 text-[13px] text-accent hover:text-accent-hover"
-            >
-              + New goal
-            </button>
-          </div>
+          <EmptyState
+            headline="No goals yet."
+            description="Goals are the top of the hierarchy — the outcomes you're working toward. You can have up to 3 active goals at a time."
+            ctaLabel="+ New goal"
+            onCta={() => useStore.getState().openPanel({ kind: "goal", mode: "new" })}
+          />
         ) : noResults ? (
-          <div className="font-mono text-[12px] text-text-tertiary px-3 py-6 text-center">
-            No goals match these filters.
-          </div>
+          <FilteredEmpty
+            onClear={() => {
+              setStateFilter("all");
+              setTypeFilter("all");
+              setQuery("");
+            }}
+          />
         ) : (
           <div className="space-y-10">
             {(activeAll.length > 0 || stateFilter === "all" || stateFilter === "active") && activeAll.length > 0 && (

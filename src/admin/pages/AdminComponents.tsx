@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { Plus, Search, ChevronDown } from "lucide-react";
 import { useStore } from "@/store/useStore";
+import { useThemeChoice } from "@/lib/theme";
 import { ImpactPill, TimePill } from "@/components/MetaPills";
 import { ActionRow } from "@/components/ActionRow";
 import { EmptyState, FilteredEmpty, ReviewEmpty } from "@/components/EmptyState";

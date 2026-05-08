@@ -236,3 +236,7 @@ body {
 @media (max-width: 767px) {
   .fab { display: flex; }
 }
+
+/* Hide scrollbars for horizontal pill rows etc. */
+.scrollbar-hide { scrollbar-width: none; -ms-overflow-style: none; }
+.scrollbar-hide::-webkit-scrollbar { display: none; }

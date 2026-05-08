@@ -358,7 +358,7 @@ const AllDelegated: React.FC = () => {
               style={{ background: "hsl(var(--accent))" }}
             >
               <Plus size={14} />
-              + Delegate
+              Delegate
             </button>
           </div>
 

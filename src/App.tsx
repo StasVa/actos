@@ -102,6 +102,8 @@ const App = () => (
           <Route path="/reviews/weeks/:yearWeek" element={<ReviewWeekDetail />} />
           <Route path="/reviews/months" element={<ReviewsMonths />} />
           <Route path="/reviews/months/:yearMonth" element={<ReviewMonthDetail />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/settings/subscription" element={<SettingsSubscription />} />
 
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

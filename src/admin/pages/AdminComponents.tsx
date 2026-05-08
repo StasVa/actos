@@ -199,7 +199,8 @@ const Atoms: React.FC = () => {
       ))}
     </Sample>
   </Section>
-);
+  );
+};
 
 // ───────── Buttons ─────────
 const TierAButton: React.FC<{ label: string; disabled?: boolean }> = ({ label, disabled }) => (

@@ -42,7 +42,10 @@ export const themeStore = {
     apply(resolveTheme(choice));
     emit();
   },
-  subscribe(cb: () => void) { listeners.add(cb); return () => listeners.delete(cb); },
+  subscribe(cb: () => void): () => void {
+    listeners.add(cb);
+    return () => { listeners.delete(cb); };
+  },
 };
 
 let mql: MediaQueryList | null = null;

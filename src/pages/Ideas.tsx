@@ -1288,19 +1288,15 @@ const Ideas: React.FC = () => {
 
         {/* Full-width list */}
         <div className="flex-1 overflow-y-auto min-h-0">
-          {filtered.length === 0 ? (
-            <div className="p-10 text-center">
-              <div className="text-[14px] text-text-secondary">
-                {ideas.length === 0
-                  ? "No ideas yet. Click + New idea to capture one."
-                  : "No ideas match these filters"}
-              </div>
-              {ideas.length > 0 && (
-                <div className="mt-4">
-                  <GhostButton onClick={clearFilters}>Clear filters</GhostButton>
-                </div>
-              )}
-            </div>
+          {ideas.length === 0 ? (
+            <EmptyState
+              headline="No ideas yet."
+              description="Capture rough thoughts here before they become actions or projects. Ideas wait until you decide what to do with them."
+              ctaLabel="+ New idea"
+              onCta={() => setShowNew(true)}
+            />
+          ) : filtered.length === 0 ? (
+            <FilteredEmpty onClear={clearFilters} />
           ) : "single" in grouped ? (
             grouped.single!.map(renderRow)
           ) : (

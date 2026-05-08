@@ -620,44 +620,55 @@ const Rituals: React.FC = () => {
             </div>
           </div>
 
-          <div style={{ height: 24 }} />
-          <TopStats
-            rows={activeRows}
-            allTime={allTime}
-            activeCount={activeRows.length}
-            pendingCount={pending.length}
-            dueCount={dueCount}
-          />
+          {storeRituals.length === 0 ? (
+            <EmptyState
+              headline="No rituals yet."
+              description="Rituals are recurring actions you commit to — daily reading, weekly review, anything you want to do consistently. They build a multiplier on your effort over time."
+              ctaLabel="+ New ritual"
+              onCta={handleAddRitual}
+            />
+          ) : (
+            <>
+              <div style={{ height: 24 }} />
+              <TopStats
+                rows={activeRows}
+                allTime={allTime}
+                activeCount={activeRows.length}
+                pendingCount={pending.length}
+                dueCount={dueCount}
+              />
 
-          <div style={{ height: 24 }} />
-          {pending.length > 0 && (
-            <PendingToday items={pending} onMarkDone={handleMarkDone} onOpen={handleOpen} />
+              <div style={{ height: 24 }} />
+              {pending.length > 0 && (
+                <PendingToday items={pending} onMarkDone={handleMarkDone} onOpen={handleOpen} />
+              )}
+
+              <div style={{ height: 32 }} />
+
+              <section>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="text-[12px] font-medium uppercase tracking-[0.08em] text-text-secondary">
+                    Active rituals · {activeRows.length}
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  {activeRows.map((r) => (
+                    <RitualCard key={r.id} r={r} onOpen={handleOpen} onMarkDone={handleMarkDone} />
+                  ))}
+                </div>
+                {activeRows.length === 0 && (
+                  <div className="mt-4 font-mono text-[11px] text-text-tertiary text-center">
+                    No active rituals. Use the “+ New ritual” button or ⌘K.
+                  </div>
+                )}
+              </section>
+
+              <div style={{ height: 24 }} />
+              <ArchivedSection rows={archivedRows} onRestore={handleRestore} />
+
+              <div style={{ height: 32 }} />
+            </>
           )}
-
-          <div style={{ height: 32 }} />
-
-          <section>
-            <div className="flex items-center justify-between mb-3">
-              <div className="text-[12px] font-medium uppercase tracking-[0.08em] text-text-secondary">
-                Active rituals · {activeRows.length}
-              </div>
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {activeRows.map((r) => (
-                <RitualCard key={r.id} r={r} onOpen={handleOpen} onMarkDone={handleMarkDone} />
-              ))}
-            </div>
-            {activeRows.length === 0 && (
-              <div className="mt-4 font-mono text-[11px] text-text-tertiary text-center">
-                No active rituals. Use the “+ New ritual” button or ⌘K.
-              </div>
-            )}
-          </section>
-
-          <div style={{ height: 24 }} />
-          <ArchivedSection rows={archivedRows} onRestore={handleRestore} />
-
-          <div style={{ height: 32 }} />
         </div>
       </main>
     </div>

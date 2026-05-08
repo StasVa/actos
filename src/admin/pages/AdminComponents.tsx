@@ -799,6 +799,10 @@ const Modals: React.FC = () => {
 
       <ConfirmModal
         open={open === "confirm"}
+        title="Confirm action"
+        body="This is a tier 1 confirm dialog."
+        onCancel={() => setOpen(null)}
+        onConfirm={() => setOpen(null)}
       />
       <ConfirmModal
         open={open === "destructive"}

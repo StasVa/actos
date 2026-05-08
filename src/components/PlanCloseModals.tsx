@@ -13,22 +13,11 @@ import { ImpactPill, TimePill } from "@/components/MetaPills";
 
 /* ───────── helpers ───────── */
 const todayISO = () => new Date().toISOString().slice(0, 10);
-const yesterdayISO = () => {
-  const d = new Date();
-  d.setDate(d.getDate() - 1);
-  return d.toISOString().slice(0, 10);
-};
 
 const formatLong = (iso: string) =>
   new Date(iso + "T00:00:00").toLocaleDateString("en-US", {
     weekday: "long",
     month: "long",
-    day: "numeric",
-  });
-const formatShort = (iso: string) =>
-  new Date(iso + "T00:00:00").toLocaleDateString("en-US", {
-    weekday: "short",
-    month: "short",
     day: "numeric",
   });
 
@@ -56,28 +45,6 @@ const SectionHead: React.FC<{ children: React.ReactNode; sub?: string; meta?: Re
       <div className="font-mono text-[11px] text-text-tertiary tabular-nums">{meta}</div>
     )}
   </div>
-);
-
-const PrimaryButton: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement>> = ({
-  className = "",
-  ...rest
-}) => (
-  <button
-    type="button"
-    {...rest}
-    className={`px-5 py-2 rounded-[4px] bg-[hsl(var(--accent))] text-white text-[13px] font-medium hover:brightness-110 transition disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
-  />
-);
-
-const LinkButton: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement>> = ({
-  className = "",
-  ...rest
-}) => (
-  <button
-    type="button"
-    {...rest}
-    className={`text-[13px] text-text-secondary hover:text-text-primary transition ${className}`}
-  />
 );
 
 /* (modal shell removed — Plan today is now a full-page in-place takeover.) */

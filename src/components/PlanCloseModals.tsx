@@ -64,42 +64,6 @@ function ritualDueOn(r: Ritual, iso: string): boolean {
   }
 }
 
-/* ───────── suggestion logic (Heavy Lift / Quick Moves) ───────── */
-function quantile(vals: number[], q: number): number {
-  if (vals.length === 0) return 0;
-  const sorted = [...vals].sort((a, b) => a - b);
-  const idx = Math.min(sorted.length - 1, Math.floor(q * sorted.length));
-  return sorted[idx];
-}
-
-function effortFor(a: Action): number {
-  if (a.timeEstimateMinutes != null) return Math.min(10, Math.ceil(a.timeEstimateMinutes / 30));
-  return 5;
-}
-
-function pickHeavyLift(pool: Action[]): Action[] {
-  if (pool.length === 0) return [];
-  const impactP75 = quantile(pool.map((a) => a.impact ?? 0), 0.75);
-  const effortP75 = quantile(pool.map(effortFor), 0.75);
-  return pool
-    .filter((a) => (a.impact ?? 0) >= impactP75 && effortFor(a) >= effortP75)
-    .sort((a, b) => (b.impact ?? 0) - (a.impact ?? 0))
-    .slice(0, 1);
-}
-
-function pickQuickMoves(pool: Action[]): Action[] {
-  if (pool.length === 0) return [];
-  const impactMedian = quantile(pool.map((a) => a.impact ?? 0), 0.5);
-  return pool
-    .filter((a) => {
-      const imp = a.impact ?? 0;
-      const tOk = (a.timeEstimateMinutes ?? 9999) <= 60;
-      return imp >= impactMedian && tOk;
-    })
-    .sort((a, b) => (b.impact ?? 0) - (a.impact ?? 0) || (a.timeEstimateMinutes ?? 0) - (b.timeEstimateMinutes ?? 0))
-    .slice(0, 3);
-}
-
 /* ═════════════ Plan Today form ═════════════ */
 
 interface PlanFormState {

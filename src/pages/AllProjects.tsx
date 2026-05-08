@@ -442,14 +442,21 @@ const AllProjects: React.FC = () => {
 
         {/* Sections */}
         <div className="flex-1 px-10 pt-8 pb-16 space-y-10">
-          {filtered.length === 0 && (
-            <div className="text-center py-16">
-              <div className="text-[14px] text-text-secondary">No projects match these filters</div>
-              <div className="mt-1 font-mono text-[11px] text-text-tertiary">
-                Clear filters or change them above.
-              </div>
-            </div>
-          )}
+          {livePROJECTS.length === 0 ? (
+            <EmptyState
+              headline="No projects yet."
+              description="Projects sit under goals and group related actions. Create one for each concrete piece of work you're moving forward."
+              ctaLabel="+ New project"
+              onCta={handleNewProject}
+              hint={
+                storeGoals.filter((g) => g.status === "active").length === 0
+                  ? "You'll need a goal first."
+                  : null
+              }
+            />
+          ) : filtered.length === 0 ? (
+            <FilteredEmpty onClear={clearFilters} />
+          ) : null}
 
           {groups.near.length > 0 && (
             <section>

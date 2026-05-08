@@ -398,7 +398,7 @@ const AllDelegated: React.FC = () => {
               <SharedEmptyState
                 headline="Nothing delegated yet."
                 description="When you delegate an action to someone, it appears here with the expected return date so you can track what's outstanding."
-                ctaLabel="+ New delegated action"
+                ctaLabel="Delegate"
                 onCta={newDelegated}
               />
             ) : (

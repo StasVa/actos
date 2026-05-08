@@ -86,29 +86,11 @@ const DAY_TYPE_FILTERS = [
   { value: "sick", label: "Sick" },
 ];
 
-const FilterDD: React.FC<{
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  options: { value: string; label: string }[];
-}> = ({ label, value, onChange, options }) => (
-  <div className="flex items-center gap-2">
-    <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">
-      {label}
-    </span>
-    <select
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className="bg-surface-hover text-[12px] text-text-primary rounded-[3px] px-2 py-1 outline-none border border-transparent focus:border-border-default"
-    >
-      {options.map((o) => (
-        <option key={o.value} value={o.value}>
-          {o.label}
-        </option>
-      ))}
-    </select>
-  </div>
-);
+type SortKey = "recent" | "oldest";
+const SORT_OPTIONS: FilterOption<SortKey>[] = [
+  { value: "recent", label: "Recent first" },
+  { value: "oldest", label: "Oldest first" },
+];
 
 const DayRowItem: React.FC<{
   row: DayRow;

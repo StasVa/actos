@@ -756,11 +756,34 @@ const IdeaDetail: React.FC<{ idea: Idea; mobile?: boolean }> = ({ idea, mobile =
         <div className="h-4" />
 
         {idea.status === "captured" && overlay === null && (
-          <div className="flex items-center gap-3">
-            <GhostButton onClick={() => setOverlay("action")}>Convert to action</GhostButton>
-            <GhostButton onClick={() => setOverlay("project")}>Convert to project</GhostButton>
-            <TertiaryLink onClick={() => setConfirmDiscard(true)}>Discard</TertiaryLink>
-          </div>
+          mobile ? (
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={() => setOverlay("action")}
+                className="w-full h-11 text-[14px] font-medium rounded-[4px] border border-border-default text-text-primary bg-transparent hover:bg-surface-hover transition-colors"
+              >
+                Convert to action
+              </button>
+              <button
+                onClick={() => setOverlay("project")}
+                className="w-full h-11 text-[14px] font-medium rounded-[4px] border border-border-default text-text-primary bg-transparent hover:bg-surface-hover transition-colors"
+              >
+                Convert to project
+              </button>
+              <button
+                onClick={() => setConfirmDiscard(true)}
+                className="mt-2 w-full h-11 text-[13px] text-text-tertiary hover:text-text-secondary transition-colors"
+              >
+                Discard
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3">
+              <GhostButton onClick={() => setOverlay("action")}>Convert to action</GhostButton>
+              <GhostButton onClick={() => setOverlay("project")}>Convert to project</GhostButton>
+              <TertiaryLink onClick={() => setConfirmDiscard(true)}>Discard</TertiaryLink>
+            </div>
+          )
         )}
         {overlay === "action" && (
           <ConvertActionOverlay idea={idea} onDone={() => setOverlay(null)} />

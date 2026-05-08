@@ -161,7 +161,8 @@ export interface StoreState {
     skippedRitualIds: ID[];
   }) => void;
   updateDayEntry: (date: ISODate, partial: Partial<DayEntry>) => void;
-  closeDay: (date: ISODate, eveningEnergyScore?: number, reflectionText?: string) => void;
+  closeDay: (date: ISODate, opts?: { closedAt?: ISODateTime }) => void;
+  reopenDay: (date: ISODate) => void;
   getDayEntry: (date: ISODate) => DayEntry | undefined;
 
   // ─── Settings ───

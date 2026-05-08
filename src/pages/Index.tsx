@@ -17,6 +17,7 @@ import { ProjectCard as SharedProjectCard } from "@/components/ProjectCard";
 import { toast } from "sonner";
 import { subscribeAppEvent } from "@/lib/appEvents";
 import { formatTime } from "@/lib/format";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export const TODAY_ISO = new Date().toISOString().slice(0, 10);
 export const YESTERDAY_ISO = (() => {
@@ -354,10 +355,15 @@ export const Hero: React.FC = () => {
     );
   }
 
+  const isMobile = useIsMobile();
   return (
     <div
-      className="grid w-full divide-x divide-border-subtle rounded-[6px] border border-border-subtle bg-surface-elevated p-6"
-      style={{ gridTemplateColumns: `repeat(${activeGoals.length}, minmax(0, 1fr))` }}
+      className="grid w-full md:divide-x divide-y md:divide-y-0 divide-border-subtle rounded-[6px] border border-border-subtle bg-surface-elevated p-4 md:p-6 gap-4 md:gap-0"
+      style={{
+        gridTemplateColumns: isMobile
+          ? "1fr"
+          : `repeat(${activeGoals.length}, minmax(0, 1fr))`,
+      }}
     >
       {activeGoals.map((g) => {
         const goalProjects = projects.filter((p) => p.goalId === g.id);

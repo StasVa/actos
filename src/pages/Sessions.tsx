@@ -5,6 +5,7 @@ import { useStore } from "@/store/useStore";
 import { AppSidebar } from "@/components/AppSidebar";
 import { MobileHeader } from "@/components/MobileHeader";
 import { ConfirmModal } from "@/components/ConfirmModal";
+import { EmptyState } from "@/components/EmptyState";
 import type { Action, Goal, ID, Session } from "@/types";
 import { formatTime } from "@/lib/format";
 

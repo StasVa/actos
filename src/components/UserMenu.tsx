@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Settings as SettingsIcon, Sparkles, LogOut } from "lucide-react";
+import { Settings as SettingsIcon, Sparkles, LogOut, Wrench } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ConfirmModal } from "@/components/ConfirmModal";
@@ -172,6 +172,19 @@ export const UserMenu: React.FC<{ collapsed: boolean }> = ({ collapsed }) => {
             <span className="text-[13px] text-text-primary flex-1">Subscription</span>
             <TierBadge tier={tier} />
           </button>
+
+          {/* Admin (gated by demo flag) */}
+          {settings.showAdminTools && (
+            <button
+              type="button"
+              onClick={() => goto("/admin/components")}
+              className="w-full flex items-center gap-[10px] hover:bg-surface-hover transition-colors text-left group"
+              style={{ padding: "8px 14px" }}
+            >
+              <Wrench size={16} className="text-text-secondary group-hover:text-text-primary" />
+              <span className="text-[13px] text-text-primary flex-1">Admin</span>
+            </button>
+          )}
 
           <div
             className="border-t border-border-subtle"

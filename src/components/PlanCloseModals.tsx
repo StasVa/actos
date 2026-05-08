@@ -429,14 +429,15 @@ const PlanForm: React.FC<{
           <div className="text-[13px] text-text-primary truncate">{a.title}</div>
           <div className="font-mono text-[11px] text-text-tertiary truncate">
             {g?.title ?? ""}
-            {a.timeEstimateMinutes ? ` · ${formatTimeMin(a.timeEstimateMinutes)}` : ""}
           </div>
         </div>
+        <TimePill minutes={a.timeEstimateMinutes} />
         <button
           type="button"
           onClick={() => removeAction(id)}
           aria-label="Remove"
           className="text-text-tertiary hover:text-text-primary text-[14px] px-1 shrink-0"
+          style={{ marginLeft: 8 }}
         >
           ×
         </button>

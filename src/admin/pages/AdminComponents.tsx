@@ -698,25 +698,27 @@ const Filters: React.FC = () => {
       <Sample name="FilterDropdown" spec="FilterDropdown.tsx">
         <Cell label="Default value">
           <FilterDropdown
+            label="Goal"
             value={val}
+            defaultValue="all"
             onChange={setVal}
             options={[
               { value: "all", label: "All" },
               { value: "g1", label: "Launch YouTube channel" },
               { value: "g2", label: "Lose 5 kg" },
             ]}
-            ariaLabel="Goal filter"
           />
         </Cell>
         <Cell label="Active value">
           <FilterDropdown
+            label="Goal"
             value={"g2"}
+            defaultValue="all"
             onChange={() => {}}
             options={[
               { value: "all", label: "All" },
               { value: "g2", label: "Lose 5 kg" },
             ]}
-            ariaLabel="Goal filter active"
           />
         </Cell>
       </Sample>

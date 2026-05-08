@@ -697,8 +697,8 @@ const IdeaDetail: React.FC<{ idea: Idea; mobile?: boolean }> = ({ idea, mobile =
   };
 
   return (
-    <div className="px-10 py-8">
-      <div className="max-w-[540px] mx-auto">
+    <div className={mobile ? "px-4 py-4" : "px-10 py-8"}>
+      <div className={mobile ? "" : "max-w-[540px] mx-auto"}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 group">
             <span className="w-2 h-2 rounded-full" style={{ background: goalColor }} />

@@ -54,13 +54,15 @@ export function ConfirmModal({
           <div className="mt-3 text-[13px] text-text-secondary leading-[1.5]">{body}</div>
         )}
         <div className="mt-6 flex items-center justify-end gap-3">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="text-[13px] text-text-secondary hover:text-text-primary transition-colors px-3 py-1.5"
-          >
-            {cancelLabel}
-          </button>
+          {cancelLabel && (
+            <button
+              type="button"
+              onClick={onCancel}
+              className="text-[13px] text-text-secondary hover:text-text-primary transition-colors px-3 py-1.5"
+            >
+              {cancelLabel}
+            </button>
+          )}
           <button
             type="button"
             onClick={onConfirm}

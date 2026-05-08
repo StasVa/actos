@@ -868,10 +868,6 @@ const EmptyFiltered: React.FC<{ onClear: () => void }> = ({ onClear }) => (
 );
 
 /* ===== Page ===== */
-import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { FilterDropdown, FilterOption } from "@/components/FilterDropdown";
-import { SortDropdown } from "@/components/SortDropdown";
 
 type StatusFilter = "all" | "captured" | "converted" | "discarded";
 type GoalFilter = "all" | ID;

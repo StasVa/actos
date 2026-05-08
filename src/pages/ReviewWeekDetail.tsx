@@ -641,25 +641,7 @@ const ReviewWeekDetail: React.FC = () => {
             </section>
           )}
 
-          {/* REFLECTIONS */}
-          {summary.reflections.length > 0 && (
-            <section>
-              <SectionHead>Reflections</SectionHead>
-              <div className="space-y-3">
-                {summary.reflections.map(({ date: d, entry }) => (
-                  <div key={d} className="border-l-2 border-border-default pl-3">
-                    <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-1">
-                      {format(parseISO(d), "EEE MMM d")}
-                      {entry.dayType && ` · ${DAY_TYPE_LABELS[entry.dayType]}`}
-                    </div>
-                    <div className="text-[14px] text-text-primary whitespace-pre-wrap">
-                      {entry.reflectionText}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
+          {/* REFLECTIONS section removed */}
 
           {summary.doneActions.length === 0 &&
             summary.closedProjects.length === 0 &&

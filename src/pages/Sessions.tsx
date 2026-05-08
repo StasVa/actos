@@ -502,13 +502,7 @@ const Sessions: React.FC = () => {
 
           {(activeSession || hasHistory) && (
             <div className="mt-6 space-y-6">
-              {activeSession ? (
-                <ActiveSessionBanner session={activeSession} />
-              ) : (
-                <div className="flex justify-start">
-                  <PrimaryButton onClick={handleStart}>+ Start a session</PrimaryButton>
-                </div>
-              )}
+              {activeSession && <ActiveSessionBanner session={activeSession} />}
 
               {hasHistory && (
                 <>

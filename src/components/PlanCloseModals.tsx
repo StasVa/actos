@@ -1,14 +1,12 @@
-// Plan today / Close day / Combined Close-yesterday-and-Plan-today modals.
+// Plan today — full-page in-place takeover (no longer a modal).
 //
-// All three render through a shared <ModalShell> (centered desktop dialog,
-// bottom sheet on mobile). Forms are uncontrolled-ish: local state, submit
-// commits to the store via startDayPlan / closeDay.
+// Renders inside /today's content area when the user clicks "Start your day".
+// Sidebar stays visible. Submit commits to the store via startDayPlan().
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { createPortal } from "react-dom";
-import { X, Zap, Leaf, Sun, Thermometer, GripVertical, Star, type LucideIcon } from "lucide-react";
+import { Zap, Leaf, Sun, Thermometer, GripVertical, Star, type LucideIcon } from "lucide-react";
 import { toast } from "sonner";
-import { useStore, ritualMultiplier } from "@/store/useStore";
+import { useStore } from "@/store/useStore";
 import type { Action, DayType, ID, Ritual } from "@/types";
 import { formatTime as formatTimeMin } from "@/lib/format";
 import { ImpactPill, TimePill } from "@/components/MetaPills";

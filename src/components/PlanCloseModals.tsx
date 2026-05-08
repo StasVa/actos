@@ -351,7 +351,7 @@ const PlanForm: React.FC<{
         type="button"
         onClick={() => toggleAction(a.id)}
         className={`relative w-full flex items-center gap-2 pr-2 hover:bg-surface-hover transition-colors text-left ${checked ? "opacity-50" : ""}`}
-        style={{ minHeight: 40 }}
+        style={{ minHeight: 48 }}
       >
         <span
           className="absolute left-0 top-0 bottom-0"
@@ -373,15 +373,15 @@ const PlanForm: React.FC<{
           {checked ? "✓" : ""}
         </span>
         <div className="min-w-0 flex-1">
-          <div className="text-[13px] text-text-primary truncate">{a.title}</div>
-          <div className="font-mono text-[11px] text-text-tertiary truncate">
+          <div className="text-[14px] font-medium text-text-primary truncate">{a.title}</div>
+          <div className="font-mono text-[11px] text-text-secondary truncate">
             {g?.title ?? ""}
             {p ? ` · ${p.title}` : ""}
           </div>
         </div>
-        <div className="font-mono text-[11px] text-text-tertiary tabular-nums shrink-0">
-          {a.impact ? `I${a.impact}` : ""}
-          {a.timeEstimateMinutes ? ` · ${formatTimeMin(a.timeEstimateMinutes)}` : ""}
+        <div className="flex items-center gap-2 shrink-0" style={{ marginLeft: 4 }}>
+          <ImpactPill impact={a.impact} goalColor={goalColor(a.goalId)} />
+          <TimePill minutes={a.timeEstimateMinutes} />
         </div>
       </button>
     );

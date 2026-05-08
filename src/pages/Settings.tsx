@@ -70,6 +70,7 @@ export default function Settings() {
   const setSubscriptionTier = useStore((s) => s.setSubscriptionTier);
   const resetToSeed = useStore((s) => s.resetToSeed);
   const activeGoals = goals.filter((g) => g.status === "active");
+  const [themeChoice, , setThemeChoice] = useThemeChoice();
   const fileRef = React.useRef<HTMLInputElement>(null);
 
   const handleReset = () => {

@@ -16,10 +16,11 @@ import {
   CalendarRange,
   PanelLeftClose,
   PanelLeftOpen,
-  Settings as SettingsIcon,
+  HelpCircle,
 } from "lucide-react";
 import { LifetimeCounters } from "@/components/LifetimeCounters";
-import { emitAppEvent } from "@/lib/appEvents";
+import { UserMenu } from "@/components/UserMenu";
+
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Tooltip,
@@ -122,10 +123,9 @@ const NavGroup: React.FC<{
 
 const Divider: React.FC = () => <div className="my-4 border-t border-border-subtle" />;
 
-export const AppSidebar: React.FC<{ onOpenSettings?: () => void }> = ({ onOpenSettings }) => {
+export const AppSidebar: React.FC<{ onOpenSettings?: () => void }> = ({ onOpenSettings: _onOpenSettings }) => {
   const { pathname } = useLocation();
   const isMobile = useIsMobile();
-  const handleSettings = onOpenSettings ?? (() => emitAppEvent("open-settings"));
 
   const [collapsed, setCollapsed] = React.useState<boolean>(() => {
     if (typeof window === "undefined") return false;
@@ -325,43 +325,40 @@ export const AppSidebar: React.FC<{ onOpenSettings?: () => void }> = ({ onOpenSe
         <div className="flex-1" />
 
         <div className={`${effectiveCollapsed ? "px-2" : "px-4"} pb-4 flex flex-col`}>
-          {effectiveCollapsed ? (
-            <Tooltip delayDuration={150}>
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  onClick={handleSettings}
-                  className="flex items-center justify-center w-10 h-10 mx-auto rounded-[4px] text-text-tertiary hover:text-text-primary hover:bg-surface-hover transition-colors mb-2"
-                  aria-label="Settings"
-                >
-                  <SettingsIcon size={16} />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="right" className="text-[12px]">
-                Settings
-              </TooltipContent>
-            </Tooltip>
-          ) : (
+          {!effectiveCollapsed && (
             <>
-              <button
-                type="button"
-                onClick={handleSettings}
-                className="text-left px-2.5 py-1.5 rounded-[4px] text-[13px] text-text-tertiary hover:text-text-primary hover:bg-surface-hover transition-colors mb-2"
-              >
-                Settings
-              </button>
-              <div className="font-mono text-[11px] text-text-tertiary px-1">?   Shortcuts</div>
-              <div className="mt-4 font-mono text-[11px] text-text-secondary px-1 leading-[1.7]">
+              <div className="font-mono text-[11px] text-text-tertiary leading-[1.7] px-1">
                 <LifetimeCounters />
               </div>
-              <div className="mt-3 flex items-center gap-2 p-1 rounded-[4px] hover:bg-surface-hover cursor-pointer">
-                <span className="w-7 h-7 rounded-full bg-surface-hover flex items-center justify-center font-mono text-[11px] text-text-primary">
-                  AK
-                </span>
-                <span className="font-mono text-[11px] text-text-secondary truncate">ak@email</span>
-              </div>
+              <div className="my-2 border-t border-border-subtle" />
             </>
           )}
+          <div
+            className={`flex items-center ${effectiveCollapsed ? "justify-center" : "justify-between"} gap-2`}
+            style={effectiveCollapsed ? undefined : { padding: "8px 4px" }}
+          >
+            <UserMenu collapsed={effectiveCollapsed} />
+            {!effectiveCollapsed && (
+              <Tooltip delayDuration={150}>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const ev = new KeyboardEvent("keydown", { key: "?", bubbles: true });
+                      document.dispatchEvent(ev);
+                    }}
+                    className="shrink-0 w-8 h-8 flex items-center justify-center rounded-[4px] text-text-tertiary hover:text-text-primary hover:bg-surface-hover transition-colors"
+                    aria-label="Keyboard shortcuts"
+                  >
+                    <HelpCircle size={16} />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="text-[12px]">
+                  Shortcuts <span className="text-text-tertiary ml-1">?</span>
+                </TooltipContent>
+              </Tooltip>
+            )}
+          </div>
         </div>
       </aside>
     </TooltipProvider>

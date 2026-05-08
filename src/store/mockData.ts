@@ -348,6 +348,9 @@ export const SEED_SETTINGS: UserSettings = {
     logTime: true,
   },
   defaultGoalId: GOAL_IDS.g1,
+  userName: "Anders K.",
+  userEmail: "ak@email",
+  subscriptionTier: "free",
 };
 
 export const NOW_ISO = NOW;

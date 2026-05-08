@@ -24,6 +24,8 @@ import Rituals from "./pages/Rituals.tsx";
 import AllActions from "./pages/AllActions.tsx";
 import AllDelegated from "./pages/AllDelegated.tsx";
 import AllProjects from "./pages/AllProjects.tsx";
+import Settings from "./pages/Settings.tsx";
+import SettingsSubscription from "./pages/SettingsSubscription.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import { ActionEditor } from "./components/ActionEditor";
 
@@ -100,6 +102,8 @@ const App = () => (
           <Route path="/reviews/weeks/:yearWeek" element={<ReviewWeekDetail />} />
           <Route path="/reviews/months" element={<ReviewsMonths />} />
           <Route path="/reviews/months/:yearMonth" element={<ReviewMonthDetail />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/settings/subscription" element={<SettingsSubscription />} />
 
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

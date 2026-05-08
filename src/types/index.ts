@@ -213,12 +213,17 @@ export interface Session {
 }
 
 // ───────── Settings ─────────
+export type SubscriptionTier = "free" | "pro";
+
 export interface UserSettings {
   layers: {
     planAndReview: boolean;
     logTime: boolean;
   };
   defaultGoalId?: ID;
+  userName?: string;
+  userEmail?: string;
+  subscriptionTier?: SubscriptionTier;
 }
 
 // ───────── UI state ─────────

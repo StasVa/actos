@@ -307,21 +307,6 @@ const PlanForm: React.FC<{
     0,
   );
 
-  const heavyDescription =
-    heavySuggestions.length === 0
-      ? "No heavy-lift candidates available."
-      : `${heavySuggestions.length} high-impact action${heavySuggestions.length > 1 ? "s" : ""}` +
-        (heavySuggestions[0]?.timeEstimateMinutes
-          ? ` (${formatTimeMin(heavySuggestions.reduce((s, a) => s + (a.timeEstimateMinutes ?? 0), 0))})`
-          : "");
-  const quickDescription =
-    quickSuggestions.length === 0
-      ? "No quick wins available."
-      : `${quickSuggestions.length} quick win${quickSuggestions.length > 1 ? "s" : ""}` +
-        (quickSuggestions.some((a) => a.timeEstimateMinutes)
-          ? ` (~${formatTimeMin(quickSuggestions.reduce((s, a) => s + (a.timeEstimateMinutes ?? 0), 0))} total)`
-          : "");
-
   return (
     <div className="space-y-7">
       {/* ACTIONS */}

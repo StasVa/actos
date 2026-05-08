@@ -607,16 +607,6 @@ const AllActions: React.FC = () => {
         </div>
       </main>
 
-      {/* Mobile FAB — quick capture */}
-      <button
-        type="button"
-        onClick={() => openPanel({ kind: "action", mode: "new" })}
-        aria-label="New action"
-        className="sm:hidden fixed bottom-4 right-4 z-50 w-14 h-14 rounded-full bg-accent hover:bg-accent-hover text-white flex items-center justify-center transition-colors"
-        style={{ boxShadow: "0 6px 16px hsl(var(--accent) / 0.4)" }}
-      >
-        <span className="text-[24px] leading-none">+</span>
-      </button>
     </div>
   );
 };

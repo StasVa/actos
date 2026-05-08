@@ -534,6 +534,19 @@ function buildRitualRow(
 }
 
 /* ===== Page ===== */
+type RStateFilter = "all" | "active" | "archived";
+type RSortKey = "recent" | "title" | "completions";
+const R_STATE_OPTIONS: FilterOption<RStateFilter>[] = [
+  { value: "all", label: "All" },
+  { value: "active", label: "Active" },
+  { value: "archived", label: "Archived" },
+];
+const R_SORT_OPTIONS: FilterOption<RSortKey>[] = [
+  { value: "recent", label: "Recent activity" },
+  { value: "title", label: "By title" },
+  { value: "completions", label: "Most completions" },
+];
+
 const Rituals: React.FC = () => {
   const storeRituals = useStore((s) => s.rituals);
   const storeGoals = useStore((s) => s.goals);
@@ -541,26 +554,38 @@ const Rituals: React.FC = () => {
   const markRitualInstanceDone = useStore((s) => s.markRitualInstanceDone);
   const restoreRitual = useStore((s) => s.restoreRitual);
 
+  const [stateFilter, setStateFilter] = useState<RStateFilter>("all");
+  const [goalFilter, setGoalFilter] = useState<string>("all");
+  const [sortKey, setSortKey] = useState<RSortKey>("recent");
+
   const goalsById = React.useMemo(() => {
     const m: Record<string, import("@/types").Goal> = {};
     for (const g of storeGoals) m[g.id] = g;
     return m;
   }, [storeGoals]);
 
+  const matchesGoal = (rGoalId: string) => goalFilter === "all" || rGoalId === goalFilter;
+
   const activeRows = React.useMemo(
     () =>
       storeRituals
-        .filter((r) => r.status === "active")
+        .filter((r) => r.status === "active" && matchesGoal(r.goalId))
         .map((r) => buildRitualRow(r, goalsById)),
-    [storeRituals, goalsById],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [storeRituals, goalsById, goalFilter],
   );
   const archivedRows = React.useMemo(
     () =>
       storeRituals
-        .filter((r) => r.status === "archived")
+        .filter((r) => r.status === "archived" && matchesGoal(r.goalId))
         .map((r) => buildRitualRow(r, goalsById)),
-    [storeRituals, goalsById],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [storeRituals, goalsById, goalFilter],
   );
+
+  const totalRituals = storeRituals.length;
+  const totalActive = storeRituals.filter((r) => r.status === "active").length;
+  const totalArchived = storeRituals.filter((r) => r.status === "archived").length;
 
   const pending = activeRows.filter((r) => r.pendingToday);
   const dueCount = activeRows.filter((r) => !r.notDueToday).length;
@@ -594,8 +619,27 @@ const Rituals: React.FC = () => {
     toast.success("Ritual restored");
   };
 
-  const headerMeta =
-    `${activeRows.length} ACTIVE · ${pending.length} PENDING TODAY · ${allTime} TOTAL DONE`;
+  const goalOptions: FilterOption<string>[] = [
+    { value: "all", label: "All" },
+    ...storeGoals
+      .filter((g) => g.status === "active")
+      .map((g) => ({ value: g.id, label: g.title, dot: `hsl(var(--${g.color}))` })),
+  ];
+
+  const sortRows = (rows: RitualRow[]) => {
+    const arr = [...rows];
+    arr.sort((a, b) => {
+      if (sortKey === "title") return a.title.localeCompare(b.title);
+      if (sortKey === "completions") return b.totalCompletions - a.totalCompletions;
+      return 0;
+    });
+    return arr;
+  };
+
+  const showActive = stateFilter !== "archived";
+  const showArchived = stateFilter !== "active";
+  const sortedActiveRows = sortRows(activeRows);
+  const sortedArchivedRows = sortRows(archivedRows);
 
   return (
     <div className="min-h-screen bg-surface-base text-text-primary">

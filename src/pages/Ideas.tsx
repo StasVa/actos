@@ -9,6 +9,10 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { MobileHeader } from "@/components/MobileHeader";
 import { subscribeAppEvent } from "@/lib/appEvents";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { FilterDropdown, FilterOption } from "@/components/FilterDropdown";
+import { SortDropdown } from "@/components/SortDropdown";
 
  function relativeAgo(iso: string): { label: string; full: string; sort: number } {
   const d = new Date(iso);

@@ -766,7 +766,14 @@ const Modals: React.FC = () => {
     <Section id="modals" title="Modals & overlays" description="Live preview — click to open the actual production overlay.">
       <Sample name="ConfirmModal — Tier 1">
         <Cell label="Trigger">
-          <TierBButton label="Open confirm" />
+          <button
+            type="button"
+            onClick={() => setOpen("confirm")}
+            className="h-9 px-4 text-[13px] font-medium rounded-[4px] text-text-primary hover:bg-surface-hover transition-colors"
+            style={{ border: "1px solid hsl(var(--border-default))" }}
+          >
+            Open confirm
+          </button>
         </Cell>
         <Cell label="Trigger (destructive)">
           <button

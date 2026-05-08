@@ -5,7 +5,8 @@
 /* ActOS dark workspace theme — Linear/Plane density */
 
 @layer base {
-  :root {
+  :root,
+  [data-theme="dark"] {
     --surface-base: 240 9% 6%;          /* #0F0F12 */
     --surface-raised: 240 8% 9%;        /* #16161A */
     --surface-hover: 240 8% 12%;        /* #1C1C22 */

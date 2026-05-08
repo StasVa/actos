@@ -9,6 +9,8 @@ import type { Action, DayEntry, Goal, ID, ISODate, Project } from "@/types";
 import { DAY_TYPE_LABELS } from "./Index";
 import { getOutcomeSummary } from "@/lib/outcomeUtils";
 import { PageHeader } from "@/components/PageHeader";
+import { FilterDropdown, FilterOption } from "@/components/FilterDropdown";
+import { SortDropdown } from "@/components/SortDropdown";
 
 const TODAY = new Date();
 TODAY.setHours(0, 0, 0, 0);
@@ -84,29 +86,11 @@ const DAY_TYPE_FILTERS = [
   { value: "sick", label: "Sick" },
 ];
 
-const FilterDD: React.FC<{
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  options: { value: string; label: string }[];
-}> = ({ label, value, onChange, options }) => (
-  <div className="flex items-center gap-2">
-    <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">
-      {label}
-    </span>
-    <select
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className="bg-surface-hover text-[12px] text-text-primary rounded-[3px] px-2 py-1 outline-none border border-transparent focus:border-border-default"
-    >
-      {options.map((o) => (
-        <option key={o.value} value={o.value}>
-          {o.label}
-        </option>
-      ))}
-    </select>
-  </div>
-);
+type SortKey = "recent" | "oldest";
+const SORT_OPTIONS: FilterOption<SortKey>[] = [
+  { value: "recent", label: "Recent first" },
+  { value: "oldest", label: "Oldest first" },
+];
 
 const DayRowItem: React.FC<{
   row: DayRow;
@@ -214,6 +198,7 @@ const ReviewsDays: React.FC = () => {
   const [goalFilter, setGoalFilter] = React.useState<string>("all");
   const [range, setRange] = React.useState("30");
   const [search, setSearch] = React.useState("");
+  const [sortKey, setSortKey] = React.useState<SortKey>("recent");
 
   const allRows = React.useMemo(
     () => buildDayRows(dayEntries, actions),
@@ -258,21 +243,23 @@ const ReviewsDays: React.FC = () => {
           meta={`${allRows.length} DAYS TRACKED`}
           filters={
             <>
-              <FilterDD label="DAY TYPE" value={dayType} onChange={setDayType} options={DAY_TYPE_FILTERS} />
-              <FilterDD
+              <FilterDropdown label="DAY TYPE" value={dayType} defaultValue="all" options={DAY_TYPE_FILTERS} onChange={setDayType} />
+              <FilterDropdown
                 label="GOAL"
                 value={goalFilter}
-                onChange={setGoalFilter}
+                defaultValue="all"
                 options={[
                   { value: "all", label: "All" },
-                  ...goals
-                    .filter((g) => g.status === "active")
-                    .map((g) => ({ value: g.id, label: g.title })),
+                  ...goals.filter((g) => g.status === "active").map((g) => ({
+                    value: g.id, label: g.title, dot: `hsl(var(--${g.color}))`,
+                  })),
                 ]}
+                onChange={setGoalFilter}
               />
-              <FilterDD label="DATE" value={range} onChange={setRange} options={RANGE_OPTIONS.map(({ value, label }) => ({ value, label }))} />
+              <FilterDropdown label="DATE" value={range} defaultValue="30" options={RANGE_OPTIONS.map(({ value, label }) => ({ value, label }))} onChange={setRange} />
             </>
           }
+          sort={<SortDropdown<SortKey> value={sortKey} options={SORT_OPTIONS} onChange={setSortKey} />}
         />
         <div style={{ height: 24 }} />
 

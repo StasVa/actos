@@ -76,7 +76,7 @@ const DelegationRow: React.FC<{
   variant: RowVariant;
   onClick: () => void;
 }> = ({ action, goal, project, variant, onClick }) => {
-  const color = goal?.color ?? "hsl(var(--text-tertiary))";
+  const color = goal ? `hsl(var(--${goal.color}))` : "hsl(var(--text-tertiary))";
   const isMobile = useIsMobile();
 
   if (isMobile) {

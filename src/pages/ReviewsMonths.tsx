@@ -15,6 +15,8 @@ import {
 } from "@/lib/monthUtils";
 import { getOutcomeSummary } from "@/lib/outcomeUtils";
 import { PageHeader } from "@/components/PageHeader";
+import { FilterDropdown, FilterOption } from "@/components/FilterDropdown";
+import { SortDropdown } from "@/components/SortDropdown";
 
 const RANGE_OPTIONS = [
   { value: "12m", label: "Last 12 months" },
@@ -23,29 +25,6 @@ const RANGE_OPTIONS = [
   { value: "all", label: "All" },
 ];
 
-const FilterDD: React.FC<{
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  options: { value: string; label: string }[];
-}> = ({ label, value, onChange, options }) => (
-  <div className="flex items-center gap-2">
-    <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">
-      {label}
-    </span>
-    <select
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className="bg-surface-hover text-[12px] text-text-primary rounded-[3px] px-2 py-1 outline-none border border-transparent focus:border-border-default"
-    >
-      {options.map((o) => (
-        <option key={o.value} value={o.value}>
-          {o.label}
-        </option>
-      ))}
-    </select>
-  </div>
-);
 
 function rangeStart(value: string): Date | null {
   const now = new Date();
@@ -110,18 +89,17 @@ const ReviewsMonths: React.FC = () => {
           meta={`${allMonths.length} MONTHS TRACKED`}
           filters={
             <>
-              <FilterDD
+              <FilterDropdown
                 label="GOAL"
                 value={goalFilter}
-                onChange={setGoalFilter}
+                defaultValue="all"
                 options={[
                   { value: "all", label: "All" },
-                  ...goals
-                    .filter((g) => g.status === "active")
-                    .map((g) => ({ value: g.id, label: g.title })),
+                  ...goals.filter((g) => g.status === "active").map((g) => ({ value: g.id, label: g.title, dot: `hsl(var(--${g.color}))` })),
                 ]}
+                onChange={setGoalFilter}
               />
-              <FilterDD label="DATE" value={range} onChange={setRange} options={RANGE_OPTIONS} />
+              <FilterDropdown label="DATE" value={range} defaultValue={range} options={RANGE_OPTIONS} onChange={setRange} />
             </>
           }
         />

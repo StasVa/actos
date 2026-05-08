@@ -919,57 +919,55 @@ const Ideas: React.FC = () => {
           )}
         </div>
 
-        {/* Two-column body */}
-        <div className="flex-1 flex min-h-0">
+        {/* Two-column body (desktop) / list-then-drill (mobile) */}
+        <div className="flex-1 flex min-h-0 relative">
           {/* Left column */}
-          <div className="w-[42%] border-r border-border-subtle flex flex-col min-h-0">
-            <div style={{ padding: "16px 16px 12px 32px" }}>
-              <div className="flex items-center gap-4 flex-wrap">
-                <FilterGroup label="GOAL">
-                  <Chip active={goalFilter === "all"} onClick={() => setGoalFilter("all")}>
+          <div className="w-full md:w-[42%] md:border-r border-border-subtle flex flex-col min-h-0">
+            <div className="px-4 md:pl-8 md:pr-4 pt-4 pb-3">
+              <div className="flex flex-col gap-3">
+                <FilterPillRow label="GOAL">
+                  <Pill active={goalFilter === "all"} onClick={() => setGoalFilter("all")}>
                     All
-                  </Chip>
+                  </Pill>
                   {activeGoals.map((g) => (
-                    <Chip
+                    <Pill
                       key={g.id}
                       active={goalFilter === g.id}
                       onClick={() => setGoalFilter(g.id)}
                       dot={`hsl(var(--${g.color}))`}
                     >
                       {g.title}
-                    </Chip>
+                    </Pill>
                   ))}
-                </FilterGroup>
-                <FilterGroup label="STATUS">
-                  <Chip
+                </FilterPillRow>
+                <FilterPillRow label="STATUS">
+                  <Pill
                     active={statusFilter === "captured"}
                     onClick={() => setStatusFilter("captured")}
                   >
                     Captured
-                  </Chip>
-                  <Chip
+                  </Pill>
+                  <Pill
                     active={statusFilter === "converted"}
                     onClick={() => setStatusFilter("converted")}
                   >
                     Converted
-                  </Chip>
-                  <Chip
+                  </Pill>
+                  <Pill
                     active={statusFilter === "discarded"}
                     onClick={() => setStatusFilter("discarded")}
                   >
                     Discarded
-                  </Chip>
-                </FilterGroup>
+                  </Pill>
+                </FilterPillRow>
               </div>
             </div>
-            {/* Search removed — global ⌘K palette handles search. */}
-            {/* Sort row */}
-            <div className="flex items-center justify-end pl-8 pr-4 py-2">
+            <div className="hidden md:flex items-center justify-end pl-8 pr-4 py-2">
               <span className="font-mono text-[11px] text-text-secondary">
                 Sort: Recent first
               </span>
             </div>
-            <div className="flex-1 overflow-y-auto pl-8">
+            <div className="flex-1 overflow-y-auto md:pl-8">
               {filtered.length === 0 ? (
                 <div className="p-8 text-center font-mono text-[11px] text-text-tertiary">
                   No ideas match these filters.
@@ -983,7 +981,7 @@ const Ideas: React.FC = () => {
                       key={idea.id}
                       idea={idea}
                       goalColor={color}
-                      selected={selected?.id === idea.id}
+                      selected={!isMobile && selected?.id === idea.id}
                       onSelect={() => selectIdea(idea.id)}
                     />
                   );
@@ -992,8 +990,8 @@ const Ideas: React.FC = () => {
             </div>
           </div>
 
-          {/* Right column */}
-          <div className="flex-1 overflow-y-auto min-h-0">
+          {/* Right column — desktop only */}
+          <div className="hidden md:block flex-1 overflow-y-auto min-h-0">
             {filtered.length === 0 ? (
               <EmptyFiltered onClear={clearFilters} />
             ) : selected ? (
@@ -1002,6 +1000,28 @@ const Ideas: React.FC = () => {
               <EmptyDetail />
             )}
           </div>
+
+          {/* Mobile drill-down full-screen detail */}
+          {isMobile && selected && selectedIdeaId && (
+            <div
+              className="fixed inset-0 z-50 overflow-y-auto"
+              style={{ background: "hsl(var(--surface-base))" }}
+            >
+              <div
+                className="sticky top-0 z-10 flex items-center px-2 py-2 border-b border-border-subtle"
+                style={{ background: "hsl(var(--surface-base))" }}
+              >
+                <button
+                  onClick={() => selectIdea(undefined)}
+                  aria-label="Back"
+                  className="inline-flex items-center justify-center text-text-secondary hover:text-text-primary tap-target rounded-[4px]"
+                >
+                  <ArrowLeft size={16} />
+                </button>
+              </div>
+              <IdeaDetail idea={selected} key={selected.id} mobile />
+            </div>
+          )}
         </div>
       </main>
     </div>

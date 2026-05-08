@@ -1,36 +1,23 @@
-// Plan today / Close day / Combined Close-yesterday-and-Plan-today modals.
+// Plan today — full-page in-place takeover (no longer a modal).
 //
-// All three render through a shared <ModalShell> (centered desktop dialog,
-// bottom sheet on mobile). Forms are uncontrolled-ish: local state, submit
-// commits to the store via startDayPlan / closeDay.
+// Renders inside /today's content area when the user clicks "Start your day".
+// Sidebar stays visible. Submit commits to the store via startDayPlan().
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { createPortal } from "react-dom";
-import { X, Zap, Leaf, Sun, Thermometer, GripVertical, Star, type LucideIcon } from "lucide-react";
+import { Zap, Leaf, Sun, Thermometer, GripVertical, Star, type LucideIcon } from "lucide-react";
 import { toast } from "sonner";
-import { useStore, ritualMultiplier } from "@/store/useStore";
+import { useStore } from "@/store/useStore";
 import type { Action, DayType, ID, Ritual } from "@/types";
 import { formatTime as formatTimeMin } from "@/lib/format";
 import { ImpactPill, TimePill } from "@/components/MetaPills";
 
 /* ───────── helpers ───────── */
 const todayISO = () => new Date().toISOString().slice(0, 10);
-const yesterdayISO = () => {
-  const d = new Date();
-  d.setDate(d.getDate() - 1);
-  return d.toISOString().slice(0, 10);
-};
 
 const formatLong = (iso: string) =>
   new Date(iso + "T00:00:00").toLocaleDateString("en-US", {
     weekday: "long",
     month: "long",
-    day: "numeric",
-  });
-const formatShort = (iso: string) =>
-  new Date(iso + "T00:00:00").toLocaleDateString("en-US", {
-    weekday: "short",
-    month: "short",
     day: "numeric",
   });
 
@@ -60,87 +47,7 @@ const SectionHead: React.FC<{ children: React.ReactNode; sub?: string; meta?: Re
   </div>
 );
 
-const PrimaryButton: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement>> = ({
-  className = "",
-  ...rest
-}) => (
-  <button
-    type="button"
-    {...rest}
-    className={`px-5 py-2 rounded-[4px] bg-[hsl(var(--accent))] text-white text-[13px] font-medium hover:brightness-110 transition disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
-  />
-);
-
-const LinkButton: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement>> = ({
-  className = "",
-  ...rest
-}) => (
-  <button
-    type="button"
-    {...rest}
-    className={`text-[13px] text-text-secondary hover:text-text-primary transition ${className}`}
-  />
-);
-
-/* ───────── shell ───────── */
-const ModalShell: React.FC<{
-  open: boolean;
-  onClose: () => void;
-  title: string;
-  subtitle?: string;
-  width?: number;
-  footer: React.ReactNode;
-  children: React.ReactNode;
-}> = ({ open, onClose, title, subtitle, footer, children, width = 560 }) => {
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
-    };
-  }, [open, onClose]);
-  if (!open) return null;
-  return createPortal(
-    <div className="fixed inset-0 z-[200] flex items-end md:items-center justify-center">
-      <div
-        className="absolute inset-0"
-        style={{ background: "rgba(0,0,0,0.5)" }}
-        onClick={onClose}
-      />
-      <div
-        className="relative w-full max-h-[90vh] md:max-h-[85vh] bg-surface-elevated border border-border-subtle md:rounded-[8px] rounded-t-[12px] flex flex-col shadow-2xl animate-in slide-in-from-bottom-4 md:slide-in-from-bottom-0 md:fade-in"
-        style={{ maxWidth: width }}
-      >
-        <div className="flex items-start justify-between px-6 pt-5 pb-4 border-b border-border-subtle shrink-0">
-          <div>
-            <h2 className="text-[20px] font-medium text-text-primary leading-tight">{title}</h2>
-            {subtitle && (
-              <div className="text-[14px] text-text-secondary mt-0.5">{subtitle}</div>
-            )}
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            className="text-text-tertiary hover:text-text-primary transition p-1 -m-1"
-          >
-            <X size={18} />
-          </button>
-        </div>
-        <div className="px-6 py-5 overflow-y-auto overflow-x-hidden flex-1 min-w-0">{children}</div>
-        <div className="px-6 py-4 border-t border-border-subtle flex items-center justify-between gap-3 shrink-0">
-          {footer}
-        </div>
-      </div>
-    </div>,
-    document.body,
-  );
-};
+/* (modal shell removed — Plan today is now a full-page in-place takeover.) */
 
 /* ───────── ritual schedule helpers ───────── */
 function ritualDueOn(r: Ritual, iso: string): boolean {
@@ -982,11 +889,11 @@ function usePrefilledPlanState(
   return [state, setState];
 }
 
-/* ═════════════ Plan Today modal ═════════════ */
+/* ═════════════ Plan Today — full-page in-place takeover ═════════════ */
 
-export const PlanTodayModal: React.FC<{ open: boolean; onClose: () => void }> = ({
-  open,
-  onClose,
+export const PlanTodayPage: React.FC<{ onCancel: () => void; onComplete: () => void }> = ({
+  onCancel,
+  onComplete,
 }) => {
   const date = todayISO();
   const startDayPlan = useStore((s) => s.startDayPlan);
@@ -996,9 +903,11 @@ export const PlanTodayModal: React.FC<{ open: boolean; onClose: () => void }> = 
 
   const canSubmit = !!state.dayType && state.selectedActionIds.length > 0;
 
+  const isMobile =
+    typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches;
+
   const handleSubmit = () => {
     if (!canSubmit) return;
-    // Clear scheduledDate on any pre-scheduled actions that the user un-selected.
     const selectedSet = new Set(state.selectedActionIds);
     actions
       .filter((a) => a.scheduledDate === date && !selectedSet.has(a.id))
@@ -1016,236 +925,59 @@ export const PlanTodayModal: React.FC<{ open: boolean; onClose: () => void }> = 
     toast.success(
       `Day planned. ${state.selectedActionIds.length} action${state.selectedActionIds.length > 1 ? "s" : ""}, ${state.keptRitualIds.size} ritual${state.keptRitualIds.size === 1 ? "" : "s"}.`,
     );
-    onClose();
+    onComplete();
+  };
+
+  const handleCancel = () => {
+    const dirty =
+      !!state.dayType ||
+      state.selectedActionIds.length > 0 ||
+      state.skippedRitualIds.size > 0;
+    if (dirty && !confirm("Discard your planning progress?")) return;
+    onCancel();
   };
 
   return (
-    <ModalShell
-      open={open}
-      onClose={onClose}
-      title="Plan today"
-      subtitle={formatLong(date)}
-      width={720}
-      footer={
-        <>
-          <LinkButton onClick={onClose}>Plan later</LinkButton>
-          <PrimaryButton onClick={handleSubmit} disabled={!canSubmit}>
-            Plan day
-          </PrimaryButton>
-        </>
-      }
-    >
+    <div className="space-y-8">
+      <header className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-[28px] md:text-[32px] font-medium text-text-primary leading-tight">
+            Plan today
+          </h1>
+          <div className="text-[14px] text-text-secondary mt-1">{formatLong(date)}</div>
+        </div>
+        <button
+          type="button"
+          onClick={handleCancel}
+          className="text-[13px] text-text-secondary hover:text-text-primary transition shrink-0"
+        >
+          Cancel
+        </button>
+      </header>
+
       <PlanForm date={date} state={state} setState={setState} />
-    </ModalShell>
-  );
-};
 
-/* ═════════════ Close Day form ═════════════ */
-
-const CloseSummary: React.FC<{ date: string }> = ({ date }) => {
-  const dayEntry = useStore((s) => s.dayEntries.find((d) => d.date === date));
-  const actions = useStore((s) => s.actions);
-  const rituals = useStore((s) => s.rituals);
-
-  if (!dayEntry) {
-    return (
-      <div className="font-mono text-[11px] text-text-tertiary">
-        No plan was made for this day.
+      {/* Footer */}
+      <div className="flex items-center justify-between gap-3 pt-4 border-t border-border-subtle md:static max-md:fixed max-md:left-0 max-md:right-0 max-md:bottom-0 max-md:z-40 max-md:bg-surface-base max-md:border-t max-md:border-border-subtle max-md:px-4 max-md:py-3 max-md:[padding-bottom:calc(env(safe-area-inset-bottom)+12px)]">
+        <button
+          type="button"
+          onClick={handleCancel}
+          className="hidden md:inline text-[13px] text-text-secondary hover:text-text-primary transition"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          onClick={handleSubmit}
+          disabled={!canSubmit}
+          className="ml-auto w-full md:w-auto px-5 py-2.5 rounded-[4px] bg-[hsl(var(--accent))] text-white text-[14px] font-medium hover:brightness-110 transition disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Plan day
+        </button>
       </div>
-    );
-  }
-
-  const planned = (dayEntry.plannedActionIds ?? [])
-    .map((id) => actions.find((a) => a.id === id))
-    .filter(Boolean) as Action[];
-  const done = planned.filter((a) => a.status === "done").length;
-  const skipped = planned.filter(
-    (a) => a.status === "dropped" || a.status === "cancelled",
-  ).length;
-  const pending = planned.length - done - skipped;
-
-  const main = dayEntry.mainTaskActionId
-    ? actions.find((a) => a.id === dayEntry.mainTaskActionId)
-    : undefined;
-
-  const plannedRituals = (dayEntry.plannedRitualIds ?? [])
-    .map((id) => rituals.find((r) => r.id === id))
-    .filter(Boolean) as Ritual[];
-  const ritualsDone = plannedRituals.filter((r) =>
-    r.completionHistory.some(
-      (c) => c.date === date && (c.status === "done" || !c.status),
-    ),
-  ).length;
-  const ritualsSkipped = (dayEntry.skippedRitualIds ?? []).length;
-  const ritualsMissed = plannedRituals.length - ritualsDone;
-
-  const dayTypeLabel = dayEntry.dayType
-    ? DAY_TYPE_OPTIONS.find((o) => o.value === dayEntry.dayType)?.label
-    : "—";
-
-  return (
-    <div className="rounded-[4px] bg-surface-raised border border-border-subtle p-4 space-y-2 text-[13px]">
-      <div className="flex justify-between">
-        <span className="text-text-secondary">Day type</span>
-        <span className="text-text-primary">{dayTypeLabel}</span>
-      </div>
-      <div className="flex justify-between">
-        <span className="text-text-secondary">Main task</span>
-        <span className="text-text-primary">
-          {main ? (main.status === "done" ? `✓ ${main.title}` : `· ${main.title}`) : "—"}
-        </span>
-      </div>
-      <div className="flex justify-between">
-        <span className="text-text-secondary">Actions</span>
-        <span className="font-mono text-text-primary">
-          {done} done · {skipped} skipped · {pending} pending
-        </span>
-      </div>
-      <div className="flex justify-between">
-        <span className="text-text-secondary">Rituals</span>
-        <span className="font-mono text-text-primary">
-          {ritualsDone} done · {ritualsSkipped} skipped · {ritualsMissed} missed
-        </span>
-      </div>
+      {/* spacer so sticky mobile footer doesn't overlap content */}
+      <div className="h-16 md:hidden" />
     </div>
   );
 };
 
-interface CloseFormState {
-  eveningEnergy?: number;
-  reflection: string;
-}
-
-const CloseForm: React.FC<{
-  date: string;
-  state: CloseFormState;
-  setState: React.Dispatch<React.SetStateAction<CloseFormState>>;
-  compact?: boolean;
-}> = ({ date, state, setState, compact }) => {
-  return (
-    <div className="space-y-6">
-      <CloseSummary date={date} />
-      <section>
-        <SectionHead>REFLECTION</SectionHead>
-        <textarea
-          value={state.reflection}
-          onChange={(e) => setState((s) => ({ ...s, reflection: e.target.value }))}
-          rows={compact ? 2 : 4}
-          placeholder="What worked? What didn't? Carry into tomorrow…"
-          className="w-full bg-surface-hover rounded-[4px] px-3 py-2 text-[13px] text-text-primary outline-none border border-transparent focus:border-border-default placeholder:text-text-tertiary resize-none"
-        />
-      </section>
-    </div>
-  );
-};
-
-/* ═════════════ Close Day modal ═════════════ */
-
-export const CloseDayModal: React.FC<{ open: boolean; onClose: () => void }> = ({
-  open,
-  onClose,
-}) => {
-  const date = todayISO();
-  const closeDay = useStore((s) => s.closeDay);
-  const [state, setState] = useState<CloseFormState>({ reflection: "" });
-  useEffect(() => {
-    if (open) setState({ reflection: "" });
-  }, [open]);
-
-  const handleSubmit = () => {
-    closeDay(date, state.eveningEnergy, state.reflection || undefined);
-    toast.success("Day closed");
-    onClose();
-  };
-
-  return (
-    <ModalShell
-      open={open}
-      onClose={onClose}
-      title="Close today"
-      subtitle={formatLong(date)}
-      footer={
-        <>
-          <LinkButton onClick={onClose}>Cancel</LinkButton>
-          <PrimaryButton onClick={handleSubmit}>Close day</PrimaryButton>
-        </>
-      }
-    >
-      <CloseForm date={date} state={state} setState={setState} />
-    </ModalShell>
-  );
-};
-
-/* ═════════════ Combined Close-yesterday + Plan-today modal ═════════════ */
-
-export const ClosePlanModal: React.FC<{ open: boolean; onClose: () => void }> = ({
-  open,
-  onClose,
-}) => {
-  const today = todayISO();
-  const yesterday = yesterdayISO();
-  const closeDay = useStore((s) => s.closeDay);
-  const startDayPlan = useStore((s) => s.startDayPlan);
-
-  const [planState, setPlanState] = usePrefilledPlanState(today);
-  const [closeState, setCloseState] = useState<CloseFormState>({ reflection: "" });
-  useEffect(() => {
-    if (open) setCloseState({ reflection: "" });
-  }, [open]);
-
-  const canSubmit = !!planState.dayType && planState.selectedActionIds.length > 0;
-
-  const updateAction = useStore((s) => s.updateAction);
-  const allActions = useStore((s) => s.actions);
-
-  const handleSubmit = () => {
-    if (!canSubmit) return;
-    closeDay(yesterday, closeState.eveningEnergy, closeState.reflection || undefined);
-    const selectedSet = new Set(planState.selectedActionIds);
-    allActions
-      .filter((a) => a.scheduledDate === today && !selectedSet.has(a.id))
-      .forEach((a) => updateAction(a.id, { scheduledDate: undefined }));
-    startDayPlan({
-      date: today,
-      dayType: planState.dayType,
-      mainTaskActionId: planState.mainTaskId,
-      morningEnergyScore: undefined,
-      morningIntentNote: undefined,
-      plannedActionIds: planState.selectedActionIds,
-      plannedRitualIds: Array.from(planState.keptRitualIds),
-      skippedRitualIds: Array.from(planState.skippedRitualIds),
-    });
-    toast.success("Yesterday closed and today planned");
-    onClose();
-  };
-
-  return (
-    <ModalShell
-      open={open}
-      onClose={onClose}
-      title="Close yesterday and plan today"
-      subtitle={`Yesterday: ${formatShort(yesterday)} · Today: ${formatShort(today)}`}
-      width={720}
-      footer={
-        <>
-          <LinkButton onClick={onClose}>Skip for now</LinkButton>
-          <PrimaryButton onClick={handleSubmit} disabled={!canSubmit}>
-            Close yesterday and plan today
-          </PrimaryButton>
-        </>
-      }
-    >
-      <div className="space-y-8">
-        <div>
-          <h3 className="text-[14px] font-medium text-text-primary mb-3">Close yesterday</h3>
-          <CloseForm date={yesterday} state={closeState} setState={setCloseState} compact />
-        </div>
-        <div className="h-px bg-border-subtle" />
-        <div>
-          <h3 className="text-[14px] font-medium text-text-primary mb-3">Plan today</h3>
-          <PlanForm date={today} state={planState} setState={setPlanState} />
-        </div>
-      </div>
-    </ModalShell>
-  );
-};

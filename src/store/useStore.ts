@@ -26,6 +26,7 @@ import type {
   UserSettings,
   ID,
   ISODate,
+  ISODateTime,
 } from "@/types";
 import {
   SEED_ACTIONS,
@@ -161,7 +162,8 @@ export interface StoreState {
     skippedRitualIds: ID[];
   }) => void;
   updateDayEntry: (date: ISODate, partial: Partial<DayEntry>) => void;
-  closeDay: (date: ISODate, eveningEnergyScore?: number, reflectionText?: string) => void;
+  closeDay: (date: ISODate, opts?: { closedAt?: ISODateTime }) => void;
+  reopenDay: (date: ISODate) => void;
   getDayEntry: (date: ISODate) => DayEntry | undefined;
 
   // ─── Settings ───
@@ -761,26 +763,33 @@ export const useStore = create<StoreState>()(
         }
       },
 
-      closeDay: (date, eveningEnergyScore, reflectionText) => {
-        const at = nowISO();
+      closeDay: (date, opts) => {
+        const at = opts?.closedAt ?? nowISO();
         const state = get();
         const existing = state.dayEntries.find((d) => d.date === date);
         if (existing) {
           set({
             dayEntries: state.dayEntries.map((d) =>
-              d.date === date
-                ? { ...d, eveningEnergyScore, reflectionText, closedAt: at, isClosed: true }
-                : d,
+              d.date === date ? { ...d, closedAt: at, isClosed: true } : d,
             ),
           });
         } else {
           set({
             dayEntries: [
               ...state.dayEntries,
-              { date, eveningEnergyScore, reflectionText, closedAt: at, isClosed: true },
+              { date, closedAt: at, isClosed: true },
             ],
           });
         }
+      },
+
+      reopenDay: (date) => {
+        const state = get();
+        set({
+          dayEntries: state.dayEntries.map((d) =>
+            d.date === date ? { ...d, isClosed: false, closedAt: undefined } : d,
+          ),
+        });
       },
 
       getDayEntry: (date) => get().dayEntries.find((d) => d.date === date),

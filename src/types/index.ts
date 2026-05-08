@@ -175,9 +175,11 @@ export interface DayEntry {
   mainTaskActionId?: ID;
   /** @deprecated Energy tracking removed; field kept to tolerate legacy data. */
   morningEnergyScore?: number;
+  /** @deprecated removed; field kept to tolerate legacy localStorage data. */
   morningIntentNote?: string;
   /** @deprecated Energy tracking removed; field kept to tolerate legacy data. */
   eveningEnergyScore?: number;
+  /** @deprecated Reflection field removed in v2. */
   reflectionText?: string;
   startedAt?: ISODateTime;
   closedAt?: ISODateTime;

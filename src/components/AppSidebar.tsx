@@ -123,10 +123,9 @@ const NavGroup: React.FC<{
 
 const Divider: React.FC = () => <div className="my-4 border-t border-border-subtle" />;
 
-export const AppSidebar: React.FC<{ onOpenSettings?: () => void }> = ({ onOpenSettings }) => {
+export const AppSidebar: React.FC<{ onOpenSettings?: () => void }> = ({ onOpenSettings: _onOpenSettings }) => {
   const { pathname } = useLocation();
   const isMobile = useIsMobile();
-  const handleSettings = onOpenSettings ?? (() => emitAppEvent("open-settings"));
 
   const [collapsed, setCollapsed] = React.useState<boolean>(() => {
     if (typeof window === "undefined") return false;

@@ -11,6 +11,97 @@ import type { Action, DayType, ID, Ritual } from "@/types";
 import { formatTime as formatTimeMin } from "@/lib/format";
 import { ImpactPill, TimePill } from "@/components/MetaPills";
 
+/* ───────── inline custom dropdown for composer parent picker ───────── */
+type MiniOption = { value: string; label: string; dot?: string };
+const MiniDropdown: React.FC<{
+  value: string;
+  options: MiniOption[];
+  onChange: (v: string) => void;
+  placeholder?: string;
+  showDot?: boolean;
+}> = ({ value, options, onChange, placeholder, showDot }) => {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const current = options.find((o) => o.value === value);
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e: MouseEvent) => {
+      if (!ref.current?.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", onDoc);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="inline-flex items-center gap-1.5 rounded-[4px] border border-border-subtle bg-transparent hover:bg-surface-hover transition-colors"
+        style={{ padding: "4px 10px", maxWidth: 160 }}
+        title={current?.label ?? placeholder}
+      >
+        {showDot && current?.dot && (
+          <span className="w-2 h-2 rounded-full shrink-0" style={{ background: current.dot }} />
+        )}
+        <span
+          className="text-[13px] text-text-primary truncate"
+          style={{ maxWidth: 110 }}
+        >
+          {current?.label ?? placeholder ?? ""}
+        </span>
+        <span className="font-mono text-text-tertiary shrink-0" style={{ fontSize: 10 }}>▾</span>
+      </button>
+      {open && (
+        <div
+          className="absolute left-0 z-50 bg-surface-elevated border border-border-subtle rounded-[6px]"
+          style={{ top: "calc(100% + 4px)", minWidth: Math.max(160, ref.current?.offsetWidth ?? 0), padding: "4px 0" }}
+        >
+          {options.length === 0 && (
+            <div className="px-3 py-1.5 text-[12px] text-text-tertiary">No options</div>
+          )}
+          {options.map((o) => {
+            const selected = o.value === value;
+            return (
+              <button
+                key={o.value || "__none"}
+                type="button"
+                onClick={() => {
+                  onChange(o.value);
+                  setOpen(false);
+                }}
+                className={`w-full flex items-center gap-2 text-left text-[13px] transition-colors ${
+                  selected ? "bg-surface-hover" : "hover:bg-surface-hover"
+                }`}
+                style={{ padding: "6px 12px" }}
+              >
+                {showDot && o.dot && (
+                  <span className="w-2 h-2 rounded-full shrink-0" style={{ background: o.dot }} />
+                )}
+                <span
+                  className="flex-1 text-text-primary truncate"
+                  style={selected ? { color: "hsl(var(--accent))" } : undefined}
+                >
+                  {o.label}
+                </span>
+                {selected && (
+                  <span style={{ color: "hsl(var(--accent))", fontSize: 12 }}>✓</span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
+
 /* ───────── helpers ───────── */
 const todayISO = () => new Date().toISOString().slice(0, 10);
 

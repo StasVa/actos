@@ -316,11 +316,12 @@ const AllDelegated: React.FC = () => {
             <h1 className="text-[24px] font-medium text-text-primary">Delegated</h1>
             <button
               onClick={newDelegated}
+              aria-label="Create a delegated action"
               className="inline-flex items-center gap-1.5 h-9 px-3 rounded-[4px] text-[13px] font-medium text-white transition-colors"
               style={{ background: "hsl(var(--accent))" }}
             >
               <Plus size={14} />
-              New delegated action
+              + Delegate
             </button>
           </div>
 
@@ -397,7 +398,7 @@ const AllDelegated: React.FC = () => {
               <SharedEmptyState
                 headline="Nothing delegated yet."
                 description="When you delegate an action to someone, it appears here with the expected return date so you can track what's outstanding."
-                ctaLabel="+ New delegated action"
+                ctaLabel="Delegate"
                 onCta={newDelegated}
               />
             ) : (

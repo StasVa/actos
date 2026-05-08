@@ -540,14 +540,14 @@ const PlanForm: React.FC<{
 
           {/* MAIN TASK */}
           <section>
-            <div className="mb-2">
+            <div className="mb-4">
               <div className="flex items-center gap-2">
-                <Star size={16} className="text-text-tertiary" />
+                <Star size={14} className="text-text-tertiary" />
                 <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
                   MAIN TASK
                 </div>
               </div>
-              <div className="text-[13px] text-text-secondary mt-1">
+              <div className="text-[16px] md:text-[19px] font-medium text-text-primary mt-1 leading-snug">
                 What single thing makes today a win?
               </div>
             </div>

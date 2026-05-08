@@ -354,7 +354,7 @@ export const Hero: React.FC = () => {
     );
   }
 
-  const isMobile = typeof window !== "undefined" && window.matchMedia("(max-width: 768px)").matches;
+  const isMobile = useIsMobile();
   return (
     <div
       className="grid w-full md:divide-x divide-y md:divide-y-0 divide-border-subtle rounded-[6px] border border-border-subtle bg-surface-elevated p-4 md:p-6 gap-4 md:gap-0"

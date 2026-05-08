@@ -552,11 +552,13 @@ const PlanForm: React.FC<{
                                 <div className="text-[13px] text-text-primary truncate mt-1">
                                   {heavy.title}
                                 </div>
-                                <div className="font-mono text-[11px] text-text-secondary tabular-nums mt-0.5">
-                                  {heavy.impact ? `I${heavy.impact}` : "—"}
-                                  {heavy.timeEstimateMinutes
-                                    ? ` · ${formatTimeMin(heavy.timeEstimateMinutes)}`
-                                    : ""}
+                                <div className="flex items-center gap-1 mt-1">
+                                  <ImpactPill
+                                    impact={heavy.impact}
+                                    goalColor={goalColor(heavy.goalId)}
+                                    size="mini"
+                                  />
+                                  <TimePill minutes={heavy.timeEstimateMinutes} size="mini" />
                                 </div>
                               </>
                             ) : (

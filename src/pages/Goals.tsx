@@ -8,6 +8,7 @@ import { CardMenu } from "@/components/CardMenu";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { FilterDropdown, FilterOption } from "@/components/FilterDropdown";
 import { SortDropdown } from "@/components/SortDropdown";
+import { EmptyState, FilteredEmpty } from "@/components/EmptyState";
 import { Tooltip, SparkTooltipContent, StateDotTooltip, type DayInfo } from "@/components/Tooltip";
 import { toast } from "sonner";
 import type { Goal } from "@/types";

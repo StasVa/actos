@@ -243,21 +243,23 @@ const ReviewsDays: React.FC = () => {
           meta={`${allRows.length} DAYS TRACKED`}
           filters={
             <>
-              <FilterDD label="DAY TYPE" value={dayType} onChange={setDayType} options={DAY_TYPE_FILTERS} />
-              <FilterDD
+              <FilterDropdown label="DAY TYPE" value={dayType} defaultValue="all" options={DAY_TYPE_FILTERS} onChange={setDayType} />
+              <FilterDropdown
                 label="GOAL"
                 value={goalFilter}
-                onChange={setGoalFilter}
+                defaultValue="all"
                 options={[
                   { value: "all", label: "All" },
-                  ...goals
-                    .filter((g) => g.status === "active")
-                    .map((g) => ({ value: g.id, label: g.title })),
+                  ...goals.filter((g) => g.status === "active").map((g) => ({
+                    value: g.id, label: g.title, dot: `hsl(var(--${g.color}))`,
+                  })),
                 ]}
+                onChange={setGoalFilter}
               />
-              <FilterDD label="DATE" value={range} onChange={setRange} options={RANGE_OPTIONS.map(({ value, label }) => ({ value, label }))} />
+              <FilterDropdown label="DATE" value={range} defaultValue="30" options={RANGE_OPTIONS.map(({ value, label }) => ({ value, label }))} onChange={setRange} />
             </>
           }
+          sort={<SortDropdown<SortKey> value={sortKey} options={SORT_OPTIONS} onChange={setSortKey} />}
         />
         <div style={{ height: 24 }} />
 

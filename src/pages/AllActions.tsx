@@ -18,6 +18,7 @@ import { FilterDropdown, FilterOption } from "@/components/FilterDropdown";
 import { SortDropdown } from "@/components/SortDropdown";
 import { useStore } from "@/store/useStore";
 import { toLegacyActions } from "@/lib/actionsAdapter";
+import { EmptyState, FilteredEmpty } from "@/components/EmptyState";
 
 /* ===== Filter chips ===== */
 const Chip: React.FC<{

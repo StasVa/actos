@@ -36,8 +36,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
   return { label, full, sort: d.getTime() };
 }
 
-/* ===== Chip / FilterGroup ===== */
-const Chip: React.FC<{
+/* ===== Pill / FilterPillRow ===== */
+const Pill: React.FC<{
   active: boolean;
   onClick: () => void;
   children: React.ReactNode;
@@ -45,21 +45,29 @@ const Chip: React.FC<{
 }> = ({ active, onClick, children, dot }) => (
   <button
     onClick={onClick}
-    className={`inline-flex items-center gap-1.5 px-[10px] py-1 rounded-[4px] border text-[12px] transition-colors ${
+    className={`inline-flex items-center gap-2 shrink-0 rounded-[4px] border transition-colors whitespace-nowrap ${
       active
-        ? "bg-surface-hover text-text-primary border-accent"
-        : "bg-transparent text-text-secondary border-border-default hover:text-text-primary"
+        ? "border-[hsl(var(--accent))] text-text-primary font-medium bg-transparent"
+        : "border-border-subtle text-text-secondary bg-transparent hover:bg-surface-hover hover:border-border-default"
     }`}
+    style={{ height: 32, padding: "6px 12px", fontSize: 13, lineHeight: "20px" }}
   >
-    {dot && <span className="w-2 h-2 rounded-full" style={{ background: dot }} />}
+    {dot && <span className="w-2 h-2 rounded-full shrink-0" style={{ background: dot }} />}
     {children}
   </button>
 );
 
-const FilterGroup: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
-  <div className="flex items-center gap-2">
-    <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">{label}</span>
-    <div className="flex items-center gap-1.5">{children}</div>
+const FilterPillRow: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
+  <div className="flex items-center gap-2 min-w-0">
+    <span className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary shrink-0">
+      {label}
+    </span>
+    <div
+      className="flex items-center gap-2 min-w-0 flex-wrap md:flex-wrap overflow-x-auto md:overflow-visible scrollbar-hide"
+      style={{ WebkitOverflowScrolling: "touch" }}
+    >
+      {children}
+    </div>
   </div>
 );
 

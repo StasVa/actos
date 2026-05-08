@@ -818,9 +818,6 @@ const PlanForm: React.FC<{
               })}
             </div>
           </section>
-
-        </>
-      )}
     </div>
   );
 };

@@ -9,6 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { FilterDropdown, FilterOption } from "@/components/FilterDropdown";
 import { useIsMobile } from "@/hooks/use-mobile";
 import type { Action, ID, SessionMode } from "@/types";
+import { TimePill } from "@/components/MetaPills";
 
 /* ───────── Mode presets ───────── */
 

@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { useStore, ritualMultiplier } from "@/store/useStore";
 import type { Action, DayType, ID, Ritual } from "@/types";
 import { formatTime as formatTimeMin } from "@/lib/format";
+import { ImpactPill, TimePill } from "@/components/MetaPills";
 
 /* ───────── helpers ───────── */
 const todayISO = () => new Date().toISOString().slice(0, 10);

@@ -16,9 +16,10 @@ import {
   CalendarRange,
   PanelLeftClose,
   PanelLeftOpen,
-  Settings as SettingsIcon,
+  HelpCircle,
 } from "lucide-react";
 import { LifetimeCounters } from "@/components/LifetimeCounters";
+import { UserMenu } from "@/components/UserMenu";
 import { emitAppEvent } from "@/lib/appEvents";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {

@@ -6,7 +6,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Zap, Leaf, Sun, Thermometer, GripVertical, Star, type LucideIcon } from "lucide-react";
 import { toast } from "sonner";
-import { useStore } from "@/store/useStore";
+import { useStore, ritualMultiplier } from "@/store/useStore";
 import type { Action, DayType, ID, Ritual } from "@/types";
 import { formatTime as formatTimeMin } from "@/lib/format";
 import { ImpactPill, TimePill } from "@/components/MetaPills";
@@ -28,16 +28,24 @@ const SectionHead: React.FC<{ children: React.ReactNode; sub?: string; meta?: Re
   sub,
   meta,
 }) => (
-  <div className="mb-2 flex items-baseline justify-between gap-3">
+  <div className="mb-4 flex items-baseline justify-between gap-3">
     <div>
-      <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
-        {children}
+      <div className="flex items-baseline gap-2 flex-wrap">
+        <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
+          {children}
+        </div>
+        {meta && (
+          <div className="font-mono text-[11px] text-text-tertiary tabular-nums">
+            · {meta}
+          </div>
+        )}
       </div>
-      {sub && <div className="text-[13px] text-text-secondary mt-1">{sub}</div>}
+      {sub && (
+        <div className="text-[16px] md:text-[19px] font-medium text-text-primary mt-1 leading-snug">
+          {sub}
+        </div>
+      )}
     </div>
-    {meta && (
-      <div className="font-mono text-[11px] text-text-tertiary tabular-nums">{meta}</div>
-    )}
   </div>
 );
 
@@ -532,14 +540,14 @@ const PlanForm: React.FC<{
 
           {/* MAIN TASK */}
           <section>
-            <div className="mb-2">
+            <div className="mb-4">
               <div className="flex items-center gap-2">
-                <Star size={16} className="text-text-tertiary" />
+                <Star size={14} className="text-text-tertiary" />
                 <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
                   MAIN TASK
                 </div>
               </div>
-              <div className="text-[13px] text-text-secondary mt-1">
+              <div className="text-[16px] md:text-[19px] font-medium text-text-primary mt-1 leading-snug">
                 What single thing makes today a win?
               </div>
             </div>
@@ -615,7 +623,9 @@ const PlanForm: React.FC<{
 
           {/* RITUALS */}
           <section>
-            <SectionHead meta={`${dueRituals.length}`}>RITUALS TODAY</SectionHead>
+            <SectionHead meta={`${dueRituals.length}`} sub="Mark anything you want to skip.">
+              RITUALS TODAY
+            </SectionHead>
             <div className="space-y-1">
               {dueRituals.length === 0 && (
                 <div className="font-mono text-[11px] text-text-tertiary py-2">
@@ -624,33 +634,56 @@ const PlanForm: React.FC<{
               )}
               {dueRituals.map((r) => {
                 const skipped = state.skippedRitualIds.has(r.id);
+                const mult = ritualMultiplier(r.totalCompletions);
+                const gColor = goalColor(r.goalId);
                 return (
                   <div
                     key={r.id}
                     className={`relative flex items-center gap-2 pr-2 rounded-[3px] hover:bg-surface-hover transition-colors ${
                       skipped ? "opacity-50" : ""
                     }`}
-                    style={{ minHeight: 40 }}
+                    style={{ minHeight: 54 }}
                   >
                     <span
                       className="absolute left-0 top-0 bottom-0"
-                      style={{ background: goalColor(r.goalId), width: 3 }}
+                      style={{ background: gColor, width: 3 }}
                     />
-                    <span style={{ paddingLeft: 11 }} />
-                    <span className={`text-[13px] truncate ${skipped ? "line-through text-text-tertiary" : "text-text-primary"}`}>
-                      {r.title}
-                    </span>
-                    <span className="font-mono text-[11px] text-text-tertiary truncate">
-                      · {r.schedule}
-                    </span>
-                    <div className="flex-1" />
-                    <button
-                      type="button"
-                      onClick={() => toggleRitualSkip(r.id, !skipped)}
-                      className="text-[12px] text-text-tertiary hover:text-text-primary transition shrink-0 px-2"
-                    >
-                      {skipped ? "Restore" : "Skip"}
-                    </button>
+                    <div className="min-w-0 flex-1" style={{ paddingLeft: 14 }}>
+                      <div
+                        className={`text-[14px] font-medium truncate ${
+                          skipped ? "line-through text-text-tertiary" : "text-text-primary"
+                        }`}
+                      >
+                        {r.title}
+                      </div>
+                      <div className="font-mono text-[12px] text-text-secondary truncate">
+                        {r.schedule}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0" style={{ marginLeft: 4 }}>
+                      <span
+                        className="inline-flex items-center justify-center font-medium tabular-nums shrink-0"
+                        style={{
+                          padding: "4px 10px",
+                          borderRadius: 4,
+                          fontSize: 13,
+                          minWidth: 52,
+                          textAlign: "center",
+                          background: `color-mix(in srgb, ${gColor} 15%, transparent)`,
+                          color: gColor,
+                        }}
+                      >
+                        ×{mult.toFixed(2)}
+                      </span>
+                      <TimePill minutes={r.timeEstimateMinutes} />
+                      <button
+                        type="button"
+                        onClick={() => toggleRitualSkip(r.id, !skipped)}
+                        className="text-[12px] text-text-tertiary hover:text-text-primary transition shrink-0 px-2"
+                      >
+                        {skipped ? "Restore" : "Skip"}
+                      </button>
+                    </div>
                   </div>
                 );
               })}
@@ -910,10 +943,10 @@ export const PlanTodayPage: React.FC<{ onCancel: () => void; onComplete: () => v
     });
     const aLabel = DAY_TYPE_META.find((m) => m.value === merged.dayType)?.label ?? "Day";
     if (merged.selectedActionIds.length === 0 && merged.keptRitualIds.size === 0) {
-      toast.success(`${aLabel} planned.`);
+      toast.success(`${aLabel} day started.`);
     } else {
       toast.success(
-        `Day planned. ${merged.selectedActionIds.length} action${merged.selectedActionIds.length === 1 ? "" : "s"}, ${merged.keptRitualIds.size} ritual${merged.keptRitualIds.size === 1 ? "" : "s"}.`,
+        `Day started. ${merged.selectedActionIds.length} action${merged.selectedActionIds.length === 1 ? "" : "s"}, ${merged.keptRitualIds.size} ritual${merged.keptRitualIds.size === 1 ? "" : "s"}.`,
       );
     }
     onComplete();
@@ -1027,7 +1060,7 @@ export const PlanTodayPage: React.FC<{ onCancel: () => void; onComplete: () => v
               disabled={submitDisabled}
               className="ml-auto w-full md:w-auto px-5 py-2.5 rounded-[4px] bg-[hsl(var(--accent))] text-white text-[14px] font-medium hover:brightness-110 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Plan day
+              Start day
             </button>
           </div>
           <div className="h-16 md:hidden" />

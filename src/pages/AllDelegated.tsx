@@ -483,3 +483,6 @@ const AllDelegated: React.FC = () => {
     </div>
   );
 };
+
+
+export default AllDelegated;

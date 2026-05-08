@@ -901,10 +901,15 @@ const DayTypeStep: React.FC<{ onPick: (m: DayTypeMeta) => void }> = ({ onPick })
   const [hover, setHover] = useState<DayType | null>(null);
   return (
     <div className="flex-1 flex flex-col items-center justify-center py-10">
-      <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
-        WHAT KIND OF DAY?
+      <div className="flex flex-col items-center text-center">
+        <h2 className="text-[22px] md:text-[26px] font-medium text-text-primary leading-tight">
+          What kind of day is it?
+        </h2>
+        <div className="text-[14px] text-text-secondary mt-2">
+          Pick one to start planning.
+        </div>
       </div>
-      <div className="h-6" />
+      <div className="h-8 md:h-11" />
       <div className="w-full grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         {DAY_TYPE_META.map((m) => {
           const isHover = hover === m.value;

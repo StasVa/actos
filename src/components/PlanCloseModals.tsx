@@ -856,7 +856,180 @@ function usePrefilledPlanState(
   return [state, setState];
 }
 
-/* ═════════════ Plan Today — full-page in-place takeover ═════════════ */
+/* ═════════════ Plan Today — two-step wizard ═════════════ */
+
+type DayTypeMeta = {
+  value: DayType;
+  label: string;
+  description: string;
+  Icon: LucideIcon;
+  color: string; // hsl(var(--…))
+  active: boolean; // execution / recovery → step 2; otherwise commit immediately
+};
+
+const DAY_TYPE_META: DayTypeMeta[] = [
+  {
+    value: "execution",
+    label: "Execution",
+    description: "Full work day — normal expectations.",
+    Icon: Zap,
+    color: "hsl(var(--state-active))",
+    active: true,
+  },
+  {
+    value: "recovery",
+    label: "Recovery",
+    description: "Light day, intentional rest.",
+    Icon: Leaf,
+    color: "hsl(var(--goal-3))",
+    active: true,
+  },
+  {
+    value: "day-off",
+    label: "Day Off",
+    description: "No work, fully off.",
+    Icon: Sun,
+    color: "hsl(var(--state-stalled))",
+    active: false,
+  },
+  {
+    value: "sick",
+    label: "Sick",
+    description: "Illness — expectations suspended.",
+    Icon: Thermometer,
+    color: "hsl(var(--status-dropped))",
+    active: false,
+  },
+];
+
+/* Step 1 — centered hero with four colored Day Type cards. */
+const DayTypeStep: React.FC<{ onPick: (m: DayTypeMeta) => void }> = ({ onPick }) => {
+  const [hover, setHover] = useState<DayType | null>(null);
+  return (
+    <div className="flex-1 flex flex-col items-center justify-center py-10">
+      <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
+        WHAT KIND OF DAY?
+      </div>
+      <div className="h-6" />
+      <div className="w-full grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+        {DAY_TYPE_META.map((m) => {
+          const isHover = hover === m.value;
+          return (
+            <button
+              key={m.value}
+              type="button"
+              onClick={() => onPick(m)}
+              onMouseEnter={() => setHover(m.value)}
+              onMouseLeave={() => setHover((h) => (h === m.value ? null : h))}
+              className="text-left rounded-[6px] bg-surface-raised transition-colors flex flex-col items-start gap-3"
+              style={{
+                padding: 24,
+                minHeight: 140,
+                border: `1px solid ${isHover ? m.color : "hsl(var(--border-subtle))"}`,
+                background: isHover ? "hsl(var(--surface-hover))" : "hsl(var(--surface-raised))",
+                transitionDuration: "150ms",
+                transitionTimingFunction: "ease-out",
+              }}
+            >
+              <span
+                className="inline-flex items-center justify-center rounded-full shrink-0"
+                style={{
+                  width: 40,
+                  height: 40,
+                  background: `color-mix(in srgb, ${m.color} 12%, transparent)`,
+                  color: m.color,
+                }}
+              >
+                <m.Icon size={20} />
+              </span>
+              <div className="text-[18px] font-medium text-text-primary">{m.label}</div>
+              <div className="text-[13px] text-text-secondary leading-snug">
+                {m.description}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+/* Compact day-type dropdown shown at top of step 2. */
+const DayTypeChip: React.FC<{
+  value: DayType;
+  onChange: (next: DayTypeMeta) => void;
+}> = ({ value, onChange }) => {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const current = DAY_TYPE_META.find((m) => m.value === value)!;
+
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e: MouseEvent) => {
+      if (!ref.current?.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", onDoc);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="inline-flex items-center gap-2 rounded-[4px] border border-border-subtle bg-transparent hover:bg-surface-hover transition-colors"
+        style={{ padding: "6px 10px" }}
+      >
+        <span
+          className="inline-block rounded-full shrink-0"
+          style={{ width: 8, height: 8, background: current.color }}
+        />
+        <span className="text-[13px] text-text-primary">{current.label}</span>
+        <span className="font-mono text-[10px] text-text-tertiary">▾</span>
+      </button>
+      {open && (
+        <div
+          className="absolute left-0 z-50 bg-surface-elevated border border-border-subtle rounded-[4px]"
+          style={{ top: "calc(100% + 4px)", minWidth: 200, padding: "4px 0" }}
+        >
+          {DAY_TYPE_META.map((m) => {
+            const selected = m.value === value;
+            return (
+              <button
+                key={m.value}
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  if (m.value !== value) onChange(m);
+                }}
+                className={`w-full flex items-center gap-2 text-left text-[13px] transition-colors ${
+                  selected ? "bg-surface-hover" : "hover:bg-surface-hover"
+                }`}
+                style={{ padding: "6px 12px" }}
+              >
+                <span
+                  className="inline-block rounded-full shrink-0"
+                  style={{ width: 8, height: 8, background: m.color }}
+                />
+                <span className="flex-1 text-text-primary">{m.label}</span>
+                {selected && (
+                  <span style={{ color: "hsl(var(--accent))", fontSize: 12 }}>✓</span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
 
 export const PlanTodayPage: React.FC<{ onCancel: () => void; onComplete: () => void }> = ({
   onCancel,
@@ -867,45 +1040,96 @@ export const PlanTodayPage: React.FC<{ onCancel: () => void; onComplete: () => v
   const updateAction = useStore((s) => s.updateAction);
   const actions = useStore((s) => s.actions);
   const [state, setState] = usePrefilledPlanState(date);
+  const [step, setStep] = useState<1 | 2>(1);
+  const [pendingSwitch, setPendingSwitch] = useState<DayTypeMeta | null>(null);
 
-  const canSubmit = !!state.dayType && state.selectedActionIds.length > 0;
-
-  const isMobile =
-    typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches;
-
-  const handleSubmit = () => {
-    if (!canSubmit) return;
-    const selectedSet = new Set(state.selectedActionIds);
+  const commitAndComplete = (overrides?: {
+    dayType?: DayType;
+    selectedActionIds?: ID[];
+    keptRitualIds?: Set<ID>;
+    skippedRitualIds?: Set<ID>;
+    mainTaskId?: ID;
+  }) => {
+    const merged = { ...state, ...overrides };
+    const selectedSet = new Set(merged.selectedActionIds);
     actions
       .filter((a) => a.scheduledDate === date && !selectedSet.has(a.id))
       .forEach((a) => updateAction(a.id, { scheduledDate: undefined }));
     startDayPlan({
       date,
-      dayType: state.dayType,
-      mainTaskActionId: state.mainTaskId,
+      dayType: merged.dayType,
+      mainTaskActionId: merged.mainTaskId,
       morningEnergyScore: undefined,
       morningIntentNote: undefined,
-      plannedActionIds: state.selectedActionIds,
-      plannedRitualIds: Array.from(state.keptRitualIds),
-      skippedRitualIds: Array.from(state.skippedRitualIds),
+      plannedActionIds: merged.selectedActionIds,
+      plannedRitualIds: Array.from(merged.keptRitualIds),
+      skippedRitualIds: Array.from(merged.skippedRitualIds),
     });
-    toast.success(
-      `Day planned. ${state.selectedActionIds.length} action${state.selectedActionIds.length > 1 ? "s" : ""}, ${state.keptRitualIds.size} ritual${state.keptRitualIds.size === 1 ? "" : "s"}.`,
-    );
+    const aLabel = DAY_TYPE_META.find((m) => m.value === merged.dayType)?.label ?? "Day";
+    if (merged.selectedActionIds.length === 0 && merged.keptRitualIds.size === 0) {
+      toast.success(`${aLabel} planned.`);
+    } else {
+      toast.success(
+        `Day planned. ${merged.selectedActionIds.length} action${merged.selectedActionIds.length === 1 ? "" : "s"}, ${merged.keptRitualIds.size} ritual${merged.keptRitualIds.size === 1 ? "" : "s"}.`,
+      );
+    }
     onComplete();
   };
 
+  const handlePickStep1 = (m: DayTypeMeta) => {
+    if (m.active) {
+      setState((s) => ({ ...s, dayType: m.value }));
+      setStep(2);
+    } else {
+      // Day Off / Sick — skip step 2 entirely and commit empty plan.
+      commitAndComplete({
+        dayType: m.value,
+        selectedActionIds: [],
+        keptRitualIds: new Set(),
+        skippedRitualIds: new Set(),
+        mainTaskId: undefined,
+      });
+    }
+  };
+
+  const isDirty =
+    state.selectedActionIds.length > 0 ||
+    state.skippedRitualIds.size > 0 ||
+    !!state.mainTaskId;
+
   const handleCancel = () => {
-    const dirty =
-      !!state.dayType ||
-      state.selectedActionIds.length > 0 ||
-      state.skippedRitualIds.size > 0;
-    if (dirty && !confirm("Discard your planning progress?")) return;
+    if (step === 2 && isDirty && !confirm("Discard your planning progress?")) return;
     onCancel();
   };
 
+  const handleChipChange = (next: DayTypeMeta) => {
+    if (!next.active) {
+      // Switching to Day Off / Sick — confirm + discard selections.
+      if (
+        isDirty &&
+        !confirm(
+          `Switch to ${next.label}? Your planned actions and main task will be discarded.`,
+        )
+      ) {
+        return;
+      }
+      commitAndComplete({
+        dayType: next.value,
+        selectedActionIds: [],
+        keptRitualIds: new Set(),
+        skippedRitualIds: new Set(),
+        mainTaskId: undefined,
+      });
+      return;
+    }
+    // Execution ↔ Recovery — silent update.
+    setState((s) => ({ ...s, dayType: next.value }));
+  };
+
+  const submitDisabled = !state.dayType;
+
   return (
-    <div className="space-y-8">
+    <div className="flex flex-col" style={{ minHeight: "calc(100vh - 96px)" }}>
       <header className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-[28px] md:text-[32px] font-medium text-text-primary leading-tight">
@@ -922,28 +1146,50 @@ export const PlanTodayPage: React.FC<{ onCancel: () => void; onComplete: () => v
         </button>
       </header>
 
-      <PlanForm date={date} state={state} setState={setState} />
+      {step === 1 ? (
+        <DayTypeStep onPick={handlePickStep1} />
+      ) : (
+        <div className="mt-8 space-y-8">
+          {/* Compact day-type row */}
+          <div className="flex items-center gap-2 pb-4 border-b border-border-subtle">
+            <span className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
+              DAY TYPE
+            </span>
+            {state.dayType && (
+              <DayTypeChip value={state.dayType} onChange={handleChipChange} />
+            )}
+            <button
+              type="button"
+              onClick={() => setStep(1)}
+              className="ml-2 text-[12px] text-text-tertiary hover:text-text-primary transition"
+            >
+              ← Back
+            </button>
+          </div>
 
-      {/* Footer */}
-      <div className="flex items-center justify-between gap-3 pt-4 border-t border-border-subtle md:static max-md:fixed max-md:left-0 max-md:right-0 max-md:bottom-0 max-md:z-40 max-md:bg-surface-base max-md:border-t max-md:border-border-subtle max-md:px-4 max-md:py-3 max-md:[padding-bottom:calc(env(safe-area-inset-bottom)+12px)]">
-        <button
-          type="button"
-          onClick={handleCancel}
-          className="hidden md:inline text-[13px] text-text-secondary hover:text-text-primary transition"
-        >
-          Cancel
-        </button>
-        <button
-          type="button"
-          onClick={handleSubmit}
-          disabled={!canSubmit}
-          className="ml-auto w-full md:w-auto px-5 py-2.5 rounded-[4px] bg-[hsl(var(--accent))] text-white text-[14px] font-medium hover:brightness-110 transition disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Plan day
-        </button>
-      </div>
-      {/* spacer so sticky mobile footer doesn't overlap content */}
-      <div className="h-16 md:hidden" />
+          <PlanForm date={date} state={state} setState={setState} />
+
+          {/* Footer */}
+          <div className="flex items-center justify-between gap-3 pt-4 border-t border-border-subtle md:static max-md:fixed max-md:left-0 max-md:right-0 max-md:bottom-0 max-md:z-40 max-md:bg-surface-base max-md:border-t max-md:border-border-subtle max-md:px-4 max-md:py-3 max-md:[padding-bottom:calc(env(safe-area-inset-bottom)+12px)]">
+            <button
+              type="button"
+              onClick={handleCancel}
+              className="hidden md:inline text-[13px] text-text-secondary hover:text-text-primary transition"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => commitAndComplete()}
+              disabled={submitDisabled}
+              className="ml-auto w-full md:w-auto px-5 py-2.5 rounded-[4px] bg-[hsl(var(--accent))] text-white text-[14px] font-medium hover:brightness-110 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Plan day
+            </button>
+          </div>
+          <div className="h-16 md:hidden" />
+        </div>
+      )}
     </div>
   );
 };

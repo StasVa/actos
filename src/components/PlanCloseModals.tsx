@@ -80,65 +80,7 @@ const LinkButton: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement>> = ({
   />
 );
 
-/* ───────── shell ───────── */
-const ModalShell: React.FC<{
-  open: boolean;
-  onClose: () => void;
-  title: string;
-  subtitle?: string;
-  width?: number;
-  footer: React.ReactNode;
-  children: React.ReactNode;
-}> = ({ open, onClose, title, subtitle, footer, children, width = 560 }) => {
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
-    };
-  }, [open, onClose]);
-  if (!open) return null;
-  return createPortal(
-    <div className="fixed inset-0 z-[200] flex items-end md:items-center justify-center">
-      <div
-        className="absolute inset-0"
-        style={{ background: "rgba(0,0,0,0.5)" }}
-        onClick={onClose}
-      />
-      <div
-        className="relative w-full max-h-[90vh] md:max-h-[85vh] bg-surface-elevated border border-border-subtle md:rounded-[8px] rounded-t-[12px] flex flex-col shadow-2xl animate-in slide-in-from-bottom-4 md:slide-in-from-bottom-0 md:fade-in"
-        style={{ maxWidth: width }}
-      >
-        <div className="flex items-start justify-between px-6 pt-5 pb-4 border-b border-border-subtle shrink-0">
-          <div>
-            <h2 className="text-[20px] font-medium text-text-primary leading-tight">{title}</h2>
-            {subtitle && (
-              <div className="text-[14px] text-text-secondary mt-0.5">{subtitle}</div>
-            )}
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            className="text-text-tertiary hover:text-text-primary transition p-1 -m-1"
-          >
-            <X size={18} />
-          </button>
-        </div>
-        <div className="px-6 py-5 overflow-y-auto overflow-x-hidden flex-1 min-w-0">{children}</div>
-        <div className="px-6 py-4 border-t border-border-subtle flex items-center justify-between gap-3 shrink-0">
-          {footer}
-        </div>
-      </div>
-    </div>,
-    document.body,
-  );
-};
+/* (modal shell removed — Plan today is now a full-page in-place takeover.) */
 
 /* ───────── ritual schedule helpers ───────── */
 function ritualDueOn(r: Ritual, iso: string): boolean {

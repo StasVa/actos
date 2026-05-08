@@ -668,7 +668,7 @@ const AttachmentsSection: React.FC<{ idea: Idea }> = ({ idea }) => {
 };
 
 /* ===== Detail panel ===== */
-const IdeaDetail: React.FC<{ idea: Idea }> = ({ idea }) => {
+const IdeaDetail: React.FC<{ idea: Idea; mobile?: boolean }> = ({ idea, mobile = false }) => {
   const [overlay, setOverlay] = useState<OverlayMode>(null);
   const [confirmDiscard, setConfirmDiscard] = useState(false);
   const goal = useStore((s) => s.goals.find((g) => g.id === idea.goalId));

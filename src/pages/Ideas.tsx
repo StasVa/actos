@@ -864,12 +864,226 @@ const EmptyFiltered: React.FC<{ onClear: () => void }> = ({ onClear }) => (
 );
 
 /* ===== Page ===== */
-type StatusFilter = "captured" | "converted" | "discarded";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { FilterDropdown, FilterOption } from "@/components/FilterDropdown";
+import { SortDropdown } from "@/components/SortDropdown";
+
+type StatusFilter = "all" | "captured" | "converted" | "discarded";
+type GoalFilter = "all" | ID;
+type DateFilter = "all" | "7d" | "30d" | "month";
+type SortKey = "recent" | "oldest" | "title";
+
+const STATUS_OPTIONS: FilterOption<StatusFilter>[] = [
+  { value: "all", label: "All" },
+  { value: "captured", label: "Captured" },
+  { value: "converted", label: "Converted" },
+  { value: "discarded", label: "Discarded" },
+];
+
+const DATE_OPTIONS: FilterOption<DateFilter>[] = [
+  { value: "all", label: "All time" },
+  { value: "7d", label: "Last 7 days" },
+  { value: "30d", label: "Last 30 days" },
+  { value: "month", label: "This month" },
+];
+
+const SORT_OPTIONS: FilterOption<SortKey>[] = [
+  { value: "recent", label: "Recent first" },
+  { value: "oldest", label: "Oldest first" },
+  { value: "title", label: "Title A–Z" },
+];
 
 const useQueryGoal = (): ID | null => {
   const { search } = useLocation();
   const params = new URLSearchParams(search);
   return params.get("goal");
+};
+
+/* ===== New idea modal (Dialog / bottom sheet on mobile) ===== */
+const NewIdeaModal: React.FC<{
+  open: boolean;
+  onClose: () => void;
+  defaultGoalId?: ID;
+}> = ({ open, onClose, defaultGoalId }) => {
+  const goals = useStore((s) => s.goals);
+  const activeGoals = useMemo(() => goals.filter((g) => g.status === "active"), [goals]);
+  const captureIdea = useStore((s) => s.captureIdea);
+  const selectIdea = useStore((s) => s.selectIdea);
+  const isMobile = useIsMobile();
+
+  const [title, setTitle] = useState("");
+  const [goalId, setGoalId] = useState<ID>(defaultGoalId ?? activeGoals[0]?.id ?? "");
+  const [note, setNote] = useState("");
+  const inputRef = React.useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    if (open) {
+      setTitle("");
+      setNote("");
+      setGoalId(defaultGoalId ?? activeGoals[0]?.id ?? "");
+      requestAnimationFrame(() => inputRef.current?.focus());
+    }
+  }, [open, defaultGoalId, activeGoals]);
+
+  const dirty = title.trim() !== "" || note.trim() !== "";
+  const canSubmit = title.trim().length > 0 && !!goalId;
+
+  const tryClose = () => {
+    if (dirty) {
+      const ok = window.confirm("Discard this idea?");
+      if (!ok) return;
+    }
+    onClose();
+  };
+
+  const submit = () => {
+    if (!canSubmit) return;
+    const id = captureIdea({ title: title.trim(), goalId, note: note.trim() || undefined });
+    selectIdea(id);
+    toast.success("Idea captured");
+    onClose();
+  };
+
+  if (isMobile) {
+    return (
+      <Sheet open={open} onOpenChange={(v) => (!v ? tryClose() : null)}>
+        <SheetContent side="bottom" className="p-0 max-h-[90vh] rounded-t-[16px] border-border-subtle bg-surface-elevated">
+          <NewIdeaModalBody
+            inputRef={inputRef}
+            title={title}
+            setTitle={setTitle}
+            goalId={goalId}
+            setGoalId={setGoalId}
+            note={note}
+            setNote={setNote}
+            activeGoals={activeGoals}
+            canSubmit={canSubmit}
+            onCancel={tryClose}
+            onSubmit={submit}
+          />
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => (!v ? tryClose() : null)}>
+      <DialogContent className="max-w-[640px] p-0 bg-surface-elevated border border-border-subtle rounded-[6px]">
+        <NewIdeaModalBody
+          inputRef={inputRef}
+          title={title}
+          setTitle={setTitle}
+          goalId={goalId}
+          setGoalId={setGoalId}
+          note={note}
+          setNote={setNote}
+          activeGoals={activeGoals}
+          canSubmit={canSubmit}
+          onCancel={tryClose}
+          onSubmit={submit}
+        />
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+const NewIdeaModalBody: React.FC<{
+  inputRef: React.RefObject<HTMLInputElement>;
+  title: string;
+  setTitle: (v: string) => void;
+  goalId: ID;
+  setGoalId: (v: ID) => void;
+  note: string;
+  setNote: (v: string) => void;
+  activeGoals: { id: ID; title: string; color: string }[];
+  canSubmit: boolean;
+  onCancel: () => void;
+  onSubmit: () => void;
+}> = ({ inputRef, title, setTitle, goalId, setGoalId, note, setNote, activeGoals, canSubmit, onCancel, onSubmit }) => (
+  <div className="p-6 flex flex-col gap-4">
+    <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-secondary">
+      NEW IDEA
+    </div>
+    <input
+      ref={inputRef}
+      value={title}
+      onChange={(e) => setTitle(e.target.value)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") onSubmit();
+        if (e.key === "Escape") onCancel();
+      }}
+      placeholder="Idea title…"
+      className="bg-surface-hover rounded-[4px] px-3 py-3 text-[16px] text-text-primary outline-none border border-transparent focus:border-border-default placeholder:text-text-tertiary"
+    />
+    <div className="flex flex-col gap-1.5">
+      <span className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
+        GOAL
+      </span>
+      <select
+        value={goalId}
+        onChange={(e) => setGoalId(e.target.value)}
+        className="bg-surface-hover rounded-[4px] px-3 py-2.5 text-[14px] text-text-primary outline-none border border-transparent focus:border-border-default cursor-pointer"
+      >
+        {activeGoals.map((g) => (
+          <option key={g.id} value={g.id}>
+            {g.title}
+          </option>
+        ))}
+      </select>
+    </div>
+    <div className="flex flex-col gap-1.5">
+      <span className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
+        NOTE
+      </span>
+      <textarea
+        value={note}
+        onChange={(e) => setNote(e.target.value)}
+        rows={3}
+        placeholder="Optional…"
+        className="bg-surface-hover rounded-[4px] px-3 py-2 text-[14px] text-text-primary outline-none border border-transparent focus:border-border-default resize-none placeholder:text-text-tertiary"
+      />
+    </div>
+    <div className="flex items-center justify-end gap-2 pt-2">
+      <button
+        onClick={onCancel}
+        className="h-9 px-4 text-[13px] text-text-tertiary hover:text-text-secondary transition-colors"
+      >
+        Cancel
+      </button>
+      <button
+        onClick={onSubmit}
+        disabled={!canSubmit}
+        className="h-9 px-4 text-[13px] font-medium rounded-[4px] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        style={{ background: "hsl(var(--accent))", color: "hsl(var(--accent-foreground))" }}
+      >
+        Create
+      </button>
+    </div>
+  </div>
+);
+
+/* ===== Idea editor sheet (right slide-in / bottom on mobile) ===== */
+const IdeaEditorSheet: React.FC<{
+  idea: Idea | null;
+  open: boolean;
+  onClose: () => void;
+}> = ({ idea, open, onClose }) => {
+  const isMobile = useIsMobile();
+  return (
+    <Sheet open={open} onOpenChange={(v) => (!v ? onClose() : null)}>
+      <SheetContent
+        side={isMobile ? "bottom" : "right"}
+        className={
+          isMobile
+            ? "p-0 max-h-[90vh] rounded-t-[16px] border-border-subtle bg-surface-elevated overflow-y-auto"
+            : "p-0 sm:max-w-[480px] w-[480px] border-l border-border-subtle bg-surface-elevated overflow-y-auto"
+        }
+      >
+        {idea && <IdeaDetail idea={idea} key={idea.id} mobile={isMobile} />}
+      </SheetContent>
+    </Sheet>
+  );
 };
 
 const Ideas: React.FC = () => {
@@ -879,68 +1093,130 @@ const Ideas: React.FC = () => {
   const settings = useStore((s) => s.settings);
   const selectedIdeaId = useStore((s) => s.ui.selectedIdeaId);
   const selectIdea = useStore((s) => s.selectIdea);
-  const location = useLocation();
-  const isMobile = useIsMobile();
 
   const activeGoals = useMemo(() => goals.filter((g) => g.status === "active"), [goals]);
   const defaultGoal =
     goals.find((g) => g.id === settings.defaultGoalId) ?? activeGoals[0] ?? goals[0];
 
-  const [goalFilter, setGoalFilter] = useState<"all" | ID>(
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("captured");
+  const [goalFilter, setGoalFilter] = useState<GoalFilter>(
     initialGoalParam && goals.some((g) => g.id === initialGoalParam) ? initialGoalParam : "all",
   );
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("captured");
-  const [showNewForm, setShowNewForm] = useState(false);
+  const [dateFilter, setDateFilter] = useState<DateFilter>("all");
+  const [sortKey, setSortKey] = useState<SortKey>("recent");
+  const [showNew, setShowNew] = useState(false);
+  const [terminalCollapsed, setTerminalCollapsed] = useState(true);
 
-  // Open the inline new-idea form when triggered from the ⌘K palette.
+  // Open the new-idea modal when triggered from the ⌘K palette.
   useEffect(() => {
-    return subscribeAppEvent("focus-idea-capture", () => {
-      setShowNewForm(true);
-      requestAnimationFrame(() => {
-        const el = document.getElementById("ideas-capture-input") as HTMLInputElement | null;
-        el?.focus();
-      });
-    });
+    return subscribeAppEvent("focus-idea-capture", () => setShowNew(true));
   }, []);
 
   const matchesStatus = (s: IdeaStatus): boolean => {
+    if (statusFilter === "all") return true;
     if (statusFilter === "captured") return s === "captured";
     if (statusFilter === "discarded") return s === "discarded";
     return s === "converted_to_action" || s === "converted_to_project";
   };
+
+  const matchesDate = (iso: string): boolean => {
+    if (dateFilter === "all") return true;
+    const d = new Date(iso);
+    const now = new Date();
+    if (dateFilter === "7d") return now.getTime() - d.getTime() <= 7 * 86400000;
+    if (dateFilter === "30d") return now.getTime() - d.getTime() <= 30 * 86400000;
+    if (dateFilter === "month")
+      return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+    return true;
+  };
+
+  const sortFn = useMemo(() => {
+    return (a: Idea, b: Idea) => {
+      if (sortKey === "title") return a.title.localeCompare(b.title);
+      const ta = new Date(a.capturedAt).getTime();
+      const tb = new Date(b.capturedAt).getTime();
+      return sortKey === "oldest" ? ta - tb : tb - ta;
+    };
+  }, [sortKey]);
 
   const filtered = useMemo(() => {
     return ideas
       .filter((i) => {
         if (goalFilter !== "all" && i.goalId !== goalFilter) return false;
         if (!matchesStatus(i.status)) return false;
+        if (!matchesDate(i.capturedAt)) return false;
         return true;
       })
-      .sort((a, b) => new Date(b.capturedAt).getTime() - new Date(a.capturedAt).getTime());
-  }, [ideas, goalFilter, statusFilter]);
+      .sort(sortFn);
+  }, [ideas, goalFilter, statusFilter, dateFilter, sortFn]);
 
-  const selected = isMobile
-    ? filtered.find((i) => i.id === selectedIdeaId) ?? null
-    : filtered.find((i) => i.id === selectedIdeaId) ?? filtered[0] ?? null;
-
-  useEffect(() => {
-    if (isMobile) return;
-    if (selected && selected.id !== selectedIdeaId) selectIdea(selected.id);
-    if (!selected && selectedIdeaId) selectIdea(undefined);
-  }, [selected, selectedIdeaId, selectIdea, isMobile]);
+  const isTerminal = (s: IdeaStatus) => s !== "captured";
+  const grouped = useMemo(() => {
+    if (statusFilter !== "all") return { single: filtered };
+    return {
+      active: filtered.filter((i) => !isTerminal(i.status)),
+      terminal: filtered.filter((i) => isTerminal(i.status)),
+    };
+  }, [filtered, statusFilter]);
 
   const meta = useMemo(() => {
-    const captured = ideas.filter((i) => i.status === "captured");
-    const total = captured.length;
-    const perGoal = activeGoals
-      .map((g) => `${captured.filter((i) => i.goalId === g.id).length} in ${g.title}`)
-      .join(" · ");
-    return perGoal ? `${total} captured · ${perGoal}` : `${total} captured`;
-  }, [ideas, activeGoals]);
+    const captured = ideas.filter((i) => i.status === "captured").length;
+    const converted = ideas.filter(
+      (i) => i.status === "converted_to_action" || i.status === "converted_to_project",
+    ).length;
+    const discarded = ideas.filter((i) => i.status === "discarded").length;
+    return `${captured} CAPTURED · ${converted} CONVERTED · ${discarded} DISCARDED`;
+  }, [ideas]);
+
+  const anyApplied =
+    statusFilter !== "captured" ||
+    goalFilter !== "all" ||
+    dateFilter !== "all" ||
+    sortKey !== "recent";
 
   const clearFilters = () => {
-    setGoalFilter("all");
     setStatusFilter("captured");
+    setGoalFilter("all");
+    setDateFilter("all");
+    setSortKey("recent");
+  };
+
+  const goalOptions: FilterOption<GoalFilter>[] = useMemo(
+    () => [
+      { value: "all", label: "All" },
+      ...activeGoals.map((g) => ({
+        value: g.id as GoalFilter,
+        label: g.title,
+        dot: `hsl(var(--${g.color}))`,
+      })),
+    ],
+    [activeGoals],
+  );
+
+  const editorOpen = !!selectedIdeaId && ideas.some((i) => i.id === selectedIdeaId);
+  const selected = ideas.find((i) => i.id === selectedIdeaId) ?? null;
+
+  const metaSuffix = (idea: Idea): string => {
+    const cap = relativeAgo(idea.capturedAt).label.replace(/^Captured\s*/i, "");
+    if (idea.status === "captured") return `Captured ${cap}`;
+    if (idea.status === "converted_to_action") return "Converted to action";
+    if (idea.status === "converted_to_project") return "Converted to project";
+    return `Discarded ${idea.discardedAt ? relativeAgo(idea.discardedAt).label.replace(/^Captured\s*/i, "") : cap}`;
+  };
+
+  const renderRow = (idea: Idea) => {
+    const g = goals.find((x) => x.id === idea.goalId);
+    const color = g ? `hsl(var(--${g.color}))` : "hsl(var(--text-tertiary))";
+    return (
+      <IdeaRow
+        key={idea.id}
+        idea={idea}
+        goalColor={color}
+        goalTitle={g?.title ?? "—"}
+        metaSuffix={metaSuffix(idea)}
+        onSelect={() => selectIdea(idea.id)}
+      />
+    );
   };
 
   return (
@@ -949,140 +1225,114 @@ const Ideas: React.FC = () => {
       <MobileHeader />
       <main className="app-main page-medium flex flex-col h-screen">
         {/* Page header */}
-        <div className="px-8 py-6 border-b border-border-subtle shrink-0">
+        <div className="px-4 md:px-10 pt-6 pb-3 shrink-0">
           <div className="flex items-center justify-between gap-4">
             <h1 className="text-[24px] font-medium text-text-primary">Ideas</h1>
             <div className="flex items-center gap-4">
               <div className="hidden sm:block font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary tabular-nums">
                 {meta}
               </div>
-              {!showNewForm && (
+              <button
+                type="button"
+                onClick={() => setShowNew(true)}
+                aria-label="New idea"
+                className="inline-flex items-center justify-center gap-1 rounded-[4px] bg-accent hover:bg-accent-hover text-white min-w-[40px] min-h-[40px] sm:min-h-0 sm:min-w-0 sm:px-[16px] sm:py-[8px] text-[13px] font-medium transition-colors"
+              >
+                <span className="text-[15px] leading-none">+</span>
+                <span className="hidden sm:inline">New idea</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Filters row */}
+          <div className="mt-3 flex items-center justify-between gap-3 flex-wrap">
+            <div
+              className="flex items-center gap-2 flex-nowrap md:flex-wrap overflow-x-auto md:overflow-visible scrollbar-hide min-w-0"
+              style={{ WebkitOverflowScrolling: "touch" }}
+            >
+              <FilterDropdown
+                label="STATUS"
+                value={statusFilter}
+                defaultValue="captured"
+                options={STATUS_OPTIONS}
+                onChange={(v) => setStatusFilter(v)}
+              />
+              <FilterDropdown
+                label="GOAL"
+                value={goalFilter}
+                defaultValue="all"
+                options={goalOptions}
+                onChange={(v) => setGoalFilter(v)}
+              />
+              <FilterDropdown
+                label="DATE"
+                value={dateFilter}
+                defaultValue="all"
+                options={DATE_OPTIONS}
+                onChange={(v) => setDateFilter(v)}
+              />
+              {anyApplied && (
                 <button
-                  onClick={() => setShowNewForm(true)}
-                  aria-label="New idea"
-                  className="inline-flex items-center justify-center gap-1 rounded-[4px] bg-accent hover:bg-accent-hover text-white min-w-[40px] min-h-[40px] sm:min-h-0 sm:min-w-0 sm:px-[16px] sm:py-[8px] text-[13px] font-medium transition-colors"
+                  onClick={clearFilters}
+                  className="ml-1 text-[12px] text-text-tertiary hover:text-text-secondary transition-colors shrink-0"
                 >
-                  <span className="text-[15px] leading-none">+</span>
-                  <span className="hidden sm:inline">New idea</span>
+                  Clear filters
                 </button>
               )}
             </div>
+            <SortDropdown value={sortKey} options={SORT_OPTIONS} onChange={(v) => setSortKey(v)} />
           </div>
-          {showNewForm && (
-            <div className="mt-4">
-              <NewIdeaForm
-                defaultGoalId={defaultGoal?.id}
-                onClose={() => setShowNewForm(false)}
-              />
-            </div>
-          )}
         </div>
 
-        {/* Two-column body (desktop) / list-then-drill (mobile) */}
-        <div className="flex-1 flex min-h-0 relative">
-          {/* Left column */}
-          <div className="w-full md:w-[42%] md:border-r border-border-subtle flex flex-col min-h-0">
-            <div className="px-4 md:pl-8 md:pr-4 pt-4 pb-3">
-              <div className="flex flex-col gap-3">
-                <FilterPillRow label="GOAL">
-                  <Pill active={goalFilter === "all"} onClick={() => setGoalFilter("all")}>
-                    All
-                  </Pill>
-                  {activeGoals.map((g) => (
-                    <Pill
-                      key={g.id}
-                      active={goalFilter === g.id}
-                      onClick={() => setGoalFilter(g.id)}
-                      dot={`hsl(var(--${g.color}))`}
-                    >
-                      {g.title}
-                    </Pill>
-                  ))}
-                </FilterPillRow>
-                <FilterPillRow label="STATUS">
-                  <Pill
-                    active={statusFilter === "captured"}
-                    onClick={() => setStatusFilter("captured")}
-                  >
-                    Captured
-                  </Pill>
-                  <Pill
-                    active={statusFilter === "converted"}
-                    onClick={() => setStatusFilter("converted")}
-                  >
-                    Converted
-                  </Pill>
-                  <Pill
-                    active={statusFilter === "discarded"}
-                    onClick={() => setStatusFilter("discarded")}
-                  >
-                    Discarded
-                  </Pill>
-                </FilterPillRow>
+        <div className="border-t border-border-subtle" />
+
+        {/* Full-width list */}
+        <div className="flex-1 overflow-y-auto min-h-0">
+          {filtered.length === 0 ? (
+            <div className="p-10 text-center">
+              <div className="text-[14px] text-text-secondary">
+                {ideas.length === 0
+                  ? "No ideas yet. Click + New idea to capture one."
+                  : "No ideas match these filters"}
               </div>
-            </div>
-            <div className="hidden md:flex items-center justify-end pl-8 pr-4 py-2">
-              <span className="font-mono text-[11px] text-text-secondary">
-                Sort: Recent first
-              </span>
-            </div>
-            <div className="flex-1 overflow-y-auto md:pl-8">
-              {filtered.length === 0 ? (
-                <div className="p-8 text-center font-mono text-[11px] text-text-tertiary">
-                  No ideas match these filters.
+              {ideas.length > 0 && (
+                <div className="mt-4">
+                  <GhostButton onClick={clearFilters}>Clear filters</GhostButton>
                 </div>
-              ) : (
-                filtered.map((idea) => {
-                  const g = goals.find((x) => x.id === idea.goalId);
-                  const color = g ? `hsl(var(--${g.color}))` : "hsl(var(--text-tertiary))";
-                  return (
-                    <IdeaRow
-                      key={idea.id}
-                      idea={idea}
-                      goalColor={color}
-                      selected={!isMobile && selected?.id === idea.id}
-                      onSelect={() => selectIdea(idea.id)}
-                    />
-                  );
-                })
               )}
             </div>
-          </div>
-
-          {/* Right column — desktop only */}
-          <div className="hidden md:block flex-1 overflow-y-auto min-h-0">
-            {filtered.length === 0 ? (
-              <EmptyFiltered onClear={clearFilters} />
-            ) : selected ? (
-              <IdeaDetail idea={selected} key={selected.id} />
-            ) : (
-              <EmptyDetail />
-            )}
-          </div>
-
-          {/* Mobile drill-down full-screen detail */}
-          {isMobile && selected && selectedIdeaId && (
-            <div
-              className="fixed inset-0 z-50 overflow-y-auto"
-              style={{ background: "hsl(var(--surface-base))" }}
-            >
-              <div
-                className="sticky top-0 z-10 flex items-center px-2 py-2 border-b border-border-subtle"
-                style={{ background: "hsl(var(--surface-base))" }}
-              >
-                <button
-                  onClick={() => selectIdea(undefined)}
-                  aria-label="Back"
-                  className="inline-flex items-center justify-center text-text-secondary hover:text-text-primary tap-target rounded-[4px]"
-                >
-                  <ArrowLeft size={16} />
-                </button>
-              </div>
-              <IdeaDetail idea={selected} key={selected.id} mobile />
-            </div>
+          ) : "single" in grouped ? (
+            grouped.single!.map(renderRow)
+          ) : (
+            <>
+              {grouped.active!.map(renderRow)}
+              {grouped.terminal!.length > 0 && (
+                <>
+                  <GroupHeader
+                    label="TERMINAL"
+                    count={grouped.terminal!.length}
+                    collapsed={terminalCollapsed}
+                    onToggle={() => setTerminalCollapsed((v) => !v)}
+                  />
+                  {!terminalCollapsed && grouped.terminal!.map(renderRow)}
+                </>
+              )}
+            </>
           )}
         </div>
       </main>
+
+      <NewIdeaModal
+        open={showNew}
+        onClose={() => setShowNew(false)}
+        defaultGoalId={defaultGoal?.id}
+      />
+
+      <IdeaEditorSheet
+        idea={selected}
+        open={editorOpen}
+        onClose={() => selectIdea(undefined)}
+      />
     </div>
   );
 };

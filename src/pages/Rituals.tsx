@@ -6,6 +6,7 @@ import { useStore } from "@/store/useStore";
 import { toast } from "sonner";
 import { AppSidebar } from "@/components/AppSidebar";
 import { MobileHeader } from "@/components/MobileHeader";
+import { EmptyState } from "@/components/EmptyState";
 
 const G1 = "hsl(var(--goal-1))";
 const G2 = "hsl(var(--goal-2))";

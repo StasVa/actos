@@ -1035,7 +1035,7 @@ export const PlanTodayPage: React.FC<{ onCancel: () => void; onComplete: () => v
   const actions = useStore((s) => s.actions);
   const [state, setState] = usePrefilledPlanState(date);
   const [step, setStep] = useState<1 | 2>(1);
-  const [pendingSwitch, setPendingSwitch] = useState<DayTypeMeta | null>(null);
+  
 
   const commitAndComplete = (overrides?: {
     dayType?: DayType;

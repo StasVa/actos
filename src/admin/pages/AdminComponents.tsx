@@ -798,6 +798,9 @@ const Modals: React.FC = () => {
       </Sample>
 
       <ConfirmModal
+        open={open === "confirm"}
+      />
+      <ConfirmModal
         open={open === "destructive"}
         title="Drop this action?"
         body="It will move to the Dropped state. You can reopen it later."

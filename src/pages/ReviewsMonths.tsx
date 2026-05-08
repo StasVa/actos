@@ -89,16 +89,15 @@ const ReviewsMonths: React.FC = () => {
           meta={`${allMonths.length} MONTHS TRACKED`}
           filters={
             <>
-              <FilterDD
+              <FilterDropdown
                 label="GOAL"
                 value={goalFilter}
-                onChange={setGoalFilter}
+                defaultValue="all"
                 options={[
                   { value: "all", label: "All" },
-                  ...goals
-                    .filter((g) => g.status === "active")
-                    .map((g) => ({ value: g.id, label: g.title })),
+                  ...goals.filter((g) => g.status === "active").map((g) => ({ value: g.id, label: g.title, dot: `hsl(var(--${g.color}))` })),
                 ]}
+                onChange={setGoalFilter}
               />
               <FilterDropdown label="DATE" value={range} defaultValue={range} options={RANGE_OPTIONS} onChange={setRange} />
             </>

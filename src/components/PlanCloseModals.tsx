@@ -943,10 +943,10 @@ export const PlanTodayPage: React.FC<{ onCancel: () => void; onComplete: () => v
     });
     const aLabel = DAY_TYPE_META.find((m) => m.value === merged.dayType)?.label ?? "Day";
     if (merged.selectedActionIds.length === 0 && merged.keptRitualIds.size === 0) {
-      toast.success(`${aLabel} planned.`);
+      toast.success(`${aLabel} day started.`);
     } else {
       toast.success(
-        `Day planned. ${merged.selectedActionIds.length} action${merged.selectedActionIds.length === 1 ? "" : "s"}, ${merged.keptRitualIds.size} ritual${merged.keptRitualIds.size === 1 ? "" : "s"}.`,
+        `Day started. ${merged.selectedActionIds.length} action${merged.selectedActionIds.length === 1 ? "" : "s"}, ${merged.keptRitualIds.size} ritual${merged.keptRitualIds.size === 1 ? "" : "s"}.`,
       );
     }
     onComplete();

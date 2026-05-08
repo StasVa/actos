@@ -19,6 +19,48 @@ function downloadJSON(filename: string, data: unknown) {
   URL.revokeObjectURL(url);
 }
 
+const ToggleRow: React.FC<{
+  label: string;
+  description?: string;
+  checked: boolean;
+  onChange: (v: boolean) => void;
+}> = ({ label, description, checked, onChange }) => (
+  <label className="flex items-start gap-3 cursor-pointer">
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      onClick={() => onChange(!checked)}
+      className="mt-0.5 shrink-0 rounded-full transition-colors"
+      style={{
+        width: 32,
+        height: 18,
+        background: checked ? "hsl(var(--accent))" : "hsl(var(--surface-hover))",
+        border: "1px solid hsl(var(--border-subtle))",
+        position: "relative",
+      }}
+    >
+      <span
+        className="block rounded-full bg-white transition-transform"
+        style={{
+          width: 12,
+          height: 12,
+          position: "absolute",
+          top: 2,
+          left: 2,
+          transform: checked ? "translateX(14px)" : "translateX(0)",
+        }}
+      />
+    </button>
+    <div className="flex-1">
+      <div className="text-[13px] text-text-primary">{label}</div>
+      {description && (
+        <div className="text-[12px] text-text-tertiary mt-0.5">{description}</div>
+      )}
+    </div>
+  </label>
+);
+
 export default function Settings() {
   const settings = useStore((s) => s.settings);
   const goals = useStore((s) => s.goals);

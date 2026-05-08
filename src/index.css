@@ -32,7 +32,7 @@
     --status-done: 102 26% 48%;
     --status-delegated: 220 8% 53%;
     --status-dropped: 18 25% 50%;
-    --text-warning: 22 33% 58%;         /* #B8896E */
+    --text-warning: 28 78% 62%;         /* amber, clearly distinct from text-tertiary */
 
     /* shadcn aliases */
     --background: 240 9% 6%;

@@ -376,39 +376,9 @@ const PlanForm: React.FC<{
           ? ` (~${formatTimeMin(quickSuggestions.reduce((s, a) => s + (a.timeEstimateMinutes ?? 0), 0))} total)`
           : "");
 
-  const dayTypeChosen = !!state.dayType;
-
   return (
     <div className="space-y-7">
-      {/* DAY TYPE */}
-      <section>
-        <SectionHead>DAY TYPE</SectionHead>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-          {DAY_TYPE_OPTIONS.map(({ value, label, Icon }) => {
-            const active = state.dayType === value;
-            return (
-              <button
-                key={value}
-                type="button"
-                onClick={() => setState((s) => ({ ...s, dayType: value }))}
-                className={`flex items-center gap-2 px-3 py-2.5 rounded-[6px] transition-colors ${
-                  active
-                    ? "bg-surface-hover border-2 border-[hsl(var(--accent))]"
-                    : "bg-surface-raised border border-border-subtle hover:border-border-default"
-                }`}
-                style={active ? { padding: "calc(0.625rem - 1px) calc(0.75rem - 1px)" } : undefined}
-              >
-                <Icon size={14} className={active ? "text-[hsl(var(--accent))]" : "text-text-secondary"} />
-                <span className="text-[13px] text-text-primary">{label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </section>
-
-      {dayTypeChosen && (
-        <>
-          {/* ACTIONS */}
+      {/* ACTIONS */}
           <section>
             <SectionHead
               sub="Pick what you'll work on today."

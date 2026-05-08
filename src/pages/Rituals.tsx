@@ -7,6 +7,9 @@ import { toast } from "sonner";
 import { AppSidebar } from "@/components/AppSidebar";
 import { MobileHeader } from "@/components/MobileHeader";
 import { EmptyState } from "@/components/EmptyState";
+import { PageHeader } from "@/components/PageHeader";
+import { FilterDropdown, FilterOption } from "@/components/FilterDropdown";
+import { SortDropdown } from "@/components/SortDropdown";
 
 const G1 = "hsl(var(--goal-1))";
 const G2 = "hsl(var(--goal-2))";
@@ -531,6 +534,19 @@ function buildRitualRow(
 }
 
 /* ===== Page ===== */
+type RStateFilter = "all" | "active" | "archived";
+type RSortKey = "recent" | "title" | "completions";
+const R_STATE_OPTIONS: FilterOption<RStateFilter>[] = [
+  { value: "all", label: "All" },
+  { value: "active", label: "Active" },
+  { value: "archived", label: "Archived" },
+];
+const R_SORT_OPTIONS: FilterOption<RSortKey>[] = [
+  { value: "recent", label: "Recent activity" },
+  { value: "title", label: "By title" },
+  { value: "completions", label: "Most completions" },
+];
+
 const Rituals: React.FC = () => {
   const storeRituals = useStore((s) => s.rituals);
   const storeGoals = useStore((s) => s.goals);
@@ -538,26 +554,38 @@ const Rituals: React.FC = () => {
   const markRitualInstanceDone = useStore((s) => s.markRitualInstanceDone);
   const restoreRitual = useStore((s) => s.restoreRitual);
 
+  const [stateFilter, setStateFilter] = useState<RStateFilter>("all");
+  const [goalFilter, setGoalFilter] = useState<string>("all");
+  const [sortKey, setSortKey] = useState<RSortKey>("recent");
+
   const goalsById = React.useMemo(() => {
     const m: Record<string, import("@/types").Goal> = {};
     for (const g of storeGoals) m[g.id] = g;
     return m;
   }, [storeGoals]);
 
+  const matchesGoal = (rGoalId: string) => goalFilter === "all" || rGoalId === goalFilter;
+
   const activeRows = React.useMemo(
     () =>
       storeRituals
-        .filter((r) => r.status === "active")
+        .filter((r) => r.status === "active" && matchesGoal(r.goalId))
         .map((r) => buildRitualRow(r, goalsById)),
-    [storeRituals, goalsById],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [storeRituals, goalsById, goalFilter],
   );
   const archivedRows = React.useMemo(
     () =>
       storeRituals
-        .filter((r) => r.status === "archived")
+        .filter((r) => r.status === "archived" && matchesGoal(r.goalId))
         .map((r) => buildRitualRow(r, goalsById)),
-    [storeRituals, goalsById],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [storeRituals, goalsById, goalFilter],
   );
+
+  const totalRituals = storeRituals.length;
+  const totalActive = storeRituals.filter((r) => r.status === "active").length;
+  const totalArchived = storeRituals.filter((r) => r.status === "archived").length;
 
   const pending = activeRows.filter((r) => r.pendingToday);
   const dueCount = activeRows.filter((r) => !r.notDueToday).length;
@@ -591,35 +619,66 @@ const Rituals: React.FC = () => {
     toast.success("Ritual restored");
   };
 
-  const headerMeta =
-    `${activeRows.length} ACTIVE · ${pending.length} PENDING TODAY · ${allTime} TOTAL DONE`;
+  const goalOptions: FilterOption<string>[] = [
+    { value: "all", label: "All" },
+    ...storeGoals
+      .filter((g) => g.status === "active")
+      .map((g) => ({ value: g.id, label: g.title, dot: `hsl(var(--${g.color}))` })),
+  ];
+
+  const sortRows = (rows: RitualRow[]) => {
+    const arr = [...rows];
+    arr.sort((a, b) => {
+      if (sortKey === "title") return a.title.localeCompare(b.title);
+      if (sortKey === "completions") return b.totalCompletions - a.totalCompletions;
+      return 0;
+    });
+    return arr;
+  };
+
+  const showActive = stateFilter !== "archived";
+  const showArchived = stateFilter !== "active";
+  const sortedActiveRows = sortRows(activeRows);
+  const sortedArchivedRows = sortRows(archivedRows);
 
   return (
     <div className="min-h-screen bg-surface-base text-text-primary">
       <AppSidebar />
       <MobileHeader />
       <main className="app-main page-medium">
-        <div className="mx-auto" style={{ maxWidth: 1100 }}>
-          <div className="flex items-center justify-between gap-4">
-            <h1 className="text-[24px] font-medium text-text-primary" style={{ fontWeight: 500 }}>
-              Rituals
-            </h1>
-            <div className="flex items-center gap-4">
-              <div className="hidden sm:block font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary tabular-nums">
-                {headerMeta}
-              </div>
-              <button
-                type="button"
-                onClick={handleAddRitual}
-                aria-label="New ritual"
-                className="inline-flex items-center justify-center gap-1 rounded-[4px] bg-accent hover:bg-accent-hover text-white min-w-[40px] min-h-[40px] sm:min-h-0 sm:min-w-0 sm:px-[16px] sm:py-[8px] text-[13px] font-medium transition-colors"
-              >
-                <span className="text-[15px] leading-none">+</span>
-                <span className="hidden sm:inline">New ritual</span>
-              </button>
-            </div>
-          </div>
+        <PageHeader
+          title="Rituals"
+          meta={`${totalRituals} RITUALS · ${totalActive} ACTIVE · ${totalArchived} ARCHIVED`}
+          cta={{
+            label: "+ New ritual",
+            onClick: handleAddRitual,
+            ariaLabel: "New ritual",
+          }}
+          filters={
+            <>
+              <FilterDropdown<RStateFilter>
+                label="STATE"
+                value={stateFilter}
+                defaultValue="all"
+                options={R_STATE_OPTIONS}
+                onChange={setStateFilter}
+              />
+              <FilterDropdown<string>
+                label="GOAL"
+                value={goalFilter}
+                defaultValue="all"
+                options={goalOptions}
+                onChange={setGoalFilter}
+              />
+            </>
+          }
+          sort={
+            <SortDropdown<RSortKey> value={sortKey} options={R_SORT_OPTIONS} onChange={setSortKey} />
+          }
+        />
 
+        <div style={{ height: 24 }} />
+        <div className="mx-auto" style={{ maxWidth: 1100 }}>
           {storeRituals.length === 0 ? (
             <EmptyState
               headline="No rituals yet."
@@ -629,7 +688,6 @@ const Rituals: React.FC = () => {
             />
           ) : (
             <>
-              <div style={{ height: 24 }} />
               <TopStats
                 rows={activeRows}
                 allTime={allTime}
@@ -639,32 +697,38 @@ const Rituals: React.FC = () => {
               />
 
               <div style={{ height: 24 }} />
-              {pending.length > 0 && (
+              {pending.length > 0 && showActive && (
                 <PendingToday items={pending} onMarkDone={handleMarkDone} onOpen={handleOpen} />
               )}
 
               <div style={{ height: 32 }} />
 
-              <section>
-                <div className="flex items-center justify-between mb-3">
-                  <div className="text-[12px] font-medium uppercase tracking-[0.08em] text-text-secondary">
-                    Active rituals · {activeRows.length}
+              {showActive && (
+                <section>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="text-[12px] font-medium uppercase tracking-[0.08em] text-text-secondary">
+                      Active rituals · {sortedActiveRows.length}
+                    </div>
                   </div>
-                </div>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  {activeRows.map((r) => (
-                    <RitualCard key={r.id} r={r} onOpen={handleOpen} onMarkDone={handleMarkDone} />
-                  ))}
-                </div>
-                {activeRows.length === 0 && (
-                  <div className="mt-4 font-mono text-[11px] text-text-tertiary text-center">
-                    No active rituals. Use the “+ New ritual” button or ⌘K.
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    {sortedActiveRows.map((r) => (
+                      <RitualCard key={r.id} r={r} onOpen={handleOpen} onMarkDone={handleMarkDone} />
+                    ))}
                   </div>
-                )}
-              </section>
+                  {sortedActiveRows.length === 0 && (
+                    <div className="mt-4 font-mono text-[11px] text-text-tertiary text-center">
+                      No active rituals match these filters.
+                    </div>
+                  )}
+                </section>
+              )}
 
-              <div style={{ height: 24 }} />
-              <ArchivedSection rows={archivedRows} onRestore={handleRestore} />
+              {showArchived && (
+                <>
+                  <div style={{ height: 24 }} />
+                  <ArchivedSection rows={sortedArchivedRows} onRestore={handleRestore} />
+                </>
+              )}
 
               <div style={{ height: 32 }} />
             </>

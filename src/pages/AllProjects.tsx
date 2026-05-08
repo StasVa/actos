@@ -10,6 +10,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { MobileHeader } from "@/components/MobileHeader";
 import { ProjectCard as SharedProjectCard } from "@/components/ProjectCard";
 import { EmptyState, FilteredEmpty } from "@/components/EmptyState";
+import { PageHeader } from "@/components/PageHeader";
 
 const G1 = "hsl(var(--goal-1))";
 const G2 = "hsl(var(--goal-2))";
@@ -353,7 +354,7 @@ const AllProjects: React.FC = () => {
     return { near, active, stalled, closed };
   }, [filtered, sortFn]);
 
-  const meta = `${counts.total} PROJECTS · ${counts.active + counts.near} ACTIVE · ${counts.stalled} STALLED · ${counts.closed} CLOSED`;
+  const meta = `${counts.total} PROJECTS · ${counts.active} ACTIVE · ${counts.near} NEAR DONE · ${counts.stalled} STALLED · ${counts.closed} CLOSED`;
 
   const anyApplied =
     goalFilter !== "all" ||
@@ -373,72 +374,46 @@ const AllProjects: React.FC = () => {
       <AppSidebar />
       <MobileHeader />
       <main className="app-main page-medium flex flex-col min-h-screen">
-        {/* Page header */}
-        <div className="px-10 pt-6 pb-3 shrink-0">
-          <div className="flex items-baseline justify-between">
-            <h1 className="text-[24px] font-medium text-text-primary">All projects</h1>
-            <div className="flex items-center gap-3">
-              <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary tabular-nums">
-                {meta}
-              </div>
-              <button
-                onClick={handleNewGoal}
-                className="hidden sm:inline-flex text-[12px] px-2.5 py-1 rounded-[4px] border border-border-subtle text-text-secondary hover:text-text-primary hover:border-accent transition-colors"
-              >
-                + New goal
-              </button>
-              <button
-                onClick={handleNewProject}
-                aria-label="New project"
-                className="inline-flex items-center justify-center gap-1 rounded-[4px] bg-accent hover:bg-accent-hover text-white min-w-[40px] min-h-[40px] sm:min-h-0 sm:min-w-0 sm:px-[16px] sm:py-[8px] text-[13px] font-medium transition-colors"
-              >
-                <span className="text-[15px] leading-none">+</span>
-                <span className="hidden sm:inline">New project</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Triage strip */}
-          <div className="mt-4 flex items-center gap-2 flex-wrap">
-            <Pill label="ACTIVE" value={counts.active} />
-            <Pill label="NEAR DONE" value={counts.near} accent />
-            <Pill label="STALLED" value={counts.stalled} warning />
-            <Pill label="CLOSED" value={counts.closed} />
-          </div>
-
-          {/* Filters row */}
-          <div className="mt-4 flex items-center justify-between gap-3 flex-wrap">
-            <div className="flex items-center gap-2 flex-wrap">
-              <FilterDropdown
-                label="GOAL"
-                value={goalFilter}
-                defaultValue="all"
-                options={GOAL_OPTIONS}
-                onChange={(v) => setGoalFilter(v)}
-              />
-              <FilterDropdown
-                label="STATE"
-                value={stateFilter}
-                defaultValue="all"
-                options={STATE_OPTIONS}
-                onChange={(v) => setStateFilter(v)}
-              />
-              {anyApplied && (
-                <button
-                  onClick={clearFilters}
-                  className="ml-1 text-[12px] text-text-tertiary hover:text-text-secondary transition-colors"
-                >
-                  Clear filters
-                </button>
-              )}
-            </div>
-            <SortDropdown value={sortKey} options={SORT_OPTIONS} onChange={(v) => setSortKey(v)} />
-          </div>
-
-          {/* Search removed — global ⌘K palette handles search. */}
+        <div className="px-4 md:px-10 pt-6 pb-4 shrink-0">
+          <PageHeader
+            title="Projects"
+            meta={meta}
+            cta={{
+              label: "+ New project",
+              onClick: handleNewProject,
+              ariaLabel: "New project",
+            }}
+            filters={
+              <>
+                <FilterDropdown
+                  label="GOAL"
+                  value={goalFilter}
+                  defaultValue="all"
+                  options={GOAL_OPTIONS}
+                  onChange={(v) => setGoalFilter(v)}
+                />
+                <FilterDropdown
+                  label="STATE"
+                  value={stateFilter}
+                  defaultValue="all"
+                  options={STATE_OPTIONS}
+                  onChange={(v) => setStateFilter(v)}
+                />
+                {anyApplied && (
+                  <button
+                    onClick={clearFilters}
+                    className="ml-1 text-[12px] text-text-tertiary hover:text-text-secondary transition-colors shrink-0"
+                  >
+                    Clear filters
+                  </button>
+                )}
+              </>
+            }
+            sort={
+              <SortDropdown value={sortKey} options={SORT_OPTIONS} onChange={(v) => setSortKey(v)} />
+            }
+          />
         </div>
-
-        <div className="border-t border-border-subtle" />
 
         {/* Sections */}
         <div className="flex-1 px-10 pt-8 pb-16 space-y-10">

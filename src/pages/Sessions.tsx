@@ -6,6 +6,9 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { MobileHeader } from "@/components/MobileHeader";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { EmptyState } from "@/components/EmptyState";
+import { PageHeader } from "@/components/PageHeader";
+import { FilterDropdown, FilterOption } from "@/components/FilterDropdown";
+import { SortDropdown } from "@/components/SortDropdown";
 import type { Action, Goal, ID, Session } from "@/types";
 import { formatTime } from "@/lib/format";
 
@@ -354,6 +357,27 @@ const PrimaryButton: React.FC<{ onClick?: () => void; children: React.ReactNode 
   </button>
 );
 
+type ModeFilter = "all" | "pomodoro" | "continuous";
+type DateFilter = "all" | "7" | "30" | "90";
+type SSortKey = "recent" | "oldest" | "duration" | "outcome";
+const MODE_OPTIONS: FilterOption<ModeFilter>[] = [
+  { value: "all", label: "All" },
+  { value: "pomodoro", label: "Pomodoro" },
+  { value: "continuous", label: "Continuous" },
+];
+const SDATE_OPTIONS: FilterOption<DateFilter>[] = [
+  { value: "all", label: "All time" },
+  { value: "7", label: "Last 7 days" },
+  { value: "30", label: "Last 30 days" },
+  { value: "90", label: "Last 90 days" },
+];
+const SSORT_OPTIONS: FilterOption<SSortKey>[] = [
+  { value: "recent", label: "Recent first" },
+  { value: "oldest", label: "Oldest first" },
+  { value: "duration", label: "Longest" },
+  { value: "outcome", label: "Most value" },
+];
+
 const Sessions: React.FC = () => {
   const navigate = useNavigate();
   const sessions = useStore((s) => s.sessions);
@@ -363,55 +387,103 @@ const Sessions: React.FC = () => {
   const [selectedId, setSelectedId] = useState<ID | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<ID | null>(null);
   const [visibleCount, setVisibleCount] = useState(20);
+  const [modeFilter, setModeFilter] = useState<ModeFilter>("all");
+  const [dateFilter, setDateFilter] = useState<DateFilter>("all");
+  const [sortKey, setSortKey] = useState<SSortKey>("recent");
 
   const activeSession = useMemo(
     () => sessions.find((s) => s.status === "in_progress") ?? null,
     [sessions],
   );
 
-  const history = useMemo(
-    () =>
-      sessions
-        .filter((s) => s.status !== "in_progress")
-        .slice()
-        .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime()),
+  const allFinished = useMemo(
+    () => sessions.filter((s) => s.status !== "in_progress"),
     [sessions],
   );
 
+  const history = useMemo(() => {
+    const cutoff = dateFilter === "all" ? null : Date.now() - parseInt(dateFilter, 10) * 86400000;
+    let arr = allFinished.filter((s) => {
+      if (modeFilter !== "all" && s.mode !== modeFilter) return false;
+      if (cutoff && new Date(s.startedAt).getTime() < cutoff) return false;
+      return true;
+    });
+    arr = arr.slice().sort((a, b) => {
+      switch (sortKey) {
+        case "oldest":
+          return new Date(a.startedAt).getTime() - new Date(b.startedAt).getTime();
+        case "duration":
+          return (durationMinutes(b) ?? 0) - (durationMinutes(a) ?? 0);
+        case "outcome":
+          return outcomeFromSession(b, actions) - outcomeFromSession(a, actions);
+        default:
+          return new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime();
+      }
+    });
+    return arr;
+  }, [allFinished, modeFilter, dateFilter, sortKey, actions]);
+
   const stats = useMemo(() => {
-    const finished = history;
-    const totalMinutes = finished.reduce((sum, s) => sum + (durationMinutes(s) ?? 0), 0);
-    const totalOutcome = finished.reduce((sum, s) => sum + outcomeFromSession(s, actions), 0);
-    const completed = finished.filter((s) => s.status === "completed").length;
-    const completionRate = finished.length > 0 ? Math.round((completed / finished.length) * 100) : 0;
+    const totalMinutes = allFinished.reduce((sum, s) => sum + (durationMinutes(s) ?? 0), 0);
+    const totalOutcome = allFinished.reduce((sum, s) => sum + outcomeFromSession(s, actions), 0);
+    const completed = allFinished.filter((s) => s.status === "completed").length;
+    const completionRate = allFinished.length > 0 ? Math.round((completed / allFinished.length) * 100) : 0;
     return {
-      count: finished.length,
+      count: allFinished.length,
       totalMinutes,
       totalOutcome,
       completionRate,
     };
-  }, [history, actions]);
+  }, [allFinished, actions]);
 
   const selected = selectedId ? sessions.find((s) => s.id === selectedId) ?? null : null;
-  const hasHistory = history.length > 0;
+  const hasHistory = allFinished.length > 0;
 
   const handleStart = () => {
     navigate("/sessions/new");
   };
+
+  const totalHours = Math.round((stats.totalMinutes / 60) * 10) / 10;
 
   return (
     <div className="min-h-screen bg-background text-text-primary">
       <AppSidebar />
       <MobileHeader />
       <main className="app-main page-medium">
-        <div className="max-w-[960px] mx-auto px-8 py-8">
-          {/* Header */}
-          <div className="flex items-end justify-between gap-4 pb-4 border-b border-border-subtle">
-            <h1 className="text-[28px] font-medium tracking-tight">Sessions</h1>
-            <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
-              {stats.count} sessions · {formatTime(stats.totalMinutes)} tracked all-time
-            </div>
-          </div>
+        <div className="px-4 md:px-10 pt-6 pb-4">
+          <PageHeader
+            title="Sessions"
+            meta={`${stats.count} SESSIONS · ${totalHours}H TRACKED`}
+            cta={{
+              label: "+ Start session",
+              onClick: handleStart,
+              ariaLabel: "Start a session",
+            }}
+            filters={
+              <>
+                <FilterDropdown<ModeFilter>
+                  label="MODE"
+                  value={modeFilter}
+                  defaultValue="all"
+                  options={MODE_OPTIONS}
+                  onChange={setModeFilter}
+                />
+                <FilterDropdown<DateFilter>
+                  label="DATE"
+                  value={dateFilter}
+                  defaultValue="all"
+                  options={SDATE_OPTIONS}
+                  onChange={setDateFilter}
+                />
+              </>
+            }
+            sort={
+              <SortDropdown<SSortKey> value={sortKey} options={SSORT_OPTIONS} onChange={setSortKey} />
+            }
+          />
+        </div>
+        <div className="max-w-[960px] mx-auto px-8">
+
 
           {/* States */}
           {!activeSession && !hasHistory && (
@@ -430,13 +502,7 @@ const Sessions: React.FC = () => {
 
           {(activeSession || hasHistory) && (
             <div className="mt-6 space-y-6">
-              {activeSession ? (
-                <ActiveSessionBanner session={activeSession} />
-              ) : (
-                <div className="flex justify-start">
-                  <PrimaryButton onClick={handleStart}>+ Start a session</PrimaryButton>
-                </div>
-              )}
+              {activeSession && <ActiveSessionBanner session={activeSession} />}
 
               {hasHistory && (
                 <>

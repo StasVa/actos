@@ -14,6 +14,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { FilterDropdown, FilterOption } from "@/components/FilterDropdown";
 import { SortDropdown } from "@/components/SortDropdown";
 import { EmptyState, FilteredEmpty } from "@/components/EmptyState";
+import { PageHeader } from "@/components/PageHeader";
 
  function relativeAgo(iso: string): { label: string; full: string; sort: number } {
   const d = new Date(iso);
@@ -1225,67 +1226,53 @@ const Ideas: React.FC = () => {
       <AppSidebar />
       <MobileHeader />
       <main className="app-main page-medium flex flex-col h-screen">
-        {/* Page header */}
-        <div className="px-4 md:px-10 pt-6 pb-3 shrink-0">
-          <div className="flex items-center justify-between gap-4">
-            <h1 className="text-[24px] font-medium text-text-primary">Ideas</h1>
-            <div className="flex items-center gap-4">
-              <div className="hidden sm:block font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary tabular-nums">
-                {meta}
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowNew(true)}
-                aria-label="New idea"
-                className="inline-flex items-center justify-center gap-1 rounded-[4px] bg-accent hover:bg-accent-hover text-white min-w-[40px] min-h-[40px] sm:min-h-0 sm:min-w-0 sm:px-[16px] sm:py-[8px] text-[13px] font-medium transition-colors"
-              >
-                <span className="text-[15px] leading-none">+</span>
-                <span className="hidden sm:inline">New idea</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Filters row */}
-          <div className="mt-3 flex items-center justify-between gap-3 flex-wrap">
-            <div
-              className="flex items-center gap-2 flex-nowrap md:flex-wrap overflow-x-auto md:overflow-visible scrollbar-hide min-w-0"
-              style={{ WebkitOverflowScrolling: "touch" }}
-            >
-              <FilterDropdown
-                label="STATUS"
-                value={statusFilter}
-                defaultValue="captured"
-                options={STATUS_OPTIONS}
-                onChange={(v) => setStatusFilter(v)}
-              />
-              <FilterDropdown
-                label="GOAL"
-                value={goalFilter}
-                defaultValue="all"
-                options={goalOptions}
-                onChange={(v) => setGoalFilter(v)}
-              />
-              <FilterDropdown
-                label="DATE"
-                value={dateFilter}
-                defaultValue="all"
-                options={DATE_OPTIONS}
-                onChange={(v) => setDateFilter(v)}
-              />
-              {anyApplied && (
-                <button
-                  onClick={clearFilters}
-                  className="ml-1 text-[12px] text-text-tertiary hover:text-text-secondary transition-colors shrink-0"
-                >
-                  Clear filters
-                </button>
-              )}
-            </div>
-            <SortDropdown value={sortKey} options={SORT_OPTIONS} onChange={(v) => setSortKey(v)} />
-          </div>
+        <div className="px-4 md:px-10 pt-6 pb-4 shrink-0">
+          <PageHeader
+            title="Ideas"
+            meta={meta}
+            cta={{
+              label: "+ New idea",
+              onClick: () => setShowNew(true),
+              ariaLabel: "New idea",
+            }}
+            filters={
+              <>
+                <FilterDropdown
+                  label="STATUS"
+                  value={statusFilter}
+                  defaultValue="captured"
+                  options={STATUS_OPTIONS}
+                  onChange={(v) => setStatusFilter(v)}
+                />
+                <FilterDropdown
+                  label="GOAL"
+                  value={goalFilter}
+                  defaultValue="all"
+                  options={goalOptions}
+                  onChange={(v) => setGoalFilter(v)}
+                />
+                <FilterDropdown
+                  label="DATE"
+                  value={dateFilter}
+                  defaultValue="all"
+                  options={DATE_OPTIONS}
+                  onChange={(v) => setDateFilter(v)}
+                />
+                {anyApplied && (
+                  <button
+                    onClick={clearFilters}
+                    className="ml-1 text-[12px] text-text-tertiary hover:text-text-secondary transition-colors shrink-0"
+                  >
+                    Clear filters
+                  </button>
+                )}
+              </>
+            }
+            sort={
+              <SortDropdown value={sortKey} options={SORT_OPTIONS} onChange={(v) => setSortKey(v)} />
+            }
+          />
         </div>
-
-        <div className="border-t border-border-subtle" />
 
         {/* Full-width list */}
         <div className="flex-1 overflow-y-auto min-h-0">

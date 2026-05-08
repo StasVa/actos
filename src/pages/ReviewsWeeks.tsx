@@ -14,6 +14,7 @@ import {
   dateFromYearWeek,
 } from "@/lib/weekUtils";
 import { getOutcomeSummary } from "@/lib/outcomeUtils";
+import { PageHeader } from "@/components/PageHeader";
 
 const RANGE_OPTIONS = [
   { value: "all", label: "All" },
@@ -110,29 +111,25 @@ const ReviewsWeeks: React.FC = () => {
       <AppSidebar onOpenSettings={() => setSettingsOpen(true)} />
       <SettingsPanel open={settingsOpen} onOpenChange={setSettingsOpen} />
       <main className="app-main page-medium">
-        <header className="mb-6 flex items-end justify-between gap-4">
-          <h1 className="text-[24px] font-medium text-text-primary leading-tight">Weeks</h1>
-          <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary tabular-nums">
-            {allWeeks.length} weeks tracked
-          </div>
-        </header>
-
-        <div className="flex flex-wrap items-center gap-4 mb-3">
-          <FilterDD label="Date range" value={range} onChange={setRange} options={RANGE_OPTIONS} />
-          <FilterDD
-            label="Goal"
-            value={goalFilter}
-            onChange={setGoalFilter}
-            options={[
-              { value: "all", label: "All" },
-              ...goals.filter((g) => g.status === "active").map((g) => ({ value: g.id, label: g.title })),
-            ]}
-          />
-        </div>
-
-        <div className="h-6" />
-        <div className="border-t border-border-subtle" />
-        <div className="h-6" />
+        <PageHeader
+          title="Weeks"
+          meta={`${allWeeks.length} WEEKS TRACKED`}
+          filters={
+            <>
+              <FilterDD
+                label="GOAL"
+                value={goalFilter}
+                onChange={setGoalFilter}
+                options={[
+                  { value: "all", label: "All" },
+                  ...goals.filter((g) => g.status === "active").map((g) => ({ value: g.id, label: g.title })),
+                ]}
+              />
+              <FilterDD label="DATE" value={range} onChange={setRange} options={RANGE_OPTIONS} />
+            </>
+          }
+        />
+        <div style={{ height: 24 }} />
 
         <div className="bg-surface-elevated border border-border-subtle rounded-[6px] overflow-hidden">
           {allWeeks.length === 0 ? (

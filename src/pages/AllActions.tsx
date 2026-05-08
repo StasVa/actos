@@ -19,6 +19,7 @@ import { SortDropdown } from "@/components/SortDropdown";
 import { useStore } from "@/store/useStore";
 import { toLegacyActions } from "@/lib/actionsAdapter";
 import { EmptyState, FilteredEmpty } from "@/components/EmptyState";
+import { PageHeader } from "@/components/PageHeader";
 
 /* ===== Filter chips ===== */
 const Chip: React.FC<{
@@ -508,70 +509,57 @@ const AllActions: React.FC = () => {
       <AppSidebar />
       <MobileHeader />
       <main className="app-main page-medium flex flex-col h-screen">
-        {/* Page header */}
-        <div className="px-10 pt-6 pb-3 shrink-0">
-          <div className="flex items-center justify-between gap-4">
-            <h1 className="text-[24px] font-medium text-text-primary">All actions</h1>
-            <div className="flex items-center gap-4">
-              <div className="hidden sm:block font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary tabular-nums">
-                {meta}
-              </div>
-              <button
-                type="button"
-                onClick={() => openPanel({ kind: "action", mode: "new" })}
-                aria-label="New action"
-                className="inline-flex items-center justify-center gap-1 rounded-[4px] bg-accent hover:bg-accent-hover text-white min-w-[40px] min-h-[40px] sm:min-h-0 sm:min-w-0 sm:px-[16px] sm:py-[8px] text-[13px] font-medium transition-colors"
-              >
-                <span className="text-[15px] leading-none">+</span>
-                <span className="hidden sm:inline">New action</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Filters row */}
-          <div className="mt-3 flex items-center justify-between gap-3 flex-wrap">
-            <div className="flex items-center gap-2 flex-wrap">
-              <FilterDropdown
-                label="STATUS"
-                value={statusFilter}
-                defaultValue="all"
-                options={STATUS_OPTIONS}
-                onChange={(v) => setStatusFilter(v)}
+        <div className="px-4 md:px-10 pt-6 pb-4 shrink-0">
+          <PageHeader
+            title="Actions"
+            meta={meta}
+            cta={{
+              label: "+ New action",
+              onClick: () => openPanel({ kind: "action", mode: "new" }),
+              ariaLabel: "New action",
+            }}
+            filters={
+              <>
+                <FilterDropdown
+                  label="STATUS"
+                  value={statusFilter}
+                  defaultValue="all"
+                  options={STATUS_OPTIONS}
+                  onChange={(v) => setStatusFilter(v)}
+                />
+                <FilterDropdown
+                  label="GOAL"
+                  value={goalFilter}
+                  defaultValue="all"
+                  options={GOAL_OPTIONS}
+                  onChange={(v) => setGoalFilter(v)}
+                />
+                <FilterDropdown
+                  label="DATE"
+                  value={dateFilter}
+                  defaultValue="all"
+                  options={DATE_OPTIONS}
+                  onChange={(v) => setDateFilter(v)}
+                />
+                {anyApplied && (
+                  <button
+                    onClick={clearFilters}
+                    className="ml-1 text-[12px] text-text-tertiary hover:text-text-secondary transition-colors shrink-0"
+                  >
+                    Clear filters
+                  </button>
+                )}
+              </>
+            }
+            sort={
+              <SortDropdown
+                value={sortKey}
+                options={SORT_OPTIONS}
+                onChange={(v) => setSortKey(v)}
               />
-              <FilterDropdown
-                label="GOAL"
-                value={goalFilter}
-                defaultValue="all"
-                options={GOAL_OPTIONS}
-                onChange={(v) => setGoalFilter(v)}
-              />
-              <FilterDropdown
-                label="DATE"
-                value={dateFilter}
-                defaultValue="all"
-                options={DATE_OPTIONS}
-                onChange={(v) => setDateFilter(v)}
-              />
-              {anyApplied && (
-                <button
-                  onClick={clearFilters}
-                  className="ml-1 text-[12px] text-text-tertiary hover:text-text-secondary transition-colors"
-                >
-                  Clear filters
-                </button>
-              )}
-            </div>
-            <SortDropdown
-              value={sortKey}
-              options={SORT_OPTIONS}
-              onChange={(v) => setSortKey(v)}
-            />
-          </div>
-
-          {/* Search removed — global ⌘K palette handles search. */}
+            }
+          />
         </div>
-
-        <div className="border-t border-border-subtle" />
 
         {/* Full-width list */}
         <div className="flex-1 overflow-y-auto min-h-0 pt-2 pl-8">
@@ -619,16 +607,6 @@ const AllActions: React.FC = () => {
         </div>
       </main>
 
-      {/* Mobile FAB — quick capture */}
-      <button
-        type="button"
-        onClick={() => openPanel({ kind: "action", mode: "new" })}
-        aria-label="New action"
-        className="sm:hidden fixed bottom-4 right-4 z-50 w-14 h-14 rounded-full bg-accent hover:bg-accent-hover text-white flex items-center justify-center transition-colors"
-        style={{ boxShadow: "0 6px 16px hsl(var(--accent) / 0.4)" }}
-      >
-        <span className="text-[24px] leading-none">+</span>
-      </button>
     </div>
   );
 };

@@ -1060,7 +1060,7 @@ export const PlanTodayPage: React.FC<{ onCancel: () => void; onComplete: () => v
               disabled={submitDisabled}
               className="ml-auto w-full md:w-auto px-5 py-2.5 rounded-[4px] bg-[hsl(var(--accent))] text-white text-[14px] font-medium hover:brightness-110 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Plan day
+              Start day
             </button>
           </div>
           <div className="h-16 md:hidden" />

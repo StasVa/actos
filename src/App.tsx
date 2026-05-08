@@ -24,6 +24,8 @@ import Rituals from "./pages/Rituals.tsx";
 import AllActions from "./pages/AllActions.tsx";
 import AllDelegated from "./pages/AllDelegated.tsx";
 import AllProjects from "./pages/AllProjects.tsx";
+import Settings from "./pages/Settings.tsx";
+import SettingsSubscription from "./pages/SettingsSubscription.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import { ActionEditor } from "./components/ActionEditor";
 

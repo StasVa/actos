@@ -859,6 +859,11 @@ const ProjectDetail: React.FC = () => {
                           style={{ width: `${row.pct}%`, background: color, opacity: row.opacity }}
                         />
                       </div>
+                      <span className="w-[14px] flex justify-center shrink-0">
+                        {row.label === "EFFORT" ? (
+                          <MetricInfoPopover variant="valueEffort" ariaLabel="What do Value and Effort mean?" />
+                        ) : null}
+                      </span>
                     </div>
                   ))}
                   <div className="h-8 flex items-center gap-3 py-1.5">
@@ -879,11 +884,9 @@ const ProjectDetail: React.FC = () => {
                         }}
                       />
                     </div>
+                    <span className="w-[14px] shrink-0" />
                   </div>
                 </div>
-                <p className="mt-2 font-mono text-[11px] text-text-tertiary">
-                  Effort discounts delegated work to 20%.
-                </p>
               </div>
             )}
           </div>

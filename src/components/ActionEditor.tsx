@@ -898,13 +898,11 @@ function ActionEditorPanel({
             <EditorCancelButton />
             <button
               onClick={handleSaveNew}
-              disabled={!canCreate}
               title={canCreate ? "" : createTooltip}
-              className="text-[13px] font-medium px-3 py-1.5 rounded-[4px] transition-colors"
+              className="text-[13px] font-medium px-3 py-1.5 rounded-[4px] transition-colors cursor-pointer"
               style={{
-                background: canCreate ? "hsl(var(--accent))" : "hsl(var(--surface-hover))",
-                color: canCreate ? "hsl(var(--surface-base))" : "hsl(var(--text-tertiary))",
-                cursor: canCreate ? "pointer" : "not-allowed",
+                background: canCreate ? "hsl(var(--accent))" : "hsl(var(--accent) / 0.4)",
+                color: "hsl(var(--surface-base))",
               }}
             >
               Create action

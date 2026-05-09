@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Zap, Leaf, Sun, Thermometer, Star, X, type LucideIcon } from "lucide-react";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Tooltip, SparkTooltipContent, StateDotTooltip } from "@/components/Tooltip";
@@ -14,7 +14,7 @@ import { PlanTodayPage } from "@/components/PlanCloseModals";
 import { CloseDayRecap } from "@/components/CloseDayRecap";
 import { ActionRow as SharedActionRow } from "@/components/ActionRow";
 import { ProjectCard as SharedProjectCard } from "@/components/ProjectCard";
-import { useNavigate } from "react-router-dom";
+
 import { toast } from "sonner";
 import { subscribeAppEvent } from "@/lib/appEvents";
 import { formatTime } from "@/lib/format";

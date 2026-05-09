@@ -62,6 +62,7 @@ const App = () => (
         <CommandPalette />
         <KeyboardShortcuts />
         <ActiveSessionGuard />
+        <MobileHeader />
         <ImpersonationBanner />
         <Routes>
           {/* Admin */}

@@ -949,3 +949,40 @@ function FieldRow({ label, children }: { label: string; children: React.ReactNod
     </div>
   );
 }
+
+function SectionHead({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-3">
+      {children}
+    </div>
+  );
+}
+
+function SectionHeadRequired({ label, required }: { label: string; required?: boolean }) {
+  return (
+    <div className="mb-3 flex items-baseline gap-1.5">
+      <span className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
+        {label}
+      </span>
+      {required && (
+        <span
+          className="text-[12px]"
+          style={{ color: "hsl(var(--text-tertiary))", fontFamily: "Inter, sans-serif" }}
+        >
+          *
+        </span>
+      )}
+    </div>
+  );
+}
+
+function InlineError({ text }: { text: string }) {
+  return (
+    <div
+      className="mt-1 text-[12px]"
+      style={{ color: "hsl(var(--text-warning))", fontFamily: "Inter, sans-serif" }}
+    >
+      {text}
+    </div>
+  );
+}

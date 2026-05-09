@@ -1345,20 +1345,9 @@ export const TodayZone: React.FC<{
                           </span>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3 shrink-0">
-                        <span
-                          className="font-medium tabular-nums text-center"
-                          style={{
-                            padding: "4px 10px",
-                            borderRadius: 4,
-                            fontSize: 13,
-                            minWidth: 52,
-                            background: `color-mix(in srgb, ${color}, transparent 85%)`,
-                            color: color,
-                          }}
-                        >
-                          ×{mult.toFixed(2)}
-                        </span>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <MultiplierPill multiplier={mult} goalColor={color} dimmed={isTerminal} />
+                        <SharedTimePill minutes={r.timeEstimateMinutes} dimmed={isTerminal} />
                         {doneToday ? (
                           <button
                             type="button"

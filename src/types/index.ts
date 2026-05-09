@@ -22,6 +22,8 @@ export interface Goal {
   updatedAt?: ISODateTime;
   completedAt?: ISODateTime;
   droppedAt?: ISODateTime;
+  /** Marks this entity as part of the seeded sample dataset (Setup Wizard). */
+  isSample?: boolean;
 }
 
 // ───────── Projects ─────────

@@ -35,6 +35,7 @@ import { CommandPalette } from "./components/CommandPalette";
 import { KeyboardShortcuts } from "./components/KeyboardShortcuts";
 import { GlobalSettingsHost } from "./components/GlobalSettingsHost";
 import { ActiveSessionGuard } from "./components/ActiveSessionGuard";
+import { MobileHeader } from "./components/MobileHeader";
 import { AdminLayout } from "./admin/AdminLayout";
 import AdminDashboard from "./admin/pages/AdminDashboard";
 import AdminUsers from "./admin/pages/AdminUsers";

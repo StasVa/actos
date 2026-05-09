@@ -3,7 +3,8 @@
 // Renders inside /today's content area when the user clicks "Start your day".
 // Sidebar stays visible. Submit commits to the store via startDayPlan().
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Zap, Leaf, Sun, Thermometer, GripVertical, Star, type LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 import { useStore, ritualMultiplier } from "@/store/useStore";

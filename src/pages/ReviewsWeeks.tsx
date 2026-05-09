@@ -16,6 +16,14 @@ import { getOutcomeSummary } from "@/lib/outcomeUtils";
 import { PageHeader } from "@/components/PageHeader";
 import { FilterDropdown } from "@/components/FilterDropdown";
 import { SortDropdown } from "@/components/SortDropdown";
+import {
+  REVIEW_SORT_OPTIONS,
+  ReviewSortKey,
+  computeAggregates,
+  loadReviewSort,
+  saveReviewSort,
+  sortReviewEntries,
+} from "@/lib/reviewSort";
 
 const RANGE_OPTIONS = [
   { value: "all", label: "All" },

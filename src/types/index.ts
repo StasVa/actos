@@ -199,6 +199,8 @@ export interface DayEntry {
   skippedRitualIds?: ID[];
   isPlanned?: boolean;
   isClosed?: boolean;
+  /** Marks this entity as part of the seeded sample dataset (Setup Wizard). */
+  isSample?: boolean;
 }
 
 // ───────── Sessions ─────────
@@ -220,6 +222,8 @@ export interface Session {
   cyclesCompleted: number;
   /** Optional user reflection captured on the session summary screen. */
   reflection?: string | null;
+  /** Marks this entity as part of the seeded sample dataset (Setup Wizard). */
+  isSample?: boolean;
 }
 
 // ───────── Settings ─────────

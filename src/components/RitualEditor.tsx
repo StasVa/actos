@@ -13,6 +13,7 @@ import type { ID, Ritual, RitualSchedule } from "@/types";
 import { ConfirmModal } from "./ConfirmModal";
 import { ritualMultiplier } from "@/store/useStore";
 import { EditorShell, EditorCloseX, EditorCancelButton } from "./EditorShell";
+import { MetricInfoPopover } from "./MetricInfoPopover";
 import { ClampedNumberInput } from "./ClampedNumberInput";
 import {
   Popover,

@@ -2,6 +2,7 @@ import React from "react";
 import { Tooltip } from "@/components/Tooltip";
 import { useStore } from "@/store/useStore";
 import { computeTimeStats, formatHM, formatDateLabel } from "@/lib/timeStats";
+import { HistoryHint } from "@/components/LockModal";
 
 const DEFAULT_PROJECT_LIMIT = 5;
 
@@ -91,6 +92,8 @@ export const TimeInvestmentSection: React.FC = () => {
   const actions = useStore((s) => s.actions);
   const goals = useStore((s) => s.goals);
   const projects = useStore((s) => s.projects);
+  const settings = useStore((s) => s.settings);
+  const isFree = settings.subscriptionTier !== "all-in";
 
   const stats = React.useMemo(
     () => computeTimeStats(actions, goals, 30, new Date(), projects),
@@ -222,6 +225,7 @@ export const TimeInvestmentSection: React.FC = () => {
           );
         })}
       </div>
+      {isFree && <HistoryHint>Showing last 90 days · </HistoryHint>}
     </section>
   );
 };

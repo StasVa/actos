@@ -22,6 +22,8 @@ export interface Goal {
   updatedAt?: ISODateTime;
   completedAt?: ISODateTime;
   droppedAt?: ISODateTime;
+  /** Marks this entity as part of the seeded sample dataset (Setup Wizard). */
+  isSample?: boolean;
 }
 
 // ───────── Projects ─────────
@@ -50,6 +52,8 @@ export interface Project {
    * hidden from all lists/counts and silently deleted if abandoned.
    */
   isDraft?: boolean;
+  /** Marks this entity as part of the seeded sample dataset (Setup Wizard). */
+  isSample?: boolean;
 }
 
 // ───────── Actions ─────────
@@ -91,6 +95,8 @@ export interface Action {
   delegatedAt?: ISODateTime;
   droppedAt?: ISODateTime;
   cancelledAt?: ISODateTime;
+  /** Marks this entity as part of the seeded sample dataset (Setup Wizard). */
+  isSample?: boolean;
 }
 
 // ───────── Rituals ─────────
@@ -132,6 +138,8 @@ export interface Ritual {
   status: RitualStatus;
   createdAt: ISODateTime;
   archivedAt?: ISODateTime;
+  /** Marks this entity as part of the seeded sample dataset (Setup Wizard). */
+  isSample?: boolean;
 }
 
 // ───────── Ideas ─────────
@@ -164,6 +172,8 @@ export interface Idea {
   convertedToId?: ID;
   capturedAt: ISODateTime;
   discardedAt?: ISODateTime;
+  /** Marks this entity as part of the seeded sample dataset (Setup Wizard). */
+  isSample?: boolean;
 }
 
 // ───────── Day entries ─────────

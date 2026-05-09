@@ -68,9 +68,23 @@ export default function Settings() {
   const setShowAdminTools = useStore((s) => s.setShowAdminTools);
   const setSubscriptionTier = useStore((s) => s.setSubscriptionTier);
   const resetToSeed = useStore((s) => s.resetToSeed);
+  const clearSampleData = useStore((s) => s.clearSampleData);
+  const hasSample = useStore((s) =>
+    s.goals.some((g) => g.isSample) ||
+    s.projects.some((p) => p.isSample) ||
+    s.actions.some((a) => a.isSample) ||
+    s.rituals.some((r) => r.isSample) ||
+    s.ideas.some((i) => i.isSample),
+  );
   const activeGoals = goals.filter((g) => g.status === "active");
   const [themeChoice, , setThemeChoice] = useThemeChoice();
   const fileRef = React.useRef<HTMLInputElement>(null);
+
+  const handleClearSample = () => {
+    if (!confirm("Clear all sample goals, projects, actions, rituals, and ideas? This can't be undone.")) return;
+    clearSampleData();
+    toast.success("Sample data cleared.");
+  };
 
   const handleReset = () => {
     if (confirm("Reset everything to seed data? This wipes all your changes.")) {
@@ -235,6 +249,22 @@ export default function Settings() {
                 onChange={handleImportFile}
               />
             </div>
+
+            {hasSample && (
+              <div className="mt-6 pt-5 border-t border-border-subtle">
+                <div className="text-[13px] text-text-primary mb-1">Clear sample data</div>
+                <div className="text-[12px] text-text-tertiary mb-3">
+                  Removes the sample goals, projects, actions, rituals, and ideas seeded by Setup Wizard. Your own entries stay.
+                </div>
+                <button
+                  type="button"
+                  onClick={handleClearSample}
+                  className="h-9 px-4 text-[13px] font-medium rounded-[4px] border border-border-default text-text-primary hover:border-[hsl(var(--accent))] hover:bg-surface-hover transition-colors"
+                >
+                  Clear sample data
+                </button>
+              </div>
+            )}
           </section>
 
           {/* Danger */}

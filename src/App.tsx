@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { useEffect } from "react";
+import { BrowserRouter, Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -27,6 +28,7 @@ import AllProjects from "./pages/AllProjects.tsx";
 import Settings from "./pages/Settings.tsx";
 import SettingsSubscription from "./pages/SettingsSubscription.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import Setup, { isSetupCompleted } from "./pages/Setup.tsx";
 import { ActionEditor } from "./components/ActionEditor";
 
 import { GoalEditor } from "./components/GoalEditor";
@@ -49,22 +51,59 @@ import { ImpersonationBanner } from "./admin/ImpersonationBanner";
 
 const queryClient = new QueryClient();
 
+/**
+ * Redirects first-run users to /setup. Setup completion is tracked in
+ * localStorage["actos.setup.completed"]; clearing it re-runs the wizard.
+ * Admin routes are exempt so demo tooling stays reachable.
+ */
+const SetupGuard = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (isSetupCompleted()) return;
+    // Legacy users: existing persisted store predates the wizard — auto-mark
+    // completed so they don't get bounced into setup and lose their data.
+    try {
+      if (localStorage.getItem("actos-store")) {
+        localStorage.setItem("actos.setup.completed", "true");
+        return;
+      }
+    } catch {}
+    if (location.pathname.startsWith("/setup")) return;
+    if (location.pathname.startsWith("/admin")) return;
+    navigate("/setup", { replace: true });
+  }, [location.pathname, navigate]);
+  return null;
+};
+
+const ChromeOnlyOutsideSetup: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { pathname } = useLocation();
+  if (pathname.startsWith("/setup")) return null;
+  return <>{children}</>;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner position="bottom-right" />
       <BrowserRouter>
-        <ActionEditor />
-        <GoalEditor />
-        <RitualEditor />
-        <GlobalSettingsHost />
-        <CommandPalette />
-        <KeyboardShortcuts />
-        <ActiveSessionGuard />
-        <MobileHeader />
-        <ImpersonationBanner />
+        <SetupGuard />
+        <ChromeOnlyOutsideSetup>
+          <ActionEditor />
+          <GoalEditor />
+          <RitualEditor />
+          <GlobalSettingsHost />
+          <CommandPalette />
+          <KeyboardShortcuts />
+          <ActiveSessionGuard />
+          <MobileHeader />
+          <ImpersonationBanner />
+        </ChromeOnlyOutsideSetup>
         <Routes>
+          {/* Setup wizard (no chrome) */}
+          <Route path="/setup" element={<Setup />} />
+
           {/* Admin */}
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminDashboard />} />

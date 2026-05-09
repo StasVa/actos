@@ -20,6 +20,62 @@ import { formatTime } from "@/lib/format";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 export const TODAY_ISO = new Date().toISOString().slice(0, 10);
+
+const SAMPLE_BANNER_KEY = "actos.coachmark.sample-data-banner";
+
+const SampleDataBanner: React.FC = () => {
+  const hasSample = useStore((s) =>
+    s.goals.some((g) => g.isSample) ||
+    s.projects.some((p) => p.isSample) ||
+    s.actions.some((a) => a.isSample) ||
+    s.rituals.some((r) => r.isSample) ||
+    s.ideas.some((i) => i.isSample),
+  );
+  const [dismissed, setDismissed] = useState<boolean>(() => {
+    try { return localStorage.getItem(SAMPLE_BANNER_KEY) === "dismissed"; }
+    catch { return false; }
+  });
+  if (!hasSample || dismissed) return null;
+  return (
+    <div
+      role="status"
+      style={{
+        background: "hsl(var(--surface-hover))",
+        borderBottom: "1px solid hsl(var(--border-subtle))",
+        padding: "12px 16px",
+        display: "flex", alignItems: "center", gap: 12,
+        fontFamily: "Inter", fontSize: 13,
+        color: "hsl(var(--text-secondary))",
+      }}
+    >
+      <span style={{ flex: 1 }}>
+        These are sample goals and tasks.{" "}
+        <Link
+          to="/settings"
+          style={{ color: "hsl(var(--text-primary))", textDecoration: "underline", textUnderlineOffset: 2 }}
+        >
+          Clear them in Settings → Data
+        </Link>{" "}
+        when you're ready to start your own.
+      </span>
+      <button
+        type="button"
+        aria-label="Dismiss banner"
+        onClick={() => {
+          try { localStorage.setItem(SAMPLE_BANNER_KEY, "dismissed"); } catch {}
+          setDismissed(true);
+        }}
+        style={{
+          background: "transparent", border: "none", cursor: "pointer",
+          color: "hsl(var(--text-tertiary))", padding: 4,
+        }}
+      >
+        <X size={14} />
+      </button>
+    </div>
+  );
+};
+
 export const YESTERDAY_ISO = (() => {
   const d = new Date();
   d.setDate(d.getDate() - 1);
@@ -1783,6 +1839,7 @@ const Index: React.FC = () => {
     <div className="min-h-screen bg-surface-base text-text-primary">
       <AppSidebar onOpenSettings={() => setSettingsOpen(true)} />
       <SettingsPanel open={settingsOpen} onOpenChange={setSettingsOpen} />
+      <SampleDataBanner />
       <main className={`app-main ${showPlanning ? "page-wide" : "page-medium"}`}>
         {showPlanning ? (
           <PlanTodayPage

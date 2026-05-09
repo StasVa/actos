@@ -3,7 +3,8 @@
 // Renders inside /today's content area when the user clicks "Start your day".
 // Sidebar stays visible. Submit commits to the store via startDayPlan().
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Zap, Leaf, Sun, Thermometer, GripVertical, Star, type LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 import { useStore, ritualMultiplier } from "@/store/useStore";
@@ -102,6 +103,116 @@ const MiniDropdown: React.FC<{
   );
 };
 
+/* ───────── inline text picker (no chrome — reads as inline link) ───────── */
+const InlineTextPicker: React.FC<{
+  value: string;
+  options: MiniOption[];
+  onChange: (v: string) => void;
+  placeholder: string;
+  showDot?: boolean;
+}> = ({ value, options, onChange, placeholder, showDot }) => {
+  const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState<{ top: number; left: number; width: number } | null>(null);
+  const current = options.find((o) => o.value === value);
+  const label = current?.label ?? placeholder;
+
+  useLayoutEffect(() => {
+    if (!open || !triggerRef.current) return;
+    const r = triggerRef.current.getBoundingClientRect();
+    setPos({ top: r.bottom + 8, left: r.left, width: Math.max(r.width, 240) });
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e: MouseEvent) => {
+      const t = e.target as Node;
+      if (triggerRef.current?.contains(t) || menuRef.current?.contains(t)) return;
+      setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    const onScroll = () => setOpen(false);
+    document.addEventListener("mousedown", onDoc);
+    document.addEventListener("keydown", onKey);
+    window.addEventListener("scroll", onScroll, true);
+    window.addEventListener("resize", onScroll);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+      document.removeEventListener("keydown", onKey);
+      window.removeEventListener("scroll", onScroll, true);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, [open]);
+
+  return (
+    <span className="inline-flex items-center gap-1.5 min-w-0">
+      {showDot && current?.dot && (
+        <span className="w-2 h-2 rounded-full shrink-0" style={{ background: current.dot }} />
+      )}
+      <button
+        ref={triggerRef}
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        title={label}
+        className="text-[13px] text-text-primary truncate bg-transparent p-0 border-0 cursor-pointer focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 rounded-[2px] hover:[text-decoration-color:hsl(var(--accent))] focus-visible:[text-decoration-color:hsl(var(--accent))]"
+        style={{
+          maxWidth: 200,
+          textDecoration: "underline",
+          textDecorationStyle: "dotted",
+          textDecorationColor: "hsl(var(--text-tertiary))",
+          textUnderlineOffset: 3,
+          outlineColor: "hsl(var(--accent))",
+        }}
+      >
+        {label}
+      </button>
+      {open && pos && createPortal(
+        <div
+          ref={menuRef}
+          className="fixed z-[100] bg-surface-elevated border border-border-subtle rounded-[4px] shadow-md max-h-[280px] overflow-y-auto"
+          style={{ top: pos.top, left: pos.left, minWidth: pos.width, padding: "4px 0" }}
+        >
+          {options.length === 0 && (
+            <div className="px-3 py-1.5 text-[12px] text-text-tertiary">No options</div>
+          )}
+          {options.map((o) => {
+            const selected = o.value === value;
+            return (
+              <button
+                key={o.value || "__none"}
+                type="button"
+                onClick={() => {
+                  onChange(o.value);
+                  setOpen(false);
+                }}
+                className={`w-full flex items-center gap-2 text-left text-[13px] transition-colors ${
+                  selected ? "bg-surface-hover" : "hover:bg-surface-hover"
+                }`}
+                style={{ padding: "6px 12px" }}
+              >
+                {showDot && o.dot && (
+                  <span className="w-2 h-2 rounded-full shrink-0" style={{ background: o.dot }} />
+                )}
+                <span
+                  className="flex-1 text-text-primary truncate"
+                  style={selected ? { color: "hsl(var(--accent))" } : undefined}
+                >
+                  {o.label}
+                </span>
+                {selected && <span style={{ color: "hsl(var(--accent))", fontSize: 12 }}>✓</span>}
+              </button>
+            );
+          })}
+        </div>,
+        document.body,
+      )}
+    </span>
+  );
+};
+
 /* ───────── helpers ───────── */
 const todayISO = () => new Date().toISOString().slice(0, 10);
 
@@ -194,14 +305,11 @@ const PlanForm: React.FC<{
   const [quickTitle, setQuickTitle] = useState("");
   const [quickGoalId, setQuickGoalId] = useState<ID | undefined>(initialGoal);
   const [quickProjectId, setQuickProjectId] = useState<ID | undefined>(initialProject);
-  const [quickShowPickers, setQuickShowPickers] = useState(false);
 
   const activeGoals = goals.filter((g) => g.status === "active");
   const projectsForQuickGoal = projects.filter(
     (p) => p.status === "active" && (!quickGoalId || p.goalId === quickGoalId),
   );
-  const isSmartDefault =
-    activeGoals.length === 1 && projectsForQuickGoal.length <= 1 && !quickShowPickers;
 
   const dueRituals = useMemo(
     () => rituals.filter((r) => r.status === "active" && ritualDueOn(r, date)),
@@ -516,83 +624,44 @@ const PlanForm: React.FC<{
                         className="flex-1 min-w-0 bg-transparent text-[14px] text-text-primary outline-none placeholder:text-text-tertiary"
                       />
                     </div>
-                    {/* Line 2: parent picker */}
-                    <div className="flex items-center gap-2 pl-[22px] flex-wrap">
-                      <span className="text-[12px] text-text-tertiary">in</span>
-                      {isSmartDefault ? (
-                        <>
-                          {quickGoalId && (
-                            <span className="flex items-center gap-1.5 min-w-0">
-                              <span
-                                className="inline-block rounded-full shrink-0"
-                                style={{
-                                  width: 8,
-                                  height: 8,
-                                  background: goalColor(quickGoalId),
-                                }}
-                              />
-                              <span
-                                className="font-mono text-[12px] text-text-secondary truncate"
-                                style={{ maxWidth: 120 }}
-                                title={goalById(quickGoalId)?.title}
-                              >
-                                {goalById(quickGoalId)?.title}
-                              </span>
-                            </span>
-                          )}
-                          {quickProjectId && (
-                            <>
-                              <span className="text-text-tertiary">·</span>
-                              <span
-                                className="font-mono text-[12px] text-text-secondary truncate"
-                                style={{ maxWidth: 120 }}
-                                title={projectById(quickProjectId)?.title}
-                              >
-                                {projectById(quickProjectId)?.title}
-                              </span>
-                            </>
-                          )}
-                          <button
-                            type="button"
-                            onClick={() => setQuickShowPickers(true)}
-                            className="ml-auto font-mono text-[11px] text-text-tertiary hover:text-text-secondary hover:underline"
-                          >
-                            Change
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <MiniDropdown
-                            value={quickGoalId ?? ""}
-                            showDot
-                            placeholder="Goal"
-                            options={activeGoals.map((g) => ({
-                              value: g.id,
-                              label: g.title,
-                              dot: goalColor(g.id),
-                            }))}
-                            onChange={(v) => {
-                              const gid = v || undefined;
-                              setQuickGoalId(gid);
-                              const proj = firstProjectForGoal(gid);
-                              setQuickProjectId(proj?.id);
-                            }}
-                          />
-                          <span className="text-text-tertiary">·</span>
-                          <MiniDropdown
-                            value={quickProjectId ?? ""}
-                            placeholder="No project"
-                            options={[
-                              { value: "", label: "No project" },
-                              ...projectsForQuickGoal.map((p) => ({
-                                value: p.id,
-                                label: p.title,
-                              })),
-                            ]}
-                            onChange={(v) => setQuickProjectId(v || undefined)}
-                          />
-                        </>
+                    {/* Line 2: parent picker — inline text triggers */}
+                    <div className="flex items-center gap-1.5 pl-[22px] flex-wrap">
+                      <span className="text-[13px] text-text-secondary">in</span>
+                      {quickGoalId && (
+                        <span
+                          className="inline-block rounded-full shrink-0"
+                          style={{ width: 8, height: 8, background: goalColor(quickGoalId) }}
+                        />
                       )}
+                      <InlineTextPicker
+                        value={quickGoalId ?? ""}
+                        showDot={false}
+                        placeholder="Pick goal"
+                        options={activeGoals.map((g) => ({
+                          value: g.id,
+                          label: g.title,
+                          dot: goalColor(g.id),
+                        }))}
+                        onChange={(v) => {
+                          const gid = v || undefined;
+                          setQuickGoalId(gid);
+                          const proj = firstProjectForGoal(gid);
+                          setQuickProjectId(proj?.id);
+                        }}
+                      />
+                      <span className="text-[13px] text-text-secondary">·</span>
+                      <InlineTextPicker
+                        value={quickProjectId ?? ""}
+                        placeholder="Pick project"
+                        options={[
+                          { value: "", label: "No project" },
+                          ...projectsForQuickGoal.map((p) => ({
+                            value: p.id,
+                            label: p.title,
+                          })),
+                        ]}
+                        onChange={(v) => setQuickProjectId(v || undefined)}
+                      />
                     </div>
                   </div>
                 </div>

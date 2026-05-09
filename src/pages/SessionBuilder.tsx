@@ -270,7 +270,7 @@ const SessionTimelineBar: React.FC<{ work: number; brk: number; cycles: number; 
 
 const ImpactPill: React.FC<{ impact: number; goalColor: string }> = ({ impact, goalColor }) => (
   <span
-    className="inline-flex items-center font-mono text-[12px] font-medium tabular-nums"
+    className="inline-flex items-center justify-center font-mono text-[12px] font-medium tabular-nums"
     style={{
       padding: "3px 10px",
       borderRadius: 4,

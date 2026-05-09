@@ -28,6 +28,7 @@ import AllProjects from "./pages/AllProjects.tsx";
 import Settings from "./pages/Settings.tsx";
 import SettingsSubscription from "./pages/SettingsSubscription.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import Setup, { isSetupCompleted } from "./pages/Setup.tsx";
 import { ActionEditor } from "./components/ActionEditor";
 
 import { GoalEditor } from "./components/GoalEditor";

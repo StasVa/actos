@@ -454,7 +454,11 @@ const AllActions: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [goalFilter, setGoalFilter] = useState<GoalFilter>("all");
   const [dateFilter, setDateFilter] = useState<DateFilter>("all");
-  const [sortKey, setSortKey] = useState<SortKey>("recent");
+  const [sortKey, setSortKeyState] = useState<SortKey>(() => loadStoredSort());
+  const setSortKey = (v: SortKey) => {
+    setSortKeyState(v);
+    try { localStorage.setItem(SORT_STORAGE_KEY, v); } catch {}
+  };
   const [query, setQuery] = useState("");
   const [terminalCollapsed, setTerminalCollapsed] = useState(false);
 

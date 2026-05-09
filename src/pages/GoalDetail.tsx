@@ -152,11 +152,11 @@ const HeroState: React.FC<{
   );
 
   return (
-    <div className="bg-surface-elevated border border-border-subtle rounded-[8px] p-8">
+    <div className="bg-surface-elevated border border-border-subtle rounded-[8px] p-4 sm:p-8">
       {/* Top tier */}
-      <div className="flex justify-between items-start gap-8">
-        <div>
-          <div className="text-[60px] font-medium text-text-primary tabular-nums leading-none">
+      <div className="flex flex-col sm:flex-row justify-between items-start gap-6 sm:gap-8">
+        <div className="min-w-0">
+          <div className="text-[40px] sm:text-[60px] font-medium text-text-primary tabular-nums leading-none">
             {progressOutcome}%
           </div>
           <div className="mt-1 font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
@@ -167,7 +167,7 @@ const HeroState: React.FC<{
             {ageMonths} {ageMonths === 1 ? "month" : "months"}
           </div>
         </div>
-        <div className="flex gap-10 shrink-0">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 lg:gap-10 w-full sm:w-auto min-w-0">
           <Pillar
             label="PROJECTS"
             value={projectsTotal === 0 ? "—" : `${projectsClosed}/${projectsTotal}`}

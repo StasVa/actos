@@ -79,7 +79,7 @@ export const MetricInfoPopover: React.FC<{
         <button
           type="button"
           aria-label={ariaLabel ?? "More info"}
-          className={`inline-flex items-center justify-center text-text-tertiary hover:text-text-secondary transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-accent rounded ${className ?? ""}`}
+          className={`inline-flex items-center justify-center text-text-tertiary hover:text-text-secondary transition-colors cursor-pointer focus:outline-none focus-visible:ring-1 focus-visible:ring-accent ${className ?? ""}`}
           onClick={(e) => e.stopPropagation()}
         >
           <Info size={iconSize} strokeWidth={1.75} />

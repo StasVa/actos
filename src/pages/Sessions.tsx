@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useStore } from "@/store/useStore";
 import { AppSidebar } from "@/components/AppSidebar";
-import { MobileHeader } from "@/components/MobileHeader";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { EmptyState } from "@/components/EmptyState";
 import { PageHeader } from "@/components/PageHeader";
@@ -448,7 +447,6 @@ const Sessions: React.FC = () => {
   return (
     <div className="min-h-screen bg-background text-text-primary">
       <AppSidebar />
-      <MobileHeader />
       <main className="app-main page-medium">
         <div className="px-4 md:px-10 pt-6 pb-4">
           <PageHeader

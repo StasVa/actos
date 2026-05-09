@@ -35,13 +35,13 @@ export function SortDropdown<T extends string>({
   }, [open]);
 
   return (
-    <div ref={ref} className="relative inline-block">
+    <div ref={ref} className="relative inline-block shrink-0">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex items-center gap-1 text-[12px] text-text-secondary hover:text-text-primary transition-colors"
+        className="inline-flex items-center gap-1 text-[12px] text-text-secondary hover:text-text-primary transition-colors whitespace-nowrap"
       >
-        <span>
+        <span className="whitespace-nowrap">
           {label}: {current?.label ?? ""}
         </span>
         <span className="text-text-tertiary" style={{ fontSize: 10 }}>▾</span>

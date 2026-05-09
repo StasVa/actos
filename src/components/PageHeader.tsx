@@ -24,23 +24,24 @@ type Props = {
 };
 
 const CtaButton: React.FC<{ cta: PageHeaderCta }> = ({ cta }) => {
-  const className =
-    "inline-flex items-center justify-center rounded-[4px] text-white text-[13px] font-medium transition-colors whitespace-nowrap";
-  const style: React.CSSProperties = {
-    background: cta.disabled ? "hsl(var(--surface-hover))" : "hsl(var(--accent))",
-    color: cta.disabled ? "hsl(var(--text-secondary))" : "white",
-    padding: "8px 16px",
-    minHeight: 40,
-    cursor: cta.disabled ? "not-allowed" : "pointer",
-  };
   const btn = (
     <button
       type="button"
       onClick={cta.disabled ? undefined : cta.onClick}
       disabled={cta.disabled}
       aria-label={cta.ariaLabel ?? cta.label}
-      className={className}
-      style={style}
+      className={[
+        "inline-flex items-center justify-center rounded-[4px] whitespace-nowrap font-medium transition-colors",
+        // Mobile: 32px height, 13px text, tighter padding
+        "h-8 px-3 text-[13px]",
+        // Desktop: 40px height, 13px text, 8/16 padding
+        "sm:h-10 sm:px-4",
+        cta.disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
+      ].join(" ")}
+      style={{
+        background: "hsl(var(--accent))",
+        color: "white",
+      }}
     >
       {cta.label}
     </button>

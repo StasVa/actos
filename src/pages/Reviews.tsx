@@ -1,6 +1,5 @@
 import React from "react";
 import { AppSidebar } from "@/components/AppSidebar";
-import { MobileHeader } from "@/components/MobileHeader";
 import { SettingsPanel } from "@/components/SettingsPanel";
 
 const Reviews: React.FC = () => {

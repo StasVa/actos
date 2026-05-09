@@ -5,7 +5,6 @@ import { Tooltip } from "@/components/Tooltip";
 import { useStore } from "@/store/useStore";
 import { toast } from "sonner";
 import { AppSidebar } from "@/components/AppSidebar";
-import { MobileHeader } from "@/components/MobileHeader";
 import { EmptyState } from "@/components/EmptyState";
 import { PageHeader } from "@/components/PageHeader";
 import { FilterDropdown, FilterOption } from "@/components/FilterDropdown";
@@ -644,7 +643,6 @@ const Rituals: React.FC = () => {
   return (
     <div className="min-h-screen bg-surface-base text-text-primary">
       <AppSidebar />
-      <MobileHeader />
       <main className="app-main page-medium">
         <PageHeader
           title="Rituals"

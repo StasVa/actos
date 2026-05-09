@@ -4,7 +4,6 @@ import { ChevronLeft, ChevronRight, GripVertical, X as XIcon } from "lucide-reac
 import { toast } from "sonner";
 import { useStore } from "@/store/useStore";
 import { AppSidebar } from "@/components/AppSidebar";
-import { MobileHeader } from "@/components/MobileHeader";
 import { Switch } from "@/components/ui/switch";
 import { FilterDropdown, FilterOption } from "@/components/FilterDropdown";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -720,7 +719,6 @@ const SessionBuilder: React.FC = () => {
   return (
     <div className="min-h-screen bg-background text-text-primary">
       <AppSidebar />
-      <MobileHeader />
       <main className="app-main page-medium">
         <div className="max-w-[1024px] mx-auto px-8 py-8 pb-32">
           {/* Header */}

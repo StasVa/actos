@@ -644,7 +644,6 @@ const Rituals: React.FC = () => {
   return (
     <div className="min-h-screen bg-surface-base text-text-primary">
       <AppSidebar />
-      <MobileHeader />
       <main className="app-main page-medium">
         <PageHeader
           title="Rituals"

@@ -972,7 +972,7 @@ export const useStore = create<StoreState>()(
 
       setUserName: (name: string) =>
         set({ settings: { ...get().settings, userName: name } }),
-    },
+    }),
     {
       name: "actos-store",
       version: 2,

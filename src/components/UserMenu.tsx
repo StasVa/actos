@@ -23,22 +23,20 @@ const Avatar: React.FC<{ name: string; size?: number }> = ({ name, size = 32 }) 
   </span>
 );
 
-const TierBadge: React.FC<{ tier: "free" | "pro" }> = ({ tier }) => {
-  if (tier === "pro") {
+const TierBadge: React.FC<{ tier: "free" | "all-in" }> = ({ tier }) => {
+  if (tier === "all-in") {
     return (
       <span
-        className="font-mono uppercase"
+        className="font-medium"
         style={{
-          fontSize: 10,
-          letterSpacing: "0.06em",
+          fontFamily: "Inter",
+          fontSize: 11,
           padding: "2px 6px",
           borderRadius: 3,
           color: "hsl(var(--accent))",
-          background: "hsl(var(--accent) / 0.1)",
-          border: "1px solid hsl(var(--accent))",
         }}
       >
-        PRO
+        All-In
       </span>
     );
   }
@@ -68,7 +66,7 @@ export const UserMenu: React.FC<{ collapsed: boolean }> = ({ collapsed }) => {
 
   const email = settings.userEmail ?? "ak@email";
   const name = settings.userName ?? email.split("@")[0];
-  const tier: "free" | "pro" = settings.subscriptionTier === "pro" ? "pro" : "free";
+  const tier: "free" | "all-in" = settings.subscriptionTier === "all-in" ? "all-in" : "free";
 
   const goto = (path: string) => {
     setOpen(false);

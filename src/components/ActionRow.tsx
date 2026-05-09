@@ -83,25 +83,14 @@ export const ActionRow: React.FC<ActionRowProps> = ({
     }
   }
 
-  // Default bottom segments.
+  // Default bottom segments. Time and Impact moved to right-side pill cluster
+  // — only Goal · Project · → Delegate live in the meta line.
   const segs: React.ReactNode[] =
     bottomSegments ??
     (() => {
       const out: React.ReactNode[] = [];
       if (goal) out.push(<span key="g">{goal.title}</span>);
       if (project) out.push(<span key="p">{project.title}</span>);
-      if (action.impact && action.impact > 0)
-        out.push(
-          <span key="i" className="tabular-nums">
-            I{action.impact}
-          </span>,
-        );
-      if (action.timeEstimateMinutes && action.timeEstimateMinutes > 0)
-        out.push(
-          <span key="t" className="tabular-nums">
-            {formatTime(action.timeEstimateMinutes)}
-          </span>,
-        );
       if (action.status === "delegated" && action.delegateName)
         out.push(<span key="d">→ {action.delegateName}</span>);
       return out;

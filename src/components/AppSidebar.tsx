@@ -353,7 +353,7 @@ export const AppSidebar: React.FC<{ onOpenSettings?: () => void }> = ({ onOpenSe
                     <HelpCircle size={16} />
                   </button>
                 </TooltipTrigger>
-                <TooltipContent side="top" className="text-[12px]">
+                <TooltipContent side="left" className="text-[12px]">
                   Shortcuts <span className="text-text-tertiary ml-1">?</span>
                 </TooltipContent>
               </Tooltip>

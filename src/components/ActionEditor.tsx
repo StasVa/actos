@@ -505,7 +505,6 @@ function ActionEditorPanel({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <FieldRow label="Impact (1–10) *">
                   <ClampedNumberInput
-                    ref={impactInputRef}
                     value={impact}
                     min={1}
                     max={10}

@@ -448,14 +448,11 @@ export default function Setup() {
       try {
         localStorage.setItem(SETUP_COMPLETED_KEY, "true");
         localStorage.removeItem(SETUP_SCREEN_KEY);
-        // Mark which path the user took — drives the inline onboarding guide on /today.
-        if (path === "own") {
-          localStorage.setItem("actos.onboarding.guide", "step:goal");
-        } else {
-          localStorage.removeItem("actos.onboarding.guide");
-        }
+        // Legacy inline-guide marker — no longer used; clear if present.
+        localStorage.removeItem("actos.onboarding.guide");
       } catch {}
-      navigate("/today", { replace: true });
+      // "own" path → full-page goal-builder. "sample" → straight to /today.
+      navigate(path === "own" ? "/onboarding/goal" : "/today", { replace: true });
     }, delay + 250);
     return () => {
       clearTimeout(seedTimer);

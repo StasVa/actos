@@ -1889,8 +1889,8 @@ const Index: React.FC = () => {
     <div className="min-h-screen bg-surface-base text-text-primary">
       <AppSidebar onOpenSettings={() => setSettingsOpen(true)} />
       <SettingsPanel open={settingsOpen} onOpenChange={setSettingsOpen} />
-      <SampleDataBanner />
       <main className={`app-main ${showPlanning ? "page-wide" : "page-medium"}`}>
+        <SampleDataBanner />
         {showPlanning ? (
           <PlanTodayPage
             onCancel={() => setPlanningMode(false)}

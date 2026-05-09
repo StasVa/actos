@@ -208,7 +208,9 @@ function ActionEditorPanel({
   // ─── Required-field validation ───
   const impactNum = impact === "" ? 0 : Number(impact);
   const timeNum = timeMin === "" ? 0 : Number(timeMin);
-  const requireTime = true; // Time is now a required core field.
+  // Time is required in edit mode (existing behavior). In the create modal,
+  // Time is optional — keep the field but don't block submission.
+  const requireTime = mode === "edit";
 
   const missingForCreate = useMemo(() => {
     const missing: string[] = [];
@@ -225,6 +227,14 @@ function ActionEditorPanel({
     missingForCreate.length === 0
       ? ""
       : `Set ${missingForCreate.join(" and ")} to create`;
+
+  // Create-modal local UI state.
+  const [notesExpanded, setNotesExpanded] = useState<boolean>(!!seed.notes);
+  const [goalError, setGoalError] = useState<string | null>(null);
+  const [goalPopoverOpen, setGoalPopoverOpen] = useState(false);
+  const [projectPopoverOpen, setProjectPopoverOpen] = useState(false);
+  const impactInputRef = useRef<HTMLInputElement>(null);
+  const goalPillRef = useRef<HTMLButtonElement>(null);
 
   // Existing-action migration warning: action exists with no impact value.
   const hasMigrationWarning =

@@ -233,7 +233,6 @@ function ActionEditorPanel({
   const [goalError, setGoalError] = useState<string | null>(null);
   const [goalPopoverOpen, setGoalPopoverOpen] = useState(false);
   const [projectPopoverOpen, setProjectPopoverOpen] = useState(false);
-  const impactInputRef = useRef<HTMLInputElement>(null);
   const goalPillRef = useRef<HTMLButtonElement>(null);
 
   // Existing-action migration warning: action exists with no impact value.

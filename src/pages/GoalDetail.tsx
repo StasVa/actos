@@ -199,10 +199,14 @@ const HeroState: React.FC<{
         </div>
         <div className="space-y-1">
           <StateBarRow label="VALUE" pct={progressOutcome} value={`${progressOutcome}%`} color={color} />
-          <StateBarRow label="EFFORT" pct={progressEffort} value={`${progressEffort}%`} color={color} opacity={0.6} />
-        </div>
-        <div className="mt-3 font-mono text-[11px] italic text-text-tertiary">
-          Effort discounts delegated work to 20%.
+          <StateBarRow
+            label="EFFORT"
+            pct={progressEffort}
+            value={`${progressEffort}%`}
+            color={color}
+            opacity={0.6}
+            trailing={<MetricInfoPopover variant="valueEffort" ariaLabel="What do Value and Effort mean?" />}
+          />
         </div>
       </div>
 

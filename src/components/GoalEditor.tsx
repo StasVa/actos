@@ -12,6 +12,43 @@ import type { Goal, GoalType, GoalStatus, ID } from "@/types";
 import { ConfirmModal } from "./ConfirmModal";
 import { EditorShell, EditorCloseX, EditorCancelButton } from "./EditorShell";
 
+const GOAL_EXAMPLES = [
+  "$10k MRR from my side business",
+  "Reach 100k YouTube subscribers",
+  "Run a sub-2h half marathon",
+  "Pass C1 Spanish proficiency exam",
+  "Publish my novel on Amazon",
+];
+
+function GoalExamplesToggle({ onPick }: { onPick: (v: string) => void }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="mt-2">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="text-[13px] text-text-tertiary hover:text-text-secondary inline-flex items-center gap-1"
+      >
+        <span className="font-mono">{open ? "−" : "+"}</span> Examples
+      </button>
+      {open && (
+        <div className="mt-2 flex flex-col gap-1 font-mono text-[13px]">
+          {GOAL_EXAMPLES.map((ex) => (
+            <button
+              key={ex}
+              type="button"
+              onClick={() => onPick(ex)}
+              className="text-left text-text-secondary hover:text-text-primary"
+            >
+              {ex}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 const STATUS_ORDER: GoalStatus[] = ["active", "completed", "dropped"];
 const STATUS_LABEL: Record<GoalStatus, string> = {
   active: "Active",

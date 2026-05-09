@@ -126,6 +126,7 @@ const ReviewsMonths: React.FC = () => {
               <FilterDropdown label="DATE" value={range} defaultValue={range} options={RANGE_OPTIONS} onChange={setRange} />
             </>
           }
+          sort={<SortDropdown<ReviewSortKey> value={sortKey} options={REVIEW_SORT_OPTIONS} onChange={setSortKey} />}
         />
         <div style={{ height: 24 }} />
 

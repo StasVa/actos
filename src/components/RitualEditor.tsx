@@ -6,12 +6,19 @@
 // Archive/restore route through dedicated store mutations.
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { ChevronDown, Check } from "lucide-react";
 import { toast } from "sonner";
 import { useStore } from "@/store/useStore";
 import type { ID, Ritual, RitualSchedule } from "@/types";
 import { ConfirmModal } from "./ConfirmModal";
 import { ritualMultiplier } from "@/store/useStore";
 import { EditorShell, EditorCloseX, EditorCancelButton } from "./EditorShell";
+import { ClampedNumberInput } from "./ClampedNumberInput";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
 
 const SCHEDULE_OPTIONS: { value: RitualSchedule; label: string }[] = [
   { value: "daily", label: "Daily" },

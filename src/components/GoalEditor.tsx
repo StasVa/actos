@@ -248,6 +248,12 @@ function GoalEditorPanel({
           </div>
         )}
 
+        {mode === "new" && (
+          <div className="text-[13px] text-text-tertiary leading-[1.5]">
+            A goal is a result you want to reach — concrete, measurable, achievable in months or years.
+          </div>
+        )}
+
         {/* Title */}
         <div>
           <input
@@ -255,9 +261,10 @@ function GoalEditorPanel({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             onBlur={() => persistField("title", title.trim())}
-            placeholder="Goal title"
+            placeholder={mode === "new" ? "e.g. Get my SaaS to $10k MRR" : "Goal title"}
             className="w-full bg-transparent outline-none text-[18px] font-medium text-text-primary placeholder:text-text-tertiary"
           />
+          {mode === "new" && <GoalExamplesToggle onPick={(v) => setTitle(v)} />}
         </div>
 
         {/* Status */}

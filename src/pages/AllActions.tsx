@@ -391,7 +391,31 @@ const EmptyFiltered: React.FC<{ onClear: () => void }> = ({ onClear }) => (
 type StatusFilter = "all" | ActionStatus;
 type GoalFilter = "all" | GoalKey;
 type DateFilter = "all" | "today" | "week" | "month";
-type SortKey = "recent" | "oldest" | "impact" | "scheduled";
+type SortKey =
+  | "recent"
+  | "oldest"
+  | "impact-desc"
+  | "impact-asc"
+  | "time-desc"
+  | "time-asc";
+
+const SORT_STORAGE_KEY = "actos.actions.sort";
+const VALID_SORT_KEYS: SortKey[] = [
+  "recent",
+  "oldest",
+  "impact-desc",
+  "impact-asc",
+  "time-desc",
+  "time-asc",
+];
+
+function loadStoredSort(): SortKey {
+  try {
+    const v = localStorage.getItem(SORT_STORAGE_KEY);
+    if (v && (VALID_SORT_KEYS as string[]).includes(v)) return v as SortKey;
+  } catch {}
+  return "recent";
+}
 
 const STATUS_OPTIONS: FilterOption<StatusFilter>[] = [
   { value: "all", label: "All" },
@@ -420,8 +444,10 @@ const GOAL_OPTIONS: FilterOption<GoalFilter>[] = [
 const SORT_OPTIONS: FilterOption<SortKey>[] = [
   { value: "recent", label: "Recent first" },
   { value: "oldest", label: "Oldest first" },
-  { value: "impact", label: "By impact" },
-  { value: "scheduled", label: "By scheduled date" },
+  { value: "impact-desc", label: "Highest impact" },
+  { value: "impact-asc", label: "Lowest impact" },
+  { value: "time-desc", label: "Longest first" },
+  { value: "time-asc", label: "Shortest first" },
 ];
 
 const AllActions: React.FC = () => {

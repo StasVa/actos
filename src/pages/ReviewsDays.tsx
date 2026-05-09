@@ -302,7 +302,7 @@ const ReviewsDays: React.FC = () => {
               )}
             </div>
           ) : (
-            filtered.map((row) => (
+            sorted.map((row) => (
               <DayRowItem
                 key={row.date}
                 row={row}

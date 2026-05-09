@@ -227,7 +227,7 @@ export interface Session {
 }
 
 // ───────── Settings ─────────
-export type SubscriptionTier = "free" | "pro";
+export type SubscriptionTier = "free" | "all-in";
 
 export interface UserSettings {
   layers: {

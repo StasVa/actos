@@ -171,7 +171,7 @@ export interface StoreState {
   toggleLayer: (layerName: keyof UserSettings["layers"], enabled: boolean) => void;
   setDefaultGoal: (goalId: ID) => void;
   setShowAdminTools: (enabled: boolean) => void;
-  setSubscriptionTier: (tier: "free" | "pro") => void;
+  setSubscriptionTier: (tier: "free" | "all-in") => void;
 
   // ─── Sessions ───
   createDraftSession: (config: {
@@ -227,7 +227,9 @@ export const useStore = create<StoreState>()(
       // ───────── Goals ─────────
       createGoal: (payload) => {
         const state = get();
-        if (activeGoalCount(state.goals) >= 3) {
+        const tier = state.settings?.subscriptionTier === "all-in" ? "all-in" : "free";
+        const limit = tier === "all-in" ? 3 : 2;
+        if (activeGoalCount(state.goals) >= limit) {
           return { ok: false, reason: "limit" };
         }
         const id = uid();
@@ -824,7 +826,7 @@ export const useStore = create<StoreState>()(
         set({ settings: { ...get().settings, showAdminTools: enabled } });
       },
 
-      setSubscriptionTier: (tier: "free" | "pro") => {
+      setSubscriptionTier: (tier: "free" | "all-in") => {
         set({ settings: { ...get().settings, subscriptionTier: tier } });
       },
 

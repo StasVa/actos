@@ -43,25 +43,25 @@ export function FilterDropdown<T extends string>({
   }, [open]);
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className="relative shrink-0">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className={`inline-flex items-center gap-1.5 rounded-[4px] border bg-transparent transition-colors ${
+        className={`inline-flex items-center gap-1.5 rounded-[4px] border bg-transparent transition-colors whitespace-nowrap shrink-0 ${
           isActive
             ? "border-[hsl(var(--accent))]"
             : "border-border-subtle hover:border-border-default hover:bg-surface-hover"
         }`}
         style={{ padding: "6px 10px" }}
       >
-        <span className="font-mono uppercase tracking-[0.06em] text-text-tertiary" style={{ fontSize: 10 }}>
+        <span className="font-mono uppercase tracking-[0.06em] text-text-tertiary whitespace-nowrap" style={{ fontSize: 10 }}>
           {label}:
         </span>
         {current?.dot && (
-          <span className="w-2 h-2 rounded-full" style={{ background: current.dot }} />
+          <span className="w-2 h-2 rounded-full shrink-0" style={{ background: current.dot }} />
         )}
         <span
-          className={`text-[13px] text-text-primary ${isActive ? "font-medium" : ""}`}
+          className={`text-[13px] text-text-primary whitespace-nowrap ${isActive ? "font-medium" : ""}`}
         >
           {current?.label ?? ""}
         </span>

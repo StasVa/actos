@@ -234,6 +234,16 @@ const ReviewsDays: React.FC = () => {
     return true;
   });
 
+  const sorted = React.useMemo(() => {
+    const sortable = filtered.map((r) => {
+      const agg = computeAggregates(r.doneActions, r.delegatedActions);
+      const untracked = !r.entry && r.doneActions.length === 0 && r.delegatedActions.length === 0;
+      const periodStart = new Date(r.date + "T00:00:00").getTime();
+      return { item: r, periodStart, id: r.date, createdAt: periodStart, aggregates: agg, untracked };
+    });
+    return sortReviewEntries(sortable, sortKey);
+  }, [filtered, sortKey]);
+
   const lastActivity = allRows[0]?.date;
   const hasFilters =
     dayType !== "all" || goalFilter !== "all" || range !== "30" || search.trim() !== "";

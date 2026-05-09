@@ -28,44 +28,35 @@ const reducedMotion = () =>
   typeof window !== "undefined" &&
   window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
-/* ───────── Mini-mockup SVG ───────── */
+/* ───────── Mini-mockup SVG ─────────
+   Wrapped in a div with a scoped data-theme so all CSS variables resolve to
+   the correct theme regardless of the wizard's current theme. */
 const ThemeMockup: React.FC<{ theme: "light" | "dark" }> = ({ theme }) => {
-  // Use literal hex values matching index.css tokens for the two themes
-  // so the swatch is correct regardless of current data-theme.
-  const t = theme === "dark"
-    ? {
-        base: "#0F0F12",
-        sidebar: "#1C1C22",
-        card: "#16161B",
-        bar: "#2A2A32",
-        accent: "#4A6AFF",
-        g1: "#19B5A0", g2: "#E8842B", g3: "#9C6BD0",
-      }
-    : {
-        base: "#F5F6F8",
-        sidebar: "#ECEEF1",
-        card: "#FFFFFF",
-        bar: "#D8DCE2",
-        accent: "#4A6AFF",
-        g1: "#19B5A0", g2: "#E8842B", g3: "#9C6BD0",
-      };
   return (
-    <svg viewBox="0 0 200 140" width="100%" height="100%" preserveAspectRatio="xMidYMid slice" aria-hidden>
-      <rect width="200" height="140" fill={t.base} />
-      <rect x="0" y="0" width="24" height="140" fill={t.sidebar} />
-      {/* title bar with goal dots */}
-      <rect x="36" y="14" width="80" height="6" rx="2" fill={t.bar} />
-      <circle cx="148" cy="17" r="3" fill={t.g1} />
-      <circle cx="160" cy="17" r="3" fill={t.g2} />
-      <circle cx="172" cy="17" r="3" fill={t.g3} />
-      {/* card */}
-      <rect x="36" y="32" width="148" height="92" rx="4" fill={t.card} stroke={t.bar} strokeWidth="0.5" />
-      <rect x="46" y="46" width="60" height="5" rx="2" fill={t.bar} />
-      <rect x="46" y="64" width="120" height="6" rx="3" fill={t.bar} />
-      <rect x="46" y="64" width="72" height="6" rx="3" fill={t.accent} />
-      <rect x="46" y="84" width="120" height="6" rx="3" fill={t.bar} />
-      <rect x="46" y="84" width="48" height="6" rx="3" fill={t.g1} />
-    </svg>
+    <div data-theme={theme} style={{ width: "100%", height: "100%" }}>
+      <svg viewBox="0 0 200 140" width="100%" height="100%" preserveAspectRatio="xMidYMid slice" aria-hidden>
+        <rect width="200" height="140" fill="hsl(var(--surface-base))" />
+        {/* sidebar */}
+        <rect x="0" y="0" width="24" height="140" fill="hsl(var(--surface-raised))" />
+        {/* title bar placeholder */}
+        <rect x="36" y="14" width="80" height="6" rx="2" fill="hsl(var(--text-primary))" opacity="0.3" />
+        {/* three goal dots */}
+        <circle cx="148" cy="17" r="3" fill="hsl(var(--goal-1))" />
+        <circle cx="160" cy="17" r="3" fill="hsl(var(--goal-2))" />
+        <circle cx="172" cy="17" r="3" fill="hsl(var(--goal-3))" />
+        {/* hero card */}
+        <rect x="36" y="32" width="148" height="92" rx="4"
+              fill="hsl(var(--surface-raised))"
+              stroke="hsl(var(--text-tertiary))" strokeOpacity="0.25" strokeWidth="0.5" />
+        <rect x="46" y="46" width="60" height="5" rx="2" fill="hsl(var(--text-tertiary))" opacity="0.5" />
+        {/* top bar — accent (60%) */}
+        <rect x="46" y="64" width="120" height="6" rx="3" fill="hsl(var(--text-primary))" opacity="0.12" />
+        <rect x="46" y="64" width="72" height="6" rx="3" fill="hsl(var(--accent))" />
+        {/* bottom bar — goal-1 teal (40%) */}
+        <rect x="46" y="84" width="120" height="6" rx="3" fill="hsl(var(--text-primary))" opacity="0.12" />
+        <rect x="46" y="84" width="48" height="6" rx="3" fill="hsl(var(--goal-1))" />
+      </svg>
+    </div>
   );
 };
 

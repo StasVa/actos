@@ -10,7 +10,6 @@
 import React, { useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { AppSidebar } from "@/components/AppSidebar";
-import { MobileHeader } from "@/components/MobileHeader";
 import { useStore } from "@/store/useStore";
 
 import {
@@ -206,7 +205,6 @@ const SessionSummary: React.FC = () => {
     return (
       <div className="min-h-screen bg-background text-text-primary">
         <AppSidebar />
-        <MobileHeader />
       <main className="app-main page-medium">
           <div className="max-w-[760px] mx-auto px-8 py-16 text-center">
             <h1 className="text-[20px] font-medium">Session not found</h1>

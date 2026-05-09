@@ -1,7 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { AppSidebar } from "@/components/AppSidebar";
-import { MobileHeader } from "@/components/MobileHeader";
 import { useStore } from "@/store/useStore";
 import { TierBadge } from "@/components/UserMenu";
 import { ConfirmModal } from "@/components/ConfirmModal";
@@ -74,7 +73,6 @@ export default function SettingsSubscription() {
   return (
     <div className="min-h-screen bg-surface-base text-text-primary">
       <AppSidebar />
-      <MobileHeader />
       <main className="app-main page-medium">
         <div className="max-w-[720px]">
           {/* Breadcrumb */}

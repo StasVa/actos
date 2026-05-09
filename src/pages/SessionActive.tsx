@@ -12,7 +12,6 @@ import { Maximize, Minimize, Volume2, VolumeX } from "lucide-react";
 import { toast } from "sonner";
 import { useStore } from "@/store/useStore";
 import { AppSidebar } from "@/components/AppSidebar";
-import { MobileHeader } from "@/components/MobileHeader";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import type { Action, Session } from "@/types";
 
@@ -473,7 +472,6 @@ const SessionActive: React.FC = () => {
       {!focusMode && (
         <>
           <AppSidebar />
-          <MobileHeader />
         </>
       )}
       <main className={focusMode ? "" : "app-main page-medium"}>

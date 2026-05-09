@@ -2,7 +2,6 @@ import React from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { format, parseISO } from "date-fns";
 import { AppSidebar } from "@/components/AppSidebar";
-import { MobileHeader } from "@/components/MobileHeader";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { useStore, ritualMultiplier } from "@/store/useStore";
 import { formatHM } from "@/lib/timeStats";

@@ -1,6 +1,5 @@
 import React from "react";
 import { AppSidebar } from "@/components/AppSidebar";
-import { MobileHeader } from "@/components/MobileHeader";
 import { PageHeader } from "@/components/PageHeader";
 import { useStore } from "@/store/useStore";
 import { useThemeChoice, type ThemeChoice } from "@/lib/theme";
@@ -110,7 +109,6 @@ export default function Settings() {
   return (
     <div className="min-h-screen bg-surface-base text-text-primary">
       <AppSidebar />
-      <MobileHeader />
       <main className="app-main page-medium">
         <PageHeader title="Settings" />
 

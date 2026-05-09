@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from "react";
 import { AppSidebar } from "@/components/AppSidebar";
-import { MobileHeader } from "@/components/MobileHeader";
 import { ReturnDatePill } from "@/components/ReturnDatePill";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { FilterDropdown, FilterOption } from "@/components/FilterDropdown";

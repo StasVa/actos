@@ -8,7 +8,6 @@ import { toast } from "sonner";
 import { useStore, selectors } from "@/store/useStore";
 import type { Action, Goal, Project, Ritual, GoalColorVar } from "@/types";
 import { AppSidebar } from "@/components/AppSidebar";
-import { MobileHeader } from "@/components/MobileHeader";
 import { ProjectCard as SharedProjectCard } from "@/components/ProjectCard";
 
 const COLOR_VAR: Record<GoalColorVar, string> = {
@@ -452,7 +451,6 @@ const GoalDetail: React.FC = () => {
     return (
       <div className="min-h-screen bg-surface-base text-text-primary">
         <AppSidebar />
-        <MobileHeader />
       <main className="app-main page-medium">
           <div className="text-[14px] text-text-secondary">Goal not found.</div>
           <Link to="/" className="mt-4 inline-block text-[13px] text-accent hover:underline">

@@ -5,7 +5,6 @@ import { Tooltip, StateDotTooltip } from "@/components/Tooltip";
 import { useStore, selectors } from "@/store/useStore";
 import type { Action, ActionStatus, GoalColorVar, Project, ProjectReference, ProjectStatus } from "@/types";
 import { AppSidebar } from "@/components/AppSidebar";
-import { MobileHeader } from "@/components/MobileHeader";
 import { ActionRow as SharedActionRow } from "@/components/ActionRow";
 import { RichTextEditor } from "@/components/RichTextEditor";
 import { CardMenu } from "@/components/CardMenu";
@@ -487,7 +486,6 @@ const ProjectDetail: React.FC = () => {
     return (
       <div className="min-h-screen bg-surface-base text-text-primary">
         <AppSidebar />
-        <MobileHeader />
       <main className="app-main page-medium">
           <div className="text-[14px] text-text-secondary">Project not found.</div>
           <Link to="/" className="mt-4 inline-block text-[13px] text-accent hover:underline">

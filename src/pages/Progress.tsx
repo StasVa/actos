@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { FolderOpen, Target } from "lucide-react";
 import { useStore } from "@/store/useStore";
 import { AppSidebar } from "@/components/AppSidebar";
-import { MobileHeader } from "@/components/MobileHeader";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { TimeInvestmentSection } from "@/components/TimeInvestmentSection";
 import { ReturnDatePill } from "@/components/ReturnDatePill";

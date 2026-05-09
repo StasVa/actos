@@ -541,6 +541,57 @@ function GoalEditorPanel({
         onCancel={() => setConfirmComplete(false)}
         onConfirm={handleConfirmComplete}
       />
+      {softBlock && (
+        <div
+          className="fixed inset-0 z-[110] flex items-center justify-center"
+          style={{ background: "var(--backdrop)" }}
+          onClick={() => setSoftBlock(false)}
+        >
+          <div
+            className="w-[460px] max-w-[90vw] bg-surface-elevated border border-border-subtle rounded-[6px] p-6 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-[16px] font-medium text-text-primary">
+              Free plan: 2 active goals.
+            </h2>
+            <div className="mt-3 text-[13px] text-text-secondary leading-[1.5]">
+              All-In lifts the cap to 3 goals — the full focus range ActOS is designed around. Your
+              draft will be saved if you'd like to continue.
+            </div>
+            <div className="mt-6 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setSoftBlock(false)}
+                className="text-[13px] text-text-secondary hover:text-text-primary transition-colors px-3 py-1.5"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setSoftBlock(false);
+                  toast("Draft saved");
+                  onClose();
+                }}
+                className="text-[13px] px-3 py-1.5 rounded-[4px] hover:bg-surface-hover text-text-secondary transition-colors"
+              >
+                Save draft
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setSoftBlock(false);
+                  navigate("/settings/subscription");
+                }}
+                className="text-[13px] font-medium px-3 py-1.5 rounded-[4px] text-white transition-colors"
+                style={{ background: "hsl(var(--accent))" }}
+              >
+                Go All-In — $12/mo
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </EditorShell>
   );
 }

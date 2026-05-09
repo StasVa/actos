@@ -935,7 +935,44 @@ export const useStore = create<StoreState>()(
 
       // ───────── Reset ─────────
       resetToSeed: () => set({ ...initialState }),
-    }),
+
+      resetToEmpty: () =>
+        set({
+          goals: [],
+          projects: [],
+          actions: [],
+          rituals: [],
+          ideas: [],
+          dayEntries: [],
+          sessions: [],
+        }),
+
+      seedSampleData: () => {
+        const stamp = (arr: any[]) => arr.map((x) => ({ ...x, isSample: true }));
+        set({
+          goals: stamp(SEED_GOALS),
+          projects: stamp(SEED_PROJECTS),
+          actions: stamp(SEED_ACTIONS),
+          rituals: stamp(SEED_RITUALS),
+          ideas: stamp(SEED_IDEAS),
+          dayEntries: SEED_DAY_ENTRIES,
+        });
+      },
+
+      clearSampleData: () => {
+        const s = get();
+        set({
+          goals: s.goals.filter((g) => !g.isSample),
+          projects: s.projects.filter((p) => !p.isSample),
+          actions: s.actions.filter((a) => !a.isSample),
+          rituals: s.rituals.filter((r) => !r.isSample),
+          ideas: s.ideas.filter((i) => !i.isSample),
+        });
+      },
+
+      setUserName: (name: string) =>
+        set({ settings: { ...get().settings, userName: name } }),
+    },
     {
       name: "actos-store",
       version: 2,

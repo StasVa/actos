@@ -13,6 +13,7 @@ import { Star } from "lucide-react";
 import { useStore } from "@/store/useStore";
 import type { Action } from "@/types";
 import { formatTime } from "@/lib/format";
+import { ImpactPill, TimePill } from "@/components/MetaPills";
 
 type RightPill =
   | { kind: "date"; label: string } // "TODAY", "MAY 12"

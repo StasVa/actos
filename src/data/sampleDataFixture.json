@@ -1,0 +1,2434 @@
+{
+  "_meta": {
+    "version": 1,
+    "generatedAt": "2026-05-09T18:00:00",
+    "anchorDate": "2026-05-09",
+    "historyDays": 60,
+    "note": "All entities flagged isSample: true. Lovable should adjust timestamps relative to current date at seed time (shift all dates by [today - 2026-05-09])."
+  },
+  "goals": [
+    {
+      "id": "g1",
+      "title": "Get my SaaS to $10k MRR",
+      "type": "mid-term",
+      "color": "goal-1",
+      "status": "active",
+      "createdAt": "2026-03-12T18:00:00",
+      "targetDate": "2026-09-06T18:00:00",
+      "successCriteria": [
+        {
+          "id": "g1-c1",
+          "text": "Paying MRR \u2265 $10,000 for 3 consecutive months",
+          "done": false
+        },
+        {
+          "id": "g1-c2",
+          "text": "At least 50 active paying customers",
+          "done": false
+        },
+        {
+          "id": "g1-c3",
+          "text": "Net revenue retention \u2265 100%",
+          "done": false
+        }
+      ],
+      "isSample": true
+    },
+    {
+      "id": "g2",
+      "title": "Run a sub-2h half marathon",
+      "type": "mid-term",
+      "color": "goal-2",
+      "status": "active",
+      "createdAt": "2026-03-15T18:00:00",
+      "targetDate": "2026-08-07T18:00:00",
+      "successCriteria": [
+        {
+          "id": "g2-c1",
+          "text": "Complete 21.1km in under 2:00:00 in a real race",
+          "done": false
+        },
+        {
+          "id": "g2-c2",
+          "text": "Hold sub-5:40/km pace for full distance",
+          "done": false
+        }
+      ],
+      "isSample": true
+    },
+    {
+      "id": "g3",
+      "title": "Pass C1 Spanish proficiency exam",
+      "type": "mid-term",
+      "color": "goal-3",
+      "status": "active",
+      "createdAt": "2026-03-28T18:00:00",
+      "targetDate": "2026-11-05T18:00:00",
+      "successCriteria": [
+        {
+          "id": "g3-c1",
+          "text": "Pass DELE C1 official exam",
+          "done": false
+        },
+        {
+          "id": "g3-c2",
+          "text": "Hold 30-min conversation with native speaker without effort",
+          "done": false
+        }
+      ],
+      "isSample": true
+    }
+  ],
+  "projects": [
+    {
+      "id": "p1",
+      "goalId": "g1",
+      "title": "Set up Stripe billing",
+      "status": "completed",
+      "createdAt": "2026-03-12T18:00:00",
+      "closedAt": "2026-04-21T18:00:00",
+      "isSample": true
+    },
+    {
+      "id": "p2",
+      "goalId": "g1",
+      "title": "Launch on Product Hunt",
+      "status": "active",
+      "createdAt": "2026-04-17T18:00:00",
+      "isSample": true
+    },
+    {
+      "id": "p3",
+      "goalId": "g1",
+      "title": "Build pricing page",
+      "status": "active",
+      "createdAt": "2026-04-24T18:00:00",
+      "isSample": true
+    },
+    {
+      "id": "p4",
+      "goalId": "g1",
+      "title": "Set up customer support flow",
+      "status": "active",
+      "createdAt": "2026-04-04T18:00:00",
+      "isSample": true
+    },
+    {
+      "id": "p5",
+      "goalId": "g2",
+      "title": "Establish 4\u00d7/week training routine",
+      "status": "completed",
+      "createdAt": "2026-03-15T18:00:00",
+      "closedAt": "2026-04-09T18:00:00",
+      "isSample": true
+    },
+    {
+      "id": "p6",
+      "goalId": "g2",
+      "title": "Build base mileage to 30km/week",
+      "status": "active",
+      "createdAt": "2026-04-11T18:00:00",
+      "isSample": true
+    },
+    {
+      "id": "p7",
+      "goalId": "g2",
+      "title": "Add tempo and interval workouts",
+      "status": "active",
+      "createdAt": "2026-04-29T18:00:00",
+      "isSample": true
+    },
+    {
+      "id": "p8",
+      "goalId": "g3",
+      "title": "Complete B2 textbook",
+      "status": "active",
+      "createdAt": "2026-03-30T18:00:00",
+      "isSample": true
+    },
+    {
+      "id": "p9",
+      "goalId": "g3",
+      "title": "Find conversation partner",
+      "status": "active",
+      "createdAt": "2026-04-24T18:00:00",
+      "isSample": true
+    }
+  ],
+  "actions": [
+    {
+      "id": "a1",
+      "projectId": "p1",
+      "goalId": "g1",
+      "title": "Read Stripe API docs",
+      "impact": 4,
+      "timeEstimate": 60,
+      "status": "done",
+      "createdAt": "2026-03-12T22:00:00",
+      "isSample": true,
+      "completedAt": "2026-03-14T09:00:00"
+    },
+    {
+      "id": "a2",
+      "projectId": "p1",
+      "goalId": "g1",
+      "title": "Set up Stripe account and verify business",
+      "impact": 5,
+      "timeEstimate": 90,
+      "status": "done",
+      "createdAt": "2026-03-15T18:00:00",
+      "isSample": true,
+      "completedAt": "2026-03-15T23:00:00"
+    },
+    {
+      "id": "a3",
+      "projectId": "p1",
+      "goalId": "g1",
+      "title": "Implement checkout webhook handler",
+      "impact": 8,
+      "timeEstimate": 120,
+      "status": "done",
+      "createdAt": "2026-03-19T10:00:00",
+      "isSample": true,
+      "completedAt": "2026-03-20T07:00:00"
+    },
+    {
+      "id": "a4",
+      "projectId": "p1",
+      "goalId": "g1",
+      "title": "Test payment flow end-to-end",
+      "impact": 6,
+      "timeEstimate": 90,
+      "status": "done",
+      "createdAt": "2026-03-24T11:00:00",
+      "isSample": true,
+      "completedAt": "2026-03-25T08:00:00"
+    },
+    {
+      "id": "a5",
+      "projectId": "p1",
+      "goalId": "g1",
+      "title": "Add subscription management page",
+      "impact": 7,
+      "timeEstimate": 120,
+      "status": "done",
+      "createdAt": "2026-03-30T19:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-01T09:00:00"
+    },
+    {
+      "id": "a6",
+      "projectId": "p1",
+      "goalId": "g1",
+      "title": "Handle failed payment retries",
+      "impact": 6,
+      "timeEstimate": 60,
+      "status": "done",
+      "createdAt": "2026-04-07T21:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-08T23:00:00"
+    },
+    {
+      "id": "a7",
+      "projectId": "p1",
+      "goalId": "g1",
+      "title": "Write Stripe integration documentation",
+      "impact": 4,
+      "timeEstimate": 45,
+      "status": "done",
+      "createdAt": "2026-04-13T01:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-14T09:00:00"
+    },
+    {
+      "id": "a8",
+      "projectId": "p1",
+      "goalId": "g1",
+      "title": "Deploy Stripe integration to production",
+      "impact": 9,
+      "timeEstimate": 60,
+      "status": "done",
+      "createdAt": "2026-04-20T00:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-21T04:00:00"
+    },
+    {
+      "id": "a9",
+      "projectId": "p2",
+      "goalId": "g1",
+      "title": "Draft Product Hunt launch copy",
+      "impact": 6,
+      "timeEstimate": 90,
+      "status": "done",
+      "createdAt": "2026-04-18T17:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-19T10:00:00"
+    },
+    {
+      "id": "a10",
+      "projectId": "p2",
+      "goalId": "g1",
+      "title": "Design hero image for launch",
+      "impact": 5,
+      "timeEstimate": 75,
+      "status": "done",
+      "createdAt": "2026-04-21T16:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-22T07:00:00"
+    },
+    {
+      "id": "a11",
+      "projectId": "p2",
+      "goalId": "g1",
+      "title": "Reach out to 20 potential hunters",
+      "impact": 7,
+      "timeEstimate": 60,
+      "status": "done",
+      "createdAt": "2026-04-26T11:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-27T02:00:00"
+    },
+    {
+      "id": "a12",
+      "projectId": "p2",
+      "goalId": "g1",
+      "title": "Prepare launch-day social posts",
+      "impact": 4,
+      "timeEstimate": 45,
+      "status": "done",
+      "createdAt": "2026-04-29T23:00:00",
+      "isSample": true,
+      "completedAt": "2026-05-01T10:00:00"
+    },
+    {
+      "id": "a13",
+      "projectId": "p2",
+      "goalId": "g1",
+      "title": "Schedule launch on Product Hunt",
+      "impact": 8,
+      "timeEstimate": 30,
+      "status": "done",
+      "createdAt": "2026-05-04T01:00:00",
+      "isSample": true,
+      "completedAt": "2026-05-05T07:00:00"
+    },
+    {
+      "id": "a14",
+      "projectId": "p2",
+      "goalId": "g1",
+      "title": "Reply to launch-day comments",
+      "impact": 6,
+      "timeEstimate": 90,
+      "status": "done",
+      "createdAt": "2026-05-06T20:00:00",
+      "isSample": true,
+      "completedAt": "2026-05-08T00:00:00"
+    },
+    {
+      "id": "a15",
+      "projectId": "p3",
+      "goalId": "g1",
+      "title": "Research competitor pricing",
+      "impact": 5,
+      "timeEstimate": 60,
+      "status": "done",
+      "createdAt": "2026-04-23T20:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-25T02:00:00"
+    },
+    {
+      "id": "a16",
+      "projectId": "p3",
+      "goalId": "g1",
+      "title": "Draft pricing tiers and copy",
+      "impact": 7,
+      "timeEstimate": 90,
+      "status": "done",
+      "createdAt": "2026-04-28T05:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-29T07:00:00"
+    },
+    {
+      "id": "a17",
+      "projectId": "p3",
+      "goalId": "g1",
+      "title": "Design pricing page layout",
+      "impact": 6,
+      "timeEstimate": 90,
+      "status": "done",
+      "createdAt": "2026-05-02T04:00:00",
+      "isSample": true,
+      "completedAt": "2026-05-03T01:00:00"
+    },
+    {
+      "id": "a18",
+      "projectId": "p3",
+      "goalId": "g1",
+      "title": "Implement pricing page in code",
+      "impact": 7,
+      "timeEstimate": 120,
+      "status": "done",
+      "createdAt": "2026-05-06T10:00:00",
+      "isSample": true,
+      "completedAt": "2026-05-06T22:00:00"
+    },
+    {
+      "id": "a19",
+      "projectId": "p4",
+      "goalId": "g1",
+      "title": "Compare Intercom vs Crisp vs Plain",
+      "impact": 5,
+      "timeEstimate": 60,
+      "status": "done",
+      "createdAt": "2026-04-10T18:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-10T22:00:00"
+    },
+    {
+      "id": "a20",
+      "projectId": "p4",
+      "goalId": "g1",
+      "title": "Set up support email forwarding",
+      "impact": 4,
+      "timeEstimate": 30,
+      "status": "done",
+      "createdAt": "2026-04-24T13:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-24T23:00:00"
+    },
+    {
+      "id": "a21",
+      "projectId": "p5",
+      "goalId": "g2",
+      "title": "Schedule 4 weekly training slots in calendar",
+      "impact": 6,
+      "timeEstimate": 30,
+      "status": "done",
+      "createdAt": "2026-03-16T05:00:00",
+      "isSample": true,
+      "completedAt": "2026-03-17T05:00:00"
+    },
+    {
+      "id": "a22",
+      "projectId": "p5",
+      "goalId": "g2",
+      "title": "Buy proper running shoes",
+      "impact": 5,
+      "timeEstimate": 60,
+      "status": "done",
+      "createdAt": "2026-03-19T10:00:00",
+      "isSample": true,
+      "completedAt": "2026-03-20T08:00:00"
+    },
+    {
+      "id": "a23",
+      "projectId": "p5",
+      "goalId": "g2",
+      "title": "Plan first 4 weeks of runs",
+      "impact": 7,
+      "timeEstimate": 45,
+      "status": "done",
+      "createdAt": "2026-03-22T12:00:00",
+      "isSample": true,
+      "completedAt": "2026-03-22T22:00:00"
+    },
+    {
+      "id": "a24",
+      "projectId": "p5",
+      "goalId": "g2",
+      "title": "Run first base-building week",
+      "impact": 8,
+      "timeEstimate": 240,
+      "status": "done",
+      "createdAt": "2026-03-27T08:00:00",
+      "isSample": true,
+      "completedAt": "2026-03-28T09:00:00"
+    },
+    {
+      "id": "a25",
+      "projectId": "p5",
+      "goalId": "g2",
+      "title": "Build training routine into habit",
+      "impact": 8,
+      "timeEstimate": 60,
+      "status": "done",
+      "createdAt": "2026-04-08T16:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-09T04:00:00"
+    },
+    {
+      "id": "a26",
+      "projectId": "p6",
+      "goalId": "g2",
+      "title": "Complete week 1 of base building",
+      "impact": 7,
+      "timeEstimate": 180,
+      "status": "done",
+      "createdAt": "2026-04-12T15:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-13T05:00:00"
+    },
+    {
+      "id": "a27",
+      "projectId": "p6",
+      "goalId": "g2",
+      "title": "Add long Sunday run",
+      "impact": 7,
+      "timeEstimate": 90,
+      "status": "done",
+      "createdAt": "2026-04-16T07:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-17T01:00:00"
+    },
+    {
+      "id": "a28",
+      "projectId": "p6",
+      "goalId": "g2",
+      "title": "Hit 20km week",
+      "impact": 7,
+      "timeEstimate": 60,
+      "status": "done",
+      "createdAt": "2026-04-19T10:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-19T22:00:00"
+    },
+    {
+      "id": "a29",
+      "projectId": "p6",
+      "goalId": "g2",
+      "title": "Recovery jog after long run",
+      "impact": 5,
+      "timeEstimate": 45,
+      "status": "done",
+      "createdAt": "2026-04-22T17:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-22T23:00:00"
+    },
+    {
+      "id": "a30",
+      "projectId": "p6",
+      "goalId": "g2",
+      "title": "Hit 25km week",
+      "impact": 8,
+      "timeEstimate": 60,
+      "status": "done",
+      "createdAt": "2026-04-25T04:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-26T02:00:00"
+    },
+    {
+      "id": "a31",
+      "projectId": "p6",
+      "goalId": "g2",
+      "title": "Test pace on long run",
+      "impact": 6,
+      "timeEstimate": 75,
+      "status": "done",
+      "createdAt": "2026-04-29T15:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-30T04:00:00"
+    },
+    {
+      "id": "a32",
+      "projectId": "p6",
+      "goalId": "g2",
+      "title": "Hit 28km week",
+      "impact": 8,
+      "timeEstimate": 60,
+      "status": "done",
+      "createdAt": "2026-05-03T16:00:00",
+      "isSample": true,
+      "completedAt": "2026-05-04T02:00:00"
+    },
+    {
+      "id": "a33",
+      "projectId": "p6",
+      "goalId": "g2",
+      "title": "Long run with negative split",
+      "impact": 8,
+      "timeEstimate": 90,
+      "status": "done",
+      "createdAt": "2026-05-06T09:00:00",
+      "isSample": true,
+      "completedAt": "2026-05-07T00:00:00"
+    },
+    {
+      "id": "a34",
+      "projectId": "p7",
+      "goalId": "g2",
+      "title": "First tempo workout (3\u00d71km)",
+      "impact": 7,
+      "timeEstimate": 60,
+      "status": "done",
+      "createdAt": "2026-04-30T23:00:00",
+      "isSample": true,
+      "completedAt": "2026-05-02T05:00:00"
+    },
+    {
+      "id": "a35",
+      "projectId": "p7",
+      "goalId": "g2",
+      "title": "First interval workout (8\u00d7400m)",
+      "impact": 8,
+      "timeEstimate": 60,
+      "status": "done",
+      "createdAt": "2026-05-05T00:00:00",
+      "isSample": true,
+      "completedAt": "2026-05-06T07:00:00"
+    },
+    {
+      "id": "a36",
+      "projectId": "p8",
+      "goalId": "g3",
+      "title": "Get B2 textbook (Aula Internacional 4)",
+      "impact": 3,
+      "timeEstimate": 30,
+      "status": "done",
+      "createdAt": "2026-03-30T20:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-01T09:00:00"
+    },
+    {
+      "id": "a37",
+      "projectId": "p8",
+      "goalId": "g3",
+      "title": "Complete unit 1 (subjunctive review)",
+      "impact": 6,
+      "timeEstimate": 90,
+      "status": "done",
+      "createdAt": "2026-04-03T17:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-04T00:00:00"
+    },
+    {
+      "id": "a38",
+      "projectId": "p8",
+      "goalId": "g3",
+      "title": "Complete unit 2 (narrative tenses)",
+      "impact": 6,
+      "timeEstimate": 90,
+      "status": "done",
+      "createdAt": "2026-04-10T11:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-10T22:00:00"
+    },
+    {
+      "id": "a39",
+      "projectId": "p8",
+      "goalId": "g3",
+      "title": "Complete unit 3 (conditionals)",
+      "impact": 6,
+      "timeEstimate": 120,
+      "status": "done",
+      "createdAt": "2026-04-17T09:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-18T09:00:00"
+    },
+    {
+      "id": "a40",
+      "projectId": "p8",
+      "goalId": "g3",
+      "title": "Complete unit 4 (reported speech)",
+      "impact": 6,
+      "timeEstimate": 90,
+      "status": "done",
+      "createdAt": "2026-04-24T11:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-25T09:00:00"
+    },
+    {
+      "id": "a41",
+      "projectId": "p8",
+      "goalId": "g3",
+      "title": "Complete unit 5 (passive voice)",
+      "impact": 6,
+      "timeEstimate": 90,
+      "status": "done",
+      "createdAt": "2026-04-30T06:00:00",
+      "isSample": true,
+      "completedAt": "2026-05-01T06:00:00"
+    },
+    {
+      "id": "a42",
+      "projectId": "p8",
+      "goalId": "g3",
+      "title": "Mid-textbook review and self-test",
+      "impact": 5,
+      "timeEstimate": 60,
+      "status": "done",
+      "createdAt": "2026-05-04T04:00:00",
+      "isSample": true,
+      "completedAt": "2026-05-05T00:00:00"
+    },
+    {
+      "id": "a43",
+      "projectId": "p9",
+      "goalId": "g3",
+      "title": "Sign up for italki.com",
+      "impact": 3,
+      "timeEstimate": 30,
+      "status": "done",
+      "createdAt": "2026-04-26T07:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-27T08:00:00"
+    },
+    {
+      "id": "a44",
+      "projectId": "p2",
+      "goalId": "g1",
+      "title": "Write Product Hunt FAQ replies",
+      "impact": 6,
+      "timeEstimate": 60,
+      "status": "planned",
+      "createdAt": "2026-04-09T07:00:00",
+      "isSample": true,
+      "scheduledDate": "2026-05-09",
+      "isPlannedToday": true
+    },
+    {
+      "id": "a45",
+      "projectId": "p3",
+      "goalId": "g1",
+      "title": "Add testimonials to pricing page",
+      "impact": 5,
+      "timeEstimate": 45,
+      "status": "planned",
+      "createdAt": "2026-04-09T07:00:00",
+      "isSample": true,
+      "scheduledDate": "2026-05-09",
+      "isPlannedToday": true
+    },
+    {
+      "id": "a46",
+      "projectId": "p7",
+      "goalId": "g2",
+      "title": "Tempo workout: 4\u00d71km @ goal pace",
+      "impact": 7,
+      "timeEstimate": 60,
+      "status": "planned",
+      "createdAt": "2026-04-09T12:00:00",
+      "isSample": true,
+      "scheduledDate": "2026-05-09",
+      "isPlannedToday": true
+    },
+    {
+      "id": "a47",
+      "projectId": "p2",
+      "goalId": "g1",
+      "title": "Email Product Hunt feedback to team",
+      "impact": 4,
+      "timeEstimate": 30,
+      "status": "planned",
+      "createdAt": "2026-05-06T21:00:00",
+      "isSample": true,
+      "scheduledDate": "2026-05-10"
+    },
+    {
+      "id": "a48",
+      "projectId": "p8",
+      "goalId": "g3",
+      "title": "Complete unit 6 (relative clauses)",
+      "impact": 6,
+      "timeEstimate": 90,
+      "status": "planned",
+      "createdAt": "2026-05-07T10:00:00",
+      "isSample": true,
+      "scheduledDate": "2026-05-10"
+    },
+    {
+      "id": "a49",
+      "projectId": "p2",
+      "goalId": "g1",
+      "title": "Plan post-launch retention campaign",
+      "impact": 6,
+      "timeEstimate": 60,
+      "status": "backlog",
+      "createdAt": "2026-04-08T20:00:00",
+      "isSample": true
+    },
+    {
+      "id": "a50",
+      "projectId": "p3",
+      "goalId": "g1",
+      "title": "A/B test pricing page CTA copy",
+      "impact": 5,
+      "timeEstimate": 45,
+      "status": "backlog",
+      "createdAt": "2026-04-08T21:00:00",
+      "isSample": true
+    },
+    {
+      "id": "a51",
+      "projectId": "p4",
+      "goalId": "g1",
+      "title": "Draft 10 canned support replies",
+      "impact": 4,
+      "timeEstimate": 60,
+      "status": "backlog",
+      "createdAt": "2026-04-08T22:00:00",
+      "isSample": true
+    },
+    {
+      "id": "a52",
+      "projectId": "p4",
+      "goalId": "g1",
+      "title": "Set up support team workflow",
+      "impact": 6,
+      "timeEstimate": 90,
+      "status": "backlog",
+      "createdAt": "2026-04-09T16:00:00",
+      "isSample": true
+    },
+    {
+      "id": "a53",
+      "projectId": "p6",
+      "goalId": "g2",
+      "title": "Plan taper week before race",
+      "impact": 7,
+      "timeEstimate": 30,
+      "status": "backlog",
+      "createdAt": "2026-04-08T23:00:00",
+      "isSample": true
+    },
+    {
+      "id": "a54",
+      "projectId": "p7",
+      "goalId": "g2",
+      "title": "Run race-pace simulation 15km",
+      "impact": 8,
+      "timeEstimate": 90,
+      "status": "backlog",
+      "createdAt": "2026-04-08T22:00:00",
+      "isSample": true
+    },
+    {
+      "id": "a55",
+      "projectId": "p8",
+      "goalId": "g3",
+      "title": "Find C1 prep textbook",
+      "impact": 4,
+      "timeEstimate": 45,
+      "status": "backlog",
+      "createdAt": "2026-04-09T13:00:00",
+      "isSample": true
+    },
+    {
+      "id": "a56",
+      "projectId": "p9",
+      "goalId": "g3",
+      "title": "Schedule first italki lesson",
+      "impact": 5,
+      "timeEstimate": 30,
+      "status": "backlog",
+      "createdAt": "2026-04-09T01:00:00",
+      "isSample": true
+    },
+    {
+      "id": "a57",
+      "projectId": null,
+      "goalId": "g1",
+      "title": "Investigate referral program",
+      "impact": 5,
+      "timeEstimate": 60,
+      "status": "backlog",
+      "createdAt": "2026-04-08T19:00:00",
+      "isSample": true
+    },
+    {
+      "id": "a58",
+      "projectId": null,
+      "goalId": "g3",
+      "title": "Find Spanish-language podcast for daily commute",
+      "impact": 4,
+      "timeEstimate": 30,
+      "status": "backlog",
+      "createdAt": "2026-04-09T11:00:00",
+      "isSample": true
+    },
+    {
+      "id": "a59",
+      "projectId": "p2",
+      "goalId": "g1",
+      "title": "Design Product Hunt assets",
+      "impact": 6,
+      "timeEstimate": 120,
+      "status": "delegated",
+      "createdAt": "2026-04-09T13:00:00",
+      "isSample": true,
+      "delegateName": "Maria",
+      "returnDate": "2026-05-10",
+      "delegatedAt": "2026-05-06T18:00:00"
+    },
+    {
+      "id": "a60",
+      "projectId": "p3",
+      "goalId": "g1",
+      "title": "Code review pricing page PR",
+      "impact": 5,
+      "timeEstimate": 60,
+      "status": "delegated",
+      "createdAt": "2026-04-09T04:00:00",
+      "isSample": true,
+      "delegateName": "John",
+      "returnDate": "2026-05-11",
+      "delegatedAt": "2026-05-08T18:00:00"
+    },
+    {
+      "id": "a61",
+      "projectId": "p4",
+      "goalId": "g1",
+      "title": "Audit current support emails",
+      "impact": 4,
+      "timeEstimate": 90,
+      "status": "delegated",
+      "createdAt": "2026-05-03T06:00:00",
+      "isSample": true,
+      "completedAt": "2026-05-04T18:00:00",
+      "delegateName": "Maria",
+      "returnDate": "2026-05-17",
+      "delegatedAt": "2026-05-04T18:00:00"
+    },
+    {
+      "id": "a62",
+      "projectId": null,
+      "goalId": "g1",
+      "title": "Research churn benchmarks for SaaS",
+      "impact": 5,
+      "timeEstimate": 60,
+      "status": "delegated",
+      "createdAt": "2026-05-05T22:00:00",
+      "isSample": true,
+      "completedAt": "2026-05-07T18:00:00",
+      "delegateName": "AI",
+      "returnDate": "2026-05-12",
+      "delegatedAt": "2026-05-07T18:00:00"
+    },
+    {
+      "id": "a63",
+      "projectId": "p9",
+      "goalId": "g3",
+      "title": "Match me with conversation partner",
+      "impact": 4,
+      "timeEstimate": 30,
+      "status": "delegated",
+      "createdAt": "2026-05-01T01:00:00",
+      "isSample": true,
+      "completedAt": "2026-05-02T18:00:00",
+      "delegateName": "italki",
+      "returnDate": "2026-05-19",
+      "delegatedAt": "2026-05-02T18:00:00"
+    },
+    {
+      "id": "a64",
+      "projectId": "p4",
+      "goalId": "g1",
+      "title": "Build custom CRM integration",
+      "impact": 4,
+      "timeEstimate": 180,
+      "status": "dropped",
+      "createdAt": "2026-04-08T21:00:00",
+      "isSample": true,
+      "droppedAt": "2026-04-14T18:00:00"
+    },
+    {
+      "id": "a65",
+      "projectId": "p1",
+      "goalId": "g1",
+      "title": "Add manual invoice generation",
+      "impact": 3,
+      "timeEstimate": 90,
+      "status": "dropped",
+      "createdAt": "2026-04-09T08:00:00",
+      "isSample": true,
+      "droppedAt": "2026-04-04T18:00:00"
+    },
+    {
+      "id": "a66",
+      "projectId": null,
+      "goalId": "g2",
+      "title": "Sign up for marathon (deferred)",
+      "impact": 4,
+      "timeEstimate": 30,
+      "status": "dropped",
+      "createdAt": "2026-04-09T17:00:00",
+      "isSample": true,
+      "droppedAt": "2026-04-19T18:00:00"
+    },
+    {
+      "id": "a67",
+      "projectId": "p7",
+      "goalId": "g2",
+      "title": "Trial running coach (cancelled)",
+      "impact": 5,
+      "timeEstimate": 60,
+      "status": "cancelled",
+      "createdAt": "2026-04-09T11:00:00",
+      "isSample": true,
+      "cancelledAt": "2026-05-01T18:00:00"
+    },
+    {
+      "id": "a68",
+      "projectId": "p8",
+      "goalId": "g3",
+      "title": "Buy old C1 textbook (replaced)",
+      "impact": 2,
+      "timeEstimate": 15,
+      "status": "cancelled",
+      "createdAt": "2026-04-09T17:00:00",
+      "isSample": true,
+      "cancelledAt": "2026-04-09T18:00:00"
+    }
+  ],
+  "rituals": [
+    {
+      "id": "r1",
+      "goalId": "g3",
+      "projectId": null,
+      "title": "Read 30 min in Spanish daily",
+      "schedule": "daily",
+      "scheduleConfig": {},
+      "baseImpact": 5,
+      "timeEstimate": 30,
+      "status": "active",
+      "createdAt": "2026-03-28T18:00:00",
+      "totalCompletions": 32,
+      "completionHistory": [
+        {
+          "date": "2026-05-08",
+          "status": "done"
+        },
+        {
+          "date": "2026-05-07",
+          "status": "done"
+        },
+        {
+          "date": "2026-05-06",
+          "status": "done"
+        },
+        {
+          "date": "2026-05-05",
+          "status": "missed"
+        },
+        {
+          "date": "2026-05-04",
+          "status": "done"
+        },
+        {
+          "date": "2026-05-03",
+          "status": "done"
+        },
+        {
+          "date": "2026-05-02",
+          "status": "done"
+        },
+        {
+          "date": "2026-05-01",
+          "status": "missed"
+        },
+        {
+          "date": "2026-04-30",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-29",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-28",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-27",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-26",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-25",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-24",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-23",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-22",
+          "status": "missed"
+        },
+        {
+          "date": "2026-04-21",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-20",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-19",
+          "status": "missed"
+        },
+        {
+          "date": "2026-04-18",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-17",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-16",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-15",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-14",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-13",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-12",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-11",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-10",
+          "status": "missed"
+        },
+        {
+          "date": "2026-04-09",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-08",
+          "status": "missed"
+        },
+        {
+          "date": "2026-04-07",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-06",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-05",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-04",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-03",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-02",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-01",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-31",
+          "status": "missed"
+        },
+        {
+          "date": "2026-03-30",
+          "status": "missed"
+        },
+        {
+          "date": "2026-03-29",
+          "status": "missed"
+        },
+        {
+          "date": "2026-03-28",
+          "status": "missed"
+        }
+      ],
+      "isSample": true
+    },
+    {
+      "id": "r2",
+      "goalId": "g2",
+      "projectId": null,
+      "title": "Strength training (alternating with runs)",
+      "schedule": "weekdays",
+      "scheduleConfig": {},
+      "baseImpact": 7,
+      "timeEstimate": 45,
+      "status": "active",
+      "createdAt": "2026-03-20T18:00:00",
+      "totalCompletions": 28,
+      "completionHistory": [
+        {
+          "date": "2026-05-08",
+          "status": "done"
+        },
+        {
+          "date": "2026-05-07",
+          "status": "done"
+        },
+        {
+          "date": "2026-05-06",
+          "status": "done"
+        },
+        {
+          "date": "2026-05-05",
+          "status": "done"
+        },
+        {
+          "date": "2026-05-04",
+          "status": "done"
+        },
+        {
+          "date": "2026-05-01",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-30",
+          "status": "missed"
+        },
+        {
+          "date": "2026-04-29",
+          "status": "missed"
+        },
+        {
+          "date": "2026-04-28",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-27",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-24",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-23",
+          "status": "missed"
+        },
+        {
+          "date": "2026-04-22",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-21",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-20",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-17",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-16",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-15",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-14",
+          "status": "missed"
+        },
+        {
+          "date": "2026-04-13",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-10",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-09",
+          "status": "missed"
+        },
+        {
+          "date": "2026-04-08",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-07",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-06",
+          "status": "missed"
+        },
+        {
+          "date": "2026-04-03",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-02",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-01",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-31",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-30",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-27",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-26",
+          "status": "missed"
+        },
+        {
+          "date": "2026-03-25",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-24",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-23",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-20",
+          "status": "missed"
+        }
+      ],
+      "isSample": true
+    },
+    {
+      "id": "r3",
+      "goalId": "g1",
+      "projectId": null,
+      "title": "Weekly project audit",
+      "schedule": "weekly",
+      "scheduleConfig": {
+        "dayOfWeek": 0
+      },
+      "baseImpact": 4,
+      "timeEstimate": 30,
+      "status": "active",
+      "createdAt": "2026-03-14T18:00:00",
+      "totalCompletions": 7,
+      "completionHistory": [
+        {
+          "date": "2026-05-02",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-25",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-18",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-11",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-04",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-28",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-21",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-14",
+          "status": "missed"
+        }
+      ],
+      "isSample": true
+    },
+    {
+      "id": "r4",
+      "goalId": "g1",
+      "projectId": null,
+      "title": "Morning pages (3 pages of writing)",
+      "schedule": "daily",
+      "scheduleConfig": {},
+      "baseImpact": 3,
+      "timeEstimate": 20,
+      "status": "active",
+      "createdAt": "2026-03-12T18:00:00",
+      "totalCompletions": 50,
+      "completionHistory": [
+        {
+          "date": "2026-05-08",
+          "status": "done"
+        },
+        {
+          "date": "2026-05-07",
+          "status": "done"
+        },
+        {
+          "date": "2026-05-06",
+          "status": "done"
+        },
+        {
+          "date": "2026-05-05",
+          "status": "done"
+        },
+        {
+          "date": "2026-05-04",
+          "status": "missed"
+        },
+        {
+          "date": "2026-05-03",
+          "status": "done"
+        },
+        {
+          "date": "2026-05-02",
+          "status": "done"
+        },
+        {
+          "date": "2026-05-01",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-30",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-29",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-28",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-27",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-26",
+          "status": "skipped"
+        },
+        {
+          "date": "2026-04-25",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-24",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-23",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-22",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-21",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-20",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-19",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-18",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-17",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-16",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-15",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-14",
+          "status": "skipped"
+        },
+        {
+          "date": "2026-04-13",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-12",
+          "status": "skipped"
+        },
+        {
+          "date": "2026-04-11",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-10",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-09",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-08",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-07",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-06",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-05",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-04",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-03",
+          "status": "missed"
+        },
+        {
+          "date": "2026-04-02",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-01",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-31",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-30",
+          "status": "missed"
+        },
+        {
+          "date": "2026-03-29",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-28",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-27",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-26",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-25",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-24",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-23",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-22",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-21",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-20",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-19",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-18",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-17",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-16",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-15",
+          "status": "missed"
+        },
+        {
+          "date": "2026-03-14",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-13",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-12",
+          "status": "missed"
+        }
+      ],
+      "isSample": true
+    }
+  ],
+  "ideas": [
+    {
+      "id": "i1",
+      "goalId": "g1",
+      "title": "Newsletter to share build-in-public learnings",
+      "createdAt": "2026-04-19T18:00:00",
+      "isSample": true
+    },
+    {
+      "id": "i2",
+      "goalId": "g1",
+      "title": "Build a public dashboard showing live MRR",
+      "createdAt": "2026-04-24T18:00:00",
+      "isSample": true
+    },
+    {
+      "id": "i3",
+      "goalId": "g2",
+      "title": "Try cold therapy after long runs",
+      "createdAt": "2026-05-01T18:00:00",
+      "isSample": true
+    },
+    {
+      "id": "i4",
+      "goalId": "g3",
+      "title": "Watch Spanish news (RTVE) for 15 min daily",
+      "createdAt": "2026-05-04T18:00:00",
+      "isSample": true
+    },
+    {
+      "id": "i5",
+      "goalId": null,
+      "title": "Start a podcast about indie SaaS journey",
+      "createdAt": "2026-04-27T18:00:00",
+      "isSample": true
+    }
+  ],
+  "sessions": [
+    {
+      "id": "s1",
+      "actionIds": [
+        "a5"
+      ],
+      "startedAt": "2026-04-01T07:03:00",
+      "endedAt": "2026-04-01T09:00:00",
+      "durationMinutes": 117,
+      "mode": "focus",
+      "isSample": true
+    },
+    {
+      "id": "s2",
+      "actionIds": [
+        "a39"
+      ],
+      "startedAt": "2026-04-18T06:54:00",
+      "endedAt": "2026-04-18T09:00:00",
+      "durationMinutes": 126,
+      "mode": "focus",
+      "isSample": true
+    },
+    {
+      "id": "s3",
+      "actionIds": [
+        "a43"
+      ],
+      "startedAt": "2026-04-27T07:31:00",
+      "endedAt": "2026-04-27T08:00:00",
+      "durationMinutes": 29,
+      "mode": "focus",
+      "isSample": true
+    },
+    {
+      "id": "s4",
+      "actionIds": [
+        "a16"
+      ],
+      "startedAt": "2026-04-29T05:16:00",
+      "endedAt": "2026-04-29T07:00:00",
+      "durationMinutes": 104,
+      "mode": "focus",
+      "isSample": true
+    },
+    {
+      "id": "s5",
+      "actionIds": [
+        "a26"
+      ],
+      "startedAt": "2026-04-13T02:15:00",
+      "endedAt": "2026-04-13T05:00:00",
+      "durationMinutes": 165,
+      "mode": "deep",
+      "isSample": true
+    },
+    {
+      "id": "s6",
+      "actionIds": [
+        "a8"
+      ],
+      "startedAt": "2026-04-21T02:56:00",
+      "endedAt": "2026-04-21T04:00:00",
+      "durationMinutes": 64,
+      "mode": "focus",
+      "isSample": true
+    },
+    {
+      "id": "s7",
+      "actionIds": [
+        "a37"
+      ],
+      "startedAt": "2026-04-03T22:43:00",
+      "endedAt": "2026-04-04T00:00:00",
+      "durationMinutes": 77,
+      "mode": "focus",
+      "isSample": true
+    },
+    {
+      "id": "s8",
+      "actionIds": [
+        "a40"
+      ],
+      "startedAt": "2026-04-25T07:29:00",
+      "endedAt": "2026-04-25T09:00:00",
+      "durationMinutes": 91,
+      "mode": "focus",
+      "isSample": true
+    },
+    {
+      "id": "s9",
+      "actionIds": [
+        "a3"
+      ],
+      "startedAt": "2026-03-20T05:11:00",
+      "endedAt": "2026-03-20T07:00:00",
+      "durationMinutes": 109,
+      "mode": "focus",
+      "isSample": true
+    },
+    {
+      "id": "s10",
+      "actionIds": [
+        "a6"
+      ],
+      "startedAt": "2026-04-08T21:47:00",
+      "endedAt": "2026-04-08T23:00:00",
+      "durationMinutes": 73,
+      "mode": "focus",
+      "isSample": true
+    },
+    {
+      "id": "s11",
+      "actionIds": [
+        "a27"
+      ],
+      "startedAt": "2026-04-16T23:17:00",
+      "endedAt": "2026-04-17T01:00:00",
+      "durationMinutes": 103,
+      "mode": "focus",
+      "isSample": true
+    },
+    {
+      "id": "s12",
+      "actionIds": [
+        "a21"
+      ],
+      "startedAt": "2026-03-17T04:34:00",
+      "endedAt": "2026-03-17T05:00:00",
+      "durationMinutes": 26,
+      "mode": "focus",
+      "isSample": true
+    },
+    {
+      "id": "s13",
+      "actionIds": [
+        "a30"
+      ],
+      "startedAt": "2026-04-26T01:10:00",
+      "endedAt": "2026-04-26T02:00:00",
+      "durationMinutes": 50,
+      "mode": "deep",
+      "isSample": true
+    },
+    {
+      "id": "s14",
+      "actionIds": [
+        "a9"
+      ],
+      "startedAt": "2026-04-19T08:19:00",
+      "endedAt": "2026-04-19T10:00:00",
+      "durationMinutes": 101,
+      "mode": "focus",
+      "isSample": true
+    },
+    {
+      "id": "s15",
+      "actionIds": [
+        "a7"
+      ],
+      "startedAt": "2026-04-14T08:11:00",
+      "endedAt": "2026-04-14T09:00:00",
+      "durationMinutes": 49,
+      "mode": "focus",
+      "isSample": true
+    },
+    {
+      "id": "s16",
+      "actionIds": [
+        "a22"
+      ],
+      "startedAt": "2026-03-20T06:54:00",
+      "endedAt": "2026-03-20T08:00:00",
+      "durationMinutes": 66,
+      "mode": "focus",
+      "isSample": true
+    },
+    {
+      "id": "s17",
+      "actionIds": [
+        "a23"
+      ],
+      "startedAt": "2026-03-22T21:01:00",
+      "endedAt": "2026-03-22T22:00:00",
+      "durationMinutes": 59,
+      "mode": "focus",
+      "isSample": true
+    },
+    {
+      "id": "s18",
+      "actionIds": [
+        "a11"
+      ],
+      "startedAt": "2026-04-27T00:45:00",
+      "endedAt": "2026-04-27T02:00:00",
+      "durationMinutes": 75,
+      "mode": "focus",
+      "isSample": true
+    },
+    {
+      "id": "s19",
+      "actionIds": [
+        "a38"
+      ],
+      "startedAt": "2026-04-10T20:37:00",
+      "endedAt": "2026-04-10T22:00:00",
+      "durationMinutes": 83,
+      "mode": "focus",
+      "isSample": true
+    },
+    {
+      "id": "s20",
+      "actionIds": [
+        "a31"
+      ],
+      "startedAt": "2026-04-30T02:32:00",
+      "endedAt": "2026-04-30T04:00:00",
+      "durationMinutes": 88,
+      "mode": "focus",
+      "isSample": true
+    }
+  ],
+  "dayEntries": [
+    {
+      "id": "d0",
+      "date": "2026-05-09",
+      "dayType": "execution",
+      "isPlanned": false,
+      "isClosed": false,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d1",
+      "date": "2026-05-08",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d2",
+      "date": "2026-05-07",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d3",
+      "date": "2026-05-06",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d4",
+      "date": "2026-05-05",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d5",
+      "date": "2026-05-04",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d6",
+      "date": "2026-05-03",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d7",
+      "date": "2026-05-02",
+      "dayType": "dayoff",
+      "isPlanned": false,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d8",
+      "date": "2026-05-01",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d9",
+      "date": "2026-04-30",
+      "dayType": "recovery",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d10",
+      "date": "2026-04-29",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d11",
+      "date": "2026-04-28",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d12",
+      "date": "2026-04-27",
+      "dayType": "recovery",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d13",
+      "date": "2026-04-26",
+      "dayType": "dayoff",
+      "isPlanned": false,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d14",
+      "date": "2026-04-25",
+      "dayType": "dayoff",
+      "isPlanned": false,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d15",
+      "date": "2026-04-24",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d16",
+      "date": "2026-04-23",
+      "dayType": "sick",
+      "isPlanned": false,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d17",
+      "date": "2026-04-22",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d18",
+      "date": "2026-04-21",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d19",
+      "date": "2026-04-20",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d20",
+      "date": "2026-04-19",
+      "dayType": "dayoff",
+      "isPlanned": false,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d21",
+      "date": "2026-04-18",
+      "dayType": "dayoff",
+      "isPlanned": false,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d22",
+      "date": "2026-04-17",
+      "dayType": "dayoff",
+      "isPlanned": false,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d23",
+      "date": "2026-04-16",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d24",
+      "date": "2026-04-15",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d25",
+      "date": "2026-04-14",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d26",
+      "date": "2026-04-13",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d27",
+      "date": "2026-04-12",
+      "dayType": "dayoff",
+      "isPlanned": false,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d28",
+      "date": "2026-04-11",
+      "dayType": "dayoff",
+      "isPlanned": false,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d29",
+      "date": "2026-04-10",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d30",
+      "date": "2026-04-09",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d31",
+      "date": "2026-04-08",
+      "dayType": "dayoff",
+      "isPlanned": false,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d32",
+      "date": "2026-04-07",
+      "dayType": "sick",
+      "isPlanned": false,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d33",
+      "date": "2026-04-06",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d34",
+      "date": "2026-04-05",
+      "dayType": "dayoff",
+      "isPlanned": false,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d35",
+      "date": "2026-04-04",
+      "dayType": "dayoff",
+      "isPlanned": false,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d36",
+      "date": "2026-04-03",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d37",
+      "date": "2026-04-02",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d38",
+      "date": "2026-04-01",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d39",
+      "date": "2026-03-31",
+      "dayType": "recovery",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d40",
+      "date": "2026-03-30",
+      "dayType": "sick",
+      "isPlanned": false,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d41",
+      "date": "2026-03-29",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d42",
+      "date": "2026-03-28",
+      "dayType": "recovery",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d43",
+      "date": "2026-03-27",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d44",
+      "date": "2026-03-26",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d45",
+      "date": "2026-03-25",
+      "dayType": "recovery",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d46",
+      "date": "2026-03-24",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d47",
+      "date": "2026-03-23",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d48",
+      "date": "2026-03-22",
+      "dayType": "dayoff",
+      "isPlanned": false,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d49",
+      "date": "2026-03-21",
+      "dayType": "recovery",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d50",
+      "date": "2026-03-20",
+      "dayType": "recovery",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d51",
+      "date": "2026-03-19",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d52",
+      "date": "2026-03-18",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d53",
+      "date": "2026-03-17",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d54",
+      "date": "2026-03-16",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d55",
+      "date": "2026-03-15",
+      "dayType": "dayoff",
+      "isPlanned": false,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d56",
+      "date": "2026-03-14",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d57",
+      "date": "2026-03-13",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d58",
+      "date": "2026-03-12",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d59",
+      "date": "2026-03-11",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    }
+  ],
+  "coachmarks": {
+    "actos.coachmark.sample-data-banner": "dismissed",
+    "actos.coachmark.first-progress-visit": "dismissed",
+    "actos.coachmark.first-ritual-creation": "dismissed",
+    "actos.coachmark.first-delegation": "dismissed",
+    "actos.coachmark.first-weekly-review": "dismissed"
+  }
+}

@@ -38,6 +38,7 @@ import {
   SEED_SETTINGS,
   TODAY_ISO,
 } from "./mockData";
+import { buildSampleSeed, applySampleCoachmarks } from "@/lib/sampleSeed";
 
 // ───────── helpers ─────────
 const uid = (): ID =>
@@ -948,15 +949,17 @@ export const useStore = create<StoreState>()(
         }),
 
       seedSampleData: () => {
-        const stamp = (arr: any[]) => arr.map((x) => ({ ...x, isSample: true }));
+        const seed = buildSampleSeed();
         set({
-          goals: stamp(SEED_GOALS),
-          projects: stamp(SEED_PROJECTS),
-          actions: stamp(SEED_ACTIONS),
-          rituals: stamp(SEED_RITUALS),
-          ideas: stamp(SEED_IDEAS),
-          dayEntries: SEED_DAY_ENTRIES,
+          goals: seed.goals,
+          projects: seed.projects,
+          actions: seed.actions,
+          rituals: seed.rituals,
+          ideas: seed.ideas,
+          sessions: seed.sessions,
+          dayEntries: seed.dayEntries,
         });
+        applySampleCoachmarks(seed.coachmarks);
       },
 
       clearSampleData: () => {
@@ -967,6 +970,8 @@ export const useStore = create<StoreState>()(
           actions: s.actions.filter((a) => !a.isSample),
           rituals: s.rituals.filter((r) => !r.isSample),
           ideas: s.ideas.filter((i) => !i.isSample),
+          sessions: s.sessions.filter((x) => !(x as any).isSample),
+          dayEntries: s.dayEntries.filter((d) => !(d as any).isSample),
         });
       },
 

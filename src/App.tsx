@@ -126,6 +126,7 @@ const App = () => (
           <MobileHeader />
           <ImpersonationBanner />
         </ChromeOnlyOutsideSetup>
+        <NoGoalsGate>
         <Routes>
           {/* Setup wizard (no chrome) */}
           <Route path="/setup" element={<Setup />} />

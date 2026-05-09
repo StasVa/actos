@@ -61,6 +61,14 @@ const SetupGuard = () => {
   const navigate = useNavigate();
   useEffect(() => {
     if (isSetupCompleted()) return;
+    // Legacy users: existing persisted store predates the wizard — auto-mark
+    // completed so they don't get bounced into setup and lose their data.
+    try {
+      if (localStorage.getItem("actos-store")) {
+        localStorage.setItem("actos.setup.completed", "true");
+        return;
+      }
+    } catch {}
     if (location.pathname.startsWith("/setup")) return;
     if (location.pathname.startsWith("/admin")) return;
     navigate("/setup", { replace: true });

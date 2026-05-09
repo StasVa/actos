@@ -51,22 +51,51 @@ import { ImpersonationBanner } from "./admin/ImpersonationBanner";
 
 const queryClient = new QueryClient();
 
+/**
+ * Redirects first-run users to /setup. Setup completion is tracked in
+ * localStorage["actos.setup.completed"]; clearing it re-runs the wizard.
+ * Admin routes are exempt so demo tooling stays reachable.
+ */
+const SetupGuard = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (isSetupCompleted()) return;
+    if (location.pathname.startsWith("/setup")) return;
+    if (location.pathname.startsWith("/admin")) return;
+    navigate("/setup", { replace: true });
+  }, [location.pathname, navigate]);
+  return null;
+};
+
+const ChromeOnlyOutsideSetup: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { pathname } = useLocation();
+  if (pathname.startsWith("/setup")) return null;
+  return <>{children}</>;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner position="bottom-right" />
       <BrowserRouter>
-        <ActionEditor />
-        <GoalEditor />
-        <RitualEditor />
-        <GlobalSettingsHost />
-        <CommandPalette />
-        <KeyboardShortcuts />
-        <ActiveSessionGuard />
-        <MobileHeader />
-        <ImpersonationBanner />
+        <SetupGuard />
+        <ChromeOnlyOutsideSetup>
+          <ActionEditor />
+          <GoalEditor />
+          <RitualEditor />
+          <GlobalSettingsHost />
+          <CommandPalette />
+          <KeyboardShortcuts />
+          <ActiveSessionGuard />
+          <MobileHeader />
+          <ImpersonationBanner />
+        </ChromeOnlyOutsideSetup>
         <Routes>
+          {/* Setup wizard (no chrome) */}
+          <Route path="/setup" element={<Setup />} />
+
           {/* Admin */}
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminDashboard />} />

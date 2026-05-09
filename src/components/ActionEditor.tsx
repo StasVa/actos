@@ -486,206 +486,401 @@ function ActionEditorPanel({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             onBlur={() => persistField("title", title.trim())}
+            onKeyDown={(e) => {
+              if (mode === "new" && e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSaveNew();
+              }
+            }}
             placeholder="Action title"
             className="w-full bg-transparent outline-none text-[18px] font-medium text-text-primary placeholder:text-text-tertiary"
           />
         </div>
 
-        {/* STATE */}
-        <div className="mb-6">
-          <SectionHead>State</SectionHead>
-
-          <StatusDropdown
-            current={status}
-            isGoalLevel={isGoalLevel}
-            onPick={handleStatusChange}
-          />
-
-          {/* Contextual timestamp line — moved directly below dropdown */}
-          {action && <TimestampLine action={action} onClose={onClose} />}
-
-          {/* Scheduled date — always visible for non-terminal statuses.
-              Picking a date auto-derives status to Planned; clearing
-              returns to Backlog. */}
-          {status !== "done" && status !== "dropped" && status !== "cancelled" && status !== "delegated" && (
-            <div className="mt-3">
-              <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-2">
-                Scheduled date
+        {mode === "new" ? (
+          <>
+            {/* ESTIMATES */}
+            <div className="mb-6">
+              <SectionHeadRequired label="Estimates" required />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <FieldRow label="Impact (1–10) *">
+                  <ClampedNumberInput
+                    ref={impactInputRef}
+                    value={impact}
+                    min={1}
+                    max={10}
+                    step={1}
+                    placeholder="1–10"
+                    required
+                    requiredMessage="Impact is required."
+                    ariaLabel="Impact"
+                    onChange={(v) => {
+                      setImpact(v);
+                      if (v === "" || (typeof v === "number" && v > 0)) setImpactError(null);
+                    }}
+                    onCommit={() => {}}
+                  />
+                  {impactError && <InlineError text={impactError} />}
+                </FieldRow>
+                <FieldRow label="Time (min)">
+                  <ClampedNumberInput
+                    value={timeMin}
+                    min={1}
+                    max={600}
+                    step={5}
+                    placeholder="optional · e.g. 30"
+                    ariaLabel="Time in minutes"
+                    onChange={(v) => setTimeMin(v)}
+                    onCommit={() => {}}
+                  />
+                </FieldRow>
               </div>
+            </div>
+
+            {/* PARENT — inline pill popovers */}
+            <div className="mb-6">
+              <SectionHeadRequired label="Parent" required />
+              <div className="flex items-center gap-2 flex-wrap text-[13px]">
+                <span className="text-text-tertiary">Goal</span>
+                <Popover open={goalPopoverOpen} onOpenChange={setGoalPopoverOpen}>
+                  <PopoverTrigger asChild>
+                    <button
+                      ref={goalPillRef}
+                      type="button"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[4px] border text-[13px] text-text-primary hover:bg-surface-hover transition-colors max-w-[240px]"
+                      style={{
+                        background: "hsl(var(--surface-raised))",
+                        borderColor: goalError
+                          ? "hsl(var(--text-warning))"
+                          : "hsl(var(--border-subtle))",
+                      }}
+                    >
+                      <span className="truncate">
+                        {goals.find((g) => g.id === goalId)?.title ?? "Pick a goal"}
+                      </span>
+                      <ChevronDown size={12} className="text-text-tertiary shrink-0" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    align="start"
+                    className="z-[210] w-[260px] p-1 bg-surface-raised border border-border-default"
+                  >
+                    {goals
+                      .filter((g) => g.status === "active")
+                      .map((g) => (
+                        <button
+                          key={g.id}
+                          type="button"
+                          onClick={() => {
+                            setGoalId(g.id);
+                            setProjectId(null);
+                            setGoalError(null);
+                            setGoalPopoverOpen(false);
+                          }}
+                          className={`w-full flex items-center justify-between gap-2 px-3 py-2 text-[13px] rounded-[3px] hover:bg-surface-hover ${
+                            g.id === goalId ? "text-[hsl(var(--accent))]" : "text-text-primary"
+                          }`}
+                        >
+                          <span className="truncate">{g.title}</span>
+                          {g.id === goalId && (
+                            <Check size={14} className="text-[hsl(var(--accent))]" />
+                          )}
+                        </button>
+                      ))}
+                  </PopoverContent>
+                </Popover>
+
+                <span className="text-text-tertiary">·</span>
+                <span className="text-text-tertiary">Project</span>
+                <Popover open={projectPopoverOpen} onOpenChange={setProjectPopoverOpen}>
+                  <PopoverTrigger asChild>
+                    <button
+                      type="button"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[4px] border border-border-subtle text-[13px] text-text-primary hover:bg-surface-hover transition-colors max-w-[240px]"
+                      style={{ background: "hsl(var(--surface-raised))" }}
+                    >
+                      <span className="truncate">
+                        {projectId
+                          ? projects.find((p) => p.id === projectId)?.title ?? "—"
+                          : "Goal-level backlog"}
+                      </span>
+                      <ChevronDown size={12} className="text-text-tertiary shrink-0" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    align="start"
+                    className="z-[210] w-[260px] p-1 bg-surface-raised border border-border-default"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setProjectId(null);
+                        setProjectPopoverOpen(false);
+                      }}
+                      className={`w-full flex items-center justify-between gap-2 px-3 py-2 text-[13px] rounded-[3px] hover:bg-surface-hover ${
+                        !projectId ? "text-[hsl(var(--accent))]" : "text-text-primary"
+                      }`}
+                    >
+                      <span className="truncate">Goal-level backlog</span>
+                      {!projectId && (
+                        <Check size={14} className="text-[hsl(var(--accent))]" />
+                      )}
+                    </button>
+                    {(projectsByGoal.find((g) => g.goal.id === goalId)?.projects ?? []).map(
+                      (p) => (
+                        <button
+                          key={p.id}
+                          type="button"
+                          onClick={() => {
+                            setProjectId(p.id);
+                            setProjectPopoverOpen(false);
+                          }}
+                          className={`w-full flex items-center justify-between gap-2 px-3 py-2 text-[13px] rounded-[3px] hover:bg-surface-hover ${
+                            p.id === projectId ? "text-[hsl(var(--accent))]" : "text-text-primary"
+                          }`}
+                        >
+                          <span className="truncate">{p.title}</span>
+                          {p.id === projectId && (
+                            <Check size={14} className="text-[hsl(var(--accent))]" />
+                          )}
+                        </button>
+                      ),
+                    )}
+                  </PopoverContent>
+                </Popover>
+              </div>
+              {goalError && <InlineError text={goalError} />}
+            </div>
+
+            {/* DATE */}
+            <div className="mb-6">
+              <SectionHead>Date</SectionHead>
               <DateChipPicker
                 value={scheduledDate}
                 optional
                 onChange={handleScheduledDateChange}
               />
             </div>
-          )}
 
-          {/* Delegation block */}
-          {status === "delegated" && (
-            <div className="mt-2 p-3 rounded-[4px] bg-surface-raised border border-border-subtle space-y-3">
-              <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
-                Delegation
-              </div>
-              <FieldRow label="Delegate name">
-                <input
-                  value={delegateName}
-                  onChange={(e) => {
-                    setDelegateName(e.target.value);
-                    if (e.target.value.trim()) setDelegateError(null);
-                  }}
-                  onBlur={() => persistField("delegateName", delegateName || undefined)}
-                  placeholder="Maria, AI, etc."
-                  list="delegate-names"
-                  className="w-full bg-surface-base border rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
-                  style={{
-                    borderColor: delegateError
-                      ? "hsl(var(--text-warning))"
-                      : "hsl(var(--border-subtle))",
-                  }}
-                />
-                <datalist id="delegate-names">
-                  {delegateSuggestions.map((n) => (
-                    <option key={n} value={n} />
-                  ))}
-                </datalist>
-                {delegateError && <InlineError text={delegateError} />}
-              </FieldRow>
-              <div>
-                <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-2">
-                  Expected back
-                </div>
-                <DateChipPicker
-                  value={expectedReturn}
-                  optional
-                  onChange={(iso) => {
-                    setExpectedReturn(iso);
-                    if (mode === "edit") {
-                      persistField("expectedReturnDate", iso || undefined);
-                    }
-                  }}
-                />
-              </div>
-              <FieldRow label="Delegate note">
-                <textarea
-                  value={delegateNote}
-                  onChange={(e) => setDelegateNote(e.target.value)}
-                  onBlur={() => persistField("delegateNote", delegateNote || undefined)}
-                  rows={2}
-                  className="w-full bg-surface-base border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none resize-y"
-                />
-              </FieldRow>
+            {/* NOTES (collapsed by default) */}
+            <div>
+              {notesExpanded ? (
+                <>
+                  <SectionHead>Notes</SectionHead>
+                  <textarea
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    placeholder="Add notes..."
+                    rows={4}
+                    autoFocus
+                    className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary placeholder:text-text-tertiary outline-none resize-y"
+                  />
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setNotesExpanded(true)}
+                  className="text-[13px] text-text-secondary hover:text-text-primary transition-colors"
+                >
+                  + Add notes
+                </button>
+              )}
             </div>
-          )}
+          </>
+        ) : (
+          <>
+            {/* STATE */}
+            <div className="mb-6">
+              <SectionHead>State</SectionHead>
 
-        </div>
-
-        {/* PARENT */}
-        <div className="mb-6">
-          <SectionHead>Parent</SectionHead>
-          <div className="flex flex-col gap-2">
-            <select
-              value={goalId}
-              onChange={(e) => {
-                setGoalId(e.target.value);
-                setProjectId(null);
-                if (mode === "edit") {
-                  persistField("goalId", e.target.value);
-                  persistField("projectId", null);
-                }
-              }}
-              className="bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
-            >
-              {goals
-                .filter((g) => g.status === "active")
-                .map((g) => (
-                  <option key={g.id} value={g.id}>
-                    {g.title}
-                  </option>
-                ))}
-            </select>
-            <select
-              value={projectId ?? ""}
-              onChange={(e) => {
-                const v = e.target.value || null;
-                setProjectId(v);
-                if (mode === "edit") persistField("projectId", v);
-              }}
-              className="bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
-            >
-              <option value="">— Goal-level backlog —</option>
-              {(projectsByGoal.find((g) => g.goal.id === goalId)?.projects ?? []).map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.title}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {/* ESTIMATES */}
-        <div className="mb-6">
-          <SectionHead>Estimates</SectionHead>
-          <div className="grid grid-cols-2 gap-3">
-            <FieldRow label="Impact (1-10) · required">
-              <ClampedNumberInput
-                value={impact}
-                min={1}
-                max={10}
-                step={1}
-                placeholder="1–10"
-                required
-                requiredMessage="Impact is required."
-                ariaLabel="Impact"
-                onChange={(v) => {
-                  setImpact(v);
-                  if (v === "" || (typeof v === "number" && v > 0)) setImpactError(null);
-                }}
-                onCommit={(v) => {
-                  if (v === "") {
-                    persistField("impact", 0);
-                  } else {
-                    persistField("impact", v);
-                    setImpactError(null);
-                  }
-                }}
+              <StatusDropdown
+                current={status}
+                isGoalLevel={isGoalLevel}
+                onPick={handleStatusChange}
               />
-              {impactError && <InlineError text={impactError} />}
-            </FieldRow>
-            <FieldRow label="Time (min) · required">
-              <ClampedNumberInput
-                value={timeMin}
-                min={1}
-                max={600}
-                step={5}
-                placeholder="e.g. 30"
-                required
-                requiredMessage="Time estimate is required."
-                ariaLabel="Time in minutes"
-                onChange={(v) => {
-                  setTimeMin(v);
-                  if (v !== "" && typeof v === "number" && v > 0) setTimeError(null);
-                }}
-                onCommit={(v) =>
-                  persistField("timeEstimateMinutes", v === "" ? undefined : v)
-                }
-              />
-              {timeError && <InlineError text={timeError} />}
-            </FieldRow>
-          </div>
-        </div>
 
-        {/* NOTES */}
-        <div>
-          <SectionHead>Notes</SectionHead>
-          <textarea
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            onBlur={() => persistField("notes", notes || undefined)}
-            placeholder="Add notes..."
-            rows={4}
-            className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary placeholder:text-text-tertiary outline-none resize-y"
-          />
-        </div>
+              {action && <TimestampLine action={action} onClose={onClose} />}
+
+              {status !== "done" &&
+                status !== "dropped" &&
+                status !== "cancelled" &&
+                status !== "delegated" && (
+                  <div className="mt-3">
+                    <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-2">
+                      Scheduled date
+                    </div>
+                    <DateChipPicker
+                      value={scheduledDate}
+                      optional
+                      onChange={handleScheduledDateChange}
+                    />
+                  </div>
+                )}
+
+              {status === "delegated" && (
+                <div className="mt-2 p-3 rounded-[4px] bg-surface-raised border border-border-subtle space-y-3">
+                  <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
+                    Delegation
+                  </div>
+                  <FieldRow label="Delegate name">
+                    <input
+                      value={delegateName}
+                      onChange={(e) => {
+                        setDelegateName(e.target.value);
+                        if (e.target.value.trim()) setDelegateError(null);
+                      }}
+                      onBlur={() => persistField("delegateName", delegateName || undefined)}
+                      placeholder="Maria, AI, etc."
+                      list="delegate-names"
+                      className="w-full bg-surface-base border rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
+                      style={{
+                        borderColor: delegateError
+                          ? "hsl(var(--text-warning))"
+                          : "hsl(var(--border-subtle))",
+                      }}
+                    />
+                    <datalist id="delegate-names">
+                      {delegateSuggestions.map((n) => (
+                        <option key={n} value={n} />
+                      ))}
+                    </datalist>
+                    {delegateError && <InlineError text={delegateError} />}
+                  </FieldRow>
+                  <div>
+                    <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-2">
+                      Expected back
+                    </div>
+                    <DateChipPicker
+                      value={expectedReturn}
+                      optional
+                      onChange={(iso) => {
+                        setExpectedReturn(iso);
+                        if (mode === "edit") {
+                          persistField("expectedReturnDate", iso || undefined);
+                        }
+                      }}
+                    />
+                  </div>
+                  <FieldRow label="Delegate note">
+                    <textarea
+                      value={delegateNote}
+                      onChange={(e) => setDelegateNote(e.target.value)}
+                      onBlur={() => persistField("delegateNote", delegateNote || undefined)}
+                      rows={2}
+                      className="w-full bg-surface-base border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none resize-y"
+                    />
+                  </FieldRow>
+                </div>
+              )}
+            </div>
+
+            {/* PARENT */}
+            <div className="mb-6">
+              <SectionHead>Parent</SectionHead>
+              <div className="flex flex-col gap-2">
+                <select
+                  value={goalId}
+                  onChange={(e) => {
+                    setGoalId(e.target.value);
+                    setProjectId(null);
+                    persistField("goalId", e.target.value);
+                    persistField("projectId", null);
+                  }}
+                  className="bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
+                >
+                  {goals
+                    .filter((g) => g.status === "active")
+                    .map((g) => (
+                      <option key={g.id} value={g.id}>
+                        {g.title}
+                      </option>
+                    ))}
+                </select>
+                <select
+                  value={projectId ?? ""}
+                  onChange={(e) => {
+                    const v = e.target.value || null;
+                    setProjectId(v);
+                    persistField("projectId", v);
+                  }}
+                  className="bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
+                >
+                  <option value="">— Goal-level backlog —</option>
+                  {(projectsByGoal.find((g) => g.goal.id === goalId)?.projects ?? []).map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.title}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* ESTIMATES */}
+            <div className="mb-6">
+              <SectionHead>Estimates</SectionHead>
+              <div className="grid grid-cols-2 gap-3">
+                <FieldRow label="Impact (1-10) · required">
+                  <ClampedNumberInput
+                    value={impact}
+                    min={1}
+                    max={10}
+                    step={1}
+                    placeholder="1–10"
+                    required
+                    requiredMessage="Impact is required."
+                    ariaLabel="Impact"
+                    onChange={(v) => {
+                      setImpact(v);
+                      if (v === "" || (typeof v === "number" && v > 0)) setImpactError(null);
+                    }}
+                    onCommit={(v) => {
+                      if (v === "") {
+                        persistField("impact", 0);
+                      } else {
+                        persistField("impact", v);
+                        setImpactError(null);
+                      }
+                    }}
+                  />
+                  {impactError && <InlineError text={impactError} />}
+                </FieldRow>
+                <FieldRow label="Time (min) · required">
+                  <ClampedNumberInput
+                    value={timeMin}
+                    min={1}
+                    max={600}
+                    step={5}
+                    placeholder="e.g. 30"
+                    required
+                    requiredMessage="Time estimate is required."
+                    ariaLabel="Time in minutes"
+                    onChange={(v) => {
+                      setTimeMin(v);
+                      if (v !== "" && typeof v === "number" && v > 0) setTimeError(null);
+                    }}
+                    onCommit={(v) =>
+                      persistField("timeEstimateMinutes", v === "" ? undefined : v)
+                    }
+                  />
+                  {timeError && <InlineError text={timeError} />}
+                </FieldRow>
+              </div>
+            </div>
+
+            {/* NOTES */}
+            <div>
+              <SectionHead>Notes</SectionHead>
+              <textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                onBlur={() => persistField("notes", notes || undefined)}
+                placeholder="Add notes..."
+                rows={4}
+                className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary placeholder:text-text-tertiary outline-none resize-y"
+              />
+            </div>
+          </>
+        )}
       </div>
 
       {/* Footer */}

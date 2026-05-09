@@ -8,8 +8,16 @@ import type { Action, DayEntry, Goal, ID, ISODate, Project } from "@/types";
 import { DAY_TYPE_LABELS } from "./Index";
 import { getOutcomeSummary } from "@/lib/outcomeUtils";
 import { PageHeader } from "@/components/PageHeader";
-import { FilterDropdown, FilterOption } from "@/components/FilterDropdown";
+import { FilterDropdown } from "@/components/FilterDropdown";
 import { SortDropdown } from "@/components/SortDropdown";
+import {
+  REVIEW_SORT_OPTIONS,
+  ReviewSortKey,
+  computeAggregates,
+  loadReviewSort,
+  saveReviewSort,
+  sortReviewEntries,
+} from "@/lib/reviewSort";
 
 const TODAY = new Date();
 TODAY.setHours(0, 0, 0, 0);

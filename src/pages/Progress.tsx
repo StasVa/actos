@@ -329,14 +329,17 @@ const RecentlyClosedActionsSection: React.FC = () => {
                         </span>
                       )}
                     </div>
-                    <div className="flex items-center gap-3 shrink-0">
-                      {showValuePill && (a.impact ?? 0) > 0 && (
+                    <div className="flex items-center gap-2 shrink-0">
+                      {showValuePill && (a.impact ?? 0) > 0 ? (
                         <span
-                          className="inline-flex items-center font-mono tabular-nums font-medium"
+                          className="inline-flex items-center justify-center font-medium tabular-nums shrink-0"
                           style={{
-                            fontSize: 12,
-                            padding: "3px 10px",
+                            fontSize: 13,
+                            padding: "4px 10px",
                             borderRadius: 4,
+                            width: 40,
+                            textAlign: "center",
+                            boxSizing: "border-box",
                             background: r.goal
                               ? `hsl(var(--${r.goal.color}) / 0.15)`
                               : "hsl(var(--surface-hover))",
@@ -345,13 +348,14 @@ const RecentlyClosedActionsSection: React.FC = () => {
                         >
                           +{a.impact}
                         </span>
+                      ) : (
+                        <span style={{ width: 40 }} className="shrink-0" />
                       )}
-                      {timeMin > 0 && (
-                        <span className="font-mono text-[12px] tabular-nums text-text-secondary whitespace-nowrap">
-                          {formatHM(timeMin)}
-                        </span>
-                      )}
-                      <span className="font-mono text-[11px] text-text-tertiary tabular-nums whitespace-nowrap">
+                      <TimePill minutes={timeMin} />
+                      <span
+                        className="font-mono text-[11px] text-text-tertiary tabular-nums whitespace-nowrap text-right shrink-0"
+                        style={{ width: 80 }}
+                      >
                         {fmtAgo(r.closureIso)}
                       </span>
                     </div>

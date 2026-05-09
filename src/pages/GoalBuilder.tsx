@@ -397,12 +397,20 @@ const ProjectStep: React.FC<{
         />
         <textarea
           value={desc}
-          placeholder="Short description (optional)"
+          placeholder="What's this project about? Optional."
           onChange={(e) => setDesc(e.target.value)}
           rows={3}
           style={{ ...inputStyle, resize: "vertical", minHeight: 72 }}
           maxLength={400}
         />
+        <p style={{
+          margin: 0,
+          fontFamily: "Inter, ui-sans-serif, system-ui",
+          fontSize: 13,
+          color: "hsl(var(--text-tertiary))",
+        }}>
+          Detailed editor with images, links, and references is available on the project page.
+        </p>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 12 }}>
           <PrimaryBtn onClick={submit} disabled={!title.trim()}>Create project</PrimaryBtn>
           <GhostLink onClick={onSkip}>Skip</GhostLink>

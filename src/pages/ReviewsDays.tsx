@@ -93,11 +93,8 @@ const DAY_TYPE_FILTERS = [
   { value: "sick", label: "Sick" },
 ];
 
-type SortKey = "recent" | "oldest";
-const SORT_OPTIONS: FilterOption<SortKey>[] = [
-  { value: "recent", label: "Recent first" },
-  { value: "oldest", label: "Oldest first" },
-];
+type SortKey = ReviewSortKey;
+const SORT_OPTIONS = REVIEW_SORT_OPTIONS;
 
 const DayRowItem: React.FC<{
   row: DayRow;

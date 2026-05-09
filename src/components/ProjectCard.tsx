@@ -5,6 +5,7 @@ import { Tooltip, StateDotTooltip } from "@/components/Tooltip";
 import { CardMenu } from "@/components/CardMenu";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { useStore, selectors } from "@/store/useStore";
+import { MetricInfoPopover } from "@/components/MetricInfoPopover";
 import { formatTime } from "@/lib/format";
 import { timeInvestedMinutes } from "@/lib/timeStats";
 

@@ -3,14 +3,14 @@ import { formatTime } from "@/lib/format";
 
 type Size = "default" | "mini";
 
-const sizeStyles: Record<Size, { padding: string; fontSize: number; minWidth: number; borderRadius: number }> = {
-  default: { padding: "4px 10px", fontSize: 13, minWidth: 36, borderRadius: 4 },
-  mini: { padding: "2px 6px", fontSize: 10, minWidth: 0, borderRadius: 3 },
+const sizeStyles: Record<Size, { padding: string; fontSize: number; width: number; borderRadius: number }> = {
+  default: { padding: "4px 10px", fontSize: 13, width: 40, borderRadius: 4 },
+  mini: { padding: "2px 6px", fontSize: 10, width: 34, borderRadius: 3 },
 };
 
-const timeSizeStyles: Record<Size, { padding: string; fontSize: number; minWidth: number; borderRadius: number }> = {
-  default: { padding: "4px 10px", fontSize: 12, minWidth: 52, borderRadius: 4 },
-  mini: { padding: "2px 6px", fontSize: 10, minWidth: 0, borderRadius: 3 },
+const timeSizeStyles: Record<Size, { padding: string; fontSize: number; width: number; borderRadius: number }> = {
+  default: { padding: "4px 10px", fontSize: 12, width: 64, borderRadius: 4 },
+  mini: { padding: "2px 6px", fontSize: 10, width: 0, borderRadius: 3 },
 };
 
 /**
@@ -32,8 +32,9 @@ export const ImpactPill: React.FC<{
         padding: s.padding,
         borderRadius: s.borderRadius,
         fontSize: s.fontSize,
-        minWidth: s.minWidth,
+        width: s.width,
         textAlign: "center",
+        boxSizing: "border-box",
         background: `color-mix(in srgb, ${goalColor} 15%, transparent)`,
         color: goalColor,
         opacity: dimmed ? 0.5 : 1,
@@ -63,8 +64,9 @@ export const TimePill: React.FC<{
         padding: s.padding,
         borderRadius: s.borderRadius,
         fontSize: s.fontSize,
-        minWidth: s.minWidth,
+        width: s.width,
         textAlign: "center",
+        boxSizing: "border-box",
         background: "hsl(var(--surface-hover))",
         color: "hsl(var(--text-secondary))",
         opacity: dimmed ? 0.5 : 1,

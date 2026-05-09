@@ -138,6 +138,8 @@ export interface Ritual {
   status: RitualStatus;
   createdAt: ISODateTime;
   archivedAt?: ISODateTime;
+  /** Marks this entity as part of the seeded sample dataset (Setup Wizard). */
+  isSample?: boolean;
 }
 
 // ───────── Ideas ─────────

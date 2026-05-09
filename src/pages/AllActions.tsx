@@ -163,24 +163,9 @@ const ActionRow: React.FC<{ action: Action; selected: boolean; onSelect: () => v
               {action.title}
             </span>
           </div>
-          <div className="shrink-0 ml-3">
-            {action.impact ? (
-              <span
-                className="inline-flex items-center justify-center font-medium tabular-nums"
-                style={{
-                  background: impactBg,
-                  color: impactFg,
-                  fontSize: 13,
-                  padding: "4px 10px",
-                  borderRadius: 4,
-                  minWidth: 36,
-                  textAlign: "center",
-                  opacity: isTerminal ? 0.5 : 1,
-                }}
-              >
-                I{action.impact}
-              </span>
-            ) : null}
+          <div className="shrink-0 ml-3 flex items-center gap-2">
+            <ImpactPill impact={action.impact} goalColor={goalColorCss} dimmed={isTerminal} />
+            <TimePill minutes={action.timeMinutes} dimmed={isTerminal} />
           </div>
         </div>
         {/* Bottom row */}

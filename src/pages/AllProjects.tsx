@@ -422,17 +422,21 @@ const AllProjects: React.FC = () => {
         {/* Sections */}
         <div className="flex-1 px-10 pt-8 pb-16 space-y-10">
           {livePROJECTS.length === 0 ? (
-            <EmptyState
-              headline="No projects yet."
-              description="Projects sit under goals and group related actions. Create one for each concrete piece of work you're moving forward."
-              ctaLabel="+ New project"
-              onCta={handleNewProject}
-              hint={
-                storeGoals.filter((g) => g.status === "active").length === 0
-                  ? "You'll need a goal first."
-                  : null
-              }
-            />
+            storeGoals.filter((g) => g.status === "active").length === 0 ? (
+              <EmptyState
+                headline="No projects yet."
+                description={"Projects are chunks of work that finish in days or weeks. Each one belongs to a goal.\n\nGoals come first."}
+                ctaLabel="+ Create your first goal"
+                onCta={handleNewGoal}
+              />
+            ) : (
+              <EmptyState
+                headline="No projects yet."
+                description={"Projects are chunks of work that finish in days or weeks. Each one belongs to a goal."}
+                ctaLabel="+ Create your first project"
+                onCta={handleNewProject}
+              />
+            )
           ) : filtered.length === 0 ? (
             <FilteredEmpty onClear={clearFilters} />
           ) : null}

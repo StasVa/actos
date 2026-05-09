@@ -368,7 +368,23 @@ function ActionEditorPanel({
 
   const handleSaveNew = () => {
     if (!canCreate) {
-      toast.error(createTooltip || "Required fields missing");
+      // Set inline errors for missing fields and focus the first one.
+      let firstFocus: "title" | "impact" | "goal" | null = null;
+      if (!title.trim()) firstFocus = firstFocus ?? "title";
+      if (!(impactNum > 0)) {
+        setImpactError("Impact is required.");
+        firstFocus = firstFocus ?? "impact";
+      }
+      if (!goalId) {
+        setGoalError("Pick a Goal.");
+        firstFocus = firstFocus ?? "goal";
+      }
+      if (firstFocus === "title") titleRef.current?.focus();
+      else if (firstFocus === "impact") impactInputRef.current?.focus();
+      else if (firstFocus === "goal") {
+        goalPillRef.current?.focus();
+        setGoalPopoverOpen(true);
+      }
       return;
     }
     createAction({

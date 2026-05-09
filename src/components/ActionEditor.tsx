@@ -505,7 +505,7 @@ function ActionEditorPanel({
             <div className="mb-6">
               <SectionHeadRequired label="Estimates" required />
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <FieldRow label="Impact (1–10) *">
+                <FieldRow label="Impact (1–10) *" info={<MetricInfoPopover variant="impact" ariaLabel="What is Impact?" />}>
                   <ClampedNumberInput
                     value={impact}
                     min={1}

@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Tooltip, StateDotTooltip } from "@/components/Tooltip";
+import { MetricInfoPopover } from "@/components/MetricInfoPopover";
 import { useStore, selectors } from "@/store/useStore";
 import type { Action, ActionStatus, GoalColorVar, Project, ProjectReference, ProjectStatus } from "@/types";
 import { AppSidebar } from "@/components/AppSidebar";

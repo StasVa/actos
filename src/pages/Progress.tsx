@@ -9,6 +9,7 @@ import { TimeInvestmentSection } from "@/components/TimeInvestmentSection";
 import { ReturnDatePill } from "@/components/ReturnDatePill";
 import { ProjectCard as SharedProjectCard } from "@/components/ProjectCard";
 import { timeInvestedMinutes, formatHM } from "@/lib/timeStats";
+import { TimePill } from "@/components/MetaPills";
 import type { Action, Goal, Project } from "@/types";
 import {
   Hero,

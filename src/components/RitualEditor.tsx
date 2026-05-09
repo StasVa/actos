@@ -86,13 +86,26 @@ function RitualEditorPanel({
     seed.scheduleConfig?.customDays ?? [1, 3, 5],
   );
   const [timeOfDay, setTimeOfDay] = useState<string>(seed.scheduleConfig?.timeOfDay ?? "");
-  const [baseImpact, setBaseImpact] = useState<number>(seed.baseImpact ?? 5);
+  const [baseImpact, setBaseImpact] = useState<number | "">(
+    seed.baseImpact === undefined || seed.baseImpact === null ? (mode === "new" ? "" : 5) : (seed.baseImpact as number),
+  );
   const [notes, setNotes] = useState<string>(seed.notes ?? "");
   const [timeMin, setTimeMin] = useState<number | "">(seed.timeEstimateMinutes ?? "");
 
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmArchive, setConfirmArchive] = useState(false);
   const titleRef = useRef<HTMLInputElement>(null);
+
+  // New-mode UI state.
+  const [titleError, setTitleError] = useState<string | null>(null);
+  const [impactError, setImpactError] = useState<string | null>(null);
+  const [timeError, setTimeError] = useState<string | null>(null);
+  const [goalError, setGoalError] = useState<string | null>(null);
+  const [scheduleError, setScheduleError] = useState<string | null>(null);
+  const [notesExpanded, setNotesExpanded] = useState<boolean>(!!seed.notes);
+  const [goalPopoverOpen, setGoalPopoverOpen] = useState(false);
+  const [projectPopoverOpen, setProjectPopoverOpen] = useState(false);
+  const goalPillRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     titleRef.current?.focus();

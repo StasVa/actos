@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { AppSidebar } from "@/components/AppSidebar";
 import {
@@ -465,7 +465,14 @@ const AllActions: React.FC = () => {
   // Live store data → legacy renderer shape (rendering JSX is unchanged).
   const storeActions = useStore((s) => s.actions);
   const storeProjects = useStore((s) => s.projects);
+  const storeGoals = useStore((s) => s.goals);
   const openPanel = useStore((s) => s.openPanel);
+  const navigate = useNavigate();
+  const hasActiveGoals = storeGoals.some((g) => g.status === "active");
+  const goNew = () => {
+    if (!hasActiveGoals) { navigate("/onboarding/goal"); return; }
+    openPanel({ kind: "action", mode: "new" });
+  };
   const ACTIONS = useMemo(
     () => toLegacyActions(storeActions, storeProjects),
     [storeActions, storeProjects],

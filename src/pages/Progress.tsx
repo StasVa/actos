@@ -431,6 +431,99 @@ const DelegatedSection: React.FC = () => {
   );
 };
 
+/* ===== Active Projects (scoped: cap 6, sort recent activity) ===== */
+const ActiveProjectsScoped: React.FC = () => {
+  const goals = useStore((s) => s.goals);
+  const projects = useStore((s) => s.projects);
+  const actions = useStore((s) => s.actions);
+
+  type Row = {
+    id: string;
+    goalLabel: string;
+    goalColor: string;
+    lastMs: number;
+    state: "active" | "stalled";
+    createdAt: string;
+  };
+
+  const rows: Row[] = projects
+    .filter((p) => p.status === "active" && !p.isDraft)
+    .map((p) => {
+      const goal = goals.find((g) => g.id === p.goalId);
+      const projActions = actions.filter(
+        (a) => a.projectId === p.id && a.status !== "dropped" && a.status !== "cancelled",
+      );
+      const lastIso = projActions
+        .map((a) => a.completedAt ?? a.delegatedAt ?? a.updatedAt ?? a.createdAt)
+        .filter(Boolean)
+        .sort()
+        .at(-1);
+      const lastMs = lastIso ? new Date(lastIso).getTime() : 0;
+      const days = lastIso ? Math.floor((Date.now() - lastMs) / 86400000) : 999;
+      return {
+        id: p.id,
+        goalLabel: (goal?.title ?? "").toUpperCase(),
+        goalColor: goal ? `hsl(var(--${goal.color}))` : "hsl(var(--text-tertiary))",
+        lastMs,
+        state: (days <= 7 ? "active" : "stalled") as "active" | "stalled",
+        createdAt: p.createdAt ?? "",
+      };
+    });
+
+  rows.sort((a, b) => {
+    if (b.lastMs !== a.lastMs) return b.lastMs - a.lastMs;
+    if (a.createdAt !== b.createdAt) return b.createdAt.localeCompare(a.createdAt);
+    return a.id.localeCompare(b.id);
+  });
+
+  const total = rows.length;
+  const stalledCount = rows.filter((r) => r.state === "stalled").length;
+  const visible = rows.slice(0, 6);
+
+  const metaParts: string[] = [`${total} ACTIVE`];
+  if (stalledCount > 0) metaParts.push(`${stalledCount} STALLED`);
+
+  return (
+    <section>
+      <SectionLabel meta={metaParts.join(" · ")}>
+        Active projects · {total}
+      </SectionLabel>
+      {total === 0 ? (
+        <div className="bg-surface-raised border border-dashed border-border-subtle rounded-[6px] py-8 text-center">
+          <div className="text-[13px] text-text-secondary">No active projects.</div>
+          <div className="font-mono text-[11px] text-text-tertiary mt-1">
+            Press ⌘K → "New project".
+          </div>
+        </div>
+      ) : (
+        <>
+          <div
+            className="grid gap-4"
+            style={{ gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))" }}
+          >
+            {visible.map((p) => (
+              <SharedProjectCard
+                key={p.id}
+                projectId={p.id}
+                goalLabel={p.goalLabel}
+                goalColor={p.goalColor}
+              />
+            ))}
+          </div>
+          {total > 6 && (
+            <Link
+              to="/projects?state=open"
+              className="inline-block mt-4 text-[13px] text-accent hover:text-accent-hover"
+            >
+              View all {total} projects →
+            </Link>
+          )}
+        </>
+      )}
+    </section>
+  );
+};
+
 const Progress: React.FC = () => {
   const [settingsOpen, setSettingsOpen] = React.useState(false);
   const goals = useStore((s) => s.goals);

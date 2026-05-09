@@ -3,14 +3,14 @@ import { formatTime } from "@/lib/format";
 
 type Size = "default" | "mini";
 
-const sizeStyles: Record<Size, { padding: string; fontSize: number; minWidth: number; borderRadius: number }> = {
-  default: { padding: "4px 10px", fontSize: 13, minWidth: 36, borderRadius: 4 },
-  mini: { padding: "2px 6px", fontSize: 10, minWidth: 0, borderRadius: 3 },
+const sizeStyles: Record<Size, { padding: string; fontSize: number; width: number; borderRadius: number }> = {
+  default: { padding: "4px 10px", fontSize: 13, width: 40, borderRadius: 4 },
+  mini: { padding: "2px 6px", fontSize: 10, width: 34, borderRadius: 3 },
 };
 
-const timeSizeStyles: Record<Size, { padding: string; fontSize: number; minWidth: number; borderRadius: number }> = {
-  default: { padding: "4px 10px", fontSize: 12, minWidth: 52, borderRadius: 4 },
-  mini: { padding: "2px 6px", fontSize: 10, minWidth: 0, borderRadius: 3 },
+const timeSizeStyles: Record<Size, { padding: string; fontSize: number; width: number; borderRadius: number }> = {
+  default: { padding: "4px 10px", fontSize: 12, width: 64, borderRadius: 4 },
+  mini: { padding: "2px 6px", fontSize: 10, width: 0, borderRadius: 3 },
 };
 
 /**

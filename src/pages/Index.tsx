@@ -1177,18 +1177,11 @@ export const TodayZone: React.FC<{
                 const bottom: React.ReactNode[] = [];
                 if (goal) bottom.push(<span key="g">{goal.title}</span>);
                 if (project) bottom.push(<span key="p">{project.title}</span>);
-                if (a.timeEstimateMinutes && a.timeEstimateMinutes > 0)
-                  bottom.push(
-                    <span key="t" className="tabular-nums">
-                      {formatTime(a.timeEstimateMinutes)}
-                    </span>,
-                  );
                 return (
                   <SharedActionRow
                     key={a.id}
                     action={a}
                     isMainTask={a.id === mainTaskId}
-                    rightPill={{ kind: "custom", node: <ImpactPill impact={a.impact} color={colorVar(a.goalId)} /> }}
                     bottomSegments={bottom}
                     onClick={() => openPanel({ kind: "action", mode: "edit", id: a.id })}
                     onToggleDone={() => handleToggleDone(a.id)}

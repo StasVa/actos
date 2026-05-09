@@ -391,7 +391,31 @@ const EmptyFiltered: React.FC<{ onClear: () => void }> = ({ onClear }) => (
 type StatusFilter = "all" | ActionStatus;
 type GoalFilter = "all" | GoalKey;
 type DateFilter = "all" | "today" | "week" | "month";
-type SortKey = "recent" | "oldest" | "impact" | "scheduled";
+type SortKey =
+  | "recent"
+  | "oldest"
+  | "impact-desc"
+  | "impact-asc"
+  | "time-desc"
+  | "time-asc";
+
+const SORT_STORAGE_KEY = "actos.actions.sort";
+const VALID_SORT_KEYS: SortKey[] = [
+  "recent",
+  "oldest",
+  "impact-desc",
+  "impact-asc",
+  "time-desc",
+  "time-asc",
+];
+
+function loadStoredSort(): SortKey {
+  try {
+    const v = localStorage.getItem(SORT_STORAGE_KEY);
+    if (v && (VALID_SORT_KEYS as string[]).includes(v)) return v as SortKey;
+  } catch {}
+  return "recent";
+}
 
 const STATUS_OPTIONS: FilterOption<StatusFilter>[] = [
   { value: "all", label: "All" },
@@ -420,15 +444,21 @@ const GOAL_OPTIONS: FilterOption<GoalFilter>[] = [
 const SORT_OPTIONS: FilterOption<SortKey>[] = [
   { value: "recent", label: "Recent first" },
   { value: "oldest", label: "Oldest first" },
-  { value: "impact", label: "By impact" },
-  { value: "scheduled", label: "By scheduled date" },
+  { value: "impact-desc", label: "Highest impact" },
+  { value: "impact-asc", label: "Lowest impact" },
+  { value: "time-desc", label: "Longest first" },
+  { value: "time-asc", label: "Shortest first" },
 ];
 
 const AllActions: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [goalFilter, setGoalFilter] = useState<GoalFilter>("all");
   const [dateFilter, setDateFilter] = useState<DateFilter>("all");
-  const [sortKey, setSortKey] = useState<SortKey>("recent");
+  const [sortKey, setSortKeyState] = useState<SortKey>(() => loadStoredSort());
+  const setSortKey = (v: SortKey) => {
+    setSortKeyState(v);
+    try { localStorage.setItem(SORT_STORAGE_KEY, v); } catch {}
+  };
   const [query, setQuery] = useState("");
   const [terminalCollapsed, setTerminalCollapsed] = useState(false);
 
@@ -462,24 +492,60 @@ const AllActions: React.FC = () => {
     return `${total} ACTIONS · ${active} ACTIVE · ${done} DONE · ${delegated} DELEGATED`;
   }, [ACTIONS]);
 
+  const createdAtById = useMemo(() => {
+    const m: Record<string, number> = {};
+    for (const a of storeActions) m[a.id] = new Date(a.createdAt).getTime();
+    return m;
+  }, [storeActions]);
+
   const sortFn = useMemo(() => {
+    const created = (a: Action) => createdAtById[a.id] ?? 0;
+    const tieBreak = (a: Action, b: Action) => {
+      const d = created(b) - created(a);
+      if (d !== 0) return d;
+      return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+    };
     return (a: Action, b: Action) => {
       switch (sortKey) {
-        case "oldest":
-          return a.changedSort - b.changedSort;
-        case "impact":
-          return (b.impact ?? 0) - (a.impact ?? 0);
-        case "scheduled": {
-          const sa = a.scheduledSort ?? Number.POSITIVE_INFINITY;
-          const sb = b.scheduledSort ?? Number.POSITIVE_INFINITY;
-          return sa - sb;
+        case "oldest": {
+          const d = created(a) - created(b);
+          return d !== 0 ? d : (a.id < b.id ? -1 : 1);
+        }
+        case "impact-desc": {
+          const d = (b.impact ?? 0) - (a.impact ?? 0);
+          return d !== 0 ? d : tieBreak(a, b);
+        }
+        case "impact-asc": {
+          const d = (a.impact ?? 0) - (b.impact ?? 0);
+          return d !== 0 ? d : tieBreak(a, b);
+        }
+        case "time-desc": {
+          // empty (0) sorts to end
+          const av = a.timeMinutes || 0;
+          const bv = b.timeMinutes || 0;
+          if (av === 0 && bv === 0) return tieBreak(a, b);
+          if (av === 0) return 1;
+          if (bv === 0) return -1;
+          const d = bv - av;
+          return d !== 0 ? d : tieBreak(a, b);
+        }
+        case "time-asc": {
+          const av = a.timeMinutes || 0;
+          const bv = b.timeMinutes || 0;
+          if (av === 0 && bv === 0) return tieBreak(a, b);
+          if (av === 0) return 1;
+          if (bv === 0) return -1;
+          const d = av - bv;
+          return d !== 0 ? d : tieBreak(a, b);
         }
         case "recent":
-        default:
-          return b.changedSort - a.changedSort;
+        default: {
+          const d = created(b) - created(a);
+          return d !== 0 ? d : (a.id < b.id ? -1 : 1);
+        }
       }
     };
-  }, [sortKey]);
+  }, [sortKey, createdAtById]);
 
   const grouped = useMemo(() => {
     if (statusFilter !== "all") {

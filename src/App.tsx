@@ -30,6 +30,8 @@ import SettingsSubscription from "./pages/SettingsSubscription.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Setup, { isSetupCompleted } from "./pages/Setup.tsx";
 import GoalBuilder from "./pages/GoalBuilder.tsx";
+import { NoGoalsLayout } from "./components/NoGoalsLayout";
+import { useStore } from "./store/useStore";
 import { ActionEditor } from "./components/ActionEditor";
 
 import { GoalEditor } from "./components/GoalEditor";
@@ -80,8 +82,29 @@ const SetupGuard = () => {
 
 const ChromeOnlyOutsideSetup: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { pathname } = useLocation();
+  const hasActiveGoal = useStore((s) => s.goals.some((g) => g.status === "active"));
   if (pathname.startsWith("/setup")) return null;
   if (pathname.startsWith("/onboarding")) return null;
+  // No-goals mode also hides global chrome.
+  if (!hasActiveGoal && !pathname.startsWith("/admin") && !pathname.startsWith("/settings")) return null;
+  return <>{children}</>;
+};
+
+/**
+ * When the user has zero active goals, the entire app is replaced by the
+ * goal-builder. The only exempt routes are /setup (first-run wizard),
+ * /admin (demo tooling), /settings (escape hatch from the avatar menu),
+ * and /onboarding/goal itself.
+ */
+const NoGoalsGate: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { pathname } = useLocation();
+  const hasActiveGoal = useStore((s) => s.goals.some((g) => g.status === "active"));
+  const exempt =
+    pathname.startsWith("/setup") ||
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/settings") ||
+    pathname.startsWith("/onboarding/goal");
+  if (!hasActiveGoal && !exempt) return <NoGoalsLayout />;
   return <>{children}</>;
 };
 
@@ -103,6 +126,7 @@ const App = () => (
           <MobileHeader />
           <ImpersonationBanner />
         </ChromeOnlyOutsideSetup>
+        <NoGoalsGate>
         <Routes>
           {/* Setup wizard (no chrome) */}
           <Route path="/setup" element={<Setup />} />
@@ -155,6 +179,7 @@ const App = () => (
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </NoGoalsGate>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

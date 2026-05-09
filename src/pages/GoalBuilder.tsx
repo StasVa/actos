@@ -269,7 +269,6 @@ const GoalStep: React.FC<{
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 16 }}>
           <PrimaryBtn onClick={submit} disabled={!title.trim()}>Create goal</PrimaryBtn>
-          <GhostLink onClick={onSkip}>Skip</GhostLink>
         </div>
       </div>
     </>

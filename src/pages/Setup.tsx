@@ -189,7 +189,9 @@ const WelcomeScreen: React.FC<{ name: string; onContinue: () => void }> = ({ nam
 
 const ThemeScreen: React.FC<{ onContinue: () => void; onBack: () => void }> = ({ onContinue, onBack }) => {
   const [choice, , setChoice] = useThemeChoice();
-  const [touched, setTouched] = React.useState(false);
+  // Wizard pre-selects Dark on entry (set by Setup root). Treat as a valid
+  // initial selection so Continue is enabled immediately.
+  const [touched, setTouched] = React.useState(true);
   const [hover, setHover] = React.useState<ThemeChoice | null>(null);
 
   // Hover preview: temporarily swap theme without persisting choice change.

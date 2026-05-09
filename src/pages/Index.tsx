@@ -32,32 +32,38 @@ const SampleDataBanner: React.FC = () => {
   );
   const clearSampleData = useStore((s) => s.clearSampleData);
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const isMobile = useIsMobile();
   if (!hasSample) return null;
   return (
     <>
       <div
         role="status"
+        className="sample-banner"
         style={{
+          position: "sticky",
+          top: 0,
+          zIndex: 30,
+          marginLeft: "calc(-1 * var(--page-pad))",
+          marginRight: "calc(-1 * var(--page-pad))",
+          marginTop: "-24px",
+          marginBottom: 16,
           background: "hsl(var(--surface-hover))",
           borderBottom: "1px solid hsl(var(--border-subtle))",
-          padding: "12px 24px",
-          minHeight: 44,
+          padding: "12px var(--page-pad)",
           display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
           fontFamily: "Inter", fontSize: 13,
           color: "hsl(var(--text-secondary))",
         }}
       >
-        <span>
-          {isMobile ? "Sample workspace" : "You're exploring a sample workspace."}
+        <span className="sample-banner-text">
+          You're exploring a sample workspace.
         </span>
         <button
           type="button"
           onClick={() => setConfirmOpen(true)}
-          className="group inline-flex items-center gap-1 transition-colors"
+          className="group inline-flex items-center gap-1 transition-colors hover:brightness-125"
           style={{
             background: "transparent", border: "none", cursor: "pointer",
-            padding: "8px 0", minHeight: 44,
+            padding: "10px 0", minHeight: 44, minWidth: 44,
             fontFamily: "Inter", fontSize: 13, fontWeight: 500,
             color: "hsl(var(--accent))",
           }}
@@ -1883,8 +1889,8 @@ const Index: React.FC = () => {
     <div className="min-h-screen bg-surface-base text-text-primary">
       <AppSidebar onOpenSettings={() => setSettingsOpen(true)} />
       <SettingsPanel open={settingsOpen} onOpenChange={setSettingsOpen} />
-      <SampleDataBanner />
       <main className={`app-main ${showPlanning ? "page-wide" : "page-medium"}`}>
+        <SampleDataBanner />
         {showPlanning ? (
           <PlanTodayPage
             onCancel={() => setPlanningMode(false)}

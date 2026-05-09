@@ -8,8 +8,16 @@ import type { Action, DayEntry, Goal, ID, ISODate, Project } from "@/types";
 import { DAY_TYPE_LABELS } from "./Index";
 import { getOutcomeSummary } from "@/lib/outcomeUtils";
 import { PageHeader } from "@/components/PageHeader";
-import { FilterDropdown, FilterOption } from "@/components/FilterDropdown";
+import { FilterDropdown } from "@/components/FilterDropdown";
 import { SortDropdown } from "@/components/SortDropdown";
+import {
+  REVIEW_SORT_OPTIONS,
+  ReviewSortKey,
+  computeAggregates,
+  loadReviewSort,
+  saveReviewSort,
+  sortReviewEntries,
+} from "@/lib/reviewSort";
 
 const TODAY = new Date();
 TODAY.setHours(0, 0, 0, 0);
@@ -85,11 +93,8 @@ const DAY_TYPE_FILTERS = [
   { value: "sick", label: "Sick" },
 ];
 
-type SortKey = "recent" | "oldest";
-const SORT_OPTIONS: FilterOption<SortKey>[] = [
-  { value: "recent", label: "Recent first" },
-  { value: "oldest", label: "Oldest first" },
-];
+type SortKey = ReviewSortKey;
+const SORT_OPTIONS = REVIEW_SORT_OPTIONS;
 
 const DayRowItem: React.FC<{
   row: DayRow;
@@ -197,7 +202,8 @@ const ReviewsDays: React.FC = () => {
   const [goalFilter, setGoalFilter] = React.useState<string>("all");
   const [range, setRange] = React.useState("30");
   const [search, setSearch] = React.useState("");
-  const [sortKey, setSortKey] = React.useState<SortKey>("recent");
+  const [sortKey, setSortKey] = React.useState<SortKey>(() => loadReviewSort("actos.reviews.days.sort"));
+  React.useEffect(() => saveReviewSort("actos.reviews.days.sort", sortKey), [sortKey]);
 
   const allRows = React.useMemo(
     () => buildDayRows(dayEntries, actions),
@@ -227,6 +233,16 @@ const ReviewsDays: React.FC = () => {
     }
     return true;
   });
+
+  const sorted = React.useMemo(() => {
+    const sortable = filtered.map((r) => {
+      const agg = computeAggregates(r.doneActions, r.delegatedActions);
+      const untracked = !r.entry && r.doneActions.length === 0 && r.delegatedActions.length === 0;
+      const periodStart = new Date(r.date + "T00:00:00").getTime();
+      return { item: r, periodStart, id: r.date, createdAt: periodStart, aggregates: agg, untracked };
+    });
+    return sortReviewEntries(sortable, sortKey);
+  }, [filtered, sortKey]);
 
   const lastActivity = allRows[0]?.date;
   const hasFilters =
@@ -286,7 +302,7 @@ const ReviewsDays: React.FC = () => {
               )}
             </div>
           ) : (
-            filtered.map((row) => (
+            sorted.map((row) => (
               <DayRowItem
                 key={row.date}
                 row={row}

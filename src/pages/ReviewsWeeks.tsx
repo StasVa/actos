@@ -16,6 +16,14 @@ import { getOutcomeSummary } from "@/lib/outcomeUtils";
 import { PageHeader } from "@/components/PageHeader";
 import { FilterDropdown } from "@/components/FilterDropdown";
 import { SortDropdown } from "@/components/SortDropdown";
+import {
+  REVIEW_SORT_OPTIONS,
+  ReviewSortKey,
+  computeAggregates,
+  loadReviewSort,
+  saveReviewSort,
+  sortReviewEntries,
+} from "@/lib/reviewSort";
 
 const RANGE_OPTIONS = [
   { value: "all", label: "All" },
@@ -60,6 +68,8 @@ const ReviewsWeeks: React.FC = () => {
 
   const [range, setRange] = React.useState("3m");
   const [goalFilter, setGoalFilter] = React.useState<string>("all");
+  const [sortKey, setSortKey] = React.useState<ReviewSortKey>(() => loadReviewSort("actos.reviews.weeks.sort"));
+  React.useEffect(() => saveReviewSort("actos.reviews.weeks.sort", sortKey), [sortKey]);
 
   const allWeeks = React.useMemo(
     () => getWeeksWithActivity(actions, dayEntries),
@@ -68,7 +78,7 @@ const ReviewsWeeks: React.FC = () => {
 
   const filteredWeeks = React.useMemo(() => {
     const cutoff = rangeStart(range);
-    return allWeeks.filter((yw) => {
+    const filtered = allWeeks.filter((yw) => {
       if (cutoff) {
         const d = dateFromYearWeek(yw);
         if (d && d < cutoff) return false;
@@ -80,7 +90,22 @@ const ReviewsWeeks: React.FC = () => {
       }
       return true;
     });
-  }, [allWeeks, range, goalFilter, actions, dayEntries, goals, projects, rituals]);
+    const sortable = filtered.map((yw) => {
+      const s = getWeekSummary(yw, { actions, dayEntries, goals, projects, rituals });
+      const done = s?.doneActions ?? [];
+      const delegated = s?.delegatedActions ?? [];
+      const periodStart = dateFromYearWeek(yw)?.getTime() ?? 0;
+      return {
+        item: yw,
+        periodStart,
+        id: yw,
+        createdAt: periodStart,
+        aggregates: computeAggregates(done, delegated),
+        untracked: !s,
+      };
+    });
+    return sortReviewEntries(sortable, sortKey);
+  }, [allWeeks, range, goalFilter, actions, dayEntries, goals, projects, rituals, sortKey]);
 
   const goalById = (id: string) => goals.find((g) => g.id === id);
 
@@ -107,6 +132,7 @@ const ReviewsWeeks: React.FC = () => {
               <FilterDropdown label="DATE" value={range} defaultValue={range} options={RANGE_OPTIONS} onChange={setRange} />
             </>
           }
+          sort={<SortDropdown<ReviewSortKey> value={sortKey} options={REVIEW_SORT_OPTIONS} onChange={setSortKey} />}
         />
         <div style={{ height: 24 }} />
 

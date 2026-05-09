@@ -3,12 +3,14 @@ import { Menu } from "lucide-react";
 import { emitAppEvent } from "@/lib/appEvents";
 
 /**
- * Mobile-only header with hamburger button. Renders nothing on desktop
- * (display: none via .mobile-hamburger CSS class).
+ * Global mobile-only hamburger button. Mounted once at the app shell so it
+ * appears on every route at ≤768px viewport. Fixed top-left of the viewport;
+ * `.app-main` mobile padding-top reserves space so it never overlaps page
+ * content. Renders nothing on desktop (display: none via .mobile-hamburger).
  */
-export const MobileHeader: React.FC<{ title?: string }> = ({ title }) => {
+export const MobileHeader: React.FC<{ title?: string }> = () => {
   return (
-    <div className="mobile-hamburger">
+    <div className="mobile-hamburger" aria-hidden={false}>
       <button
         type="button"
         aria-label="Open navigation"
@@ -17,11 +19,6 @@ export const MobileHeader: React.FC<{ title?: string }> = ({ title }) => {
       >
         <Menu size={20} />
       </button>
-      {title && (
-        <span className="text-[14px] font-medium text-text-primary truncate">
-          {title}
-        </span>
-      )}
     </div>
   );
 };

@@ -379,7 +379,10 @@ function ActionEditorPanel({
         firstFocus = firstFocus ?? "goal";
       }
       if (firstFocus === "title") titleRef.current?.focus();
-      else if (firstFocus === "impact") impactInputRef.current?.focus();
+      else if (firstFocus === "impact") {
+        const el = document.querySelector<HTMLInputElement>('input[aria-label="Impact"]');
+        el?.focus();
+      }
       else if (firstFocus === "goal") {
         goalPillRef.current?.focus();
         setGoalPopoverOpen(true);

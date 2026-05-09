@@ -4,6 +4,7 @@ import { FolderOpen, Target } from "lucide-react";
 import { useStore } from "@/store/useStore";
 import { AppSidebar } from "@/components/AppSidebar";
 import { SettingsPanel } from "@/components/SettingsPanel";
+import { PageHeader } from "@/components/PageHeader";
 import { TimeInvestmentSection } from "@/components/TimeInvestmentSection";
 import { ReturnDatePill } from "@/components/ReturnDatePill";
 import { timeInvestedMinutes, formatHM } from "@/lib/timeStats";

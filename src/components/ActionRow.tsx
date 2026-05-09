@@ -168,7 +168,11 @@ export const ActionRow: React.FC<ActionRowProps> = ({
               {action.title}
             </span>
           </div>
-          <div className="shrink-0">{renderPill(pill)}</div>
+          <div className="flex items-center gap-2 shrink-0">
+            <ImpactPill impact={action.impact} goalColor={color} dimmed={isTerminal} />
+            <TimePill minutes={action.timeEstimateMinutes} dimmed={isTerminal} />
+            {pill && <span className="ml-1">{renderPill(pill)}</span>}
+          </div>
         </div>
         {/* Bottom line */}
         {segs.length > 0 && (

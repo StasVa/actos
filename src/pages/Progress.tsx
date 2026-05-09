@@ -7,11 +7,11 @@ import { SettingsPanel } from "@/components/SettingsPanel";
 import { PageHeader } from "@/components/PageHeader";
 import { TimeInvestmentSection } from "@/components/TimeInvestmentSection";
 import { ReturnDatePill } from "@/components/ReturnDatePill";
+import { ProjectCard as SharedProjectCard } from "@/components/ProjectCard";
 import { timeInvestedMinutes, formatHM } from "@/lib/timeStats";
 import type { Action, Goal, Project } from "@/types";
 import {
   Hero,
-  ActiveProjects,
   SectionLabel,
 } from "./Index";
 

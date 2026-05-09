@@ -547,9 +547,9 @@ const Progress: React.FC = () => {
 
         <Hero />
         <div className="h-10" />
-        <ActiveProjectsScoped />
-        <div className="h-10" />
         <TimeInvestmentSection />
+        <div className="h-10" />
+        <ActiveProjectsScoped />
         <div className="h-10" />
         <RecentlyClosedHigherSection />
         <div className="h-10" />

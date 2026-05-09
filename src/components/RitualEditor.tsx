@@ -311,7 +311,7 @@ function RitualEditorPanel({
             <div>
               <SectionHeadRequired label="Estimates" required />
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <FieldRow label="Base Impact (1-10) · required">
+                <FieldRow label="Base Impact (1-10) · required" info={<MetricInfoPopover variant="ritualImpact" ariaLabel="What is Base Impact?" />}>
                   <ClampedNumberInput
                     value={baseImpact}
                     min={1}

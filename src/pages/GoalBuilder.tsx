@@ -694,7 +694,7 @@ const GoalBuilder: React.FC = () => {
     return (
       <ScreenWrap step={4} onBack={() => setPersisted({ step: 3, goalId: persisted.goalId, projectId: persisted.projectId })}>
         <ActionsStep
-          projectTitle={project?.title ?? "your project"}
+          goalTitle={goal?.title ?? goalDraft.title ?? "your goal"}
           onSubmit={onSubmit}
           onSkip={finish}
         />

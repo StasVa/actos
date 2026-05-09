@@ -20,6 +20,7 @@ import type { Action, ActionStatus, ID } from "@/types";
 import { ConfirmModal } from "./ConfirmModal";
 import { ClampedNumberInput } from "./ClampedNumberInput";
 import { EditorShell, EditorCloseX, EditorCancelButton } from "./EditorShell";
+import { MetricInfoPopover } from "./MetricInfoPopover";
 import {
   DropdownMenu,
   DropdownMenuTrigger,

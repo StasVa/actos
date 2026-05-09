@@ -627,83 +627,44 @@ const PlanForm: React.FC<{
                         className="flex-1 min-w-0 bg-transparent text-[14px] text-text-primary outline-none placeholder:text-text-tertiary"
                       />
                     </div>
-                    {/* Line 2: parent picker */}
-                    <div className="flex items-center gap-2 pl-[22px] flex-wrap">
-                      <span className="text-[12px] text-text-tertiary">in</span>
-                      {isSmartDefault ? (
-                        <>
-                          {quickGoalId && (
-                            <span className="flex items-center gap-1.5 min-w-0">
-                              <span
-                                className="inline-block rounded-full shrink-0"
-                                style={{
-                                  width: 8,
-                                  height: 8,
-                                  background: goalColor(quickGoalId),
-                                }}
-                              />
-                              <span
-                                className="font-mono text-[12px] text-text-secondary truncate"
-                                style={{ maxWidth: 120 }}
-                                title={goalById(quickGoalId)?.title}
-                              >
-                                {goalById(quickGoalId)?.title}
-                              </span>
-                            </span>
-                          )}
-                          {quickProjectId && (
-                            <>
-                              <span className="text-text-tertiary">·</span>
-                              <span
-                                className="font-mono text-[12px] text-text-secondary truncate"
-                                style={{ maxWidth: 120 }}
-                                title={projectById(quickProjectId)?.title}
-                              >
-                                {projectById(quickProjectId)?.title}
-                              </span>
-                            </>
-                          )}
-                          <button
-                            type="button"
-                            onClick={() => setQuickShowPickers(true)}
-                            className="ml-auto font-mono text-[11px] text-text-tertiary hover:text-text-secondary hover:underline"
-                          >
-                            Change
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <MiniDropdown
-                            value={quickGoalId ?? ""}
-                            showDot
-                            placeholder="Goal"
-                            options={activeGoals.map((g) => ({
-                              value: g.id,
-                              label: g.title,
-                              dot: goalColor(g.id),
-                            }))}
-                            onChange={(v) => {
-                              const gid = v || undefined;
-                              setQuickGoalId(gid);
-                              const proj = firstProjectForGoal(gid);
-                              setQuickProjectId(proj?.id);
-                            }}
-                          />
-                          <span className="text-text-tertiary">·</span>
-                          <MiniDropdown
-                            value={quickProjectId ?? ""}
-                            placeholder="No project"
-                            options={[
-                              { value: "", label: "No project" },
-                              ...projectsForQuickGoal.map((p) => ({
-                                value: p.id,
-                                label: p.title,
-                              })),
-                            ]}
-                            onChange={(v) => setQuickProjectId(v || undefined)}
-                          />
-                        </>
+                    {/* Line 2: parent picker — inline text triggers */}
+                    <div className="flex items-center gap-1.5 pl-[22px] flex-wrap">
+                      <span className="text-[13px] text-text-secondary">in</span>
+                      {quickGoalId && (
+                        <span
+                          className="inline-block rounded-full shrink-0"
+                          style={{ width: 8, height: 8, background: goalColor(quickGoalId) }}
+                        />
                       )}
+                      <InlineTextPicker
+                        value={quickGoalId ?? ""}
+                        showDot={false}
+                        placeholder="Pick goal"
+                        options={activeGoals.map((g) => ({
+                          value: g.id,
+                          label: g.title,
+                          dot: goalColor(g.id),
+                        }))}
+                        onChange={(v) => {
+                          const gid = v || undefined;
+                          setQuickGoalId(gid);
+                          const proj = firstProjectForGoal(gid);
+                          setQuickProjectId(proj?.id);
+                        }}
+                      />
+                      <span className="text-[13px] text-text-secondary">·</span>
+                      <InlineTextPicker
+                        value={quickProjectId ?? ""}
+                        placeholder="Pick project"
+                        options={[
+                          { value: "", label: "No project" },
+                          ...projectsForQuickGoal.map((p) => ({
+                            value: p.id,
+                            label: p.title,
+                          })),
+                        ]}
+                        onChange={(v) => setQuickProjectId(v || undefined)}
+                      />
                     </div>
                   </div>
                 </div>

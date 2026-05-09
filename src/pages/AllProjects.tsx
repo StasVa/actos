@@ -208,8 +208,14 @@ function isOpen(p: Project) {
 }
 
 const AllProjects: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const initialState = ((): StateFilter => {
+    const s = searchParams.get("state");
+    if (s === "open" || s === "near" || s === "stalled" || s === "closed" || s === "all") return s;
+    return "all";
+  })();
   const [goalFilter, setGoalFilter] = useState<GoalFilter>("all");
-  const [stateFilter, setStateFilter] = useState<StateFilter>("all");
+  const [stateFilter, setStateFilter] = useState<StateFilter>(initialState);
   const [query, setQuery] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("recent");
   const [archivedCollapsed, setArchivedCollapsed] = useState(false);

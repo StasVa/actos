@@ -126,7 +126,9 @@ function RitualEditorPanel({
   // Live multiplier preview from current totalCompletions.
   const completions = ritual?.totalCompletions ?? 0;
   const mult = ritualMultiplier(completions);
-  const effective = baseImpact * mult;
+  const baseImpactNum = baseImpact === "" ? 0 : Number(baseImpact);
+  const timeNum = timeMin === "" ? 0 : Number(timeMin);
+  const effective = baseImpactNum * mult;
 
   const persistField = <K extends keyof Ritual>(field: K, value: Ritual[K]) => {
     if (mode !== "edit" || !ritualId) return;
@@ -140,16 +142,52 @@ function RitualEditorPanel({
     });
   };
 
+  const missingForCreate = useMemo(() => {
+    const missing: string[] = [];
+    if (!title.trim()) missing.push("Title");
+    if (!(baseImpactNum >= 1 && baseImpactNum <= 10)) missing.push("Base Impact");
+    if (!(timeNum > 0)) missing.push("Time");
+    if (!goalId) missing.push("Goal");
+    if (!schedule) missing.push("Schedule");
+    return missing;
+  }, [title, baseImpactNum, timeNum, goalId, schedule]);
+  const canCreate = missingForCreate.length === 0;
+
   const handleSaveNew = () => {
-    if (!title.trim()) {
-      toast.error("Title is required");
+    if (!canCreate) {
+      let firstFocus: "title" | "impact" | "time" | "goal" | "schedule" | null = null;
+      if (!title.trim()) {
+        setTitleError("Add a title.");
+        firstFocus = firstFocus ?? "title";
+      }
+      if (!(baseImpactNum >= 1 && baseImpactNum <= 10)) {
+        setImpactError("Base Impact is required (1-10).");
+        firstFocus = firstFocus ?? "impact";
+      }
+      if (!(timeNum > 0)) {
+        setTimeError("Time is required.");
+        firstFocus = firstFocus ?? "time";
+      }
+      if (!goalId) {
+        setGoalError("Pick a goal.");
+        firstFocus = firstFocus ?? "goal";
+      }
+      if (!schedule) {
+        setScheduleError("Pick a schedule.");
+        firstFocus = firstFocus ?? "schedule";
+      }
+      if (firstFocus === "title") titleRef.current?.focus();
+      else if (firstFocus === "impact") {
+        document.querySelector<HTMLInputElement>('input[aria-label="Base Impact"]')?.focus();
+      } else if (firstFocus === "time") {
+        document.querySelector<HTMLInputElement>('input[aria-label="Time in minutes"]')?.focus();
+      } else if (firstFocus === "goal") {
+        goalPillRef.current?.focus();
+        setGoalPopoverOpen(true);
+      }
       return;
     }
-    if (!goalId) {
-      toast.error("Pick a goal");
-      return;
-    }
-    const newId = createRitual({
+    createRitual({
       title: title.trim(),
       goalId,
       projectId,
@@ -158,14 +196,13 @@ function RitualEditorPanel({
         weekday: schedule === "weekly" ? weekday : undefined,
         monthDay: schedule === "monthly" ? monthDay : undefined,
         customDays: schedule === "custom" ? customDays : undefined,
-        timeOfDay: timeOfDay || undefined,
       },
-      baseImpact,
+      baseImpact: baseImpactNum,
       notes: notes || undefined,
-      timeEstimateMinutes: timeMin === "" ? undefined : Number(timeMin),
+      timeEstimateMinutes: Number(timeMin),
     });
-    toast("Ritual created");
-    useStore.getState().openPanel({ kind: "ritual", mode: "edit", id: newId });
+    toast(`Ritual "${title.trim()}" created`);
+    onClose();
   };
 
   const handleMarkDone = () => {

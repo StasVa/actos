@@ -146,9 +146,9 @@ export default function Settings() {
               </div>
 
               <ToggleRow
-                label="Pro tier (preview Pro UI)"
-                checked={settings.subscriptionTier === "pro"}
-                onChange={(v) => setSubscriptionTier(v ? "pro" : "free")}
+                label="All-In tier (preview All-In UI)"
+                checked={settings.subscriptionTier === "all-in"}
+                onChange={(v) => setSubscriptionTier(v ? "all-in" : "free")}
               />
               <div className="my-3 border-t border-border-subtle" />
               <ToggleRow

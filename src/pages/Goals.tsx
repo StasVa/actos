@@ -525,7 +525,9 @@ const Goals: React.FC = () => {
   const totalActive = goals.filter((g) => g.status === "active").length;
   const totalCompleted = goals.filter((g) => g.status === "completed").length;
   const totalAll = goals.length;
-  const ghostDisabled = totalActive >= 3;
+  const isFree = settings.subscriptionTier !== "all-in";
+  const goalLimit = isFree ? 2 : 3;
+  const ghostDisabled = totalActive >= goalLimit;
 
   const noResults = sorted.length === 0;
   const noGoalsAtAll = goals.length === 0;
@@ -542,10 +544,11 @@ const Goals: React.FC = () => {
             label: "+ New goal",
             onClick: () => useStore.getState().openPanel({ kind: "goal", mode: "new" }),
             ariaLabel: "New goal",
-            disabled: ghostDisabled,
-            disabledTooltip: ghostDisabled
-              ? "You have 3 active goals. Complete or drop one to add another."
-              : undefined,
+            disabled: ghostDisabled && !isFree,
+            disabledTooltip:
+              ghostDisabled && !isFree
+                ? "You have 3 active goals. Complete or drop one to add another."
+                : undefined,
           }}
           filters={
             <>
@@ -569,6 +572,19 @@ const Goals: React.FC = () => {
             <SortDropdown<SortKey> value={sortKey} options={SORT_OPTIONS} onChange={setSortKey} />
           }
         />
+
+        {isFree && (
+          <div className="mt-2 text-[12px] text-text-tertiary">
+            {totalActive} of {goalLimit} goals active ·{" "}
+            <Link
+              to="/settings/subscription"
+              className="underline hover:text-text-secondary transition-colors"
+            >
+              Go All-In
+            </Link>{" "}
+            for 3.
+          </div>
+        )}
 
         <div style={{ height: 24 }} />
 

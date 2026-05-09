@@ -532,7 +532,7 @@ const Pills: React.FC = () => (
 
     <Sample name="Tier badge">
       <Cell label="Free"><TierBadge tier="free" /></Cell>
-      <Cell label="Pro"><TierBadge tier="pro" /></Cell>
+      <Cell label="All-In"><TierBadge tier="all-in" /></Cell>
     </Sample>
   </Section>
 );
@@ -893,7 +893,7 @@ const Avatars: React.FC = () => (
     </Sample>
     <Sample name="Tier badge inline">
       <Cell label="Free"><TierBadge tier="free" /></Cell>
-      <Cell label="Pro"><TierBadge tier="pro" /></Cell>
+      <Cell label="All-In"><TierBadge tier="all-in" /></Cell>
     </Sample>
   </Section>
 );

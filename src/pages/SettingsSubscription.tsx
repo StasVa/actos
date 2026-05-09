@@ -1,81 +1,74 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useStore } from "@/store/useStore";
 import { TierBadge } from "@/components/UserMenu";
 import { ConfirmModal } from "@/components/ConfirmModal";
+import { toast } from "sonner";
 
-const FEATURES_FREE = [
-  "Up to 3 active goals",
-  "Unlimited actions, projects, ideas",
-  "Local data storage",
-  "Daily planning and reviews",
-  "Focus sessions",
+const FREE_FEATURES = [
+  "Up to 2 active goals",
+  "All current features",
+  "Last 90 days of history",
+  "Standard support",
 ];
 
-const FEATURES_PRO_EXTRA = [
-  "Cloud sync across devices",
-  "Unlimited goals",
+const ALL_IN_FEATURES = [
+  "Up to 3 active goals",
+  "All current features",
+  "Full history forever",
   "Priority support",
-  "Early access to new features",
+  "Every future feature, included",
 ];
 
 const Check: React.FC = () => (
   <span style={{ color: "hsl(var(--state-active))", fontWeight: 600 }}>✓</span>
 );
 
-const PlanCard: React.FC<{
-  name: "Free" | "Pro";
-  price: string;
-  features: string[];
-  current: boolean;
-  footer: React.ReactNode;
-}> = ({ name, price, features, current, footer }) => (
-  <div
-    className="flex-1 rounded-[6px] bg-surface-raised flex flex-col"
-    style={{
-      padding: 24,
-      border: current ? "1px solid hsl(var(--accent))" : "1px solid hsl(var(--border-subtle))",
-    }}
-  >
-    <div className="flex items-center justify-between">
-      <div className="text-[18px] font-medium text-text-primary">{name}</div>
-      <TierBadge tier={name === "Pro" ? "pro" : "free"} />
-    </div>
-    <div className="mt-3 flex items-baseline gap-1">
-      <span
-        className="text-[32px] font-medium text-text-primary tabular-nums"
-        style={{ lineHeight: 1 }}
-      >
-        {price}
-      </span>
-      <span className="text-[14px] text-text-tertiary">/month</span>
-    </div>
-    <ul className="mt-4 space-y-2 text-[13px] text-text-secondary">
-      {features.map((f) => (
-        <li key={f} className="flex items-start gap-2">
-          <Check />
-          <span>{f}</span>
-        </li>
-      ))}
-    </ul>
-    <div className="mt-4">{footer}</div>
-  </div>
+const FeatureList: React.FC<{ items: string[] }> = ({ items }) => (
+  <ul className="mt-4 space-y-2 text-[13px] text-text-secondary">
+    {items.map((f) => (
+      <li key={f} className="flex items-start gap-2">
+        <Check />
+        <span>{f}</span>
+      </li>
+    ))}
+  </ul>
 );
 
 export default function SettingsSubscription() {
   const settings = useStore((s) => s.settings);
-  const tier: "free" | "pro" = settings.subscriptionTier === "pro" ? "pro" : "free";
+  const setSubscriptionTier = useStore((s) => s.setSubscriptionTier);
+  const navigate = useNavigate();
+  const tier: "free" | "all-in" = settings.subscriptionTier === "all-in" ? "all-in" : "free";
+  const isAllIn = tier === "all-in";
+
+  const [confirmUpgrade, setConfirmUpgrade] = React.useState(false);
+  const [downgradeOpen, setDowngradeOpen] = React.useState(false);
+  const [downgradeText, setDowngradeText] = React.useState("");
   const [demoModal, setDemoModal] = React.useState<null | { title: string; body: string }>(null);
 
-  const isPro = tier === "pro";
+  const handleUpgrade = () => {
+    setConfirmUpgrade(false);
+    // Demo: flip tier locally and show welcome toast.
+    setSubscriptionTier("all-in");
+    toast.success("Welcome to All-In. Full history is back.");
+    setTimeout(() => navigate("/today"), 400);
+  };
+
+  const handleDowngrade = () => {
+    if (downgradeText.trim().toUpperCase() !== "DOWNGRADE") return;
+    setSubscriptionTier("free");
+    setDowngradeOpen(false);
+    setDowngradeText("");
+    toast("Switched to Free. Your data is safe.");
+  };
 
   return (
     <div className="min-h-screen bg-surface-base text-text-primary">
       <AppSidebar />
       <main className="app-main page-medium">
         <div className="max-w-[720px]">
-          {/* Breadcrumb */}
           <Link
             to="/settings"
             className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary hover:text-text-primary transition-colors"
@@ -85,112 +78,226 @@ export default function SettingsSubscription() {
           <h1 className="mt-2 text-[24px] sm:text-[28px] md:text-[32px] font-medium text-text-primary leading-tight">
             Subscription
           </h1>
-          <div className="mt-2 text-[14px] text-text-secondary">Manage your plan.</div>
+          <div className="mt-2 text-[14px] text-text-secondary">
+            {isAllIn ? "You're All-In." : "You're on Free."}
+          </div>
           <div className="mt-4 border-t border-border-subtle" />
 
-          {/* Current plan card */}
+          {/* Free card */}
           <div
             className="mt-6 rounded-[6px] bg-surface-raised"
-            style={{ padding: 24, border: "1px solid hsl(var(--border-subtle))" }}
+            style={{
+              padding: 24,
+              border: "1px solid hsl(var(--border-subtle))",
+              opacity: isAllIn ? 0.7 : 1,
+            }}
           >
             <div className="flex items-center justify-between gap-3">
-              <div className="text-[20px] font-medium text-text-primary">
-                {isPro ? "Pro plan" : "Free plan"}
-              </div>
-              <TierBadge tier={tier} />
-            </div>
-            <div className="mt-2 text-[13px] text-text-secondary">
-              {isPro
-                ? "Everything in Free, plus cloud sync, larger limits, and priority support."
-                : "Core features. Local data only."}
+              <div className="text-[20px] font-medium text-text-primary">Free plan</div>
+              <TierBadge tier="free" />
             </div>
             <div
-              className="mt-3 font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary"
+              className="mt-1 font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary"
             >
-              {isPro ? "ACTIVE · NEXT BILLING 2026-06-08" : "ACTIVE · NO PAYMENT REQUIRED"}
+              {isAllIn ? "AVAILABLE — DOWNGRADE" : "ACTIVE · NO PAYMENT"}
             </div>
+            <FeatureList items={FREE_FEATURES} />
+            {isAllIn && (
+              <button
+                type="button"
+                onClick={() => setDowngradeOpen(true)}
+                className="mt-4 h-9 px-3 text-[13px] rounded-[4px] text-text-tertiary hover:text-text-primary hover:bg-surface-hover transition-colors"
+              >
+                Switch to Free
+              </button>
+            )}
           </div>
 
-          {/* Plans comparison */}
-          <div className="mt-6">
-            <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
-              PLANS
+          {/* All-In card */}
+          <div
+            className="mt-4 rounded-[6px] bg-surface-raised"
+            style={{
+              padding: 24,
+              border: "1px solid hsl(var(--accent))",
+              boxShadow: "0 0 0 1px hsl(var(--accent) / 0.08)",
+            }}
+          >
+            <div className="flex items-center justify-between gap-3">
+              <div
+                className="text-[20px] font-medium"
+                style={{ color: "hsl(var(--accent))", fontWeight: 600 }}
+              >
+                {isAllIn ? "Your plan: All-In" : "Go All-In — $12/mo"}
+              </div>
+              <TierBadge tier="all-in" />
             </div>
-            <div className="mt-1 text-[14px] text-text-secondary">Compare what's included.</div>
+            <div className="mt-2 text-[13px] text-text-secondary">
+              {isAllIn
+                ? "Active · Next billing 2026-06-08 · $12/mo"
+                : "Everything we ever build."}
+            </div>
+            <FeatureList items={ALL_IN_FEATURES} />
 
-            <div className="mt-4 flex flex-col md:flex-row gap-4 items-stretch">
-              <PlanCard
-                name="Free"
-                price="$0"
-                features={FEATURES_FREE}
-                current={!isPro}
-                footer={
-                  !isPro ? (
-                    <button
-                      type="button"
-                      disabled
-                      className="w-full h-9 text-[13px] font-medium rounded-[4px] text-text-secondary"
-                      style={{ cursor: "default" }}
-                    >
-                      Current plan
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setDemoModal({
-                          title: "Downgrade unavailable",
-                          body: "Downgrades will be available soon.",
-                        })
-                      }
-                      className="w-full h-9 text-[13px] rounded-[4px] text-text-tertiary hover:text-text-primary hover:bg-surface-hover transition-colors"
-                    >
-                      Downgrade to Free
-                    </button>
-                  )
-                }
-              />
-              <PlanCard
-                name="Pro"
-                price="$8"
-                features={[...FEATURES_FREE, ...FEATURES_PRO_EXTRA]}
-                current={isPro}
-                footer={
-                  !isPro ? (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setDemoModal({
-                          title: "Pro is coming soon",
-                          body: "We'll email you when it's ready.",
-                        })
-                      }
-                      className="w-full h-9 text-[13px] font-medium rounded-[4px] text-white transition-colors"
-                      style={{ background: "hsl(var(--accent))" }}
-                    >
-                      Upgrade to Pro
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setDemoModal({
-                          title: "Manage subscription",
-                          body: "Subscription management is coming soon.",
-                        })
-                      }
-                      className="w-full h-9 text-[13px] font-medium rounded-[4px] text-text-primary hover:bg-surface-hover transition-colors"
-                      style={{ border: "1px solid hsl(var(--border-default))" }}
-                    >
-                      Manage subscription
-                    </button>
-                  )
-                }
-              />
+            {!isAllIn ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setConfirmUpgrade(true)}
+                  className="mt-5 w-full h-10 text-[14px] font-medium rounded-[4px] text-white transition-colors"
+                  style={{ background: "hsl(var(--accent))" }}
+                >
+                  Go All-In — $12/mo
+                </button>
+                <div className="mt-3 flex items-center justify-between text-[12px] text-text-tertiary">
+                  <span>Save 17% with annual — $120/yr (vs. $144 monthly)</span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setDemoModal({
+                        title: "Annual billing coming soon",
+                        body: "We'll email you when annual is live.",
+                      })
+                    }
+                    className="text-text-secondary hover:text-text-primary transition-colors"
+                  >
+                    Switch to annual →
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className="mt-5 flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setDemoModal({
+                      title: "Manage subscription",
+                      body: "Subscription management is coming soon.",
+                    })
+                  }
+                  className="h-9 px-3 text-[13px] font-medium rounded-[4px] text-text-primary hover:bg-surface-hover transition-colors"
+                  style={{ border: "1px solid hsl(var(--border-default))" }}
+                >
+                  Manage subscription
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setDemoModal({
+                      title: "Annual billing coming soon",
+                      body: "We'll email you when annual is live.",
+                    })
+                  }
+                  className="h-9 px-3 text-[13px] rounded-[4px] text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-colors"
+                >
+                  Switch to annual
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Lifetime card — secondary */}
+          <div
+            className="mt-4 rounded-[6px] bg-surface-raised"
+            style={{
+              padding: 20,
+              border: "1px solid hsl(var(--border-subtle))",
+            }}
+          >
+            <div className="flex items-baseline justify-between gap-3">
+              <div className="text-[15px] font-medium text-text-primary">
+                All-In Lifetime — $200 once
+              </div>
+              <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">
+                LIMITED
+              </span>
             </div>
+            <div className="mt-1 text-[13px] text-text-secondary">
+              For believers. Pay once, never billed again, every feature ever.
+            </div>
+            <button
+              type="button"
+              onClick={() =>
+                setDemoModal({
+                  title: "Lifetime is coming soon",
+                  body: "We'll email you when Lifetime opens.",
+                })
+              }
+              className="mt-3 h-9 px-3 text-[13px] rounded-[4px] text-text-primary hover:bg-surface-hover transition-colors"
+              style={{ border: "1px solid hsl(var(--border-default))" }}
+            >
+              Go Lifetime
+            </button>
+          </div>
+
+          {/* Footer */}
+          <div className="mt-8 text-[12px] text-text-tertiary">
+            Questions about subscription? hello@actos.app
           </div>
         </div>
       </main>
+
+      <ConfirmModal
+        open={confirmUpgrade}
+        title="Subscribe to All-In?"
+        body="$12/mo, billed monthly. Cancel anytime."
+        confirmLabel="Subscribe"
+        cancelLabel="Cancel"
+        onCancel={() => setConfirmUpgrade(false)}
+        onConfirm={handleUpgrade}
+      />
+
+      {/* Downgrade — Tier 2 (type DOWNGRADE) */}
+      {downgradeOpen && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center"
+          style={{ background: "var(--backdrop)" }}
+          onClick={() => setDowngradeOpen(false)}
+        >
+          <div
+            className="w-[460px] max-w-[90vw] bg-surface-elevated border border-border-subtle rounded-[6px] p-6 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-[16px] font-medium text-text-primary">Downgrade to Free?</h2>
+            <div className="mt-3 text-[13px] text-text-secondary leading-[1.5]">
+              You'll keep all your data, but: history older than 90 days will be locked, and you
+              can't add new goals if you have 3 active. You can return to All-In anytime.
+            </div>
+            <div className="mt-4 text-[12px] text-text-tertiary">
+              Type <span className="font-mono text-text-secondary">DOWNGRADE</span> to confirm.
+            </div>
+            <input
+              autoFocus
+              value={downgradeText}
+              onChange={(e) => setDowngradeText(e.target.value)}
+              className="mt-2 w-full h-9 px-3 rounded-[4px] bg-surface-base border border-border-default text-[13px] text-text-primary focus:outline-none focus:border-accent"
+            />
+            <div className="mt-6 flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setDowngradeOpen(false);
+                  setDowngradeText("");
+                }}
+                className="text-[13px] text-text-secondary hover:text-text-primary transition-colors px-3 py-1.5"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={downgradeText.trim().toUpperCase() !== "DOWNGRADE"}
+                onClick={handleDowngrade}
+                className="text-[13px] font-medium px-3 py-1.5 rounded-[4px] transition-colors disabled:opacity-40"
+                style={{
+                  color: "hsl(var(--text-warning))",
+                  background: "hsl(var(--surface-hover))",
+                }}
+              >
+                Downgrade
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <ConfirmModal
         open={!!demoModal}

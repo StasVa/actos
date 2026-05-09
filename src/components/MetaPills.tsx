@@ -76,3 +76,32 @@ export const TimePill: React.FC<{
     </span>
   );
 };
+
+/**
+ * MultiplierPill — goal-tinted pill showing ritual multiplier (e.g. "×1.10").
+ * Fixed 56px wide so it aligns with ImpactPill (40) + TimePill (64) clusters.
+ */
+export const MultiplierPill: React.FC<{
+  multiplier: number;
+  goalColor: string;
+  dimmed?: boolean;
+}> = ({ multiplier, goalColor, dimmed = false }) => {
+  return (
+    <span
+      className="inline-flex items-center justify-center font-medium tabular-nums shrink-0"
+      style={{
+        padding: "4px 8px",
+        borderRadius: 4,
+        fontSize: 12,
+        width: 56,
+        textAlign: "center",
+        boxSizing: "border-box",
+        background: `color-mix(in srgb, ${goalColor} 15%, transparent)`,
+        color: goalColor,
+        opacity: dimmed ? 0.5 : 1,
+      }}
+    >
+      ×{multiplier.toFixed(2)}
+    </span>
+  );
+};

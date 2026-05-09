@@ -14,6 +14,7 @@ import { PlanTodayPage } from "@/components/PlanCloseModals";
 import { CloseDayRecap } from "@/components/CloseDayRecap";
 import { ActionRow as SharedActionRow } from "@/components/ActionRow";
 import { ProjectCard as SharedProjectCard } from "@/components/ProjectCard";
+import { MultiplierPill, TimePill as SharedTimePill } from "@/components/MetaPills";
 
 import { toast } from "sonner";
 import { subscribeAppEvent } from "@/lib/appEvents";
@@ -1177,18 +1178,11 @@ export const TodayZone: React.FC<{
                 const bottom: React.ReactNode[] = [];
                 if (goal) bottom.push(<span key="g">{goal.title}</span>);
                 if (project) bottom.push(<span key="p">{project.title}</span>);
-                if (a.timeEstimateMinutes && a.timeEstimateMinutes > 0)
-                  bottom.push(
-                    <span key="t" className="tabular-nums">
-                      {formatTime(a.timeEstimateMinutes)}
-                    </span>,
-                  );
                 return (
                   <SharedActionRow
                     key={a.id}
                     action={a}
                     isMainTask={a.id === mainTaskId}
-                    rightPill={{ kind: "custom", node: <ImpactPill impact={a.impact} color={colorVar(a.goalId)} /> }}
                     bottomSegments={bottom}
                     onClick={() => openPanel({ kind: "action", mode: "edit", id: a.id })}
                     onToggleDone={() => handleToggleDone(a.id)}
@@ -1351,20 +1345,9 @@ export const TodayZone: React.FC<{
                           </span>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3 shrink-0">
-                        <span
-                          className="font-medium tabular-nums text-center"
-                          style={{
-                            padding: "4px 10px",
-                            borderRadius: 4,
-                            fontSize: 13,
-                            minWidth: 52,
-                            background: `color-mix(in srgb, ${color}, transparent 85%)`,
-                            color: color,
-                          }}
-                        >
-                          ×{mult.toFixed(2)}
-                        </span>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <MultiplierPill multiplier={mult} goalColor={color} dimmed={isTerminal} />
+                        <SharedTimePill minutes={r.timeEstimateMinutes} dimmed={isTerminal} />
                         {doneToday ? (
                           <button
                             type="button"

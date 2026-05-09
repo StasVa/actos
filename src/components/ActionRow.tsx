@@ -12,7 +12,8 @@ import React from "react";
 import { Star } from "lucide-react";
 import { useStore } from "@/store/useStore";
 import type { Action } from "@/types";
-import { formatTime } from "@/lib/format";
+
+import { ImpactPill, TimePill } from "@/components/MetaPills";
 
 type RightPill =
   | { kind: "date"; label: string } // "TODAY", "MAY 12"
@@ -82,25 +83,14 @@ export const ActionRow: React.FC<ActionRowProps> = ({
     }
   }
 
-  // Default bottom segments.
+  // Default bottom segments. Time and Impact moved to right-side pill cluster
+  // — only Goal · Project · → Delegate live in the meta line.
   const segs: React.ReactNode[] =
     bottomSegments ??
     (() => {
       const out: React.ReactNode[] = [];
       if (goal) out.push(<span key="g">{goal.title}</span>);
       if (project) out.push(<span key="p">{project.title}</span>);
-      if (action.impact && action.impact > 0)
-        out.push(
-          <span key="i" className="tabular-nums">
-            I{action.impact}
-          </span>,
-        );
-      if (action.timeEstimateMinutes && action.timeEstimateMinutes > 0)
-        out.push(
-          <span key="t" className="tabular-nums">
-            {formatTime(action.timeEstimateMinutes)}
-          </span>,
-        );
       if (action.status === "delegated" && action.delegateName)
         out.push(<span key="d">→ {action.delegateName}</span>);
       return out;
@@ -178,7 +168,11 @@ export const ActionRow: React.FC<ActionRowProps> = ({
               {action.title}
             </span>
           </div>
-          <div className="shrink-0">{renderPill(pill)}</div>
+          <div className="flex items-center gap-2 shrink-0">
+            <ImpactPill impact={action.impact} goalColor={color} dimmed={isTerminal} />
+            <TimePill minutes={action.timeEstimateMinutes} dimmed={isTerminal} />
+            {pill && <span className="ml-1">{renderPill(pill)}</span>}
+          </div>
         </div>
         {/* Bottom line */}
         {segs.length > 0 && (

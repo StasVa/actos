@@ -13,6 +13,7 @@ import {
 } from "@/lib/actionsData";
 import { LifetimeCounters } from "@/components/LifetimeCounters";
 import { formatTime } from "@/lib/format";
+import { ImpactPill, TimePill } from "@/components/MetaPills";
 import { FilterDropdown, FilterOption } from "@/components/FilterDropdown";
 import { SortDropdown } from "@/components/SortDropdown";
 import { useStore } from "@/store/useStore";
@@ -109,13 +110,10 @@ const ActionRow: React.FC<{ action: Action; selected: boolean; onSelect: () => v
   const bottomBits: React.ReactNode[] = [];
   bottomBits.push(<span key="goal">{goal.name}</span>);
   bottomBits.push(<span key="proj">{action.project}</span>);
-  if (action.timeMinutes) bottomBits.push(<span key="time" className="tabular-nums">{formatTime(action.timeMinutes)}</span>);
   if (action.status === "delegated" && action.delegate)
     bottomBits.push(<span key="del">→ {action.delegate}</span>);
 
-  const goalVar = `--goal-${action.goal === "g1" ? 1 : action.goal === "g2" ? 2 : 3}`;
-  const impactBg = `color-mix(in srgb, hsl(var(${goalVar})) 15%, transparent)`;
-  const impactFg = `hsl(var(${goalVar}))`;
+  const goalColorCss = goal.color;
 
   return (
     <div
@@ -165,24 +163,9 @@ const ActionRow: React.FC<{ action: Action; selected: boolean; onSelect: () => v
               {action.title}
             </span>
           </div>
-          <div className="shrink-0 ml-3">
-            {action.impact ? (
-              <span
-                className="inline-flex items-center justify-center font-medium tabular-nums"
-                style={{
-                  background: impactBg,
-                  color: impactFg,
-                  fontSize: 13,
-                  padding: "4px 10px",
-                  borderRadius: 4,
-                  minWidth: 36,
-                  textAlign: "center",
-                  opacity: isTerminal ? 0.5 : 1,
-                }}
-              >
-                I{action.impact}
-              </span>
-            ) : null}
+          <div className="shrink-0 ml-3 flex items-center gap-2">
+            <ImpactPill impact={action.impact} goalColor={goalColorCss} dimmed={isTerminal} />
+            <TimePill minutes={action.timeMinutes} dimmed={isTerminal} />
           </div>
         </div>
         {/* Bottom row */}

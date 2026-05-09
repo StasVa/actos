@@ -32,7 +32,6 @@ const SampleDataBanner: React.FC = () => {
   );
   const clearSampleData = useStore((s) => s.clearSampleData);
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const isMobile = useIsMobile();
   if (!hasSample) return null;
   return (
     <>

@@ -192,14 +192,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ projectId, goalLabel, 
           {/* Measure bars */}
           <div className="mt-4 flex flex-col gap-2 min-w-0">
             <MeasureBar label="VALUE" percentage={progress.outcome} color={goalColor} />
-            <div className="flex items-center gap-2">
-              <div className="flex-1 min-w-0">
-                <MeasureBar label="EFFORT" percentage={progress.effort} color={goalColor} opacity={0.6} />
-              </div>
-              <div onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
-                <MetricInfoPopover variant="valueEffort" ariaLabel="What do Value and Effort mean?" />
-              </div>
-            </div>
+            <MeasureBar label="EFFORT" percentage={progress.effort} color={goalColor} opacity={0.6} />
           </div>
 
           {/* Stat rows */}

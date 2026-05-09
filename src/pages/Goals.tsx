@@ -272,14 +272,7 @@ const GoalCard: React.FC<{ m: GoalMeta; logTimeOn: boolean }> = ({ m, logTimeOn 
           {/* Section 3 — Bars */}
           <div className="flex flex-col gap-2">
             <MeasureBar label="VALUE" percentage={outcome} color={color} />
-            <div className="flex items-center gap-2">
-              <div className="flex-1 min-w-0">
-                <MeasureBar label="EFFORT" percentage={effort} color={color} opacity={0.6} />
-              </div>
-              <div data-no-nav onClick={(e) => e.stopPropagation()}>
-                <MetricInfoPopover variant="valueEffort" ariaLabel="What do Value and Effort mean?" />
-              </div>
-            </div>
+            <MeasureBar label="EFFORT" percentage={effort} color={color} opacity={0.6} />
           </div>
 
           {/* Section 4 — Stats */}

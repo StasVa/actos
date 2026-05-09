@@ -575,8 +575,8 @@ const Goals: React.FC = () => {
         {noGoalsAtAll ? (
           <EmptyState
             headline="No goals yet."
-            description="Goals are the top of the hierarchy — the outcomes you're working toward. You can have up to 3 active goals at a time."
-            ctaLabel="+ New goal"
+            description={`A goal is a result you want to reach — like "Reach 100k YouTube subscribers" or "Pass C1 Spanish proficiency exam." Not a deliverable or activity — a result.\n\nYou can have up to 3 active goals.`}
+            ctaLabel="+ Create your first goal"
             onCta={() => useStore.getState().openPanel({ kind: "goal", mode: "new" })}
           />
         ) : noResults ? (

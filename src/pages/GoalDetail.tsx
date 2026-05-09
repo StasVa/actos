@@ -86,10 +86,10 @@ const SuccessCriteria: React.FC<{ goal: Goal }> = ({ goal }) => {
 
 /* ===== Hero state ===== */
 const Pillar: React.FC<{ label: string; value: string; sub: string }> = ({ label, value, sub }) => (
-  <div className="flex flex-col">
+  <div className="flex flex-col min-w-0">
     <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">{label}</div>
     <div className="text-[26px] font-medium text-text-primary leading-tight tabular-nums mt-1.5">{value}</div>
-    <div className="font-mono text-[11px] text-text-tertiary mt-1">{sub}</div>
+    <div className="font-mono text-[11px] text-text-tertiary mt-1 break-words">{sub}</div>
   </div>
 );
 

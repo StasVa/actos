@@ -511,7 +511,6 @@ const AllActions: React.FC = () => {
   return (
     <div className="min-h-screen bg-surface-base text-text-primary">
       <AppSidebar />
-      <MobileHeader />
       <main className="app-main page-medium flex flex-col h-screen">
         <div className="px-4 md:px-10 pt-6 pb-4 shrink-0">
           <PageHeader

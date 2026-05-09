@@ -289,6 +289,13 @@ const GoalStep: React.FC<{
             })}
           </div>
         </div>
+        <div style={{
+          fontSize: 13, color: "hsl(var(--text-tertiary))",
+          fontStyle: "italic", lineHeight: 1.5, maxWidth: 560,
+        }}>
+          Tip: once created, you can add success criteria — up to 5 concrete signs
+          you've reached this goal. They make "done" specific.
+        </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6 }}>
           <PrimaryBtn onClick={submit} disabled={!title.trim()}>Create goal</PrimaryBtn>
           <GhostBtn onClick={onSkip}>Skip</GhostBtn>

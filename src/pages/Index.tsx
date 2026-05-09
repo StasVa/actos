@@ -22,8 +22,6 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 export const TODAY_ISO = new Date().toISOString().slice(0, 10);
 
-const SAMPLE_BANNER_KEY = "actos.coachmark.sample-data-banner";
-
 const SampleDataBanner: React.FC = () => {
   const hasSample = useStore((s) =>
     s.goals.some((g) => g.isSample) ||
@@ -32,48 +30,62 @@ const SampleDataBanner: React.FC = () => {
     s.rituals.some((r) => r.isSample) ||
     s.ideas.some((i) => i.isSample),
   );
-  const [dismissed, setDismissed] = useState<boolean>(() => {
-    try { return localStorage.getItem(SAMPLE_BANNER_KEY) === "dismissed"; }
-    catch { return false; }
-  });
-  if (!hasSample || dismissed) return null;
+  const clearSampleData = useStore((s) => s.clearSampleData);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const isMobile = useIsMobile();
+  if (!hasSample) return null;
   return (
-    <div
-      role="status"
-      style={{
-        background: "hsl(var(--surface-hover))",
-        borderBottom: "1px solid hsl(var(--border-subtle))",
-        padding: "12px 16px",
-        display: "flex", alignItems: "center", gap: 12,
-        fontFamily: "Inter", fontSize: 13,
-        color: "hsl(var(--text-secondary))",
-      }}
-    >
-      <span style={{ flex: 1 }}>
-        These are sample goals and tasks.{" "}
-        <Link
-          to="/settings"
-          style={{ color: "hsl(var(--text-primary))", textDecoration: "underline", textUnderlineOffset: 2 }}
-        >
-          Clear them in Settings → Data
-        </Link>{" "}
-        when you're ready to start your own.
-      </span>
-      <button
-        type="button"
-        aria-label="Dismiss banner"
-        onClick={() => {
-          try { localStorage.setItem(SAMPLE_BANNER_KEY, "dismissed"); } catch {}
-          setDismissed(true);
-        }}
+    <>
+      <div
+        role="status"
         style={{
-          background: "transparent", border: "none", cursor: "pointer",
-          color: "hsl(var(--text-tertiary))", padding: 4,
+          background: "hsl(var(--surface-hover))",
+          borderBottom: "1px solid hsl(var(--border-subtle))",
+          padding: "12px 24px",
+          minHeight: 44,
+          display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
+          fontFamily: "Inter", fontSize: 13,
+          color: "hsl(var(--text-secondary))",
         }}
       >
-        <X size={14} />
-      </button>
-    </div>
+        <span>
+          {isMobile ? "Sample workspace" : "You're exploring a sample workspace."}
+        </span>
+        <button
+          type="button"
+          onClick={() => setConfirmOpen(true)}
+          className="group inline-flex items-center gap-1 transition-colors"
+          style={{
+            background: "transparent", border: "none", cursor: "pointer",
+            padding: "8px 0", minHeight: 44,
+            fontFamily: "Inter", fontSize: 13, fontWeight: 500,
+            color: "hsl(var(--accent))",
+          }}
+        >
+          <span>Clear and start fresh</span>
+          <span
+            aria-hidden
+            className="transition-transform group-hover:translate-x-[2px]"
+          >
+            →
+          </span>
+        </button>
+      </div>
+      <ConfirmModal
+        open={confirmOpen}
+        title="Clear sample workspace?"
+        body="This will delete all sample goals, projects, actions, rituals, and ideas. This can't be undone. Anything you've created yourself stays."
+        cancelLabel="Cancel"
+        confirmLabel="Clear and start fresh"
+        destructive
+        onCancel={() => setConfirmOpen(false)}
+        onConfirm={() => {
+          setConfirmOpen(false);
+          clearSampleData();
+          toast.success("Sample workspace cleared. Let's set up your goal.");
+        }}
+      />
+    </>
   );
 };
 

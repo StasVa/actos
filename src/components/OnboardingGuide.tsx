@@ -150,6 +150,14 @@ const GhostBtn: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement>> = ({ chi
 );
 
 /* ───────── Step 1: Goal ───────── */
+const GOAL_EXAMPLES = [
+  "$10k MRR from my side business",
+  "Reach 100k YouTube subscribers",
+  "Run a sub-2h half marathon",
+  "Pass C1 Spanish proficiency exam",
+  "Publish my novel on Amazon",
+];
+
 const GoalStep: React.FC<{
   onCreated: (goalId: string) => void;
   onSkip: () => void;
@@ -158,6 +166,7 @@ const GoalStep: React.FC<{
   const updateGoal = useStore((s) => s.updateGoal);
   const [title, setTitle] = React.useState("");
   const [color, setColor] = React.useState<GoalColorVar>("goal-1");
+  const [showExamples, setShowExamples] = React.useState(false);
 
   const submit = () => {
     const t = title.trim();
@@ -172,25 +181,88 @@ const GoalStep: React.FC<{
     onCreated(res.id);
   };
 
+  // Custom three-paragraph description rendered inside Shell via a wrapper.
   return (
     <Shell
       icon={<Target size={16} />}
       eyebrow="Step 1 of 3"
       title="Create your first goal"
-      description="A goal is a meaningful outcome you want to move toward — something you'd be proud to finish in a few weeks or months."
+      description=""
       onSkip={onSkip}
     >
+      <div style={{
+        display: "flex", flexDirection: "column", gap: 12,
+        marginTop: -12, marginBottom: 8,
+        fontSize: 14, lineHeight: 1.5,
+        color: "hsl(var(--text-secondary))",
+        maxWidth: 560,
+      }}>
+        <p style={{ margin: 0 }}>
+          A goal is a result you want to reach — months or years of work
+          toward something concrete you'll know you've achieved.
+        </p>
+        <p style={{ margin: 0 }}>
+          Not "build a side business" — that's an activity. More like
+          "$10k MRR from my side business" — a result you can hit.
+        </p>
+        <p style={{ margin: 0 }}>
+          You'll break this goal into projects (the things that get
+          finished) and actions (what you do today).
+        </p>
+      </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         <input
           autoFocus
           type="text"
           value={title}
-          placeholder="e.g. Launch personal portfolio site"
+          placeholder="e.g. Get my SaaS to $10k MRR"
           onChange={(e) => setTitle(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter") submit(); }}
           style={inputStyle}
           maxLength={120}
         />
+        <div>
+          <button
+            type="button"
+            onClick={() => setShowExamples((v) => !v)}
+            style={{
+              background: "transparent", border: "none", padding: 0,
+              color: "hsl(var(--text-tertiary))",
+              fontFamily: "Inter", fontSize: 13, cursor: "pointer",
+              display: "inline-flex", alignItems: "center", gap: 4,
+            }}
+          >
+            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace" }}>
+              {showExamples ? "−" : "+"}
+            </span>
+            Examples
+          </button>
+          {showExamples && (
+            <div style={{
+              marginTop: 8,
+              display: "flex", flexDirection: "column", gap: 4,
+              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+              fontSize: 13,
+            }}>
+              {GOAL_EXAMPLES.map((ex) => (
+                <button
+                  key={ex}
+                  type="button"
+                  onClick={() => setTitle(ex)}
+                  style={{
+                    background: "transparent", border: "none",
+                    color: "hsl(var(--text-secondary))",
+                    textAlign: "left", padding: "2px 0", cursor: "pointer",
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "hsl(var(--text-primary))")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "hsl(var(--text-secondary))")}
+                >
+                  {ex}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
         <div>
           <div style={{
             fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase",
@@ -216,6 +288,13 @@ const GoalStep: React.FC<{
               );
             })}
           </div>
+        </div>
+        <div style={{
+          fontSize: 13, color: "hsl(var(--text-tertiary))",
+          fontStyle: "italic", lineHeight: 1.5, maxWidth: 560,
+        }}>
+          Tip: once created, you can add success criteria — up to 5 concrete signs
+          you've reached this goal. They make "done" specific.
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6 }}>
           <PrimaryBtn onClick={submit} disabled={!title.trim()}>Create goal</PrimaryBtn>
@@ -253,7 +332,7 @@ const ProjectStep: React.FC<{
       icon={<Folder size={16} />}
       eyebrow="Step 2 of 3"
       title={`Add a project to "${goalTitle}"`}
-      description="A project is a concrete piece of work that moves the goal forward — usually 1–4 weeks of effort."
+      description="A project is a chunk of work that finishes — usually in days or weeks. Break a goal into projects, projects into actions."
       onSkip={onSkip}
     >
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -261,7 +340,7 @@ const ProjectStep: React.FC<{
           autoFocus
           type="text"
           value={title}
-          placeholder="e.g. Design the landing page"
+          placeholder="e.g. Set up landing page"
           onChange={(e) => setTitle(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter") submit(); }}
           style={inputStyle}

@@ -280,7 +280,7 @@ const TitleField: React.FC<{
             setEditing(false);
           }
         }}
-        placeholder="Untitled project"
+        placeholder="e.g. Set up landing page"
         className="w-full bg-transparent outline-none text-[32px] font-medium text-text-primary placeholder:text-text-tertiary leading-tight"
       />
     );

@@ -283,6 +283,33 @@ export default function Settings() {
               Wipes localStorage and restores the demo dataset.
             </div>
           </section>
+
+          {/* Help · Concepts */}
+          <section>
+            <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-3">
+              GOALS, PROJECTS, ACTIONS
+            </div>
+            <div className="space-y-4 text-[13px] text-text-secondary leading-[1.6] max-w-[640px]">
+              <div>
+                <div className="text-text-primary font-medium">Goal — a result you want to reach. Months or years.</div>
+                <div>Examples: "$10k MRR", "100k YouTube subs", "Sub-2h half marathon."</div>
+                <div>You can have up to 3 active goals.</div>
+              </div>
+              <div>
+                <div className="text-text-primary font-medium">Project — a chunk of work that finishes. Days to weeks.</div>
+                <div>Belongs to a goal. Has a clear "done" state.</div>
+                <div>Example under "$10k MRR" goal: "Set up Stripe billing", "Launch v1 on Product Hunt."</div>
+              </div>
+              <div>
+                <div className="text-text-primary font-medium">Action — what you do today. Up to 2 hours.</div>
+                <div>Belongs to a project (or directly to a goal as Goal-level Backlog).</div>
+                <div>Example under "Set up Stripe billing": "Read Stripe API docs", "Implement webhook handler."</div>
+              </div>
+              <div className="text-text-tertiary italic">
+                Goals are reached. Projects close. Actions get done.
+              </div>
+            </div>
+          </section>
         </div>
       </main>
     </div>

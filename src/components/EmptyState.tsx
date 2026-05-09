@@ -25,7 +25,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
     style={{ maxWidth: 480, paddingTop: 80, gap: 12 }}
   >
     <div className="text-[18px] font-medium text-text-primary">{headline}</div>
-    <div className="text-[14px] text-text-secondary leading-[1.5]">{description}</div>
+    <div className="text-[14px] text-text-secondary leading-[1.5]" style={{ whiteSpace: "pre-line" }}>{description}</div>
     {ctaLabel && onCta && (
       <button
         type="button"

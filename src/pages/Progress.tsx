@@ -445,12 +445,11 @@ const Progress: React.FC = () => {
       <AppSidebar onOpenSettings={() => setSettingsOpen(true)} />
       <SettingsPanel open={settingsOpen} onOpenChange={setSettingsOpen} />
       <main className="app-main page-wide">
-        <header className="mb-8 flex items-end justify-between gap-4">
-          <h1 className="text-[24px] font-medium text-text-primary leading-tight">Progress</h1>
-          <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary tabular-nums pb-1">
-            {activeGoals} goals · {activeProjects} active projects · {actionsDone} actions done all-time
-          </div>
-        </header>
+        <PageHeader
+          title="Progress"
+          meta={`${activeGoals} GOALS · ${activeProjects} ACTIVE PROJECTS · ${actionsDone} ACTIONS DONE ALL-TIME`}
+        />
+        <div style={{ height: 24 }} />
 
         <Hero />
         <div className="h-10" />

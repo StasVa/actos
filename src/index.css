@@ -300,3 +300,15 @@ body {
 /* Hide scrollbars for horizontal pill rows etc. */
 .scrollbar-hide { scrollbar-width: none; -ms-overflow-style: none; }
 .scrollbar-hide::-webkit-scrollbar { display: none; }
+
+/* Sample workspace banner — mobile stacking when content doesn't fit */
+@media (max-width: 640px) {
+  .sample-banner { font-size: 12px; }
+}
+@media (max-width: 480px) {
+  .sample-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}

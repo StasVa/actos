@@ -10,7 +10,6 @@ import { SortDropdown } from "@/components/SortDropdown";
 import { EmptyState, FilteredEmpty } from "@/components/EmptyState";
 import { PageHeader } from "@/components/PageHeader";
 import { Tooltip, SparkTooltipContent, StateDotTooltip, type DayInfo } from "@/components/Tooltip";
-import { MetricInfoPopover } from "@/components/MetricInfoPopover";
 import { toast } from "sonner";
 import type { Goal } from "@/types";
 

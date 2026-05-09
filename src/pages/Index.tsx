@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { Zap, Leaf, Sun, Thermometer, Star, X, type LucideIcon } from "lucide-react";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Tooltip, SparkTooltipContent, StateDotTooltip } from "@/components/Tooltip";
-import { MetricInfoPopover } from "@/components/MetricInfoPopover";
 import { LifetimeCounters } from "@/components/LifetimeCounters";
 import { buildYouTubeTooltips, buildFitnessTooltips, buildReadingTooltips } from "@/lib/sparkTooltips";
 import { useStore } from "@/store/useStore";

@@ -217,11 +217,13 @@ const DayRowItem: React.FC<{
 
 const ReviewsDays: React.FC = () => {
   const [settingsOpen, setSettingsOpen] = React.useState(false);
+  const [lockOpen, setLockOpen] = React.useState(false);
   const dayEntries = useStore((s) => s.dayEntries);
   const actions = useStore((s) => s.actions);
   const goals = useStore((s) => s.goals);
   const projects = useStore((s) => s.projects);
   const settings = useStore((s) => s.settings);
+  const isFree = settings.subscriptionTier !== "all-in";
 
   const [dayType, setDayType] = React.useState("all");
   const [goalFilter, setGoalFilter] = React.useState<string>("all");
@@ -327,18 +329,29 @@ const ReviewsDays: React.FC = () => {
               )}
             </div>
           ) : (
-            sorted.map((row) => (
-              <DayRowItem
-                key={row.date}
-                row={row}
-                goals={goals}
-                projects={projects}
-                allActions={actions}
-                logTime={settings.layers.logTime}
-              />
-            ))
+            sorted.map((row) => {
+              const ageDays =
+                (Date.now() - new Date(row.date + "T00:00:00").getTime()) / 86400000;
+              const locked = isFree && ageDays > 90;
+              return (
+                <DayRowItem
+                  key={row.date}
+                  row={row}
+                  goals={goals}
+                  projects={projects}
+                  allActions={actions}
+                  logTime={settings.layers.logTime}
+                  locked={locked}
+                  onLockedClick={() => setLockOpen(true)}
+                />
+              );
+            })
           )}
         </div>
+        {isFree && allRows.some((r) => (Date.now() - new Date(r.date + "T00:00:00").getTime()) / 86400000 > 90) && (
+          <HistoryHint />
+        )}
+        <LockModal open={lockOpen} onClose={() => setLockOpen(false)} />
         <div className="h-12" />
       </main>
     </div>

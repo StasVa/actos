@@ -95,6 +95,8 @@ export interface Action {
   delegatedAt?: ISODateTime;
   droppedAt?: ISODateTime;
   cancelledAt?: ISODateTime;
+  /** Marks this entity as part of the seeded sample dataset (Setup Wizard). */
+  isSample?: boolean;
 }
 
 // ───────── Rituals ─────────

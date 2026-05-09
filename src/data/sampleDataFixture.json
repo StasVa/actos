@@ -87,7 +87,257 @@
       "status": "completed",
       "createdAt": "2026-03-12T18:00:00",
       "closedAt": "2026-04-21T18:00:00",
-      "isSample": true
+      "isSample": true,
+      "description": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Built end-to-end paid subscription support: checkout, webhooks, "
+              },
+              {
+                "type": "text",
+                "text": "customer portal, and failed-payment handling. Shipped to production "
+              },
+              {
+                "type": "text",
+                "text": "18 days ago. "
+              },
+              {
+                "type": "text",
+                "text": "Onboarded our first 12 paying customers through this stack.",
+                "marks": [
+                  {
+                    "type": "bold"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "heading",
+            "attrs": {
+              "level": 2
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "Decisions"
+              }
+            ]
+          },
+          {
+            "type": "bulletList",
+            "content": [
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Went with "
+                      },
+                      {
+                        "type": "text",
+                        "text": "stripe-checkout",
+                        "marks": [
+                          {
+                            "type": "code"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": " hosted page instead of custom UI \u2014 saved ~5 days."
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Single subscription tier for now (Pro $19/mo). Annual + team plans deferred."
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Webhooks routed through "
+                      },
+                      {
+                        "type": "text",
+                        "text": "/api/stripe/webhook",
+                        "marks": [
+                          {
+                            "type": "code"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": " with signature verification."
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Failed payments retry 3\u00d7 over 7 days, then downgrade to Free with email notice."
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "heading",
+            "attrs": {
+              "level": 2
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "What didn't work"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Tried building custom invoice generation early on \u2014 abandoned after realizing "
+              },
+              {
+                "type": "text",
+                "text": "Stripe's invoice API covers everything we need for $0 extra. "
+              },
+              {
+                "type": "text",
+                "text": "Logged as a Dropped action.",
+                "marks": [
+                  {
+                    "type": "bold"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "heading",
+            "attrs": {
+              "level": 2
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "Open follow-ups"
+              }
+            ]
+          },
+          {
+            "type": "bulletList",
+            "content": [
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Set up dunning emails (currently using Stripe defaults \u2014 could be more on-brand)"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Add tax handling once we expand to EU customers"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Test SCA flow with real European cards"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "references": [
+        {
+          "id": "r-p1-1",
+          "url": "https://stripe.com/docs/billing/subscriptions/overview",
+          "title": "Stripe Subscriptions docs"
+        },
+        {
+          "id": "r-p1-2",
+          "url": "https://stripe.com/docs/webhooks/signatures",
+          "title": "Webhook signature verification"
+        },
+        {
+          "id": "r-p1-3",
+          "url": "https://github.com/myorg/saas-app/pull/127",
+          "title": "PR #127 \u2014 Stripe integration"
+        },
+        {
+          "id": "r-p1-4",
+          "url": "https://github.com/myorg/saas-app/pull/142",
+          "title": "PR #142 \u2014 Customer portal"
+        },
+        {
+          "id": "r-p1-5",
+          "url": "https://www.notion.so/saas/billing-architecture",
+          "title": "Internal: billing architecture notes"
+        }
+      ]
     },
     {
       "id": "p2",
@@ -95,7 +345,128 @@
       "title": "Launch on Product Hunt",
       "status": "active",
       "createdAt": "2026-04-17T18:00:00",
-      "isSample": true
+      "isSample": true,
+      "description": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Coordinated launch \u2014 assets, copy, hunter outreach, comment-day staffing. "
+              },
+              {
+                "type": "text",
+                "text": "Aiming for top 5 of the day; the real win is 200+ signups in launch week."
+              }
+            ]
+          },
+          {
+            "type": "heading",
+            "attrs": {
+              "level": 3
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "Pre-launch checklist"
+              }
+            ]
+          },
+          {
+            "type": "bulletList",
+            "content": [
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Hunter found and confirmed"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Maker comment drafted (the long one explaining why we built this)"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "5 hero images ready in 16:9, 4:3, square"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Backup launch day in case calendar shifts (Wed \u2192 Thu)"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Day-of plan: I'm on comments 7am-1pm, Maria covers 1pm-7pm. "
+              },
+              {
+                "type": "text",
+                "text": "Auto-replies disabled \u2014 every comment gets a real response."
+              }
+            ]
+          }
+        ]
+      },
+      "references": [
+        {
+          "id": "r-p2-1",
+          "url": "https://www.producthunt.com/launch",
+          "title": "Product Hunt launch checklist"
+        },
+        {
+          "id": "r-p2-2",
+          "url": "https://www.notion.so/saas/launch-day-plan",
+          "title": "Internal: launch day playbook"
+        },
+        {
+          "id": "r-p2-3",
+          "url": "https://twitter.com/i/lists/launch-supporters",
+          "title": "Twitter list of launch supporters"
+        }
+      ]
     },
     {
       "id": "p3",
@@ -103,7 +474,122 @@
       "title": "Build pricing page",
       "status": "active",
       "createdAt": "2026-04-24T18:00:00",
-      "isSample": true
+      "isSample": true,
+      "description": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Replacing the temporary single-CTA pricing block with a proper page. "
+              },
+              {
+                "type": "text",
+                "text": "Goal is to convert visitors who hesitated on the previous version."
+              }
+            ]
+          },
+          {
+            "type": "heading",
+            "attrs": {
+              "level": 3
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "Tiers"
+              }
+            ]
+          },
+          {
+            "type": "bulletList",
+            "content": [
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Free \u2014 up to 3 active goals (the natural cap). Single device."
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Pro \u2014 $19/mo. Cloud sync, priority support, early features."
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Annual at 20% off ("
+                      },
+                      {
+                        "type": "text",
+                        "text": "$15/mo",
+                        "marks": [
+                          {
+                            "type": "code"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": " billed yearly)."
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Considering a 14-day Pro trial vs. just leaving Free as the trial. "
+              },
+              {
+                "type": "text",
+                "text": "Leaning toward no trial \u2014 the Free tier is genuinely useful."
+              }
+            ]
+          }
+        ]
+      },
+      "references": [
+        {
+          "id": "r-p3-1",
+          "url": "https://stripe.com/atlas/guides/pricing",
+          "title": "Stripe Atlas: pricing playbook"
+        },
+        {
+          "id": "r-p3-2",
+          "url": "https://www.priceintelligently.com/blog/saas-pricing-strategy",
+          "title": "Pricing strategy reading"
+        }
+      ]
     },
     {
       "id": "p4",
@@ -111,7 +597,59 @@
       "title": "Set up customer support flow",
       "status": "active",
       "createdAt": "2026-04-04T18:00:00",
-      "isSample": true
+      "isSample": true,
+      "description": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Need a real support workflow before launch \u2014 currently emails go to my inbox "
+              },
+              {
+                "type": "text",
+                "text": "and that won't scale past ~50 customers."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Picked Plain after evaluating Intercom and Crisp. Setup is half-done; got the email "
+              },
+              {
+                "type": "text",
+                "text": "forwarding working but the team workflow is still pending. "
+              },
+              {
+                "type": "text",
+                "text": "Back-burner until after PH launch.",
+                "marks": [
+                  {
+                    "type": "bold"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "references": [
+        {
+          "id": "r-p4-1",
+          "url": "https://www.plain.com",
+          "title": "Plain (chosen tool)"
+        },
+        {
+          "id": "r-p4-2",
+          "url": "https://www.notion.so/saas/support-comparison",
+          "title": "Internal: tool comparison notes"
+        }
+      ]
     },
     {
       "id": "p5",
@@ -120,7 +658,200 @@
       "status": "completed",
       "createdAt": "2026-03-15T18:00:00",
       "closedAt": "2026-04-09T18:00:00",
-      "isSample": true
+      "isSample": true,
+      "description": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Spent the first 25 days proving I can actually show up 4\u00d7/week consistently before "
+              },
+              {
+                "type": "text",
+                "text": "increasing volume. "
+              },
+              {
+                "type": "text",
+                "text": "Closed when streak hit 3 weeks of full attendance with 0 zero-effort sessions.",
+                "marks": [
+                  {
+                    "type": "bold"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "heading",
+            "attrs": {
+              "level": 2
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "Week structure"
+              }
+            ]
+          },
+          {
+            "type": "bulletList",
+            "content": [
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Monday \u2014 easy 5km"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Wednesday \u2014 strength (45 min)"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Friday \u2014 easy 5km or tempo (alternating weeks)"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Sunday \u2014 long run (start at 8km, build slowly)"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "heading",
+            "attrs": {
+              "level": 2
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "Insights from this base period"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Morning runs work better than evening for me \u2014 heart rate noticeably lower at the same pace, "
+              },
+              {
+                "type": "text",
+                "text": "and I'm less likely to skip when it's the first thing I do."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Strength day is the keystone \u2014 when I miss it, my Friday run feels heavier and form drops. "
+              },
+              {
+                "type": "text",
+                "text": "Treating it as non-optional from now on."
+              }
+            ]
+          },
+          {
+            "type": "image",
+            "attrs": {
+              "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 80' width='480' height='80'><rect width='480' height='80' fill='%231a1a1a'/><line x1='20' y1='40' x2='460' y2='40' stroke='%23333' stroke-width='1'/><circle cx='40' cy='40' r='4' fill='%234A6AFF'/><text x='40' y='65' font-family='monospace' font-size='10' fill='%23999' text-anchor='middle'>day 1</text><circle cx='160' cy='40' r='4' fill='%234A6AFF'/><text x='160' y='65' font-family='monospace' font-size='10' fill='%23999' text-anchor='middle'>day 14</text><circle cx='280' cy='40' r='4' fill='%234A6AFF'/><text x='280' y='65' font-family='monospace' font-size='10' fill='%23999' text-anchor='middle'>day 28</text><circle cx='400' cy='40' r='6' fill='%23F58A4F'/><text x='400' y='65' font-family='monospace' font-size='10' fill='%23F58A4F' text-anchor='middle'>RACE</text><text x='240' y='20' font-family='Inter, sans-serif' font-size='11' fill='%23eaeaea' text-anchor='middle'>Half marathon training timeline</text></svg>",
+              "alt": "Half marathon training timeline showing race target"
+            }
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Reference target marked on the timeline above. "
+              },
+              {
+                "type": "text",
+                "text": "Translated into the project "
+              },
+              {
+                "type": "text",
+                "text": "Build base mileage to 30km/week",
+                "marks": [
+                  {
+                    "type": "bold"
+                  }
+                ]
+              },
+              {
+                "type": "text",
+                "text": " \u2014 see active list."
+              }
+            ]
+          }
+        ]
+      },
+      "references": [
+        {
+          "id": "r-p5-1",
+          "url": "https://www.runnersworld.com/training/a20791286/half-marathon-base-building/",
+          "title": "Runner's World: base building principles"
+        },
+        {
+          "id": "r-p5-2",
+          "url": "https://www.strava.com/activities/12345678",
+          "title": "Strava: first 5km test run"
+        },
+        {
+          "id": "r-p5-3",
+          "url": "https://www.youtube.com/watch?v=example",
+          "title": "Form check video \u2014 coach feedback"
+        },
+        {
+          "id": "r-p5-4",
+          "url": "https://www.amazon.com/dp/example",
+          "title": "Hal Higdon Half Marathon Training Guide"
+        }
+      ]
     },
     {
       "id": "p6",
@@ -128,7 +859,133 @@
       "title": "Build base mileage to 30km/week",
       "status": "active",
       "createdAt": "2026-04-11T18:00:00",
-      "isSample": true
+      "isSample": true,
+      "description": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "The middle phase \u2014 gradually increasing weekly volume from 20km to 30km without "
+              },
+              {
+                "type": "text",
+                "text": "blowing up. Following 10% rule strictly: each week's total can be at most 10% over the previous."
+              }
+            ]
+          },
+          {
+            "type": "image",
+            "attrs": {
+              "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 160' width='480' height='160'><rect width='480' height='160' fill='%231a1a1a'/><text x='20' y='25' font-family='Inter, sans-serif' font-size='12' fill='%23eaeaea'>Weekly mileage progression (km)</text><line x1='40' y1='130' x2='460' y2='130' stroke='%23333'/><line x1='40' y1='40' x2='40' y2='130' stroke='%23333'/><rect x='60' y='100' width='30' height='30' fill='%23F58A4F' opacity='0.7'/><rect x='110' y='90' width='30' height='40' fill='%23F58A4F' opacity='0.75'/><rect x='160' y='80' width='30' height='50' fill='%23F58A4F' opacity='0.8'/><rect x='210' y='75' width='30' height='55' fill='%23F58A4F' opacity='0.85'/><rect x='260' y='65' width='30' height='65' fill='%23F58A4F' opacity='0.9'/><rect x='310' y='55' width='30' height='75' fill='%23F58A4F' opacity='0.95'/><rect x='360' y='50' width='30' height='80' fill='%23F58A4F'/><text x='75' y='148' font-family='monospace' font-size='9' fill='%23999' text-anchor='middle'>w1</text><text x='125' y='148' font-family='monospace' font-size='9' fill='%23999' text-anchor='middle'>w2</text><text x='175' y='148' font-family='monospace' font-size='9' fill='%23999' text-anchor='middle'>w3</text><text x='225' y='148' font-family='monospace' font-size='9' fill='%23999' text-anchor='middle'>w4</text><text x='275' y='148' font-family='monospace' font-size='9' fill='%23999' text-anchor='middle'>w5</text><text x='325' y='148' font-family='monospace' font-size='9' fill='%23999' text-anchor='middle'>w6</text><text x='375' y='148' font-family='monospace' font-size='9' fill='%23999' text-anchor='middle'>w7</text><text x='25' y='105' font-family='monospace' font-size='9' fill='%23999' text-anchor='end'>10</text><text x='25' y='75' font-family='monospace' font-size='9' fill='%23999' text-anchor='end'>20</text><text x='25' y='55' font-family='monospace' font-size='9' fill='%23999' text-anchor='end'>30</text></svg>",
+              "alt": "Weekly mileage chart showing gradual increase from 12km to 28km"
+            }
+          },
+          {
+            "type": "heading",
+            "attrs": {
+              "level": 3
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "Where I am"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Hit 28km last week. One more week at 28-30km, then start adding intensity per the next "
+              },
+              {
+                "type": "text",
+                "text": "project. Knees feel fine, sleep is good, appetite is up. Right side of the rubber band."
+              }
+            ]
+          },
+          {
+            "type": "heading",
+            "attrs": {
+              "level": 3
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "Pace targets at this volume"
+              }
+            ]
+          },
+          {
+            "type": "bulletList",
+            "content": [
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Easy runs \u2014 6:00-6:30/km (HR < 145)"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Long Sunday runs \u2014 6:15-6:45/km"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Recovery \u2014 slower than 6:30/km, no shame in walking"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "references": [
+        {
+          "id": "r-p6-1",
+          "url": "https://www.runnersworld.com/training/a20791286/10-percent-rule/",
+          "title": "10% rule explained"
+        },
+        {
+          "id": "r-p6-2",
+          "url": "https://www.strava.com/athlete/training-log",
+          "title": "Strava training log"
+        },
+        {
+          "id": "r-p6-3",
+          "url": "https://www.notion.so/running/weekly-log",
+          "title": "Personal weekly log"
+        }
+      ]
     },
     {
       "id": "p7",
@@ -136,7 +993,39 @@
       "title": "Add tempo and interval workouts",
       "status": "active",
       "createdAt": "2026-04-29T18:00:00",
-      "isSample": true
+      "isSample": true,
+      "description": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Adding speed work after building base. One tempo session and one interval session per week, "
+              },
+              {
+                "type": "text",
+                "text": "starting easy and building up to race pace efforts."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "First tempo done last week (3\u00d71km @ 5:30/km \u2014 felt sustainable). "
+              },
+              {
+                "type": "text",
+                "text": "First interval session done \u2014 short reps to introduce the system gently."
+              }
+            ]
+          }
+        ]
+      },
+      "references": []
     },
     {
       "id": "p8",
@@ -144,7 +1033,123 @@
       "title": "Complete B2 textbook",
       "status": "active",
       "createdAt": "2026-03-30T18:00:00",
-      "isSample": true
+      "isSample": true,
+      "description": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Working through Aula Internacional 4 (B2 level). One unit per week, "
+              },
+              {
+                "type": "text",
+                "text": "writing every exercise out by hand \u2014 slower but retention is much better."
+              }
+            ]
+          },
+          {
+            "type": "heading",
+            "attrs": {
+              "level": 3
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "Process per unit"
+              }
+            ]
+          },
+          {
+            "type": "bulletList",
+            "content": [
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Day 1: read the unit, do reading exercises"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Day 2-3: grammar drills + listening"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Day 4: writing exercises (free composition)"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Day 5: review with flashcards from Anki"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Halfway through. Subjunctive feels much more natural than 6 weeks ago. "
+              },
+              {
+                "type": "text",
+                "text": "Reported speech (unit 4) was the hardest so far."
+              }
+            ]
+          }
+        ]
+      },
+      "references": [
+        {
+          "id": "r-p8-1",
+          "url": "https://difusion.com/idiomas/aula-internacional/",
+          "title": "Aula Internacional textbook info"
+        },
+        {
+          "id": "r-p8-2",
+          "url": "https://ankiweb.net/shared/info/example",
+          "title": "Spanish B2 Anki deck"
+        }
+      ]
     },
     {
       "id": "p9",
@@ -152,7 +1157,32 @@
       "title": "Find conversation partner",
       "status": "active",
       "createdAt": "2026-04-24T18:00:00",
-      "isSample": true
+      "isSample": true,
+      "description": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Finding a regular conversation partner \u2014 italki tutor or language exchange. "
+              },
+              {
+                "type": "text",
+                "text": "30 minutes, 2\u00d7 a week to start. Goal is fluency through use, not lessons."
+              }
+            ]
+          }
+        ]
+      },
+      "references": [
+        {
+          "id": "r-p9-1",
+          "url": "https://www.italki.com",
+          "title": "italki"
+        }
+      ]
     }
   ],
   "actions": [
@@ -2425,7 +3455,6 @@
     }
   ],
   "coachmarks": {
-    "actos.coachmark.sample-data-banner": "dismissed",
     "actos.coachmark.first-progress-visit": "dismissed",
     "actos.coachmark.first-ritual-creation": "dismissed",
     "actos.coachmark.first-delegation": "dismissed",

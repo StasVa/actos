@@ -45,6 +45,73 @@ function shift(value: string, days: number): string {
 const sh = (v: string | undefined | null, days: number) =>
   v ? shift(v, days) : v ?? undefined;
 
+// Minimal TipTap JSON → HTML converter for the subset used in the fixture.
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function renderMarks(text: string, marks: any[] | undefined): string {
+  let html = escapeHtml(text);
+  for (const m of marks ?? []) {
+    if (m.type === "bold") html = `<strong>${html}</strong>`;
+    else if (m.type === "italic") html = `<em>${html}</em>`;
+    else if (m.type === "code") html = `<code>${html}</code>`;
+    else if (m.type === "underline") html = `<u>${html}</u>`;
+    else if (m.type === "strike") html = `<s>${html}</s>`;
+    else if (m.type === "link") {
+      const href = escapeHtml(m.attrs?.href ?? "#");
+      html = `<a href="${href}" target="_blank" rel="noopener noreferrer">${html}</a>`;
+    }
+  }
+  return html;
+}
+
+function renderNode(node: any): string {
+  if (!node) return "";
+  switch (node.type) {
+    case "doc":
+      return (node.content ?? []).map(renderNode).join("");
+    case "paragraph":
+      return `<p>${(node.content ?? []).map(renderNode).join("")}</p>`;
+    case "heading": {
+      const level = node.attrs?.level ?? 2;
+      return `<h${level}>${(node.content ?? []).map(renderNode).join("")}</h${level}>`;
+    }
+    case "bulletList":
+      return `<ul>${(node.content ?? []).map(renderNode).join("")}</ul>`;
+    case "orderedList":
+      return `<ol>${(node.content ?? []).map(renderNode).join("")}</ol>`;
+    case "listItem":
+      return `<li>${(node.content ?? []).map(renderNode).join("")}</li>`;
+    case "blockquote":
+      return `<blockquote>${(node.content ?? []).map(renderNode).join("")}</blockquote>`;
+    case "codeBlock":
+      return `<pre><code>${(node.content ?? []).map(renderNode).join("")}</code></pre>`;
+    case "hardBreak":
+      return "<br />";
+    case "image": {
+      const src = escapeHtml(node.attrs?.src ?? "");
+      const alt = escapeHtml(node.attrs?.alt ?? "");
+      const title = node.attrs?.title ? ` title="${escapeHtml(node.attrs.title)}"` : "";
+      return `<img src="${src}" alt="${alt}"${title} />`;
+    }
+    case "text":
+      return renderMarks(node.text ?? "", node.marks);
+    default:
+      return (node.content ?? []).map(renderNode).join("");
+  }
+}
+
+function tiptapJsonToHtml(doc: any): string {
+  if (!doc) return "";
+  if (typeof doc === "string") return doc;
+  return renderNode(doc);
+}
+
 const SAMPLE_COACHMARKS: Record<string, string> =
   (fixture as any).coachmarks ?? {};
 
@@ -86,7 +153,10 @@ export function buildSampleSeed(): SampleSeed {
     goalId: p.goalId,
     title: p.title,
     status: p.status,
-    references: [],
+    description: p.description ? tiptapJsonToHtml(p.description) : undefined,
+    references: Array.isArray(p.references)
+      ? p.references.map((r: any) => ({ id: r.id, url: r.url, title: r.title }))
+      : [],
     createdAt: shift(p.createdAt, days),
     completedAt:
       p.closedAt && p.status === "completed" ? shift(p.closedAt, days) : undefined,

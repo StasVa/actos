@@ -103,6 +103,116 @@ const MiniDropdown: React.FC<{
   );
 };
 
+/* ───────── inline text picker (no chrome — reads as inline link) ───────── */
+const InlineTextPicker: React.FC<{
+  value: string;
+  options: MiniOption[];
+  onChange: (v: string) => void;
+  placeholder: string;
+  showDot?: boolean;
+}> = ({ value, options, onChange, placeholder, showDot }) => {
+  const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState<{ top: number; left: number; width: number } | null>(null);
+  const current = options.find((o) => o.value === value);
+  const label = current?.label ?? placeholder;
+
+  useLayoutEffect(() => {
+    if (!open || !triggerRef.current) return;
+    const r = triggerRef.current.getBoundingClientRect();
+    setPos({ top: r.bottom + 8, left: r.left, width: Math.max(r.width, 240) });
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e: MouseEvent) => {
+      const t = e.target as Node;
+      if (triggerRef.current?.contains(t) || menuRef.current?.contains(t)) return;
+      setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    const onScroll = () => setOpen(false);
+    document.addEventListener("mousedown", onDoc);
+    document.addEventListener("keydown", onKey);
+    window.addEventListener("scroll", onScroll, true);
+    window.addEventListener("resize", onScroll);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+      document.removeEventListener("keydown", onKey);
+      window.removeEventListener("scroll", onScroll, true);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, [open]);
+
+  return (
+    <span className="inline-flex items-center gap-1.5 min-w-0">
+      {showDot && current?.dot && (
+        <span className="w-2 h-2 rounded-full shrink-0" style={{ background: current.dot }} />
+      )}
+      <button
+        ref={triggerRef}
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        title={label}
+        className="text-[13px] text-text-primary truncate bg-transparent p-0 border-0 cursor-pointer focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 rounded-[2px] hover:[text-decoration-color:hsl(var(--accent))] focus-visible:[text-decoration-color:hsl(var(--accent))]"
+        style={{
+          maxWidth: 200,
+          textDecoration: "underline",
+          textDecorationStyle: "dotted",
+          textDecorationColor: "hsl(var(--text-tertiary))",
+          textUnderlineOffset: 3,
+          outlineColor: "hsl(var(--accent))",
+        }}
+      >
+        {label}
+      </button>
+      {open && pos && createPortal(
+        <div
+          ref={menuRef}
+          className="fixed z-[100] bg-surface-elevated border border-border-subtle rounded-[4px] shadow-md max-h-[280px] overflow-y-auto"
+          style={{ top: pos.top, left: pos.left, minWidth: pos.width, padding: "4px 0" }}
+        >
+          {options.length === 0 && (
+            <div className="px-3 py-1.5 text-[12px] text-text-tertiary">No options</div>
+          )}
+          {options.map((o) => {
+            const selected = o.value === value;
+            return (
+              <button
+                key={o.value || "__none"}
+                type="button"
+                onClick={() => {
+                  onChange(o.value);
+                  setOpen(false);
+                }}
+                className={`w-full flex items-center gap-2 text-left text-[13px] transition-colors ${
+                  selected ? "bg-surface-hover" : "hover:bg-surface-hover"
+                }`}
+                style={{ padding: "6px 12px" }}
+              >
+                {showDot && o.dot && (
+                  <span className="w-2 h-2 rounded-full shrink-0" style={{ background: o.dot }} />
+                )}
+                <span
+                  className="flex-1 text-text-primary truncate"
+                  style={selected ? { color: "hsl(var(--accent))" } : undefined}
+                >
+                  {o.label}
+                </span>
+                {selected && <span style={{ color: "hsl(var(--accent))", fontSize: 12 }}>✓</span>}
+              </button>
+            );
+          })}
+        </div>,
+        document.body,
+      )}
+    </span>
+  );
+};
+
 /* ───────── helpers ───────── */
 const todayISO = () => new Date().toISOString().slice(0, 10);
 

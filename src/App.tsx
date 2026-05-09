@@ -30,6 +30,8 @@ import SettingsSubscription from "./pages/SettingsSubscription.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Setup, { isSetupCompleted } from "./pages/Setup.tsx";
 import GoalBuilder from "./pages/GoalBuilder.tsx";
+import { NoGoalsLayout } from "./components/NoGoalsLayout";
+import { useStore } from "./store/useStore";
 import { ActionEditor } from "./components/ActionEditor";
 
 import { GoalEditor } from "./components/GoalEditor";

@@ -62,6 +62,8 @@ const ReviewsMonths: React.FC = () => {
 
   const [range, setRange] = React.useState("12m");
   const [goalFilter, setGoalFilter] = React.useState<string>("all");
+  const [sortKey, setSortKey] = React.useState<ReviewSortKey>(() => loadReviewSort("actos.reviews.months.sort"));
+  React.useEffect(() => saveReviewSort("actos.reviews.months.sort", sortKey), [sortKey]);
 
   const allMonths = React.useMemo(
     () => getMonthsWithActivity(actions, dayEntries),
@@ -70,7 +72,7 @@ const ReviewsMonths: React.FC = () => {
 
   const filteredMonths = React.useMemo(() => {
     const cutoff = rangeStart(range);
-    return allMonths.filter((ym) => {
+    const filtered = allMonths.filter((ym) => {
       if (cutoff) {
         const d = dateFromYearMonth(ym);
         if (d && d < cutoff) return false;
@@ -82,7 +84,22 @@ const ReviewsMonths: React.FC = () => {
       }
       return true;
     });
-  }, [allMonths, range, goalFilter, actions, dayEntries, goals, projects, rituals]);
+    const sortable = filtered.map((ym) => {
+      const s = getMonthSummary(ym, { actions, dayEntries, goals, projects, rituals });
+      const done = s?.doneActions ?? [];
+      const delegated = s?.delegatedActions ?? [];
+      const periodStart = dateFromYearMonth(ym)?.getTime() ?? 0;
+      return {
+        item: ym,
+        periodStart,
+        id: ym,
+        createdAt: periodStart,
+        aggregates: computeAggregates(done, delegated),
+        untracked: !s,
+      };
+    });
+    return sortReviewEntries(sortable, sortKey);
+  }, [allMonths, range, goalFilter, actions, dayEntries, goals, projects, rituals, sortKey]);
 
   const goalById = (id: string) => goals.find((g) => g.id === id);
 

@@ -462,7 +462,7 @@ const ActionsStep: React.FC<{
             <input
               type="text"
               value={d.title}
-              placeholder={idx === 0 ? "First action…" : "Another action…"}
+              placeholder={`e.g. ${["Read Stripe API docs", "Implement webhook handler", "Set up test environment"][idx % 3]}`}
               onChange={(e) => update(d.id, { title: e.target.value })}
               style={inputStyle}
               maxLength={140}
@@ -477,7 +477,7 @@ const ActionsStep: React.FC<{
             <input
               type="number" min={0}
               value={d.time}
-              placeholder="Time min"
+              placeholder="e.g. 30"
               onChange={(e) => update(d.id, { time: e.target.value })}
               aria-label="Time estimate (minutes)"
               style={inputStyle}

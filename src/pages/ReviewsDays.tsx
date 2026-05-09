@@ -202,7 +202,8 @@ const ReviewsDays: React.FC = () => {
   const [goalFilter, setGoalFilter] = React.useState<string>("all");
   const [range, setRange] = React.useState("30");
   const [search, setSearch] = React.useState("");
-  const [sortKey, setSortKey] = React.useState<SortKey>("recent");
+  const [sortKey, setSortKey] = React.useState<SortKey>(() => loadReviewSort("actos.reviews.days.sort"));
+  React.useEffect(() => saveReviewSort("actos.reviews.days.sort", sortKey), [sortKey]);
 
   const allRows = React.useMemo(
     () => buildDayRows(dayEntries, actions),

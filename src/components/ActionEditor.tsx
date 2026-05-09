@@ -1080,11 +1080,14 @@ function InlineError({ text }: { text: string }) {
   );
 }
 
-function FieldRow({ label, children }: { label: string; children: React.ReactNode }) {
+function FieldRow({ label, info, children }: { label: React.ReactNode; info?: React.ReactNode; children: React.ReactNode }) {
   return (
     <div>
-      <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-1">
-        {label}
+      <div className="flex items-center gap-1.5 mb-1">
+        <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
+          {label}
+        </div>
+        {info}
       </div>
       {children}
     </div>

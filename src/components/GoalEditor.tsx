@@ -6,6 +6,7 @@
 // editing inline.
 
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useStore } from "@/store/useStore";
 import type { Goal, GoalType, GoalStatus, ID } from "@/types";
@@ -99,6 +100,8 @@ function GoalEditorPanel({
   const projects = useStore((s) => s.projects);
   const actions = useStore((s) => s.actions);
   const goals = useStore((s) => s.goals);
+  const settings = useStore((s) => s.settings);
+  const navigate = useNavigate();
 
   const createGoal = useStore((s) => s.createGoal);
   const updateGoal = useStore((s) => s.updateGoal);
@@ -118,6 +121,7 @@ function GoalEditorPanel({
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmDrop, setConfirmDrop] = useState(false);
   const [confirmComplete, setConfirmComplete] = useState(false);
+  const [softBlock, setSoftBlock] = useState(false);
   const titleRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -153,6 +157,11 @@ function GoalEditorPanel({
   const handleSaveNew = () => {
     if (!title.trim()) {
       toast.error("Title is required");
+      return;
+    }
+    const isFree = settings.subscriptionTier !== "all-in";
+    if (isFree && activeCount >= 2) {
+      setSoftBlock(true);
       return;
     }
     const result = createGoal({

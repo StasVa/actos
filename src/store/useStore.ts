@@ -197,6 +197,13 @@ export interface StoreState {
 
   // ─── Reset ───
   resetToSeed: () => void;
+  /** Wipe all entities & day entries for a fresh-start workspace. */
+  resetToEmpty: () => void;
+  /** Replace workspace with seed fixtures, marking every entity isSample=true. */
+  seedSampleData: () => void;
+  /** Delete every entity (and dependent day entries) flagged isSample=true. */
+  clearSampleData: () => void;
+  setUserName: (name: string) => void;
 }
 
 const initialState = {

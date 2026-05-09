@@ -99,7 +99,8 @@ const StateBarRow: React.FC<{
   value: string;
   color: string;
   opacity?: number;
-}> = ({ label, pct, value, color, opacity = 1 }) => (
+  trailing?: React.ReactNode;
+}> = ({ label, pct, value, color, opacity = 1, trailing }) => (
   <div className="flex items-center gap-4 py-1.5">
     <span className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-secondary w-[80px] shrink-0">
       {label}
@@ -113,6 +114,7 @@ const StateBarRow: React.FC<{
     <span className="font-mono text-[13px] text-text-primary tabular-nums w-[70px] text-right shrink-0">
       {value}
     </span>
+    <span className="w-[16px] flex justify-center shrink-0">{trailing}</span>
   </div>
 );
 

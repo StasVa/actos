@@ -86,10 +86,10 @@ const SuccessCriteria: React.FC<{ goal: Goal }> = ({ goal }) => {
 
 /* ===== Hero state ===== */
 const Pillar: React.FC<{ label: string; value: string; sub: string }> = ({ label, value, sub }) => (
-  <div className="flex flex-col">
+  <div className="flex flex-col min-w-0">
     <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">{label}</div>
     <div className="text-[26px] font-medium text-text-primary leading-tight tabular-nums mt-1.5">{value}</div>
-    <div className="font-mono text-[11px] text-text-tertiary mt-1">{sub}</div>
+    <div className="font-mono text-[11px] text-text-tertiary mt-1 break-words">{sub}</div>
   </div>
 );
 
@@ -152,11 +152,11 @@ const HeroState: React.FC<{
   );
 
   return (
-    <div className="bg-surface-elevated border border-border-subtle rounded-[8px] p-8">
+    <div className="bg-surface-elevated border border-border-subtle rounded-[8px] p-4 sm:p-8">
       {/* Top tier */}
-      <div className="flex justify-between items-start gap-8">
-        <div>
-          <div className="text-[60px] font-medium text-text-primary tabular-nums leading-none">
+      <div className="flex flex-col sm:flex-row justify-between items-start gap-6 sm:gap-8">
+        <div className="min-w-0">
+          <div className="text-[40px] sm:text-[60px] font-medium text-text-primary tabular-nums leading-none">
             {progressOutcome}%
           </div>
           <div className="mt-1 font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
@@ -167,7 +167,7 @@ const HeroState: React.FC<{
             {ageMonths} {ageMonths === 1 ? "month" : "months"}
           </div>
         </div>
-        <div className="flex gap-10 shrink-0">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 lg:gap-10 w-full sm:w-auto min-w-0">
           <Pillar
             label="PROJECTS"
             value={projectsTotal === 0 ? "—" : `${projectsClosed}/${projectsTotal}`}

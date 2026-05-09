@@ -249,6 +249,22 @@ export default function Settings() {
                 onChange={handleImportFile}
               />
             </div>
+
+            {hasSample && (
+              <div className="mt-6 pt-5 border-t border-border-subtle">
+                <div className="text-[13px] text-text-primary mb-1">Clear sample data</div>
+                <div className="text-[12px] text-text-tertiary mb-3">
+                  Removes the sample goals, projects, actions, rituals, and ideas seeded by Setup Wizard. Your own entries stay.
+                </div>
+                <button
+                  type="button"
+                  onClick={handleClearSample}
+                  className="h-9 px-4 text-[13px] font-medium rounded-[4px] border border-border-default text-text-primary hover:border-[hsl(var(--accent))] hover:bg-surface-hover transition-colors"
+                >
+                  Clear sample data
+                </button>
+              </div>
+            )}
           </section>
 
           {/* Danger */}

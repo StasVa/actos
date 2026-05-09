@@ -1,7 +1,9 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { Lock } from "lucide-react";
 import { AppSidebar } from "@/components/AppSidebar";
 import { SettingsPanel } from "@/components/SettingsPanel";
+import { LockModal, HistoryHint } from "@/components/LockModal";
 import { useStore } from "@/store/useStore";
 import { formatHM } from "@/lib/timeStats";
 import type { Action, DayEntry, Goal, ID, ISODate, Project } from "@/types";
@@ -102,13 +104,13 @@ const DayRowItem: React.FC<{
   projects: Project[];
   allActions: Action[];
   logTime: boolean;
-}> = ({ row, goals, projects, allActions, logTime }) => {
+  locked?: boolean;
+  onLockedClick?: () => void;
+}> = ({ row, goals, projects, allActions, logTime, locked, onLockedClick }) => {
   const { date, entry, doneActions, delegatedActions } = row;
-  // Approximate ritual count via plannedRitualIds minus skipped
   const ritualCount = entry
     ? Math.max(0, (entry.plannedRitualIds?.length ?? 0) - (entry.skippedRitualIds?.length ?? 0))
     : 0;
-  // Time invested = full Done time + 20% Delegated time.
   const investedMin = (a: Action) => {
     const t = a.timeEstimateMinutes ?? 0;
     if (t <= 0) return 0;
@@ -122,7 +124,6 @@ const DayRowItem: React.FC<{
   const dt = entry?.dayType;
   const noPlan = !entry?.isPlanned && doneActions.length > 0 ? "(no plan)" : null;
 
-  // Per-goal time invested
   const perGoal = goals
     .filter((g) => g.status === "active")
     .map((g) => {
@@ -145,11 +146,8 @@ const DayRowItem: React.FC<{
     mainPrefix = main ? "Main: ✓ Done · " : "Main: ✗ Not completed · ";
   }
 
-  return (
-    <Link
-      to={`/reviews/days/${date}`}
-      className="block px-5 py-4 border-b border-border-subtle hover:bg-surface-hover transition-colors"
-    >
+  const inner = (
+    <>
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
           <span className="text-[14px] font-medium text-text-primary">{longDate(date)}</span>
@@ -164,16 +162,23 @@ const DayRowItem: React.FC<{
             <span className="font-mono text-[10px] uppercase text-text-tertiary">{noPlan}</span>
           )}
         </div>
-        <span className="font-mono text-[11px] text-text-tertiary tabular-nums">
+        <span className="font-mono text-[11px] text-text-tertiary tabular-nums flex items-center gap-2">
           {relativeLabel(date)}
+          {locked && <Lock size={14} style={{ color: "hsl(var(--text-tertiary))" }} />}
         </span>
       </div>
-      <div className="mt-1 font-mono text-[12px] text-text-secondary tabular-nums">
+      <div
+        className="mt-1 font-mono text-[12px] text-text-secondary tabular-nums"
+        style={{ opacity: locked ? 0.5 : 1 }}
+      >
         {mainPrefix}
         {stats.join(" · ")}
       </div>
       {logTime && perGoal.some((x) => x.min > 0) && (
-        <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[11px] text-text-tertiary">
+        <div
+          className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[11px] text-text-tertiary"
+          style={{ opacity: locked ? 0.5 : 1 }}
+        >
           {perGoal.map(({ g, min }) => (
             <span key={g.id} className="flex items-center gap-1">
               <span
@@ -186,6 +191,26 @@ const DayRowItem: React.FC<{
           ))}
         </div>
       )}
+    </>
+  );
+
+  if (locked) {
+    return (
+      <button
+        type="button"
+        onClick={onLockedClick}
+        className="block w-full text-left px-5 py-4 border-b border-border-subtle hover:bg-surface-hover transition-colors"
+      >
+        {inner}
+      </button>
+    );
+  }
+  return (
+    <Link
+      to={`/reviews/days/${date}`}
+      className="block px-5 py-4 border-b border-border-subtle hover:bg-surface-hover transition-colors"
+    >
+      {inner}
     </Link>
   );
 };

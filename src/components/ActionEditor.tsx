@@ -361,7 +361,7 @@ function ActionEditorPanel({
       toast.error(createTooltip || "Required fields missing");
       return;
     }
-    const newId = createAction({
+    createAction({
       title: title.trim(),
       projectId,
       goalId,
@@ -379,7 +379,6 @@ function ActionEditorPanel({
       cancelledAt: prefill?.cancelledAt,
     });
     toast(`Action "${title.trim()}" created`);
-    void newId;
     onClose();
   };
 

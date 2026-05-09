@@ -172,6 +172,8 @@ export interface Idea {
   convertedToId?: ID;
   capturedAt: ISODateTime;
   discardedAt?: ISODateTime;
+  /** Marks this entity as part of the seeded sample dataset (Setup Wizard). */
+  isSample?: boolean;
 }
 
 // ───────── Day entries ─────────

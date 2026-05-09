@@ -378,8 +378,9 @@ function ActionEditorPanel({
       droppedAt: prefill?.droppedAt,
       cancelledAt: prefill?.cancelledAt,
     });
-    toast("Action created");
-    useStore.getState().openPanel({ kind: "action", mode: "edit", id: newId });
+    toast(`Action "${title.trim()}" created`);
+    void newId;
+    onClose();
   };
 
   const handleDuplicate = () => {

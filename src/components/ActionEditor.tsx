@@ -361,7 +361,7 @@ function ActionEditorPanel({
       toast.error(createTooltip || "Required fields missing");
       return;
     }
-    const newId = createAction({
+    createAction({
       title: title.trim(),
       projectId,
       goalId,
@@ -378,8 +378,8 @@ function ActionEditorPanel({
       droppedAt: prefill?.droppedAt,
       cancelledAt: prefill?.cancelledAt,
     });
-    toast("Action created");
-    useStore.getState().openPanel({ kind: "action", mode: "edit", id: newId });
+    toast(`Action "${title.trim()}" created`);
+    onClose();
   };
 
   const handleDuplicate = () => {

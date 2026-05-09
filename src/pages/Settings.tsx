@@ -68,9 +68,23 @@ export default function Settings() {
   const setShowAdminTools = useStore((s) => s.setShowAdminTools);
   const setSubscriptionTier = useStore((s) => s.setSubscriptionTier);
   const resetToSeed = useStore((s) => s.resetToSeed);
+  const clearSampleData = useStore((s) => s.clearSampleData);
+  const hasSample = useStore((s) =>
+    s.goals.some((g) => g.isSample) ||
+    s.projects.some((p) => p.isSample) ||
+    s.actions.some((a) => a.isSample) ||
+    s.rituals.some((r) => r.isSample) ||
+    s.ideas.some((i) => i.isSample),
+  );
   const activeGoals = goals.filter((g) => g.status === "active");
   const [themeChoice, , setThemeChoice] = useThemeChoice();
   const fileRef = React.useRef<HTMLInputElement>(null);
+
+  const handleClearSample = () => {
+    if (!confirm("Clear all sample goals, projects, actions, rituals, and ideas? This can't be undone.")) return;
+    clearSampleData();
+    toast.success("Sample data cleared.");
+  };
 
   const handleReset = () => {
     if (confirm("Reset everything to seed data? This wipes all your changes.")) {

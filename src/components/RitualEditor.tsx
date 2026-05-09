@@ -852,9 +852,9 @@ function RitualEditorPanel({
             <EditorCancelButton />
             <button
               onClick={handleSaveNew}
-              className="text-[13px] font-medium px-3 py-1.5 rounded-[4px]"
+              className="text-[13px] font-medium px-3 py-1.5 rounded-[4px] transition-colors cursor-pointer"
               style={{
-                background: "hsl(var(--accent))",
+                background: canCreate ? "hsl(var(--accent))" : "hsl(var(--accent) / 0.4)",
                 color: "hsl(var(--surface-base))",
               }}
             >

@@ -10,6 +10,7 @@ import { SortDropdown } from "@/components/SortDropdown";
 import { EmptyState, FilteredEmpty } from "@/components/EmptyState";
 import { PageHeader } from "@/components/PageHeader";
 import { Tooltip, SparkTooltipContent, StateDotTooltip, type DayInfo } from "@/components/Tooltip";
+import { MetricInfoPopover } from "@/components/MetricInfoPopover";
 import { toast } from "sonner";
 import type { Goal } from "@/types";
 
@@ -272,7 +273,14 @@ const GoalCard: React.FC<{ m: GoalMeta; logTimeOn: boolean }> = ({ m, logTimeOn 
           {/* Section 3 — Bars */}
           <div className="flex flex-col gap-2">
             <MeasureBar label="VALUE" percentage={outcome} color={color} />
-            <MeasureBar label="EFFORT" percentage={effort} color={color} opacity={0.6} />
+            <div className="flex items-center gap-2">
+              <div className="flex-1 min-w-0">
+                <MeasureBar label="EFFORT" percentage={effort} color={color} opacity={0.6} />
+              </div>
+              <div data-no-nav onClick={(e) => e.stopPropagation()}>
+                <MetricInfoPopover variant="valueEffort" ariaLabel="What do Value and Effort mean?" />
+              </div>
+            </div>
           </div>
 
           {/* Section 4 — Stats */}

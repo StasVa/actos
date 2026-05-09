@@ -20,6 +20,7 @@ import type { Action, ActionStatus, ID } from "@/types";
 import { ConfirmModal } from "./ConfirmModal";
 import { ClampedNumberInput } from "./ClampedNumberInput";
 import { EditorShell, EditorCloseX, EditorCancelButton } from "./EditorShell";
+import { MetricInfoPopover } from "./MetricInfoPopover";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -505,7 +506,7 @@ function ActionEditorPanel({
             <div className="mb-6">
               <SectionHeadRequired label="Estimates" required />
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <FieldRow label="Impact (1–10) *">
+                <FieldRow label="Impact (1–10) *" info={<MetricInfoPopover variant="impact" ariaLabel="What is Impact?" />}>
                   <ClampedNumberInput
                     value={impact}
                     min={1}
@@ -1080,11 +1081,14 @@ function InlineError({ text }: { text: string }) {
   );
 }
 
-function FieldRow({ label, children }: { label: string; children: React.ReactNode }) {
+function FieldRow({ label, info, children }: { label: React.ReactNode; info?: React.ReactNode; children: React.ReactNode }) {
   return (
     <div>
-      <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-1">
-        {label}
+      <div className="flex items-center gap-1.5 mb-1">
+        <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
+          {label}
+        </div>
+        {info}
       </div>
       {children}
     </div>

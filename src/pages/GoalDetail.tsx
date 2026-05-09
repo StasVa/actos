@@ -9,6 +9,7 @@ import { useStore, selectors } from "@/store/useStore";
 import type { Action, Goal, Project, Ritual, GoalColorVar } from "@/types";
 import { AppSidebar } from "@/components/AppSidebar";
 import { ProjectCard as SharedProjectCard } from "@/components/ProjectCard";
+import { MetricInfoPopover } from "@/components/MetricInfoPopover";
 
 const COLOR_VAR: Record<GoalColorVar, string> = {
   "goal-1": "hsl(var(--goal-1))",
@@ -98,7 +99,8 @@ const StateBarRow: React.FC<{
   value: string;
   color: string;
   opacity?: number;
-}> = ({ label, pct, value, color, opacity = 1 }) => (
+  trailing?: React.ReactNode;
+}> = ({ label, pct, value, color, opacity = 1, trailing }) => (
   <div className="flex items-center gap-4 py-1.5">
     <span className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-secondary w-[80px] shrink-0">
       {label}
@@ -112,6 +114,7 @@ const StateBarRow: React.FC<{
     <span className="font-mono text-[13px] text-text-primary tabular-nums w-[70px] text-right shrink-0">
       {value}
     </span>
+    <span className="w-[16px] flex justify-center shrink-0">{trailing}</span>
   </div>
 );
 
@@ -196,10 +199,14 @@ const HeroState: React.FC<{
         </div>
         <div className="space-y-1">
           <StateBarRow label="VALUE" pct={progressOutcome} value={`${progressOutcome}%`} color={color} />
-          <StateBarRow label="EFFORT" pct={progressEffort} value={`${progressEffort}%`} color={color} opacity={0.6} />
-        </div>
-        <div className="mt-3 font-mono text-[11px] italic text-text-tertiary">
-          Effort discounts delegated work to 20%.
+          <StateBarRow
+            label="EFFORT"
+            pct={progressEffort}
+            value={`${progressEffort}%`}
+            color={color}
+            opacity={0.6}
+            trailing={<MetricInfoPopover variant="valueEffort" ariaLabel="What do Value and Effort mean?" />}
+          />
         </div>
       </div>
 

@@ -13,6 +13,7 @@ import type { ID, Ritual, RitualSchedule } from "@/types";
 import { ConfirmModal } from "./ConfirmModal";
 import { ritualMultiplier } from "@/store/useStore";
 import { EditorShell, EditorCloseX, EditorCancelButton } from "./EditorShell";
+import { MetricInfoPopover } from "./MetricInfoPopover";
 import { ClampedNumberInput } from "./ClampedNumberInput";
 import {
   Popover,
@@ -311,7 +312,7 @@ function RitualEditorPanel({
             <div>
               <SectionHeadRequired label="Estimates" required />
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <FieldRow label="Base Impact (1-10) · required">
+                <FieldRow label="Base Impact (1-10) · required" info={<MetricInfoPopover variant="ritualImpact" ariaLabel="What is Base Impact?" />}>
                   <ClampedNumberInput
                     value={baseImpact}
                     min={1}
@@ -939,11 +940,14 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
-function FieldRow({ label, children }: { label: string; children: React.ReactNode }) {
+function FieldRow({ label, info, children }: { label: React.ReactNode; info?: React.ReactNode; children: React.ReactNode }) {
   return (
     <div>
-      <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-1">
-        {label}
+      <div className="flex items-center gap-1.5 mb-1">
+        <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
+          {label}
+        </div>
+        {info}
       </div>
       {children}
     </div>

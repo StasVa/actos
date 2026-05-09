@@ -153,7 +153,10 @@ export function buildSampleSeed(): SampleSeed {
     goalId: p.goalId,
     title: p.title,
     status: p.status,
-    references: [],
+    description: p.description ? tiptapJsonToHtml(p.description) : undefined,
+    references: Array.isArray(p.references)
+      ? p.references.map((r: any) => ({ id: r.id, url: r.url, title: r.title }))
+      : [],
     createdAt: shift(p.createdAt, days),
     completedAt:
       p.closedAt && p.status === "completed" ? shift(p.closedAt, days) : undefined,

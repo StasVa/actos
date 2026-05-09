@@ -52,6 +52,8 @@ export interface Project {
    * hidden from all lists/counts and silently deleted if abandoned.
    */
   isDraft?: boolean;
+  /** Marks this entity as part of the seeded sample dataset (Setup Wizard). */
+  isSample?: boolean;
 }
 
 // ───────── Actions ─────────

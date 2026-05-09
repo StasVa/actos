@@ -332,7 +332,7 @@ const ProjectStep: React.FC<{
       icon={<Folder size={16} />}
       eyebrow="Step 2 of 3"
       title={`Add a project to "${goalTitle}"`}
-      description="A project is a concrete piece of work that moves the goal forward — usually 1–4 weeks of effort."
+      description="A project is a chunk of work that finishes — usually in days or weeks. Break a goal into projects, projects into actions."
       onSkip={onSkip}
     >
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -340,7 +340,7 @@ const ProjectStep: React.FC<{
           autoFocus
           type="text"
           value={title}
-          placeholder="e.g. Design the landing page"
+          placeholder="e.g. Set up landing page"
           onChange={(e) => setTitle(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter") submit(); }}
           style={inputStyle}

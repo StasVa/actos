@@ -181,6 +181,9 @@ export function CommandPalette() {
         iconChar: "+",
         rightHint: "⌘N",
         onSelect: () => {
+          if (!goals.some((g) => g.status === "active")) {
+            navigate("/onboarding/goal"); close(); return;
+          }
           openPanel({ kind: "action", mode: "new" });
           close();
         },
@@ -219,6 +222,9 @@ export function CommandPalette() {
         title: "Create new ritual",
         iconChar: "+",
         onSelect: () => {
+          if (!goals.some((g) => g.status === "active")) {
+            navigate("/onboarding/goal"); close(); return;
+          }
           openPanel({ kind: "ritual", mode: "new" });
           close();
         },
@@ -534,7 +540,13 @@ export function CommandPalette() {
         const row = flatRows[selectedIdx];
         if (row) row.onSelect();
         else if (query.trim()) {
-          // Empty results → quick-create action with the query
+          // Empty results → quick-create action with the query (or route to
+          // goal-builder if the user has no goals yet).
+          if (!useStore.getState().goals.some((g) => g.status === "active")) {
+            navigate("/onboarding/goal");
+            close();
+            return;
+          }
           const id = createAction({ title: query.trim() });
           toast.success("Action created");
           openPanel({ kind: "action", mode: "edit", id });

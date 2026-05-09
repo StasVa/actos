@@ -403,6 +403,10 @@ export default function Setup() {
   const [path, setPath] = React.useState<Path | null>(null);
   const [fading, setFading] = React.useState(false);
 
+  // Setup Wizard always starts in Dark, regardless of system preference.
+  // User's later selection on Screen 1 overrides this via themeStore.set().
+  React.useEffect(() => { themeStore.set("dark"); }, []);
+
   React.useEffect(() => { writeScreen(screen); }, [screen]);
 
   // Browser back button → step back. Push history entry per screen.

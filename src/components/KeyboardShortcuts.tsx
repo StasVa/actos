@@ -18,6 +18,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useStore } from "@/store/useStore";
+import { hasActiveGoal } from "@/lib/goalGuard";
 
 const NAV_MAP: Record<string, { path: string; label: string }> = {
   t: { path: "/today", label: "Today" },
@@ -87,6 +88,7 @@ export function KeyboardShortcuts() {
 
       if (key === "n") {
         e.preventDefault();
+        if (!hasActiveGoal()) { navigate("/onboarding/goal"); return; }
         openPanel({ kind: "action", mode: "new" });
         return;
       }

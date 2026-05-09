@@ -29,6 +29,7 @@ import Settings from "./pages/Settings.tsx";
 import SettingsSubscription from "./pages/SettingsSubscription.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Setup, { isSetupCompleted } from "./pages/Setup.tsx";
+import GoalBuilder from "./pages/GoalBuilder.tsx";
 import { ActionEditor } from "./components/ActionEditor";
 
 import { GoalEditor } from "./components/GoalEditor";
@@ -70,6 +71,7 @@ const SetupGuard = () => {
       }
     } catch {}
     if (location.pathname.startsWith("/setup")) return;
+    if (location.pathname.startsWith("/onboarding")) return;
     if (location.pathname.startsWith("/admin")) return;
     navigate("/setup", { replace: true });
   }, [location.pathname, navigate]);
@@ -79,6 +81,7 @@ const SetupGuard = () => {
 const ChromeOnlyOutsideSetup: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { pathname } = useLocation();
   if (pathname.startsWith("/setup")) return null;
+  if (pathname.startsWith("/onboarding")) return null;
   return <>{children}</>;
 };
 
@@ -103,6 +106,7 @@ const App = () => (
         <Routes>
           {/* Setup wizard (no chrome) */}
           <Route path="/setup" element={<Setup />} />
+          <Route path="/onboarding/goal" element={<GoalBuilder />} />
 
           {/* Admin */}
           <Route path="/admin" element={<AdminLayout />}>

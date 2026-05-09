@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { LifetimeCounters } from "@/components/LifetimeCounters";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Tooltip } from "@/components/Tooltip";
 import { useStore } from "@/store/useStore";
 import { toast } from "sonner";
@@ -594,7 +594,11 @@ const Rituals: React.FC = () => {
     openPanel({ kind: "ritual", mode: "edit", id: r.id });
   };
 
+  const navigate = useNavigate();
+  const hasActiveGoals = storeGoals.some((g) => g.status === "active");
+
   const handleAddRitual = () => {
+    if (!hasActiveGoals) { navigate("/onboarding/goal"); return; }
     openPanel({
       kind: "ritual",
       mode: "new",
@@ -651,6 +655,8 @@ const Rituals: React.FC = () => {
             label: "+ New ritual",
             onClick: handleAddRitual,
             ariaLabel: "New ritual",
+            disabled: !hasActiveGoals,
+            disabledTooltip: "Create a goal first",
           }}
           filters={
             <>
@@ -678,12 +684,21 @@ const Rituals: React.FC = () => {
         <div style={{ height: 24 }} />
         <div className="mx-auto" style={{ maxWidth: 1100 }}>
           {storeRituals.length === 0 ? (
-            <EmptyState
-              headline="No rituals yet."
-              description="Rituals are recurring actions you commit to — daily reading, weekly review, anything you want to do consistently. They build a multiplier on your effort over time."
-              ctaLabel="+ New ritual"
-              onCta={handleAddRitual}
-            />
+            !hasActiveGoals ? (
+              <EmptyState
+                headline="Goals come first."
+                description={`A goal is a result you want to reach — like "$10k MRR" or "Pass C1 Spanish exam". Create one, then add rituals under it.`}
+                ctaLabel="+ Create your first goal"
+                onCta={() => navigate("/onboarding/goal")}
+              />
+            ) : (
+              <EmptyState
+                headline="No rituals yet."
+                description="Rituals are recurring actions you commit to — daily reading, weekly review, anything you want to do consistently. They build a multiplier on your effort over time."
+                ctaLabel="+ New ritual"
+                onCta={handleAddRitual}
+              />
+            )
           ) : (
             <>
               <TopStats

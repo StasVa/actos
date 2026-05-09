@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { AppSidebar } from "@/components/AppSidebar";
 import {
@@ -465,7 +465,14 @@ const AllActions: React.FC = () => {
   // Live store data → legacy renderer shape (rendering JSX is unchanged).
   const storeActions = useStore((s) => s.actions);
   const storeProjects = useStore((s) => s.projects);
+  const storeGoals = useStore((s) => s.goals);
   const openPanel = useStore((s) => s.openPanel);
+  const navigate = useNavigate();
+  const hasActiveGoals = storeGoals.some((g) => g.status === "active");
+  const goNew = () => {
+    if (!hasActiveGoals) { navigate("/onboarding/goal"); return; }
+    openPanel({ kind: "action", mode: "new" });
+  };
   const ACTIONS = useMemo(
     () => toLegacyActions(storeActions, storeProjects),
     [storeActions, storeProjects],
@@ -583,8 +590,10 @@ const AllActions: React.FC = () => {
             meta={meta}
             cta={{
               label: "+ New action",
-              onClick: () => openPanel({ kind: "action", mode: "new" }),
+              onClick: goNew,
               ariaLabel: "New action",
+              disabled: !hasActiveGoals,
+              disabledTooltip: "Create a goal first",
             }}
             filters={
               <>
@@ -632,17 +641,26 @@ const AllActions: React.FC = () => {
         {/* Full-width list */}
         <div className="flex-1 overflow-y-auto min-h-0 pt-2 pl-8">
           {ACTIONS.length === 0 ? (
-            <EmptyState
-              headline="No actions yet."
-              description="Actions are the concrete next steps under your projects. Capture them here as you think of them, then mark them done as you complete them."
-              ctaLabel="+ New action"
-              onCta={() => openPanel({ kind: "action", mode: "new" })}
-              hint={
-                storeProjects.filter((p) => !p.isDraft && p.status === "active").length === 0
-                  ? "You'll need a goal and project first."
-                  : null
-              }
-            />
+            !hasActiveGoals ? (
+              <EmptyState
+                headline="Goals come first."
+                description={`A goal is a result you want to reach — like "$10k MRR" or "Pass C1 Spanish exam". Create one, then add actions under its projects.`}
+                ctaLabel="+ Create your first goal"
+                onCta={() => navigate("/onboarding/goal")}
+              />
+            ) : (
+              <EmptyState
+                headline="No actions yet."
+                description="Actions are the concrete next steps under your projects. Capture them here as you think of them, then mark them done as you complete them."
+                ctaLabel="+ New action"
+                onCta={goNew}
+                hint={
+                  storeProjects.filter((p) => !p.isDraft && p.status === "active").length === 0
+                    ? "You'll need a goal and project first."
+                    : null
+                }
+              />
+            )
           ) : filtered.length === 0 ? (
             <FilteredEmpty onClear={clearFilters} />
           ) : "single" in grouped ? (

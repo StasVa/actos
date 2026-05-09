@@ -384,8 +384,15 @@ const AllProjects: React.FC = () => {
             meta={meta}
             cta={{
               label: "+ New project",
-              onClick: handleNewProject,
+              onClick: () => {
+                if (storeGoals.filter((g) => g.status === "active").length === 0) {
+                  navigate("/onboarding/goal"); return;
+                }
+                handleNewProject();
+              },
               ariaLabel: "New project",
+              disabled: storeGoals.filter((g) => g.status === "active").length === 0,
+              disabledTooltip: "Create a goal first",
             }}
             filters={
               <>
@@ -424,10 +431,10 @@ const AllProjects: React.FC = () => {
           {livePROJECTS.length === 0 ? (
             storeGoals.filter((g) => g.status === "active").length === 0 ? (
               <EmptyState
-                headline="No projects yet."
-                description={"Projects are chunks of work that finish in days or weeks. Each one belongs to a goal.\n\nGoals come first."}
+                headline="Goals come first."
+                description={`A goal is a result you want to reach — like "$10k MRR" or "Pass C1 Spanish exam". Create one, then add projects under it.`}
                 ctaLabel="+ Create your first goal"
-                onCta={handleNewGoal}
+                onCta={() => navigate("/onboarding/goal")}
               />
             ) : (
               <EmptyState

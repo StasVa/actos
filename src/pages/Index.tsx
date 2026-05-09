@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Zap, Leaf, Sun, Thermometer, Star, X, type LucideIcon } from "lucide-react";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Tooltip, SparkTooltipContent, StateDotTooltip } from "@/components/Tooltip";
@@ -14,7 +14,7 @@ import { PlanTodayPage } from "@/components/PlanCloseModals";
 import { CloseDayRecap } from "@/components/CloseDayRecap";
 import { ActionRow as SharedActionRow } from "@/components/ActionRow";
 import { ProjectCard as SharedProjectCard } from "@/components/ProjectCard";
-import { OnboardingGuide } from "@/components/OnboardingGuide";
+
 import { toast } from "sonner";
 import { subscribeAppEvent } from "@/lib/appEvents";
 import { formatTime } from "@/lib/format";
@@ -756,6 +756,37 @@ export const TodayZone: React.FC<{
   const planAndReview = settings.layers.planAndReview;
   const isPlanned = !!dayEntry?.isPlanned;
   const isClosed = !!dayEntry?.isClosed;
+
+  // ─── EMPTY: no active goals → cannot plan a day. Route into goal-builder. ───
+  const activeGoalsCount = goals.filter((g) => g.status === "active").length;
+  if (activeGoalsCount === 0) {
+    return (
+      <section>
+        <div
+          className="bg-surface-elevated border border-border-subtle rounded-[8px] text-center"
+          style={{ padding: "32px 40px" }}
+        >
+          <div className="text-[20px] font-medium text-text-primary leading-snug">
+            No goals yet.
+          </div>
+          <div
+            className="text-text-secondary mx-auto"
+            style={{ fontSize: 14, marginTop: 8, maxWidth: 480, lineHeight: 1.55 }}
+          >
+            A goal is a result you want to reach — like "$10k MRR" or
+            "Pass C1 Spanish exam". Create one to start planning days.
+          </div>
+          <Link
+            to="/onboarding/goal"
+            className="mt-6 inline-block rounded-[4px] bg-[hsl(var(--accent))] text-white font-medium hover:brightness-110 transition"
+            style={{ padding: "12px 32px", fontSize: 15 }}
+          >
+            + Create your first goal
+          </Link>
+        </div>
+      </section>
+    );
+  }
 
   // ─── STATE A: today not yet planned ───
   if (!isPlanned) {
@@ -1851,7 +1882,7 @@ const Index: React.FC = () => {
           <CloseDayRecap />
         ) : (
           <>
-            <OnboardingGuide />
+            
             <header className="mb-8">
               <div className="flex items-start justify-between gap-4">
                 <h1 className="text-[28px] font-medium text-text-primary leading-tight">

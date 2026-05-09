@@ -14,7 +14,7 @@ import { PlanTodayPage } from "@/components/PlanCloseModals";
 import { CloseDayRecap } from "@/components/CloseDayRecap";
 import { ActionRow as SharedActionRow } from "@/components/ActionRow";
 import { ProjectCard as SharedProjectCard } from "@/components/ProjectCard";
-import { OnboardingGuide } from "@/components/OnboardingGuide";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { subscribeAppEvent } from "@/lib/appEvents";
 import { formatTime } from "@/lib/format";
@@ -1851,7 +1851,7 @@ const Index: React.FC = () => {
           <CloseDayRecap />
         ) : (
           <>
-            <OnboardingGuide />
+            
             <header className="mb-8">
               <div className="flex items-start justify-between gap-4">
                 <h1 className="text-[28px] font-medium text-text-primary leading-tight">

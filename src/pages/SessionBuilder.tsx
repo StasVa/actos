@@ -274,6 +274,9 @@ const ImpactPill: React.FC<{ impact: number; goalColor: string }> = ({ impact, g
     style={{
       padding: "3px 10px",
       borderRadius: 4,
+      width: 40,
+      textAlign: "center",
+      boxSizing: "border-box",
       // Tinted background derived from goal color (low alpha against surface)
       background: `color-mix(in srgb, ${goalColor} 15%, transparent)`,
       color: goalColor,

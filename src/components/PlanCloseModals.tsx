@@ -821,8 +821,9 @@ const PlanForm: React.FC<{
                           padding: "4px 10px",
                           borderRadius: 4,
                           fontSize: 13,
-                          minWidth: 52,
+                          width: 56,
                           textAlign: "center",
+                          boxSizing: "border-box",
                           background: `color-mix(in srgb, ${gColor} 15%, transparent)`,
                           color: gColor,
                         }}

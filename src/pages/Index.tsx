@@ -86,8 +86,9 @@ const ImpactPill: React.FC<{ impact: number; color: string }> = ({ impact, color
       padding: "4px 10px",
       borderRadius: 4,
       fontSize: 13,
-      minWidth: 36,
+      width: 40,
       textAlign: "center",
+      boxSizing: "border-box",
       background: `color-mix(in srgb, ${color}, transparent 85%)`,
       color,
     }}

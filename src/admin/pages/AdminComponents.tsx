@@ -502,6 +502,9 @@ const Pills: React.FC = () => (
                 padding: "3px 7px",
                 borderRadius: 4,
                 fontSize: 11,
+                width: 56,
+                textAlign: "center",
+                boxSizing: "border-box",
                 background: "hsl(var(--goal-1) / 0.12)",
                 color: "hsl(var(--goal-1))",
               }}

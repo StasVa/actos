@@ -181,7 +181,12 @@ const MeasureBar: React.FC<{
 const DualBars: React.FC<{ outcome: number; effort: number; color: string }> = ({ outcome, effort, color }) => (
   <div className="flex min-w-0 flex-col gap-2">
     <MeasureBar label="VALUE" percentage={outcome} color={color} />
-    <MeasureBar label="EFFORT" percentage={effort} color={color} opacity={0.6} />
+    <div className="flex items-center gap-2">
+      <div className="flex-1 min-w-0">
+        <MeasureBar label="EFFORT" percentage={effort} color={color} opacity={0.6} />
+      </div>
+      <MetricInfoPopover variant="valueEffort" ariaLabel="What do Value and Effort mean?" />
+    </div>
   </div>
 );
 

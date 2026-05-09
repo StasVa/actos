@@ -684,12 +684,21 @@ const Rituals: React.FC = () => {
         <div style={{ height: 24 }} />
         <div className="mx-auto" style={{ maxWidth: 1100 }}>
           {storeRituals.length === 0 ? (
-            <EmptyState
-              headline="No rituals yet."
-              description="Rituals are recurring actions you commit to — daily reading, weekly review, anything you want to do consistently. They build a multiplier on your effort over time."
-              ctaLabel="+ New ritual"
-              onCta={handleAddRitual}
-            />
+            !hasActiveGoals ? (
+              <EmptyState
+                headline="Goals come first."
+                description={`A goal is a result you want to reach — like "$10k MRR" or "Pass C1 Spanish exam". Create one, then add rituals under it.`}
+                ctaLabel="+ Create your first goal"
+                onCta={() => navigate("/onboarding/goal")}
+              />
+            ) : (
+              <EmptyState
+                headline="No rituals yet."
+                description="Rituals are recurring actions you commit to — daily reading, weekly review, anything you want to do consistently. They build a multiplier on your effort over time."
+                ctaLabel="+ New ritual"
+                onCta={handleAddRitual}
+              />
+            )
           ) : (
             <>
               <TopStats

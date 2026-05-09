@@ -421,10 +421,10 @@ const newDraft = (): Draft => ({
 });
 
 const ActionsStep: React.FC<{
-  projectTitle: string;
+  goalTitle: string;
   onSubmit: (drafts: Draft[]) => void;
   onSkip: () => void;
-}> = ({ projectTitle, onSubmit, onSkip }) => {
+}> = ({ goalTitle, onSubmit, onSkip }) => {
   const [drafts, setDrafts] = React.useState<Draft[]>([newDraft(), newDraft()]);
   const update = (id: string, p: Partial<Draft>) =>
     setDrafts((d) => d.map((x) => (x.id === id ? { ...x, ...p } : x)));
@@ -437,11 +437,37 @@ const ActionsStep: React.FC<{
 
   return (
     <>
-      <Heading>Add actions to "{projectTitle}"</Heading>
+      <Heading>Add actions to "{goalTitle}"</Heading>
       <Lede>
         Actions are the small, concrete next steps. Add 2–3 you could do
         this week. You'll see them on Today.
       </Lede>
+      <div
+        style={{
+          fontSize: 13,
+          lineHeight: 1.6,
+          color: "hsl(var(--text-secondary))",
+          fontFamily: "Inter",
+          marginBottom: 20,
+        }}
+      >
+        <div style={{ marginBottom: 6, color: "hsl(var(--text-primary))" }}>
+          About these fields:
+        </div>
+        <ul style={{ paddingLeft: 18, margin: 0, display: "flex", flexDirection: "column", gap: 4 }}>
+          <li>
+            <strong style={{ color: "hsl(var(--text-primary))", fontWeight: 600 }}>IMPACT</strong> (1–10) —
+            how much this task moves your goal. Critical ones are 8–10, supporting ones are 3–5. You decide.
+          </li>
+          <li>
+            <strong style={{ color: "hsl(var(--text-primary))", fontWeight: 600 }}>TIME</strong> —
+            your estimate in minutes. Powers progress tracking ("how much time invested" in Reviews).
+          </li>
+        </ul>
+        <div style={{ marginTop: 8, color: "hsl(var(--text-tertiary))" }}>
+          Both are required so we can calculate Value, Effort, and time investment automatically — you focus on doing the work.
+        </div>
+      </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         <div style={{
           display: "grid",
@@ -668,7 +694,7 @@ const GoalBuilder: React.FC = () => {
     return (
       <ScreenWrap step={4} onBack={() => setPersisted({ step: 3, goalId: persisted.goalId, projectId: persisted.projectId })}>
         <ActionsStep
-          projectTitle={project?.title ?? "your project"}
+          goalTitle={goal?.title ?? goalDraft.title ?? "your goal"}
           onSubmit={onSubmit}
           onSkip={finish}
         />

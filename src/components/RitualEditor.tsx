@@ -284,244 +284,564 @@ function RitualEditorPanel({
 
       {/* Body */}
       <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
-        {/* Title */}
-        <div>
-          <input
-            ref={titleRef}
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            onBlur={() => persistField("title", title.trim())}
-            placeholder="Ritual title"
-            className="w-full bg-transparent outline-none text-[18px] font-medium text-text-primary placeholder:text-text-tertiary"
-          />
-        </div>
+        {mode === "new" ? (
+          <>
+            {/* Title */}
+            <div>
+              <input
+                ref={titleRef}
+                value={title}
+                onChange={(e) => {
+                  setTitle(e.target.value);
+                  if (e.target.value.trim()) setTitleError(null);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSaveNew();
+                  }
+                }}
+                placeholder="Ritual title"
+                className="w-full bg-transparent outline-none text-[18px] font-medium text-text-primary placeholder:text-text-tertiary"
+              />
+              {titleError && <InlineError text={titleError} />}
+            </div>
 
-        {/* Stats strip (edit only) */}
-        {mode === "edit" && (
-          <div className="grid grid-cols-3 gap-3 pb-2 border-b border-border-subtle">
-            <Stat label="Completions" value={String(completions)} />
-            <Stat label="Multiplier" value={`×${mult.toFixed(2)}`} />
-            <Stat label="Effective" value={effective.toFixed(1)} />
-          </div>
-        )}
+            {/* ESTIMATES */}
+            <div>
+              <SectionHeadRequired label="Estimates" required />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <FieldRow label="Base Impact (1-10) · required">
+                  <ClampedNumberInput
+                    value={baseImpact}
+                    min={1}
+                    max={10}
+                    step={1}
+                    placeholder="1–10"
+                    required
+                    requiredMessage="Base Impact is required (1-10)."
+                    ariaLabel="Base Impact"
+                    onChange={(v) => {
+                      setBaseImpact(v);
+                      if (v !== "" && typeof v === "number" && v >= 1 && v <= 10) {
+                        setImpactError(null);
+                      }
+                    }}
+                    onCommit={() => {}}
+                  />
+                  {impactError && <InlineError text={impactError} />}
+                </FieldRow>
+                <FieldRow label="Time (min) · required">
+                  <ClampedNumberInput
+                    value={timeMin}
+                    min={1}
+                    max={600}
+                    step={5}
+                    placeholder="e.g. 30"
+                    required
+                    requiredMessage="Time is required."
+                    ariaLabel="Time in minutes"
+                    onChange={(v) => {
+                      setTimeMin(v);
+                      if (v !== "" && typeof v === "number" && v > 0) setTimeError(null);
+                    }}
+                    onCommit={() => {}}
+                  />
+                  {timeError && <InlineError text={timeError} />}
+                </FieldRow>
+              </div>
+            </div>
 
-        {/* Parent (goal + project) */}
-        <div>
-          <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-2">
-            Parent
-          </div>
-          <div className="flex flex-col gap-2">
-            <select
-              value={goalId}
-              onChange={(e) => {
-                setGoalId(e.target.value);
-                setProjectId(null);
-                if (mode === "edit") {
-                  persistField("goalId", e.target.value);
-                  persistField("projectId", null);
-                }
-              }}
-              className="bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
-            >
-              {goals
-                .filter((g) => g.status === "active")
-                .map((g) => (
-                  <option key={g.id} value={g.id}>
-                    {g.title}
+            {/* PARENT — inline pill popovers */}
+            <div>
+              <SectionHeadRequired label="Parent" required />
+              <div className="flex items-center gap-2 flex-wrap text-[13px]">
+                <Popover open={goalPopoverOpen} onOpenChange={setGoalPopoverOpen}>
+                  <PopoverTrigger asChild>
+                    <button
+                      ref={goalPillRef}
+                      type="button"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[4px] border text-[13px] text-text-primary hover:bg-surface-hover transition-colors max-w-[200px]"
+                      style={{
+                        background: "hsl(var(--surface-raised))",
+                        borderColor: goalError
+                          ? "hsl(var(--text-warning))"
+                          : "hsl(var(--border-default))",
+                        height: 32,
+                      }}
+                      title={goals.find((g) => g.id === goalId)?.title ?? "Pick a goal"}
+                    >
+                      <span
+                        className="w-2 h-2 rounded-full shrink-0"
+                        style={{ background: goalColor }}
+                      />
+                      <span className="truncate">
+                        {goals.find((g) => g.id === goalId)?.title ?? "Pick a goal"}
+                      </span>
+                      <ChevronDown size={12} className="text-text-tertiary shrink-0" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    align="start"
+                    className="z-[210] w-[260px] p-1 bg-surface-raised border border-border-default"
+                  >
+                    {goals
+                      .filter((g) => g.status === "active")
+                      .map((g) => (
+                        <button
+                          key={g.id}
+                          type="button"
+                          onClick={() => {
+                            setGoalId(g.id);
+                            setProjectId(null);
+                            setGoalError(null);
+                            setGoalPopoverOpen(false);
+                          }}
+                          className={`w-full flex items-center justify-between gap-2 px-3 py-2 text-[13px] rounded-[3px] hover:bg-surface-hover ${
+                            g.id === goalId ? "text-[hsl(var(--accent))]" : "text-text-primary"
+                          }`}
+                        >
+                          <span className="flex items-center gap-2 truncate">
+                            <span
+                              className="w-2 h-2 rounded-full shrink-0"
+                              style={{ background: `hsl(var(--${g.color}))` }}
+                            />
+                            <span className="truncate">{g.title}</span>
+                          </span>
+                          {g.id === goalId && (
+                            <Check size={14} className="text-[hsl(var(--accent))]" />
+                          )}
+                        </button>
+                      ))}
+                  </PopoverContent>
+                </Popover>
+
+                <Popover open={projectPopoverOpen} onOpenChange={setProjectPopoverOpen}>
+                  <PopoverTrigger asChild>
+                    <button
+                      type="button"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[4px] border text-[13px] text-text-primary hover:bg-surface-hover transition-colors max-w-[200px]"
+                      style={{
+                        background: "hsl(var(--surface-raised))",
+                        borderColor: "hsl(var(--border-default))",
+                        height: 32,
+                      }}
+                      title={
+                        projectId
+                          ? projects.find((p) => p.id === projectId)?.title ?? ""
+                          : "Goal-level ritual"
+                      }
+                    >
+                      <span className="truncate">
+                        {projectId
+                          ? projects.find((p) => p.id === projectId)?.title ?? "Project"
+                          : "Goal-level ritual"}
+                      </span>
+                      <ChevronDown size={12} className="text-text-tertiary shrink-0" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    align="start"
+                    className="z-[210] w-[260px] p-1 bg-surface-raised border border-border-default"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setProjectId(null);
+                        setProjectPopoverOpen(false);
+                      }}
+                      className={`w-full flex items-center justify-between gap-2 px-3 py-2 text-[13px] rounded-[3px] hover:bg-surface-hover ${
+                        !projectId ? "text-[hsl(var(--accent))]" : "text-text-primary"
+                      }`}
+                    >
+                      <span className="truncate">— Goal-level ritual —</span>
+                      {!projectId && (
+                        <Check size={14} className="text-[hsl(var(--accent))]" />
+                      )}
+                    </button>
+                    {projectsForGoal.map((p) => (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => {
+                          setProjectId(p.id);
+                          setProjectPopoverOpen(false);
+                        }}
+                        className={`w-full flex items-center justify-between gap-2 px-3 py-2 text-[13px] rounded-[3px] hover:bg-surface-hover ${
+                          p.id === projectId ? "text-[hsl(var(--accent))]" : "text-text-primary"
+                        }`}
+                      >
+                        <span className="truncate">{p.title}</span>
+                        {p.id === projectId && (
+                          <Check size={14} className="text-[hsl(var(--accent))]" />
+                        )}
+                      </button>
+                    ))}
+                  </PopoverContent>
+                </Popover>
+              </div>
+              {goalError && <InlineError text={goalError} />}
+            </div>
+
+            {/* SCHEDULE */}
+            <div>
+              <SectionHeadRequired label="Schedule" required />
+              <select
+                value={schedule}
+                onChange={(e) => {
+                  setSchedule(e.target.value as RitualSchedule);
+                  setScheduleError(null);
+                }}
+                className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
+              >
+                {SCHEDULE_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
                   </option>
                 ))}
-            </select>
-            <select
-              value={projectId ?? ""}
-              onChange={(e) => {
-                const v = e.target.value || null;
-                setProjectId(v);
-                if (mode === "edit") persistField("projectId", v);
-              }}
-              className="bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
-            >
-              <option value="">— Goal-level ritual —</option>
-              {projectsForGoal.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.title}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
+              </select>
 
-        {/* Schedule */}
-        <div>
-          <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-2">
-            Schedule
-          </div>
-          <select
-            value={schedule}
-            onChange={(e) => {
-              const v = e.target.value as RitualSchedule;
-              setSchedule(v);
-              if (mode === "edit") persistField("schedule", v);
-            }}
-            className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
-          >
-            {SCHEDULE_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
+              {schedule === "weekly" && (
+                <div className="mt-2">
+                  <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-1">
+                    Day of week
+                  </div>
+                  <div className="flex gap-1">
+                    {WEEKDAY_LABELS.map((label, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => setWeekday(idx)}
+                        className="flex-1 text-[11px] py-1.5 rounded-[4px] border transition-colors"
+                        style={{
+                          background: weekday === idx ? "hsl(var(--surface-elevated))" : "transparent",
+                          borderColor: weekday === idx ? "hsl(var(--accent))" : "hsl(var(--border-subtle))",
+                          color: weekday === idx ? "hsl(var(--text-primary))" : "hsl(var(--text-secondary))",
+                        }}
+                      >
+                        {label.slice(0, 1)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
-          {schedule === "weekly" && (
-            <div className="mt-2">
-              <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-1">
-                Day of week
-              </div>
-              <div className="flex gap-1">
-                {WEEKDAY_LABELS.map((label, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => {
-                      setWeekday(idx);
-                      persistScheduleConfig({ weekday: idx });
+              {schedule === "monthly" && (
+                <div className="mt-2">
+                  <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-1">
+                    Day of month
+                  </div>
+                  <input
+                    type="number"
+                    min={1}
+                    max={31}
+                    value={monthDay}
+                    onChange={(e) => {
+                      const v = Math.max(1, Math.min(31, Number(e.target.value)));
+                      setMonthDay(v);
                     }}
-                    className="flex-1 text-[11px] py-1.5 rounded-[4px] border transition-colors"
-                    style={{
-                      background: weekday === idx ? "hsl(var(--surface-elevated))" : "transparent",
-                      borderColor: weekday === idx ? "hsl(var(--accent))" : "hsl(var(--border-subtle))",
-                      color: weekday === idx ? "hsl(var(--text-primary))" : "hsl(var(--text-secondary))",
-                    }}
-                  >
-                    {label.slice(0, 1)}
-                  </button>
-                ))}
-              </div>
+                    className="w-24 bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
+                  />
+                </div>
+              )}
+
+              {schedule === "custom" && (
+                <div className="mt-2">
+                  <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-1">
+                    Days of week
+                  </div>
+                  <div className="flex gap-1">
+                    {WEEKDAY_LABELS.map((label, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => toggleCustomDay(idx)}
+                        className="flex-1 text-[11px] py-1.5 rounded-[4px] border transition-colors"
+                        style={{
+                          background: customDays.includes(idx)
+                            ? "hsl(var(--surface-elevated))"
+                            : "transparent",
+                          borderColor: customDays.includes(idx)
+                            ? "hsl(var(--accent))"
+                            : "hsl(var(--border-subtle))",
+                          color: customDays.includes(idx)
+                            ? "hsl(var(--text-primary))"
+                            : "hsl(var(--text-secondary))",
+                        }}
+                      >
+                        {label.slice(0, 1)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {scheduleError && <InlineError text={scheduleError} />}
             </div>
-          )}
 
-          {schedule === "monthly" && (
-            <div className="mt-2">
-              <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-1">
-                Day of month
-              </div>
+            {/* NOTES (collapsed by default) */}
+            <div>
+              {notesExpanded ? (
+                <>
+                  <SectionHead>Notes</SectionHead>
+                  <textarea
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    placeholder="Add notes..."
+                    rows={3}
+                    autoFocus
+                    className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary placeholder:text-text-tertiary outline-none resize-y"
+                  />
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setNotesExpanded(true)}
+                  className="text-[13px] text-text-tertiary hover:text-text-primary transition-colors"
+                >
+                  + Add notes
+                </button>
+              )}
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Title */}
+            <div>
               <input
-                type="number"
-                min={1}
-                max={31}
-                value={monthDay}
-                onChange={(e) => {
-                  const v = Math.max(1, Math.min(31, Number(e.target.value)));
-                  setMonthDay(v);
-                  if (mode === "edit") persistScheduleConfig({ monthDay: v });
-                }}
-                className="w-24 bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
+                ref={titleRef}
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                onBlur={() => persistField("title", title.trim())}
+                placeholder="Ritual title"
+                className="w-full bg-transparent outline-none text-[18px] font-medium text-text-primary placeholder:text-text-tertiary"
               />
             </div>
-          )}
 
-          {schedule === "custom" && (
-            <div className="mt-2">
-              <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-1">
-                Days of week
+            {/* Stats strip */}
+            <div className="grid grid-cols-3 gap-3 pb-2 border-b border-border-subtle">
+              <Stat label="Completions" value={String(completions)} />
+              <Stat label="Multiplier" value={`×${mult.toFixed(2)}`} />
+              <Stat label="Effective" value={effective.toFixed(1)} />
+            </div>
+
+            {/* Parent (goal + project) */}
+            <div>
+              <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-2">
+                Parent
               </div>
-              <div className="flex gap-1">
-                {WEEKDAY_LABELS.map((label, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => toggleCustomDay(idx)}
-                    className="flex-1 text-[11px] py-1.5 rounded-[4px] border transition-colors"
-                    style={{
-                      background: customDays.includes(idx)
-                        ? "hsl(var(--surface-elevated))"
-                        : "transparent",
-                      borderColor: customDays.includes(idx)
-                        ? "hsl(var(--accent))"
-                        : "hsl(var(--border-subtle))",
-                      color: customDays.includes(idx)
-                        ? "hsl(var(--text-primary))"
-                        : "hsl(var(--text-secondary))",
-                    }}
-                  >
-                    {label.slice(0, 1)}
-                  </button>
+              <div className="flex flex-col gap-2">
+                <select
+                  value={goalId}
+                  onChange={(e) => {
+                    setGoalId(e.target.value);
+                    setProjectId(null);
+                    persistField("goalId", e.target.value);
+                    persistField("projectId", null);
+                  }}
+                  className="bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
+                >
+                  {goals
+                    .filter((g) => g.status === "active")
+                    .map((g) => (
+                      <option key={g.id} value={g.id}>
+                        {g.title}
+                      </option>
+                    ))}
+                </select>
+                <select
+                  value={projectId ?? ""}
+                  onChange={(e) => {
+                    const v = e.target.value || null;
+                    setProjectId(v);
+                    persistField("projectId", v);
+                  }}
+                  className="bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
+                >
+                  <option value="">— Goal-level ritual —</option>
+                  {projectsForGoal.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.title}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Schedule */}
+            <div>
+              <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-2">
+                Schedule
+              </div>
+              <select
+                value={schedule}
+                onChange={(e) => {
+                  const v = e.target.value as RitualSchedule;
+                  setSchedule(v);
+                  persistField("schedule", v);
+                }}
+                className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
+              >
+                {SCHEDULE_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
                 ))}
+              </select>
+
+              {schedule === "weekly" && (
+                <div className="mt-2">
+                  <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-1">
+                    Day of week
+                  </div>
+                  <div className="flex gap-1">
+                    {WEEKDAY_LABELS.map((label, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => {
+                          setWeekday(idx);
+                          persistScheduleConfig({ weekday: idx });
+                        }}
+                        className="flex-1 text-[11px] py-1.5 rounded-[4px] border transition-colors"
+                        style={{
+                          background: weekday === idx ? "hsl(var(--surface-elevated))" : "transparent",
+                          borderColor: weekday === idx ? "hsl(var(--accent))" : "hsl(var(--border-subtle))",
+                          color: weekday === idx ? "hsl(var(--text-primary))" : "hsl(var(--text-secondary))",
+                        }}
+                      >
+                        {label.slice(0, 1)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {schedule === "monthly" && (
+                <div className="mt-2">
+                  <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-1">
+                    Day of month
+                  </div>
+                  <input
+                    type="number"
+                    min={1}
+                    max={31}
+                    value={monthDay}
+                    onChange={(e) => {
+                      const v = Math.max(1, Math.min(31, Number(e.target.value)));
+                      setMonthDay(v);
+                      persistScheduleConfig({ monthDay: v });
+                    }}
+                    className="w-24 bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
+                  />
+                </div>
+              )}
+
+              {schedule === "custom" && (
+                <div className="mt-2">
+                  <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-1">
+                    Days of week
+                  </div>
+                  <div className="flex gap-1">
+                    {WEEKDAY_LABELS.map((label, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => toggleCustomDay(idx)}
+                        className="flex-1 text-[11px] py-1.5 rounded-[4px] border transition-colors"
+                        style={{
+                          background: customDays.includes(idx)
+                            ? "hsl(var(--surface-elevated))"
+                            : "transparent",
+                          borderColor: customDays.includes(idx)
+                            ? "hsl(var(--accent))"
+                            : "hsl(var(--border-subtle))",
+                          color: customDays.includes(idx)
+                            ? "hsl(var(--text-primary))"
+                            : "hsl(var(--text-secondary))",
+                        }}
+                      >
+                        {label.slice(0, 1)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-2">
+                <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-1">
+                  Time of day (optional)
+                </div>
+                <input
+                  type="time"
+                  value={timeOfDay}
+                  onChange={(e) => {
+                    setTimeOfDay(e.target.value);
+                    persistScheduleConfig({ timeOfDay: e.target.value || undefined });
+                  }}
+                  className="w-32 bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
+                />
               </div>
             </div>
-          )}
 
-          <div className="mt-2">
-            <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-1">
-              Time of day (optional)
+            {/* Notes */}
+            <div>
+              <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-2">
+                Notes
+              </div>
+              <textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                onBlur={() => persistField("notes", notes || undefined)}
+                placeholder="Add notes..."
+                rows={3}
+                className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary placeholder:text-text-tertiary outline-none resize-y"
+              />
             </div>
-            <input
-              type="time"
-              value={timeOfDay}
-              onChange={(e) => {
-                setTimeOfDay(e.target.value);
-                if (mode === "edit") persistScheduleConfig({ timeOfDay: e.target.value || undefined });
-              }}
-              className="w-32 bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
-            />
-          </div>
-        </div>
 
-        {/* Notes */}
-        <div>
-          <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-2">
-            Notes
-          </div>
-          <textarea
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            onBlur={() => persistField("notes", notes || undefined)}
-            placeholder="Add notes..."
-            rows={3}
-            className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary placeholder:text-text-tertiary outline-none resize-y"
-          />
-        </div>
+            {/* Impact + costs */}
+            <div className="grid grid-cols-2 gap-3">
+              <FieldRow label="Base impact (0-10)">
+                <input
+                  type="number"
+                  min={0}
+                  max={10}
+                  value={baseImpact}
+                  onChange={(e) =>
+                    setBaseImpact(e.target.value === "" ? "" : Number(e.target.value))
+                  }
+                  onBlur={() => persistField("baseImpact", baseImpactNum || 0)}
+                  className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
+                />
+              </FieldRow>
+              <FieldRow label="Time (min)">
+                <input
+                  type="number"
+                  min={0}
+                  value={timeMin}
+                  onChange={(e) => setTimeMin(e.target.value === "" ? "" : Number(e.target.value))}
+                  onBlur={() =>
+                    persistField(
+                      "timeEstimateMinutes",
+                      timeMin === "" ? undefined : Number(timeMin),
+                    )
+                  }
+                  className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
+                />
+              </FieldRow>
+            </div>
 
-        {/* Impact + costs */}
-        <div className="grid grid-cols-2 gap-3">
-          <FieldRow label="Base impact (0-10)">
-            <input
-              type="number"
-              min={0}
-              max={10}
-              value={baseImpact}
-              onChange={(e) => setBaseImpact(Number(e.target.value))}
-              onBlur={() => persistField("baseImpact", Number(baseImpact) || 0)}
-              className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
-            />
-          </FieldRow>
-          <FieldRow label="Time (min)">
-            <input
-              type="number"
-              min={0}
-              value={timeMin}
-              onChange={(e) => setTimeMin(e.target.value === "" ? "" : Number(e.target.value))}
-              onBlur={() =>
-                persistField(
-                  "timeEstimateMinutes",
-                  timeMin === "" ? undefined : Number(timeMin),
-                )
-              }
-              className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
-            />
-          </FieldRow>
-          {/* Energy and Focus fields removed */}
-        </div>
-
-        {/* Status indicator (archived) */}
-        {mode === "edit" && status === "archived" && (
-          <div
-            className="text-[12px] px-3 py-2 rounded-[4px] border"
-            style={{
-              borderColor: "hsl(var(--border-subtle))",
-              background: "hsl(var(--surface-raised))",
-              color: "hsl(var(--text-secondary))",
-            }}
-          >
-            Archived. Restore to resume tracking and multiplier growth.
-          </div>
+            {/* Status indicator (archived) */}
+            {status === "archived" && (
+              <div
+                className="text-[12px] px-3 py-2 rounded-[4px] border"
+                style={{
+                  borderColor: "hsl(var(--border-subtle))",
+                  background: "hsl(var(--surface-raised))",
+                  color: "hsl(var(--text-secondary))",
+                }}
+              >
+                Archived. Restore to resume tracking and multiplier growth.
+              </div>
+            )}
+          </>
         )}
       </div>
 

@@ -14,6 +14,7 @@ import { PlanTodayPage } from "@/components/PlanCloseModals";
 import { CloseDayRecap } from "@/components/CloseDayRecap";
 import { ActionRow as SharedActionRow } from "@/components/ActionRow";
 import { ProjectCard as SharedProjectCard } from "@/components/ProjectCard";
+import { MultiplierPill, TimePill as SharedTimePill } from "@/components/MetaPills";
 
 import { toast } from "sonner";
 import { subscribeAppEvent } from "@/lib/appEvents";

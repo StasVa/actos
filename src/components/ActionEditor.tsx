@@ -530,17 +530,17 @@ function ActionEditorPanel({
           <>
             {/* ESTIMATES */}
             <div className="mb-6">
-              <SectionHeadRequired label="Estimates" required />
+              <SectionHeadRequired label={t("actionEditor.section.estimates")} required />
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <FieldRow label="Impact (1–10) *" info={<MetricInfoPopover variant="impact" ariaLabel="What is Impact?" />}>
+                <FieldRow label={t("actionEditor.field.impactRequired")} info={<MetricInfoPopover variant="impact" ariaLabel={t("actionEditor.field.metricImpactAria")} />}>
                   <ClampedNumberInput
                     value={impact}
                     min={1}
                     max={10}
                     step={1}
-                    placeholder="1–10"
+                    placeholder={t("actionEditor.field.impactPlaceholder")}
                     required
-                    requiredMessage="Impact is required."
+                    requiredMessage={t("actionEditor.error.impactRequired")}
                     ariaLabel="Impact"
                     onChange={(v) => {
                       setImpact(v);
@@ -550,13 +550,13 @@ function ActionEditorPanel({
                   />
                   {impactError && <InlineError text={impactError} />}
                 </FieldRow>
-                <FieldRow label="Time (min)">
+                <FieldRow label={t("actionEditor.field.timeOptional")}>
                   <ClampedNumberInput
                     value={timeMin}
                     min={1}
                     max={600}
                     step={5}
-                    placeholder="optional · e.g. 30"
+                    placeholder={t("actionEditor.field.timePlaceholderOptional")}
                     ariaLabel="Time in minutes"
                     onChange={(v) => setTimeMin(v)}
                     onCommit={() => {}}

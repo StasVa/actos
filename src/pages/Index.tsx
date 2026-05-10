@@ -1629,6 +1629,7 @@ export const Delegated: React.FC = () => {
 };
 
 const ThisWeek: React.FC = () => {
+  const { t } = useTranslation();
   const actions = useStore((s) => s.actions);
   const projects = useStore((s) => s.projects);
   const cutoff = Date.now() - 7 * 86400000;
@@ -1640,14 +1641,14 @@ const ThisWeek: React.FC = () => {
   ).length;
   const projClosed = projects.filter((p) => p.status === "completed" && inWeek(p.completedAt)).length;
   const stats = [
-    { n: `${done}`, label: "actions done" },
-    { n: `${delegated}`, label: "delegated" },
-    { n: `${dropped}`, label: "dropped" },
-    { n: `${projClosed}`, label: "projects closed" },
+    { n: `${done}`, label: t("home.thisWeek.actionsDone") },
+    { n: `${delegated}`, label: t("home.thisWeek.delegated") },
+    { n: `${dropped}`, label: t("home.thisWeek.dropped") },
+    { n: `${projClosed}`, label: t("home.thisWeek.projectsClosed") },
   ];
   return (
     <div className="p-4">
-      <TinyHeader>THIS WEEK</TinyHeader>
+      <TinyHeader>{t("home.thisWeek.title")}</TinyHeader>
       <div className="mt-3 space-y-1.5 font-mono text-[12px]">
         {stats.map((s, i) => (
           <div key={i} className="flex items-baseline gap-3">

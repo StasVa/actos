@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { Tooltip, StateDotTooltip } from "@/components/Tooltip";
 import { CardMenu } from "@/components/CardMenu";
@@ -60,6 +61,7 @@ export type ProjectCardProps = {
 };
 
 export const ProjectCard: React.FC<ProjectCardProps> = ({ projectId, goalLabel, goalColor }) => {
+  const { t } = useTranslation();
   const project = useStore((s) => s.projects.find((p) => p.id === projectId));
   const allActions = useStore((s) => s.actions);
   const actions = useMemo(
@@ -133,10 +135,10 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ projectId, goalLabel, 
       </React.Fragment>,
     );
   };
-  pushPart(meta.done, "done");
-  pushPart(meta.planned, "planned");
-  pushPart(meta.delegated, "delegated");
-  pushPart(meta.backlog, "backlog");
+  pushPart(meta.done, t("projects.card.statusDone"));
+  pushPart(meta.planned, t("projects.card.statusPlanned"));
+  pushPart(meta.delegated, t("projects.card.statusDelegated"));
+  pushPart(meta.backlog, t("projects.card.statusBacklog"));
   if (actionParts.length === 0) {
     actionParts.push(
       <span key="empty" className="text-text-tertiary">—</span>,
@@ -171,11 +173,11 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ projectId, goalLabel, 
                 />
               </Tooltip>
               <CardMenu
-                ariaLabel="Project menu"
+                ariaLabel={t("projects.menu.aria")}
                 items={[
-                  { label: "Mark complete", onSelect: () => { markProjectComplete(projectId); toast("Project completed"); } },
-                  { label: "Drop", destructive: true, onSelect: () => setConfirmDrop(true) },
-                  { label: "Delete", destructive: true, onSelect: () => setConfirmDelete(true) },
+                  { label: t("common.markComplete"), onSelect: () => { markProjectComplete(projectId); toast(t("toast.projectCompleted")); } },
+                  { label: t("common.drop"), destructive: true, onSelect: () => setConfirmDrop(true) },
+                  { label: t("common.delete"), destructive: true, onSelect: () => setConfirmDelete(true) },
                 ]}
               />
             </div>
@@ -186,42 +188,44 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ projectId, goalLabel, 
             className="mt-2 text-[16px] font-medium text-text-primary leading-[1.3] overflow-hidden"
             style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}
           >
-            {project.title || "Untitled"}
+            {project.title || t("common.untitled")}
           </div>
 
           {/* Measure bars */}
           <div className="mt-4 flex flex-col gap-2 min-w-0">
-            <MeasureBar label="VALUE" percentage={progress.outcome} color={goalColor} />
-            <MeasureBar label="EFFORT" percentage={progress.effort} color={goalColor} opacity={0.6} />
+            <MeasureBar label={t("projects.card.value")} percentage={progress.outcome} color={goalColor} />
+            <MeasureBar label={t("projects.card.effort")} percentage={progress.effort} color={goalColor} opacity={0.6} />
           </div>
 
           {/* Stat rows */}
           <div className="mt-4 flex flex-col gap-1.5 text-[12px]">
             <div className="flex items-center justify-between gap-3 min-h-[22px]">
-              <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">ACTIONS</span>
+              <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">{t("projects.card.actions")}</span>
               <span className="font-mono text-[11px] text-right truncate">{actionParts}</span>
             </div>
 
             {showTimeRow && (
               <div className="flex items-center justify-between gap-3 min-h-[22px]">
-                <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">TIME</span>
+                <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">{t("projects.card.time")}</span>
                 <span className="font-mono text-[11px] text-right tabular-nums truncate">
                   <span className="text-text-primary">{formatTime(meta.investedMin)}</span>
-                  <span className="text-text-secondary"> invested</span>
+                  <span className="text-text-secondary">{t("projects.card.timeInvested")}</span>
                   <span className="text-text-tertiary"> · </span>
                   <span className="text-text-primary">{formatTime(meta.remainingMin)}</span>
-                  <span className="text-text-secondary"> estimated remaining</span>
+                  <span className="text-text-secondary">{t("projects.card.timeEstimatedRemaining")}</span>
                 </span>
               </div>
             )}
 
             <div className="flex items-center justify-between gap-3 min-h-[22px]">
-              <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">STARTED</span>
+              <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">{t("projects.card.started")}</span>
               <span className="font-mono text-[11px] text-right truncate">
                 <span className="text-text-primary">{fmtShortDate(project.createdAt)}</span>
                 <span className="text-text-tertiary"> · </span>
                 <span className="text-text-secondary">
-                  {isClosed ? `closed in ${ageDays} days` : `${ageDays} days active`}
+                  {isClosed
+                    ? t("projects.card.closedInDays", { count: ageDays })
+                    : t("projects.card.daysActive", { count: ageDays })}
                 </span>
               </span>
             </div>
@@ -235,28 +239,28 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ projectId, goalLabel, 
 
           {/* Footer */}
           <div className="text-[12px]">
-            <span className="text-text-tertiary">Last activity: </span>
+            <span className="text-text-tertiary">{t("projects.card.lastActivity")} </span>
             <span className="text-text-secondary">{meta.lastLabel}</span>
           </div>
         </div>
       </Link>
       <ConfirmModal
         open={confirmDrop}
-        title="Drop this project?"
-        body="Open actions in this project will be dropped. You can re-open it later."
-        confirmLabel="Drop project"
+        title={t("projects.confirm.drop.heading")}
+        body={t("projects.confirm.drop.body")}
+        confirmLabel={t("common.drop")}
         destructive
         onCancel={() => setConfirmDrop(false)}
-        onConfirm={() => { dropProject(projectId); toast("Project dropped"); setConfirmDrop(false); }}
+        onConfirm={() => { dropProject(projectId); toast(t("toast.projectDropped")); setConfirmDrop(false); }}
       />
       <ConfirmModal
         open={confirmDelete}
-        title="Delete this project?"
-        body="This permanently removes the project and all its actions. This cannot be undone."
-        confirmLabel="Delete"
+        title={t("projects.confirm.delete.heading")}
+        body={t("projects.confirm.delete.body")}
+        confirmLabel={t("common.delete")}
         destructive
         onCancel={() => setConfirmDelete(false)}
-        onConfirm={() => { deleteProject(projectId); toast("Project deleted"); setConfirmDelete(false); }}
+        onConfirm={() => { deleteProject(projectId); toast(t("toast.projectDeleted")); setConfirmDelete(false); }}
       />
     </>
   );

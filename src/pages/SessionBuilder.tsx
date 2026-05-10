@@ -426,7 +426,7 @@ const SelectedRow: React.FC<{
             <button
               onClick={onRemove}
               className="w-6 h-6 inline-flex items-center justify-center rounded-[3px] text-text-tertiary opacity-0 group-hover:opacity-100 hover:text-text-primary hover:bg-surface-elevated transition-all"
-              aria-label="Remove"
+              aria-label={t("sessionBuilder.selected.removeAria")}
             >
               <XIcon size={14} />
             </button>

@@ -453,14 +453,14 @@ const ReferencesSection: React.FC<{ idea: Idea }> = ({ idea }) => {
   const submit = () => {
     const u = url.trim();
     if (!u) return;
-    const t = refTitle.trim() || undefined;
+    const ttl = refTitle.trim() || undefined;
     if (editingId) {
       updateIdea(idea.id, {
-        references: refs.map((r) => (r.id === editingId ? { ...r, url: u, title: t } : r)),
+        references: refs.map((r) => (r.id === editingId ? { ...r, url: u, title: ttl } : r)),
       });
     } else {
       updateIdea(idea.id, {
-        references: [...refs, { id: localId(), url: u, title: t }],
+        references: [...refs, { id: localId(), url: u, title: ttl }],
       });
     }
     resetForm();

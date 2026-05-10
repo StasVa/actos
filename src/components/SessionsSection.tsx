@@ -64,28 +64,39 @@ interface RowProps {
 }
 
 const SessionRow: React.FC<RowProps> = ({ session, outcome, subExtra, leftLabel, onClick }) => {
+  const { t } = useTranslation();
   const dur = sessionDurationMinutes(session);
   const planned = sessionPlannedMinutes(session);
   const doneCount = session.completedActionIds.length;
   const droppedCount = session.droppedActionIds.length;
-  const durStr = dur > 0 ? formatTime(dur) : "—";
+  const durStr = dur > 0 ? formatTime(dur) : t("sessions.section.dash");
 
   let modeLine: string;
   if (session.mode === "continuous") {
-    modeLine = `Continuous · ${dur > 0 ? `${dur}min focused` : `${session.workDuration}min planned`}`;
+    const detail = dur > 0
+      ? t("sessions.section.minutesFocused", { count: dur })
+      : t("sessions.section.minutesPlanned", { count: session.workDuration });
+    modeLine = t("sessions.section.modeContinuous", { detail });
   } else {
-    const mode = session.mode === "pomodoro" ? "Pomodoro" : "Custom";
-    modeLine = `${mode} · ${session.workDuration}min × ${session.cyclesCompleted}/${session.cyclesPlanned} cycles`;
+    const mode = session.mode === "pomodoro"
+      ? t("sessions.section.modePomodoro")
+      : t("sessions.section.modeCustom");
+    modeLine = t("sessions.section.modeNamed", {
+      mode,
+      work: session.workDuration,
+      done: session.cyclesCompleted,
+      planned: session.cyclesPlanned,
+    });
   }
 
   const stats: string[] = [];
-  if (outcome > 0) stats.push(`+${outcome} value`);
-  if (doneCount > 0) stats.push(`${doneCount} done`);
-  if (droppedCount > 0) stats.push(`${droppedCount} dropped`);
+  if (outcome > 0) stats.push(t("sessions.section.statValue", { count: outcome }));
+  if (doneCount > 0) stats.push(t("sessions.section.statDone", { count: doneCount }));
+  if (droppedCount > 0) stats.push(t("sessions.section.statDropped", { count: droppedCount }));
 
   const rightLabel =
     session.status === "aborted" && dur > 0
-      ? `${formatTime(dur)} of ${formatTime(planned)}`
+      ? t("sessions.section.rightOf", { actual: formatTime(dur), planned: formatTime(planned) })
       : durStr;
 
   return (

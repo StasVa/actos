@@ -1,5 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   Search,
   Calendar,
@@ -33,26 +34,27 @@ import {
 import type { LucideIcon } from "lucide-react";
 type NavItem = { label: string; href: string; icon: LucideIcon };
 
-const GROUP_EXECUTION: NavItem[] = [
-  { label: "Today", href: "/today", icon: Sun },
-  { label: "Progress", href: "/progress", icon: TrendingUp },
-  { label: "Actions", href: "/actions", icon: CheckSquare },
-  { label: "Delegated", href: "/delegated", icon: Send },
-  { label: "Rituals", href: "/rituals", icon: Repeat },
-];
-
-const GROUP_STRATEGY: NavItem[] = [
-  { label: "Goals", href: "/goals", icon: Target },
-  { label: "Projects", href: "/projects", icon: FolderKanban },
-  { label: "Ideas", href: "/ideas", icon: Lightbulb },
-  { label: "Sessions", href: "/sessions", icon: Timer },
-];
-
-const GROUP_REVIEWS: NavItem[] = [
-  { label: "Days", href: "/reviews/days", icon: Calendar },
-  { label: "Weeks", href: "/reviews/weeks", icon: CalendarDays },
-  { label: "Months", href: "/reviews/months", icon: CalendarRange },
-];
+function buildGroups(t: (k: string) => string) {
+  const GROUP_EXECUTION: NavItem[] = [
+    { label: t("nav.today"), href: "/today", icon: Sun },
+    { label: t("nav.progress"), href: "/progress", icon: TrendingUp },
+    { label: t("nav.actions"), href: "/actions", icon: CheckSquare },
+    { label: t("nav.delegated"), href: "/delegated", icon: Send },
+    { label: t("nav.rituals"), href: "/rituals", icon: Repeat },
+  ];
+  const GROUP_STRATEGY: NavItem[] = [
+    { label: t("nav.goals"), href: "/goals", icon: Target },
+    { label: t("nav.projects"), href: "/projects", icon: FolderKanban },
+    { label: t("nav.ideas"), href: "/ideas", icon: Lightbulb },
+    { label: t("nav.sessions"), href: "/sessions", icon: Timer },
+  ];
+  const GROUP_REVIEWS: NavItem[] = [
+    { label: t("nav.reviews.days"), href: "/reviews/days", icon: Calendar },
+    { label: t("nav.reviews.weeks"), href: "/reviews/weeks", icon: CalendarDays },
+    { label: t("nav.reviews.months"), href: "/reviews/months", icon: CalendarRange },
+  ];
+  return { GROUP_EXECUTION, GROUP_STRATEGY, GROUP_REVIEWS };
+}
 
 function isActive(pathname: string, href: string): boolean {
   if (href === "/today") {
@@ -125,6 +127,8 @@ const NavGroup: React.FC<{
 const Divider: React.FC = () => <div className="my-4 border-t border-border-subtle" />;
 
 export const AppSidebar: React.FC<{ onOpenSettings?: () => void }> = ({ onOpenSettings: _onOpenSettings }) => {
+  const { t } = useTranslation();
+  const { GROUP_EXECUTION, GROUP_STRATEGY, GROUP_REVIEWS } = buildGroups(t);
   const { pathname } = useLocation();
   const isMobile = useIsMobile();
 

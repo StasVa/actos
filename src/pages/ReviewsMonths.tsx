@@ -18,12 +18,12 @@ import { PageHeader } from "@/components/PageHeader";
 import { FilterDropdown } from "@/components/FilterDropdown";
 import { SortDropdown } from "@/components/SortDropdown";
 import {
-  REVIEW_SORT_OPTIONS,
   ReviewSortKey,
   computeAggregates,
   loadReviewSort,
   saveReviewSort,
   sortReviewEntries,
+  useReviewSortOptions,
 } from "@/lib/reviewSort";
 
 

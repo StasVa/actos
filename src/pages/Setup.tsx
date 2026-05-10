@@ -200,6 +200,7 @@ const WelcomeScreen: React.FC<{ name: string; onContinue: () => void }> = ({ nam
 };
 
 const ThemeScreen: React.FC<{ onContinue: () => void; onBack: () => void }> = ({ onContinue, onBack }) => {
+  const { t } = useTranslation();
   const [choice, , setChoice] = useThemeChoice();
   // Wizard pre-selects Dark on entry (set by Setup root). Treat as a valid
   // initial selection so Continue is enabled immediately.
@@ -220,9 +221,9 @@ const ThemeScreen: React.FC<{ onContinue: () => void; onBack: () => void }> = ({
   }, [hover, choice]);
 
   const tiles: { value: ThemeChoice; label: string; mockup: "light" | "dark" }[] = [
-    { value: "system", label: "System", mockup: window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light" },
-    { value: "light", label: "Light", mockup: "light" },
-    { value: "dark", label: "Dark", mockup: "dark" },
+    { value: "system", label: t("setup.theme.system"), mockup: window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light" },
+    { value: "light", label: t("settings.theme.light"), mockup: "light" },
+    { value: "dark", label: t("settings.theme.dark"), mockup: "dark" },
   ];
 
   return (

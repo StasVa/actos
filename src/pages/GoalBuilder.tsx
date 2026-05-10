@@ -429,6 +429,7 @@ const ActionsStep: React.FC<{
   onSubmit: (drafts: Draft[]) => void;
   onSkip: () => void;
 }> = ({ goalTitle, onSubmit, onSkip }) => {
+  const { t } = useTranslation();
   const [drafts, setDrafts] = React.useState<Draft[]>([newDraft(), newDraft()]);
   const update = (id: string, p: Partial<Draft>) =>
     setDrafts((d) => d.map((x) => (x.id === id ? { ...x, ...p } : x)));
@@ -438,14 +439,16 @@ const ActionsStep: React.FC<{
 
   const valid = drafts.filter((d) => d.title.trim());
   const canSubmit = valid.length >= 1;
+  const placeholders = [
+    t("goalBuilder.actions.placeholder1"),
+    t("goalBuilder.actions.placeholder2"),
+    t("goalBuilder.actions.placeholder3"),
+  ];
 
   return (
     <>
-      <Heading>Add actions to "{goalTitle}"</Heading>
-      <Lede>
-        Actions are the small, concrete next steps. Add 2–3 you could do
-        this week. You'll see them on Today.
-      </Lede>
+      <Heading>{t("goalBuilder.actions.heading", { goalTitle })}</Heading>
+      <Lede>{t("goalBuilder.actions.description")}</Lede>
       <div
         style={{
           fontSize: 13,
@@ -456,20 +459,20 @@ const ActionsStep: React.FC<{
         }}
       >
         <div style={{ marginBottom: 6, color: "hsl(var(--text-primary))" }}>
-          About these fields:
+          {t("goalBuilder.actions.explainerHeading")}
         </div>
         <ul style={{ paddingLeft: 18, margin: 0, display: "flex", flexDirection: "column", gap: 4 }}>
           <li>
-            <strong style={{ color: "hsl(var(--text-primary))", fontWeight: 600 }}>IMPACT</strong> (1–10) —
-            how much this task moves your goal. Critical ones are 8–10, supporting ones are 3–5. You decide.
+            <strong style={{ color: "hsl(var(--text-primary))", fontWeight: 600 }}>IMPACT</strong>{" "}
+            {t("goalBuilder.actions.explainerImpact")}
           </li>
           <li>
-            <strong style={{ color: "hsl(var(--text-primary))", fontWeight: 600 }}>TIME</strong> —
-            your estimate in minutes. Powers progress tracking ("how much time invested" in Reviews).
+            <strong style={{ color: "hsl(var(--text-primary))", fontWeight: 600 }}>TIME</strong>{" "}
+            {t("goalBuilder.actions.explainerTime")}
           </li>
         </ul>
         <div style={{ marginTop: 8, color: "hsl(var(--text-tertiary))" }}>
-          Both are required so we can calculate Value, Effort, and time investment automatically — you focus on doing the work.
+          {t("goalBuilder.actions.explainerBoth")}
         </div>
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -481,7 +484,10 @@ const ActionsStep: React.FC<{
           color: "hsl(var(--text-tertiary))",
           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
         }}>
-          <span>Title</span><span>Impact</span><span>Time (min)</span><span />
+          <span>{t("goalBuilder.actions.colTitle")}</span>
+          <span>{t("goalBuilder.actions.colImpact")}</span>
+          <span>{t("goalBuilder.actions.colTime")}</span>
+          <span />
         </div>
         {drafts.map((d, idx) => (
           <div key={d.id} style={{
@@ -492,7 +498,7 @@ const ActionsStep: React.FC<{
             <input
               type="text"
               value={d.title}
-              placeholder={`e.g. ${["Read Stripe API docs", "Implement webhook handler", "Set up test environment"][idx % 3]}`}
+              placeholder={placeholders[idx % 3]}
               onChange={(e) => update(d.id, { title: e.target.value })}
               style={inputStyle}
               maxLength={140}
@@ -501,20 +507,20 @@ const ActionsStep: React.FC<{
               type="number" min={0} max={10}
               value={d.impact}
               onChange={(e) => update(d.id, { impact: parseInt(e.target.value, 10) || 0 })}
-              aria-label="Impact 0–10"
+              aria-label={t("goalBuilder.actions.colImpact")}
               style={inputStyle}
             />
             <input
               type="number" min={0}
               value={d.time}
-              placeholder="e.g. 30"
+              placeholder={t("goalBuilder.actions.timePlaceholder")}
               onChange={(e) => update(d.id, { time: e.target.value })}
-              aria-label="Time estimate (minutes)"
+              aria-label={t("goalBuilder.actions.colTime")}
               style={inputStyle}
             />
             <button
               type="button"
-              aria-label="Remove row"
+              aria-label={t("common.delete")}
               onClick={() => remove(d.id)}
               disabled={drafts.length <= 1}
               style={{
@@ -543,14 +549,16 @@ const ActionsStep: React.FC<{
               padding: "6px 0",
             }}
           >
-            <Plus size={14} /> Add another
+            <Plus size={14} /> {t("goalBuilder.actions.add").replace(/^\+\s*/, "")}
           </button>
         )}
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 16 }}>
           <PrimaryBtn onClick={() => canSubmit && onSubmit(valid)} disabled={!canSubmit}>
-            Add {valid.length || ""} action{valid.length === 1 ? "" : "s"}
+            {valid.length > 0
+              ? t("goalBuilder.actions.cta", { count: valid.length })
+              : t("goalBuilder.actions.ctaEmpty")}
           </PrimaryBtn>
-          <GhostLink onClick={onSkip}>Skip</GhostLink>
+          <GhostLink onClick={onSkip}>{t("common.skip")}</GhostLink>
         </div>
       </div>
     </>

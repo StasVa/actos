@@ -907,12 +907,15 @@ function RitualEditorPanel({
           </>
         ) : status === "archived" ? (
           <>
-            <button
-              onClick={() => setConfirmDelete(true)}
-              className="text-[13px] text-text-tertiary hover:text-text-warning px-3 py-1.5"
-            >
-              Delete
-            </button>
+            <div className="flex items-center gap-3">
+              <EditorOverflowMenu
+                items={[
+                  overflowDuplicate(handleDuplicate),
+                  overflowDelete(() => setConfirmDelete(true)),
+                ]}
+              />
+              <SaveIndicator state={saveState} />
+            </div>
             <button
               onClick={handleRestore}
               className="text-[13px] font-medium px-3 py-1.5 rounded-[4px] border border-border-subtle text-text-primary hover:bg-surface-hover"
@@ -922,31 +925,22 @@ function RitualEditorPanel({
           </>
         ) : (
           <>
-            <button
-              onClick={() => setConfirmArchive(true)}
-              className="text-[13px] text-text-tertiary hover:text-text-primary px-3 py-1.5"
-            >
-              Archive
-            </button>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setConfirmDelete(true)}
-                className="text-[13px] text-text-tertiary hover:text-text-warning px-3 py-1.5"
-              >
-                Delete
-              </button>
-              <button
-                onClick={handleMarkDone}
-                disabled={doneToday}
-                className="text-[13px] font-medium px-3 py-1.5 rounded-[4px] disabled:opacity-50"
-                style={{
-                  background: "hsl(var(--accent))",
-                  color: "hsl(var(--surface-base))",
-                }}
-              >
-                {doneToday ? "Done today ✓" : "Mark today done"}
-              </button>
+            <div className="flex items-center gap-3">
+              <EditorOverflowMenu
+                items={[
+                  overflowDuplicate(handleDuplicate),
+                  overflowDrop(() => setConfirmArchive(true), "Archive"),
+                  overflowDelete(() => setConfirmDelete(true)),
+                ]}
+              />
+              <SaveIndicator state={saveState} />
             </div>
+            <MarkDoneButton
+              onClick={handleMarkDone}
+              disabled={doneToday}
+              disabledTooltip={doneToday ? "Already logged today" : undefined}
+              label={doneToday ? "Done today" : "Mark today done"}
+            />
           </>
         )}
       </div>
@@ -959,12 +953,10 @@ function RitualEditorPanel({
         onCancel={() => setConfirmArchive(false)}
         onConfirm={handleArchive}
       />
-      <ConfirmModal
+      <DeleteTypeConfirm
         open={confirmDelete}
         title="Delete this ritual?"
         body="This permanently removes the ritual and its completion history. This cannot be undone."
-        confirmLabel="Delete"
-        destructive
         onCancel={() => setConfirmDelete(false)}
         onConfirm={handleDelete}
       />

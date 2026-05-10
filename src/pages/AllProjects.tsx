@@ -40,29 +40,32 @@ const GOAL_COLOR_VARS: Record<string, GoalKey> = {
   "goal-3": "g3",
 };
 
-function fmtAgo(iso?: string): { label: string; days: number } {
+function fmtAgo(iso?: string, t?: (k: string, opts?: any) => string): { label: string; days: number } {
   if (!iso) return { label: "—", days: 999 };
   const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
-  if (days <= 0) return { label: "today", days: 0 };
-  if (days === 1) return { label: "1d ago", days: 1 };
-  if (days < 30) return { label: `${days}d ago`, days };
+  if (days <= 0) return { label: t ? t("allProjects.relAgo.today") : "today", days: 0 };
+  if (days === 1) return { label: t ? t("allProjects.relAgo.oneDay") : "1d ago", days: 1 };
+  if (days < 30) return { label: t ? t("allProjects.relAgo.daysAgo", { n: days }) : `${days}d ago`, days };
   const d = new Date(iso);
   return {
-    label: d.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+    label: d.toLocaleDateString(undefined, { month: "short", day: "numeric" }),
     days,
   };
 }
 
 
 /* ===== Tooltip content ===== */
-const StateTooltip: React.FC<{ p: Project }> = ({ p }) => (
-  <div className="font-mono text-[11px] leading-[1.6]">
-    <div className="text-text-primary uppercase tracking-[0.06em]">
-      {p.state === "stalled" ? "STALLED" : p.state === "near" ? "NEAR COMPLETION" : "ACTIVE"}
+const StateTooltip: React.FC<{ p: Project }> = ({ p }) => {
+  const { t } = useTranslation();
+  return (
+    <div className="font-mono text-[11px] leading-[1.6]">
+      <div className="text-text-primary uppercase tracking-[0.06em]">
+        {p.state === "stalled" ? t("common.label.stalled") : p.state === "near" ? t("common.label.nearCompletion") : t("common.label.active")}
+      </div>
+      <div className="text-text-tertiary">{t("allProjects.tooltip.lastActivity", { last: p.last })}</div>
     </div>
-    <div className="text-text-tertiary">Last activity {p.last}</div>
-  </div>
-);
+  );
+};
 
 /* ===== Project card (active grid) — navigates to /projects/:id ===== */
 const ProjectCard: React.FC<{ p: Project }> = ({ p }) => (

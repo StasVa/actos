@@ -336,7 +336,7 @@ function ActionEditorPanel({
   // semantically wrong, so we offer to mark the action Done on that date.
   const handleScheduledDateChange = (iso: string) => {
     if (isGoalLevel && iso) {
-      toast.error("Assign to a Project to schedule this action.");
+      toast.error(t("actionEditor.toast.needAssignProjectSchedule"));
       return;
     }
     if (iso && iso < TODAY_ISO()) {
@@ -351,11 +351,11 @@ function ActionEditorPanel({
     if (!actionId) return;
     if (iso) {
       changeActionStatus(actionId, "planned", { scheduledDate: iso });
-      toast("Action scheduled");
+      toast(t("actionEditor.toast.scheduled"));
     } else {
       changeActionStatus(actionId, "backlog");
       persistField("scheduledDate", undefined);
-      toast("Action moved to Backlog");
+      toast(t("actionEditor.toast.movedToBacklog"));
     }
   };
 

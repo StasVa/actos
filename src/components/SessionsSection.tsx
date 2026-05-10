@@ -384,7 +384,7 @@ export const SessionsSection: React.FC<Props> = ({
             onClick={() => setExpanded(true)}
             className="mt-2 font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary hover:text-text-primary transition-colors"
           >
-            Show all {sessions.length} sessions →
+            {t("sessions.section.showAll", { count: sessions.length })}
           </button>
         )}
         {selected && <SessionDetailPanel session={selected} onClose={() => setSelectedId(null)} />}
@@ -405,14 +405,7 @@ export const SessionsSection: React.FC<Props> = ({
 
     return (
       <>
-        {showStats && finished.length > 0 && (
-          <div className="mb-3 font-mono text-[12px] text-text-secondary tabular-nums">
-            Total focused:{" "}
-            <span className="text-text-primary">{formatTime(totalMin)}</span> · Avg session:{" "}
-            <span className="text-text-primary">{formatTime(avgMin)}</span> · Completion rate:{" "}
-            <span className="text-text-primary">{completionRate}%</span>
-          </div>
-        )}
+        {showStats && finished.length > 0 && totalsLine()}
         <div className="space-y-4">
           {groups.map(([date, list]) => (
             <div key={date}>
@@ -463,25 +456,12 @@ export const SessionsSection: React.FC<Props> = ({
 
   return (
     <>
-      {showStats && finished.length > 0 && (
-        <div className="mb-3 font-mono text-[12px] text-text-secondary tabular-nums">
-          Total focused:{" "}
-          <span className="text-text-primary">{formatTime(totalMin)}</span> · Avg session:{" "}
-          <span className="text-text-primary">{formatTime(avgMin)}</span> · Completion rate:{" "}
-          <span className="text-text-primary">{completionRate}%</span>
-          {bestWeek && bestWeek.minutes > 0 && (
-            <>
-              {" · Best week: "}
-              <span className="text-text-primary">{formatTime(bestWeek.minutes)}</span>
-            </>
-          )}
-        </div>
-      )}
+      {showStats && finished.length > 0 && totalsLine(bestWeek)}
       <div className="rounded-[6px] border border-border-subtle overflow-hidden">
         {weekRows.map((r) => {
           const range = weekRange(r.yearWeek);
           const label = range
-            ? `Week of ${format(range.start, "MMM d")} – ${format(range.end, "MMM d")}`
+            ? t("sessions.section.weekOf", { start: format(range.start, "MMM d"), end: format(range.end, "MMM d") })
             : formatWeekLabel(r.yearWeek);
           return (
             <button
@@ -494,13 +474,13 @@ export const SessionsSection: React.FC<Props> = ({
                 {label}
               </span>
               <span className="font-mono text-[12px] text-text-secondary tabular-nums">
-                <span className="text-text-primary">{r.count}</span> session{r.count === 1 ? "" : "s"}
+                <span className="text-text-primary">{t("sessions.section.weekRowSessions", { count: r.count })}</span>
                 <span className="text-text-tertiary"> · </span>
                 <span className="text-text-primary">{formatTime(r.minutes)}</span>
                 {r.outcome > 0 && (
                   <>
                     <span className="text-text-tertiary"> · </span>
-                    <span className="text-text-primary">+{r.outcome}</span> value
+                    <span className="text-text-primary">{t("sessions.section.weekRowValue", { count: r.outcome })}</span>
                   </>
                 )}
               </span>

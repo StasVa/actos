@@ -140,17 +140,17 @@ export function EditorShell({
           >
             <div className="text-center px-6 max-w-[420px]">
               <div className="text-[15px] font-medium text-text-primary mb-1">
-                Discard unsaved changes?
+                {t("confirm.discard.heading")}
               </div>
               <div className="text-[13px] text-text-secondary mb-5">
-                Your input will be lost.
+                {t("confirm.discard.body")}
               </div>
               <div className="flex items-center justify-center gap-3">
                 <button
                   onClick={() => setConfirmDiscard(false)}
                   className="text-[13px] text-text-secondary hover:text-text-primary px-3 py-1.5"
                 >
-                  Keep editing
+                  {t("confirm.discard.keepEditing")}
                 </button>
                 <button
                   onClick={() => {
@@ -163,7 +163,7 @@ export function EditorShell({
                     background: "hsl(var(--surface-hover))",
                   }}
                 >
-                  Discard
+                  {t("confirm.discard.confirmLabel")}
                 </button>
               </div>
             </div>

@@ -657,9 +657,9 @@ const PlanForm: React.FC<{
                       <span className="text-[13px] text-text-secondary">·</span>
                       <InlineTextPicker
                         value={quickProjectId ?? ""}
-                        placeholder="Pick project"
+                        placeholder={t("planToday.actions.pickProject")}
                         options={[
-                          { value: "", label: "No project" },
+                          { value: "", label: t("planToday.actions.noProject") },
                           ...projectsForQuickGoal.map((p) => ({
                             value: p.id,
                             label: p.title,

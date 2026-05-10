@@ -299,7 +299,7 @@ const GoalCard: React.FC<{ m: GoalMeta; logTimeOn: boolean }> = ({ m, logTimeOn 
             {showTime && (
               <StatRow
                 label={t("common.label.time")}
-                value={`${fmtTime(time.spent)} invested · ${fmtTime(time.remaining)} estimated remaining`}
+                value={t("goals.card.timeLine", { spent: formatDuration(time.spent), remaining: formatDuration(time.remaining) })}
               />
             )}
           </div>

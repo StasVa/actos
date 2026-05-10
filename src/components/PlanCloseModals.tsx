@@ -690,7 +690,7 @@ const PlanForm: React.FC<{
                 </div>
                 {state.selectedActionIds.length > 0 && totalEstMin > 0 && (
                   <div className="px-3 py-2 border-t border-border-subtle font-mono text-[11px] text-text-secondary tabular-nums">
-                    Estimated time: {formatTimeMin(totalEstMin)}
+                    {t("planToday.actions.estimatedTime", { time: formatTimeMin(totalEstMin) })}
                   </div>
                 )}
               </div>

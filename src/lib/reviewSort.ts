@@ -1,3 +1,5 @@
+import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import type { Action } from "@/types";
 import type { FilterOption } from "@/components/FilterDropdown";
 
@@ -17,6 +19,21 @@ export const REVIEW_SORT_OPTIONS: FilterOption<ReviewSortKey>[] = [
   { value: "most_value", label: "Most value" },
   { value: "most_effort", label: "Most effort" },
 ];
+
+export function useReviewSortOptions(): FilterOption<ReviewSortKey>[] {
+  const { t } = useTranslation();
+  return useMemo(
+    () => [
+      { value: "most_recent", label: t("reviews.sort.recent") },
+      { value: "oldest", label: t("reviews.sort.oldest") },
+      { value: "most_actions", label: t("reviews.sort.mostActions") },
+      { value: "most_time", label: t("reviews.sort.mostTime") },
+      { value: "most_value", label: t("reviews.sort.mostValue") },
+      { value: "most_effort", label: t("reviews.sort.mostEffort") },
+    ],
+    [t],
+  );
+}
 
 const VALID = new Set<ReviewSortKey>(REVIEW_SORT_OPTIONS.map((o) => o.value));
 

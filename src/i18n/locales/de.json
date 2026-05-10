@@ -579,6 +579,8 @@
   "goals.filter.mid": "Mittelfristig",
   "goals.filter.short": "Kurzfristig",
   "goals.freePlan.line": "{{active}} von {{cap}} Ziel{{plural}} aktiv · ",
+  "goals.freePlan.lineOverCap_one": "{{count}} aktives Ziel · Free erlaubt {{cap}} · ",
+  "goals.freePlan.lineOverCap_other": "{{count}} aktive Ziele · Free erlaubt {{cap}} · ",
   "goals.freePlan.linkText": "Go All-In",
   "goals.freePlan.suffix": " für 3.",
   "goals.menu.delete": "Löschen",

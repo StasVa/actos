@@ -480,17 +480,17 @@ const ReferencesSection: React.FC<{ idea: Idea }> = ({ idea }) => {
               onClick={() => setAdding(true)}
               className="text-[12px] text-[hsl(var(--accent))] hover:underline"
             >
-              + Add reference
+              {t("ideas.refs.add")}
             </button>
           )
         }
       >
-        {`REFERENCES · ${refs.length}`}
+        {t("ideas.refs.heading", { count: refs.length })}
       </SectionHeading>
 
       {refs.length === 0 && !adding && (
         <div className="text-[12px] text-text-tertiary">
-          No references yet. Add links to videos, articles, designs.
+          {t("ideas.refs.empty")}
         </div>
       )}
 

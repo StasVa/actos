@@ -263,12 +263,15 @@ const MeasureBar: React.FC<{
   </div>
 );
 
-const DualBars: React.FC<{ outcome: number; effort: number; color: string }> = ({ outcome, effort, color }) => (
-  <div className="flex min-w-0 flex-col gap-2">
-    <MeasureBar label="VALUE" percentage={outcome} color={color} />
-    <MeasureBar label="EFFORT" percentage={effort} color={color} opacity={0.6} />
-  </div>
-);
+const DualBars: React.FC<{ outcome: number; effort: number; color: string }> = ({ outcome, effort, color }) => {
+  const { t } = useTranslation();
+  return (
+    <div className="flex min-w-0 flex-col gap-2">
+      <MeasureBar label={t("projects.card.value")} percentage={outcome} color={color} />
+      <MeasureBar label={t("projects.card.effort")} percentage={effort} color={color} opacity={0.6} />
+    </div>
+  );
+};
 
 const GoalColumn: React.FC<{
   title: string;

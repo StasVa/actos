@@ -77,6 +77,7 @@ const ActionRow: React.FC<{ action: Action; selected: boolean; onSelect: () => v
   selected,
   onSelect,
 }) => {
+  const { t } = useTranslation();
   const changeStatus = useStore((s) => s.changeActionStatus);
   const storeAction = useStore((s) => s.actions.find((x) => x.id === action.id));
   const openPanel = useStore((s) => s.openPanel);

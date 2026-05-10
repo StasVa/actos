@@ -1224,5 +1224,11 @@
   "today.stats.timeInvested": "TIME INVESTED",
   "today.stats.valueAdded": "VALUE ADDED",
   "validation.createGoalFirst": "Create a goal first",
-  "validation.required": "Required"
+  "validation.required": "Required",
+  "reviews.detail.weekLabel": "Week of {{start}} — {{end}}",
+  "reviews.detail.ritualStatus.done": "done",
+  "reviews.detail.ritualStatus.skipped": "skipped",
+  "reviews.detail.ritualStatus.missed": "missed",
+  "reviews.detail.ritualStatus.pending": "pending",
+  "reviews.detail.ritualStatus.na": "n/a"
 }

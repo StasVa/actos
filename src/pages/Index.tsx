@@ -1538,10 +1538,10 @@ const QuickMoves: React.FC = () => {
               >
                 <Strip color={c} />
                 <button
-                  onClick={(e) => { e.stopPropagation(); changeStatus(a.id, "done"); toast.success("Action completed"); }}
+                  onClick={(e) => { e.stopPropagation(); changeStatus(a.id, "done"); toast.success(t("home.heavyLift.toast.completed")); }}
                   className="ml-1 inline-block rounded-[2px] border border-text-tertiary hover:border-accent shrink-0"
                   style={{ width: 14, height: 14 }}
-                  aria-label="Mark done"
+                  aria-label={t("home.quickMoves.markDoneAria")}
                 />
                 <span className="text-[13px] text-text-primary truncate">{a.title}</span>
                 <span className="text-[12px] text-text-secondary truncate">· {g?.title}{p ? ` · ${p.title}` : ""}</span>

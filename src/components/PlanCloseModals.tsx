@@ -996,6 +996,7 @@ const DayTypeChip: React.FC<{
   value: DayType;
   onChange: (next: DayTypeMeta) => void;
 }> = ({ value, onChange }) => {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const current = DAY_TYPE_META.find((m) => m.value === value)!;

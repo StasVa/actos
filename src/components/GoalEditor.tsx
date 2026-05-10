@@ -297,7 +297,7 @@ function GoalEditorPanel({
       {/* Body */}
       <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
         {/* Active limit notice */}
-        {mode === "new" && activeCount >= 3 && (
+        {mode === "new" && atCap && (
           <div
             className="text-[12px] px-3 py-2 rounded-[4px] border"
             style={{
@@ -306,7 +306,9 @@ function GoalEditorPanel({
               background: "hsl(var(--surface-raised))",
             }}
           >
-            You already have 3 active goals. Complete or drop one first.
+            {isFree
+              ? "Free plan: 1 active goal · Go All-In for 3."
+              : "You already have 3 active goals. Complete or drop one first."}
           </div>
         )}
 

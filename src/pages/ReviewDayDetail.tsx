@@ -124,6 +124,7 @@ const ClosedRow: React.FC<{
 };
 
 const ReviewDayDetail: React.FC = () => {
+  const { t } = useTranslation();
   const { date = "" } = useParams();
   const navigate = useNavigate();
   const [settingsOpen, setSettingsOpen] = React.useState(false);

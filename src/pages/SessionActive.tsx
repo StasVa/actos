@@ -925,7 +925,7 @@ const SessionActive: React.FC = () => {
                   color: "hsl(var(--accent-foreground))",
                 }}
               >
-                Add {pickerSelected.length > 0 ? `(${pickerSelected.length})` : ""}
+                {pickerSelected.length > 0 ? t("sessionActive.picker.addCount", { count: pickerSelected.length }) : t("sessionActive.picker.add")}
               </button>
             </div>
           </div>

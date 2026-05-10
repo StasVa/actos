@@ -730,6 +730,7 @@ const IdeaDetail: React.FC<{ idea: Idea; mobile?: boolean }> = ({ idea, mobile =
   }, [idea.id]);
 
   const goalColor = goal ? `hsl(var(--${goal.color}))` : "hsl(var(--text-tertiary))";
+  const relativeAgo = useRelativeAgo();
   const captured = relativeAgo(idea.capturedAt);
 
   const commitTitle = () => {

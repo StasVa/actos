@@ -180,7 +180,7 @@ const InlineTextPicker: React.FC<{
           style={{ top: pos.top, left: pos.left, minWidth: pos.width, padding: "4px 0" }}
         >
           {options.length === 0 && (
-            <div className="px-3 py-1.5 text-[12px] text-text-tertiary">No options</div>
+            <div className="px-3 py-1.5 text-[12px] text-text-tertiary">{t("planToday.miniDropdown.noOptions")}</div>
           )}
           {options.map((o) => {
             const selected = o.value === value;

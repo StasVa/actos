@@ -1147,11 +1147,11 @@ function relDays(iso: string): string {
       new Date(today + "T00:00:00").getTime()) /
       86400000,
   );
-  if (days === 0) return "today";
-  if (days === 1) return "tomorrow";
-  if (days === -1) return "yesterday";
-  if (days > 0) return `in ${days} days`;
-  return `${Math.abs(days)} days ago`;
+  if (days === 0) return i18n.t("actionEditor.relDays.today");
+  if (days === 1) return i18n.t("actionEditor.relDays.tomorrow");
+  if (days === -1) return i18n.t("actionEditor.relDays.yesterday");
+  if (days > 0) return i18n.t("actionEditor.relDays.inDays", { count: days });
+  return i18n.t("actionEditor.relDays.daysAgo", { count: Math.abs(days) });
 }
 
 export function DateChipPicker({

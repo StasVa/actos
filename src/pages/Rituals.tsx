@@ -588,6 +588,8 @@ const Rituals: React.FC = () => {
   const [stateFilter, setStateFilter] = useState<RStateFilter>("all");
   const [goalFilter, setGoalFilter] = useState<string>("all");
   const [sortKey, setSortKey] = useState<RSortKey>("recent");
+  const stateOptions = useRStateOptions();
+  const sortOptions = useRSortOptions();
 
   const goalsById = React.useMemo(() => {
     const m: Record<string, import("@/types").Goal> = {};

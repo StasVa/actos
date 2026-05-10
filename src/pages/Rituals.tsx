@@ -644,20 +644,20 @@ const Rituals: React.FC = () => {
     const match = storeRituals.find((sr) => sr.id === r.id);
     if (!match) return;
     if (match.completionHistory.some((c) => c.date === TODAY_ISO)) {
-      toast("Already logged today");
+      toast(t("rituals.toast.alreadyLogged"));
       return;
     }
     markRitualInstanceDone(match.id);
-    toast.success(`Logged · ${match.totalCompletions + 1} completion${match.totalCompletions + 1 === 1 ? "" : "s"}`);
+    toast.success(t("rituals.toast.logged", { count: match.totalCompletions + 1 }));
   };
 
   const handleRestore = (id: string) => {
     restoreRitual(id);
-    toast.success("Ritual restored");
+    toast.success(t("rituals.toast.restored"));
   };
 
   const goalOptions: FilterOption<string>[] = [
-    { value: "all", label: "All" },
+    { value: "all", label: t("common.all") },
     ...storeGoals
       .filter((g) => g.status === "active")
       .map((g) => ({ value: g.id, label: g.title, dot: `hsl(var(--${g.color}))` })),
@@ -684,25 +684,25 @@ const Rituals: React.FC = () => {
       <main className="app-main page-medium">
         <PageHeader
           title={t("rituals.page.title")}
-          meta={`${totalRituals} RITUALS · ${totalActive} ACTIVE · ${totalArchived} ARCHIVED`}
+          meta={t("rituals.meta", { total: totalRituals, active: totalActive, archived: totalArchived })}
           cta={{
-            label: "+ New ritual",
+            label: t("rituals.newRitual"),
             onClick: handleAddRitual,
-            ariaLabel: "New ritual",
+            ariaLabel: t("rituals.aria.newRitual"),
             disabled: !hasActiveGoals,
-            disabledTooltip: "Create a goal first",
+            disabledTooltip: t("rituals.disabledTooltip"),
           }}
           filters={
             <>
               <FilterDropdown<RStateFilter>
-                label="STATE"
+                label={t("common.label.state")}
                 value={stateFilter}
                 defaultValue="all"
-                options={R_STATE_OPTIONS}
+                options={stateOptions}
                 onChange={setStateFilter}
               />
               <FilterDropdown<string>
-                label="GOAL"
+                label={t("common.label.goal")}
                 value={goalFilter}
                 defaultValue="all"
                 options={goalOptions}
@@ -711,7 +711,7 @@ const Rituals: React.FC = () => {
             </>
           }
           sort={
-            <SortDropdown<RSortKey> value={sortKey} options={R_SORT_OPTIONS} onChange={setSortKey} />
+            <SortDropdown<RSortKey> value={sortKey} options={sortOptions} onChange={setSortKey} />
           }
         />
 
@@ -720,16 +720,16 @@ const Rituals: React.FC = () => {
           {storeRituals.length === 0 ? (
             !hasActiveGoals ? (
               <EmptyState
-                headline="Goals come first."
-                description={`A goal is a result you want to reach — like "$10k MRR" or "Pass C1 Spanish exam". Create one, then add rituals under it.`}
-                ctaLabel="+ Create your first goal"
+                headline={t("rituals.empty.noGoals.headline")}
+                description={t("rituals.empty.noGoals.description")}
+                ctaLabel={t("goals.empty.noGoals.cta")}
                 onCta={() => navigate("/onboarding/goal")}
               />
             ) : (
               <EmptyState
-                headline="No rituals yet."
-                description="Rituals are recurring actions you commit to — daily reading, weekly review, anything you want to do consistently. They build a multiplier on your effort over time."
-                ctaLabel="+ New ritual"
+                headline={t("rituals.empty.noRituals.headline")}
+                description={t("rituals.empty.noRituals.description")}
+                ctaLabel={t("rituals.newRitual")}
                 onCta={handleAddRitual}
               />
             )
@@ -754,7 +754,7 @@ const Rituals: React.FC = () => {
                 <section>
                   <div className="flex items-center justify-between mb-3">
                     <div className="text-[12px] font-medium uppercase tracking-[0.08em] text-text-secondary">
-                      Active rituals · {sortedActiveRows.length}
+                      {t("rituals.section.activeRituals", { count: sortedActiveRows.length })}
                     </div>
                   </div>
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -764,7 +764,7 @@ const Rituals: React.FC = () => {
                   </div>
                   {sortedActiveRows.length === 0 && (
                     <div className="mt-4 font-mono text-[11px] text-text-tertiary text-center">
-                      No active rituals match these filters.
+                      {t("rituals.empty.noActiveMatch")}
                     </div>
                   )}
                 </section>

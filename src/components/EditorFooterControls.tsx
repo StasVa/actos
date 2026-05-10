@@ -137,19 +137,21 @@ export type OverflowMenuItem = {
 
 export function EditorOverflowMenu({
   items,
-  ariaLabel = "More actions",
+  ariaLabel,
 }: {
   items: OverflowMenuItem[];
   ariaLabel?: string;
 }) {
   const [open, setOpen] = useState(false);
+  const { t } = useTranslation();
+  const resolvedAria = ariaLabel ?? t("editor.overflow.aria");
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <button
           type="button"
-          aria-label={ariaLabel}
+          aria-label={resolvedAria}
           className="w-8 h-8 inline-flex items-center justify-center rounded-[4px] text-text-tertiary hover:bg-surface-hover hover:text-text-primary transition-colors"
         >
           <MoreHorizontal size={16} />
@@ -221,7 +223,7 @@ export function DeleteTypeConfirm({
   title,
   body,
   keyword = "DELETE",
-  confirmLabel = "Delete",
+  confirmLabel,
   onCancel,
   onConfirm,
 }: {
@@ -233,6 +235,7 @@ export function DeleteTypeConfirm({
   onCancel: () => void;
   onConfirm: () => void;
 }) {
+  const { t } = useTranslation();
   const [text, setText] = useState("");
   useEffect(() => {
     if (!open) setText("");
@@ -248,6 +251,7 @@ export function DeleteTypeConfirm({
 
   if (!open) return null;
   const matches = text.trim() === keyword;
+  const resolvedConfirm = confirmLabel ?? t("confirm.delete.confirmLabel");
 
   return (
     <div
@@ -265,7 +269,13 @@ export function DeleteTypeConfirm({
         )}
         <div className="mt-4">
           <label className="block text-[12px] text-text-secondary mb-1.5">
-            Type <span className="font-mono text-text-primary">{keyword}</span> to confirm
+            {t("confirm.delete.typeShort", { keyword: "" }).replace("  ", " ").trim().split(keyword)[0]}
+            <span className="font-mono text-text-primary">{keyword}</span>
+            {(() => {
+              const tpl = t("confirm.delete.typeShort", { keyword });
+              const idx = tpl.indexOf(keyword);
+              return idx >= 0 ? tpl.slice(idx + keyword.length) : "";
+            })()}
           </label>
           <input
             autoFocus
@@ -284,7 +294,7 @@ export function DeleteTypeConfirm({
             onClick={onCancel}
             className="text-[13px] text-text-secondary hover:text-text-primary transition-colors px-3 py-1.5"
           >
-            Cancel
+            {t("common.cancel")}
           </button>
           <button
             type="button"
@@ -296,7 +306,7 @@ export function DeleteTypeConfirm({
               background: "hsl(var(--surface-hover))",
             }}
           >
-            {confirmLabel}
+            {resolvedConfirm}
           </button>
         </div>
       </div>
@@ -310,13 +320,15 @@ export function MarkDoneButton({
   onClick,
   disabled,
   disabledTooltip,
-  label = "Mark done",
+  label,
 }: {
   onClick: () => void;
   disabled?: boolean;
   disabledTooltip?: string;
   label?: string;
 }) {
+  const { t } = useTranslation();
+  const resolvedLabel = label ?? t("common.markDone");
   const button = (
     <button
       type="button"
@@ -342,7 +354,7 @@ export function MarkDoneButton({
       }}
     >
       <Check size={16} />
-      <span>{label}</span>
+      <span>{resolvedLabel}</span>
     </button>
   );
 

@@ -1306,6 +1306,7 @@
   "rituals.tip.pending": "Pending",
   "rituals.toast.alreadyLogged": "Already logged today",
   "rituals.toast.loggedSimple_one": "Logged · {{count}} completion",
+  "rituals.toast.loggedSimple_other": "Logged · {{count}} completions",
   "rituals.toast.logged_one": "Logged · {{count}} completion",
   "rituals.toast.logged_other": "Logged · {{count}} completions",
   "rituals.toast.restored": "Ritual restored",

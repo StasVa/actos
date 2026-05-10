@@ -81,6 +81,7 @@ function RitualEditorPanel({
   prefill?: Partial<Ritual>;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const ritual = useStore((s) => (ritualId ? s.rituals.find((r) => r.id === ritualId) : undefined));
   const goals = useStore((s) => s.goals);
   const projects = useStore((s) => s.projects);

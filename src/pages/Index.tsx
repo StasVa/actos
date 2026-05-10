@@ -1178,30 +1178,30 @@ export const TodayZone: React.FC<{
 
         <ConfirmModal
           open={clearMainTaskOpen}
-          title="Clear Main Task?"
-          body="You can pick another from today's actions."
-          confirmLabel="Clear"
+          title={t("home.mainTask.confirm.clear.heading")}
+          body={t("home.mainTask.confirm.clear.body")}
+          confirmLabel={t("home.mainTask.confirm.clear.cta")}
           onCancel={() => setClearMainTaskOpen(false)}
           onConfirm={() => {
             updateDayEntry(TODAY_ISO, { mainTaskActionId: null });
             setClearMainTaskOpen(false);
-            toast("Main Task cleared");
+            toast(t("home.mainTask.toast.cleared"));
           }}
         />
 
         {/* ACTIONS GROUP */}
         <div>
           <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
-            TODAY'S ACTIONS · {todays.length}
+            {t("home.actions.section", { count: todays.length })}
           </div>
           {todays.length > 0 && (
             <div className="font-mono text-[12px] text-text-secondary mt-1 mb-2 tabular-nums">
-              {doneActionsCount} done · {remainingActionsCount} remaining
+              {t("home.actions.progress", { done: doneActionsCount, remaining: remainingActionsCount })}
             </div>
           )}
           {todays.length === 0 ? (
             <div className="px-3 py-4 text-center font-mono text-[11px] text-text-tertiary border border-dashed border-border-subtle rounded-[4px]">
-              No actions for today.
+              {t("home.actions.empty")}
             </div>
           ) : (
             <div>

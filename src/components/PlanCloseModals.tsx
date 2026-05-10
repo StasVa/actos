@@ -114,6 +114,7 @@ const InlineTextPicker: React.FC<{
   placeholder: string;
   showDot?: boolean;
 }> = ({ value, options, onChange, placeholder, showDot }) => {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);

@@ -8,7 +8,7 @@
 //   - MarkDoneButton     — green-tinted Mark-done button with Check icon
 
 import { useEffect, useRef, useState } from "react";
-import { Check, Copy, MoreHorizontal, Trash2, XCircle } from "lucide-react";
+import { Check, Copy, MoreHorizontal, Trash2, XCircle, type LucideIcon } from "lucide-react";
 import {
   Popover,
   PopoverContent,

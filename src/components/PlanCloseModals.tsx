@@ -1191,7 +1191,7 @@ export const PlanTodayPage: React.FC<{ onCancel: () => void; onComplete: () => v
           {/* Compact day-type row */}
           <div className="flex items-center gap-2 pb-4 border-b border-border-subtle">
             <span className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
-              DAY TYPE
+              {t("planToday.dayType.heading")}
             </span>
             {state.dayType && (
               <DayTypeChip value={state.dayType} onChange={handleChipChange} />

@@ -603,9 +603,9 @@ const Goals: React.FC = () => {
 
         {noGoalsAtAll ? (
           <EmptyState
-            headline="No goals yet."
-            description={`A goal is a result you want to reach — like "Reach 100k YouTube subscribers" or "Pass C1 Spanish proficiency exam." Not a deliverable or activity — a result.\n\nYou can have up to 3 active goals.`}
-            ctaLabel="+ Create your first goal"
+            headline={t("goals.empty.noGoals.headline")}
+            description={t("goals.empty.noGoals.description")}
+            ctaLabel={t("goals.empty.noGoals.cta")}
             onCta={() => useStore.getState().openPanel({ kind: "goal", mode: "new" })}
           />
         ) : noResults ? (
@@ -619,19 +619,19 @@ const Goals: React.FC = () => {
         ) : (
           <div className="space-y-10">
             {(activeAll.length > 0 || stateFilter === "all" || stateFilter === "active") && activeAll.length > 0 && (
-              <SectionGrid label="ACTIVE" count={activeAll.length}>
+              <SectionGrid label={t("common.label.active")} count={activeAll.length}>
                 {activeAll.map((m) => <GoalCard key={m.goal.id} m={m} logTimeOn={logTimeOn} />)}
               </SectionGrid>
             )}
 
             {completed.length > 0 && (
-              <SectionGrid label="COMPLETED" count={completed.length} collapsible defaultOpen={false}>
+              <SectionGrid label={t("common.label.completed")} count={completed.length} collapsible defaultOpen={false}>
                 {completed.map((m) => <GoalCard key={m.goal.id} m={m} logTimeOn={logTimeOn} />)}
               </SectionGrid>
             )}
 
             {dropped.length > 0 && (
-              <SectionGrid label="DROPPED" count={dropped.length} collapsible defaultOpen={false}>
+              <SectionGrid label={t("common.label.dropped")} count={dropped.length} collapsible defaultOpen={false}>
                 {dropped.map((m) => <GoalCard key={m.goal.id} m={m} logTimeOn={logTimeOn} />)}
               </SectionGrid>
             )}

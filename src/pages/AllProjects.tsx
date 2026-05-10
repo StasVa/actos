@@ -446,16 +446,16 @@ const AllProjects: React.FC = () => {
           {livePROJECTS.length === 0 ? (
             storeGoals.filter((g) => g.status === "active").length === 0 ? (
               <EmptyState
-                headline="Goals come first."
-                description={`A goal is a result you want to reach — like "$10k MRR" or "Pass C1 Spanish exam". Create one, then add projects under it.`}
-                ctaLabel="+ Create your first goal"
+                headline={t("allProjects.empty.noGoals.headline")}
+                description={t("allProjects.empty.noGoals.description")}
+                ctaLabel={t("allProjects.empty.noGoals.cta")}
                 onCta={() => navigate("/onboarding/goal")}
               />
             ) : (
               <EmptyState
-                headline="No projects yet."
-                description={"Projects are chunks of work that finish in days or weeks. Each one belongs to a goal."}
-                ctaLabel="+ Create your first project"
+                headline={t("allProjects.empty.noProjects.headline")}
+                description={t("allProjects.empty.noProjects.description")}
+                ctaLabel={t("allProjects.empty.noProjects.cta")}
                 onCta={handleNewProject}
               />
             )
@@ -466,9 +466,9 @@ const AllProjects: React.FC = () => {
           {groups.near.length > 0 && (
             <section>
               <SectionHeader
-                label="NEAR COMPLETION"
+                label={t("common.label.nearCompletion")}
                 count={groups.near.length}
-                meta="≥ 75% DONE"
+                meta={t("allProjects.section.near.meta")}
               />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {groups.near.map((p) => (
@@ -480,7 +480,7 @@ const AllProjects: React.FC = () => {
 
           {groups.active.length > 0 && (
             <section>
-              <SectionHeader label="ACTIVE" count={groups.active.length} meta="MOVING THIS WEEK" />
+              <SectionHeader label={t("common.label.active")} count={groups.active.length} meta={t("common.label.movingThisWeek")} />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {groups.active.map((p) => (
                   <ProjectCard key={p.id} p={p} />
@@ -492,9 +492,9 @@ const AllProjects: React.FC = () => {
           {groups.stalled.length > 0 && (
             <section>
               <SectionHeader
-                label="STALLED"
+                label={t("common.label.stalled")}
                 count={groups.stalled.length}
-                meta="NO ACTIVITY ≥ 7 DAYS"
+                meta={t("allProjects.section.stalled.meta")}
                 warning
               />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -508,9 +508,9 @@ const AllProjects: React.FC = () => {
           {groups.closed.length > 0 && (
             <section>
               <SectionHeader
-                label="ARCHIVED"
+                label={t("common.label.archived")}
                 count={groups.closed.length}
-                meta="COMPLETED OR DROPPED"
+                meta={t("common.label.completedOrDropped")}
                 collapsible
                 collapsed={archivedCollapsed}
                 onToggle={() => setArchivedCollapsed((v) => !v)}

@@ -408,10 +408,10 @@ const SessionActive: React.FC = () => {
   /* ─── Labels ─── */
   const topLabel = (() => {
     if (timer.phase === "work" || timer.phase === "workEnd")
-      return `WORK · CYCLE ${timer.cycleIndex + 1}/${session.cyclesPlanned}`;
+      return t("sessionActive.label.workCycle", { current: timer.cycleIndex + 1, total: session.cyclesPlanned });
     if (timer.phase === "break" || timer.phase === "breakEnd")
-      return `BREAK · ${session.breakDuration}MIN`;
-    return "SESSION COMPLETE";
+      return t("sessionActive.label.breakMin", { count: session.breakDuration });
+    return t("sessionActive.label.sessionComplete");
   })();
 
   const timerColor =

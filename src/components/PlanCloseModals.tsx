@@ -524,10 +524,10 @@ const PlanForm: React.FC<{
       {/* ACTIONS */}
           <section>
             <SectionHead
-              sub="Pick what you'll work on today."
-              meta={`${state.selectedActionIds.length} selected`}
+              sub={t("planToday.actions.sub")}
+              meta={t("planToday.actions.selectedCount", { count: state.selectedActionIds.length })}
             >
-              ACTIONS
+              {t("planToday.actions.heading")}
             </SectionHead>
 
             <div className="flex flex-col md:flex-row gap-3 min-w-0">

@@ -437,7 +437,7 @@ function ActionEditorPanel({
   const handleDuplicate = () => {
     if (!action) return;
     const newId = createAction({
-      title: action.title + " (copy)",
+      title: "Copy of " + action.title,
       projectId: action.projectId,
       goalId: action.goalId,
       notes: action.notes,
@@ -445,7 +445,7 @@ function ActionEditorPanel({
       timeEstimateMinutes: action.timeEstimateMinutes,
       status: "backlog",
     });
-    toast("Action duplicated");
+    toast("Action duplicated · view in Backlog.");
     useStore.getState().openPanel({ kind: "action", mode: "edit", id: newId });
   };
 

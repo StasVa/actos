@@ -170,6 +170,7 @@ const App = () => (
 
           {/* Default + legacy redirects */}
           <Route path="/" element={<Landing />} />
+          <Route path="/start" element={<Start />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/manifesto" element={<Manifesto />} />
           <Route path="/login" element={<Login />} />

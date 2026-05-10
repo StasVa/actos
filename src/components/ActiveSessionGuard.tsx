@@ -54,6 +54,7 @@ const NavConfirmModal: React.FC<{
   onContinue: () => void;
   onEnd: () => void;
 }> = ({ open, remainingLabel, plannedTotal, onCancel, onContinue, onEnd }) => {
+  const { t } = useTranslation();
   React.useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -73,9 +74,9 @@ const NavConfirmModal: React.FC<{
         className="w-[460px] max-w-[90vw] bg-surface-elevated border border-border-subtle rounded-[6px] p-6 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-[16px] font-medium text-text-primary">Session in progress</h2>
+        <h2 className="text-[16px] font-medium text-text-primary">{t("sessionGuard.modal.title")}</h2>
         <p className="mt-3 text-[13px] text-text-secondary leading-[1.5]">
-          You have an active session running. {remainingLabel} left of {plannedTotal}min total.
+          {t("sessionGuard.modal.body", { remaining: remainingLabel, total: plannedTotal })}
         </p>
         <div className="mt-6 flex items-center justify-end gap-3">
           <button
@@ -83,7 +84,7 @@ const NavConfirmModal: React.FC<{
             onClick={onCancel}
             className="text-[13px] text-text-secondary hover:text-text-primary transition-colors px-3 py-1.5"
           >
-            Cancel
+            {t("sessionGuard.modal.cancel")}
           </button>
           <button
             type="button"
@@ -94,7 +95,7 @@ const NavConfirmModal: React.FC<{
               background: "hsl(var(--surface-hover))",
             }}
           >
-            Continue session
+            {t("sessionGuard.modal.continue")}
           </button>
           <button
             type="button"
@@ -105,7 +106,7 @@ const NavConfirmModal: React.FC<{
               background: "hsl(var(--accent))",
             }}
           >
-            End session
+            {t("sessionGuard.modal.end")}
           </button>
         </div>
       </div>

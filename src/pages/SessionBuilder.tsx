@@ -834,18 +834,18 @@ const SessionBuilder: React.FC = () => {
               <div className="mt-5 flex flex-wrap items-baseline gap-x-6 gap-y-2">
                 <div className="flex items-baseline gap-2">
                   <span className="text-[14px] tabular-nums text-text-primary">
-                    {cyclesN} {cyclesN === 1 ? "session" : "sessions"}
+                    {t("sessionBuilder.derived.sessionsOfFocus", { count: cyclesN })}
                   </span>
-                  <span className="font-mono text-[12px] text-text-secondary">of focus</span>
+                  <span className="font-mono text-[12px] text-text-secondary">{t("sessionBuilder.derived.ofFocus")}</span>
                 </div>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-[14px] tabular-nums text-text-primary">{focusTotal} min</span>
-                  <span className="font-mono text-[12px] text-text-secondary">focused</span>
+                  <span className="text-[14px] tabular-nums text-text-primary">{t("sessionBuilder.derived.minFocused", { count: focusTotal })}</span>
+                  <span className="font-mono text-[12px] text-text-secondary">{t("sessionBuilder.derived.focused")}</span>
                 </div>
                 {breaksOn && breakTotal > 0 && (
                   <div className="flex items-baseline gap-2">
-                    <span className="text-[14px] tabular-nums text-text-primary">{breakTotal} min</span>
-                    <span className="font-mono text-[12px] text-text-secondary">breaks</span>
+                    <span className="text-[14px] tabular-nums text-text-primary">{t("sessionBuilder.derived.minBreaks", { count: breakTotal })}</span>
+                    <span className="font-mono text-[12px] text-text-secondary">{t("sessionBuilder.derived.breaks")}</span>
                   </div>
                 )}
               </div>

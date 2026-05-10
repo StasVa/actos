@@ -554,6 +554,8 @@
   "goals.cap.softBlock.heading": "Free ist auf ein Ziel ausgelegt.",
   "goals.cap.softBlock.line": "{{count}} von {{cap}} Zielen aktiv · All-In für 3.",
   "goals.card.activityHeading": "AKTIVITÄT · LETZTE 30 TAGE",
+  "goals.card.completedAgo": "Abgeschlossen {{relative}}",
+  "goals.card.droppedAgo": "Verworfen {{relative}}",
   "goals.card.lastActivityLabel": "Letzte Aktivität: {{relative}}",
   "goals.card.projectsLine_one": "{{active}} aktiv · {{closed}} abgeschlossen",
   "goals.card.projectsLine_other": "{{active}} aktiv · {{closed}} abgeschlossen",

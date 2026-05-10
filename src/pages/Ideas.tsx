@@ -16,30 +16,35 @@ import { SortDropdown } from "@/components/SortDropdown";
 import { EmptyState, FilteredEmpty } from "@/components/EmptyState";
 import { PageHeader } from "@/components/PageHeader";
 
- function relativeAgo(iso: string): { label: string; full: string; sort: number } {
-  const d = new Date(iso);
-  const now = new Date();
-  const days = Math.floor((now.getTime() - d.getTime()) / 86400000);
-  const monthDay = d
-    .toLocaleDateString("en-US", { month: "short", day: "numeric" })
-    .toUpperCase();
-  let label: string;
-  let fullPrefix: string;
-  if (days <= 0) {
-    label = "Captured today";
-    fullPrefix = "TODAY";
-  } else if (days === 1) {
-    label = "Captured 1d ago";
-    fullPrefix = "1 DAY AGO";
-  } else if (days < 14) {
-    label = `Captured ${days}d ago`;
-    fullPrefix = `${days} DAYS AGO`;
-  } else {
-    label = `Captured ${monthDay}`;
-    fullPrefix = "";
-  }
-  const full = fullPrefix ? `CAPTURED · ${fullPrefix} · ${monthDay}` : `CAPTURED · ${monthDay}`;
-  return { label, full, sort: d.getTime() };
+function useRelativeAgo() {
+  const { t, i18n } = useTranslation();
+  return (iso: string): { label: string; full: string; sort: number } => {
+    const d = new Date(iso);
+    const now = new Date();
+    const days = Math.floor((now.getTime() - d.getTime()) / 86400000);
+    const monthDay = d
+      .toLocaleDateString(i18n.language, { month: "short", day: "numeric" })
+      .toUpperCase();
+    let label: string;
+    let fullPrefix: string;
+    if (days <= 0) {
+      label = t("ideas.label.capturedToday");
+      fullPrefix = t("ideas.label.capturedFullToday");
+    } else if (days === 1) {
+      label = t("ideas.relCaptured.captured1d");
+      fullPrefix = t("ideas.relCaptured.dayAgoUpper");
+    } else if (days < 14) {
+      label = t("ideas.relCaptured.capturedDays", { count: days });
+      fullPrefix = t("ideas.relCaptured.daysAgoUpper", { count: days });
+    } else {
+      label = t("ideas.relCaptured.capturedOnDate", { date: monthDay });
+      fullPrefix = "";
+    }
+    const full = fullPrefix
+      ? t("ideas.label.capturedFullPrefix", { prefix: fullPrefix, date: monthDay })
+      : t("ideas.label.capturedFullNoPrefix", { date: monthDay });
+    return { label, full, sort: d.getTime() };
+  };
 }
 
 /* ===== Pill / FilterPillRow ===== */
@@ -88,6 +93,7 @@ const NewIdeaForm: React.FC<{
   defaultGoalId?: ID;
   onClose: () => void;
 }> = ({ defaultGoalId, onClose }) => {
+  const { t } = useTranslation();
   const goals = useStore((s) => s.goals);
   const activeGoals = useMemo(() => goals.filter((g) => g.status === "active"), [goals]);
   const captureIdea = useStore((s) => s.captureIdea);
@@ -109,7 +115,7 @@ const NewIdeaForm: React.FC<{
     if (!canSubmit) return;
     const id = captureIdea({ title: title.trim(), goalId });
     selectIdea(id);
-    toast.success("Idea captured");
+    toast.success(t("ideas.toast.captured"));
     onClose();
   };
 
@@ -139,7 +145,7 @@ const NewIdeaForm: React.FC<{
             if (e.key === "Enter") submit();
             if (e.key === "Escape") onClose();
           }}
-          placeholder="Idea title…"
+          placeholder={t("ideas.placeholder.title")}
           className="flex-1 bg-transparent outline-none text-[14px] text-text-primary placeholder:text-text-tertiary"
         />
         <button
@@ -151,13 +157,13 @@ const NewIdeaForm: React.FC<{
             color: "hsl(var(--accent-foreground))",
           }}
         >
-          Save
+          {t("ideas.button.save")}
         </button>
         <button
           onClick={onClose}
           className="h-9 px-2 text-[13px] text-text-tertiary hover:text-text-secondary transition-colors"
         >
-          Cancel
+          {t("common.cancel")}
         </button>
       </div>
     </div>
@@ -165,21 +171,24 @@ const NewIdeaForm: React.FC<{
 };
 
 /* ===== Idea row (matches /actions row pattern) ===== */
-const STATUS_PILL_LABEL: Record<IdeaStatus, string> = {
-  captured: "CAPTURED",
-  converted_to_action: "CONVERTED",
-  converted_to_project: "CONVERTED",
-  discarded: "DISCARDED",
+const STATUS_PILL_KEY: Record<IdeaStatus, string> = {
+  captured: "ideas.statusPill.captured",
+  converted_to_action: "ideas.statusPill.converted",
+  converted_to_project: "ideas.statusPill.converted",
+  discarded: "ideas.statusPill.discarded",
 };
 
-const IdeaStatusPill: React.FC<{ status: IdeaStatus }> = ({ status }) => (
+const IdeaStatusPill: React.FC<{ status: IdeaStatus }> = ({ status }) => {
+  const { t } = useTranslation();
+  return (
   <span
     className="inline-flex items-center font-mono uppercase tracking-[0.08em] rounded-[4px] border border-border-subtle text-text-secondary"
     style={{ padding: "4px 8px", fontSize: 11, background: "transparent" }}
   >
-    {STATUS_PILL_LABEL[status]}
+    {t(STATUS_PILL_KEY[status])}
   </span>
-);
+  );
+};
 
 const IdeaRow: React.FC<{
   idea: Idea;
@@ -298,6 +307,7 @@ const TertiaryLink: React.FC<{ children: React.ReactNode; onClick?: () => void }
 type OverlayMode = null | "action" | "project" | "discard";
 
 const ConvertActionOverlay: React.FC<{ idea: Idea; onDone: () => void }> = ({ idea, onDone }) => {
+  const { t } = useTranslation();
   const projects = useStore((s) =>
     s.projects.filter((p) => p.goalId === idea.goalId && p.status === "active"),
   );
@@ -314,14 +324,14 @@ const ConvertActionOverlay: React.FC<{ idea: Idea; onDone: () => void }> = ({ id
       goalId: idea.goalId,
       notes: notes.trim() || undefined,
     });
-    toast.success("Idea converted to action");
+    toast.success(t("ideas.toast.convertedAction"));
     onDone();
   };
 
   return (
     <div className="bg-surface-elevated border border-border-default rounded-[4px] p-5">
       <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-secondary">
-        CONVERT TO ACTION
+        {t("ideas.heading.convertAction")}
       </div>
       <div className="mt-4 flex flex-col gap-3">
         <input
@@ -334,7 +344,7 @@ const ConvertActionOverlay: React.FC<{ idea: Idea; onDone: () => void }> = ({ id
           onChange={(e) => setProjectId(e.target.value)}
           className="bg-surface-hover rounded-[4px] px-3 py-2 text-[14px] text-text-primary outline-none border border-transparent focus:border-border-default"
         >
-          <option value="">— Goal-level (no project) —</option>
+          <option value="">{t("ideas.field.goalLevelOption")}</option>
           {projects.map((p) => (
             <option key={p.id} value={p.id}>
               {p.title}
@@ -345,21 +355,22 @@ const ConvertActionOverlay: React.FC<{ idea: Idea; onDone: () => void }> = ({ id
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           rows={3}
-          placeholder="Notes (optional)"
+          placeholder={t("ideas.placeholder.notesOptional")}
           className="bg-surface-hover rounded-[4px] px-3 py-2 text-[14px] text-text-primary outline-none border border-transparent focus:border-border-default resize-none placeholder:text-text-tertiary"
         />
       </div>
       <div className="mt-4 flex items-center gap-3">
         <GhostButton accent onClick={submit}>
-          Create action
+          {t("ideas.button.createAction")}
         </GhostButton>
-        <TertiaryLink onClick={onDone}>Cancel</TertiaryLink>
+        <TertiaryLink onClick={onDone}>{t("common.cancel")}</TertiaryLink>
       </div>
     </div>
   );
 };
 
 const ConvertProjectOverlay: React.FC<{ idea: Idea; onDone: () => void }> = ({ idea, onDone }) => {
+  const { t } = useTranslation();
   const convertIdeaToProject = useStore((s) => s.convertIdeaToProject);
   const [title, setTitle] = useState(idea.title);
   const [desc, setDesc] = useState("");
@@ -373,14 +384,14 @@ const ConvertProjectOverlay: React.FC<{ idea: Idea; onDone: () => void }> = ({ i
       description: (desc.trim() || notes.trim() || undefined),
       references: (idea.references ?? []).map((r) => ({ ...r })),
     });
-    toast.success("Idea converted to project");
+    toast.success(t("ideas.toast.convertedProject"));
     onDone();
   };
 
   return (
     <div className="bg-surface-elevated border border-border-default rounded-[4px] p-5">
       <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-secondary">
-        CONVERT TO PROJECT
+        {t("ideas.heading.convertProject")}
       </div>
       <div className="mt-4 flex flex-col gap-3">
         <input
@@ -391,7 +402,7 @@ const ConvertProjectOverlay: React.FC<{ idea: Idea; onDone: () => void }> = ({ i
         <input
           value={desc}
           onChange={(e) => setDesc(e.target.value)}
-          placeholder="Short description"
+          placeholder={t("ideas.placeholder.shortDesc")}
           className="bg-surface-hover rounded-[4px] px-3 py-2 text-[14px] text-text-primary outline-none border border-transparent focus:border-border-default placeholder:text-text-tertiary"
         />
         <textarea
@@ -403,9 +414,9 @@ const ConvertProjectOverlay: React.FC<{ idea: Idea; onDone: () => void }> = ({ i
       </div>
       <div className="mt-4 flex items-center gap-3">
         <GhostButton accent onClick={submit}>
-          Create project
+          {t("ideas.button.createProject")}
         </GhostButton>
-        <TertiaryLink onClick={onDone}>Cancel</TertiaryLink>
+        <TertiaryLink onClick={onDone}>{t("common.cancel")}</TertiaryLink>
       </div>
     </div>
   );
@@ -413,6 +424,7 @@ const ConvertProjectOverlay: React.FC<{ idea: Idea; onDone: () => void }> = ({ i
 
 /* ===== References section ===== */
 const ReferencesSection: React.FC<{ idea: Idea }> = ({ idea }) => {
+  const { t } = useTranslation();
   const updateIdea = useStore((s) => s.updateIdea);
   const refs = idea.references ?? [];
   const [adding, setAdding] = useState(false);
@@ -468,17 +480,17 @@ const ReferencesSection: React.FC<{ idea: Idea }> = ({ idea }) => {
               onClick={() => setAdding(true)}
               className="text-[12px] text-[hsl(var(--accent))] hover:underline"
             >
-              + Add reference
+              {t("ideas.refs.add")}
             </button>
           )
         }
       >
-        {`REFERENCES · ${refs.length}`}
+        {t("ideas.refs.heading", { count: refs.length })}
       </SectionHeading>
 
       {refs.length === 0 && !adding && (
         <div className="text-[12px] text-text-tertiary">
-          No references yet. Add links to videos, articles, designs.
+          {t("ideas.refs.empty")}
         </div>
       )}
 
@@ -725,6 +737,7 @@ const IdeaDetail: React.FC<{ idea: Idea; mobile?: boolean }> = ({ idea, mobile =
   }, [idea.id]);
 
   const goalColor = goal ? `hsl(var(--${goal.color}))` : "hsl(var(--text-tertiary))";
+  const relativeAgo = useRelativeAgo();
   const captured = relativeAgo(idea.capturedAt);
 
   const commitTitle = () => {
@@ -1199,12 +1212,14 @@ const Ideas: React.FC = () => {
   const editorOpen = !!selectedIdeaId && ideas.some((i) => i.id === selectedIdeaId);
   const selected = ideas.find((i) => i.id === selectedIdeaId) ?? null;
 
+  const relativeAgo = useRelativeAgo();
   const metaSuffix = (idea: Idea): string => {
-    const cap = relativeAgo(idea.capturedAt).label.replace(/^Captured\s*/i, "");
-    if (idea.status === "captured") return `Captured ${cap}`;
-    if (idea.status === "converted_to_action") return "Converted to action";
-    if (idea.status === "converted_to_project") return "Converted to project";
-    return `Discarded ${idea.discardedAt ? relativeAgo(idea.discardedAt).label.replace(/^Captured\s*/i, "") : cap}`;
+    const cap = relativeAgo(idea.capturedAt).label;
+    if (idea.status === "captured") return cap;
+    if (idea.status === "converted_to_action") return t("ideas.status.convertedAction");
+    if (idea.status === "converted_to_project") return t("ideas.status.convertedProject");
+    const discardedRel = idea.discardedAt ? relativeAgo(idea.discardedAt).label : cap;
+    return t("ideas.metaSuffix.discarded", { rel: discardedRel });
   };
 
   const renderRow = (idea: Idea) => {

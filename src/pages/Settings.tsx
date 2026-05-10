@@ -87,16 +87,16 @@ export default function Settings() {
   const fileRef = React.useRef<HTMLInputElement>(null);
 
   const handleClearSample = () => {
-    if (!confirm("Clear all sample goals, projects, actions, rituals, and ideas? This can't be undone.")) return;
+    if (!confirm(t("settings.clearSampleData.confirm"))) return;
     clearSampleData();
-    toast.success("Sample data cleared.");
+    toast.success(t("settings.toast.sampleCleared"));
   };
 
   const handleReset = () => {
-    if (confirm("Reset everything to seed data? This wipes all your changes.")) {
+    if (confirm(t("settings.confirm.reset"))) {
       localStorage.removeItem(STORAGE_KEY);
       resetToSeed();
-      toast.success("Reset to seed data");
+      toast.success(t("settings.toast.resetSeed"));
     }
   };
   const handleExport = () => {
@@ -104,25 +104,25 @@ export default function Settings() {
     const payload = raw ? JSON.parse(raw) : { state: useStore.getState() };
     const stamp = new Date().toISOString().slice(0, 10);
     downloadJSON(`actos-backup-${stamp}.json`, payload);
-    toast.success("Backup downloaded");
+    toast.success(t("settings.toast.backupDownloaded"));
   };
   const handleImportPick = () => fileRef.current?.click();
   const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
-    if (!confirm(`Import "${file.name}"? This replaces all current data.`)) return;
+    if (!confirm(t("settings.panel.confirm.import", { name: file.name }))) return;
     try {
       const text = await file.text();
       const parsed = JSON.parse(text);
       const envelope = parsed?.state ? parsed : { state: parsed, version: 0 };
       if (!envelope.state || typeof envelope.state !== "object") throw new Error("Missing state");
       localStorage.setItem(STORAGE_KEY, JSON.stringify(envelope));
-      toast.success("Import complete — reloading…");
+      toast.success(t("settings.panel.toast.imported"));
       setTimeout(() => window.location.reload(), 600);
     } catch (err) {
       console.error(err);
-      toast.error("Import failed — invalid JSON");
+      toast.error(t("settings.panel.toast.importFailed"));
     }
   };
 
@@ -136,10 +136,10 @@ export default function Settings() {
           {/* Account */}
           <section>
             <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-3">
-              ACCOUNT
+              {t("settings.account.heading").toUpperCase()}
             </div>
             <div className="text-[13px] text-text-secondary mb-4">
-              Signed in as <span className="text-text-primary">{settings.userEmail ?? "ak@email"}</span>
+              {t("settings.account.signedInAs")} <span className="text-text-primary">{settings.userEmail ?? "ak@email"}</span>
             </div>
 
             {/* Demo controls */}
@@ -148,18 +148,18 @@ export default function Settings() {
               style={{ padding: 16, border: "1px solid hsl(var(--border-subtle))" }}
             >
               <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-3">
-                DEMO CONTROLS (WILL BE REMOVED)
+                {t("settings.demo.heading").toUpperCase()}
               </div>
 
               <ToggleRow
-                label="All-In tier (preview All-In UI)"
+                label={t("settings.account.allInTier")}
                 checked={settings.subscriptionTier === "all-in"}
                 onChange={(v) => setSubscriptionTier(v ? "all-in" : "free")}
               />
               <div className="my-3 border-t border-border-subtle" />
               <ToggleRow
-                label="Show admin tools"
-                description="Adds /admin/components link to the user menu."
+                label={t("settings.adminToggle.label")}
+                description={t("settings.adminToggle.description")}
                 checked={!!settings.showAdminTools}
                 onChange={(v) => setShowAdminTools(v)}
               />
@@ -167,13 +167,13 @@ export default function Settings() {
 
             {/* Theme */}
             <div className="mt-6">
-              <div className="text-[13px] text-text-primary mb-1">Theme</div>
+              <div className="text-[13px] text-text-primary mb-1">{t("settings.theme.label")}</div>
               <div className="text-[12px] text-text-tertiary mb-2">
-                Defaults to your system setting.
+                {t("settings.theme.systemHint")}
               </div>
               <div
                 role="radiogroup"
-                aria-label="Theme"
+                aria-label={t("settings.theme.ariaLabel")}
                 className="inline-flex items-stretch rounded-[4px] overflow-hidden"
                 style={{ border: "1px solid hsl(var(--border-default))", height: 32 }}
               >
@@ -186,7 +186,7 @@ export default function Settings() {
                       role="radio"
                       aria-checked={active}
                       onClick={() => setThemeChoice(opt)}
-                      className="px-4 text-[13px] capitalize transition-colors"
+                      className="px-4 text-[13px] transition-colors"
                       style={{
                         background: active ? "hsl(var(--surface-hover))" : "transparent",
                         color: active ? "hsl(var(--text-primary))" : "hsl(var(--text-secondary))",
@@ -194,7 +194,7 @@ export default function Settings() {
                         minWidth: 80,
                       }}
                     >
-                      {opt}
+                      {t(`settings.theme.${opt}`)}
                     </button>
                   );
                 })}
@@ -226,10 +226,10 @@ export default function Settings() {
           {/* Default goal */}
           <section>
             <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-3">
-              DEFAULT GOAL
+              {t("settings.panel.defaultGoal.label")}
             </div>
             <div className="text-[13px] text-text-tertiary mb-2">
-              New ideas and unattached actions land here.
+              {t("settings.panel.defaultGoal.hint")}
             </div>
             <select
               value={settings.defaultGoalId ?? ""}
@@ -247,11 +247,10 @@ export default function Settings() {
           {/* Backup */}
           <section>
             <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-3">
-              DATA
+              {t("settings.data.heading").toUpperCase()}
             </div>
             <div className="text-[13px] text-text-tertiary mb-3">
-              Export a JSON snapshot of every goal, project, action, ritual, idea, and day entry.
-              Import replaces all current data — make a backup first.
+              {t("settings.panel.backup.hint")}
             </div>
             <div className="flex items-center gap-2 flex-wrap">
               <button
@@ -259,14 +258,14 @@ export default function Settings() {
                 onClick={handleExport}
                 className="h-9 px-4 text-[13px] font-medium rounded-[4px] border border-border-default text-text-primary hover:border-[hsl(var(--accent))] hover:bg-surface-hover transition-colors"
               >
-                Export JSON
+                {t("settings.panel.backup.export")}
               </button>
               <button
                 type="button"
                 onClick={handleImportPick}
                 className="h-9 px-4 text-[13px] font-medium rounded-[4px] border border-border-default text-text-primary hover:border-[hsl(var(--accent))] hover:bg-surface-hover transition-colors"
               >
-                Import JSON
+                {t("settings.panel.backup.import")}
               </button>
               <input
                 ref={fileRef}
@@ -279,16 +278,16 @@ export default function Settings() {
 
             {hasSample && (
               <div className="mt-6 pt-5 border-t border-border-subtle">
-                <div className="text-[13px] text-text-primary mb-1">Clear sample data</div>
+                <div className="text-[13px] text-text-primary mb-1">{t("settings.clearSampleData.heading")}</div>
                 <div className="text-[12px] text-text-tertiary mb-3">
-                  Removes the sample goals, projects, actions, rituals, and ideas seeded by Setup Wizard. Your own entries stay.
+                  {t("settings.clearSampleData.description")}
                 </div>
                 <button
                   type="button"
                   onClick={handleClearSample}
                   className="h-9 px-4 text-[13px] font-medium rounded-[4px] border border-border-default text-text-primary hover:border-[hsl(var(--accent))] hover:bg-surface-hover transition-colors"
                 >
-                  Clear sample data
+                  {t("settings.clearSampleData.heading")}
                 </button>
               </div>
             )}
@@ -297,43 +296,43 @@ export default function Settings() {
           {/* Danger */}
           <section>
             <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-3">
-              DANGER ZONE
+              {t("settings.panel.danger.label")}
             </div>
             <button
               type="button"
               onClick={handleReset}
               className="h-9 px-4 text-[13px] font-medium rounded-[4px] border border-[hsl(var(--text-warning))] text-text-warning hover:bg-surface-hover transition-colors"
             >
-              Reset to seed data
+              {t("settings.panel.danger.reset")}
             </button>
             <div className="text-[13px] text-text-tertiary mt-2">
-              Wipes localStorage and restores the demo dataset.
+              {t("settings.danger.hint")}
             </div>
           </section>
 
           {/* Help · Concepts */}
           <section>
             <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-3">
-              GOALS, PROJECTS, ACTIONS
+              {t("settings.help.heading")}
             </div>
             <div className="space-y-4 text-[13px] text-text-secondary leading-[1.6] max-w-[640px]">
               <div>
-                <div className="text-text-primary font-medium">Goal — a result you want to reach. Months or years.</div>
-                <div>Examples: "$10k MRR", "100k YouTube subs", "Sub-2h half marathon."</div>
-                <div>You can have up to 3 active goals.</div>
+                <div className="text-text-primary font-medium">{t("settings.help.goal.title")}</div>
+                <div>{t("settings.help.goal.examples")}</div>
+                <div>{t("settings.help.goal.cap")}</div>
               </div>
               <div>
-                <div className="text-text-primary font-medium">Project — a chunk of work that finishes. Days to weeks.</div>
-                <div>Belongs to a goal. Has a clear "done" state.</div>
-                <div>Example under "$10k MRR" goal: "Set up Stripe billing", "Launch v1 on Product Hunt."</div>
+                <div className="text-text-primary font-medium">{t("settings.help.project.title")}</div>
+                <div>{t("settings.help.project.body")}</div>
+                <div>{t("settings.help.project.example")}</div>
               </div>
               <div>
-                <div className="text-text-primary font-medium">Action — what you do today. Up to 2 hours.</div>
-                <div>Belongs to a project (or directly to a goal as Goal-level Backlog).</div>
-                <div>Example under "Set up Stripe billing": "Read Stripe API docs", "Implement webhook handler."</div>
+                <div className="text-text-primary font-medium">{t("settings.help.action.title")}</div>
+                <div>{t("settings.help.action.body")}</div>
+                <div>{t("settings.help.action.example")}</div>
               </div>
               <div className="text-text-tertiary italic">
-                Goals are reached. Projects close. Actions get done.
+                {t("settings.help.summary")}
               </div>
             </div>
           </section>

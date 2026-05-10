@@ -108,6 +108,7 @@ const ConsistencyCalendar: React.FC<{ data: number[]; color: string; cellSize?: 
 
 /* 90-day calendar in 3 rows of 30 (for monthly rituals) */
 const MonthlyConsistency: React.FC<{ data: number[]; color: string }> = ({ data, color }) => {
+  const { t } = useTranslation();
   const last = data.length - 1;
   const rows = [data.slice(0, 30), data.slice(30, 60), data.slice(60, 90)];
   return (
@@ -119,10 +120,10 @@ const MonthlyConsistency: React.FC<{ data: number[]; color: string }> = ({ data,
             const daysFromToday = last - idx;
             const status =
               daysFromToday === 0 && v === 0
-                ? "Pending"
+                ? t("rituals.tip.pending")
                 : v === 1
-                ? "Done"
-                : "Missed";
+                ? t("rituals.tip.done")
+                : t("rituals.tip.missed");
             const tip = (
               <div className="text-[12px] text-text-primary" style={{ fontFamily: "Inter, sans-serif" }}>
                 {dayLabel(daysFromToday)} ·{" "}
@@ -153,6 +154,7 @@ const MonthlyConsistency: React.FC<{ data: number[]; color: string }> = ({ data,
 };
 
 const FrequencyChart: React.FC<{ data: number[]; max: number; color: string; unit?: "week" | "month" }> = ({ data, max, color, unit = "week" }) => {
+  const { t } = useTranslation();
   return (
     <div className="w-full flex items-end gap-[3px]" style={{ height: 44 }}>
       {data.map((v, i) => {
@@ -162,7 +164,7 @@ const FrequencyChart: React.FC<{ data: number[]; max: number; color: string; uni
           <div className="text-[12px] text-text-primary" style={{ fontFamily: "Inter, sans-serif" }}>
             {unit === "month" ? monthLabel(stepsFromNow) : weekLabel(stepsFromNow)} ·{" "}
             <span className="font-mono text-text-secondary">
-              {v === 0 ? "No completions" : `${v} done`}
+              {v === 0 ? t("rituals.consistency.noCompletions") : t("rituals.consistency.done", { count: v })}
             </span>
           </div>
         );
@@ -275,10 +277,12 @@ const RitualCard: React.FC<{ r: RitualRow; onOpen: (r: RitualRow) => void; onMar
 };
 
 /* ===== Pending today list ===== */
-const PendingToday: React.FC<{ items: RitualRow[]; onMarkDone: (r: RitualRow) => void; onOpen: (r: RitualRow) => void }> = ({ items, onMarkDone, onOpen }) => (
+const PendingToday: React.FC<{ items: RitualRow[]; onMarkDone: (r: RitualRow) => void; onOpen: (r: RitualRow) => void }> = ({ items, onMarkDone, onOpen }) => {
+  const { t } = useTranslation();
+  return (
   <section>
     <div className="text-[12px] font-medium uppercase tracking-[0.08em] text-text-secondary mb-3">
-      Pending today · {items.length}
+      {t("rituals.section.pendingToday", { count: items.length })}
     </div>
     <div className="rounded-[4px] overflow-hidden border border-border-subtle">
       {items.map((r, i) => (
@@ -309,25 +313,27 @@ const PendingToday: React.FC<{ items: RitualRow[]; onMarkDone: (r: RitualRow) =>
             }}
             className="text-[12px] text-text-secondary hover:text-text-primary"
           >
-            Mark done
+            {t("common.markDone")}
           </button>
         </div>
       ))}
     </div>
   </section>
-);
+  );
+};
 
 /* ===== Top stats (live) ===== */
 const TopStats: React.FC<{ rows: RitualRow[]; allTime: number; activeCount: number; pendingCount: number; dueCount: number }> = ({ rows, allTime, activeCount, pendingCount, dueCount }) => {
+  const { t } = useTranslation();
   // Week consistency: across all active daily/weekly rituals, fraction of "due" days hit in last 7.
   const weekDone = rows.reduce((sum, r) => sum + r.consistency.slice(-7).reduce((a, b) => a + b, 0), 0);
   const weekDue = rows.length * 7;
   const weekPct = weekDue > 0 ? Math.round((weekDone / weekDue) * 100) : 0;
   const stats = [
-    { label: "ACTIVE", value: `${activeCount}`, sub: activeCount === 1 ? "ritual" : "rituals" },
-    { label: "PENDING TODAY", value: `${pendingCount}`, sub: `of ${dueCount} due` },
-    { label: "WEEK CONSISTENCY", value: `${weekPct}%`, sub: `${weekDone} of ${weekDue}` },
-    { label: "ALL TIME", value: `${allTime}`, sub: "completions" },
+    { key: "active", label: t("rituals.stat.active.label"), value: `${activeCount}`, sub: activeCount === 1 ? t("rituals.stat.active.subOne") : t("rituals.stat.active.subOther") },
+    { key: "pending", label: t("rituals.stat.pendingToday.label"), value: `${pendingCount}`, sub: t("rituals.stat.pendingToday.sub", { due: dueCount }) },
+    { key: "week", label: t("rituals.stat.weekConsistency.label"), value: `${weekPct}%`, sub: t("rituals.stat.weekConsistency.sub", { done: weekDone, due: weekDue }) },
+    { key: "alltime", label: t("rituals.stat.allTime.label"), value: `${allTime}`, sub: t("rituals.stat.allTime.sub") },
   ];
   return (
     <div
@@ -335,7 +341,7 @@ const TopStats: React.FC<{ rows: RitualRow[]; allTime: number; activeCount: numb
       style={{ minHeight: 88 }}
     >
       {stats.map((s) => (
-        <div key={s.label} style={{ padding: "20px 24px" }}>
+        <div key={s.key} style={{ padding: "20px 24px" }}>
           <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
             {s.label}
           </div>
@@ -353,6 +359,7 @@ const TopStats: React.FC<{ rows: RitualRow[]; allTime: number; activeCount: numb
 
 /* ===== Archived (live) ===== */
 const ArchivedSection: React.FC<{ rows: RitualRow[]; onRestore: (id: string) => void }> = ({ rows, onRestore }) => {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   if (rows.length === 0) return null;
   return (
@@ -362,7 +369,7 @@ const ArchivedSection: React.FC<{ rows: RitualRow[]; onRestore: (id: string) => 
         onClick={() => setOpen((v) => !v)}
         className="text-[12px] font-medium uppercase tracking-[0.08em] text-text-tertiary hover:text-text-secondary cursor-pointer"
       >
-        {open ? "▾" : "▸"} ARCHIVED · {rows.length}
+        {open ? "▾" : "▸"} {t("rituals.section.archived", { count: rows.length })}
       </button>
       {open && (
         <div className="mt-3 rounded-[4px] overflow-hidden border border-border-subtle">
@@ -378,7 +385,8 @@ const ArchivedSection: React.FC<{ rows: RitualRow[]; onRestore: (id: string) => 
               />
               <span className="text-[13px] text-text-tertiary">{r.title}</span>
               <span className="font-mono text-[11px] text-text-tertiary">
-                · {r.scheduleLabel} · {r.totalCompletions} completions{r.archivedAgoLabel ? ` · archived ${r.archivedAgoLabel}` : ""}
+                {t("rituals.archivedRow.body", { schedule: r.scheduleLabel, count: r.totalCompletions })}
+                {r.archivedAgoLabel ? t("rituals.archivedSuffix", { ago: r.archivedAgoLabel }) : ""}
               </span>
               <div className="flex-1" />
               <button
@@ -386,7 +394,7 @@ const ArchivedSection: React.FC<{ rows: RitualRow[]; onRestore: (id: string) => 
                 onClick={() => onRestore(r.id)}
                 className="text-[12px] text-text-tertiary hover:text-text-secondary"
               >
-                Restore
+                {t("common.restore")}
               </button>
             </div>
           ))}
@@ -552,16 +560,22 @@ function buildRitualRow(
 /* ===== Page ===== */
 type RStateFilter = "all" | "active" | "archived";
 type RSortKey = "recent" | "title" | "completions";
-const R_STATE_OPTIONS: FilterOption<RStateFilter>[] = [
-  { value: "all", label: "All" },
-  { value: "active", label: "Active" },
-  { value: "archived", label: "Archived" },
-];
-const R_SORT_OPTIONS: FilterOption<RSortKey>[] = [
-  { value: "recent", label: "Recent activity" },
-  { value: "title", label: "By title" },
-  { value: "completions", label: "Most completions" },
-];
+function useRStateOptions(): FilterOption<RStateFilter>[] {
+  const { t } = useTranslation();
+  return [
+    { value: "all", label: t("common.all") },
+    { value: "active", label: t("common.state.active") },
+    { value: "archived", label: t("common.state.archived") },
+  ];
+}
+function useRSortOptions(): FilterOption<RSortKey>[] {
+  const { t } = useTranslation();
+  return [
+    { value: "recent", label: t("common.sort.recentActivity") },
+    { value: "title", label: t("common.sort.byTitle") },
+    { value: "completions", label: t("common.sort.mostCompletions") },
+  ];
+}
 
 const Rituals: React.FC = () => {
   const { t } = useTranslation();
@@ -574,6 +588,8 @@ const Rituals: React.FC = () => {
   const [stateFilter, setStateFilter] = useState<RStateFilter>("all");
   const [goalFilter, setGoalFilter] = useState<string>("all");
   const [sortKey, setSortKey] = useState<RSortKey>("recent");
+  const stateOptions = useRStateOptions();
+  const sortOptions = useRSortOptions();
 
   const goalsById = React.useMemo(() => {
     const m: Record<string, import("@/types").Goal> = {};
@@ -628,20 +644,20 @@ const Rituals: React.FC = () => {
     const match = storeRituals.find((sr) => sr.id === r.id);
     if (!match) return;
     if (match.completionHistory.some((c) => c.date === TODAY_ISO)) {
-      toast("Already logged today");
+      toast(t("rituals.toast.alreadyLogged"));
       return;
     }
     markRitualInstanceDone(match.id);
-    toast.success(`Logged · ${match.totalCompletions + 1} completion${match.totalCompletions + 1 === 1 ? "" : "s"}`);
+    toast.success(t("rituals.toast.logged", { count: match.totalCompletions + 1 }));
   };
 
   const handleRestore = (id: string) => {
     restoreRitual(id);
-    toast.success("Ritual restored");
+    toast.success(t("rituals.toast.restored"));
   };
 
   const goalOptions: FilterOption<string>[] = [
-    { value: "all", label: "All" },
+    { value: "all", label: t("common.all") },
     ...storeGoals
       .filter((g) => g.status === "active")
       .map((g) => ({ value: g.id, label: g.title, dot: `hsl(var(--${g.color}))` })),
@@ -668,25 +684,25 @@ const Rituals: React.FC = () => {
       <main className="app-main page-medium">
         <PageHeader
           title={t("rituals.page.title")}
-          meta={`${totalRituals} RITUALS · ${totalActive} ACTIVE · ${totalArchived} ARCHIVED`}
+          meta={t("rituals.meta", { total: totalRituals, active: totalActive, archived: totalArchived })}
           cta={{
-            label: "+ New ritual",
+            label: t("rituals.newRitual"),
             onClick: handleAddRitual,
-            ariaLabel: "New ritual",
+            ariaLabel: t("rituals.aria.newRitual"),
             disabled: !hasActiveGoals,
-            disabledTooltip: "Create a goal first",
+            disabledTooltip: t("rituals.disabledTooltip"),
           }}
           filters={
             <>
               <FilterDropdown<RStateFilter>
-                label="STATE"
+                label={t("common.label.state")}
                 value={stateFilter}
                 defaultValue="all"
-                options={R_STATE_OPTIONS}
+                options={stateOptions}
                 onChange={setStateFilter}
               />
               <FilterDropdown<string>
-                label="GOAL"
+                label={t("common.label.goal")}
                 value={goalFilter}
                 defaultValue="all"
                 options={goalOptions}
@@ -695,7 +711,7 @@ const Rituals: React.FC = () => {
             </>
           }
           sort={
-            <SortDropdown<RSortKey> value={sortKey} options={R_SORT_OPTIONS} onChange={setSortKey} />
+            <SortDropdown<RSortKey> value={sortKey} options={sortOptions} onChange={setSortKey} />
           }
         />
 
@@ -704,16 +720,16 @@ const Rituals: React.FC = () => {
           {storeRituals.length === 0 ? (
             !hasActiveGoals ? (
               <EmptyState
-                headline="Goals come first."
-                description={`A goal is a result you want to reach — like "$10k MRR" or "Pass C1 Spanish exam". Create one, then add rituals under it.`}
-                ctaLabel="+ Create your first goal"
+                headline={t("rituals.empty.noGoals.headline")}
+                description={t("rituals.empty.noGoals.description")}
+                ctaLabel={t("goals.empty.noGoals.cta")}
                 onCta={() => navigate("/onboarding/goal")}
               />
             ) : (
               <EmptyState
-                headline="No rituals yet."
-                description="Rituals are recurring actions you commit to — daily reading, weekly review, anything you want to do consistently. They build a multiplier on your effort over time."
-                ctaLabel="+ New ritual"
+                headline={t("rituals.empty.noRituals.headline")}
+                description={t("rituals.empty.noRituals.description")}
+                ctaLabel={t("rituals.newRitual")}
                 onCta={handleAddRitual}
               />
             )
@@ -738,7 +754,7 @@ const Rituals: React.FC = () => {
                 <section>
                   <div className="flex items-center justify-between mb-3">
                     <div className="text-[12px] font-medium uppercase tracking-[0.08em] text-text-secondary">
-                      Active rituals · {sortedActiveRows.length}
+                      {t("rituals.section.activeRituals", { count: sortedActiveRows.length })}
                     </div>
                   </div>
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -748,7 +764,7 @@ const Rituals: React.FC = () => {
                   </div>
                   {sortedActiveRows.length === 0 && (
                     <div className="mt-4 font-mono text-[11px] text-text-tertiary text-center">
-                      No active rituals match these filters.
+                      {t("rituals.empty.noActiveMatch")}
                     </div>
                   )}
                 </section>

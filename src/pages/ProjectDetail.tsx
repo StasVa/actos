@@ -592,15 +592,15 @@ const ProjectDetail: React.FC = () => {
         completedAt: undefined,
         droppedAt: undefined,
       });
-      toast("Project re-opened");
+      toast(t("projectDetail.toast.reopened"));
     }
   };
 
   const submitQuickAdd = () => {
-    const t = quickAdd.trim();
-    if (!t) return;
+    const trimmed = quickAdd.trim();
+    if (!trimmed) return;
     createAction({
-      title: t,
+      title: trimmed,
       projectId: project.id,
       goalId: goal.id,
       status: "backlog",
@@ -619,12 +619,12 @@ const ProjectDetail: React.FC = () => {
               to={`/goals/${goal.id}`}
               className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary hover:text-text-secondary transition-colors"
             >
-              ← {goal.title.toUpperCase()} · PROJECTS
+              {t("projectDetail.backLink", { goal: goal.title.toUpperCase() })}
             </Link>
             <div className="flex items-center gap-2">
               {isDraft && (
                 <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
-                  DRAFT
+                  {t("projectDetail.draft")}
                 </span>
               )}
               <span
@@ -648,7 +648,7 @@ const ProjectDetail: React.FC = () => {
                   project={project}
                   onChange={(gid) => {
                     moveProjectToGoal(project.id, gid);
-                    toast("Project moved");
+                    toast(t("projectDetail.toast.moved"));
                   }}
                 />
                 {!isDraft && (
@@ -658,18 +658,22 @@ const ProjectDetail: React.FC = () => {
               {!isDraft && (
                 <>
                   <div className="mt-3 font-mono text-[12px] text-text-tertiary tabular-nums">
-                    Created {new Date(project.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })} · {ageDays} days active ·{" "}
-                    {grouped.done.length} of {actions.length} actions done
+                    {t("projectDetail.created", {
+                      date: fmtShortDate(project.createdAt),
+                      age: ageDays,
+                      done: grouped.done.length,
+                      total: actions.length,
+                    })}
                   </div>
                   <div className="mt-3 font-mono text-[12px] text-text-tertiary">
-                    <span>PROGRESS </span>
+                    <span>{t("projectDetail.progressLabel.progress")} </span>
                     <span className="text-text-primary">{progress.outcome}%</span>
-                    <span> · VALUE </span>
+                    <span> · {t("projectDetail.progressLabel.value")} </span>
                     <span className="text-text-primary">{progress.outcome}%</span>
-                    <span> · EFFORT </span>
+                    <span> · {t("projectDetail.progressLabel.effort")} </span>
                     <span className="text-text-primary">{progress.effort}%</span>
-                    <span> · LAST ACTIVITY </span>
-                    <span className="text-text-primary">{lastTs ? fmtAgo(lastTs) : "—"}</span>
+                    <span> · {t("projectDetail.progressLabel.lastActivity")} </span>
+                    <span className="text-text-primary">{lastTs ? fmtAgo(lastTs) : t("goalDetail.hero.dash")}</span>
                   </div>
                   <div className="mt-2 h-1.5 w-full bg-surface-hover rounded-[4px] overflow-hidden">
                     <div className="h-full rounded-[4px]" style={{ width: `${progress.outcome}%`, background: color }} />

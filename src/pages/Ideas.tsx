@@ -560,7 +560,7 @@ const ReferencesSection: React.FC<{ idea: Idea }> = ({ idea }) => {
               if (e.key === "Escape") resetForm();
             }}
             autoFocus
-            placeholder="https://..."
+            placeholder={t("ideas.placeholder.url")}
             className="bg-surface-elevated rounded-[4px] px-3 py-2 text-[13px] text-text-primary outline-none border border-transparent focus:border-border-default placeholder:text-text-tertiary"
           />
           <input
@@ -570,7 +570,7 @@ const ReferencesSection: React.FC<{ idea: Idea }> = ({ idea }) => {
               if (e.key === "Enter") submit();
               if (e.key === "Escape") resetForm();
             }}
-            placeholder="Optional title"
+            placeholder={t("ideas.placeholder.optionalTitle")}
             className="bg-surface-elevated rounded-[4px] px-3 py-2 text-[13px] text-text-primary outline-none border border-transparent focus:border-border-default placeholder:text-text-tertiary"
           />
           <div className="flex items-center gap-2">
@@ -579,13 +579,13 @@ const ReferencesSection: React.FC<{ idea: Idea }> = ({ idea }) => {
               disabled={!url.trim()}
               className="h-8 px-3 text-[12px] font-medium rounded-[4px] border border-[hsl(var(--accent))] text-[hsl(var(--accent))] hover:bg-surface-elevated transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              {editingId ? "Save" : "Add"}
+              {editingId ? t("ideas.button.save") : t("ideas.button.add")}
             </button>
             <button
               onClick={resetForm}
               className="h-8 px-2 text-[12px] text-text-tertiary hover:text-text-secondary transition-colors"
             >
-              Cancel
+              {t("common.cancel")}
             </button>
           </div>
         </div>

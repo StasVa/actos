@@ -3,6 +3,7 @@
 
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 interface LockModalProps {
   open: boolean;
@@ -11,6 +12,7 @@ interface LockModalProps {
 
 export function LockModal({ open, onClose }: LockModalProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!open) return;
@@ -34,11 +36,10 @@ export function LockModal({ open, onClose }: LockModalProps) {
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-[16px] font-medium text-text-primary">
-          This is part of your history.
+          {t("lock.heading")}
         </h2>
         <div className="mt-3 text-[13px] text-text-secondary leading-[1.5]">
-          All-In keeps your full history forever — every day, every week, every month back to day
-          one. Free shows the last 90 days.
+          {t("lock.body")}
         </div>
         <div className="mt-6 flex items-center justify-end gap-3">
           <button
@@ -46,7 +47,7 @@ export function LockModal({ open, onClose }: LockModalProps) {
             onClick={onClose}
             className="text-[13px] text-text-secondary hover:text-text-primary transition-colors px-3 py-1.5"
           >
-            Maybe later
+            {t("lock.maybeLater")}
           </button>
           <button
             type="button"
@@ -57,7 +58,7 @@ export function LockModal({ open, onClose }: LockModalProps) {
             className="text-[13px] font-medium px-3 py-1.5 rounded-[4px] text-white transition-colors"
             style={{ background: "hsl(var(--accent))" }}
           >
-            Go All-In — $12/mo
+            {t("lock.cta")}
           </button>
         </div>
       </div>
@@ -68,20 +69,21 @@ export function LockModal({ open, onClose }: LockModalProps) {
 /** Inline footer hint for charts/lists when Free user has data >90d. */
 export function HistoryHint({ children }: { children?: React.ReactNode }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   return (
     <div
       className="mt-2 text-[12px] text-text-tertiary"
       style={{ fontFamily: "Inter" }}
     >
-      {children ?? "Showing last 90 days · "}
+      {children ?? t("lock.hint.prefix")}
       <button
         type="button"
         onClick={() => navigate("/settings/subscription")}
         className="underline hover:text-text-secondary transition-colors"
       >
-        Go All-In
+        {t("lock.hint.cta")}
       </button>{" "}
-      for full history.
+      {t("lock.hint.suffix")}
     </div>
   );
 }

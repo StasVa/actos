@@ -1,49 +1,47 @@
-## Part 1 — i18n architecture + English string extraction
+# i18n Completion — execution plan
 
-### Scope reality check
-The codebase has ~30 pages and ~60 components with thousands of user-facing strings. A truly exhaustive single-shot extraction across all of them (including rarely-touched admin pages, every error toast, every tooltip) is not realistic in one pass without producing hundreds of risky edits. Part 2 is explicitly an audit/gap pass, so this Part 1 will:
+Scope is too large for one safe pass (~27k lines JSX/TSX, multiple 1000+ line files). Splitting into 4 sequential batches. Each batch ends with a clean build and a coverage delta. No "deferred to Part 2" — every batch fully closes its surface.
 
-1. Build a complete, production-ready i18n foundation.
-2. Extract strings from the **high-traffic surface** comprehensively.
-3. Honestly mark the remaining surfaces as "deferred to Part 2" in the completeness summary so the audit pass can target them precisely.
+## Batch A — Foundations (this turn)
 
-### 1. Infrastructure
-- Install `i18next`, `react-i18next`, `i18next-browser-languagedetector`.
-- Create `src/i18n/index.ts` with config (EN only, localStorage detection key `actos.i18n.language`, fallback `en`).
-- Create `src/i18n/locales/en.json` (sorted alphabetically within domains, 2-space indent).
-- Create `src/i18n/format.ts` with `formatDate`, `formatRelative`, `formatTime(minutes)` (locale + i18n keys for "m"/"h" units), `formatNumber`.
-- Import `./i18n` in `src/main.tsx` so initialization runs before render. (No provider needed — `react-i18next` works via the default instance once initialized.)
+**Goal:** add every new key to `en.json`, consolidate duplicates, swap call sites in shared/leaf components and status pills (the Part 1 bug).
 
-### 2. Extraction targets (Part 1 scope)
-Will extract strings in:
-- `AppSidebar`, `MobileHeader`, `UserMenu`, `PageHeader`, `LifetimeCounters`
-- `pages/Index.tsx` (Today)
-- `pages/AllActions.tsx`, `pages/AllDelegated.tsx`, `pages/AllProjects.tsx`, `pages/Goals.tsx`, `pages/Ideas.tsx`, `pages/Rituals.tsx`, `pages/Sessions.tsx`, `pages/Progress.tsx`, `pages/Reviews.tsx`
-- `pages/Settings.tsx`, `pages/SettingsSubscription.tsx`, `pages/Setup.tsx`, `pages/GoalBuilder.tsx`
-- `components/ActionRow.tsx`, `ActionEditor.tsx`, `RitualEditor.tsx`, `GoalEditor.tsx`, `EditorFooterControls.tsx`, `ConfirmModal.tsx`, `EmptyState.tsx`, `FilterDropdown.tsx`, `SortDropdown.tsx`, `CommandPalette.tsx`, `KeyboardShortcuts.tsx`, `NoGoalsLayout.tsx`, `PlanCloseModals.tsx`, `LockModal.tsx`, `CloseDayRecap.tsx`, `SettingsPanel.tsx`, `RitualPanel.tsx`, `SessionsSection.tsx`, `AccomplishmentsSection.tsx`, `OutcomeAddedSection.tsx`, `TimeInvestmentSection.tsx`
-- Sample workspace banner (`Index.tsx` + related)
-- Status / common / nav labels used everywhere
+1. Rewrite `en.json` to the full target set (~500 keys), alphabetized. Domains: `common`, `nav`, `sidebar`, `time`, `status`, `dayType`, `filters`, `sort`, `validation`, `confirm`, `toast`, `subscription`, `lock`, `sample`, `editor`, `today`, `actions`, `rituals`, `sessions`, `delegated`, `goals`, `projects`, `ideas`, `reviews`, `progress`, `settings`, `setup`, `goalBuilder`, `noGoals`.
+2. Consolidate duplicates: drop `common.actions`, drop `editor.overflow.{delete,duplicate,drop,archive}` in favor of `common.*`, keep `status.done` ≠ `common.done` split (commented).
+3. Swap call sites in **shared, low-risk** components:
+   - `ActionRow.tsx` — status pill labels via `t('status.*')`
+   - `FilterDropdown.tsx`, `SortDropdown.tsx` — filter/sort labels
+   - `ConfirmModal.tsx` (already), `LockModal.tsx`, `EditorFooterControls.tsx` — labels + Tier-2 prompts
+   - `ProjectCard.tsx`, `EmptyState.tsx`, `PageHeader.tsx`, `MobileHeader.tsx`, `UserMenu.tsx`, `LifetimeCounters.tsx`, `MetaPills.tsx`, `ReturnDatePill.tsx`, `NavLink.tsx`, `NoGoalsLayout.tsx`, `KeyboardShortcuts.tsx`
+4. Swap **all top-level page chrome** strings (page titles, "+ New X" CTAs, tab labels, empty states) across: `AllActions`, `AllProjects`, `AllDelegated`, `Goals`, `Ideas`, `Rituals`, `Sessions`, `Progress`, `Reviews`, `ReviewsDays`, `ReviewsWeeks`, `ReviewsMonths`, `Settings`, `SettingsSubscription`.
 
-### 3. Deferred to Part 2 (will be listed in summary)
-- All `src/admin/**` pages (admin console — internal tool, separate audience).
-- `pages/SessionBuilder.tsx`, `SessionActive.tsx`, `SessionSummary.tsx` (session flow — high copy density, will defer if scope explodes).
-- All `Review*Detail` pages (deep review screens).
-- All ARIA labels and `aria-label` attributes (explicitly deferred per prompt).
-- Toast strings inside rarely-hit error branches.
-- Any `<Tooltip content={...}>` longer-form copy that's not on the main surfaces.
+**Explicitly out of Batch A** (going to Batch B–D, not "deferred forever"): `ActionEditor` (1441), `RitualEditor` (1027), `GoalEditor` (629), `PlanCloseModals` (1227), `Setup` (485), `GoalBuilder` (in `pages/GoalBuilder.tsx`), `SessionBuilder` (908), `SessionActive` (938), `SessionSummary`, `CloseDayRecap`, `CommandPalette` (778), `Index` (Today body content), drill-down detail pages (`Review*Detail`, `GoalDetail`, `ProjectDetail`).
 
-### 4. Settings → Language section
-Add a "Language" section to `pages/Settings.tsx` with a disabled `<Select>` containing only "English" and helper text "More languages coming soon."
+## Batch B — Today + Plan/Close + No-Goals + Setup wizard
 
-### 5. Key naming
-- Domain prefixes per prompt: `common`, `nav`, `status`, `today`, `actions`, `delegated`, `goals`, `goalBuilder`, `projects`, `ideas`, `rituals`, `sessions`, `reviews`, `progress`, `settings`, `subscription`, `sample`, `signin`, `time`, `confirm`, `empty`, `toast`.
-- Plurals: `_one` / `_other`.
-- Interpolation: `{{named}}` placeholders.
+`Index.tsx`, `PlanCloseModals.tsx`, `CloseDayRecap.tsx`, `NoGoalsLayout.tsx` (full pass), `Setup.tsx`, `pages/GoalBuilder.tsx` (4 steps), `SettingsPanel.tsx`, `RitualPanel.tsx`, `LifetimeCounters.tsx`, `AccomplishmentsSection.tsx`, `OutcomeAddedSection.tsx`, `TimeInvestmentSection.tsx`, `SessionsSection.tsx`.
 
-### 6. Output summary
-After completion: total key count, per-domain breakdown, interpolated keys list, plural keys list, deferred-strings list, and the `en.json` path.
+## Batch C — Editors + CommandPalette
 
-### Risks / notes
-- Even with the deferred surfaces, this is ~30+ file edits. I'll proceed without further confirmation since the prompt is explicit.
-- I'll preserve the existing `formatTime` in `src/lib/format.ts` (already plain numeric output) and add the i18n-aware variant in `src/i18n/format.ts` for new call sites; mass-swapping every `formatTime` call site is deferred to Part 2 to keep diff size sane.
-- No visible copy changes — extraction is lossless.
+`ActionEditor.tsx`, `RitualEditor.tsx`, `GoalEditor.tsx`, `EditorShell.tsx`, `CommandPalette.tsx`, status timestamp lines, validation tooltips, "Add Impact and Time first" patterns, all editor toasts.
+
+## Batch D — Sessions + Reviews + Detail pages + final sweep
+
+`SessionBuilder.tsx`, `SessionActive.tsx`, `SessionSummary.tsx`, `ActiveSessionGuard.tsx`, `GoalDetail.tsx`, `ProjectDetail.tsx`, `ReviewDayDetail.tsx`, `ReviewWeekDetail.tsx`, `ReviewMonthDetail.tsx`, `SettingsSubscription` deep flows (downgrade Tier-2, Lifetime card, demo modals). Final ripgrep sweep for stray English literals; fix or flag with file+line+reason.
+
+---
+
+## Why batched, not one-shot
+
+- Megafiles need careful per-section editing; one bad search/replace in a 1400-line file silently breaks rendering and is hard to back out.
+- Each batch is independently buildable & visually verifiable — if Batch B introduces a regression, A is still good.
+- Keeps `en.json` reviewable: after Batch A you have the canonical key skeleton; later batches only fill in usages, rarely add new keys.
+
+## What you get at the end of Batch A (this turn)
+
+- `en.json` at ~500 keys, alphabetized, deduped — the full vocabulary.
+- Status pill bug from Part 1 fixed everywhere it renders.
+- All shared/leaf components and page chrome translating.
+- Coverage report: which files swapped, which keys added, what's queued for B/C/D with explicit file paths.
+
+Confirm and I'll execute Batch A now, then continue B → C → D in subsequent turns.

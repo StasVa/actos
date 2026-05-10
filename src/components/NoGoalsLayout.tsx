@@ -5,15 +5,17 @@
 // close to.
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import GoalBuilder from "@/pages/GoalBuilder";
 import { UserMenu } from "@/components/UserMenu";
 
 export const NoGoalsLayout: React.FC = () => {
+  const { t } = useTranslation();
   React.useEffect(() => {
     const prev = document.title;
-    document.title = "Set up your first goal — ActOS";
+    document.title = t("noGoals.title");
     return () => { document.title = prev; };
-  }, []);
+  }, [t]);
 
   return (
     <div

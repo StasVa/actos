@@ -8,6 +8,7 @@
 //   - MarkDoneButton     — green-tinted Mark-done button with Check icon
 
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Check, Copy, MoreHorizontal, Trash2, XCircle, type LucideIcon } from "lucide-react";
 import {
   Popover,
@@ -72,13 +73,14 @@ export function SaveIndicator({
   state: SaveState;
   onRetry?: () => void;
 }) {
+  const { t } = useTranslation();
   if (state === "failed") {
     return (
       <div
         className="inline-flex items-center gap-1 text-[12px]"
         style={{ color: "hsl(var(--text-warning))", fontFamily: "Inter, sans-serif" }}
       >
-        <span>Save failed</span>
+        <span>{t("editor.autosave.failed")}</span>
         <span style={{ color: "hsl(var(--text-tertiary))" }}>·</span>
         <button
           type="button"
@@ -86,7 +88,7 @@ export function SaveIndicator({
           className="underline hover:no-underline"
           style={{ color: "hsl(var(--text-warning))" }}
         >
-          retry
+          {t("common.retry")}
         </button>
       </div>
     );
@@ -97,13 +99,13 @@ export function SaveIndicator({
       <div
         className="inline-flex items-center gap-1.5 text-[12px]"
         style={{ color: "hsl(var(--text-tertiary))", fontFamily: "Inter, sans-serif" }}
-        aria-label="Saving"
+        aria-label={t("editor.autosave.savingAria")}
       >
         <span
           className="inline-block w-1.5 h-1.5 rounded-full animate-pulse"
           style={{ background: "hsl(var(--text-tertiary))" }}
         />
-        <span>Saving…</span>
+        <span>{t("common.saving")}</span>
       </div>
     );
   }
@@ -114,10 +116,10 @@ export function SaveIndicator({
     <div
       className="inline-flex items-center gap-1 text-[12px] transition-colors"
       style={{ color, fontFamily: "Inter, sans-serif" }}
-      aria-label="Saved"
+      aria-label={t("editor.autosave.savedAria")}
     >
       <Check size={12} />
-      <span>Saved</span>
+      <span>{t("common.saved")}</span>
     </div>
   );
 }
@@ -135,19 +137,21 @@ export type OverflowMenuItem = {
 
 export function EditorOverflowMenu({
   items,
-  ariaLabel = "More actions",
+  ariaLabel,
 }: {
   items: OverflowMenuItem[];
   ariaLabel?: string;
 }) {
   const [open, setOpen] = useState(false);
+  const { t } = useTranslation();
+  const resolvedAria = ariaLabel ?? t("editor.overflow.aria");
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <button
           type="button"
-          aria-label={ariaLabel}
+          aria-label={resolvedAria}
           className="w-8 h-8 inline-flex items-center justify-center rounded-[4px] text-text-tertiary hover:bg-surface-hover hover:text-text-primary transition-colors"
         >
           <MoreHorizontal size={16} />
@@ -219,7 +223,7 @@ export function DeleteTypeConfirm({
   title,
   body,
   keyword = "DELETE",
-  confirmLabel = "Delete",
+  confirmLabel,
   onCancel,
   onConfirm,
 }: {
@@ -231,6 +235,7 @@ export function DeleteTypeConfirm({
   onCancel: () => void;
   onConfirm: () => void;
 }) {
+  const { t } = useTranslation();
   const [text, setText] = useState("");
   useEffect(() => {
     if (!open) setText("");
@@ -246,6 +251,7 @@ export function DeleteTypeConfirm({
 
   if (!open) return null;
   const matches = text.trim() === keyword;
+  const resolvedConfirm = confirmLabel ?? t("confirm.delete.confirmLabel");
 
   return (
     <div
@@ -263,7 +269,18 @@ export function DeleteTypeConfirm({
         )}
         <div className="mt-4">
           <label className="block text-[12px] text-text-secondary mb-1.5">
-            Type <span className="font-mono text-text-primary">{keyword}</span> to confirm
+            {(() => {
+              const tpl = t("confirm.delete.typeShort", { keyword });
+              const idx = tpl.indexOf(keyword);
+              if (idx < 0) return tpl;
+              return (
+                <>
+                  {tpl.slice(0, idx)}
+                  <span className="font-mono text-text-primary">{keyword}</span>
+                  {tpl.slice(idx + keyword.length)}
+                </>
+              );
+            })()}
           </label>
           <input
             autoFocus
@@ -282,7 +299,7 @@ export function DeleteTypeConfirm({
             onClick={onCancel}
             className="text-[13px] text-text-secondary hover:text-text-primary transition-colors px-3 py-1.5"
           >
-            Cancel
+            {t("common.cancel")}
           </button>
           <button
             type="button"
@@ -294,7 +311,7 @@ export function DeleteTypeConfirm({
               background: "hsl(var(--surface-hover))",
             }}
           >
-            {confirmLabel}
+            {resolvedConfirm}
           </button>
         </div>
       </div>
@@ -308,13 +325,15 @@ export function MarkDoneButton({
   onClick,
   disabled,
   disabledTooltip,
-  label = "Mark done",
+  label,
 }: {
   onClick: () => void;
   disabled?: boolean;
   disabledTooltip?: string;
   label?: string;
 }) {
+  const { t } = useTranslation();
+  const resolvedLabel = label ?? t("common.markDone");
   const button = (
     <button
       type="button"
@@ -340,7 +359,7 @@ export function MarkDoneButton({
       }}
     >
       <Check size={16} />
-      <span>{label}</span>
+      <span>{resolvedLabel}</span>
     </button>
   );
 

@@ -401,22 +401,26 @@ function loadStoredSort(): SortKey {
   return "recent";
 }
 
-const STATUS_OPTIONS: FilterOption<StatusFilter>[] = [
-  { value: "all", label: "All" },
-  { value: "backlog", label: "Backlog" },
-  { value: "planned", label: "Planned" },
-  { value: "done", label: "Done" },
-  { value: "delegated", label: "Delegated" },
-  { value: "dropped", label: "Dropped" },
-  { value: "cancelled", label: "Cancelled" },
-];
+function makeStatusOptions(t: (k: string) => string): FilterOption<StatusFilter>[] {
+  return [
+    { value: "all", label: t("common.all") },
+    { value: "backlog", label: t("status.backlog") },
+    { value: "planned", label: t("status.planned") },
+    { value: "done", label: t("status.done") },
+    { value: "delegated", label: t("status.delegated") },
+    { value: "dropped", label: t("status.dropped") },
+    { value: "cancelled", label: t("status.cancelled") },
+  ];
+}
 
-const DATE_OPTIONS: FilterOption<DateFilter>[] = [
-  { value: "all", label: "All time" },
-  { value: "today", label: "Today" },
-  { value: "week", label: "This week" },
-  { value: "month", label: "This month" },
-];
+function makeDateOptions(t: (k: string) => string): FilterOption<DateFilter>[] {
+  return [
+    { value: "all", label: t("actions.filter.allTime") },
+    { value: "today", label: t("actions.filter.today") },
+    { value: "week", label: t("actions.filter.week") },
+    { value: "month", label: t("actions.filter.month") },
+  ];
+}
 
 const GOAL_OPTIONS: FilterOption<GoalFilter>[] = [
   { value: "all", label: "All" },
@@ -425,14 +429,16 @@ const GOAL_OPTIONS: FilterOption<GoalFilter>[] = [
   { value: "g3", label: "Read 24 books", dot: GOALS.g3.color },
 ];
 
-const SORT_OPTIONS: FilterOption<SortKey>[] = [
-  { value: "recent", label: "Recent first" },
-  { value: "oldest", label: "Oldest first" },
-  { value: "impact-desc", label: "Highest impact" },
-  { value: "impact-asc", label: "Lowest impact" },
-  { value: "time-desc", label: "Longest first" },
-  { value: "time-asc", label: "Shortest first" },
-];
+function makeSortOptions(t: (k: string) => string): FilterOption<SortKey>[] {
+  return [
+    { value: "recent", label: t("actions.sort.recent") },
+    { value: "oldest", label: t("actions.sort.oldest") },
+    { value: "impact-desc", label: t("actions.sort.impactDesc") },
+    { value: "impact-asc", label: t("actions.sort.impactAsc") },
+    { value: "time-desc", label: t("actions.sort.timeDesc") },
+    { value: "time-asc", label: t("actions.sort.timeAsc") },
+  ];
+}
 
 const AllActions: React.FC = () => {
   const { t } = useTranslation();
@@ -446,6 +452,9 @@ const AllActions: React.FC = () => {
   };
   const [query, setQuery] = useState("");
   const [terminalCollapsed, setTerminalCollapsed] = useState(false);
+  const STATUS_OPTIONS = useMemo(() => makeStatusOptions(t), [t]);
+  const DATE_OPTIONS = useMemo(() => makeDateOptions(t), [t]);
+  const SORT_OPTIONS = useMemo(() => makeSortOptions(t), [t]);
 
   // Live store data → legacy renderer shape (rendering JSX is unchanged).
   const storeActions = useStore((s) => s.actions);
@@ -574,30 +583,30 @@ const AllActions: React.FC = () => {
             title={t("actions.page.title")}
             meta={meta}
             cta={{
-              label: "+ New action",
+              label: t("actions.newAction"),
               onClick: goNew,
-              ariaLabel: "New action",
+              ariaLabel: t("actions.newAction"),
               disabled: !hasActiveGoals,
-              disabledTooltip: "Create a goal first",
+              disabledTooltip: t("validation.createGoalFirst"),
             }}
             filters={
               <>
                 <FilterDropdown
-                  label="STATUS"
+                  label={t("actions.filter.status")}
                   value={statusFilter}
                   defaultValue="all"
                   options={STATUS_OPTIONS}
                   onChange={(v) => setStatusFilter(v)}
                 />
                 <FilterDropdown
-                  label="GOAL"
+                  label={t("actions.filter.goal")}
                   value={goalFilter}
                   defaultValue="all"
                   options={GOAL_OPTIONS}
                   onChange={(v) => setGoalFilter(v)}
                 />
                 <FilterDropdown
-                  label="DATE"
+                  label={t("actions.filter.date")}
                   value={dateFilter}
                   defaultValue="all"
                   options={DATE_OPTIONS}
@@ -608,7 +617,7 @@ const AllActions: React.FC = () => {
                     onClick={clearFilters}
                     className="ml-1 text-[12px] text-text-tertiary hover:text-text-secondary transition-colors shrink-0"
                   >
-                    Clear filters
+                    {t("common.clearFilters")}
                   </button>
                 )}
               </>

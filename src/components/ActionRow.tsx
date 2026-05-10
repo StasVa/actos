@@ -9,6 +9,7 @@
 // equivalent display by passing pre-built bottom segments via `bottomSegments`.
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Star, Send } from "lucide-react";
 import { useStore } from "@/store/useStore";
 import type { Action } from "@/types";
@@ -56,6 +57,7 @@ export const ActionRow: React.FC<ActionRowProps> = ({
   onClick,
   onToggleDone,
 }) => {
+  const { t } = useTranslation();
   const goals = useStore((s) => s.goals);
   const projects = useStore((s) => s.projects);
 
@@ -124,18 +126,21 @@ export const ActionRow: React.FC<ActionRowProps> = ({
               <Tooltip
                 content={
                   <span className="text-[12px] text-text-primary">
-                    Delegated to {action.delegateName ?? "—"}
-                    {" · "}
                     {action.expectedReturnDate
-                      ? `returns ${action.expectedReturnDate}`
-                      : "no return date set"}
+                      ? t("delegated.tooltip.full", {
+                          name: action.delegateName ?? "—",
+                          date: action.expectedReturnDate,
+                        })
+                      : t("delegated.tooltip.noDate", {
+                          name: action.delegateName ?? "—",
+                        })}
                   </span>
                 }
                 showDelay={300}
               >
                 <span
                   role="button"
-                  aria-label="Delegated — open action"
+                  aria-label={t("delegated.row.aria")}
                   onClick={(e) => {
                     e.stopPropagation();
                     onClick?.();
@@ -160,8 +165,8 @@ export const ActionRow: React.FC<ActionRowProps> = ({
                     onToggleDone?.();
                   }}
                   disabled={disabled}
-                  title={disabled ? "Re-open this action via the editor" : undefined}
-                  aria-label={isDone ? "Re-open" : "Mark done"}
+                  title={disabled ? t("editor.markDone.disabled") : undefined}
+                  aria-label={isDone ? t("common.reopen") : t("common.markDone")}
                   className="inline-flex items-center justify-center rounded-[2px] border shrink-0"
                   style={{
                     width: 16,
@@ -197,7 +202,7 @@ export const ActionRow: React.FC<ActionRowProps> = ({
           <div className="flex items-center gap-2 shrink-0">
             <ImpactPill impact={action.impact} goalColor={color} dimmed={isTerminal} />
             {isDelegated ? (
-              <ReturnTimePill expectedReturnDate={action.expectedReturnDate} />
+              <ReturnTimePill expectedReturnDate={action.expectedReturnDate} t={t} />
             ) : (
               <TimePill minutes={action.timeEstimateMinutes} dimmed={isTerminal} />
             )}
@@ -274,25 +279,25 @@ function formatScheduledLabel(iso: string): string {
     .toUpperCase();
 }
 
-const ReturnTimePill: React.FC<{ expectedReturnDate?: string }> = ({ expectedReturnDate }) => {
+const ReturnTimePill: React.FC<{ expectedReturnDate?: string; t: (k: string, opts?: any) => string }> = ({ expectedReturnDate, t }) => {
   let label = "—";
   let color = "hsl(var(--text-tertiary))";
   if (expectedReturnDate) {
     const today = new Date();
-    const t = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+    const t0 = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
     const r = new Date(expectedReturnDate + "T00:00:00").getTime();
-    const diff = Math.round((r - t) / 86400000);
+    const diff = Math.round((r - t0) / 86400000);
     if (diff < 0) {
-      label = `${Math.abs(diff)}d ago`;
+      label = t("time.daysAgo", { count: Math.abs(diff) });
       color = "hsl(var(--text-warning))";
     } else if (diff === 0) {
-      label = "today";
+      label = t("time.today");
       color = "hsl(var(--text-secondary))";
     } else if (diff === 1) {
-      label = "tomorrow";
+      label = t("time.tomorrow");
       color = "hsl(var(--text-secondary))";
     } else {
-      label = `in ${diff}d`;
+      label = t("time.inDays", { count: diff });
       color = "hsl(var(--text-secondary))";
     }
   }

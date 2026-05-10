@@ -1,9 +1,10 @@
-// Public marketing landing page. Single-viewport, dark-only, distillery-minimal.
-// All colors via CSS tokens. No animations, no scroll reveals, no nav.
+// Public marketing landing page. Single-viewport, dark-only.
+// All colors via CSS tokens. Static radial glow behind hero.
 
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { ArrowRight, Github, Linkedin, Twitter } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
+import { LandingTopBar, LandingFooter } from "@/components/LandingChrome";
 
 const Landing: React.FC = () => {
   const navigate = useNavigate();
@@ -14,24 +15,18 @@ const Landing: React.FC = () => {
       className="relative flex min-h-screen flex-col"
       style={{ background: "hsl(var(--surface-base))" }}
     >
-      {/* Top bar — logo */}
-      <header className="absolute left-4 top-4 md:left-8 md:top-8">
-        <span
-          className="select-none"
-          style={{
-            fontFamily: "Inter, system-ui, sans-serif",
-            fontSize: 18,
-            fontWeight: 500,
-            letterSpacing: "-0.01em",
-          }}
-        >
-          <span style={{ color: "hsl(var(--text-primary))" }}>Act</span>
-          <span style={{ color: "hsl(var(--goal-2))" }}>OS</span>
-        </span>
-      </header>
+      {/* Radial glow — static, behind everything */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 landing-glow"
+        style={{ zIndex: 0 }}
+      />
 
-      {/* Hero */}
-      <main className="flex flex-1 flex-col items-center justify-center px-6 text-center">
+      <div className="relative" style={{ zIndex: 1 }}>
+        <LandingTopBar logoIsHome />
+      </div>
+
+      <main className="relative flex flex-1 flex-col items-center justify-center px-6 text-center" style={{ zIndex: 1 }}>
         <h1
           className="mx-auto"
           style={{
@@ -58,12 +53,32 @@ const Landing: React.FC = () => {
         >
           The OS for getting things done.
         </p>
+
+        <a
+          href="/manifesto"
+          onClick={(e) => {
+            e.preventDefault();
+            navigate("/manifesto");
+          }}
+          className="manifesto-link"
+          style={{
+            marginTop: 24,
+            fontFamily: "Inter, system-ui, sans-serif",
+            fontSize: 14,
+            fontWeight: 400,
+            color: "hsl(var(--text-secondary))",
+            textDecoration: "none",
+          }}
+        >
+          Why we don't do tasks <span style={{ color: "hsl(var(--goal-2))" }}>→</span>
+        </a>
+
         <button
           type="button"
           onClick={() => navigate("/today")}
           className="cta-btn"
           style={{
-            marginTop: 40,
+            marginTop: 32,
             display: "inline-flex",
             alignItems: "center",
             gap: 8,
@@ -80,100 +95,67 @@ const Landing: React.FC = () => {
           }}
           onMouseEnter={(e) => (e.currentTarget.style.filter = "brightness(1.1)")}
           onMouseLeave={(e) => (e.currentTarget.style.filter = "")}
-          onMouseDown={(e) => (e.currentTarget.style.filter = "brightness(0.95)")}
-          onMouseUp={(e) => (e.currentTarget.style.filter = "brightness(1.1)")}
         >
           Open ActOS
           <ArrowRight size={16} />
         </button>
+
+        <p
+          style={{
+            marginTop: 24,
+            fontFamily: "Inter, system-ui, sans-serif",
+            fontSize: 13,
+            color: "hsl(var(--text-tertiary))",
+          }}
+        >
+          Already have an account?{" "}
+          <a
+            href="/login"
+            onClick={(e) => {
+              e.preventDefault();
+              navigate("/login");
+            }}
+            className="signin-inline"
+            style={{ color: "hsl(var(--text-secondary))", textDecoration: "none" }}
+          >
+            Sign in
+          </a>
+        </p>
       </main>
 
-      {/* Footer */}
-      <footer
-        className="w-full px-6 pb-6 md:pb-8"
-        style={{
-          fontFamily: "Inter, system-ui, sans-serif",
-          color: "hsl(var(--text-tertiary))",
-          fontSize: 13,
-        }}
-      >
-        <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 md:flex-row md:justify-between">
-          <div>© 2026 ActOS</div>
-
-          {/* TODO: real social URLs at launch */}
-          <div className="flex items-center" style={{ gap: 20 }}>
-            <a
-              href="https://twitter.com/actos"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="ActOS on Twitter"
-              className="social-link"
-              style={{ color: "hsl(var(--text-tertiary))", display: "inline-flex" }}
-            >
-              <Twitter size={18} />
-            </a>
-            <a
-              href="https://github.com/actos"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="ActOS on GitHub"
-              className="social-link"
-              style={{ color: "hsl(var(--text-tertiary))", display: "inline-flex" }}
-            >
-              <Github size={18} />
-            </a>
-            <a
-              href="https://linkedin.com/company/actos"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="ActOS on LinkedIn"
-              className="social-link"
-              style={{ color: "hsl(var(--text-tertiary))", display: "inline-flex" }}
-            >
-              <Linkedin size={18} />
-            </a>
-          </div>
-
-          {/* TODO: badges when available */}
-          <div className="hidden md:block" style={{ minWidth: 100 }} aria-hidden />
-        </div>
-
-        <div
-          className="mx-auto mt-2 flex max-w-6xl items-center justify-center md:justify-start"
-          style={{ gap: 0 }}
-        >
-          <FooterLink to="/legal/privacy">Privacy</FooterLink>
-          <Sep />
-          <FooterLink to="/legal/terms">Terms</FooterLink>
-          <Sep />
-          <FooterLink to="/pricing">Pricing</FooterLink>
-        </div>
-      </footer>
+      <div className="relative" style={{ zIndex: 1 }}>
+        <LandingFooter />
+      </div>
 
       <style>{`
+        .landing-glow {
+          background: radial-gradient(
+            ellipse 800px 500px at center 55%,
+            rgba(212, 136, 74, 0.08) 0%,
+            rgba(212, 136, 74, 0.03) 40%,
+            transparent 70%
+          );
+        }
+        @media (max-width: 768px) {
+          .landing-glow {
+            background: radial-gradient(
+              ellipse 400px 300px at center 55%,
+              rgba(212, 136, 74, 0.08) 0%,
+              rgba(212, 136, 74, 0.03) 40%,
+              transparent 70%
+            );
+          }
+        }
         .cta-btn:focus-visible {
           outline: 2px solid hsl(var(--goal-2));
           outline-offset: 3px;
         }
-        .social-link:hover { color: hsl(var(--text-secondary)) !important; }
-        .footer-link:hover { color: hsl(var(--text-secondary)) !important; }
+        .manifesto-link:hover { color: hsl(var(--text-primary)) !important; }
+        .manifesto-link:hover span { filter: brightness(1.1); }
+        .signin-inline:hover { color: hsl(var(--text-primary)) !important; }
       `}</style>
     </div>
   );
 };
-
-const Sep: React.FC = () => (
-  <span style={{ color: "hsl(var(--text-tertiary))", padding: "0 8px" }}>·</span>
-);
-
-const FooterLink: React.FC<{ to: string; children: React.ReactNode }> = ({ to, children }) => (
-  <Link
-    to={to}
-    className="footer-link"
-    style={{ color: "hsl(var(--text-tertiary))", textDecoration: "none" }}
-  >
-    {children}
-  </Link>
-);
 
 export default Landing;

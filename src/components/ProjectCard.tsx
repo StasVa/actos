@@ -221,7 +221,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ projectId, goalLabel, 
             <div className="flex items-center justify-between gap-3 min-h-[22px]">
               <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">{t("projects.card.started")}</span>
               <span className="font-mono text-[11px] text-right truncate">
-                <span className="text-text-primary">{fmtShortDate(project.createdAt)}</span>
+                <span className="text-text-primary">{fmtShortDate(project.createdAt, locale)}</span>
                 <span className="text-text-tertiary"> · </span>
                 <span className="text-text-secondary">
                   {isClosed

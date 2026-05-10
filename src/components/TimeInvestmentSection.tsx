@@ -89,6 +89,7 @@ const ProjectRow: React.FC<{
 };
 
 export const TimeInvestmentSection: React.FC = () => {
+  const { t } = useTranslation();
   const actions = useStore((s) => s.actions);
   const goals = useStore((s) => s.goals);
   const projects = useStore((s) => s.projects);
@@ -106,10 +107,10 @@ export const TimeInvestmentSection: React.FC = () => {
     <section>
       <div className="flex items-baseline justify-between mb-3">
         <h2 className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
-          Time investment
+          {t("timeInvest.heading")}
         </h2>
         <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary tabular-nums">
-          {formatHM(stats.total30d)} LAST 30 DAYS · {formatHM(stats.totalAllTime)} ALL-TIME
+          {t("timeInvest.headerMeta", { last30: formatHM(stats.total30d), allTime: formatHM(stats.totalAllTime) })}
         </div>
       </div>
 

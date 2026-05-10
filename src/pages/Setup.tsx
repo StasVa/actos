@@ -381,32 +381,35 @@ const ChoiceScreen: React.FC<{
   );
 };
 
-const PauseScreen: React.FC<{ fade: boolean }> = ({ fade }) => (
-  <ScreenWrap keyId="s3">
-    <div
-      className="flex flex-col items-center justify-center min-h-screen px-6 text-center"
-      style={{
-        animation: fade && !reducedMotion() ? "setupFadeOut 250ms forwards" : undefined,
-      }}
-    >
-      <div style={{
-        fontFamily: "Inter", fontSize: 18, color: "hsl(var(--text-secondary))",
-      }}>Setting up your workspace…</div>
-      <div style={{ height: 24 }} />
-      <div style={{
-        width: 200, height: 2, borderRadius: 2,
-        background: "hsl(var(--surface-hover))", overflow: "hidden",
-      }}>
+const PauseScreen: React.FC<{ fade: boolean }> = ({ fade }) => {
+  const { t } = useTranslation();
+  return (
+    <ScreenWrap keyId="s3">
+      <div
+        className="flex flex-col items-center justify-center min-h-screen px-6 text-center"
+        style={{
+          animation: fade && !reducedMotion() ? "setupFadeOut 250ms forwards" : undefined,
+        }}
+      >
         <div style={{
-          height: "100%", background: "hsl(var(--accent))",
-          width: reducedMotion() ? "100%" : 0,
-          animation: reducedMotion() ? undefined : "setupBarFill 1200ms cubic-bezier(0.32,0.72,0,1) forwards",
-        }} />
+          fontFamily: "Inter", fontSize: 18, color: "hsl(var(--text-secondary))",
+        }}>{t("setup.pause.text")}</div>
+        <div style={{ height: 24 }} />
+        <div style={{
+          width: 200, height: 2, borderRadius: 2,
+          background: "hsl(var(--surface-hover))", overflow: "hidden",
+        }}>
+          <div style={{
+            height: "100%", background: "hsl(var(--accent))",
+            width: reducedMotion() ? "100%" : 0,
+            animation: reducedMotion() ? undefined : "setupBarFill 1200ms cubic-bezier(0.32,0.72,0,1) forwards",
+          }} />
+        </div>
       </div>
-    </div>
-    <StepIndicator n={3} />
-  </ScreenWrap>
-);
+      <StepIndicator n={3} />
+    </ScreenWrap>
+  );
+};
 
 /* ───────── Wizard root ───────── */
 export default function Setup() {

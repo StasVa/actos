@@ -314,7 +314,7 @@ const GoalColumn: React.FC<{
         <div className="font-mono font-medium text-text-primary leading-none" style={{ fontSize: 36 }}>
           {progress}%
         </div>
-        <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mt-2">Progress</div>
+        <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mt-2">{t("home.hero.progress")}</div>
       </div>
       <div className="flex-1 flex flex-col gap-1.5 pb-1 min-w-0">
         {meta.map((m, i) => (

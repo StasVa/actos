@@ -1,10 +1,10 @@
 import React, { useMemo, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { Link, useParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import i18n from "@/i18n";
 import { Tooltip, StateDotTooltip } from "@/components/Tooltip";
-import { CardMenu } from "@/components/CardMenu";
 import { ConfirmModal } from "@/components/ConfirmModal";
-import { toast } from "sonner";
 import { useStore, selectors } from "@/store/useStore";
 import type { Action, Goal, Project, Ritual, GoalColorVar } from "@/types";
 import { AppSidebar } from "@/components/AppSidebar";
@@ -36,6 +36,7 @@ const GhostAddButton: React.FC<{ children: React.ReactNode; onClick?: () => void
 
 /* ===== Success Criteria ===== */
 const SuccessCriteria: React.FC<{ goal: Goal }> = ({ goal }) => {
+  const { t } = useTranslation();
   const updateGoal = useStore((s) => s.updateGoal);
   const criteria = goal.successCriteria ?? [];
   const met = criteria.filter((c) => c.done).length;
@@ -47,13 +48,17 @@ const SuccessCriteria: React.FC<{ goal: Goal }> = ({ goal }) => {
   return (
     <section>
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-[12px] font-medium uppercase tracking-[0.08em] text-text-secondary">Success criteria</h2>
+        <h2 className="text-[12px] font-medium uppercase tracking-[0.08em] text-text-secondary">
+          {t("goalDetail.successCriteria.title")}
+        </h2>
         <div className="font-mono text-[11px] tabular-nums text-text-tertiary">
-          {met} of {criteria.length} met
+          {t("goalDetail.successCriteria.met", { met, total: criteria.length })}
         </div>
       </div>
       {criteria.length === 0 ? (
-        <div className="font-mono text-[11px] text-text-tertiary">No criteria defined.</div>
+        <div className="font-mono text-[11px] text-text-tertiary">
+          {t("goalDetail.successCriteria.none")}
+        </div>
       ) : (
         <div>
           {criteria.map((c) => (
@@ -124,6 +129,7 @@ const HeroState: React.FC<{
   rituals: Ritual[];
   actions: Action[];
 }> = ({ goal, projects, rituals, actions }) => {
+  const { t } = useTranslation();
   const color = COLOR_VAR[goal.color];
   const progressOutcome = useStore((s) => selectors.goalProgress(s, goal.id).outcome);
   const progressEffort = useStore((s) => selectors.goalProgress(s, goal.id).effort);
@@ -145,7 +151,7 @@ const HeroState: React.FC<{
     .filter(Boolean)
     .sort()
     .reverse()[0];
-  const lastLabel = lastTs ? fmtAgo(lastTs) : "—";
+  const lastLabel = lastTs ? fmtAgo(lastTs) : t("goalDetail.hero.dash");
 
   const actionsDone = actions.filter((a) => a.status === "done").length;
   const ageMonths = Math.max(
@@ -162,32 +168,45 @@ const HeroState: React.FC<{
             {progressOutcome}%
           </div>
           <div className="mt-1 font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
-            PROGRESS · VALUE
+            {t("goalDetail.hero.progressValue")}
           </div>
           <div className="mt-3 font-mono text-[12px] text-text-secondary tabular-nums">
-            {actionsDone} actions done · {projectsClosed} of {projectsTotal} projects closed · Active{" "}
-            {ageMonths} {ageMonths === 1 ? "month" : "months"}
+            {t("goalDetail.hero.summary", {
+              count: ageMonths,
+              actionsDone,
+              closed: projectsClosed,
+              total: projectsTotal,
+              months: ageMonths,
+            })}
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 lg:gap-10 w-full sm:w-auto min-w-0">
           <Pillar
-            label="PROJECTS"
-            value={projectsTotal === 0 ? "—" : `${projectsClosed}/${projectsTotal}`}
-            sub={projectsTotal === 0 ? "no projects" : `closed · ${projectsActive} active`}
-          />
-          <Pillar
-            label="RITUALS"
-            value={rituals.length === 0 ? "—" : `${rituals.length}`}
+            label={t("goalDetail.hero.pillar.projects")}
+            value={projectsTotal === 0 ? t("goalDetail.hero.dash") : `${projectsClosed}/${projectsTotal}`}
             sub={
-              rituals.length === 0
-                ? "no active"
-                : `active · ×${avgMult.toFixed(2)} avg multiplier`
+              projectsTotal === 0
+                ? t("goalDetail.hero.noProjects")
+                : t("goalDetail.hero.projectsSub", { active: projectsActive })
             }
           />
           <Pillar
-            label="CRITERIA"
-            value={criteria.length === 0 ? "—" : `${criteriaMet}/${criteria.length}`}
-            sub={criteria.length === 0 ? "no criteria" : "criteria met"}
+            label={t("goalDetail.hero.pillar.rituals")}
+            value={rituals.length === 0 ? t("goalDetail.hero.dash") : `${rituals.length}`}
+            sub={
+              rituals.length === 0
+                ? t("goalDetail.hero.noActive")
+                : t("goalDetail.hero.ritualsSub", { mult: avgMult.toFixed(2) })
+            }
+          />
+          <Pillar
+            label={t("goalDetail.hero.pillar.criteria")}
+            value={criteria.length === 0 ? t("goalDetail.hero.dash") : `${criteriaMet}/${criteria.length}`}
+            sub={
+              criteria.length === 0
+                ? t("goalDetail.hero.noCriteria")
+                : t("goalDetail.hero.criteriaMet")
+            }
           />
         </div>
       </div>
@@ -195,24 +214,29 @@ const HeroState: React.FC<{
       {/* Bottom tier — STATE */}
       <div className="mt-8">
         <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-3">
-          STATE
+          {t("goalDetail.hero.state")}
         </div>
         <div className="space-y-1">
-          <StateBarRow label="VALUE" pct={progressOutcome} value={`${progressOutcome}%`} color={color} />
           <StateBarRow
-            label="EFFORT"
+            label={t("goalDetail.hero.value")}
+            pct={progressOutcome}
+            value={`${progressOutcome}%`}
+            color={color}
+          />
+          <StateBarRow
+            label={t("goalDetail.hero.effort")}
             pct={progressEffort}
             value={`${progressEffort}%`}
             color={color}
             opacity={0.6}
-            trailing={<MetricInfoPopover variant="valueEffort" ariaLabel="What do Value and Effort mean?" />}
+            trailing={<MetricInfoPopover variant="valueEffort" ariaLabel={t("goalDetail.hero.metricInfoAria")} />}
           />
         </div>
       </div>
 
       {/* Last activity */}
       <div className="mt-6 font-mono text-[12px] text-text-secondary tabular-nums">
-        Last activity {lastLabel} · {actionsDone} actions done overall
+        {t("goalDetail.hero.lastActivity", { count: actionsDone, label: lastLabel })}
       </div>
     </div>
   );
@@ -220,6 +244,7 @@ const HeroState: React.FC<{
 
 /* ===== Resources block ===== */
 const ResourcesBlock: React.FC<{ actions: Action[] }> = ({ actions }) => {
+  const { t } = useTranslation();
   const done = actions.filter((a) => a.status === "done");
   const delegated = actions.filter((a) => a.status === "delegated");
   const pending = actions.filter((a) => a.status === "backlog" || a.status === "planned");
@@ -242,12 +267,12 @@ const ResourcesBlock: React.FC<{ actions: Action[] }> = ({ actions }) => {
   return (
     <section>
       <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-3">
-        RESOURCES
+        {t("goalDetail.resources.heading")}
       </div>
       <div className="space-y-1.5">
         {showTime && (
           <div className="font-mono text-[13px] text-text-secondary tabular-nums">
-            Time spent: {fmtH(timeSpent)} · Time remaining: {fmtH(timeRemaining)} estimated
+            {t("goalDetail.resources.timeLine", { spent: fmtH(timeSpent), remaining: fmtH(timeRemaining) })}
           </div>
         )}
       </div>
@@ -258,10 +283,18 @@ const ResourcesBlock: React.FC<{ actions: Action[] }> = ({ actions }) => {
 function fmtAgo(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-  if (days <= 0) return "today";
-  if (days === 1) return "yesterday";
-  if (days < 30) return `${days}d ago`;
-  return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  if (days <= 0) return i18n.t("time.today");
+  if (days === 1) return i18n.t("time.yesterday");
+  if (days < 30) return i18n.t("time.daysAgo_other", { count: days });
+  return new Date(iso).toLocaleDateString(i18n.language || "en", { month: "short", day: "numeric" });
+}
+
+function fmtFullDate(iso: string): string {
+  return new Date(iso).toLocaleDateString(i18n.language || "en", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
 /* ===== Project card (delegates to shared component) ===== */
@@ -275,6 +308,7 @@ const ProjectCard: React.FC<{ p: Project; color: string; goalLabel: string }> = 
 
 /* ===== Ritual row ===== */
 const RitualRow: React.FC<{ r: Ritual; color: string; onOpen: () => void }> = ({ r, color, onOpen }) => {
+  const { t } = useTranslation();
   const mult = useStore((s) => selectors.ritualMultiplier(s, r.id));
   const lastDays = r.completionHistory.slice(-12).map(() => 1);
   while (lastDays.length < 12) lastDays.unshift(0);
@@ -295,7 +329,9 @@ const RitualRow: React.FC<{ r: Ritual; color: string; onOpen: () => void }> = ({
       <div className="flex-1" />
       <div className="flex flex-col items-end">
         <div className="font-mono text-[18px] text-text-primary">×{mult.toFixed(2)}</div>
-        <div className="font-mono text-[11px] text-text-tertiary">{r.totalCompletions} completions</div>
+        <div className="font-mono text-[11px] text-text-tertiary">
+          {t("goalDetail.rituals.completions", { count: r.totalCompletions })}
+        </div>
       </div>
       <div className="flex gap-[2px]">
         {lastDays.map((v, i) => (
@@ -312,6 +348,7 @@ const RitualRow: React.FC<{ r: Ritual; color: string; onOpen: () => void }> = ({
 
 /* ===== Recent activity ===== */
 const RecentActivity: React.FC<{ actions: Action[] }> = ({ actions }) => {
+  const { t } = useTranslation();
   const events = useMemo(() => {
     const items = actions
       .filter(
@@ -334,15 +371,17 @@ const RecentActivity: React.FC<{ actions: Action[] }> = ({ actions }) => {
   if (events.length === 0) {
     return (
       <section>
-        <SectionHeader>Recent activity · 0</SectionHeader>
-        <div className="font-mono text-[11px] text-text-tertiary">No completed actions yet.</div>
+        <SectionHeader>{t("goalDetail.recentActivity.title", { count: 0 })}</SectionHeader>
+        <div className="font-mono text-[11px] text-text-tertiary">
+          {t("goalDetail.recentActivity.empty")}
+        </div>
       </section>
     );
   }
 
   return (
     <section>
-      <SectionHeader>Recent activity · {events.length}</SectionHeader>
+      <SectionHeader>{t("goalDetail.recentActivity.title", { count: events.length })}</SectionHeader>
       <div>
         {events.map(({ a, at }) => (
           <div
@@ -374,6 +413,7 @@ const RecentActivity: React.FC<{ actions: Action[] }> = ({ actions }) => {
 
 /* ===== Ideas ===== */
 const IdeasSection: React.FC<{ goalId: string }> = ({ goalId }) => {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(true);
   const ideas = useStore(
     useShallow((s) => s.ideas.filter((i) => i.goalId === goalId && i.status === "captured")),
@@ -392,7 +432,7 @@ const IdeasSection: React.FC<{ goalId: string }> = ({ goalId }) => {
         className="flex items-center gap-2 text-[12px] font-medium uppercase tracking-[0.08em] text-text-tertiary hover:text-text-secondary transition-colors cursor-pointer"
       >
         <span className="inline-block w-3">{open ? "▾" : "▸"}</span>
-        Ideas · {ideas.length} captured
+        {t("goalDetail.ideas.title", { count: ideas.length })}
       </button>
       {open && (
         <div className="mt-3">
@@ -401,7 +441,7 @@ const IdeasSection: React.FC<{ goalId: string }> = ({ goalId }) => {
               value={text}
               onChange={(e) => setText(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && submit()}
-              placeholder="Capture an idea..."
+              placeholder={t("goalDetail.ideas.placeholder")}
               className="flex-1 bg-transparent outline-none text-[13px] text-text-primary placeholder:text-text-tertiary"
             />
           </div>
@@ -420,7 +460,7 @@ const IdeasSection: React.FC<{ goalId: string }> = ({ goalId }) => {
             to="/ideas"
             className="inline-block mt-3 text-[12px] text-[hsl(var(--accent))] hover:text-text-primary transition-colors"
           >
-            View all ideas in this goal →
+            {t("goalDetail.ideas.viewAll")}
           </Link>
         </div>
       )}
@@ -430,6 +470,7 @@ const IdeasSection: React.FC<{ goalId: string }> = ({ goalId }) => {
 
 /* ===== Page ===== */
 const GoalDetail: React.FC = () => {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const goal = useStore((s) => s.goals.find((g) => g.id === id));
@@ -459,9 +500,9 @@ const GoalDetail: React.FC = () => {
       <div className="min-h-screen bg-surface-base text-text-primary">
         <AppSidebar />
       <main className="app-main page-medium">
-          <div className="text-[14px] text-text-secondary">Goal not found.</div>
+          <div className="text-[14px] text-text-secondary">{t("goalDetail.notFound")}</div>
           <Link to="/" className="mt-4 inline-block text-[13px] text-accent hover:underline">
-            ← Back to home
+            {t("goalDetail.backHome")}
           </Link>
         </main>
       </div>
@@ -482,7 +523,7 @@ const GoalDetail: React.FC = () => {
               to="/"
               className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary hover:text-text-secondary transition-colors"
             >
-              ← GOALS
+              {t("goalDetail.backLink")}
             </Link>
             <div className="h-4" />
             <div className="flex items-center justify-between">
@@ -495,23 +536,25 @@ const GoalDetail: React.FC = () => {
                 </Tooltip>
                 <h1 className="text-[28px] font-medium text-text-primary truncate">{goal.title}</h1>
                 <span className="ml-3 font-mono text-[11px] uppercase tracking-[0.08em] text-text-tertiary shrink-0">
-                  {goal.type === "mid-term" ? "MID-TERM" : "SHORT-TERM"}
+                  {goal.type === "mid-term" ? t("goals.type.midTerm") : t("goals.type.shortTerm")}
                 </span>
               </div>
               <button
                 onClick={() => openPanel({ kind: "goal", mode: "edit", id: goal.id })}
                 className="px-2 py-1 rounded-[4px] text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-colors text-[16px] leading-none"
-                aria-label="Edit goal"
+                aria-label={t("goalDetail.editAria")}
               >
                 ···
               </button>
             </div>
             <div className="h-2" />
             <div className="font-mono text-[12px] text-text-tertiary">
-              Created {new Date(goal.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} ·{" "}
               {goal.targetDate
-                ? `Target ${new Date(goal.targetDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`
-                : "No target date"}
+                ? t("goalDetail.createdWithTarget", {
+                    created: fmtFullDate(goal.createdAt),
+                    target: fmtFullDate(goal.targetDate),
+                  })
+                : `${t("goalDetail.created", { date: fmtFullDate(goal.createdAt) })} · ${t("goalDetail.noTarget")}`}
             </div>
           </div>
 
@@ -532,11 +575,13 @@ const GoalDetail: React.FC = () => {
 
           <div className="h-14" />
           <section>
-            <SectionHeader meta={`${activeProjects.length} ACTIVE`}>
-              Active projects · {activeProjects.length}
+            <SectionHeader meta={t("goalDetail.activeProjects.meta", { count: activeProjects.length })}>
+              {t("goalDetail.activeProjects.title", { count: activeProjects.length })}
             </SectionHeader>
             {activeProjects.length === 0 ? (
-              <div className="font-mono text-[11px] text-text-tertiary">No active projects.</div>
+              <div className="font-mono text-[11px] text-text-tertiary">
+                {t("goalDetail.activeProjects.empty")}
+              </div>
             ) : (
               <div className="grid grid-cols-2 gap-4">
                 {activeProjects.map((p) => (
@@ -554,15 +599,17 @@ const GoalDetail: React.FC = () => {
                 navigate(`/projects/${newId}`);
               }}
             >
-              + Add project to this goal
+              {t("goalDetail.activeProjects.add")}
             </GhostAddButton>
           </section>
 
           <div className="h-14" />
           <section>
-            <SectionHeader>Rituals · {rituals.length}</SectionHeader>
+            <SectionHeader>{t("goalDetail.rituals.title", { count: rituals.length })}</SectionHeader>
             {rituals.length === 0 ? (
-              <div className="font-mono text-[11px] text-text-tertiary">No active rituals.</div>
+              <div className="font-mono text-[11px] text-text-tertiary">
+                {t("goalDetail.rituals.empty")}
+              </div>
             ) : (
               <div className="space-y-3">
                 {rituals.map((r) => (
@@ -584,7 +631,7 @@ const GoalDetail: React.FC = () => {
                 })
               }
             >
-              + Add ritual to this goal
+              {t("goalDetail.rituals.add")}
             </GhostAddButton>
           </section>
 

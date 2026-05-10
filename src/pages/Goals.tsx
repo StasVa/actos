@@ -279,7 +279,7 @@ const GoalCard: React.FC<{ m: GoalMeta; logTimeOn: boolean }> = ({ m, logTimeOn 
               {progress}%
             </div>
             <div className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary mt-1">
-              PROGRESS · VALUE
+              {t("goalDetail.hero.progressValue")}
             </div>
           </div>
 

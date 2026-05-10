@@ -1205,12 +1205,14 @@ const Ideas: React.FC = () => {
   const editorOpen = !!selectedIdeaId && ideas.some((i) => i.id === selectedIdeaId);
   const selected = ideas.find((i) => i.id === selectedIdeaId) ?? null;
 
+  const relativeAgo = useRelativeAgo();
   const metaSuffix = (idea: Idea): string => {
-    const cap = relativeAgo(idea.capturedAt).label.replace(/^Captured\s*/i, "");
-    if (idea.status === "captured") return `Captured ${cap}`;
-    if (idea.status === "converted_to_action") return "Converted to action";
-    if (idea.status === "converted_to_project") return "Converted to project";
-    return `Discarded ${idea.discardedAt ? relativeAgo(idea.discardedAt).label.replace(/^Captured\s*/i, "") : cap}`;
+    const cap = relativeAgo(idea.capturedAt).label;
+    if (idea.status === "captured") return cap;
+    if (idea.status === "converted_to_action") return t("ideas.status.convertedAction");
+    if (idea.status === "converted_to_project") return t("ideas.status.convertedProject");
+    const discardedRel = idea.discardedAt ? relativeAgo(idea.discardedAt).label : cap;
+    return t("ideas.metaSuffix.discarded", { rel: discardedRel });
   };
 
   const renderRow = (idea: Idea) => {

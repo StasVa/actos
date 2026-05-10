@@ -31,6 +31,7 @@ import NotFound from "./pages/NotFound.tsx";
 import Setup, { isSetupCompleted } from "./pages/Setup.tsx";
 import GoalBuilder from "./pages/GoalBuilder.tsx";
 import Landing from "./pages/Landing.tsx";
+import Start from "./pages/Start.tsx";
 import Pricing from "./pages/Pricing.tsx";
 import Manifesto from "./pages/Manifesto.tsx";
 import Login from "./pages/Login.tsx";
@@ -79,6 +80,7 @@ const SetupGuard = () => {
     } catch {}
     if (location.pathname === "/") return;
     if (location.pathname.startsWith("/pricing")) return;
+    if (location.pathname.startsWith("/start")) return;
     if (location.pathname.startsWith("/manifesto")) return;
     if (location.pathname.startsWith("/login")) return;
     if (location.pathname.startsWith("/legal")) return;
@@ -95,6 +97,7 @@ const ChromeOnlyOutsideSetup: React.FC<{ children: React.ReactNode }> = ({ child
   const hasActiveGoal = useStore((s) => s.goals.some((g) => g.status === "active"));
   if (pathname === "/") return null;
   if (pathname.startsWith("/pricing")) return null;
+  if (pathname.startsWith("/start")) return null;
   if (pathname.startsWith("/manifesto")) return null;
   if (pathname.startsWith("/login")) return null;
   if (pathname.startsWith("/legal")) return null;
@@ -117,6 +120,7 @@ const NoGoalsGate: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const exempt =
     pathname === "/" ||
     pathname.startsWith("/pricing") ||
+    pathname.startsWith("/start") ||
     pathname.startsWith("/manifesto") ||
     pathname.startsWith("/login") ||
     pathname.startsWith("/legal") ||
@@ -166,6 +170,7 @@ const App = () => (
 
           {/* Default + legacy redirects */}
           <Route path="/" element={<Landing />} />
+          <Route path="/start" element={<Start />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/manifesto" element={<Manifesto />} />
           <Route path="/login" element={<Login />} />

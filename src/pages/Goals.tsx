@@ -46,19 +46,10 @@ function useSortOptions(t: (k: string) => string): FilterOption<SortKey>[] {
 function fmtAgo(iso?: string): string {
   if (!iso) return "—";
   const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
-  if (days <= 0) return "today";
-  if (days === 1) return "1d ago";
-  if (days < 30) return `${days}d ago`;
-  return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
-}
-
-function fmtTime(minutes: number): string {
-  if (!minutes || minutes <= 0) return "0m";
-  const h = Math.floor(minutes / 60);
-  const m = Math.round(minutes - h * 60);
-  if (h === 0) return `${m}m`;
-  if (m === 0) return `${h}h`;
-  return `${h}h ${m}m`;
+  if (days <= 0) return i18n.t("progress.relAgo.today");
+  if (days === 1) return i18n.t("progress.relAgo.yesterday");
+  if (days < 30) return i18n.t("progress.relAgo.daysAgo", { n: days });
+  return new Date(iso).toLocaleDateString(i18n.language || "en", { month: "short", day: "numeric" });
 }
 
 type GoalMeta = {

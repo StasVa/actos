@@ -782,8 +782,8 @@ const PlanForm: React.FC<{
 
           {/* RITUALS */}
           <section>
-            <SectionHead meta={`${dueRituals.length}`} sub="Mark anything you want to skip.">
-              RITUALS TODAY
+            <SectionHead meta={`${dueRituals.length}`} sub={t("planToday.rituals.sub")}>
+              {t("planToday.rituals.heading")}
             </SectionHead>
             <div className="space-y-1">
               {dueRituals.length === 0 && (

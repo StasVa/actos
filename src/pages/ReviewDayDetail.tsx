@@ -485,7 +485,7 @@ const ReviewDayDetail: React.FC = () => {
             {/* TIME INVESTED */}
             {settings.layers.logTime && totalMin > 0 && (
               <section>
-                <SectionHead meta={`Total: ${formatHM(totalMin)}`}>Time invested</SectionHead>
+                <SectionHead meta={t("reviews.detail.section.timeTotal", { time: formatHM(totalMin) })}>{t("reviews.detail.section.timeInvested")}</SectionHead>
                 <div className="space-y-2">
                   {perGoal.map(({ g, min, projectRows }) => {
                     const pct = yMax > 0 ? (min / yMax) * 100 : 0;

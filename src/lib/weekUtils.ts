@@ -14,6 +14,7 @@ import {
 } from "date-fns";
 import type { Action, DayEntry, DayType, Goal, ID, ISODate, Project, Ritual } from "@/types";
 import { timeInvestedMinutes } from "@/lib/timeStats";
+import i18n from "@/i18n";
 
 const ISO_DATE = (d: Date): ISODate => format(d, "yyyy-MM-dd");
 

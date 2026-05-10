@@ -141,7 +141,7 @@ const ActionRow: React.FC<{ action: Action; selected: boolean; onSelect: () => v
               onClick={handleToggle}
               disabled={checkboxDisabled}
               title={checkboxDisabled ? "Re-open this action via the editor" : undefined}
-              aria-label={isDone ? "Re-open" : "Mark done"}
+              aria-label={isDone ? t("allActions.aria.reopen") : t("allActions.aria.markDone")}
               className="inline-flex items-center justify-center rounded-[2px] border shrink-0"
               style={{
                 width: 16,

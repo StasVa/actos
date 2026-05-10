@@ -68,6 +68,7 @@ const ConsistencyCalendar: React.FC<{ data: number[]; color: string; cellSize?: 
   color,
   cellSize = 12,
 }) => {
+  const { t } = useTranslation();
   const last = data.length - 1;
   return (
     <div className="flex items-center gap-[2px]">

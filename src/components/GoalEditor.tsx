@@ -570,11 +570,11 @@ function GoalEditorPanel({
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-[16px] font-medium text-text-primary">
-              Free plan: 2 active goals.
+              Free is built for one goal at a time.
             </h2>
             <div className="mt-3 text-[13px] text-text-secondary leading-[1.5]">
-              All-In lifts the cap to 3 goals — the full focus range ActOS is designed around. Your
-              draft will be saved if you'd like to continue.
+              Most ambitious people work on 2-3. All-In lifts the cap to 3 — the full focus range
+              ActOS is designed around. Your draft will be saved if you'd like to continue later.
             </div>
             <div className="mt-6 flex items-center justify-end gap-2">
               <button

@@ -291,6 +291,7 @@ const GoalColumn: React.FC<{
   href?: string;
   menu?: React.ReactNode;
 }> = ({ title, state, type, target, progress, meta, outcome, effort, spark, sparkTips, lastActivity, stalledFor, color, recent, href, menu }) => {
+  const { t } = useTranslation();
   const inner = (
     <div className="group min-w-0 overflow-hidden py-1 space-y-4">
     <div className="flex items-center justify-between gap-2">

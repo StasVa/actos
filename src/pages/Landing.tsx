@@ -15,7 +15,7 @@ const Landing: React.FC = () => {
       style={{ background: "hsl(var(--surface-base))" }}
     >
       {/* Top bar — logo */}
-      <header className="absolute left-8 top-8 md:left-8 md:top-8" style={{ left: undefined }}>
+      <header className="absolute left-4 top-4 md:left-8 md:top-8">
         <span
           className="select-none"
           style={{

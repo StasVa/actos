@@ -531,6 +531,7 @@ const ActiveProjectsScoped: React.FC = () => {
 };
 
 const Progress: React.FC = () => {
+  const { t } = useTranslation();
   const [settingsOpen, setSettingsOpen] = React.useState(false);
   const goals = useStore((s) => s.goals);
   const projects = useStore((s) => s.projects);

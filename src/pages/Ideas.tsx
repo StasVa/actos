@@ -1089,6 +1089,7 @@ const IdeaEditorSheet: React.FC<{
 };
 
 const Ideas: React.FC = () => {
+  const { t } = useTranslation();
   const initialGoalParam = useQueryGoal();
   const ideas = useStore((s) => s.ideas);
   const goals = useStore((s) => s.goals);

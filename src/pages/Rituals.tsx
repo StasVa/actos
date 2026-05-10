@@ -548,6 +548,7 @@ const R_SORT_OPTIONS: FilterOption<RSortKey>[] = [
 ];
 
 const Rituals: React.FC = () => {
+  const { t } = useTranslation();
   const storeRituals = useStore((s) => s.rituals);
   const storeGoals = useStore((s) => s.goals);
   const openPanel = useStore((s) => s.openPanel);

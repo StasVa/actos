@@ -362,6 +362,7 @@ const SectionGrid: React.FC<{
 };
 
 const Goals: React.FC = () => {
+  const { t } = useTranslation();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [stateFilter, setStateFilter] = useState<StateFilter>("all");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");

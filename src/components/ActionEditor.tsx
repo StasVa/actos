@@ -975,7 +975,7 @@ function ActionEditorPanel({
                   onClick={() => handleStatusChange("backlog")}
                   className="text-[13px] px-3 py-1.5 rounded-[4px] border border-border-subtle text-text-secondary hover:text-text-primary"
                 >
-                  Re-open
+                  {t("actionEditor.action.reopen")}
                 </button>
               )}
             </div>

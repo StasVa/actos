@@ -102,35 +102,38 @@ const BackLink: React.FC<{ onClick: () => void }> = ({ onClick }) => {
 };
 
 const ContinueCTA: React.FC<{ onClick: () => void; disabled?: boolean; label?: string }> = ({
-  onClick, disabled, label = "Continue",
-}) => (
-  <button
-    type="button"
-    onClick={onClick}
-    disabled={disabled}
-    className="group inline-flex items-center gap-2 transition-all"
-    style={{
-      fontFamily: "Inter, ui-sans-serif, system-ui",
-      fontSize: 16, fontWeight: 500,
-      color: "hsl(var(--accent))",
-      background: "transparent", border: "none",
-      cursor: disabled ? "not-allowed" : "pointer",
-      opacity: disabled ? 0.4 : 1,
-      padding: "8px 4px",
-    }}
-  >
-    <span>{label}</span>
-    <ArrowRight
-      size={18}
-      className="transition-transform"
-      style={{ transitionDuration: "150ms" }}
-    />
-    <style>{`
-      .group:not(:disabled):hover svg { transform: translateX(2px); }
-      .group:not(:disabled):hover { color: hsl(var(--accent-hover)); }
-    `}</style>
-  </button>
-);
+  onClick, disabled, label,
+}) => {
+  const { t } = useTranslation();
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className="group inline-flex items-center gap-2 transition-all"
+      style={{
+        fontFamily: "Inter, ui-sans-serif, system-ui",
+        fontSize: 16, fontWeight: 500,
+        color: "hsl(var(--accent))",
+        background: "transparent", border: "none",
+        cursor: disabled ? "not-allowed" : "pointer",
+        opacity: disabled ? 0.4 : 1,
+        padding: "8px 4px",
+      }}
+    >
+      <span>{label ?? t("setup.continue")}</span>
+      <ArrowRight
+        size={18}
+        className="transition-transform"
+        style={{ transitionDuration: "150ms" }}
+      />
+      <style>{`
+        .group:not(:disabled):hover svg { transform: translateX(2px); }
+        .group:not(:disabled):hover { color: hsl(var(--accent-hover)); }
+      `}</style>
+    </button>
+  );
+};
 
 /* ───────── Screens ───────── */
 const ScreenWrap: React.FC<{ children: React.ReactNode; keyId: string }> = ({ children, keyId }) => (

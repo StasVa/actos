@@ -974,7 +974,7 @@ export const TodayZone: React.FC<{
 
   const handleReopen = () => {
     updateDayEntry(TODAY_ISO, { isClosed: false, closedAt: undefined });
-    toast("Day re-opened");
+    toast(t("home.toast.dayReopened"));
   };
 
   // ─── STATE C: closed ───

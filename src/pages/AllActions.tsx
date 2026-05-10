@@ -648,20 +648,20 @@ const AllActions: React.FC = () => {
           {ACTIONS.length === 0 ? (
             !hasActiveGoals ? (
               <EmptyState
-                headline="Goals come first."
-                description={`A goal is a result you want to reach — like "$10k MRR" or "Pass C1 Spanish exam". Create one, then add actions under its projects.`}
-                ctaLabel="+ Create your first goal"
+                headline={t("allActions.empty.noGoals.headline")}
+                description={t("allActions.empty.noGoals.description")}
+                ctaLabel={t("goals.empty.noGoals.cta")}
                 onCta={() => navigate("/onboarding/goal")}
               />
             ) : (
               <EmptyState
-                headline="No actions yet."
-                description="Actions are the concrete next steps under your projects. Capture them here as you think of them, then mark them done as you complete them."
-                ctaLabel="+ New action"
+                headline={t("allActions.empty.noActions.headline")}
+                description={t("allActions.empty.noActions.description")}
+                ctaLabel={t("allActions.empty.noActions.cta")}
                 onCta={goNew}
                 hint={
                   storeProjects.filter((p) => !p.isDraft && p.status === "active").length === 0
-                    ? "You'll need a goal and project first."
+                    ? t("allActions.empty.noActions.hint")
                     : null
                 }
               />

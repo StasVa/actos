@@ -1,12 +1,13 @@
 import React from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
+import i18n from "@/i18n";
 import { AppSidebar } from "@/components/AppSidebar";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { useStore } from "@/store/useStore";
 import { formatHM } from "@/lib/timeStats";
 import type { Action, Goal, Project, Ritual } from "@/types";
-import { DAY_TYPE_LABELS } from "./Index";
 import { ActionRow as SharedActionRow } from "@/components/ActionRow";
 import { AccomplishmentsSection, type AccomplishmentTile } from "@/components/AccomplishmentsSection";
 import { OutcomeAddedSection } from "@/components/OutcomeAddedSection";
@@ -14,8 +15,18 @@ import { SessionsSection } from "@/components/SessionsSection";
 import { getOutcomeSummary } from "@/lib/outcomeUtils";
 import { getSessionsForDay, sessionDurationMinutes } from "@/lib/sessionUtils";
 
+const dayTypeLabelKey = (dt?: string): string => {
+  switch (dt) {
+    case "execution": return "today.dayType.execution";
+    case "recovery": return "today.dayType.recovery";
+    case "day-off": return "today.dayType.dayOff";
+    case "sick": return "today.dayType.sick";
+    default: return "";
+  }
+};
+
 const longDate = (iso: string) =>
-  new Date(iso + "T00:00:00").toLocaleDateString("en-US", {
+  new Date(iso + "T00:00:00").toLocaleDateString(i18n.language, {
     weekday: "long",
     month: "long",
     day: "numeric",
@@ -23,7 +34,7 @@ const longDate = (iso: string) =>
   });
 
 const timeOnly = (iso?: string) =>
-  iso ? new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : null;
+  iso ? new Date(iso).toLocaleTimeString(i18n.language, { hour: "2-digit", minute: "2-digit" }) : null;
 
 const SectionHead: React.FC<{ children: React.ReactNode; meta?: string }> = ({ children, meta }) => (
   <div className="flex items-baseline justify-between mb-3">

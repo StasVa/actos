@@ -95,17 +95,17 @@ const ActionRow: React.FC<{ action: Action; selected: boolean; onSelect: () => v
       const today = new Date().toISOString().slice(0, 10);
       changeStatus(action.id, "planned", { scheduledDate: today });
       toast.dismiss();
-      toast.success("Action re-opened");
+      toast.success(t("allActions.toast.reopened"));
       return;
     }
     if (!storeAction?.impact || !storeAction?.timeEstimateMinutes) {
-      toast.error("Set Impact and Time before marking done");
+      toast.error(t("allActions.toast.markDoneRequired"));
       openPanel({ kind: "action", mode: "edit", id: action.id });
       return;
     }
     changeStatus(action.id, "done");
     toast.dismiss();
-    toast.success("Action marked done");
+    toast.success(t("allActions.toast.markedDone"));
   };
 
   const bottomBits: React.ReactNode[] = [];

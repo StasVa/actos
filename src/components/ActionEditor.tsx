@@ -398,11 +398,11 @@ function ActionEditorPanel({
       let firstFocus: "title" | "impact" | "goal" | null = null;
       if (!title.trim()) firstFocus = firstFocus ?? "title";
       if (!(impactNum > 0)) {
-        setImpactError("Impact is required.");
+        setImpactError(t("actionEditor.error.impactRequired"));
         firstFocus = firstFocus ?? "impact";
       }
       if (!goalId) {
-        setGoalError("Pick a Goal.");
+        setGoalError(t("actionEditor.error.goalRequired"));
         firstFocus = firstFocus ?? "goal";
       }
       if (firstFocus === "title") titleRef.current?.focus();
@@ -433,7 +433,7 @@ function ActionEditorPanel({
       droppedAt: prefill?.droppedAt,
       cancelledAt: prefill?.cancelledAt,
     });
-    toast(`Action "${title.trim()}" created`);
+    toast(t("actionEditor.toast.created", { title: title.trim() }));
     onClose();
   };
 

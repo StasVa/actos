@@ -300,6 +300,7 @@ const AvailableActionRow: React.FC<{
   selected: boolean;
   onToggle: () => void;
 }> = ({ action, goalColor, goalTitle, projectTitle, selected, onToggle }) => {
+  const { t } = useTranslation();
   const impact = action.impact ?? 0;
   return (
     <div

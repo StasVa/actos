@@ -1138,7 +1138,7 @@ export const PlanTodayPage: React.FC<{ onCancel: () => void; onComplete: () => v
     !!state.mainTaskId;
 
   const handleCancel = () => {
-    if (step === 2 && isDirty && !confirm("Discard your planning progress?")) return;
+    if (step === 2 && isDirty && !confirm(t("planToday.confirm.discardProgress"))) return;
     onCancel();
   };
 
@@ -1147,9 +1147,7 @@ export const PlanTodayPage: React.FC<{ onCancel: () => void; onComplete: () => v
       // Switching to Day Off / Sick — confirm + discard selections.
       if (
         isDirty &&
-        !confirm(
-          `Switch to ${next.label}? Your planned actions and main task will be discarded.`,
-        )
+        !confirm(t("planToday.confirm.switchDayType", { label: t(next.labelKey) }))
       ) {
         return;
       }

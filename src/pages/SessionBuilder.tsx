@@ -651,7 +651,7 @@ const SessionBuilder: React.FC = () => {
       <div className={`${isMobile ? "" : "max-h-[480px] overflow-y-auto"}`}>
         {available.length === 0 ? (
           <div className="p-6 text-[13px] text-text-tertiary text-center">
-            No actions available. Create some first or pick a different goal/project filter.
+            {t("sessionBuilder.empty.noAvailable")}
           </div>
         ) : (
           available.map((a) => {

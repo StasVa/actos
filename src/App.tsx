@@ -80,6 +80,7 @@ const SetupGuard = () => {
     } catch {}
     if (location.pathname === "/") return;
     if (location.pathname.startsWith("/pricing")) return;
+    if (location.pathname.startsWith("/start")) return;
     if (location.pathname.startsWith("/manifesto")) return;
     if (location.pathname.startsWith("/login")) return;
     if (location.pathname.startsWith("/legal")) return;

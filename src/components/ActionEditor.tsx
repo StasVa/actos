@@ -804,7 +804,7 @@ function ActionEditorPanel({
 
             {/* PARENT */}
             <div className="mb-6">
-              <SectionHead>Parent</SectionHead>
+              <SectionHead>{t("actionEditor.section.parent")}</SectionHead>
               <div className="flex flex-col gap-2">
                 <select
                   value={goalId}

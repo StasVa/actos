@@ -127,7 +127,7 @@ const RitualPanel: React.FC<Props> = ({ open, onClose, mode = "edit" }) => {
       {/* Panel */}
       <div
         role="dialog"
-        aria-label="Edit ritual"
+        aria-label={t("ritualPanel.aria.edit")}
         className="bg-surface-elevated border-l border-border-subtle"
         style={{
           position: "fixed",
@@ -151,11 +151,11 @@ const RitualPanel: React.FC<Props> = ({ open, onClose, mode = "edit" }) => {
               style={{ zIndex: 1 }}
             >
               <div className="font-mono text-[11px] uppercase tracking-[0.08em] text-text-secondary">
-                {isNew ? "NEW RITUAL" : "EDIT RITUAL"}
+                {isNew ? t("ritualPanel.headingNew") : t("ritualPanel.headingEdit")}
               </div>
               <button
                 onClick={onClose}
-                aria-label="Close"
+                aria-label={t("ritualPanel.aria.close")}
                 className="w-6 h-6 flex items-center justify-center text-text-secondary rounded-[4px] hover:bg-surface-hover hover:text-text-primary transition-colors text-[16px] leading-none cursor-pointer"
               >
                 ×
@@ -167,16 +167,16 @@ const RitualPanel: React.FC<Props> = ({ open, onClose, mode = "edit" }) => {
               ref={titleRef}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder={isNew ? "Ritual title" : undefined}
+              placeholder={isNew ? t("ritualPanel.titlePlaceholder") : undefined}
               className="w-full bg-transparent text-text-primary text-[18px] font-medium outline-none border border-transparent rounded-[4px] focus:border-border-default focus:px-3 focus:py-2 transition-[padding,border-color] duration-100 placeholder:text-text-tertiary"
               style={{ fontFamily: "Inter, sans-serif" }}
             />
 
             <div className="h-3" />
 
-            {/* Parent */}
+            {/* Parent — demo placeholder, not extracted (mock data) */}
             <div>
-              <TinyLabel>PARENT</TinyLabel>
+              <TinyLabel>{t("ritualPanel.label.parent")}</TinyLabel>
               <div className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2.5 py-2 flex items-center gap-2 text-[13px] text-text-primary">
                 <span className="w-2 h-2 rounded-full" style={{ background: G1 }} />
                 <span>Launch YouTube channel</span>
@@ -188,9 +188,9 @@ const RitualPanel: React.FC<Props> = ({ open, onClose, mode = "edit" }) => {
 
             {/* Schedule */}
             <div>
-              <TinyLabel>SCHEDULE</TinyLabel>
+              <TinyLabel>{t("ritualPanel.label.schedule")}</TinyLabel>
               <div className="w-full border border-border-subtle rounded-[4px] flex overflow-hidden">
-                {SCHEDULE_OPTIONS.map((opt, i) => {
+                {SCHEDULE_KEYS.map((opt, i) => {
                   const active = schedule === opt;
                   return (
                     <button
@@ -203,14 +203,14 @@ const RitualPanel: React.FC<Props> = ({ open, onClose, mode = "edit" }) => {
                       } ${i > 0 ? "border-l border-border-subtle" : ""}`}
                       style={{ fontFamily: "Inter, sans-serif" }}
                     >
-                      {opt}
+                      {t(`ritualPanel.schedule.${opt}` as const)}
                     </button>
                   );
                 })}
               </div>
-              {schedule === "Weekly" && (
+              {schedule === "weekly" && (
                 <div className="mt-2 font-mono text-[11px] text-text-secondary">
-                  On Mondays · Next: tomorrow
+                  {t("ritualPanel.weekly.next")}
                 </div>
               )}
             </div>

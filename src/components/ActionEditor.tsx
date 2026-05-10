@@ -845,9 +845,9 @@ function ActionEditorPanel({
 
             {/* ESTIMATES */}
             <div className="mb-6">
-              <SectionHead>Estimates</SectionHead>
+              <SectionHead>{t("actionEditor.section.estimates")}</SectionHead>
               <div className="grid grid-cols-2 gap-3">
-                <FieldRow label="Impact (1-10) · required">
+                <FieldRow label={t("actionEditor.field.impactRequiredEdit")}>
                   <ClampedNumberInput
                     value={impact}
                     min={1}

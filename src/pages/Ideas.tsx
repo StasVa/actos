@@ -1231,15 +1231,19 @@ const Ideas: React.FC = () => {
 
   const goalOptions: FilterOption<GoalFilter>[] = useMemo(
     () => [
-      { value: "all", label: "All" },
+      { value: "all", label: t("ideas.filter.all") },
       ...activeGoals.map((g) => ({
         value: g.id as GoalFilter,
         label: g.title,
         dot: `hsl(var(--${g.color}))`,
       })),
     ],
-    [activeGoals],
+    [activeGoals, t],
   );
+
+  const statusOptions = useStatusOptions();
+  const dateOptions = useDateOptions();
+  const sortOptions = useSortOptions();
 
   const editorOpen = !!selectedIdeaId && ideas.some((i) => i.id === selectedIdeaId);
   const selected = ideas.find((i) => i.id === selectedIdeaId) ?? null;

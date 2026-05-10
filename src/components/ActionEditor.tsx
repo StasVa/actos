@@ -853,9 +853,9 @@ function ActionEditorPanel({
                     min={1}
                     max={10}
                     step={1}
-                    placeholder="1–10"
+                    placeholder={t("actionEditor.field.impactPlaceholder")}
                     required
-                    requiredMessage="Impact is required."
+                    requiredMessage={t("actionEditor.error.impactRequired")}
                     ariaLabel="Impact"
                     onChange={(v) => {
                       setImpact(v);

@@ -985,20 +985,20 @@ function ActionEditorPanel({
 
       <DeleteTypeConfirm
         open={confirmDelete}
-        title="Delete this action?"
-        body="This permanently removes the action and its timeline. This cannot be undone."
+        title={t("confirm.delete.action.heading")}
+        body={t("confirm.delete.action.body")}
         onCancel={() => setConfirmDelete(false)}
         onConfirm={handleDelete}
       />
       <ConfirmModal
         open={confirmDrop !== null}
-        title={confirmDrop === "dropped" ? "Drop this action?" : "Cancel this action?"}
+        title={confirmDrop === "dropped" ? t("confirm.drop.action.heading") : t("actionEditor.confirm.cancel.heading")}
         body={
           confirmDrop === "dropped"
-            ? "It moves out of progress without counting against you."
-            : "Its impact contribution will be removed from the project. You can re-open it later."
+            ? t("confirm.drop.action.body")
+            : t("actionEditor.confirm.cancel.body")
         }
-        confirmLabel={confirmDrop === "dropped" ? "Drop" : "Cancel action"}
+        confirmLabel={confirmDrop === "dropped" ? t("confirm.drop.action.cta") : t("actionEditor.confirm.cancel.cta")}
         destructive
         onCancel={() => setConfirmDrop(null)}
         onConfirm={confirmDropAction}

@@ -719,7 +719,7 @@ function ActionEditorPanel({
           <>
             {/* STATE */}
             <div className="mb-6">
-              <SectionHead>State</SectionHead>
+              <SectionHead>{t("actionEditor.section.state")}</SectionHead>
 
               <StatusDropdown
                 current={status}

@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import i18n from "@/i18n";
 import { toast } from "sonner";
 import { Tooltip, StateDotTooltip } from "@/components/Tooltip";
 import { MetricInfoPopover } from "@/components/MetricInfoPopover";
@@ -18,34 +20,49 @@ const COLOR_VAR: Record<GoalColorVar, string> = {
 
 function fmtAgo(iso: string): string {
   const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
-  if (days <= 0) return "today";
-  if (days === 1) return "yesterday";
-  if (days < 30) return `${days}d ago`;
-  return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  if (days <= 0) return i18n.t("time.today");
+  if (days === 1) return i18n.t("time.yesterday");
+  if (days < 30) return i18n.t("time.daysAgo_other", { count: days });
+  return new Date(iso).toLocaleDateString(i18n.language || "en", { month: "short", day: "numeric" });
+}
+
+function fmtFullDate(iso: string): string {
+  return new Date(iso).toLocaleDateString(i18n.language || "en", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+function fmtShortDate(iso: string): string {
+  return new Date(iso).toLocaleDateString(i18n.language || "en", { month: "short", day: "numeric" });
 }
 
 const Check: React.FC<{ done?: boolean; color: string; onClick?: () => void }> = ({
   done,
   color,
   onClick,
-}) => (
-  <button
-    onClick={onClick}
-    type="button"
-    className="inline-flex items-center justify-center w-4 h-4 rounded-[2px] shrink-0"
-    style={{
-      border: done ? "none" : "1px solid hsl(var(--text-tertiary))",
-      background: done ? color : "transparent",
-      color: "hsl(var(--surface-base))",
-      fontSize: 10,
-      lineHeight: 1,
-      cursor: "pointer",
-    }}
-    aria-label={done ? "Mark not done" : "Mark done"}
-  >
-    {done ? "✓" : ""}
-  </button>
-);
+}) => {
+  const { t } = useTranslation();
+  return (
+    <button
+      onClick={onClick}
+      type="button"
+      className="inline-flex items-center justify-center w-4 h-4 rounded-[2px] shrink-0"
+      style={{
+        border: done ? "none" : "1px solid hsl(var(--text-tertiary))",
+        background: done ? color : "transparent",
+        color: "hsl(var(--surface-base))",
+        fontSize: 10,
+        lineHeight: 1,
+        cursor: "pointer",
+      }}
+      aria-label={done ? t("projectDetail.markNotDone") : t("common.markDone")}
+    >
+      {done ? "✓" : ""}
+    </button>
+  );
+};
 
 const STATUS_LABEL: Record<ActionStatus, string> = {
   backlog: "BACKLOG",
@@ -57,6 +74,7 @@ const STATUS_LABEL: Record<ActionStatus, string> = {
 };
 
 const ActionRow: React.FC<{ a: Action; color: string }> = ({ a, color }) => {
+  const { t } = useTranslation();
   const openPanel = useStore((s) => s.openPanel);
   const changeStatus = useStore((s) => s.changeActionStatus);
   const handleToggle = () => {
@@ -65,17 +83,17 @@ const ActionRow: React.FC<{ a: Action; color: string }> = ({ a, color }) => {
       const today = new Date().toISOString().slice(0, 10);
       changeStatus(a.id, "planned", { scheduledDate: today });
       toast.dismiss();
-      toast.success("Action re-opened");
+      toast.success(t("home.actions.toast.reopened"));
       return;
     }
     if (!a.impact || !a.timeEstimateMinutes) {
-      toast.error("Set Impact and Time before marking done");
+      toast.error(t("home.actions.toast.needImpactTime"));
       openPanel({ kind: "action", mode: "edit", id: a.id });
       return;
     }
     changeStatus(a.id, "done");
     toast.dismiss();
-    toast.success("Action marked done");
+    toast.success(t("home.actions.toast.markedDone"));
   };
   return (
     <SharedActionRow
@@ -98,6 +116,7 @@ const ReferencesSection: React.FC<{
   onRemove: (id: string) => void;
   onUpdate: (id: string, partial: Partial<ProjectReference>) => void;
 }> = ({ project, onAdd, onRemove, onUpdate }) => {
+  const { t } = useTranslation();
   const [adding, setAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [url, setUrl] = useState("");
@@ -142,7 +161,7 @@ const ReferencesSection: React.FC<{
     <section>
       <div className="flex items-center justify-between mb-3">
         <h2 className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
-          REFERENCES · {project.references.length}
+          {t("projectDetail.references.title", { count: project.references.length })}
         </h2>
         {!formOpen && (
           <button
@@ -150,7 +169,7 @@ const ReferencesSection: React.FC<{
             onClick={startAdd}
             className="text-[12px] text-accent hover:text-accent-hover"
           >
-            + Add reference
+            {t("projectDetail.references.add")}
           </button>
         )}
       </div>
@@ -163,7 +182,7 @@ const ReferencesSection: React.FC<{
           <input
             autoFocus
             type="url"
-            placeholder="https://..."
+            placeholder={t("projectDetail.references.urlPlaceholder")}
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             required
@@ -171,7 +190,7 @@ const ReferencesSection: React.FC<{
           />
           <input
             type="text"
-            placeholder="Title (optional)"
+            placeholder={t("projectDetail.references.titlePlaceholder")}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className="bg-surface-base border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-accent"
@@ -182,13 +201,13 @@ const ReferencesSection: React.FC<{
               onClick={cancel}
               className="text-[12px] text-text-tertiary hover:text-text-secondary px-2 py-1"
             >
-              Cancel
+              {t("common.cancel")}
             </button>
             <button
               type="submit"
               className="text-[12px] bg-accent hover:bg-accent-hover text-white px-3 py-1 rounded-[4px]"
             >
-              {editingId ? "Save" : "Add"}
+              {editingId ? t("common.save") : t("common.add")}
             </button>
           </div>
         </form>
@@ -196,7 +215,7 @@ const ReferencesSection: React.FC<{
 
       {project.references.length === 0 && !formOpen ? (
         <div className="text-[13px] text-text-tertiary">
-          No references yet. Click + Add reference to add docs, links, materials.
+          {t("projectDetail.references.empty")}
         </div>
       ) : (
         <div className="flex flex-col">
@@ -223,10 +242,10 @@ const ReferencesSection: React.FC<{
               </a>
               <div className="opacity-0 group-hover:opacity-100 transition-opacity">
                 <CardMenu
-                  ariaLabel="Reference menu"
+                  ariaLabel={t("projectDetail.references.menu.aria")}
                   items={[
-                    { label: "Edit", onSelect: () => startEdit(r) },
-                    { label: "Remove", destructive: true, onSelect: () => onRemove(r.id) },
+                    { label: t("common.edit"), onSelect: () => startEdit(r) },
+                    { label: t("projectDetail.references.remove"), destructive: true, onSelect: () => onRemove(r.id) },
                   ]}
                 />
               </div>
@@ -244,6 +263,7 @@ const TitleField: React.FC<{
   autoFocus: boolean;
   onCommit: (next: string) => void;
 }> = ({ value, autoFocus, onCommit }) => {
+  const { t } = useTranslation();
   const [editing, setEditing] = useState(autoFocus);
   const [draft, setDraft] = useState(value);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -280,7 +300,7 @@ const TitleField: React.FC<{
             setEditing(false);
           }
         }}
-        placeholder="e.g. Set up landing page"
+        placeholder={t("projectDetail.titlePlaceholder")}
         className="w-full bg-transparent outline-none text-[32px] font-medium text-text-primary placeholder:text-text-tertiary leading-tight"
       />
     );
@@ -292,7 +312,7 @@ const TitleField: React.FC<{
       className="text-[32px] font-medium leading-tight cursor-text"
       style={{ color: value ? "hsl(var(--text-primary))" : "hsl(var(--text-tertiary))" }}
     >
-      {value || "Untitled project"}
+      {value || t("projectDetail.untitled")}
     </h1>
   );
 };
@@ -364,35 +384,39 @@ const GoalSelector: React.FC<{
 };
 
 /* ===== Inline status toggle ===== */
-const STATUSES: { value: ProjectStatus; label: string }[] = [
-  { value: "active", label: "Active" },
-  { value: "completed", label: "Completed" },
-  { value: "dropped", label: "Dropped" },
+const STATUS_KEYS: { value: ProjectStatus; key: string }[] = [
+  { value: "active", key: "projectDetail.status.active" },
+  { value: "completed", key: "projectDetail.status.completed" },
+  { value: "dropped", key: "projectDetail.status.dropped" },
 ];
 
 const StatusToggle: React.FC<{
   status: ProjectStatus;
   onChange: (next: ProjectStatus) => void;
-}> = ({ status, onChange }) => (
-  <div className="inline-flex items-center gap-0.5 p-0.5 rounded-[4px] bg-surface-raised border border-border-subtle">
-    {STATUSES.map((s) => (
-      <button
-        key={s.value}
-        type="button"
-        onClick={() => onChange(s.value)}
-        className="text-[11px] px-2 py-0.5 rounded-[3px] transition-colors"
-        style={{
-          background: s.value === status ? "hsl(var(--surface-elevated))" : "transparent",
-          color: s.value === status ? "hsl(var(--text-primary))" : "hsl(var(--text-tertiary))",
-        }}
-      >
-        {s.label}
-      </button>
-    ))}
-  </div>
-);
+}> = ({ status, onChange }) => {
+  const { t } = useTranslation();
+  return (
+    <div className="inline-flex items-center gap-0.5 p-0.5 rounded-[4px] bg-surface-raised border border-border-subtle">
+      {STATUS_KEYS.map((s) => (
+        <button
+          key={s.value}
+          type="button"
+          onClick={() => onChange(s.value)}
+          className="text-[11px] px-2 py-0.5 rounded-[3px] transition-colors"
+          style={{
+            background: s.value === status ? "hsl(var(--surface-elevated))" : "transparent",
+            color: s.value === status ? "hsl(var(--text-primary))" : "hsl(var(--text-tertiary))",
+          }}
+        >
+          {t(s.key)}
+        </button>
+      ))}
+    </div>
+  );
+};
 
 const ProjectDetail: React.FC = () => {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const project = useStore((s) => s.projects.find((p) => p.id === id));
@@ -443,7 +467,7 @@ const ProjectDetail: React.FC = () => {
   useEffect(() => {
     if (isDraft && hasMeaningfulContent && projectId) {
       updateProject(projectId, { isDraft: false });
-      if (goalTitle) toast(`Project created in “${goalTitle}”`);
+      if (goalTitle) toast(t("projectDetail.toast.created", { title: goalTitle }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDraft, hasMeaningfulContent, projectId]);
@@ -473,7 +497,7 @@ const ProjectDetail: React.FC = () => {
           // Promote with placeholder title instead of losing content.
           useStore
             .getState()
-            .updateProject(fresh.id, { title: "Untitled project", isDraft: false });
+            .updateProject(fresh.id, { title: i18n.t("projectDetail.untitled"), isDraft: false });
         }
       }
     };
@@ -488,9 +512,9 @@ const ProjectDetail: React.FC = () => {
       <div className="min-h-screen bg-surface-base text-text-primary">
         <AppSidebar />
       <main className="app-main page-medium">
-          <div className="text-[14px] text-text-secondary">Project not found.</div>
+          <div className="text-[14px] text-text-secondary">{t("projectDetail.notFound")}</div>
           <Link to="/" className="mt-4 inline-block text-[13px] text-accent hover:underline">
-            ← Back to home
+            {t("goalDetail.backHome")}
           </Link>
         </main>
       </div>
@@ -542,31 +566,41 @@ const ProjectDetail: React.FC = () => {
       ? "hsl(var(--status-dropped))"
       : "hsl(var(--status-done))";
   const projStatusText =
-    project.status === "completed" ? "COMPLETED" : project.status === "dropped" ? "DROPPED" : "ACTIVE";
+    project.status === "completed"
+      ? t("projectDetail.statusBadge.completed")
+      : project.status === "dropped"
+      ? t("projectDetail.statusBadge.dropped")
+      : t("projectDetail.statusBadge.active");
+  const projStatusDisplay =
+    project.status === "completed"
+      ? t("projectDetail.statusDisplay.completed")
+      : project.status === "dropped"
+      ? t("projectDetail.statusDisplay.dropped")
+      : t("projectDetail.statusDisplay.active");
 
   const handleStatusChange = (next: ProjectStatus) => {
     if (next === project.status) return;
     if (next === "completed") {
       markComplete(project.id);
-      toast("Project completed");
+      toast(t("projectDetail.toast.completed"));
     } else if (next === "dropped") {
       dropProject(project.id);
-      toast("Project dropped");
+      toast(t("projectDetail.toast.dropped"));
     } else {
       updateProject(project.id, {
         status: "active",
         completedAt: undefined,
         droppedAt: undefined,
       });
-      toast("Project re-opened");
+      toast(t("projectDetail.toast.reopened"));
     }
   };
 
   const submitQuickAdd = () => {
-    const t = quickAdd.trim();
-    if (!t) return;
+    const trimmed = quickAdd.trim();
+    if (!trimmed) return;
     createAction({
-      title: t,
+      title: trimmed,
       projectId: project.id,
       goalId: goal.id,
       status: "backlog",
@@ -585,12 +619,12 @@ const ProjectDetail: React.FC = () => {
               to={`/goals/${goal.id}`}
               className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary hover:text-text-secondary transition-colors"
             >
-              ← {goal.title.toUpperCase()} · PROJECTS
+              {t("projectDetail.backLink", { goal: goal.title.toUpperCase() })}
             </Link>
             <div className="flex items-center gap-2">
               {isDraft && (
                 <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
-                  DRAFT
+                  {t("projectDetail.draft")}
                 </span>
               )}
               <span
@@ -614,7 +648,7 @@ const ProjectDetail: React.FC = () => {
                   project={project}
                   onChange={(gid) => {
                     moveProjectToGoal(project.id, gid);
-                    toast("Project moved");
+                    toast(t("projectDetail.toast.moved"));
                   }}
                 />
                 {!isDraft && (
@@ -624,18 +658,22 @@ const ProjectDetail: React.FC = () => {
               {!isDraft && (
                 <>
                   <div className="mt-3 font-mono text-[12px] text-text-tertiary tabular-nums">
-                    Created {new Date(project.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })} · {ageDays} days active ·{" "}
-                    {grouped.done.length} of {actions.length} actions done
+                    {t("projectDetail.created", {
+                      date: fmtShortDate(project.createdAt),
+                      age: ageDays,
+                      done: grouped.done.length,
+                      total: actions.length,
+                    })}
                   </div>
                   <div className="mt-3 font-mono text-[12px] text-text-tertiary">
-                    <span>PROGRESS </span>
+                    <span>{t("projectDetail.progressLabel.progress")} </span>
                     <span className="text-text-primary">{progress.outcome}%</span>
-                    <span> · VALUE </span>
+                    <span> · {t("projectDetail.progressLabel.value")} </span>
                     <span className="text-text-primary">{progress.outcome}%</span>
-                    <span> · EFFORT </span>
+                    <span> · {t("projectDetail.progressLabel.effort")} </span>
                     <span className="text-text-primary">{progress.effort}%</span>
-                    <span> · LAST ACTIVITY </span>
-                    <span className="text-text-primary">{lastTs ? fmtAgo(lastTs) : "—"}</span>
+                    <span> · {t("projectDetail.progressLabel.lastActivity")} </span>
+                    <span className="text-text-primary">{lastTs ? fmtAgo(lastTs) : t("goalDetail.hero.dash")}</span>
                   </div>
                   <div className="mt-2 h-1.5 w-full bg-surface-hover rounded-[4px] overflow-hidden">
                     <div className="h-full rounded-[4px]" style={{ width: `${progress.outcome}%`, background: color }} />
@@ -646,12 +684,12 @@ const ProjectDetail: React.FC = () => {
 
             <section>
               <h2 className="text-[12px] font-medium uppercase tracking-[0.08em] text-text-secondary mb-2">
-                Description
+                {t("projectDetail.description.heading")}
               </h2>
               <RichTextEditor
                 value={project.description ?? ""}
                 onChange={(html) => updateProject(project.id, { description: html })}
-                placeholder="Describe the project, add references, materials..."
+                placeholder={t("projectDetail.description.placeholder")}
               />
             </section>
 
@@ -679,17 +717,22 @@ const ProjectDetail: React.FC = () => {
             <section>
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-[12px] font-medium uppercase tracking-[0.08em] text-text-secondary">
-                  Actions · {actions.length}
+                  {t("projectDetail.actions.title", { count: actions.length })}
                 </h2>
                 <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
-                  {grouped.done.length} DONE · {grouped.backlog.length} BACKLOG · {grouped.planned.length} PLANNED · {grouped.delegated.length} DELEGATED
+                  {t("projectDetail.actions.meta", {
+                    done: grouped.done.length,
+                    backlog: grouped.backlog.length,
+                    planned: grouped.planned.length,
+                    delegated: grouped.delegated.length,
+                  })}
                 </div>
               </div>
 
               <div className="border-t border-border-subtle">
                 {activeList.length === 0 ? (
                   <div className="py-3 font-mono text-[11px] text-text-tertiary px-3">
-                    No active actions in this project.
+                    {t("projectDetail.actions.empty")}
                   </div>
                 ) : (
                   activeList.map((a) => <ActionRow key={a.id} a={a} color={color} />)
@@ -707,7 +750,7 @@ const ProjectDetail: React.FC = () => {
                       submitQuickAdd();
                     }
                   }}
-                  placeholder="Add an action…"
+                  placeholder={t("projectDetail.actions.placeholder")}
                   className="flex-1 bg-transparent outline-none text-[13px] text-text-primary placeholder:text-text-tertiary"
                 />
                 <span className="font-mono text-[11px] text-text-tertiary">↵</span>
@@ -718,7 +761,7 @@ const ProjectDetail: React.FC = () => {
                   <div className="flex items-center gap-2 h-7 px-3">
                     <span className="text-text-secondary text-[10px]">▾</span>
                     <span className="text-[12px] font-medium uppercase tracking-[0.08em] text-text-secondary">
-                      Delegated · {grouped.delegated.length}
+                      {t("projectDetail.delegated.title", { count: grouped.delegated.length })}
                     </span>
                   </div>
                   <div className="border-t border-border-subtle">
@@ -734,7 +777,7 @@ const ProjectDetail: React.FC = () => {
                   <div className="flex items-center gap-2 h-7 px-3">
                     <span className="text-text-tertiary text-[10px]">▾</span>
                     <span className="text-[12px] font-medium uppercase tracking-[0.08em] text-text-tertiary">
-                      Done · {grouped.done.length}
+                      {t("projectDetail.done.title", { count: grouped.done.length })}
                     </span>
                   </div>
                   <div className="border-t border-border-subtle">
@@ -753,33 +796,33 @@ const ProjectDetail: React.FC = () => {
           <div className="h-12 px-6 flex items-center justify-end gap-2 border-b border-border-subtle">
             {!isDraft && (
               <CardMenu
-                ariaLabel="Project actions"
+                ariaLabel={t("projectDetail.menu.aria")}
                 items={[
                   ...(project.status === "active"
                     ? [
                         {
-                          label: "Mark complete",
+                          label: t("projectDetail.menu.markComplete"),
                           onSelect: () => handleStatusChange("completed"),
                         },
                         {
-                          label: "Drop project",
+                          label: t("projectDetail.menu.drop"),
                           destructive: true,
                           onSelect: () => handleStatusChange("dropped"),
                         },
                       ]
                     : [
                         {
-                          label: "Re-open",
+                          label: t("projectDetail.menu.reopen"),
                           onSelect: () => handleStatusChange("active"),
                         },
                       ]),
                   {
-                    label: "Delete project",
+                    label: t("projectDetail.menu.delete"),
                     destructive: true,
                     onSelect: () => {
-                      if (confirm("Delete this project? This cannot be undone.")) {
+                      if (confirm(t("projectDetail.confirm.delete"))) {
                         deleteProject(project.id);
-                        toast("Project deleted");
+                        toast(t("projectDetail.toast.deleted"));
                         navigate("/projects");
                       }
                     },
@@ -792,9 +835,9 @@ const ProjectDetail: React.FC = () => {
             <div>
               {([
                 [
-                  "STATUS",
+                  t("projectDetail.sidebar.status"),
                   <span className="inline-flex items-center gap-1.5">
-                    <Tooltip content={<StateDotTooltip state={stateInd} lastActivity={lastTs ? fmtAgo(lastTs) : "—"} />}>
+                    <Tooltip content={<StateDotTooltip state={stateInd} lastActivity={lastTs ? fmtAgo(lastTs) : t("goalDetail.hero.dash")} />}>
                       <span
                         className="w-1.5 h-1.5 rounded-full"
                         style={{
@@ -803,11 +846,11 @@ const ProjectDetail: React.FC = () => {
                         }}
                       />
                     </Tooltip>
-                    {projStatusText.charAt(0) + projStatusText.slice(1).toLowerCase()}
+                    {projStatusDisplay}
                   </span>,
                 ],
                 [
-                  "PARENT GOAL",
+                  t("projectDetail.sidebar.parentGoal"),
                   <Link
                     to={`/goals/${goal.id}`}
                     className="inline-flex items-center gap-1.5 hover:text-accent transition-colors"
@@ -816,8 +859,8 @@ const ProjectDetail: React.FC = () => {
                     {goal.title}
                   </Link>,
                 ],
-                ["CREATED", new Date(project.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })],
-                ["AGE", `${ageDays} days`],
+                [t("projectDetail.sidebar.created"), fmtFullDate(project.createdAt)],
+                [t("projectDetail.sidebar.age"), t("projectDetail.age", { count: ageDays })],
               ] as [string, React.ReactNode][]).map(([k, v], i, arr) => (
                 <div
                   key={k}
@@ -834,12 +877,12 @@ const ProjectDetail: React.FC = () => {
             {!isDraft && (
               <div>
                 <h3 className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-secondary mb-3">
-                  State
+                  {t("projectDetail.sidebar.state")}
                 </h3>
                 <div>
                   {[
-                    { label: "VALUE", value: `${progress.outcome}%`, pct: progress.outcome, opacity: 1 },
-                    { label: "EFFORT", value: `${progress.effort}%`, pct: progress.effort, opacity: 0.6 },
+                    { label: t("projectDetail.progressLabel.value"), isEffort: false, value: `${progress.outcome}%`, pct: progress.outcome, opacity: 1 },
+                    { label: t("projectDetail.progressLabel.effort"), isEffort: true, value: `${progress.effort}%`, pct: progress.effort, opacity: 0.6 },
                   ].map((row, i) => (
                     <div
                       key={row.label}
@@ -860,15 +903,15 @@ const ProjectDetail: React.FC = () => {
                         />
                       </div>
                       <span className="w-[14px] flex justify-center shrink-0">
-                        {row.label === "EFFORT" ? (
-                          <MetricInfoPopover variant="valueEffort" ariaLabel="What do Value and Effort mean?" />
+                        {row.isEffort ? (
+                          <MetricInfoPopover variant="valueEffort" ariaLabel={t("goalDetail.hero.metricInfoAria")} />
                         ) : null}
                       </span>
                     </div>
                   ))}
                   <div className="h-8 flex items-center gap-3 py-1.5">
                     <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary w-[70px] shrink-0">
-                      TIME
+                      {t("projectDetail.sidebar.time")}
                     </span>
                     <span className="flex-1 font-mono tabular-nums">
                       <span className="text-[14px] text-text-primary">{fmtHM(doneMinutes)}</span>

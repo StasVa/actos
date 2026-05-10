@@ -502,7 +502,7 @@ function GoalEditorPanel({
                 color: "hsl(var(--surface-base))",
               }}
             >
-              Create goal
+              {t("goalEditor.create.cta")}
             </button>
           </>
         ) : (
@@ -511,7 +511,7 @@ function GoalEditorPanel({
               onClick={() => setConfirmDelete(true)}
               className="text-[13px] text-text-tertiary hover:text-text-warning px-3 py-1.5"
             >
-              Delete
+              {t("common.delete")}
             </button>
             <div className="flex items-center gap-2">
               {!isTerminal && (
@@ -523,7 +523,7 @@ function GoalEditorPanel({
                     color: "hsl(var(--surface-base))",
                   }}
                 >
-                  Mark complete
+                  {t("goalEditor.markComplete")}
                 </button>
               )}
             </div>
@@ -533,35 +533,41 @@ function GoalEditorPanel({
 
       <ConfirmModal
         open={confirmDelete}
-        title="Delete this goal?"
-        body="This permanently removes the goal and ALL its projects, actions, rituals, and ideas. This cannot be undone."
-        confirmLabel="Delete"
+        title={t("confirm.delete.goal.heading")}
+        body={t("goalEditor.confirm.delete.body")}
+        confirmLabel={t("common.delete")}
         destructive
         onCancel={() => setConfirmDelete(false)}
         onConfirm={handleDelete}
       />
       <ConfirmModal
         open={confirmDrop}
-        title="Drop this goal?"
+        title={t("confirm.drop.goal.heading")}
         body={
           childStats.openProjects + childStats.openActions > 0
-            ? `${childStats.openProjects} open project${childStats.openProjects === 1 ? "" : "s"} and ${childStats.openActions} open action${childStats.openActions === 1 ? "" : "s"} will be dropped along with it. You can re-open the goal later (subject to the 3-active limit).`
-            : "You can re-open the goal later (subject to the 3-active limit)."
+            ? t("goalEditor.confirm.drop.bodyWith", {
+                projects: t("goalEditor.summary.openProjects", { count: childStats.openProjects }),
+                actions: t("goalEditor.summary.openActions", { count: childStats.openActions }),
+              })
+            : t("goalEditor.confirm.drop.bodyEmpty")
         }
-        confirmLabel="Drop goal"
+        confirmLabel={t("goalEditor.confirm.drop.cta")}
         destructive
         onCancel={() => setConfirmDrop(false)}
         onConfirm={handleConfirmDrop}
       />
       <ConfirmModal
         open={confirmComplete}
-        title="Mark this goal complete?"
+        title={t("goalEditor.confirm.complete.heading")}
         body={
           childStats.openProjects + childStats.openActions > 0
-            ? `${childStats.openProjects} project${childStats.openProjects === 1 ? "" : "s"} and ${childStats.openActions} action${childStats.openActions === 1 ? "" : "s"} are still open. They will not be auto-closed.`
-            : "All projects and actions are accounted for."
+            ? t("goalEditor.confirm.complete.bodyWith", {
+                projects: t("goalEditor.summary.projects", { count: childStats.openProjects }),
+                actions: t("goalEditor.summary.actions", { count: childStats.openActions }),
+              })
+            : t("goalEditor.confirm.complete.bodyEmpty")
         }
-        confirmLabel="Mark complete"
+        confirmLabel={t("goalEditor.confirm.complete.cta")}
         onCancel={() => setConfirmComplete(false)}
         onConfirm={handleConfirmComplete}
       />
@@ -576,11 +582,10 @@ function GoalEditorPanel({
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-[16px] font-medium text-text-primary">
-              Free is built for one goal at a time.
+              {t("goalEditor.softBlock.heading")}
             </h2>
             <div className="mt-3 text-[13px] text-text-secondary leading-[1.5]">
-              Most ambitious people work on 2-3. All-In lifts the cap to 3 — the full focus range
-              ActOS is designed around. Your draft will be saved if you'd like to continue later.
+              {t("goalEditor.softBlock.body")}
             </div>
             <div className="mt-6 flex items-center justify-end gap-2">
               <button
@@ -591,18 +596,18 @@ function GoalEditorPanel({
                 }}
                 className="text-[13px] text-text-secondary hover:text-text-primary transition-colors px-3 py-1.5"
               >
-                Cancel
+                {t("common.cancel")}
               </button>
               <button
                 type="button"
                 onClick={() => {
                   setSoftBlock(false);
-                  toast("Draft saved");
+                  toast(t("goalEditor.toast.draftSaved"));
                   onClose();
                 }}
                 className="text-[13px] px-3 py-1.5 rounded-[4px] hover:bg-surface-hover text-text-secondary transition-colors"
               >
-                Save draft
+                {t("goalEditor.softBlock.saveDraft")}
               </button>
               <button
                 type="button"
@@ -613,7 +618,7 @@ function GoalEditorPanel({
                 className="text-[13px] font-medium px-3 py-1.5 rounded-[4px] text-white transition-colors"
                 style={{ background: "hsl(var(--accent))" }}
               >
-                Go All-In — $12/mo
+                {t("goalEditor.softBlock.goAllIn")}
               </button>
             </div>
           </div>

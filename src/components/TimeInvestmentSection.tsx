@@ -149,12 +149,12 @@ export const TimeInvestmentSection: React.FC = () => {
                     </span>
                     {isClosed && (
                       <span className="font-mono text-[9px] uppercase tracking-[0.06em] text-text-tertiary border border-border-subtle rounded-[2px] px-1 py-px shrink-0">
-                        Closed
+                        {t("timeInvest.closed")}
                       </span>
                     )}
                   </div>
                   <div className="font-mono text-[11px] text-text-tertiary tabular-nums mt-0.5 pl-4">
-                    {pct}% of last 30d
+                    {t("timeInvest.pctOfLast30d", { pct })}
                   </div>
                 </div>
 
@@ -170,7 +170,7 @@ export const TimeInvestmentSection: React.FC = () => {
                 <div className="md:w-[160px] shrink-0 flex md:block items-baseline justify-between md:text-right gap-4">
                   <div>
                     <div className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">
-                      30 days
+                      {t("timeInvest.label.30days")}
                     </div>
                     <div className="text-[14px] font-medium tabular-nums text-text-primary">
                       {formatHM(total30d)}
@@ -178,7 +178,7 @@ export const TimeInvestmentSection: React.FC = () => {
                   </div>
                   <div className="md:mt-1.5">
                     <div className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">
-                      All-time
+                      {t("timeInvest.label.allTime")}
                     </div>
                     <div className="font-mono text-[12px] tabular-nums text-text-secondary">
                       {formatHM(totalAllTime)}
@@ -190,7 +190,7 @@ export const TimeInvestmentSection: React.FC = () => {
               {/* Projects */}
               {perProject.length === 0 ? (
                 <div className="pl-6 mt-1.5 italic text-text-tertiary text-[12px]">
-                  No time invested in this goal yet
+                  {t("timeInvest.empty.goal")}
                 </div>
               ) : (
                 <div
@@ -216,8 +216,8 @@ export const TimeInvestmentSection: React.FC = () => {
                       className="font-mono text-[11px] text-text-tertiary hover:text-text-secondary transition-colors pl-6 py-1"
                     >
                       {isExpanded
-                        ? "Show fewer ▴"
-                        : `+ ${perProject.length - DEFAULT_PROJECT_LIMIT} more projects ▾`}
+                        ? t("timeInvest.showFewer")
+                        : t("timeInvest.moreProjects", { count: perProject.length - DEFAULT_PROJECT_LIMIT })}
                     </button>
                   )}
                 </div>

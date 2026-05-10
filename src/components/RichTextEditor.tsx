@@ -131,7 +131,7 @@ export const RichTextEditor: React.FC<Props> = ({
         HTMLAttributes: { rel: "noreferrer", target: "_blank" },
       }),
       Image.configure({ inline: false, allowBase64: true }),
-      Placeholder.configure({ placeholder }),
+      Placeholder.configure({ placeholder: placeholderText }),
     ],
     content: value || "",
     editable: mode === "edit",
@@ -320,7 +320,7 @@ export const RichTextEditor: React.FC<Props> = ({
       >
         <div className="flex items-center justify-center gap-2 text-text-tertiary group-hover:text-text-secondary transition-colors">
           <Plus size={16} />
-          <span className="text-[14px]">{placeholder}</span>
+          <span className="text-[14px]">{placeholderText}</span>
         </div>
       </div>
     );

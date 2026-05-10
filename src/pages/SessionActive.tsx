@@ -483,8 +483,8 @@ const SessionActive: React.FC = () => {
             <button
               onClick={() => setSound((v) => !v)}
               className="w-8 h-8 inline-flex items-center justify-center rounded-[3px] text-text-tertiary hover:bg-surface-hover hover:text-text-primary transition-colors"
-              aria-label={sound ? "Sound on" : "Sound off"}
-              title={sound ? "Sound on" : "Sound off"}
+              aria-label={sound ? t("sessionActive.controls.soundOn") : t("sessionActive.controls.soundOff")}
+              title={sound ? t("sessionActive.controls.soundOn") : t("sessionActive.controls.soundOff")}
             >
               {sound ? <Volume2 size={16} /> : <VolumeX size={16} />}
             </button>

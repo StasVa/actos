@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { LifetimeCounters } from "@/components/LifetimeCounters";
 import { Link, useNavigate } from "react-router-dom";
 import { Tooltip } from "@/components/Tooltip";
@@ -649,7 +650,7 @@ const Rituals: React.FC = () => {
       <AppSidebar />
       <main className="app-main page-medium">
         <PageHeader
-          title="Rituals"
+          title={t("rituals.page.title")}
           meta={`${totalRituals} RITUALS · ${totalActive} ACTIVE · ${totalArchived} ARCHIVED`}
           cta={{
             label: "+ New ritual",

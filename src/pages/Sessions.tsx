@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useStore } from "@/store/useStore";
@@ -450,7 +451,7 @@ const Sessions: React.FC = () => {
       <main className="app-main page-medium">
         <div className="px-4 md:px-10 pt-6 pb-4">
           <PageHeader
-            title="Sessions"
+            title={t("sessions.page.title")}
             meta={`${stats.count} SESSIONS · ${totalHours}H TRACKED`}
             cta={{
               label: "+ Start session",

@@ -396,6 +396,7 @@ const RecentlyClosedActionsSection: React.FC = () => {
 };
 
 const DelegatedSection: React.FC = () => {
+  const { t } = useTranslation();
   const actions = useStore((s) => s.actions);
   const openPanel = useStore((s) => s.openPanel);
   const items = actions.filter((a) => a.status === "delegated");
@@ -412,13 +413,13 @@ const DelegatedSection: React.FC = () => {
     if (d < 0) overdue++;
     else if (d === 0) dueToday++;
   }
-  const meta = `${items.length} ACTIVE · ${overdue} OVERDUE · ${dueToday} DUE TODAY`;
+  const meta = t("progress.delegatedMeta", { active: items.length, overdue, dueToday });
 
   return (
     <section>
-      <SectionLabel meta={meta}>Delegated · {items.length}</SectionLabel>
+      <SectionLabel meta={meta}>{t("progress.section.delegated", { count: items.length })}</SectionLabel>
       {items.length === 0 ? (
-        <div className="font-mono text-[11px] text-text-tertiary px-3 py-2">No active delegations.</div>
+        <div className="font-mono text-[11px] text-text-tertiary px-3 py-2">{t("progress.noActiveDelegations")}</div>
       ) : (
         <div className="space-y-1 bg-surface-elevated border border-border-subtle rounded-[6px] p-3">
           {items.map((a) => (
@@ -438,7 +439,7 @@ const DelegatedSection: React.FC = () => {
         </div>
       )}
       <Link to="/delegated" className="inline-block mt-3 text-[13px] text-accent hover:text-accent-hover">
-        View all delegated →
+        {t("progress.viewAllDelegated")}
       </Link>
     </section>
   );

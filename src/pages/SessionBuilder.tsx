@@ -163,7 +163,7 @@ const StepperField: React.FC<{
           type="button"
           onClick={dec}
           disabled={atMin}
-          aria-label={`Decrease ${ariaLabel ?? label ?? ""}`}
+          aria-label={t("sessionBuilder.stepper.decrease", { label: ariaLabel ?? label ?? "" })}
           className="inline-flex items-center justify-center rounded-[4px] transition-colors text-text-secondary hover:text-text-primary hover:bg-surface-hover disabled:opacity-30 disabled:hover:bg-transparent disabled:cursor-not-allowed"
           style={{ padding: spec.btnPad }}
         >

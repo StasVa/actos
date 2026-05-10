@@ -521,7 +521,7 @@ function ActionEditorPanel({
                 handleSaveNew();
               }
             }}
-            placeholder="Action title"
+            placeholder={t("actionEditor.titlePlaceholder")}
             className="w-full bg-transparent outline-none text-[18px] font-medium text-text-primary placeholder:text-text-tertiary"
           />
         </div>

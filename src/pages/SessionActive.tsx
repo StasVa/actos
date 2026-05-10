@@ -803,7 +803,7 @@ const SessionActive: React.FC = () => {
               className="text-[12px] hover:underline"
               style={{ color: "hsl(var(--text-warning))" }}
             >
-              End session
+              {t("sessionActive.controls.endSession")}
             </button>
           </section>
         </div>

@@ -505,7 +505,7 @@ function ActionEditorPanel({
               fontFamily: "Inter, sans-serif",
             }}
           >
-            This action has no Impact set. Set a value to include it in progress calculations.
+            {t("actionEditor.migrationWarning")}
           </div>
         )}
         {/* Title */}

@@ -255,7 +255,7 @@ const GoalStep: React.FC<{
                 <button
                   key={c.value}
                   type="button"
-                  aria-label={c.label}
+                  aria-label={c.labelKey}
                   onClick={() => setColor(c.value)}
                   style={{
                     width: 36, height: 36, borderRadius: 8,

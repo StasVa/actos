@@ -13,6 +13,16 @@ import type { ID, Ritual, RitualSchedule } from "@/types";
 import { ConfirmModal } from "./ConfirmModal";
 import { ritualMultiplier } from "@/store/useStore";
 import { EditorShell, EditorCloseX, EditorCancelButton } from "./EditorShell";
+import {
+  DeleteTypeConfirm,
+  EditorOverflowMenu,
+  MarkDoneButton,
+  SaveIndicator,
+  overflowDelete,
+  overflowDrop,
+  overflowDuplicate,
+  useSaveIndicator,
+} from "./EditorFooterControls";
 import { MetricInfoPopover } from "./MetricInfoPopover";
 import { ClampedNumberInput } from "./ClampedNumberInput";
 import {
@@ -96,6 +106,23 @@ function RitualEditorPanel({
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmArchive, setConfirmArchive] = useState(false);
   const titleRef = useRef<HTMLInputElement>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
+
+  // Auto-save indicator (edit mode only).
+  const { state: saveState, markEditing } = useSaveIndicator();
+  useEffect(() => {
+    if (mode !== "edit") return;
+    const el = bodyRef.current;
+    if (!el) return;
+    const handler = () => markEditing();
+    el.addEventListener("input", handler);
+    el.addEventListener("change", handler);
+    return () => {
+      el.removeEventListener("input", handler);
+      el.removeEventListener("change", handler);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode]);
 
   // New-mode UI state.
   const [titleError, setTitleError] = useState<string | null>(null);
@@ -238,6 +265,22 @@ function RitualEditorPanel({
     onClose();
   };
 
+  const handleDuplicate = () => {
+    if (!ritual) return;
+    const newId = createRitual({
+      title: "Copy of " + ritual.title,
+      goalId: ritual.goalId,
+      projectId: ritual.projectId,
+      schedule: ritual.schedule,
+      scheduleConfig: ritual.scheduleConfig,
+      baseImpact: ritual.baseImpact,
+      notes: ritual.notes,
+      timeEstimateMinutes: ritual.timeEstimateMinutes,
+    });
+    toast("Ritual duplicated");
+    useStore.getState().openPanel({ kind: "ritual", mode: "edit", id: newId });
+  };
+
   const toggleCustomDay = (d: number) => {
     const next = customDays.includes(d)
       ? customDays.filter((x) => x !== d)
@@ -284,7 +327,7 @@ function RitualEditorPanel({
       </div>
 
       {/* Body */}
-      <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+      <div ref={bodyRef} className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
         {mode === "new" ? (
           <>
             {/* Title */}
@@ -864,12 +907,15 @@ function RitualEditorPanel({
           </>
         ) : status === "archived" ? (
           <>
-            <button
-              onClick={() => setConfirmDelete(true)}
-              className="text-[13px] text-text-tertiary hover:text-text-warning px-3 py-1.5"
-            >
-              Delete
-            </button>
+            <div className="flex items-center gap-3">
+              <EditorOverflowMenu
+                items={[
+                  overflowDuplicate(handleDuplicate),
+                  overflowDelete(() => setConfirmDelete(true)),
+                ]}
+              />
+              <SaveIndicator state={saveState} />
+            </div>
             <button
               onClick={handleRestore}
               className="text-[13px] font-medium px-3 py-1.5 rounded-[4px] border border-border-subtle text-text-primary hover:bg-surface-hover"
@@ -879,31 +925,22 @@ function RitualEditorPanel({
           </>
         ) : (
           <>
-            <button
-              onClick={() => setConfirmArchive(true)}
-              className="text-[13px] text-text-tertiary hover:text-text-primary px-3 py-1.5"
-            >
-              Archive
-            </button>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setConfirmDelete(true)}
-                className="text-[13px] text-text-tertiary hover:text-text-warning px-3 py-1.5"
-              >
-                Delete
-              </button>
-              <button
-                onClick={handleMarkDone}
-                disabled={doneToday}
-                className="text-[13px] font-medium px-3 py-1.5 rounded-[4px] disabled:opacity-50"
-                style={{
-                  background: "hsl(var(--accent))",
-                  color: "hsl(var(--surface-base))",
-                }}
-              >
-                {doneToday ? "Done today ✓" : "Mark today done"}
-              </button>
+            <div className="flex items-center gap-3">
+              <EditorOverflowMenu
+                items={[
+                  overflowDuplicate(handleDuplicate),
+                  overflowDrop(() => setConfirmArchive(true), "Archive"),
+                  overflowDelete(() => setConfirmDelete(true)),
+                ]}
+              />
+              <SaveIndicator state={saveState} />
             </div>
+            <MarkDoneButton
+              onClick={handleMarkDone}
+              disabled={doneToday}
+              disabledTooltip={doneToday ? "Already logged today" : undefined}
+              label={doneToday ? "Done today" : "Mark today done"}
+            />
           </>
         )}
       </div>
@@ -916,12 +953,10 @@ function RitualEditorPanel({
         onCancel={() => setConfirmArchive(false)}
         onConfirm={handleArchive}
       />
-      <ConfirmModal
+      <DeleteTypeConfirm
         open={confirmDelete}
         title="Delete this ritual?"
         body="This permanently removes the ritual and its completion history. This cannot be undone."
-        confirmLabel="Delete"
-        destructive
         onCancel={() => setConfirmDelete(false)}
         onConfirm={handleDelete}
       />

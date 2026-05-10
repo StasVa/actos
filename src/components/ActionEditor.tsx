@@ -12,21 +12,25 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { ChevronDown, Check, MoreHorizontal, Calendar as CalendarIcon } from "lucide-react";
+import { ChevronDown, Check, Calendar as CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { toast } from "sonner";
 import { useStore } from "@/store/useStore";
 import type { Action, ActionStatus, ID } from "@/types";
 import { ConfirmModal } from "./ConfirmModal";
 import { ClampedNumberInput } from "./ClampedNumberInput";
+import {
+  DeleteTypeConfirm,
+  EditorOverflowMenu,
+  MarkDoneButton,
+  SaveIndicator,
+  overflowDelete,
+  overflowDrop,
+  overflowDuplicate,
+  useSaveIndicator,
+} from "./EditorFooterControls";
 import { EditorShell, EditorCloseX, EditorCancelButton } from "./EditorShell";
 import { MetricInfoPopover } from "./MetricInfoPopover";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
 import {
   Popover,
   PopoverTrigger,
@@ -171,6 +175,25 @@ function ActionEditorPanel({
   const [confirmDrop, setConfirmDrop] = useState<ActionStatus | null>(null);
   const [confirmPastDate, setConfirmPastDate] = useState<string | null>(null);
   const titleRef = useRef<HTMLInputElement>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
+
+  // Auto-save indicator (edit mode only). Listens to input/change events on
+  // the body container — every keystroke marks "Saving"; after 500ms idle
+  // the indicator settles to "Saved" with a brief accent flash.
+  const { state: saveState, markEditing } = useSaveIndicator();
+  useEffect(() => {
+    if (mode !== "edit") return;
+    const el = bodyRef.current;
+    if (!el) return;
+    const handler = () => markEditing();
+    el.addEventListener("input", handler);
+    el.addEventListener("change", handler);
+    return () => {
+      el.removeEventListener("input", handler);
+      el.removeEventListener("change", handler);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode]);
 
   useEffect(() => {
     titleRef.current?.focus();
@@ -414,7 +437,7 @@ function ActionEditorPanel({
   const handleDuplicate = () => {
     if (!action) return;
     const newId = createAction({
-      title: action.title + " (copy)",
+      title: "Copy of " + action.title,
       projectId: action.projectId,
       goalId: action.goalId,
       notes: action.notes,
@@ -422,7 +445,7 @@ function ActionEditorPanel({
       timeEstimateMinutes: action.timeEstimateMinutes,
       status: "backlog",
     });
-    toast("Action duplicated");
+    toast("Action duplicated · view in Backlog.");
     useStore.getState().openPanel({ kind: "action", mode: "edit", id: newId });
   };
 
@@ -468,7 +491,7 @@ function ActionEditorPanel({
       </div>
 
       {/* Body */}
-      <div className="flex-1 overflow-y-auto px-6 py-5">
+      <div ref={bodyRef} className="flex-1 overflow-y-auto px-6 py-5">
         {hasMigrationWarning && (
           <div
             className="mb-4 p-3 rounded-[4px] text-[12px]"
@@ -911,37 +934,23 @@ function ActionEditorPanel({
           </>
         ) : (
           <>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  className="w-8 h-8 inline-flex items-center justify-center rounded-[4px] text-text-tertiary hover:bg-surface-hover hover:text-text-primary transition-colors"
-                  aria-label="More actions"
-                >
-                  <MoreHorizontal size={16} />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="bg-surface-raised border border-border-default">
-                <DropdownMenuItem onSelect={handleDuplicate}>Duplicate</DropdownMenuItem>
-                <DropdownMenuItem
-                  onSelect={() => setConfirmDelete(true)}
-                  className="text-[hsl(var(--text-warning))] focus:text-[hsl(var(--text-warning))]"
-                >
-                  Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <div className="flex items-center gap-3">
+              <EditorOverflowMenu
+                items={[
+                  overflowDuplicate(handleDuplicate),
+                  overflowDrop(() => setConfirmDrop("dropped")),
+                  overflowDelete(() => setConfirmDelete(true)),
+                ]}
+              />
+              <SaveIndicator state={saveState} />
+            </div>
             <div className="flex items-center gap-2">
               {(status === "backlog" || status === "planned") && !isGoalLevel && (
-                <button
+                <MarkDoneButton
                   onClick={() => handleStatusChange("done")}
-                  className="text-[13px] font-medium px-3 py-1.5 rounded-[4px]"
-                  style={{
-                    background: "hsl(var(--accent))",
-                    color: "hsl(var(--surface-base))",
-                  }}
-                >
-                  Mark done
-                </button>
+                  disabled={!(impactNum > 0) || (requireTime && !(timeNum > 0))}
+                  disabledTooltip="Add Impact and Time first"
+                />
               )}
               {status === "delegated" && (
                 <>
@@ -951,16 +960,11 @@ function ActionEditorPanel({
                   >
                     Re-open
                   </button>
-                  <button
+                  <MarkDoneButton
                     onClick={() => handleStatusChange("done")}
-                    className="text-[13px] font-medium px-3 py-1.5 rounded-[4px]"
-                    style={{
-                      background: "hsl(var(--accent))",
-                      color: "hsl(var(--surface-base))",
-                    }}
-                  >
-                    Mark done
-                  </button>
+                    disabled={!(impactNum > 0) || (requireTime && !(timeNum > 0))}
+                    disabledTooltip="Add Impact and Time first"
+                  />
                 </>
               )}
               {(status === "done" || status === "dropped" || status === "cancelled") && (
@@ -976,19 +980,21 @@ function ActionEditorPanel({
         )}
       </div>
 
-      <ConfirmModal
+      <DeleteTypeConfirm
         open={confirmDelete}
         title="Delete this action?"
         body="This permanently removes the action and its timeline. This cannot be undone."
-        confirmLabel="Delete"
-        destructive
         onCancel={() => setConfirmDelete(false)}
         onConfirm={handleDelete}
       />
       <ConfirmModal
         open={confirmDrop !== null}
         title={confirmDrop === "dropped" ? "Drop this action?" : "Cancel this action?"}
-        body="Its impact contribution will be removed from the project. You can re-open it later."
+        body={
+          confirmDrop === "dropped"
+            ? "It moves out of progress without counting against you."
+            : "Its impact contribution will be removed from the project. You can re-open it later."
+        }
         confirmLabel={confirmDrop === "dropped" ? "Drop" : "Cancel action"}
         destructive
         onCancel={() => setConfirmDrop(null)}

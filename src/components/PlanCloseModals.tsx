@@ -500,7 +500,7 @@ const PlanForm: React.FC<{
         <button
           type="button"
           onClick={() => removeAction(id)}
-          aria-label="Remove"
+          aria-label={t("planToday.actions.removeAria")}
           className="text-text-tertiary hover:text-text-primary text-[14px] px-1 shrink-0"
           style={{ marginLeft: 8 }}
         >

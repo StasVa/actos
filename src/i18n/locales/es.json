@@ -940,6 +940,8 @@
   "projectDetail.actions.placeholder": "Añadir una acción…",
   "projectDetail.actions.title": "Acciones · {{count}}",
   "projectDetail.age": "{{count}} días",
+  "projectDetail.age_one": "{{count}} día",
+  "projectDetail.age_other": "{{count}} días",
   "projectDetail.backLink": "← {{goal}} · PROYECTOS",
   "projectDetail.confirm.delete": "¿Eliminar este proyecto? No se puede deshacer.",
   "projectDetail.created": "Creado {{date}} · {{age}} días activo · {{done}} de {{total}} acciones hechas",

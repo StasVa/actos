@@ -49,16 +49,16 @@ const KIND_ICON: Record<RecentKind, string> = {
   day: "▤",
 };
 
-const NAV_ITEMS: { label: string; path: string }[] = [
-  { label: "Today", path: "/today" },
-  { label: "Progress", path: "/progress" },
-  { label: "Goals", path: "/goals" },
-  { label: "Projects", path: "/projects" },
-  { label: "Actions", path: "/actions" },
-  { label: "Delegated", path: "/delegated" },
-  { label: "Rituals", path: "/rituals" },
-  { label: "Ideas", path: "/ideas" },
-  { label: "Reviews/Days", path: "/reviews/days" },
+const NAV_ITEMS: { labelKey: string; path: string }[] = [
+  { labelKey: "nav.today", path: "/today" },
+  { labelKey: "nav.progress", path: "/progress" },
+  { labelKey: "nav.goals", path: "/goals" },
+  { labelKey: "nav.projects", path: "/projects" },
+  { labelKey: "nav.actions", path: "/actions" },
+  { labelKey: "nav.delegated", path: "/delegated" },
+  { labelKey: "nav.rituals", path: "/rituals" },
+  { labelKey: "nav.ideas", path: "/ideas" },
+  { labelKey: "nav.reviews.days", path: "/reviews/days" },
 ];
 
 const TODAY_ISO = () => new Date().toISOString().slice(0, 10);

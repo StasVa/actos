@@ -363,17 +363,17 @@ export function getMonthsWithActivity(
   return Array.from(set).sort((a, b) => b.localeCompare(a));
 }
 
-const DAY_TYPE_SHORT_LABEL: Record<DayType, string> = {
-  execution: "Execution",
-  recovery: "Recovery",
-  "day-off": "Day Off",
-  sick: "Sick",
+const DAY_TYPE_COUNT_KEY: Record<DayType, string> = {
+  execution: "reviews.dayCount.execution",
+  recovery: "reviews.dayCount.recovery",
+  "day-off": "reviews.dayCount.dayOff",
+  sick: "reviews.dayCount.sick",
 };
 
 export function formatMonthDayTypeDistribution(d: Record<DayType, number>): string {
   const parts: string[] = [];
   (Object.keys(d) as DayType[]).forEach((k) => {
-    if (d[k] > 0) parts.push(`${d[k]} ${DAY_TYPE_SHORT_LABEL[k]}`);
+    if (d[k] > 0) parts.push(i18n.t(DAY_TYPE_COUNT_KEY[k], { count: d[k] }));
   });
   return parts.join(" · ");
 }

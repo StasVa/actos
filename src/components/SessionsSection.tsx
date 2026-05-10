@@ -10,6 +10,7 @@
 // component so all integration points behave consistently.
 
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { format, parseISO } from "date-fns";
 import { useStore } from "@/store/useStore";
@@ -27,13 +28,19 @@ import { formatWeekLabel, weekRange, yearWeekFromDate } from "@/lib/weekUtils";
 /* ───────── Status pill ───────── */
 
 const StatusPill: React.FC<{ status: Session["status"] }> = ({ status }) => {
+  const { t } = useTranslation();
   const color =
     status === "completed"
       ? "hsl(var(--state-active))"
       : status === "aborted"
       ? "hsl(var(--text-warning))"
       : "hsl(var(--accent))";
-  const label = status === "in_progress" ? "ACTIVE" : status.toUpperCase();
+  const label =
+    status === "in_progress"
+      ? t("sessions.section.status.active")
+      : status === "completed"
+        ? t("sessions.section.status.completed")
+        : t("sessions.section.status.aborted");
   return (
     <span
       className="font-mono text-[10px] uppercase tracking-[0.06em] px-1.5 py-[2px] rounded-[3px]"

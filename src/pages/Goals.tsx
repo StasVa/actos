@@ -135,6 +135,7 @@ const StatRow: React.FC<{ label: string; value: React.ReactNode }> = ({ label, v
 );
 
 const GoalCard: React.FC<{ m: GoalMeta; logTimeOn: boolean }> = ({ m, logTimeOn }) => {
+  const { t } = useTranslation();
   const { goal: g, progress, outcome, effort, lastIso, state, projects, rituals, criteria, time, spark, sparkTips } = m;
   const navigate = useNavigate();
   const openPanel = useStore((s) => s.openPanel);

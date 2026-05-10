@@ -241,19 +241,19 @@ function ActionEditorPanel({
 
   const missingForCreate = useMemo(() => {
     const missing: string[] = [];
-    if (!title.trim()) missing.push("Title");
-    if (!goalId) missing.push("Goal");
-    if (!(impactNum > 0)) missing.push("Impact");
-    if (requireTime && !(timeNum > 0)) missing.push("Time estimate");
-    if (newStatus === "delegated" && !delegateName.trim()) missing.push("Delegate name");
+    if (!title.trim()) missing.push(t("actionEditor.field.required.title"));
+    if (!goalId) missing.push(t("actionEditor.field.required.goal"));
+    if (!(impactNum > 0)) missing.push(t("actionEditor.field.required.impact"));
+    if (requireTime && !(timeNum > 0)) missing.push(t("actionEditor.field.required.time"));
+    if (newStatus === "delegated" && !delegateName.trim()) missing.push(t("actionEditor.field.required.delegateName"));
     return missing;
-  }, [title, goalId, impactNum, requireTime, timeNum, newStatus, delegateName]);
+  }, [title, goalId, impactNum, requireTime, timeNum, newStatus, delegateName, t]);
 
   const canCreate = missingForCreate.length === 0;
   const createTooltip =
     missingForCreate.length === 0
       ? ""
-      : `Set ${missingForCreate.join(" and ")} to create`;
+      : t("actionEditor.create.tooltip", { fields: missingForCreate.join(t("actionEditor.create.fieldsJoin")) });
 
   // Create-modal local UI state.
   const [notesExpanded, setNotesExpanded] = useState<boolean>(!!seed.notes);

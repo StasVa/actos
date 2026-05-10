@@ -313,7 +313,7 @@ const ReviewDayDetail: React.FC = () => {
       updateDayEntry(date, { reflectionText: reflectionDraft });
     }
     setEditingReflection(false);
-    toast("Reflection saved");
+    toast(t("reviews.detail.toast.reflectionSaved"));
   };
 
   const openActionEdit = (id: string) => {

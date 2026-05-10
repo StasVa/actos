@@ -970,6 +970,7 @@
   "projectDetail.references.urlPlaceholder": "https://...",
   "projectDetail.sidebar.age": "AGE",
   "projectDetail.sidebar.created": "CREATED",
+  "projectDetail.sidebar.lastActivity": "LAST ACTIVITY",
   "projectDetail.sidebar.parentGoal": "PARENT GOAL",
   "projectDetail.sidebar.state": "State",
   "projectDetail.sidebar.status": "STATUS",

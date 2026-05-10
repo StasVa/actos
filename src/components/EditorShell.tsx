@@ -18,12 +18,13 @@ export const useEditorClose = () => useContext(EditorCloseContext);
 
 /** X button that triggers the shell's guarded close. */
 export function EditorCloseX() {
+  const { t } = useTranslation();
   const requestClose = useEditorClose();
   return (
     <button
       onClick={requestClose}
       className="w-7 h-7 inline-flex items-center justify-center rounded-[4px] text-text-tertiary hover:bg-surface-hover hover:text-text-primary transition-colors"
-      aria-label="Close"
+      aria-label={t("common.close")}
     >
       ✕
     </button>
@@ -31,7 +32,8 @@ export function EditorCloseX() {
 }
 
 /** "Cancel" link button that triggers the shell's guarded close. */
-export function EditorCancelButton({ label = "Cancel" }: { label?: string }) {
+export function EditorCancelButton({ label }: { label?: string }) {
+  const { t } = useTranslation();
   const requestClose = useEditorClose();
   return (
     <button

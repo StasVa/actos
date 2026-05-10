@@ -228,7 +228,7 @@ export const useStore = create<StoreState>()(
       createGoal: (payload) => {
         const state = get();
         const tier = state.settings?.subscriptionTier === "all-in" ? "all-in" : "free";
-        const limit = tier === "all-in" ? 3 : 2;
+        const limit = tier === "all-in" ? 3 : 1;
         if (activeGoalCount(state.goals) >= limit) {
           return { ok: false, reason: "limit" };
         }

@@ -148,6 +148,18 @@ function GoalEditorPanel({
   })();
 
   const activeCount = goals.filter((g) => g.status === "active").length;
+  const isFree = settings.subscriptionTier !== "all-in";
+  const freeCap = 1;
+  const allInCap = 3;
+  const atCap = isFree ? activeCount >= freeCap : activeCount >= allInCap;
+
+  // Free user opening "new" panel while at cap → show soft block immediately.
+  useEffect(() => {
+    if (mode === "new" && isFree && activeCount >= freeCap) {
+      setSoftBlock(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const persistField = <K extends keyof Goal>(field: K, value: Goal[K]) => {
     if (mode !== "edit" || !goalId) return;
@@ -159,8 +171,8 @@ function GoalEditorPanel({
       toast.error("Title is required");
       return;
     }
-    const isFree = settings.subscriptionTier !== "all-in";
-    if (isFree && activeCount >= 2) {
+    const isFreeNow = settings.subscriptionTier !== "all-in";
+    if (isFreeNow && activeCount >= freeCap) {
       setSoftBlock(true);
       return;
     }
@@ -172,7 +184,11 @@ function GoalEditorPanel({
       successCriteria: criteria,
     });
     if (!result.ok) {
-      toast.error("You already have 3 active goals. Complete or drop one first.");
+      toast.error(
+        isFreeNow
+          ? "Free plan: 1 active goal · Go All-In for 3."
+          : "You already have 3 active goals. Complete or drop one first.",
+      );
       return;
     }
     toast("Goal created");
@@ -281,7 +297,7 @@ function GoalEditorPanel({
       {/* Body */}
       <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
         {/* Active limit notice */}
-        {mode === "new" && activeCount >= 3 && (
+        {mode === "new" && atCap && (
           <div
             className="text-[12px] px-3 py-2 rounded-[4px] border"
             style={{
@@ -290,7 +306,9 @@ function GoalEditorPanel({
               background: "hsl(var(--surface-raised))",
             }}
           >
-            You already have 3 active goals. Complete or drop one first.
+            {isFree
+              ? "Free plan: 1 active goal · Go All-In for 3."
+              : "You already have 3 active goals. Complete or drop one first."}
           </div>
         )}
 
@@ -471,7 +489,7 @@ function GoalEditorPanel({
             <EditorCancelButton />
             <button
               onClick={handleSaveNew}
-              disabled={activeCount >= 3}
+              disabled={atCap}
               className="text-[13px] font-medium px-3 py-1.5 rounded-[4px] disabled:opacity-50 disabled:cursor-not-allowed"
               style={{
                 background: "hsl(var(--accent))",
@@ -552,16 +570,19 @@ function GoalEditorPanel({
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-[16px] font-medium text-text-primary">
-              Free plan: 2 active goals.
+              Free is built for one goal at a time.
             </h2>
             <div className="mt-3 text-[13px] text-text-secondary leading-[1.5]">
-              All-In lifts the cap to 3 goals — the full focus range ActOS is designed around. Your
-              draft will be saved if you'd like to continue.
+              Most ambitious people work on 2-3. All-In lifts the cap to 3 — the full focus range
+              ActOS is designed around. Your draft will be saved if you'd like to continue later.
             </div>
             <div className="mt-6 flex items-center justify-end gap-2">
               <button
                 type="button"
-                onClick={() => setSoftBlock(false)}
+                onClick={() => {
+                  setSoftBlock(false);
+                  onClose();
+                }}
                 className="text-[13px] text-text-secondary hover:text-text-primary transition-colors px-3 py-1.5"
               >
                 Cancel

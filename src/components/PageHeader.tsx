@@ -27,8 +27,8 @@ const CtaButton: React.FC<{ cta: PageHeaderCta }> = ({ cta }) => {
   const btn = (
     <button
       type="button"
-      onClick={cta.disabled ? undefined : cta.onClick}
-      disabled={cta.disabled}
+      onClick={cta.onClick}
+      aria-disabled={cta.disabled || undefined}
       aria-label={cta.ariaLabel ?? cta.label}
       className={[
         "inline-flex items-center justify-center rounded-[4px] whitespace-nowrap font-medium transition-colors",

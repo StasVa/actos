@@ -279,20 +279,20 @@ const GoalCard: React.FC<{ m: GoalMeta; logTimeOn: boolean }> = ({ m, logTimeOn 
 
           {/* Section 3 — Bars */}
           <div className="flex flex-col gap-2">
-            <MeasureBar label="VALUE" percentage={outcome} color={color} />
-            <MeasureBar label="EFFORT" percentage={effort} color={color} opacity={0.6} />
+            <MeasureBar label={t("common.label.value")} percentage={outcome} color={color} />
+            <MeasureBar label={t("common.label.effort")} percentage={effort} color={color} opacity={0.6} />
           </div>
 
           {/* Section 4 — Stats */}
           <div className="border-t border-border-subtle pt-3 flex flex-col gap-2">
-            <StatRow label="PROJECTS" value={projectsValue} />
-            <StatRow label="RITUALS" value={ritualsValue} />
+            <StatRow label={t("common.label.projects")} value={projectsValue} />
+            <StatRow label={t("common.label.rituals")} value={ritualsValue} />
             {showCriteria && (
-              <StatRow label="CRITERIA" value={`${criteria.met}/${criteria.total} met`} />
+              <StatRow label={t("common.label.criteria")} value={t("common.criteriaMet", { met: criteria.met, total: criteria.total })} />
             )}
             {showTime && (
               <StatRow
-                label="TIME"
+                label={t("common.label.time")}
                 value={`${fmtTime(time.spent)} invested · ${fmtTime(time.remaining)} estimated remaining`}
               />
             )}

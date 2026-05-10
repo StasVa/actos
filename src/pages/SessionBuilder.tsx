@@ -677,7 +677,7 @@ const SessionBuilder: React.FC = () => {
   const RightPane = (
     <div className="rounded-[6px] border border-border-subtle bg-surface-raised flex flex-col">
       <div className="p-3 border-b border-border-subtle font-mono text-[11px] uppercase tracking-[0.06em] text-text-secondary">
-        SELECTED · {selectedIds.length}
+        {t("sessionBuilder.selectedHeader", { count: selectedIds.length })}
       </div>
       <div className={`flex-1 ${isMobile ? "" : "max-h-[480px] overflow-y-auto"}`}>
         {selectedIds.length === 0 ? (

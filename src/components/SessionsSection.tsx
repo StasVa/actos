@@ -328,6 +328,7 @@ export const SessionsSection: React.FC<Props> = ({
   showStats = false,
   initialLimit,
 }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const actions = useStore((s) => s.actions);
   const allSessions = useStore((s) => s.sessions);
@@ -348,8 +349,16 @@ export const SessionsSection: React.FC<Props> = ({
     const planned = s.plannedActionIds.filter((id) => scope.actionIds.has(id));
     const done = planned.filter((id) => s.completedActionIds.includes(id));
     if (planned.length === 0) return undefined;
-    return `from this ${scope.label}: ${planned.length} planned, ${done.length} done`;
+    return t("sessions.section.scopeSubset", { label: scope.label, planned: planned.length, done: done.length });
   };
+
+  const totalsLine = (withBestWeek?: { minutes: number } | null) => (
+    <div className="mb-3 font-mono text-[12px] text-text-secondary tabular-nums">
+      {t("sessions.section.totalsLine", { total: formatTime(totalMin), avg: formatTime(avgMin), rate: completionRate })}
+      {withBestWeek && withBestWeek.minutes > 0 &&
+        t("sessions.section.bestWeekSuffix", { time: formatTime(withBestWeek.minutes) })}
+    </div>
+  );
 
   /* ─── flat ─── */
   if (variant === "flat") {
@@ -357,14 +366,7 @@ export const SessionsSection: React.FC<Props> = ({
     const visible = sessions.slice(0, limit);
     return (
       <>
-        {showStats && finished.length > 0 && (
-          <div className="mb-3 font-mono text-[12px] text-text-secondary tabular-nums">
-            Total focused:{" "}
-            <span className="text-text-primary">{formatTime(totalMin)}</span> · Avg session:{" "}
-            <span className="text-text-primary">{formatTime(avgMin)}</span> · Completion rate:{" "}
-            <span className="text-text-primary">{completionRate}%</span>
-          </div>
-        )}
+        {showStats && finished.length > 0 && totalsLine()}
         <div className="rounded-[6px] border border-border-subtle overflow-hidden bg-surface-elevated">
           {visible.map((s) => (
             <SessionRow

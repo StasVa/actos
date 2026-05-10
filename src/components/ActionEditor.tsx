@@ -32,12 +32,6 @@ import {
 import { EditorShell, EditorCloseX, EditorCancelButton } from "./EditorShell";
 import { MetricInfoPopover } from "./MetricInfoPopover";
 import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
-import {
   Popover,
   PopoverTrigger,
   PopoverContent,

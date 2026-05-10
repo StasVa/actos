@@ -33,6 +33,8 @@ const MS_DAY = 86400000;
 
 /* ===== Recently Closed Projects & Goals ===== */
 const RecentlyClosedHigherSection: React.FC = () => {
+  const { t } = useTranslation();
+  const fmtAgo = useFmtAgo();
   const projects = useStore((s) => s.projects);
   const goals = useStore((s) => s.goals);
   const actions = useStore((s) => s.actions);

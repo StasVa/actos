@@ -186,6 +186,7 @@ const FrequencyChart: React.FC<{ data: number[]; max: number; color: string; uni
 
 /* ===== Ritual card ===== */
 const RitualCard: React.FC<{ r: RitualRow; onOpen: (r: RitualRow) => void; onMarkDone: (r: RitualRow) => void }> = ({ r, onOpen, onMarkDone }) => {
+  const { t } = useTranslation();
   const isMonthly = r.isMonthly;
   return (
     <div
@@ -212,7 +213,7 @@ const RitualCard: React.FC<{ r: RitualRow; onOpen: (r: RitualRow) => void; onMar
             {r.multiplier}
           </div>
           <div className="mt-1 font-mono text-[11px] text-text-tertiary tabular-nums">
-            {r.totalCompletions} completions
+            {t("rituals.completions", { count: r.totalCompletions })}
           </div>
         </div>
       </div>
@@ -222,7 +223,7 @@ const RitualCard: React.FC<{ r: RitualRow; onOpen: (r: RitualRow) => void; onMar
       {/* Chart 1 */}
       <div>
         <div className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary mb-1">
-          LAST 30 DAYS · CONSISTENCY
+          {t("rituals.card.consistencyHeading")}
         </div>
         <ConsistencyCalendar data={r.consistency} color={r.goalColor} />
       </div>
@@ -233,9 +234,9 @@ const RitualCard: React.FC<{ r: RitualRow; onOpen: (r: RitualRow) => void; onMar
       <div>
         <div className="flex items-baseline justify-between mb-1">
           <div className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">
-            12 WEEKS · FREQUENCY
+            {t("rituals.card.frequencyHeading")}
           </div>
-          <div className="font-mono text-[9px] text-text-tertiary">max: {r.freqMax}</div>
+          <div className="font-mono text-[9px] text-text-tertiary">{t("rituals.card.frequencyMax", { n: r.freqMax })}</div>
         </div>
         <FrequencyChart data={r.frequency} max={r.freqMax} color={r.goalColor} />
       </div>
@@ -245,7 +246,7 @@ const RitualCard: React.FC<{ r: RitualRow; onOpen: (r: RitualRow) => void; onMar
       {/* Footer */}
       <div className="flex items-center justify-between mt-2">
         <div className="font-mono text-[11px] text-text-secondary tabular-nums">
-          Last done: {r.lastDoneLabel}
+          {t("rituals.card.lastDone", { label: r.lastDoneLabel })}
         </div>
         {r.pendingToday ? (
           <button
@@ -256,16 +257,16 @@ const RitualCard: React.FC<{ r: RitualRow; onOpen: (r: RitualRow) => void; onMar
             }}
             className="px-3 py-1 rounded-[4px] border border-accent bg-transparent text-[12px] font-medium text-text-primary hover:bg-surface-hover transition-colors"
           >
-            Mark today done
+            {t("rituals.card.markTodayDone")}
           </button>
         ) : isMonthly ? null : (
-          <span className="font-mono text-[11px] text-text-tertiary">Not due today</span>
+          <span className="font-mono text-[11px] text-text-tertiary">{t("rituals.notDueToday")}</span>
         )}
       </div>
 
       {isMonthly && r.pendingToday && (
         <div className="mt-1 font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary tabular-nums">
-          DUE THIS MONTH
+          {t("rituals.card.dueThisMonth")}
         </div>
       )}
     </div>

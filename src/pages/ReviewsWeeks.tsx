@@ -133,7 +133,7 @@ const ReviewsWeeks: React.FC = () => {
                 ]}
                 onChange={setGoalFilter}
               />
-              <FilterDropdown label="DATE" value={range} defaultValue={range} options={RANGE_OPTIONS} onChange={setRange} />
+              <FilterDropdown label={t("reviews.filters.label.date")} value={range} defaultValue={range} options={RANGE_OPTIONS} onChange={setRange} />
             </>
           }
           sort={<SortDropdown<ReviewSortKey> value={sortKey} options={REVIEW_SORT_OPTIONS} onChange={setSortKey} />}

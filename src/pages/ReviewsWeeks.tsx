@@ -143,17 +143,17 @@ const ReviewsWeeks: React.FC = () => {
         <div className="bg-surface-elevated border border-border-subtle rounded-[6px] overflow-hidden">
           {allWeeks.length === 0 ? (
             <div className="text-center text-[14px] text-text-secondary" style={{ paddingTop: 80, paddingBottom: 80 }}>
-              No weeks tracked yet. Weeks appear here once you have day activity.
+              {t("reviews.empty.weeks")}
             </div>
           ) : filteredWeeks.length === 0 ? (
             <div className="p-10 text-center">
-              <div className="text-[14px] text-text-secondary">No items match these filters.</div>
+              <div className="text-[14px] text-text-secondary">{t("reviews.filters.noMatch")}</div>
               <button
                 type="button"
                 onClick={() => { setRange("all"); setGoalFilter("all"); }}
                 className="mt-3 text-[13px] text-text-secondary hover:text-text-primary transition-colors"
               >
-                Clear filters
+                {t("reviews.filters.clear")}
               </button>
             </div>
           ) : (

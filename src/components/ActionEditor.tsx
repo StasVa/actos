@@ -1364,6 +1364,7 @@ export function StatusDropdown({
 }
 
 function TimestampLine({ action, onClose }: { action: Action; onClose: () => void }) {
+  const { t } = useTranslation();
   const status = action.status;
   if (status === "backlog") return null;
 
@@ -1388,7 +1389,7 @@ function TimestampLine({ action, onClose }: { action: Action; onClose: () => voi
         className="mt-3 font-mono text-[12px]"
         style={{ color: overdue ? "hsl(var(--state-stalled))" : "hsl(var(--text-secondary))" }}
       >
-        {overdue ? "Overdue · scheduled for " : "Scheduled for "}
+        {overdue ? t("actionEditor.timestamp.overduePrefix") : t("actionEditor.timestamp.scheduledForPrefix")}
         {linkDate(sd, label)}
       </div>
     );
@@ -1402,11 +1403,11 @@ function TimestampLine({ action, onClose }: { action: Action; onClose: () => voi
     return (
       <div className="mt-3 space-y-0.5">
         <div className="font-mono text-[12px] text-text-secondary">
-          Completed {linkDate(cDate, cLabel)}
+          {t("actionEditor.timestamp.completed")}{linkDate(cDate, cLabel)}
         </div>
         {showOriginal && (
           <div className="font-mono text-[12px] text-text-tertiary">
-            Originally scheduled for {fmtRelDate(sd!)}
+            {t("actionEditor.timestamp.originallyScheduled", { label: fmtRelDate(sd!) })}
           </div>
         )}
       </div>
@@ -1417,7 +1418,9 @@ function TimestampLine({ action, onClose }: { action: Action; onClose: () => voi
     const dDate = action.delegatedAt.slice(0, 10);
     return (
       <div className="mt-3 font-mono text-[12px] text-text-secondary">
-        Delegated{action.delegateName ? ` to ${action.delegateName}` : ""} ·{" "}
+        {action.delegateName
+          ? t("actionEditor.timestamp.delegatedTo", { name: action.delegateName })
+          : t("actionEditor.timestamp.delegated")}
         {linkDate(dDate, fmtRelFromNow(action.delegatedAt))}
       </div>
     );
@@ -1427,7 +1430,7 @@ function TimestampLine({ action, onClose }: { action: Action; onClose: () => voi
     const dDate = action.droppedAt.slice(0, 10);
     return (
       <div className="mt-3 font-mono text-[12px] text-text-secondary">
-        Dropped on {linkDate(dDate, fmtRelDate(dDate))}
+        {t("actionEditor.timestamp.droppedOn")}{linkDate(dDate, fmtRelDate(dDate))}
       </div>
     );
   }
@@ -1436,7 +1439,7 @@ function TimestampLine({ action, onClose }: { action: Action; onClose: () => voi
     const dDate = action.cancelledAt.slice(0, 10);
     return (
       <div className="mt-3 font-mono text-[12px] text-text-secondary">
-        Cancelled on {linkDate(dDate, fmtRelDate(dDate))}
+        {t("actionEditor.timestamp.cancelledOn")}{linkDate(dDate, fmtRelDate(dDate))}
       </div>
     );
   }

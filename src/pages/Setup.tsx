@@ -62,8 +62,9 @@ const ThemeMockup: React.FC<{ theme: "light" | "dark" }> = ({ theme }) => {
 };
 
 /* ───────── Shared bits ───────── */
-const StepIndicator: React.FC<{ n: Screen }> = ({ n }) =>
-  n >= 1 ? (
+const StepIndicator: React.FC<{ n: Screen }> = ({ n }) => {
+  const { t } = useTranslation();
+  return n >= 1 ? (
     <div
       className="absolute"
       style={{
@@ -73,9 +74,10 @@ const StepIndicator: React.FC<{ n: Screen }> = ({ n }) =>
         color: "hsl(var(--text-tertiary))",
       }}
     >
-      Step {n} of 3
+      {t("setup.stepCount", { n, total: 3 })}
     </div>
   ) : null;
+};
 
 const BackLink: React.FC<{ onClick: () => void }> = ({ onClick }) => (
   <button

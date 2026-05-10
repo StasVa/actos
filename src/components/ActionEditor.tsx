@@ -475,10 +475,10 @@ function ActionEditorPanel({
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-border-subtle shrink-0">
         {mode === "new" ? (
-          <div className="text-[18px] font-medium text-text-primary">New action</div>
+          <div className="text-[18px] font-medium text-text-primary">{t("actionEditor.header.new")}</div>
         ) : (
           <div className="font-mono text-[11px] uppercase tracking-[0.08em] text-text-tertiary">
-            Edit action
+            {t("actionEditor.header.edit")}
           </div>
         )}
         {mode === "new" ? (

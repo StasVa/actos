@@ -120,6 +120,7 @@ const NoGoalsGate: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const exempt =
     pathname === "/" ||
     pathname.startsWith("/pricing") ||
+    pathname.startsWith("/start") ||
     pathname.startsWith("/manifesto") ||
     pathname.startsWith("/login") ||
     pathname.startsWith("/legal") ||

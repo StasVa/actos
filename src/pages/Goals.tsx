@@ -551,29 +551,29 @@ const Goals: React.FC = () => {
       <main className="app-main page-medium">
         <PageHeader
           title={t("goals.page.title")}
-          meta={`${totalAll} GOALS · ${totalActive} ACTIVE · ${totalCompleted} COMPLETED`}
+          meta={t("goals.meta", { total: totalAll, active: totalActive, completed: totalCompleted })}
           cta={{
-            label: "+ New goal",
+            label: t("goals.cta.newGoal"),
             onClick: () => useStore.getState().openPanel({ kind: "goal", mode: "new" }),
-            ariaLabel: "New goal",
+            ariaLabel: t("goals.aria.newGoal"),
             disabled: ghostDisabled,
             disabledTooltip: ghostDisabled
               ? isFree
-                ? "Free plan: 1 active goal · Go All-In for 3."
-                : "You have 3 active goals. Complete or drop one to add another."
+                ? t("goals.cap.disabledTooltip")
+                : t("goals.disabledTooltip.atCapPaid")
               : undefined,
           }}
           filters={
             <>
               <FilterDropdown<StateFilter>
-                label="STATE"
+                label={t("common.label.state")}
                 value={stateFilter}
                 defaultValue="all"
                 options={STATE_OPTIONS}
                 onChange={setStateFilter}
               />
               <FilterDropdown<TypeFilter>
-                label="TYPE"
+                label={t("common.label.type")}
                 value={typeFilter}
                 defaultValue="all"
                 options={TYPE_OPTIONS}
@@ -588,14 +588,14 @@ const Goals: React.FC = () => {
 
         {isFree && (
           <div className="mt-2 text-[12px] text-text-tertiary">
-            {totalActive} of {goalLimit} goal{goalLimit === 1 ? "" : "s"} active ·{" "}
+            {t("goals.freePlan.line", { active: totalActive, cap: goalLimit, plural: goalLimit === 1 ? "" : "s" })}
             <Link
               to="/settings/subscription"
               className="underline hover:text-text-secondary transition-colors"
             >
-              Go All-In
-            </Link>{" "}
-            for 3.
+              {t("goals.freePlan.linkText")}
+            </Link>
+            {t("goals.freePlan.suffix")}
           </div>
         )}
 

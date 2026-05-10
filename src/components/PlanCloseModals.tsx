@@ -23,6 +23,7 @@ const MiniDropdown: React.FC<{
   placeholder?: string;
   showDot?: boolean;
 }> = ({ value, options, onChange, placeholder, showDot }) => {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const current = options.find((o) => o.value === value);

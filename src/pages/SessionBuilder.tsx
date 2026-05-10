@@ -604,10 +604,10 @@ const SessionBuilder: React.FC = () => {
       plannedActionIds: selectedIds,
     });
     if (!result.ok) {
-      toast.error("A session is already in progress");
+      toast.error(t("sessionBuilder.toast.activeExists"));
       return;
     }
-    toast.success("Session started");
+    toast.success(t("sessionBuilder.toast.started"));
     navigate("/sessions/active");
   };
 

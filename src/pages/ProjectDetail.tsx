@@ -263,6 +263,7 @@ const TitleField: React.FC<{
   autoFocus: boolean;
   onCommit: (next: string) => void;
 }> = ({ value, autoFocus, onCommit }) => {
+  const { t } = useTranslation();
   const [editing, setEditing] = useState(autoFocus);
   const [draft, setDraft] = useState(value);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -299,7 +300,7 @@ const TitleField: React.FC<{
             setEditing(false);
           }
         }}
-        placeholder="e.g. Set up landing page"
+        placeholder={t("projectDetail.titlePlaceholder")}
         className="w-full bg-transparent outline-none text-[32px] font-medium text-text-primary placeholder:text-text-tertiary leading-tight"
       />
     );
@@ -311,7 +312,7 @@ const TitleField: React.FC<{
       className="text-[32px] font-medium leading-tight cursor-text"
       style={{ color: value ? "hsl(var(--text-primary))" : "hsl(var(--text-tertiary))" }}
     >
-      {value || "Untitled project"}
+      {value || t("projectDetail.untitled")}
     </h1>
   );
 };

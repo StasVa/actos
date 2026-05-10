@@ -620,7 +620,7 @@ const ProjectDetail: React.FC = () => {
   return (
     <div className="min-h-screen bg-surface-base text-text-primary">
       <AppSidebar />
-      <div className="app-main page-medium min-h-screen flex">
+      <div className="app-main page-medium min-h-screen flex flex-col md:flex-row">
         {/* Left column */}
         <div className="flex-1 min-w-0 flex flex-col">
           <div className="h-12 px-8 flex items-center justify-between border-b border-border-subtle">

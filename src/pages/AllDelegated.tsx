@@ -184,31 +184,34 @@ type TabKey = "active" | "returned";
 const TabBar: React.FC<{ value: TabKey; onChange: (v: TabKey) => void }> = ({
   value,
   onChange,
-}) => (
-  <div className="flex items-center gap-6 border-b border-border-subtle">
-    {(["active", "returned"] as TabKey[]).map((k) => {
-      const active = value === k;
-      return (
-        <button
-          key={k}
-          onClick={() => onChange(k)}
-          className="relative pb-2 text-[14px] font-medium transition-colors"
-          style={{
-            color: active ? "hsl(var(--text-primary))" : "hsl(var(--text-secondary))",
-          }}
-        >
-          {k === "active" ? "Active" : "Returned"}
-          {active && (
-            <span
-              className="absolute left-0 right-0 -bottom-px h-[2px]"
-              style={{ background: "hsl(var(--accent))" }}
-            />
-          )}
-        </button>
-      );
-    })}
-  </div>
-);
+}) => {
+  const { t } = useTranslation();
+  return (
+    <div className="flex items-center gap-6 border-b border-border-subtle">
+      {(["active", "returned"] as TabKey[]).map((k) => {
+        const active = value === k;
+        return (
+          <button
+            key={k}
+            onClick={() => onChange(k)}
+            className="relative pb-2 text-[14px] font-medium transition-colors"
+            style={{
+              color: active ? "hsl(var(--text-primary))" : "hsl(var(--text-secondary))",
+            }}
+          >
+            {k === "active" ? t("delegated.tab.active") : t("delegated.tab.returned")}
+            {active && (
+              <span
+                className="absolute left-0 right-0 -bottom-px h-[2px]"
+                style={{ background: "hsl(var(--accent))" }}
+              />
+            )}
+          </button>
+        );
+      })}
+    </div>
+  );
+};
 
 /* ===== Date range ===== */
 type DateRange = "all" | "30" | "90" | "365";

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useTranslation } from "react-i18next";
+import { useTranslation, Trans } from "react-i18next";
 import { Zap, Leaf, Sun, Thermometer, Star, X, type LucideIcon } from "lucide-react";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Tooltip, SparkTooltipContent, StateDotTooltip } from "@/components/Tooltip";
@@ -20,6 +20,8 @@ import { MultiplierPill, TimePill as SharedTimePill } from "@/components/MetaPil
 import { toast } from "sonner";
 import { subscribeAppEvent } from "@/lib/appEvents";
 import { formatTime } from "@/lib/format";
+import { formatDate } from "@/i18n/format";
+import i18n from "@/i18n";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 export const TODAY_ISO = new Date().toISOString().slice(0, 10);
@@ -119,9 +121,17 @@ export const DAY_TYPE_ICONS: Record<string, LucideIcon> = {
 };
 
 export const DayTypeIndicator: React.FC<{ dayType?: string }> = ({ dayType }) => {
+  const { t } = useTranslation();
   if (!dayType) return null;
   const Icon = DAY_TYPE_ICONS[dayType];
-  const label = (DAY_TYPE_LABELS[dayType] ?? "").toUpperCase() + " DAY";
+  const dayTypeKeyMap: Record<string, string> = {
+    execution: "today.dayType.execution",
+    recovery: "today.dayType.recovery",
+    "day-off": "today.dayType.dayOff",
+    sick: "today.dayType.sick",
+  };
+  const localized = dayTypeKeyMap[dayType] ? t(dayTypeKeyMap[dayType]) : dayType;
+  const label = t("today.dayTypeSuffix", { label: localized.toUpperCase() });
   return (
     <div className="flex items-center text-text-secondary mt-2">
       {Icon && <Icon size={12} className="mr-1.5" />}
@@ -255,12 +265,15 @@ const MeasureBar: React.FC<{
   </div>
 );
 
-const DualBars: React.FC<{ outcome: number; effort: number; color: string }> = ({ outcome, effort, color }) => (
-  <div className="flex min-w-0 flex-col gap-2">
-    <MeasureBar label="VALUE" percentage={outcome} color={color} />
-    <MeasureBar label="EFFORT" percentage={effort} color={color} opacity={0.6} />
-  </div>
-);
+const DualBars: React.FC<{ outcome: number; effort: number; color: string }> = ({ outcome, effort, color }) => {
+  const { t } = useTranslation();
+  return (
+    <div className="flex min-w-0 flex-col gap-2">
+      <MeasureBar label={t("projects.card.value")} percentage={outcome} color={color} />
+      <MeasureBar label={t("projects.card.effort")} percentage={effort} color={color} opacity={0.6} />
+    </div>
+  );
+};
 
 const GoalColumn: React.FC<{
   title: string;
@@ -280,6 +293,7 @@ const GoalColumn: React.FC<{
   href?: string;
   menu?: React.ReactNode;
 }> = ({ title, state, type, target, progress, meta, outcome, effort, spark, sparkTips, lastActivity, stalledFor, color, recent, href, menu }) => {
+  const { t } = useTranslation();
   const inner = (
     <div className="group min-w-0 overflow-hidden py-1 space-y-4">
     <div className="flex items-center justify-between gap-2">
@@ -302,7 +316,7 @@ const GoalColumn: React.FC<{
         <div className="font-mono font-medium text-text-primary leading-none" style={{ fontSize: 36 }}>
           {progress}%
         </div>
-        <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mt-2">Progress</div>
+        <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mt-2">{t("home.hero.progress")}</div>
       </div>
       <div className="flex-1 flex flex-col gap-1.5 pb-1 min-w-0">
         {meta.map((m, i) => (
@@ -317,7 +331,7 @@ const GoalColumn: React.FC<{
 
     <div>
       <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-1.5">
-        Activity · Last 30 days
+        {t("home.hero.activity")}
       </div>
       <Sparkline data={spark} color={color} tips={sparkTips} />
     </div>
@@ -337,6 +351,7 @@ const GoalColumn: React.FC<{
 
 /* ===== Goal column menu (composed in Hero) ===== */
 const GoalColumnMenu: React.FC<{ goalId: string }> = ({ goalId }) => {
+  const { t } = useTranslation();
   const openPanel = useStore((s) => s.openPanel);
   const markGoalComplete = useStore((s) => s.markGoalComplete);
   const dropGoal = useStore((s) => s.dropGoal);
@@ -346,31 +361,31 @@ const GoalColumnMenu: React.FC<{ goalId: string }> = ({ goalId }) => {
   return (
     <>
       <CardMenu
-        ariaLabel="Goal menu"
+        ariaLabel={t("home.hero.menu.aria")}
         items={[
-          { label: "Edit", onSelect: () => openPanel({ kind: "goal", mode: "edit", id: goalId }) },
-          { label: "Mark complete", onSelect: () => { markGoalComplete(goalId); toast("Goal completed"); } },
-          { label: "Drop", destructive: true, onSelect: () => setConfirmDrop(true) },
-          { label: "Delete", destructive: true, onSelect: () => setConfirmDelete(true) },
+          { label: t("common.edit"), onSelect: () => openPanel({ kind: "goal", mode: "edit", id: goalId }) },
+          { label: t("common.markComplete"), onSelect: () => { markGoalComplete(goalId); toast(t("toast.goalCompleted")); } },
+          { label: t("common.drop"), destructive: true, onSelect: () => setConfirmDrop(true) },
+          { label: t("common.delete"), destructive: true, onSelect: () => setConfirmDelete(true) },
         ]}
       />
       <ConfirmModal
         open={confirmDrop}
-        title="Drop this goal?"
-        body="Open projects, actions, and rituals under this goal will be dropped."
-        confirmLabel="Drop goal"
+        title={t("home.hero.confirm.drop.heading")}
+        body={t("home.hero.confirm.drop.body")}
+        confirmLabel={t("home.hero.confirm.drop.cta")}
         destructive
         onCancel={() => setConfirmDrop(false)}
-        onConfirm={() => { dropGoal(goalId); toast("Goal dropped"); setConfirmDrop(false); }}
+        onConfirm={() => { dropGoal(goalId); toast(t("home.hero.toast.dropped")); setConfirmDrop(false); }}
       />
       <ConfirmModal
         open={confirmDelete}
-        title="Delete this goal?"
-        body="This permanently removes the goal and ALL its projects, actions, rituals, and ideas."
-        confirmLabel="Delete"
+        title={t("home.hero.confirm.delete.heading")}
+        body={t("home.hero.confirm.delete.body")}
+        confirmLabel={t("common.delete")}
         destructive
         onCancel={() => setConfirmDelete(false)}
-        onConfirm={() => { deleteGoal(goalId); toast("Goal deleted"); setConfirmDelete(false); }}
+        onConfirm={() => { deleteGoal(goalId); toast(t("toast.goalDeleted")); setConfirmDelete(false); }}
       />
     </>
   );
@@ -409,15 +424,16 @@ function buildSparkFromActions(
 }
 
 function relativeDayLabel(iso?: string): string {
-  if (!iso) return "no activity yet";
-  const t = new Date(iso).getTime();
-  const days = Math.floor((Date.now() - t) / 86400000);
-  if (days <= 0) return "today";
-  if (days === 1) return "yesterday";
-  return `${days} days ago`;
+  if (!iso) return i18n.t("home.relative.noActivity");
+  const ts = new Date(iso).getTime();
+  const days = Math.floor((Date.now() - ts) / 86400000);
+  if (days <= 0) return i18n.t("home.relative.today");
+  if (days === 1) return i18n.t("home.relative.yesterday");
+  return i18n.t("home.relative.daysAgo", { count: days });
 }
 
 export const Hero: React.FC = () => {
+  const { t } = useTranslation();
   const goals = useStore((s) => s.goals);
   const projects = useStore((s) => s.projects);
   const actions = useStore((s) => s.actions);
@@ -426,9 +442,9 @@ export const Hero: React.FC = () => {
   if (activeGoals.length === 0) {
     return (
       <div className="bg-surface-elevated border border-border-subtle rounded-[6px] p-10 text-center">
-        <div className="text-[14px] text-text-secondary">No active goals.</div>
+        <div className="text-[14px] text-text-secondary">{t("home.hero.empty.heading")}</div>
         <div className="font-mono text-[11px] text-text-tertiary mt-1">
-          Press ⌘K → “New goal” to start.
+          {t("home.hero.empty.body")}
         </div>
       </div>
     );
@@ -481,9 +497,9 @@ export const Hero: React.FC = () => {
         const progress = outcome;
 
         const targetLabel = g.targetDate
-          ? `TARGET ${new Date(g.targetDate)
-              .toLocaleDateString("en-US", { month: "short", day: "numeric" })
-              .toUpperCase()}`
+          ? t("home.hero.targetPrefix", {
+              date: formatDate(g.targetDate, { month: "short", day: "numeric" }).toUpperCase(),
+            })
           : undefined;
 
         const recentDone = goalActions
@@ -500,35 +516,43 @@ export const Hero: React.FC = () => {
             href={`/goals/${g.id}`}
             title={g.title}
             state={state}
-            type={g.type === "mid-term" ? "MID-TERM" : "SHORT-TERM"}
+            type={g.type === "mid-term" ? t("goals.type.midTerm") : t("goals.type.shortTerm")}
             target={targetLabel}
             progress={progress}
             meta={[
-              <><span className="text-text-primary tabular-nums">{projectsClosed}</span> of <span className="text-text-primary tabular-nums">{projectsTotal}</span> projects closed</>,
-              <><span className="text-text-primary tabular-nums">{actionsDone}</span> actions done</>,
-              <><span className="text-text-tertiary">Last activity:</span> <span className="text-text-primary">{lastLabel}</span></>,
+              <Trans
+                i18nKey="home.hero.projectsClosed"
+                values={{ closed: projectsClosed, total: projectsTotal }}
+                components={[<span className="text-text-primary tabular-nums" />]}
+              />,
+              <Trans
+                i18nKey="home.hero.actionsDone"
+                values={{ count: actionsDone }}
+                components={[<span className="text-text-primary tabular-nums" />]}
+              />,
+              <><span className="text-text-tertiary">{t("home.hero.lastActivityPrefix")}</span> <span className="text-text-primary">{lastLabel}</span></>,
             ]}
             outcome={outcome}
             effort={effort}
             spark={spark.data}
             sparkTips={spark.tips}
             lastActivity={state === "active" ? lastLabel : undefined}
-            stalledFor={state === "stalled" ? `${days} days` : undefined}
+            stalledFor={state === "stalled" ? t("home.hero.stalledFor", { count: days }) : undefined}
             color={`hsl(var(--${g.color}))`}
             recent={
               recentDone.length > 0 ? (
                 <>
-                  <span className="text-text-tertiary">Recent: </span>
-                  {recentDone.map((t, i) => (
+                  <span className="text-text-tertiary">{t("home.hero.recentPrefix")}</span>
+                  {recentDone.map((title, i) => (
                     <React.Fragment key={i}>
                       {i > 0 && <span className="text-text-tertiary"> · </span>}
                       <span className="text-text-tertiary">✓ </span>
-                      <span className="text-text-secondary">{t}</span>
+                      <span className="text-text-secondary">{title}</span>
                     </React.Fragment>
                   ))}
                 </>
               ) : (
-                <>No closed actions yet.</>
+                <>{t("home.hero.noClosedYet")}</>
               )
             }
             menu={<GoalColumnMenu goalId={g.id} />}
@@ -554,6 +578,7 @@ type ActiveProjectMeta = {
 };
 
 const ActiveProjectCard: React.FC<{ p: ActiveProjectMeta; pct: number }> = ({ p, pct }) => {
+  const { t } = useTranslation();
   const markProjectComplete = useStore((s) => s.markProjectComplete);
   const dropProject = useStore((s) => s.dropProject);
   const deleteProject = useStore((s) => s.deleteProject);
@@ -579,11 +604,11 @@ const ActiveProjectCard: React.FC<{ p: ActiveProjectMeta; pct: number }> = ({ p,
                 />
               </Tooltip>
               <CardMenu
-                ariaLabel="Project menu"
+                ariaLabel={t("home.activeProjects.menu.aria")}
                 items={[
-                  { label: "Mark complete", onSelect: () => { markProjectComplete(p.id); toast("Project completed"); } },
-                  { label: "Drop", destructive: true, onSelect: () => setConfirmDrop(true) },
-                  { label: "Delete", destructive: true, onSelect: () => setConfirmDelete(true) },
+                  { label: t("common.markComplete"), onSelect: () => { markProjectComplete(p.id); toast(t("home.activeProjects.toast.completed")); } },
+                  { label: t("common.drop"), destructive: true, onSelect: () => setConfirmDrop(true) },
+                  { label: t("common.delete"), destructive: true, onSelect: () => setConfirmDelete(true) },
                 ]}
               />
             </div>
@@ -600,10 +625,10 @@ const ActiveProjectCard: React.FC<{ p: ActiveProjectMeta; pct: number }> = ({ p,
           <div className="flex items-center justify-between font-mono text-[11px] tabular-nums">
             <div>
               <span className="text-text-secondary">{p.done}/{p.hasActions ? p.total : 0}</span>
-              <span className="text-text-tertiary"> actions</span>
+              <span className="text-text-tertiary">{t("home.activeProjects.actionsSuffix")}</span>
             </div>
             <div>
-              <span className="text-text-tertiary">Last: </span>
+              <span className="text-text-tertiary">{t("home.activeProjects.lastPrefix")}</span>
               <span className={p.warnLast ? "text-text-warning" : "text-text-secondary"}>{p.last}</span>
             </div>
           </div>
@@ -611,21 +636,21 @@ const ActiveProjectCard: React.FC<{ p: ActiveProjectMeta; pct: number }> = ({ p,
       </Link>
       <ConfirmModal
         open={confirmDrop}
-        title="Drop this project?"
-        body="Open actions in this project will be dropped. You can re-open it later."
-        confirmLabel="Drop project"
+        title={t("home.activeProjects.confirm.drop.heading")}
+        body={t("home.activeProjects.confirm.drop.body")}
+        confirmLabel={t("home.activeProjects.confirm.drop.cta")}
         destructive
         onCancel={() => setConfirmDrop(false)}
-        onConfirm={() => { dropProject(p.id); toast("Project dropped"); setConfirmDrop(false); }}
+        onConfirm={() => { dropProject(p.id); toast(t("home.activeProjects.toast.dropped")); setConfirmDrop(false); }}
       />
       <ConfirmModal
         open={confirmDelete}
-        title="Delete this project?"
-        body="This permanently removes the project and all its actions. This cannot be undone."
-        confirmLabel="Delete"
+        title={t("home.activeProjects.confirm.delete.heading")}
+        body={t("home.activeProjects.confirm.delete.body")}
+        confirmLabel={t("common.delete")}
         destructive
         onCancel={() => setConfirmDelete(false)}
-        onConfirm={() => { deleteProject(p.id); toast("Project deleted"); setConfirmDelete(false); }}
+        onConfirm={() => { deleteProject(p.id); toast(t("home.activeProjects.toast.deleted")); setConfirmDelete(false); }}
       />
     </>
   );
@@ -633,6 +658,7 @@ const ActiveProjectCard: React.FC<{ p: ActiveProjectMeta; pct: number }> = ({ p,
 
 /* ===== Active Projects (live store-wired) ===== */
 export const ActiveProjects: React.FC = () => {
+  const { t } = useTranslation();
   const goals = useStore((s) => s.goals);
   const projects = useStore((s) => s.projects);
   const actions = useStore((s) => s.actions);
@@ -656,9 +682,9 @@ export const ActiveProjects: React.FC = () => {
     const state: "active" | "stalled" = days <= 7 ? "active" : "stalled";
     let last: string;
     if (!lastIso) last = "—";
-    else if (days <= 0) last = "today";
-    else if (days === 1) last = "1d ago";
-    else last = `${days}d ago`;
+    else if (days <= 0) last = t("home.activeProjects.lastShort.today");
+    else if (days === 1) last = t("home.activeProjects.lastShort.oneDay");
+    else last = t("home.activeProjects.lastShort.daysAgo", { count: days });
     return {
       id: p.id,
       goalLabel: (goal?.title ?? "").toUpperCase(),
@@ -677,14 +703,14 @@ export const ActiveProjects: React.FC = () => {
 
   return (
     <section>
-      <SectionLabel meta={`${projectsWithMeta.length} ACTIVE · ${stalledCount} STALLED`}>
-        Active projects · {projectsWithMeta.length}
+      <SectionLabel meta={t("home.activeProjects.meta", { active: projectsWithMeta.length, stalled: stalledCount })}>
+        {t("home.activeProjects.title", { count: projectsWithMeta.length })}
       </SectionLabel>
       {projectsWithMeta.length === 0 ? (
         <div className="bg-surface-raised border border-dashed border-border-subtle rounded-[6px] py-8 text-center">
-          <div className="text-[13px] text-text-secondary">No active projects.</div>
+          <div className="text-[13px] text-text-secondary">{t("home.activeProjects.empty.heading")}</div>
           <div className="font-mono text-[11px] text-text-tertiary mt-1">
-            Press ⌘K → “New project”.
+            {t("home.activeProjects.empty.body")}
           </div>
         </div>
       ) : (
@@ -738,6 +764,7 @@ export const TodayZone: React.FC<{
   onPlanClick: () => void;
   onCloseClick: () => void;
 }> = ({ onPlanClick, onCloseClick }) => {
+  const { t } = useTranslation();
   const goals = useStore((s) => s.goals);
   const projects = useStore((s) => s.projects);
   const actions = useStore((s) => s.actions);
@@ -788,21 +815,20 @@ export const TodayZone: React.FC<{
           style={{ padding: "32px 40px" }}
         >
           <div className="text-[20px] font-medium text-text-primary leading-snug">
-            No goals yet.
+            {t("home.todayZone.noGoals.heading")}
           </div>
           <div
             className="text-text-secondary mx-auto"
             style={{ fontSize: 14, marginTop: 8, maxWidth: 480, lineHeight: 1.55 }}
           >
-            A goal is a result you want to reach — like "$10k MRR" or
-            "Pass C1 Spanish exam". Create one to start planning days.
+            {t("home.todayZone.noGoals.body")}
           </div>
           <Link
             to="/onboarding/goal"
             className="mt-6 inline-block rounded-[4px] bg-[hsl(var(--accent))] text-white font-medium hover:brightness-110 transition"
             style={{ padding: "12px 32px", fontSize: 15 }}
           >
-            + Create your first goal
+            {t("home.todayZone.noGoals.cta")}
           </Link>
         </div>
       </section>
@@ -823,14 +849,14 @@ export const TodayZone: React.FC<{
           style={{ padding: "32px 40px" }}
         >
           <div className="text-[20px] font-medium text-text-primary leading-snug">
-            What are you doing today?
+            {t("home.todayZone.notPlanned.heading")}
           </div>
           <div className="text-[14px] text-text-secondary mt-2">
-            Pick today's actions to start.
+            {t("home.todayZone.notPlanned.body")}
           </div>
           {preScheduledCount > 0 && (
             <div className="font-mono text-[12px] text-text-tertiary mt-3 tabular-nums">
-              {preScheduledCount} action{preScheduledCount === 1 ? "" : "s"} already scheduled for today
+              {t("home.todayZone.notPlanned.preScheduled", { count: preScheduledCount })}
             </div>
           )}
           <button
@@ -839,7 +865,7 @@ export const TodayZone: React.FC<{
             className="mt-6 inline-block rounded-[4px] bg-[hsl(var(--accent))] text-white font-medium hover:brightness-110 transition"
             style={{ padding: "12px 32px", fontSize: 15 }}
           >
-            Start your day →
+            {t("home.todayZone.notPlanned.cta")}
           </button>
         </div>
       </section>
@@ -886,26 +912,26 @@ export const TodayZone: React.FC<{
     if (a.status === "done") {
       changeActionStatus(id, "planned", { scheduledDate: TODAY_ISO });
       toast.dismiss();
-      toast.success("Action re-opened");
+      toast.success(t("home.actions.toast.reopened"));
       return;
     }
     if (a.status === "delegated" || a.status === "dropped" || a.status === "cancelled") {
       return;
     }
     if (!a.impact || !a.timeEstimateMinutes) {
-      toast.error("Set Impact and Time before marking done");
+      toast.error(t("home.actions.toast.needImpactTime"));
       openPanel({ kind: "action", mode: "edit", id });
       return;
     }
     changeActionStatus(id, "done");
     toast.dismiss();
-    toast.success("Action marked done");
+    toast.success(t("home.actions.toast.markedDone"));
   };
 
   const handleQuickAdd = () => {
-    const t = quickAdd.trim();
-    if (!t) return;
-    const id = createAction({ title: t, scheduledDate: TODAY_ISO });
+    const title = quickAdd.trim();
+    if (!title) return;
+    const id = createAction({ title, scheduledDate: TODAY_ISO });
     setQuickAdd("");
     // If a plan exists, append to plannedActionIds.
     if (isPlanned) {
@@ -913,14 +939,14 @@ export const TodayZone: React.FC<{
         plannedActionIds: [...(dayEntry?.plannedActionIds ?? []), id],
       });
     }
-    toast.success("Action added to today");
+    toast.success(t("home.actions.toast.added"));
     openPanel({ kind: "action", mode: "edit", id });
   };
 
   const handleRitualDone = (ritualId: string, alreadyDone: boolean) => {
     if (alreadyDone) return;
     markRitualInstanceDone(ritualId);
-    toast.success("Ritual logged");
+    toast.success(t("home.rituals.toast.logged"));
   };
 
 
@@ -933,7 +959,7 @@ export const TodayZone: React.FC<{
           skippedRitualIds: (dayEntry?.skippedRitualIds ?? []).filter((id) => id !== ritualId),
         });
       }
-      toast("Ritual restored");
+      toast(t("home.rituals.toast.restored"));
     } else {
       skipRitualInstance(ritualId);
       if (isPlanned) {
@@ -942,13 +968,13 @@ export const TodayZone: React.FC<{
           skippedRitualIds: [...(dayEntry?.skippedRitualIds ?? []), ritualId],
         });
       }
-      toast("Ritual skipped today");
+      toast(t("home.rituals.toast.skipped"));
     }
   };
 
   const handleReopen = () => {
     updateDayEntry(TODAY_ISO, { isClosed: false, closedAt: undefined });
-    toast("Day re-opened");
+    toast(t("home.toast.dayReopened"));
   };
 
   // ─── STATE C: closed ───
@@ -970,10 +996,15 @@ export const TodayZone: React.FC<{
       <section>
         <div className="bg-surface-elevated border border-border-subtle rounded-[6px] p-5 space-y-3">
           <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
-            DAY CLOSED
+            {t("home.todayZone.dayClosed.label")}
           </div>
           <div className="font-mono text-[13px] text-text-secondary tabular-nums">
-            {doneActions} actions done · {ritualsDoneCount} rituals done · +{valueAdded} value · {focusH}h focused
+            {t("home.todayZone.dayClosed.summary", {
+              actions: doneActions,
+              rituals: ritualsDoneCount,
+              value: valueAdded,
+              hours: focusH,
+            })}
           </div>
           {/* reflection removed */}
           <button
@@ -981,7 +1012,7 @@ export const TodayZone: React.FC<{
             onClick={handleReopen}
             className="text-[12px] text-text-warning hover:brightness-110 transition"
           >
-            Re-open day
+            {t("home.todayZone.dayClosed.reopen")}
           </button>
         </div>
       </section>
@@ -998,7 +1029,7 @@ export const TodayZone: React.FC<{
         {/* MAIN TASK */}
         <div>
           <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-2">
-            MAIN TASK
+            {t("home.mainTask.label")}
           </div>
           {mainTask ? (
             (() => {
@@ -1032,7 +1063,7 @@ export const TodayZone: React.FC<{
                       e.stopPropagation();
                       handleToggleDone(mainTask.id);
                     }}
-                    aria-label={mtDone ? "Re-open" : "Mark done"}
+                    aria-label={mtDone ? t("home.mainTask.aria.reopen") : t("home.mainTask.aria.markDone")}
                     className="inline-flex items-center justify-center rounded-[2px] border shrink-0 ml-1"
                     style={{
                       width: 16,
@@ -1064,7 +1095,7 @@ export const TodayZone: React.FC<{
                         mtDone ? "text-text-tertiary" : "text-text-secondary"
                       }`}
                     >
-                      {doneAtLabel ? `Done at ${doneAtLabel}` : null}
+                      {doneAtLabel ? t("home.mainTask.doneAt", { time: doneAtLabel }) : null}
                       {doneAtLabel && parentLabel ? " · " : null}
                       {parentLabel}
                     </span>
@@ -1074,7 +1105,7 @@ export const TodayZone: React.FC<{
                       className="font-mono text-[11px] uppercase tracking-[0.06em] shrink-0"
                       style={{ color: "hsl(var(--accent))" }}
                     >
-                      ✓ Day's win
+                      {t("home.mainTask.daysWin")}
                     </span>
                   )}
                   {mainTask.impact > 0 && (
@@ -1091,7 +1122,7 @@ export const TodayZone: React.FC<{
                       e.stopPropagation();
                       setClearMainTaskOpen(true);
                     }}
-                    aria-label="Clear Main Task"
+                    aria-label={t("home.mainTask.clearAria")}
                     className="shrink-0 text-text-tertiary hover:text-text-primary transition-colors p-1 -mr-1"
                   >
                     <X size={14} />
@@ -1110,8 +1141,8 @@ export const TodayZone: React.FC<{
                 <Star size={16} className="text-text-tertiary" />
                 <span className="text-[14px] text-text-tertiary">
                   {todays.length === 0
-                    ? "No actions planned · add some first"
-                    : "Pick a Main Task"}
+                    ? t("home.mainTask.empty.noActions")
+                    : t("home.mainTask.empty.pick")}
                 </span>
               </button>
               {pickMainTaskOpen && todays.length > 0 && (
@@ -1128,7 +1159,7 @@ export const TodayZone: React.FC<{
                           onClick={() => {
                             updateDayEntry(TODAY_ISO, { mainTaskActionId: a.id });
                             setPickMainTaskOpen(false);
-                            toast.success("Main Task set");
+                            toast.success(t("home.mainTask.toast.set"));
                           }}
                           className="w-full text-left px-4 py-2.5 hover:bg-surface-hover transition-colors border-b border-border-subtle last:border-b-0"
                         >
@@ -1147,30 +1178,30 @@ export const TodayZone: React.FC<{
 
         <ConfirmModal
           open={clearMainTaskOpen}
-          title="Clear Main Task?"
-          body="You can pick another from today's actions."
-          confirmLabel="Clear"
+          title={t("home.mainTask.confirm.clear.heading")}
+          body={t("home.mainTask.confirm.clear.body")}
+          confirmLabel={t("home.mainTask.confirm.clear.cta")}
           onCancel={() => setClearMainTaskOpen(false)}
           onConfirm={() => {
             updateDayEntry(TODAY_ISO, { mainTaskActionId: null });
             setClearMainTaskOpen(false);
-            toast("Main Task cleared");
+            toast(t("home.mainTask.toast.cleared"));
           }}
         />
 
         {/* ACTIONS GROUP */}
         <div>
           <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
-            TODAY'S ACTIONS · {todays.length}
+            {t("home.actions.section", { count: todays.length })}
           </div>
           {todays.length > 0 && (
             <div className="font-mono text-[12px] text-text-secondary mt-1 mb-2 tabular-nums">
-              {doneActionsCount} done · {remainingActionsCount} remaining
+              {t("home.actions.progress", { done: doneActionsCount, remaining: remainingActionsCount })}
             </div>
           )}
           {todays.length === 0 ? (
             <div className="px-3 py-4 text-center font-mono text-[11px] text-text-tertiary border border-dashed border-border-subtle rounded-[4px]">
-              No actions for today.
+              {t("home.actions.empty")}
             </div>
           ) : (
             <div>
@@ -1204,7 +1235,7 @@ export const TodayZone: React.FC<{
             onChange={(e) => setQuickAdd(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") handleQuickAdd(); }}
             className="flex-1 bg-transparent text-[13px] text-text-primary placeholder:text-text-tertiary focus:outline-none"
-            placeholder="+ Add action for today…"
+            placeholder={t("home.actions.quickAddPlaceholder")}
           />
           <span className="font-mono text-[11px] text-text-tertiary">⏎</span>
         </div>
@@ -1222,18 +1253,18 @@ export const TodayZone: React.FC<{
             return (
               <>
                 <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
-                  TODAY'S RITUALS · {ritualsTotal}
+                  {t("home.rituals.section", { count: ritualsTotal })}
                 </div>
                 {ritualsTotal > 0 && (
                   <div className="font-mono text-[12px] text-text-secondary mb-2 mt-1 tabular-nums">
-                    {doneCount} done · {pendingCount} pending · {skippedCount} skipped
+                    {t("home.rituals.progress", { done: doneCount, pending: pendingCount, skipped: skippedCount })}
                   </div>
                 )}
               </>
             );
           })()}
           {todaysRituals.length === 0 ? (
-            <div className="font-mono text-[11px] text-text-tertiary px-3 py-2">No rituals today.</div>
+            <div className="font-mono text-[11px] text-text-tertiary px-3 py-2">{t("home.rituals.empty")}</div>
           ) : (
             <div>
               {todaysRituals.map((r) => {
@@ -1245,19 +1276,26 @@ export const TodayZone: React.FC<{
                 const mult = ritualMultiplier(r.totalCompletions);
                 const color = colorVar(r.goalId);
                 const streak = computeRitualStreak(r);
-                const scheduleLabel = r.schedule[0].toUpperCase() + r.schedule.slice(1);
+                const scheduleKeyMap: Record<string, string> = {
+                  daily: "rituals.schedule.daily",
+                  weekdays: "rituals.schedule.weekdays",
+                  weekly: "rituals.schedule.weekly",
+                };
+                const scheduleLabel = scheduleKeyMap[r.schedule]
+                  ? t(scheduleKeyMap[r.schedule])
+                  : r.schedule[0].toUpperCase() + r.schedule.slice(1);
                 const metaParts: string[] = [scheduleLabel];
                 if (r.totalCompletions === 0) {
-                  metaParts.push("brand new");
+                  metaParts.push(t("home.rituals.brandNew"));
                 } else {
-                  metaParts.push(`${streak}d streak`);
-                  metaParts.push(`${r.totalCompletions} done`);
+                  metaParts.push(t("home.rituals.streak", { count: streak }));
+                  metaParts.push(t("home.rituals.totalDone", { count: r.totalCompletions }));
                 }
                 if (doneToday && doneEntry?.at) {
-                  const t = new Date(doneEntry.at);
-                  const hh = String(t.getHours()).padStart(2, "0");
-                  const mm = String(t.getMinutes()).padStart(2, "0");
-                  metaParts.push(`✓ Done at ${hh}:${mm}`);
+                  const dt = new Date(doneEntry.at);
+                  const hh = String(dt.getHours()).padStart(2, "0");
+                  const mm = String(dt.getMinutes()).padStart(2, "0");
+                  metaParts.push(t("home.rituals.doneAt", { time: `${hh}:${mm}` }));
                 }
                 const isTerminal = doneToday || isSkipped;
                 const reopenRitual = () => {
@@ -1268,7 +1306,7 @@ export const TodayZone: React.FC<{
                     completionHistory: newHistory,
                     totalCompletions: Math.max(0, r.totalCompletions - 1),
                   });
-                  toast("Ritual re-opened");
+                  toast(t("home.rituals.toast.reopened"));
                 };
                 return (
                   <div
@@ -1296,17 +1334,17 @@ export const TodayZone: React.FC<{
                             reopenRitual();
                           } else {
                             if (!r.baseImpact || !r.timeEstimateMinutes) {
-                              toast.error("Set base impact and time before marking done");
+                              toast.error(t("home.rituals.toast.needBaseImpactTime"));
                               openPanel({ kind: "ritual", mode: "edit", id: r.id });
                               return;
                             }
                             handleRitualDone(r.id, false);
                             const newMult = ritualMultiplier(r.totalCompletions + 1);
-                            toast.success(`Ritual marked done — multiplier now ×${newMult.toFixed(2)}`);
+                            toast.success(t("home.rituals.toast.markedDone", { mult: newMult.toFixed(2) }));
                           }
                         }}
                         disabled={isSkipped}
-                        aria-label={doneToday ? "Re-open ritual" : "Mark ritual done"}
+                        aria-label={doneToday ? t("home.rituals.aria.reopen") : t("home.rituals.aria.markDone")}
                         className="inline-flex items-center justify-center rounded-[2px] border shrink-0 disabled:cursor-not-allowed"
                         style={{
                           width: 16,
@@ -1356,7 +1394,7 @@ export const TodayZone: React.FC<{
                             onClick={(e) => { e.stopPropagation(); reopenRitual(); }}
                             className="text-[11px] text-text-tertiary hover:text-text-primary transition"
                           >
-                            Re-open
+                            {t("common.reopen")}
                           </button>
                         ) : (
                           <button
@@ -1367,7 +1405,7 @@ export const TodayZone: React.FC<{
                             }}
                             className="text-[11px] text-text-tertiary hover:text-text-primary transition"
                           >
-                            {isSkipped ? "Restore" : "Skip"}
+                            {isSkipped ? t("common.restore") : t("common.skip")}
                           </button>
                         )}
                       </div>
@@ -1387,7 +1425,7 @@ export const TodayZone: React.FC<{
             onClick={onCloseClick}
             className="w-full md:w-auto px-5 py-2 rounded-[4px] border border-[hsl(var(--accent))] text-[hsl(var(--accent))] text-[13px] font-medium hover:bg-surface-hover transition"
           >
-            Close day
+            {t("home.closeDay")}
           </button>
         )}
       </div>

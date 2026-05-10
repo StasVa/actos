@@ -1029,7 +1029,7 @@ const DayTypeChip: React.FC<{
           className="inline-block rounded-full shrink-0"
           style={{ width: 8, height: 8, background: current.color }}
         />
-        <span className="text-[13px] text-text-primary">{current.label}</span>
+        <span className="text-[13px] text-text-primary">{t(current.labelKey)}</span>
         <span className="font-mono text-[10px] text-text-tertiary">▾</span>
       </button>
       {open && (

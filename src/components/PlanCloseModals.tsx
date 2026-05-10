@@ -631,7 +631,7 @@ const PlanForm: React.FC<{
                     </div>
                     {/* Line 2: parent picker — inline text triggers */}
                     <div className="flex items-center gap-1.5 pl-[22px] flex-wrap">
-                      <span className="text-[13px] text-text-secondary">in</span>
+                      <span className="text-[13px] text-text-secondary">{t("planToday.actions.in")}</span>
                       {quickGoalId && (
                         <span
                           className="inline-block rounded-full shrink-0"

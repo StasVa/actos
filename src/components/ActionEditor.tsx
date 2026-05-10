@@ -15,6 +15,8 @@ import { Link } from "react-router-dom";
 import { ChevronDown, Check, Calendar as CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
+import i18n from "@/i18n";
 import { useStore } from "@/store/useStore";
 import type { Action, ActionStatus, ID } from "@/types";
 import { ConfirmModal } from "./ConfirmModal";

@@ -541,11 +541,11 @@ const ReviewDayDetail: React.FC = () => {
             {sessionsForDay.length > 0 && (
               <section>
                 <SectionHead
-                  meta={`${formatHM(
+                  meta={t("reviews.detail.section.sessionsMeta", { time: formatHM(
                     sessionsForDay.reduce((s, x) => s + sessionDurationMinutes(x), 0),
-                  ).toUpperCase()} FOCUSED`}
+                  ).toUpperCase() })}
                 >
-                  Sessions · {sessionsForDay.length}
+                  {t("reviews.detail.section.sessions", { count: sessionsForDay.length })}
                 </SectionHead>
                 <SessionsSection sessions={sessionsForDay} variant="flat" />
               </section>

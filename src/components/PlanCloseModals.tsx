@@ -788,7 +788,7 @@ const PlanForm: React.FC<{
             <div className="space-y-1">
               {dueRituals.length === 0 && (
                 <div className="font-mono text-[11px] text-text-tertiary py-2">
-                  No rituals scheduled for today.
+                  {t("planToday.rituals.none")}
                 </div>
               )}
               {dueRituals.map((r) => {

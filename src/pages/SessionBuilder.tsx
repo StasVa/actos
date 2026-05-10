@@ -856,10 +856,10 @@ const SessionBuilder: React.FC = () => {
           {/* ACTIONS */}
           <section className="mt-8">
             <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-1">
-              ACTIONS · {selectedIds.length} SELECTED
+              {t("sessionBuilder.section.actions", { count: selectedIds.length })}
             </div>
             <div className="text-[13px] text-text-secondary mb-3">
-              Pick what you'll work on. The session will guide you through them in order.
+              {t("sessionBuilder.section.actionsHelp")}
             </div>
             {isMobile ? (
               <div className="flex flex-col gap-4">

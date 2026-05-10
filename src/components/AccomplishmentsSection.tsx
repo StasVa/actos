@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 export interface AccomplishmentTile {
   /** Identifier for React keying. */
@@ -57,19 +58,20 @@ const AccomplishmentTileView: React.FC<{ tile: AccomplishmentTile }> = ({ tile }
 };
 
 export const AccomplishmentsSection: React.FC<Props> = ({ tiles, period }) => {
+  const { t } = useTranslation();
   return (
     <section>
       <h2 className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-3">
-        Accomplishments
+        {t("accomplishments.heading")}
       </h2>
       {tiles.length === 0 ? (
         <div className="text-[13px] text-text-tertiary">
-          No accomplishments tracked for this {period}.
+          {t(`accomplishments.empty.${period}` as const)}
         </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
-          {tiles.map((t) => (
-            <AccomplishmentTileView key={t.key} tile={t} />
+          {tiles.map((tile) => (
+            <AccomplishmentTileView key={tile.key} tile={tile} />
           ))}
         </div>
       )}

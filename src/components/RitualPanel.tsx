@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { useTranslation } from "react-i18next";
 import { Tooltip } from "@/components/Tooltip";
 
 const G1 = "hsl(var(--goal-1))";
@@ -10,8 +11,8 @@ type Props = {
   mode?: "edit" | "new";
 };
 
-const SCHEDULE_OPTIONS = ["Daily", "Weekdays", "Weekly", "Custom"] as const;
-type ScheduleOpt = (typeof SCHEDULE_OPTIONS)[number];
+const SCHEDULE_KEYS = ["daily", "weekdays", "weekly", "custom"] as const;
+type ScheduleOpt = (typeof SCHEDULE_KEYS)[number];
 
 /* 12 weeks consistency: positions 4 and 8 (1-indexed) missed */
 const WEEKS: { label: string; done: boolean }[] = [
@@ -51,10 +52,11 @@ const Divider: React.FC = () => (
 );
 
 const RitualPanel: React.FC<Props> = ({ open, onClose, mode = "edit" }) => {
+  const { t } = useTranslation();
   const isNew = mode === "new";
   const [mounted, setMounted] = useState(open);
   const [visible, setVisible] = useState(false);
-  const [schedule, setSchedule] = useState<ScheduleOpt>(isNew ? "Daily" : "Weekly");
+  const [schedule, setSchedule] = useState<ScheduleOpt>(isNew ? "daily" : "weekly");
   const [title, setTitle] = useState(isNew ? "" : "Weekly project audit");
   const [impact, setImpact] = useState(5);
   const [time, setTime] = useState("30m");
@@ -68,16 +70,15 @@ const RitualPanel: React.FC<Props> = ({ open, onClose, mode = "edit" }) => {
   // Mount / animate + reset form state on each open
   useEffect(() => {
     if (open) {
-      // Reset form to mode defaults whenever panel opens
       if (isNew) {
         setTitle("");
-        setSchedule("Daily");
+        setSchedule("daily");
         setImpact(5);
         setTime("30m");
         setNotes("");
       } else {
         setTitle("Weekly project audit");
-        setSchedule("Weekly");
+        setSchedule("weekly");
         setImpact(5);
         setTime("30m");
         setNotes(
@@ -126,7 +127,7 @@ const RitualPanel: React.FC<Props> = ({ open, onClose, mode = "edit" }) => {
       {/* Panel */}
       <div
         role="dialog"
-        aria-label="Edit ritual"
+        aria-label={t("ritualPanel.aria.edit")}
         className="bg-surface-elevated border-l border-border-subtle"
         style={{
           position: "fixed",
@@ -150,11 +151,11 @@ const RitualPanel: React.FC<Props> = ({ open, onClose, mode = "edit" }) => {
               style={{ zIndex: 1 }}
             >
               <div className="font-mono text-[11px] uppercase tracking-[0.08em] text-text-secondary">
-                {isNew ? "NEW RITUAL" : "EDIT RITUAL"}
+                {isNew ? t("ritualPanel.headingNew") : t("ritualPanel.headingEdit")}
               </div>
               <button
                 onClick={onClose}
-                aria-label="Close"
+                aria-label={t("ritualPanel.aria.close")}
                 className="w-6 h-6 flex items-center justify-center text-text-secondary rounded-[4px] hover:bg-surface-hover hover:text-text-primary transition-colors text-[16px] leading-none cursor-pointer"
               >
                 ×
@@ -166,16 +167,16 @@ const RitualPanel: React.FC<Props> = ({ open, onClose, mode = "edit" }) => {
               ref={titleRef}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder={isNew ? "Ritual title" : undefined}
+              placeholder={isNew ? t("ritualPanel.titlePlaceholder") : undefined}
               className="w-full bg-transparent text-text-primary text-[18px] font-medium outline-none border border-transparent rounded-[4px] focus:border-border-default focus:px-3 focus:py-2 transition-[padding,border-color] duration-100 placeholder:text-text-tertiary"
               style={{ fontFamily: "Inter, sans-serif" }}
             />
 
             <div className="h-3" />
 
-            {/* Parent */}
+            {/* Parent — demo placeholder, not extracted (mock data) */}
             <div>
-              <TinyLabel>PARENT</TinyLabel>
+              <TinyLabel>{t("ritualPanel.label.parent")}</TinyLabel>
               <div className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2.5 py-2 flex items-center gap-2 text-[13px] text-text-primary">
                 <span className="w-2 h-2 rounded-full" style={{ background: G1 }} />
                 <span>Launch YouTube channel</span>
@@ -187,9 +188,9 @@ const RitualPanel: React.FC<Props> = ({ open, onClose, mode = "edit" }) => {
 
             {/* Schedule */}
             <div>
-              <TinyLabel>SCHEDULE</TinyLabel>
+              <TinyLabel>{t("ritualPanel.label.schedule")}</TinyLabel>
               <div className="w-full border border-border-subtle rounded-[4px] flex overflow-hidden">
-                {SCHEDULE_OPTIONS.map((opt, i) => {
+                {SCHEDULE_KEYS.map((opt, i) => {
                   const active = schedule === opt;
                   return (
                     <button
@@ -202,14 +203,14 @@ const RitualPanel: React.FC<Props> = ({ open, onClose, mode = "edit" }) => {
                       } ${i > 0 ? "border-l border-border-subtle" : ""}`}
                       style={{ fontFamily: "Inter, sans-serif" }}
                     >
-                      {opt}
+                      {t(`ritualPanel.schedule.${opt}` as const)}
                     </button>
                   );
                 })}
               </div>
-              {schedule === "Weekly" && (
+              {schedule === "weekly" && (
                 <div className="mt-2 font-mono text-[11px] text-text-secondary">
-                  On Mondays · Next: tomorrow
+                  {t("ritualPanel.weekly.next")}
                 </div>
               )}
             </div>
@@ -218,7 +219,7 @@ const RitualPanel: React.FC<Props> = ({ open, onClose, mode = "edit" }) => {
 
             {/* Base impact */}
             <div>
-              <TinyLabel>BASE IMPACT</TinyLabel>
+              <TinyLabel>{t("ritualPanel.label.baseImpact")}</TinyLabel>
               <div className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2.5 py-1.5 flex items-center">
                 <span className="font-mono text-[16px] text-text-primary tabular-nums flex-1">
                   {impact}
@@ -226,20 +227,20 @@ const RitualPanel: React.FC<Props> = ({ open, onClose, mode = "edit" }) => {
                 <button
                   onClick={() => setImpact(Math.max(0, impact - 1))}
                   className="w-4 h-4 flex items-center justify-center text-text-tertiary hover:text-text-primary text-[14px] leading-none cursor-pointer"
-                  aria-label="Decrease"
+                  aria-label={t("ritualPanel.aria.decrease")}
                 >
                   −
                 </button>
                 <button
                   onClick={() => setImpact(impact + 1)}
                   className="w-4 h-4 ml-2 flex items-center justify-center text-text-tertiary hover:text-text-primary text-[14px] leading-none cursor-pointer"
-                  aria-label="Increase"
+                  aria-label={t("ritualPanel.aria.increase")}
                 >
                   +
                 </button>
               </div>
               <div className="mt-1 font-mono text-[10px] text-text-tertiary">
-                Per completed instance, at base level.
+                {t("ritualPanel.baseImpact.hint")}
               </div>
             </div>
 
@@ -247,7 +248,7 @@ const RitualPanel: React.FC<Props> = ({ open, onClose, mode = "edit" }) => {
 
             {/* Time estimate */}
             <div>
-              <TinyLabel>TIME ESTIMATE</TinyLabel>
+              <TinyLabel>{t("ritualPanel.label.timeEstimate")}</TinyLabel>
               <div className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2.5 py-1.5">
                 <input
                   value={time}
@@ -255,14 +256,14 @@ const RitualPanel: React.FC<Props> = ({ open, onClose, mode = "edit" }) => {
                   className="w-full bg-transparent outline-none font-mono text-[14px] text-text-primary tabular-nums"
                 />
               </div>
-              <div className="mt-1 font-mono text-[10px] text-text-tertiary">Per instance.</div>
+              <div className="mt-1 font-mono text-[10px] text-text-tertiary">{t("ritualPanel.timeEstimate.hint")}</div>
             </div>
 
             <div className="h-6" />
 
             {/* Notes */}
             <div>
-              <TinyLabel>NOTES</TinyLabel>
+              <TinyLabel>{t("ritualPanel.label.notes")}</TinyLabel>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
@@ -278,7 +279,7 @@ const RitualPanel: React.FC<Props> = ({ open, onClose, mode = "edit" }) => {
 
                 {/* Multiplier */}
                 <div className="font-mono text-[11px] uppercase tracking-[0.08em] text-text-secondary">
-                  MULTIPLIER
+                  {t("ritualPanel.multiplier")}
                 </div>
                 <div className="h-3" />
                 <div className="font-mono text-[32px] font-medium text-text-primary tabular-nums leading-none">
@@ -286,13 +287,13 @@ const RitualPanel: React.FC<Props> = ({ open, onClose, mode = "edit" }) => {
                 </div>
                 <div className="h-2" />
                 <div className="font-mono">
-                  <span className="text-[13px] text-text-primary">Effective impact: 5.5</span>
-                  <span className="text-[11px] text-text-tertiary"> (base 5 × 1.10)</span>
+                  <span className="text-[13px] text-text-primary">{t("ritualPanel.effective", { value: "5.5" })}</span>
+                  <span className="text-[11px] text-text-tertiary">{t("ritualPanel.effectiveBase", { base: 5, mult: "1.10" })}</span>
                 </div>
 
                 <div className="h-4" />
 
-                <TinyLabel>PROGRESS TO ×1.25</TinyLabel>
+                <TinyLabel>{t("ritualPanel.progress.label")}</TinyLabel>
                 <div className="w-full h-1.5 bg-surface-hover rounded-[2px] overflow-hidden">
                   <div
                     className="h-full rounded-[2px]"
@@ -300,7 +301,7 @@ const RitualPanel: React.FC<Props> = ({ open, onClose, mode = "edit" }) => {
                   />
                 </div>
                 <div className="mt-2 font-mono text-[11px] text-text-tertiary">
-                  12 of 30 completions · 18 to go
+                  {t("ritualPanel.progress.text", { done: 12, total: 30, remain: 18 })}
                 </div>
 
                 <Divider />
@@ -308,10 +309,10 @@ const RitualPanel: React.FC<Props> = ({ open, onClose, mode = "edit" }) => {
                 {/* Recent consistency */}
                 <div className="flex items-center justify-between">
                   <div className="font-mono text-[11px] uppercase tracking-[0.08em] text-text-secondary">
-                    RECENT CONSISTENCY
+                    {t("ritualPanel.consistency.heading")}
                   </div>
                   <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
-                    10 OF 12 LAST WEEKS
+                    {t("ritualPanel.consistency.meta", { done: 10, total: 12 })}
                   </div>
                 </div>
                 <div className="h-3" />
@@ -328,7 +329,7 @@ const RitualPanel: React.FC<Props> = ({ open, onClose, mode = "edit" }) => {
                             {w.label}
                           </div>
                           <div className="font-mono text-[11px] text-text-tertiary mt-1">
-                            {w.done ? "Completed" : "Missed"}
+                            {w.done ? t("ritualPanel.consistency.completed") : t("ritualPanel.consistency.missed")}
                           </div>
                         </div>
                       }
@@ -345,7 +346,7 @@ const RitualPanel: React.FC<Props> = ({ open, onClose, mode = "edit" }) => {
                   ))}
                 </div>
                 <div className="mt-2 font-mono text-[10px] text-text-tertiary">
-                  Each block represents one week. Streak is not tracked — only total completions.
+                  {t("ritualPanel.consistency.hint")}
                 </div>
 
                 <Divider />
@@ -353,10 +354,10 @@ const RitualPanel: React.FC<Props> = ({ open, onClose, mode = "edit" }) => {
                 {/* History */}
                 <div className="flex items-center justify-between">
                   <div className="font-mono text-[11px] uppercase tracking-[0.08em] text-text-secondary">
-                    HISTORY
+                    {t("ritualPanel.history.heading")}
                   </div>
                   <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
-                    12 ALL-TIME
+                    {t("ritualPanel.history.meta", { count: 12 })}
                   </div>
                 </div>
                 <div className="h-3" />
@@ -392,7 +393,7 @@ const RitualPanel: React.FC<Props> = ({ open, onClose, mode = "edit" }) => {
                   className="inline-block text-[12px] text-[hsl(var(--accent))] hover:text-text-primary hover:underline transition-colors"
                   style={{ fontFamily: "Inter, sans-serif" }}
                 >
-                  View all 12 completions
+                  {t("ritualPanel.history.viewAll", { count: 12 })}
                 </a>
               </>
             )}
@@ -418,14 +419,14 @@ const RitualPanel: React.FC<Props> = ({ open, onClose, mode = "edit" }) => {
                   }
                   onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                 >
-                  Save ritual
+                  {t("ritualPanel.cta.save")}
                 </button>
                 <button
                   onClick={onClose}
                   className="text-[12px] text-text-tertiary hover:text-text-secondary transition-colors cursor-pointer bg-transparent"
                   style={{ fontFamily: "Inter, sans-serif" }}
                 >
-                  Cancel
+                  {t("common.cancel")}
                 </button>
               </>
             ) : (
@@ -441,17 +442,17 @@ const RitualPanel: React.FC<Props> = ({ open, onClose, mode = "edit" }) => {
                   }
                   onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                 >
-                  Mark today done
+                  {t("ritualPanel.cta.markToday")}
                 </button>
                 <div className="flex items-center" style={{ gap: 12 }}>
                   <button
                     className="text-[12px] text-text-tertiary hover:text-text-secondary transition-colors cursor-pointer bg-transparent"
                     style={{ fontFamily: "Inter, sans-serif" }}
                   >
-                    Archive ritual
+                    {t("common.archive")} {t("nav.rituals").toLowerCase()}
                   </button>
                   <button
-                    aria-label="More"
+                    aria-label={t("common.more")}
                     className="w-6 h-6 rounded-[4px] text-text-tertiary hover:bg-surface-hover hover:text-text-primary transition-colors text-[16px] leading-none cursor-pointer flex items-center justify-center"
                   >
                     ···

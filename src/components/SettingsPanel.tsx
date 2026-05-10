@@ -4,6 +4,7 @@
 // triggered from the Sidebar.
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useStore } from "@/store/useStore";
 import { toast } from "sonner";
@@ -28,6 +29,7 @@ interface SettingsPanelProps {
 }
 
 export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
+  const { t } = useTranslation();
   const settings = useStore((s) => s.settings);
   const goals = useStore((s) => s.goals);
   const setDefaultGoal = useStore((s) => s.setDefaultGoal);
@@ -36,12 +38,10 @@ export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
   const activeGoals = goals.filter((g) => g.status === "active");
 
   const handleReset = () => {
-    if (
-      confirm("Reset everything to seed data? This wipes all your changes.")
-    ) {
+    if (confirm(t("settings.panel.confirm.reset"))) {
       localStorage.removeItem(STORAGE_KEY);
       resetToSeed();
-      toast.success("Reset to seed data");
+      toast.success(t("settings.panel.toast.reset"));
       onOpenChange(false);
     }
   };
@@ -51,7 +51,7 @@ export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
     const payload = raw ? JSON.parse(raw) : { state: useStore.getState() };
     const stamp = new Date().toISOString().slice(0, 10);
     downloadJSON(`actos-backup-${stamp}.json`, payload);
-    toast.success("Backup downloaded");
+    toast.success(t("settings.panel.toast.exported"));
   };
 
   const fileRef = React.useRef<HTMLInputElement>(null);
@@ -60,21 +60,20 @@ export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
-    if (!confirm(`Import "${file.name}"? This replaces all current data.`)) return;
+    if (!confirm(t("settings.panel.confirm.import", { name: file.name }))) return;
     try {
       const text = await file.text();
       const parsed = JSON.parse(text);
-      // Accept either a raw zustand-persist envelope { state, version } or a bare state object.
       const envelope = parsed?.state ? parsed : { state: parsed, version: 0 };
       if (!envelope.state || typeof envelope.state !== "object") {
         throw new Error("Missing state field");
       }
       localStorage.setItem(STORAGE_KEY, JSON.stringify(envelope));
-      toast.success("Import complete — reloading…");
+      toast.success(t("settings.panel.toast.imported"));
       setTimeout(() => window.location.reload(), 600);
     } catch (err) {
       console.error(err);
-      toast.error("Import failed — invalid JSON");
+      toast.error(t("settings.panel.toast.importFailed"));
     }
   };
 
@@ -82,7 +81,7 @@ export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-[420px] sm:max-w-[420px] bg-surface-elevated border-l border-border-subtle">
         <SheetHeader>
-          <SheetTitle className="text-text-primary text-[16px] font-medium">Settings</SheetTitle>
+          <SheetTitle className="text-text-primary text-[16px] font-medium">{t("settings.panel.title")}</SheetTitle>
         </SheetHeader>
 
         <div className="mt-6 space-y-8">
@@ -90,10 +89,10 @@ export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
           {/* Default goal */}
           <section>
             <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-3">
-              DEFAULT GOAL
+              {t("settings.panel.defaultGoal.label")}
             </div>
             <div className="text-[11px] text-text-tertiary mb-2">
-              New ideas and unattached actions land here.
+              {t("settings.panel.defaultGoal.hint")}
             </div>
             <select
               value={settings.defaultGoalId ?? ""}
@@ -111,11 +110,10 @@ export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
           {/* Backup */}
           <section>
             <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-3">
-              BACKUP
+              {t("settings.panel.backup.label")}
             </div>
             <div className="text-[11px] text-text-tertiary mb-3">
-              Export a JSON snapshot of every goal, project, action, ritual, idea, and day entry.
-              Import replaces all current data — make a backup first.
+              {t("settings.panel.backup.hint")}
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -123,14 +121,14 @@ export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
                 onClick={handleExport}
                 className="h-9 px-4 text-[13px] font-medium rounded-[4px] border border-border-default text-text-primary hover:border-[hsl(var(--accent))] hover:bg-surface-hover transition-colors"
               >
-                Export JSON
+                {t("settings.panel.backup.export")}
               </button>
               <button
                 type="button"
                 onClick={handleImportPick}
                 className="h-9 px-4 text-[13px] font-medium rounded-[4px] border border-border-default text-text-primary hover:border-[hsl(var(--accent))] hover:bg-surface-hover transition-colors"
               >
-                Import JSON
+                {t("settings.panel.backup.import")}
               </button>
               <input
                 ref={fileRef}
@@ -145,19 +143,19 @@ export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
           {/* Danger */}
           <section>
             <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-3">
-              DANGER ZONE
+              {t("settings.panel.danger.label")}
             </div>
             <button
               type="button"
               onClick={handleReset}
               className="h-9 px-4 text-[13px] font-medium rounded-[4px] border border-[hsl(var(--text-warning))] text-text-warning hover:bg-surface-hover transition-colors"
             >
-              Reset to seed data
+              {t("settings.panel.danger.reset")}
             </button>
-            <div className="text-[11px] text-text-tertiary mt-2">
-              Wipes localStorage and restores the demo dataset. You can also run{" "}
-              <code className="font-mono text-text-secondary">__resetStore()</code> in the console.
-            </div>
+            <div
+              className="text-[11px] text-text-tertiary mt-2 [&_code]:font-mono [&_code]:text-text-secondary"
+              dangerouslySetInnerHTML={{ __html: t("settings.panel.danger.hintHtml") }}
+            />
           </section>
         </div>
       </SheetContent>

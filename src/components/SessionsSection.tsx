@@ -10,6 +10,7 @@
 // component so all integration points behave consistently.
 
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { format, parseISO } from "date-fns";
 import { useStore } from "@/store/useStore";
@@ -27,13 +28,19 @@ import { formatWeekLabel, weekRange, yearWeekFromDate } from "@/lib/weekUtils";
 /* ───────── Status pill ───────── */
 
 const StatusPill: React.FC<{ status: Session["status"] }> = ({ status }) => {
+  const { t } = useTranslation();
   const color =
     status === "completed"
       ? "hsl(var(--state-active))"
       : status === "aborted"
       ? "hsl(var(--text-warning))"
       : "hsl(var(--accent))";
-  const label = status === "in_progress" ? "ACTIVE" : status.toUpperCase();
+  const label =
+    status === "in_progress"
+      ? t("sessions.section.status.active")
+      : status === "completed"
+        ? t("sessions.section.status.completed")
+        : t("sessions.section.status.aborted");
   return (
     <span
       className="font-mono text-[10px] uppercase tracking-[0.06em] px-1.5 py-[2px] rounded-[3px]"
@@ -57,28 +64,39 @@ interface RowProps {
 }
 
 const SessionRow: React.FC<RowProps> = ({ session, outcome, subExtra, leftLabel, onClick }) => {
+  const { t } = useTranslation();
   const dur = sessionDurationMinutes(session);
   const planned = sessionPlannedMinutes(session);
   const doneCount = session.completedActionIds.length;
   const droppedCount = session.droppedActionIds.length;
-  const durStr = dur > 0 ? formatTime(dur) : "—";
+  const durStr = dur > 0 ? formatTime(dur) : t("sessions.section.dash");
 
   let modeLine: string;
   if (session.mode === "continuous") {
-    modeLine = `Continuous · ${dur > 0 ? `${dur}min focused` : `${session.workDuration}min planned`}`;
+    const detail = dur > 0
+      ? t("sessions.section.minutesFocused", { count: dur })
+      : t("sessions.section.minutesPlanned", { count: session.workDuration });
+    modeLine = t("sessions.section.modeContinuous", { detail });
   } else {
-    const mode = session.mode === "pomodoro" ? "Pomodoro" : "Custom";
-    modeLine = `${mode} · ${session.workDuration}min × ${session.cyclesCompleted}/${session.cyclesPlanned} cycles`;
+    const mode = session.mode === "pomodoro"
+      ? t("sessions.section.modePomodoro")
+      : t("sessions.section.modeCustom");
+    modeLine = t("sessions.section.modeNamed", {
+      mode,
+      work: session.workDuration,
+      done: session.cyclesCompleted,
+      planned: session.cyclesPlanned,
+    });
   }
 
   const stats: string[] = [];
-  if (outcome > 0) stats.push(`+${outcome} value`);
-  if (doneCount > 0) stats.push(`${doneCount} done`);
-  if (droppedCount > 0) stats.push(`${droppedCount} dropped`);
+  if (outcome > 0) stats.push(t("sessions.section.statValue", { count: outcome }));
+  if (doneCount > 0) stats.push(t("sessions.section.statDone", { count: doneCount }));
+  if (droppedCount > 0) stats.push(t("sessions.section.statDropped", { count: droppedCount }));
 
   const rightLabel =
     session.status === "aborted" && dur > 0
-      ? `${formatTime(dur)} of ${formatTime(planned)}`
+      ? t("sessions.section.rightOf", { actual: formatTime(dur), planned: formatTime(planned) })
       : durStr;
 
   return (
@@ -117,6 +135,7 @@ const DetailRow: React.FC<{
   goal: Goal | undefined;
   onClick: () => void;
 }> = ({ action, status, goal, onClick }) => {
+  const { t } = useTranslation();
   if (!action) return null;
   const goalColor = goal ? `hsl(var(--${goal.color}))` : "hsl(var(--border-default))";
   const pillColor =
@@ -125,7 +144,12 @@ const DetailRow: React.FC<{
       : status === "dropped"
       ? "hsl(var(--text-warning))"
       : "hsl(var(--text-tertiary))";
-  const pillLabel = status === "untouched" ? "NOT TOUCHED" : status.toUpperCase();
+  const pillLabel =
+    status === "untouched"
+      ? t("sessions.section.detail.notTouched")
+      : status === "done"
+        ? t("sessions.section.detail.done")
+        : t("sessions.section.detail.dropped");
   return (
     <div
       onClick={onClick}
@@ -152,7 +176,7 @@ const DetailRow: React.FC<{
   );
 };
 
-function fmtPanelDateTime(iso: string): string {
+function fmtPanelDateTime(iso: string, t: (k: string, opts?: Record<string, unknown>) => string): string {
   const d = new Date(iso);
   const today = new Date();
   const yesterday = new Date(today);
@@ -160,15 +184,17 @@ function fmtPanelDateTime(iso: string): string {
   const sameDay = (a: Date, b: Date) =>
     a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
   const time = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
-  if (sameDay(d, today)) return `Today, ${time}`;
-  if (sameDay(d, yesterday)) return `Yesterday, ${time}`;
-  return `${d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}, ${time}`;
+  if (sameDay(d, today)) return t("sessions.section.todayAt", { time });
+  if (sameDay(d, yesterday)) return t("sessions.section.yesterdayAt", { time });
+  const date = d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+  return t("sessions.section.dateAt", { date, time });
 }
 
 export const SessionDetailPanel: React.FC<{
   session: Session;
   onClose: () => void;
 }> = ({ session, onClose }) => {
+  const { t } = useTranslation();
   const actions = useStore((s) => s.actions);
   const goals = useStore((s) => s.goals);
   const openPanel = useStore((s) => s.openPanel);
@@ -176,8 +202,16 @@ export const SessionDetailPanel: React.FC<{
   const dur = sessionDurationMinutes(session);
   const outcome = sessionOutcome(session, actions);
 
-  const breakStr = session.mode === "continuous" ? "—" : `${session.breakDuration}min break`;
-  const config = `${session.mode[0].toUpperCase() + session.mode.slice(1)} · ${session.workDuration}min work / ${breakStr} · ${session.cyclesPlanned} cycles planned`;
+  const breakStr = session.mode === "continuous"
+    ? t("sessions.section.breakNone")
+    : t("sessions.section.breakMin", { count: session.breakDuration });
+  const modeName = session.mode[0].toUpperCase() + session.mode.slice(1);
+  const config = t("sessions.section.config", {
+    mode: modeName,
+    work: session.workDuration,
+    breakStr,
+    planned: session.cyclesPlanned,
+  });
 
   return (
     <div
@@ -192,7 +226,7 @@ export const SessionDetailPanel: React.FC<{
         <div className="flex items-start justify-between p-5 border-b border-border-subtle">
           <div>
             <div className="text-[18px] font-medium text-text-primary">
-              {fmtPanelDateTime(session.startedAt)}
+              {fmtPanelDateTime(session.startedAt, t)}
             </div>
             <div className="mt-2">
               <StatusPill status={session.status} />
@@ -201,7 +235,7 @@ export const SessionDetailPanel: React.FC<{
           <button
             onClick={onClose}
             className="w-7 h-7 inline-flex items-center justify-center rounded-[3px] text-text-tertiary hover:bg-surface-hover hover:text-text-primary"
-            aria-label="Close"
+            aria-label={t("sessions.section.closeAria")}
           >
             ✕
           </button>
@@ -212,10 +246,12 @@ export const SessionDetailPanel: React.FC<{
             <div className="font-mono text-[12px] text-text-secondary">{config}</div>
             <div className="space-y-1.5">
               <div className="text-[14px] text-text-primary">
-                Actual: {dur > 0 ? `${dur}min` : "—"}
+                {t("sessions.section.actual", {
+                  detail: dur > 0 ? t("sessions.section.actualMin", { count: dur }) : t("sessions.section.dash"),
+                })}
               </div>
               <div className="text-[14px] text-text-primary">
-                Completed {session.cyclesCompleted} of {session.cyclesPlanned} cycles
+                {t("sessions.section.cyclesCompleted", { done: session.cyclesCompleted, planned: session.cyclesPlanned })}
               </div>
               <div
                 className="text-[14px]"
@@ -223,16 +259,18 @@ export const SessionDetailPanel: React.FC<{
                   color: outcome > 0 ? "hsl(var(--state-active))" : "hsl(var(--text-secondary))",
                 }}
               >
-                {outcome > 0 ? `+${outcome} Impact added to active goals` : "+0 Impact added"}
+                {outcome > 0
+                  ? t("sessions.section.impactAdded", { count: outcome })
+                  : t("sessions.section.impactZero")}
               </div>
             </div>
 
             <div>
               <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-secondary mb-2">
-                ACTIONS · {session.plannedActionIds.length} PLANNED
+                {t("sessions.section.actionsHeader", { count: session.plannedActionIds.length })}
               </div>
               {session.plannedActionIds.length === 0 ? (
-                <div className="text-[13px] text-text-tertiary">No actions were planned.</div>
+                <div className="text-[13px] text-text-tertiary">{t("sessions.section.noActionsPlanned")}</div>
               ) : (
                 <div className="border-t border-border-subtle">
                   {session.plannedActionIds.map((aid) => {
@@ -290,6 +328,7 @@ export const SessionsSection: React.FC<Props> = ({
   showStats = false,
   initialLimit,
 }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const actions = useStore((s) => s.actions);
   const allSessions = useStore((s) => s.sessions);
@@ -310,8 +349,16 @@ export const SessionsSection: React.FC<Props> = ({
     const planned = s.plannedActionIds.filter((id) => scope.actionIds.has(id));
     const done = planned.filter((id) => s.completedActionIds.includes(id));
     if (planned.length === 0) return undefined;
-    return `from this ${scope.label}: ${planned.length} planned, ${done.length} done`;
+    return t("sessions.section.scopeSubset", { label: scope.label, planned: planned.length, done: done.length });
   };
+
+  const totalsLine = (withBestWeek?: { minutes: number } | null) => (
+    <div className="mb-3 font-mono text-[12px] text-text-secondary tabular-nums">
+      {t("sessions.section.totalsLine", { total: formatTime(totalMin), avg: formatTime(avgMin), rate: completionRate })}
+      {withBestWeek && withBestWeek.minutes > 0 &&
+        t("sessions.section.bestWeekSuffix", { time: formatTime(withBestWeek.minutes) })}
+    </div>
+  );
 
   /* ─── flat ─── */
   if (variant === "flat") {
@@ -319,14 +366,7 @@ export const SessionsSection: React.FC<Props> = ({
     const visible = sessions.slice(0, limit);
     return (
       <>
-        {showStats && finished.length > 0 && (
-          <div className="mb-3 font-mono text-[12px] text-text-secondary tabular-nums">
-            Total focused:{" "}
-            <span className="text-text-primary">{formatTime(totalMin)}</span> · Avg session:{" "}
-            <span className="text-text-primary">{formatTime(avgMin)}</span> · Completion rate:{" "}
-            <span className="text-text-primary">{completionRate}%</span>
-          </div>
-        )}
+        {showStats && finished.length > 0 && totalsLine()}
         <div className="rounded-[6px] border border-border-subtle overflow-hidden bg-surface-elevated">
           {visible.map((s) => (
             <SessionRow
@@ -344,7 +384,7 @@ export const SessionsSection: React.FC<Props> = ({
             onClick={() => setExpanded(true)}
             className="mt-2 font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary hover:text-text-primary transition-colors"
           >
-            Show all {sessions.length} sessions →
+            {t("sessions.section.showAll", { count: sessions.length })}
           </button>
         )}
         {selected && <SessionDetailPanel session={selected} onClose={() => setSelectedId(null)} />}
@@ -365,14 +405,7 @@ export const SessionsSection: React.FC<Props> = ({
 
     return (
       <>
-        {showStats && finished.length > 0 && (
-          <div className="mb-3 font-mono text-[12px] text-text-secondary tabular-nums">
-            Total focused:{" "}
-            <span className="text-text-primary">{formatTime(totalMin)}</span> · Avg session:{" "}
-            <span className="text-text-primary">{formatTime(avgMin)}</span> · Completion rate:{" "}
-            <span className="text-text-primary">{completionRate}%</span>
-          </div>
-        )}
+        {showStats && finished.length > 0 && totalsLine()}
         <div className="space-y-4">
           {groups.map(([date, list]) => (
             <div key={date}>
@@ -423,25 +456,12 @@ export const SessionsSection: React.FC<Props> = ({
 
   return (
     <>
-      {showStats && finished.length > 0 && (
-        <div className="mb-3 font-mono text-[12px] text-text-secondary tabular-nums">
-          Total focused:{" "}
-          <span className="text-text-primary">{formatTime(totalMin)}</span> · Avg session:{" "}
-          <span className="text-text-primary">{formatTime(avgMin)}</span> · Completion rate:{" "}
-          <span className="text-text-primary">{completionRate}%</span>
-          {bestWeek && bestWeek.minutes > 0 && (
-            <>
-              {" · Best week: "}
-              <span className="text-text-primary">{formatTime(bestWeek.minutes)}</span>
-            </>
-          )}
-        </div>
-      )}
+      {showStats && finished.length > 0 && totalsLine(bestWeek)}
       <div className="rounded-[6px] border border-border-subtle overflow-hidden">
         {weekRows.map((r) => {
           const range = weekRange(r.yearWeek);
           const label = range
-            ? `Week of ${format(range.start, "MMM d")} – ${format(range.end, "MMM d")}`
+            ? t("sessions.section.weekOf", { start: format(range.start, "MMM d"), end: format(range.end, "MMM d") })
             : formatWeekLabel(r.yearWeek);
           return (
             <button
@@ -454,13 +474,13 @@ export const SessionsSection: React.FC<Props> = ({
                 {label}
               </span>
               <span className="font-mono text-[12px] text-text-secondary tabular-nums">
-                <span className="text-text-primary">{r.count}</span> session{r.count === 1 ? "" : "s"}
+                <span className="text-text-primary">{t("sessions.section.weekRowSessions", { count: r.count })}</span>
                 <span className="text-text-tertiary"> · </span>
                 <span className="text-text-primary">{formatTime(r.minutes)}</span>
                 {r.outcome > 0 && (
                   <>
                     <span className="text-text-tertiary"> · </span>
-                    <span className="text-text-primary">+{r.outcome}</span> value
+                    <span className="text-text-primary">{t("sessions.section.weekRowValue", { count: r.outcome })}</span>
                   </>
                 )}
               </span>

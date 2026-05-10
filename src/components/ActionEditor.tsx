@@ -175,6 +175,25 @@ function ActionEditorPanel({
   const [confirmDrop, setConfirmDrop] = useState<ActionStatus | null>(null);
   const [confirmPastDate, setConfirmPastDate] = useState<string | null>(null);
   const titleRef = useRef<HTMLInputElement>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
+
+  // Auto-save indicator (edit mode only). Listens to input/change events on
+  // the body container — every keystroke marks "Saving"; after 500ms idle
+  // the indicator settles to "Saved" with a brief accent flash.
+  const { state: saveState, markEditing } = useSaveIndicator();
+  useEffect(() => {
+    if (mode !== "edit") return;
+    const el = bodyRef.current;
+    if (!el) return;
+    const handler = () => markEditing();
+    el.addEventListener("input", handler);
+    el.addEventListener("change", handler);
+    return () => {
+      el.removeEventListener("input", handler);
+      el.removeEventListener("change", handler);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode]);
 
   useEffect(() => {
     titleRef.current?.focus();

@@ -178,14 +178,17 @@ const STATUS_PILL_KEY: Record<IdeaStatus, string> = {
   discarded: "ideas.statusPill.discarded",
 };
 
-const IdeaStatusPill: React.FC<{ status: IdeaStatus }> = ({ status }) => (
+const IdeaStatusPill: React.FC<{ status: IdeaStatus }> = ({ status }) => {
+  const { t } = useTranslation();
+  return (
   <span
     className="inline-flex items-center font-mono uppercase tracking-[0.08em] rounded-[4px] border border-border-subtle text-text-secondary"
     style={{ padding: "4px 8px", fontSize: 11, background: "transparent" }}
   >
-    {STATUS_PILL_LABEL[status]}
+    {t(STATUS_PILL_KEY[status])}
   </span>
-);
+  );
+};
 
 const IdeaRow: React.FC<{
   idea: Idea;

@@ -1893,7 +1893,7 @@ const Index: React.FC = () => {
 
   // Header date + meta
   const today = new Date();
-  const headerDate = today.toLocaleDateString("en-US", {
+  const headerDate = today.toLocaleDateString(i18nInst.language, {
     weekday: "long",
     month: "long",
     day: "numeric",
@@ -1914,7 +1914,7 @@ const Index: React.FC = () => {
     (r) => r.status === "active" && (planAndReview && isPlanned ? plannedRitualSet.has(r.id) : true),
   ).length;
   const aggMeta = isPlanned && !isClosed && !planningMode
-    ? `${todaysActionCount} actions · ${todaysRitualCount} rituals`
+    ? t("home.header.aggMeta", { actions: todaysActionCount, rituals: todaysRitualCount })
     : "";
 
   const lookingBackDate = selectLookingBackDate(dayEntries, actions, rituals);

@@ -801,7 +801,7 @@ const ProjectDetail: React.FC = () => {
         </div>
 
         {/* Right column */}
-        <aside className="w-[320px] shrink-0 bg-surface-raised border-l border-border-subtle">
+        <aside className="w-full md:w-[320px] shrink-0 bg-surface-raised border-t md:border-t-0 md:border-l border-border-subtle">
           <div className="h-12 px-6 flex items-center justify-end gap-2 border-b border-border-subtle">
             {!isDraft && (
               <CardMenu

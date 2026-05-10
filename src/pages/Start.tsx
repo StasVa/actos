@@ -9,12 +9,9 @@ import {
   BarChart3,
   Check,
   ChevronDown,
-  Github,
-  Linkedin,
   Minimize2,
   Star,
   Target,
-  Twitter,
   X,
 } from "lucide-react";
 import { LandingFooter } from "@/components/LandingChrome";

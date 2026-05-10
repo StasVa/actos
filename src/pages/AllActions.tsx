@@ -235,17 +235,18 @@ const StatusPill: React.FC<{ status: ActionStatus }> = ({ status }) => (
 );
 
 const ActionDetail: React.FC<{ action: Action }> = ({ action }) => {
+  const { t } = useTranslation();
   const openPanel = useStore((s) => s.openPanel);
   const changeActionStatus = useStore((s) => s.changeActionStatus);
   const handleEdit = () =>
     openPanel({ kind: "action", mode: "edit", id: action.id });
   const handleMarkDone = () => {
     changeActionStatus(action.id, "done");
-    toast.success("Action completed");
+    toast.success(t("allActions.toast.completed"));
   };
   const handleReopen = () => {
     changeActionStatus(action.id, "planned");
-    toast.success("Action re-opened");
+    toast.success(t("allActions.toast.reopened"));
   };
   const goal = GOALS[action.goal];
   const isOverdue =
@@ -254,13 +255,13 @@ const ActionDetail: React.FC<{ action: Action }> = ({ action }) => {
     action.expectedReturnDelta < 0;
 
   const quickInfoBits: React.ReactNode[] = [
-    `IMPACT ${action.impact}`,
+    t("allActions.detail.impact", { n: action.impact }),
     formatTime(action.timeMinutes),
   ];
   if (action.status === "planned" && action.scheduledLabel) {
-    quickInfoBits.push(`SCHEDULED ${action.scheduledLabel}`);
+    quickInfoBits.push(t("allActions.detail.scheduled", { label: action.scheduledLabel }));
   }
-  quickInfoBits.push(`CREATED ${action.createdLabel.toUpperCase()}`);
+  quickInfoBits.push(t("allActions.detail.created", { label: action.createdLabel.toUpperCase() }));
 
   return (
     <div className="px-10 py-8">

@@ -67,7 +67,7 @@ export function SortDropdown<T extends string>({
         className="inline-flex items-center gap-1 text-[12px] text-text-secondary hover:text-text-primary transition-colors whitespace-nowrap"
       >
         <span className="whitespace-nowrap">
-          {label}: {current?.label ?? ""}
+          {resolvedLabel}: {current?.label ?? ""}
         </span>
         <span className="text-text-tertiary" style={{ fontSize: 10 }}>▾</span>
       </button>

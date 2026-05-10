@@ -579,6 +579,8 @@
   "goals.filter.mid": "Medio plazo",
   "goals.filter.short": "Corto plazo",
   "goals.freePlan.line": "{{active}} de {{cap}} meta{{plural}} activa · ",
+  "goals.freePlan.lineOverCap_one": "{{count}} meta activa · Free permite {{cap}} · ",
+  "goals.freePlan.lineOverCap_other": "{{count}} metas activas · Free permite {{cap}} · ",
   "goals.freePlan.linkText": "Go All-In",
   "goals.freePlan.suffix": " para 3.",
   "goals.menu.delete": "Eliminar",

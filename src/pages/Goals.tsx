@@ -152,22 +152,35 @@ const GoalCard: React.FC<{ m: GoalMeta; logTimeOn: boolean }> = ({ m, logTimeOn 
     !archived && progress >= 100 && projects.active === 0 && projects.closed > 0;
 
   const projectsValue = (() => {
-    const parts = [`${projects.active} active`, `${projects.closed} closed`];
-    if (projects.dropped > 0) parts.push(`${projects.dropped} dropped`);
-    return parts.join(" · ");
+    if (projects.dropped > 0) {
+      return t("goals.card.projectsLineWithDropped", {
+        active: projects.active,
+        closed: projects.closed,
+        dropped: projects.dropped,
+        count: projects.active,
+      });
+    }
+    return t("goals.card.projectsLine", {
+      active: projects.active,
+      closed: projects.closed,
+      count: projects.active,
+    });
   })();
 
   const ritualsValue =
     rituals.active === 0
       ? "—"
-      : `${rituals.active} active · ×${rituals.avgMultiplier.toFixed(2)} avg`;
+      : t("goals.card.ritualsLine", {
+          active: rituals.active,
+          mult: rituals.avgMultiplier.toFixed(2),
+        });
 
   const closedLabel =
     g.status === "completed"
-      ? `Completed ${fmtAgo(g.completedAt)}`
+      ? t("goals.card.completedAgo", { relative: fmtAgo(g.completedAt) })
       : g.status === "dropped"
-      ? `Dropped ${fmtAgo(g.droppedAt)}`
-      : `Last activity: ${fmtAgo(lastIso)}`;
+      ? t("goals.card.droppedAgo", { relative: fmtAgo(g.droppedAt) })
+      : t("goals.card.lastActivityLabel", { relative: fmtAgo(lastIso) });
 
   const onCardClick = (e: React.MouseEvent) => {
     // Avoid navigation when interacting with menu/tooltips.

@@ -74,6 +74,7 @@ const ProjectCard: React.FC<{ p: Project }> = ({ p }) => (
 
 /* ===== Closed list row (denser, history) — navigates ===== */
 const ClosedRow: React.FC<{ p: Project }> = ({ p }) => {
+  const { t } = useTranslation();
   const isDropped = p.state === "dropped";
   return (
     <Link

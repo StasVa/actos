@@ -576,7 +576,7 @@ const Goals: React.FC = () => {
 
         {isFree && (
           <div className="mt-2 text-[12px] text-text-tertiary">
-            {totalActive} of {goalLimit} goals active ·{" "}
+            {totalActive} of {goalLimit} goal{goalLimit === 1 ? "" : "s"} active ·{" "}
             <Link
               to="/settings/subscription"
               className="underline hover:text-text-secondary transition-colors"

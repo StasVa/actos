@@ -148,6 +148,18 @@ function GoalEditorPanel({
   })();
 
   const activeCount = goals.filter((g) => g.status === "active").length;
+  const isFree = settings.subscriptionTier !== "all-in";
+  const freeCap = 1;
+  const allInCap = 3;
+  const atCap = isFree ? activeCount >= freeCap : activeCount >= allInCap;
+
+  // Free user opening "new" panel while at cap → show soft block immediately.
+  useEffect(() => {
+    if (mode === "new" && isFree && activeCount >= freeCap) {
+      setSoftBlock(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const persistField = <K extends keyof Goal>(field: K, value: Goal[K]) => {
     if (mode !== "edit" || !goalId) return;

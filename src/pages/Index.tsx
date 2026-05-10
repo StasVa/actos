@@ -919,7 +919,7 @@ export const TodayZone: React.FC<{
       return;
     }
     if (!a.impact || !a.timeEstimateMinutes) {
-      toast.error("Set Impact and Time before marking done");
+      toast.error(t("home.actions.toast.needImpactTime"));
       openPanel({ kind: "action", mode: "edit", id });
       return;
     }

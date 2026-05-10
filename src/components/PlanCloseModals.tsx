@@ -1073,6 +1073,7 @@ export const PlanTodayPage: React.FC<{ onCancel: () => void; onComplete: () => v
   onCancel,
   onComplete,
 }) => {
+  const { t } = useTranslation();
   const date = todayISO();
   const startDayPlan = useStore((s) => s.startDayPlan);
   const updateAction = useStore((s) => s.updateAction);

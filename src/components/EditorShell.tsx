@@ -40,7 +40,7 @@ export function EditorCancelButton({ label }: { label?: string }) {
       onClick={requestClose}
       className="text-[13px] text-text-secondary hover:text-text-primary px-3 py-1.5"
     >
-      {label}
+      {label ?? t("common.cancel")}
     </button>
   );
 }

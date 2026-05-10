@@ -560,16 +560,22 @@ function buildRitualRow(
 /* ===== Page ===== */
 type RStateFilter = "all" | "active" | "archived";
 type RSortKey = "recent" | "title" | "completions";
-const R_STATE_OPTIONS: FilterOption<RStateFilter>[] = [
-  { value: "all", label: "All" },
-  { value: "active", label: "Active" },
-  { value: "archived", label: "Archived" },
-];
-const R_SORT_OPTIONS: FilterOption<RSortKey>[] = [
-  { value: "recent", label: "Recent activity" },
-  { value: "title", label: "By title" },
-  { value: "completions", label: "Most completions" },
-];
+function useRStateOptions(): FilterOption<RStateFilter>[] {
+  const { t } = useTranslation();
+  return [
+    { value: "all", label: t("common.all") },
+    { value: "active", label: t("common.state.active") },
+    { value: "archived", label: t("common.state.archived") },
+  ];
+}
+function useRSortOptions(): FilterOption<RSortKey>[] {
+  const { t } = useTranslation();
+  return [
+    { value: "recent", label: t("common.sort.recentActivity") },
+    { value: "title", label: t("common.sort.byTitle") },
+    { value: "completions", label: t("common.sort.mostCompletions") },
+  ];
+}
 
 const Rituals: React.FC = () => {
   const { t } = useTranslation();

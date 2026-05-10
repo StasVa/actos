@@ -560,7 +560,7 @@ function RitualEditorPanel({
                     Day of week
                   </div>
                   <div className="flex gap-1">
-                    {WEEKDAY_LABELS.map((label, idx) => (
+                    {WEEKDAY_LABEL_KEYS.map((labelKey, idx) => (
                       <button
                         key={idx}
                         type="button"
@@ -572,7 +572,7 @@ function RitualEditorPanel({
                           color: weekday === idx ? "hsl(var(--text-primary))" : "hsl(var(--text-secondary))",
                         }}
                       >
-                        {label.slice(0, 1)}
+                        {t(labelKey).slice(0, 1)}
                       </button>
                     ))}
                   </div>
@@ -604,7 +604,7 @@ function RitualEditorPanel({
                     Days of week
                   </div>
                   <div className="flex gap-1">
-                    {WEEKDAY_LABELS.map((label, idx) => (
+                    {WEEKDAY_LABEL_KEYS.map((labelKey, idx) => (
                       <button
                         key={idx}
                         type="button"
@@ -622,7 +622,7 @@ function RitualEditorPanel({
                             : "hsl(var(--text-secondary))",
                         }}
                       >
-                        {label.slice(0, 1)}
+                        {t(labelKey).slice(0, 1)}
                       </button>
                     ))}
                   </div>
@@ -747,7 +747,7 @@ function RitualEditorPanel({
                     Day of week
                   </div>
                   <div className="flex gap-1">
-                    {WEEKDAY_LABELS.map((label, idx) => (
+                    {WEEKDAY_LABEL_KEYS.map((labelKey, idx) => (
                       <button
                         key={idx}
                         onClick={() => {
@@ -761,7 +761,7 @@ function RitualEditorPanel({
                           color: weekday === idx ? "hsl(var(--text-primary))" : "hsl(var(--text-secondary))",
                         }}
                       >
-                        {label.slice(0, 1)}
+                        {t(labelKey).slice(0, 1)}
                       </button>
                     ))}
                   </div>
@@ -794,7 +794,7 @@ function RitualEditorPanel({
                     Days of week
                   </div>
                   <div className="flex gap-1">
-                    {WEEKDAY_LABELS.map((label, idx) => (
+                    {WEEKDAY_LABEL_KEYS.map((labelKey, idx) => (
                       <button
                         key={idx}
                         onClick={() => toggleCustomDay(idx)}
@@ -811,7 +811,7 @@ function RitualEditorPanel({
                             : "hsl(var(--text-secondary))",
                         }}
                       >
-                        {label.slice(0, 1)}
+                        {t(labelKey).slice(0, 1)}
                       </button>
                     ))}
                   </div>

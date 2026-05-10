@@ -1021,30 +1021,29 @@ function PastDateConfirmModal({
   onCancel: () => void;
   onConfirm: () => void;
 }) {
+  const { t } = useTranslation();
   if (!iso) return null;
   const d = new Date(iso + "T00:00:00");
-  const fullLabel = d.toLocaleDateString("en-US", {
+  const fullLabel = d.toLocaleDateString(i18n.language || "en", {
     weekday: "short",
     month: "short",
     day: "numeric",
     year: "numeric",
   });
-  const shortLabel = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  const shortLabel = d.toLocaleDateString(i18n.language || "en", { month: "short", day: "numeric" });
   return (
     <ConfirmModal
       open={true}
-      title="Schedule for past date?"
+      title={t("actionEditor.confirm.pastDate.heading")}
       body={
         <>
-          You picked <strong>{fullLabel}</strong> ({relDays(iso)}), which is in
-          the past.
+          {t("actionEditor.confirm.pastDate.bodyLine1Pre")}<strong>{fullLabel}</strong>{t("actionEditor.confirm.pastDate.bodyLine1Post", { rel: relDays(iso) })}
           <div className="mt-2">
-            This action will be marked as Done on that date and included in
-            progress calculations and reviews.
+            {t("actionEditor.confirm.pastDate.bodyLine2")}
           </div>
         </>
       }
-      confirmLabel={`Mark as Done on ${shortLabel}`}
+      confirmLabel={t("actionEditor.confirm.pastDate.cta", { date: shortLabel })}
       onCancel={onCancel}
       onConfirm={onConfirm}
     />

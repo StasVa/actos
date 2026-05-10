@@ -17,6 +17,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   HelpCircle,
+  Settings as SettingsIcon,
 } from "lucide-react";
 import { LifetimeCounters } from "@/components/LifetimeCounters";
 import { UserMenu } from "@/components/UserMenu";

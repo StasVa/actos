@@ -1056,7 +1056,7 @@ const DayTypeChip: React.FC<{
                   className="inline-block rounded-full shrink-0"
                   style={{ width: 8, height: 8, background: m.color }}
                 />
-                <span className="flex-1 text-text-primary">{m.label}</span>
+                <span className="flex-1 text-text-primary">{t(m.labelKey)}</span>
                 {selected && (
                   <span style={{ color: "hsl(var(--accent))", fontSize: 12 }}>✓</span>
                 )}

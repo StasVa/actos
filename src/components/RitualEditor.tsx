@@ -8,6 +8,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDown, Check } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import { useStore } from "@/store/useStore";
 import type { ID, Ritual, RitualSchedule } from "@/types";
 import { ConfirmModal } from "./ConfirmModal";
@@ -31,15 +32,23 @@ import {
   PopoverContent,
 } from "@/components/ui/popover";
 
-const SCHEDULE_OPTIONS: { value: RitualSchedule; label: string }[] = [
-  { value: "daily", label: "Daily" },
-  { value: "weekdays", label: "Weekdays (Mon–Fri)" },
-  { value: "weekly", label: "Weekly" },
-  { value: "monthly", label: "Monthly" },
-  { value: "custom", label: "Custom days" },
+const SCHEDULE_OPTIONS: { value: RitualSchedule; labelKey: string }[] = [
+  { value: "daily", labelKey: "ritualEditor.schedule.daily" },
+  { value: "weekdays", labelKey: "ritualEditor.schedule.weekdays" },
+  { value: "weekly", labelKey: "ritualEditor.schedule.weekly" },
+  { value: "monthly", labelKey: "ritualEditor.schedule.monthly" },
+  { value: "custom", labelKey: "ritualEditor.schedule.custom" },
 ];
 
-const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const WEEKDAY_LABEL_KEYS = [
+  "ritualEditor.weekday.sun",
+  "ritualEditor.weekday.mon",
+  "ritualEditor.weekday.tue",
+  "ritualEditor.weekday.wed",
+  "ritualEditor.weekday.thu",
+  "ritualEditor.weekday.fri",
+  "ritualEditor.weekday.sat",
+];
 
 const todayISO = () => new Date().toISOString().slice(0, 10);
 

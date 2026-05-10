@@ -1253,18 +1253,18 @@ export const TodayZone: React.FC<{
             return (
               <>
                 <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
-                  TODAY'S RITUALS · {ritualsTotal}
+                  {t("home.rituals.section", { count: ritualsTotal })}
                 </div>
                 {ritualsTotal > 0 && (
                   <div className="font-mono text-[12px] text-text-secondary mb-2 mt-1 tabular-nums">
-                    {doneCount} done · {pendingCount} pending · {skippedCount} skipped
+                    {t("home.rituals.progress", { done: doneCount, pending: pendingCount, skipped: skippedCount })}
                   </div>
                 )}
               </>
             );
           })()}
           {todaysRituals.length === 0 ? (
-            <div className="font-mono text-[11px] text-text-tertiary px-3 py-2">No rituals today.</div>
+            <div className="font-mono text-[11px] text-text-tertiary px-3 py-2">{t("home.rituals.empty")}</div>
           ) : (
             <div>
               {todaysRituals.map((r) => {

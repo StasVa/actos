@@ -872,15 +872,15 @@ function ActionEditorPanel({
                   />
                   {impactError && <InlineError text={impactError} />}
                 </FieldRow>
-                <FieldRow label="Time (min) · required">
+                <FieldRow label={t("actionEditor.field.timeRequired")}>
                   <ClampedNumberInput
                     value={timeMin}
                     min={1}
                     max={600}
                     step={5}
-                    placeholder="e.g. 30"
+                    placeholder={t("actionEditor.field.timePlaceholderExample")}
                     required
-                    requiredMessage="Time estimate is required."
+                    requiredMessage={t("actionEditor.error.timeRequired")}
                     ariaLabel="Time in minutes"
                     onChange={(v) => {
                       setTimeMin(v);

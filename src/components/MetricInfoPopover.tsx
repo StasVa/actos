@@ -1,68 +1,14 @@
 import React from "react";
 import { Info } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 
 type Variant = "impact" | "valueEffort" | "ritualImpact";
 
-const COPY: Record<Variant, { width: number; padding: number; body: React.ReactNode }> = {
-  impact: {
-    width: 280,
-    padding: 12,
-    body: (
-      <div className="space-y-2">
-        <div className="font-medium text-text-primary text-[13px]">
-          How much does this task move your goal?
-        </div>
-        <p className="text-text-primary text-[13px] leading-[1.5]">
-          1 = small thing, 10 = critical.
-        </p>
-        <p className="text-text-primary text-[13px] leading-[1.5]">
-          You decide — this is your judgment of importance, not time spent.
-        </p>
-      </div>
-    ),
-  },
-  ritualImpact: {
-    width: 280,
-    padding: 12,
-    body: (
-      <div className="space-y-2">
-        <div className="font-medium text-text-primary text-[13px]">
-          How much does each completion of this ritual move your goal?
-        </div>
-        <p className="text-text-primary text-[13px] leading-[1.5]">
-          1 = small thing, 10 = critical.
-        </p>
-        <p className="text-text-primary text-[13px] leading-[1.5]">
-          You decide — this is your judgment of importance, not time spent.
-        </p>
-      </div>
-    ),
-  },
-  valueEffort: {
-    width: 320,
-    padding: 16,
-    body: (
-      <div className="space-y-3">
-        <div>
-          <div className="font-medium text-text-primary text-[13px]">
-            Value — how far the goal has moved
-          </div>
-          <p className="text-text-primary text-[13px] leading-[1.5] mt-1">
-            Sum of Impact for finished work, divided by total planned Impact. Delegated tasks count fully — work done is work done.
-          </p>
-        </div>
-        <div>
-          <div className="font-medium text-text-primary text-[13px]">
-            Effort — your personal workload
-          </div>
-          <p className="text-text-primary text-[13px] leading-[1.5] mt-1">
-            Same math, but delegated tasks count at 20% — you handed off, you didn't do the work yourself. So if Effort is lower than Value, your delegation is paying off.
-          </p>
-        </div>
-      </div>
-    ),
-  },
+const SIZES: Record<Variant, { width: number; padding: number }> = {
+  impact: { width: 280, padding: 12 },
+  ritualImpact: { width: 280, padding: 12 },
+  valueEffort: { width: 320, padding: 16 },
 };
 
 export const MetricInfoPopover: React.FC<{
@@ -71,14 +17,54 @@ export const MetricInfoPopover: React.FC<{
   ariaLabel?: string;
   className?: string;
 }> = ({ variant, size, ariaLabel, className }) => {
-  const cfg = COPY[variant];
+  const { t } = useTranslation();
+  const cfg = SIZES[variant];
   const iconSize = size ?? (variant === "valueEffort" ? 12 : 14);
+
+  let body: React.ReactNode;
+  if (variant === "impact" || variant === "ritualImpact") {
+    body = (
+      <div className="space-y-2">
+        <div className="font-medium text-text-primary text-[13px]">
+          {t(`metricInfo.${variant}.title`)}
+        </div>
+        <p className="text-text-primary text-[13px] leading-[1.5]">
+          {t("metricInfo.impact.scale")}
+        </p>
+        <p className="text-text-primary text-[13px] leading-[1.5]">
+          {t("metricInfo.impact.judgment")}
+        </p>
+      </div>
+    );
+  } else {
+    body = (
+      <div className="space-y-3">
+        <div>
+          <div className="font-medium text-text-primary text-[13px]">
+            {t("metricInfo.value.title")}
+          </div>
+          <p className="text-text-primary text-[13px] leading-[1.5] mt-1">
+            {t("metricInfo.value.body")}
+          </p>
+        </div>
+        <div>
+          <div className="font-medium text-text-primary text-[13px]">
+            {t("metricInfo.effort.title")}
+          </div>
+          <p className="text-text-primary text-[13px] leading-[1.5] mt-1">
+            {t("metricInfo.effort.body")}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <Popover>
       <PopoverTrigger asChild>
         <button
           type="button"
-          aria-label={ariaLabel ?? "More info"}
+          aria-label={ariaLabel ?? t("metricInfo.moreInfo")}
           className={`inline-flex items-center justify-center text-text-tertiary hover:text-text-secondary transition-colors cursor-pointer focus:outline-none focus-visible:ring-1 focus-visible:ring-accent ${className ?? ""}`}
           onClick={(e) => e.stopPropagation()}
         >
@@ -94,7 +80,7 @@ export const MetricInfoPopover: React.FC<{
         className="border border-border-subtle bg-surface-elevated text-text-primary shadow-md rounded-[6px]"
         style={{ width: cfg.width, padding: cfg.padding, fontFamily: "Inter, sans-serif" }}
       >
-        {cfg.body}
+        {body}
       </PopoverContent>
     </Popover>
   );

@@ -363,17 +363,17 @@ function RitualEditorPanel({
 
             {/* ESTIMATES */}
             <div>
-              <SectionHeadRequired label="Estimates" required />
+              <SectionHeadRequired label={t("ritualEditor.section.estimates")} required />
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <FieldRow label="Base Impact (1-10) · required" info={<MetricInfoPopover variant="ritualImpact" ariaLabel="What is Base Impact?" />}>
+                <FieldRow label={t("ritualEditor.field.baseImpact")} info={<MetricInfoPopover variant="ritualImpact" ariaLabel={t("ritualEditor.field.baseImpactInfoAria")} />}>
                   <ClampedNumberInput
                     value={baseImpact}
                     min={1}
                     max={10}
                     step={1}
-                    placeholder="1–10"
+                    placeholder={t("ritualEditor.field.baseImpactPlaceholder")}
                     required
-                    requiredMessage="Base Impact is required (1-10)."
+                    requiredMessage={t("ritualEditor.error.baseImpactRequired")}
                     ariaLabel="Base Impact"
                     onChange={(v) => {
                       setBaseImpact(v);
@@ -385,15 +385,15 @@ function RitualEditorPanel({
                   />
                   {impactError && <InlineError text={impactError} />}
                 </FieldRow>
-                <FieldRow label="Time (min) · required">
+                <FieldRow label={t("ritualEditor.field.timeRequired")}>
                   <ClampedNumberInput
                     value={timeMin}
                     min={1}
                     max={600}
                     step={5}
-                    placeholder="e.g. 30"
+                    placeholder={t("ritualEditor.field.timePlaceholder")}
                     required
-                    requiredMessage="Time is required."
+                    requiredMessage={t("ritualEditor.error.timeRequired")}
                     ariaLabel="Time in minutes"
                     onChange={(v) => {
                       setTimeMin(v);
@@ -408,7 +408,7 @@ function RitualEditorPanel({
 
             {/* PARENT — inline pill popovers */}
             <div>
-              <SectionHeadRequired label="Parent" required />
+              <SectionHeadRequired label={t("ritualEditor.section.parent")} required />
               <div className="flex items-center gap-2 flex-wrap text-[13px]">
                 <Popover open={goalPopoverOpen} onOpenChange={setGoalPopoverOpen}>
                   <PopoverTrigger asChild>

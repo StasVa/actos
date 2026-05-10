@@ -1235,7 +1235,7 @@ export const TodayZone: React.FC<{
             onChange={(e) => setQuickAdd(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") handleQuickAdd(); }}
             className="flex-1 bg-transparent text-[13px] text-text-primary placeholder:text-text-tertiary focus:outline-none"
-            placeholder="+ Add action for today…"
+            placeholder={t("home.actions.quickAddPlaceholder")}
           />
           <span className="font-mono text-[11px] text-text-tertiary">⏎</span>
         </div>

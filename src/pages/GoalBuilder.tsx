@@ -59,50 +59,53 @@ const ScreenWrap: React.FC<{
   step: Step;
   onBack?: () => void;
   children: React.ReactNode;
-}> = ({ step, onBack, children }) => (
-  <div
-    className="relative min-h-screen w-full"
-    style={{
-      background: "hsl(var(--surface-base))",
-      color: "hsl(var(--text-primary))",
-      animation: reducedMotion() ? undefined : "gbFadeIn 250ms cubic-bezier(0.32,0.72,0,1)",
-    }}
-  >
-    <style>{`@keyframes gbFadeIn { from { opacity:0; transform: translateY(8px) } to { opacity:1; transform: none } }`}</style>
-    <div className="mx-auto" style={{ maxWidth: 640, padding: "80px 24px 120px" }}>
-      {children}
-    </div>
-    {onBack && (
-      <button
-        type="button"
-        onClick={onBack}
-        className="absolute transition-colors"
-        style={{
-          left: 32, bottom: 28,
-          fontFamily: "Inter, ui-sans-serif, system-ui",
-          fontSize: 14,
-          color: "hsl(var(--text-tertiary))",
-          background: "transparent", border: "none", cursor: "pointer",
-        }}
-        onMouseEnter={(e) => (e.currentTarget.style.color = "hsl(var(--text-secondary))")}
-        onMouseLeave={(e) => (e.currentTarget.style.color = "hsl(var(--text-tertiary))")}
-      >
-        ← Back
-      </button>
-    )}
+}> = ({ step, onBack, children }) => {
+  const { t } = useTranslation();
+  return (
     <div
-      className="absolute"
+      className="relative min-h-screen w-full"
       style={{
-        right: 32, bottom: 28,
-        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-        fontSize: 11, letterSpacing: "0.06em", textTransform: "uppercase",
-        color: "hsl(var(--text-tertiary))",
+        background: "hsl(var(--surface-base))",
+        color: "hsl(var(--text-primary))",
+        animation: reducedMotion() ? undefined : "gbFadeIn 250ms cubic-bezier(0.32,0.72,0,1)",
       }}
     >
-      Step {step} of 4
+      <style>{`@keyframes gbFadeIn { from { opacity:0; transform: translateY(8px) } to { opacity:1; transform: none } }`}</style>
+      <div className="mx-auto" style={{ maxWidth: 640, padding: "80px 24px 120px" }}>
+        {children}
+      </div>
+      {onBack && (
+        <button
+          type="button"
+          onClick={onBack}
+          className="absolute transition-colors"
+          style={{
+            left: 32, bottom: 28,
+            fontFamily: "Inter, ui-sans-serif, system-ui",
+            fontSize: 14,
+            color: "hsl(var(--text-tertiary))",
+            background: "transparent", border: "none", cursor: "pointer",
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = "hsl(var(--text-secondary))")}
+          onMouseLeave={(e) => (e.currentTarget.style.color = "hsl(var(--text-tertiary))")}
+        >
+          ← {t("common.back")}
+        </button>
+      )}
+      <div
+        className="absolute"
+        style={{
+          right: 32, bottom: 28,
+          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+          fontSize: 11, letterSpacing: "0.06em", textTransform: "uppercase",
+          color: "hsl(var(--text-tertiary))",
+        }}
+      >
+        {t("goalBuilder.step", { n: step, total: 4 })}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const PrimaryBtn: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement>> = ({ children, style, ...rest }) => (
   <button

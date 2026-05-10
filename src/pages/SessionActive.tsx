@@ -699,7 +699,7 @@ const SessionActive: React.FC = () => {
                 style={{ boxShadow: "0 20px 50px rgba(0,0,0,0.4)" }}
               >
                 <h2 className="text-[16px] font-medium text-text-primary">
-                  Break done · ready for next cycle?
+                  {t("sessionActive.breakEnd.title")}
                 </h2>
                 <div className="mt-6 flex items-center justify-end gap-3">
                   <button
@@ -707,7 +707,7 @@ const SessionActive: React.FC = () => {
                     className="text-[13px] font-medium px-3 py-1.5"
                     style={{ color: "hsl(var(--text-warning))" }}
                   >
-                    End session
+                    {t("sessionActive.controls.endSession")}
                   </button>
                   <button
                     onClick={handleStartNextWork}
@@ -717,7 +717,7 @@ const SessionActive: React.FC = () => {
                       color: "hsl(var(--accent-foreground))",
                     }}
                   >
-                    Continue to work
+                    {t("sessionActive.breakEnd.continueWork")}
                   </button>
                 </div>
               </div>

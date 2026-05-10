@@ -200,17 +200,17 @@ export function EditorOverflowMenu({
 
 /** Convenience helpers for standard items. */
 export const overflowDuplicate = (onSelect: () => void): OverflowMenuItem => ({
-  label: "Duplicate",
+  label: i18n.t("common.duplicate"),
   icon: Copy,
   onSelect,
 });
-export const overflowDrop = (onSelect: () => void, label = "Drop"): OverflowMenuItem => ({
-  label,
+export const overflowDrop = (onSelect: () => void, label?: string): OverflowMenuItem => ({
+  label: label ?? i18n.t("common.drop"),
   icon: XCircle,
   onSelect,
 });
 export const overflowDelete = (onSelect: () => void): OverflowMenuItem => ({
-  label: "Delete",
+  label: i18n.t("common.delete"),
   icon: Trash2,
   onSelect,
   destructive: true,

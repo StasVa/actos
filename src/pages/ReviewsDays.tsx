@@ -230,6 +230,7 @@ const ReviewsDays: React.FC = () => {
   const [search, setSearch] = React.useState("");
   const [sortKey, setSortKey] = React.useState<SortKey>(() => loadReviewSort("actos.reviews.days.sort"));
   React.useEffect(() => saveReviewSort("actos.reviews.days.sort", sortKey), [sortKey]);
+  const SORT_OPTIONS = useReviewSortOptions();
 
   const RANGE_OPTIONS = React.useMemo(() => [
     { value: "30", label: t("reviews.filters.range.last30"), days: 30 },

@@ -768,7 +768,7 @@ const PlanForm: React.FC<{
                   className="w-full appearance-none bg-transparent rounded-[4px] px-4 py-3 text-[14px] text-text-tertiary outline-none border border-dashed border-border-default cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <option value="">
-                    {disabled ? "Add actions first" : "Pick from selected actions ▾"}
+                    {disabled ? t("planToday.mainTask.addActionsFirst") : t("planToday.mainTask.pickFromSelected")}
                   </option>
                   {selectedActions.map((a) => (
                     <option key={a.id} value={a.id}>

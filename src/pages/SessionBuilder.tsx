@@ -34,7 +34,9 @@ const ModeCard: React.FC<{
   preset: ModePreset;
   selected: boolean;
   onClick: () => void;
-}> = ({ preset, selected, onClick }) => (
+}> = ({ preset, selected, onClick }) => {
+  const { t } = useTranslation();
+  return (
   <button
     type="button"
     onClick={onClick}
@@ -49,12 +51,13 @@ const ModeCard: React.FC<{
     }}
   >
     <div>
-      <div className="text-[16px] font-medium text-text-primary">{preset.title}</div>
-      <div className="mt-1 font-mono text-[12px] text-text-secondary">{preset.desc}</div>
+      <div className="text-[16px] font-medium text-text-primary">{t(`sessionBuilder.preset.${preset.key}.title`)}</div>
+      <div className="mt-1 font-mono text-[12px] text-text-secondary">{t(`sessionBuilder.preset.${preset.key}.desc`)}</div>
     </div>
-    <div className="mt-3 font-mono text-[11px] text-text-tertiary">{preset.sub}</div>
+    <div className="mt-3 font-mono text-[11px] text-text-tertiary">{t(`sessionBuilder.preset.${preset.key}.sub`)}</div>
   </button>
-);
+  );
+};
 
 /* ───────── Stepper number control (Duration centerpiece) ───────── */
 

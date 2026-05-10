@@ -1767,7 +1767,7 @@ const LookingBackCard: React.FC<{ date: string }> = ({ date }) => {
   return (
     <section>
       <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-3">
-        LOOKING BACK
+        {t("home.lookingBack.label")}
       </div>
       <div className="bg-surface-elevated border border-border-subtle rounded-[6px] p-6">
         <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
@@ -1778,7 +1778,7 @@ const LookingBackCard: React.FC<{ date: string }> = ({ date }) => {
           <span>{dtLabel}</span>
         </div>
         <div className="mt-2 font-mono text-[13px] text-text-secondary tabular-nums">
-          {actionsDone} actions done · {ritualsDone} rituals · {hours} invested
+          {t("home.lookingBack.summary", { actions: actionsDone, rituals: ritualsDone, time: hours })}
         </div>
         {perGoal.length > 0 && (
           <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5">
@@ -1802,14 +1802,14 @@ const LookingBackCard: React.FC<{ date: string }> = ({ date }) => {
         )}
         {lastTime && (
           <div className="mt-3 font-mono text-[11px] text-text-tertiary">
-            Last activity: {lastTime}
+            {t("home.lookingBack.lastActivity", { time: lastTime })}
           </div>
         )}
         <Link
           to={`/reviews/days/${date}`}
           className="inline-block mt-4 text-[12px] text-[hsl(var(--accent))] hover:brightness-110 transition-colors"
         >
-          View full review →
+          {t("home.lookingBack.viewFull")}
         </Link>
       </div>
     </section>

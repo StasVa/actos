@@ -22,6 +22,7 @@ import type {
 } from "@/types";
 import { yearWeekFromDate } from "./weekUtils";
 import { timeInvestedMinutes } from "./timeStats";
+import i18n from "@/i18n";
 
 const ISO_DATE = (d: Date): ISODate => format(d, "yyyy-MM-dd");
 

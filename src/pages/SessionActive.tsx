@@ -734,11 +734,10 @@ const SessionActive: React.FC = () => {
                 style={{ boxShadow: "0 20px 50px rgba(0,0,0,0.4)" }}
               >
                 <h2 className="text-[18px] font-medium text-text-primary">
-                  Session complete · {session.workDuration * session.cyclesPlanned}min focused
+                  {t("sessionActive.sessionEnd.title", { count: session.workDuration * session.cyclesPlanned })}
                 </h2>
                 <div className="mt-3 font-mono text-[13px] text-text-secondary">
-                  {session.completedActionIds.length} actions done ·{" "}
-                  {session.droppedActionIds.length} dropped · +{sessionOutcome} value added
+                  {t("sessionActive.sessionEnd.summary", { done: session.completedActionIds.length, dropped: session.droppedActionIds.length, value: sessionOutcome })}
                 </div>
                 <div className="mt-6 flex items-center justify-end gap-3">
                   <button
@@ -749,7 +748,7 @@ const SessionActive: React.FC = () => {
                       color: "hsl(var(--accent-foreground))",
                     }}
                   >
-                    Review session
+                    {t("sessionActive.sessionEnd.review")}
                   </button>
                 </div>
               </div>

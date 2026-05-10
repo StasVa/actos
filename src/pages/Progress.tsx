@@ -168,7 +168,7 @@ const RecentlyClosedHigherSection: React.FC = () => {
                         background: "hsl(var(--surface-hover))",
                       }}
                     >
-                      [{r.isDropped ? "DROPPED" : "COMPLETED"}]
+                      [{r.isDropped ? t("common.label.dropped") : t("common.label.completed")}]
                     </span>
                     <span className="font-mono text-[11px] text-text-tertiary tabular-nums whitespace-nowrap">
                       {fmtAgo(r.closureIso)}

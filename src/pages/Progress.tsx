@@ -17,19 +17,24 @@ import {
   SectionLabel,
 } from "./Index";
 
-function fmtAgo(iso?: string): string {
-  if (!iso) return "—";
-  const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
-  if (days <= 0) return "today";
-  if (days === 1) return "yesterday";
-  if (days < 30) return `${days}d ago`;
-  return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+function useFmtAgo() {
+  const { t, i18n } = useTranslation();
+  return (iso?: string): string => {
+    if (!iso) return "—";
+    const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+    if (days <= 0) return t("progress.relAgo.today");
+    if (days === 1) return t("progress.relAgo.yesterday");
+    if (days < 30) return t("progress.relAgo.daysAgo", { n: days });
+    return new Date(iso).toLocaleDateString(i18n.language, { month: "short", day: "numeric" });
+  };
 }
 
 const MS_DAY = 86400000;
 
 /* ===== Recently Closed Projects & Goals ===== */
 const RecentlyClosedHigherSection: React.FC = () => {
+  const { t } = useTranslation();
+  const fmtAgo = useFmtAgo();
   const projects = useStore((s) => s.projects);
   const goals = useStore((s) => s.goals);
   const actions = useStore((s) => s.actions);
@@ -65,7 +70,7 @@ const RecentlyClosedHigherSection: React.FC = () => {
       goal: goals.find((g) => g.id === p.goalId),
       closureIso: stamp,
       isDropped: p.status === "dropped",
-      countLabel: `${doneActs.length} action${doneActs.length === 1 ? "" : "s"} done`,
+      countLabel: t("progress.row.actionsDoneCount", { count: doneActs.length }),
       valueAdded,
       timeInvestedMin: timeMin,
     });
@@ -88,7 +93,7 @@ const RecentlyClosedHigherSection: React.FC = () => {
       goal: g,
       closureIso: stamp,
       isDropped: g.status === "dropped",
-      countLabel: `${goalProjects.length} project${goalProjects.length === 1 ? "" : "s"}`,
+      countLabel: t("common.count.projects", { count: goalProjects.length }),
       valueAdded,
       timeInvestedMin: timeMin,
     });
@@ -101,16 +106,16 @@ const RecentlyClosedHigherSection: React.FC = () => {
   const projCount = rows.filter((r) => r.kind === "project").length;
   const goalCount = rows.filter((r) => r.kind === "goal").length;
   const metaParts: string[] = [];
-  if (projCount > 0) metaParts.push(`${projCount} project${projCount === 1 ? "" : "s"}`);
-  if (goalCount > 0) metaParts.push(`${goalCount} goal${goalCount === 1 ? "" : "s"}`);
+  if (projCount > 0) metaParts.push(t("common.count.projects", { count: projCount }).toUpperCase());
+  if (goalCount > 0) metaParts.push(t("common.count.goals", { count: goalCount }).toUpperCase());
 
   const visible = rows.slice(0, 8);
   const remaining = rows.length - visible.length;
 
   return (
     <section>
-      <SectionLabel meta={metaParts.join(" · ").toUpperCase()}>
-        Recently closed · {rows.length}
+      <SectionLabel meta={metaParts.join(" · ")}>
+        {t("progress.section.recentlyClosed", { count: rows.length })}
       </SectionLabel>
       <div className="bg-surface-elevated border border-border-subtle rounded-[6px] overflow-hidden">
         {visible.map((r, i) => {
@@ -163,7 +168,7 @@ const RecentlyClosedHigherSection: React.FC = () => {
                         background: "hsl(var(--surface-hover))",
                       }}
                     >
-                      [{r.isDropped ? "DROPPED" : "COMPLETED"}]
+                      [{r.isDropped ? t("common.label.dropped") : t("common.label.completed")}]
                     </span>
                     <span className="font-mono text-[11px] text-text-tertiary tabular-nums whitespace-nowrap">
                       {fmtAgo(r.closureIso)}
@@ -177,10 +182,10 @@ const RecentlyClosedHigherSection: React.FC = () => {
                   <span> {r.countLabel.split(" ").slice(1).join(" ")}</span>
                   <span className="mx-1.5 text-text-tertiary">·</span>
                   <span className="text-text-primary">+{r.valueAdded}</span>
-                  <span> value</span>
+                  <span> {t("progress.row.value")}</span>
                   <span className="mx-1.5 text-text-tertiary">·</span>
                   <span className="text-text-primary">{formatHM(r.timeInvestedMin)}</span>
-                  <span> invested</span>
+                  <span> {t("progress.row.invested")}</span>
                 </div>
               </div>
             </Link>
@@ -189,14 +194,14 @@ const RecentlyClosedHigherSection: React.FC = () => {
       </div>
       {remaining > 0 && (
         <div className="mt-2 px-1 font-mono text-[11px] text-text-tertiary">
-          + {remaining} more
+          {t("progress.moreCount", { count: remaining })}
         </div>
       )}
       <Link
         to="/projects"
         className="inline-block mt-3 text-[13px] text-accent hover:text-accent-hover"
       >
-        {goalCount > 0 ? "View all closed →" : "View all closed projects →"}
+        {goalCount > 0 ? t("progress.viewAllClosed") : t("progress.viewAllClosedProjects")}
       </Link>
     </section>
   );
@@ -204,6 +209,8 @@ const RecentlyClosedHigherSection: React.FC = () => {
 
 /* ===== Recently Closed Actions (enriched ActionRow-style) ===== */
 const RecentlyClosedActionsSection: React.FC = () => {
+  const { t } = useTranslation();
+  const fmtAgo = useFmtAgo();
   const actions = useStore((s) => s.actions);
   const goals = useStore((s) => s.goals);
   const projects = useStore((s) => s.projects);
@@ -248,10 +255,10 @@ const RecentlyClosedActionsSection: React.FC = () => {
 
   return (
     <section>
-      <SectionLabel>Recently closed</SectionLabel>
+      <SectionLabel>{t("progress.recentlyClosed")}</SectionLabel>
       {top.length === 0 ? (
         <div className="font-mono text-[11px] text-text-tertiary px-3 py-2">
-          Nothing closed yet.
+          {t("progress.section.nothingClosed")}
         </div>
       ) : (
         <div className="bg-surface-elevated border border-border-subtle rounded-[6px] overflow-hidden">
@@ -382,13 +389,14 @@ const RecentlyClosedActionsSection: React.FC = () => {
         to="/actions"
         className="inline-block mt-3 text-[13px] text-accent hover:text-accent-hover"
       >
-        View all actions →
+        {t("progress.viewAllActions")}
       </Link>
     </section>
   );
 };
 
 const DelegatedSection: React.FC = () => {
+  const { t } = useTranslation();
   const actions = useStore((s) => s.actions);
   const openPanel = useStore((s) => s.openPanel);
   const items = actions.filter((a) => a.status === "delegated");
@@ -405,13 +413,13 @@ const DelegatedSection: React.FC = () => {
     if (d < 0) overdue++;
     else if (d === 0) dueToday++;
   }
-  const meta = `${items.length} ACTIVE · ${overdue} OVERDUE · ${dueToday} DUE TODAY`;
+  const meta = t("progress.delegatedMeta", { active: items.length, overdue, dueToday });
 
   return (
     <section>
-      <SectionLabel meta={meta}>Delegated · {items.length}</SectionLabel>
+      <SectionLabel meta={meta}>{t("progress.section.delegated", { count: items.length })}</SectionLabel>
       {items.length === 0 ? (
-        <div className="font-mono text-[11px] text-text-tertiary px-3 py-2">No active delegations.</div>
+        <div className="font-mono text-[11px] text-text-tertiary px-3 py-2">{t("progress.noActiveDelegations")}</div>
       ) : (
         <div className="space-y-1 bg-surface-elevated border border-border-subtle rounded-[6px] p-3">
           {items.map((a) => (
@@ -431,7 +439,7 @@ const DelegatedSection: React.FC = () => {
         </div>
       )}
       <Link to="/delegated" className="inline-block mt-3 text-[13px] text-accent hover:text-accent-hover">
-        View all delegated →
+        {t("progress.viewAllDelegated")}
       </Link>
     </section>
   );
@@ -439,6 +447,7 @@ const DelegatedSection: React.FC = () => {
 
 /* ===== Active Projects (scoped: cap 6, sort recent activity) ===== */
 const ActiveProjectsScoped: React.FC = () => {
+  const { t } = useTranslation();
   const goals = useStore((s) => s.goals);
   const projects = useStore((s) => s.projects);
   const actions = useStore((s) => s.actions);
@@ -486,19 +495,19 @@ const ActiveProjectsScoped: React.FC = () => {
   const stalledCount = rows.filter((r) => r.state === "stalled").length;
   const visible = rows.slice(0, 6);
 
-  const metaParts: string[] = [`${total} ACTIVE`];
-  if (stalledCount > 0) metaParts.push(`${stalledCount} STALLED`);
+  const metaParts: string[] = [t("progress.metaActiveOnly", { count: total })];
+  if (stalledCount > 0) metaParts.push(t("progress.metaStalled", { count: stalledCount }));
 
   return (
     <section>
       <SectionLabel meta={metaParts.join(" · ")}>
-        Active projects · {total}
+        {t("progress.section.activeProjects", { count: total })}
       </SectionLabel>
       {total === 0 ? (
         <div className="bg-surface-raised border border-dashed border-border-subtle rounded-[6px] py-8 text-center">
-          <div className="text-[13px] text-text-secondary">No active projects.</div>
+          <div className="text-[13px] text-text-secondary">{t("progress.noActiveProjects")}</div>
           <div className="font-mono text-[11px] text-text-tertiary mt-1">
-            Press ⌘K → "New project".
+            {t("progress.newProjectHint")}
           </div>
         </div>
       ) : (
@@ -521,7 +530,7 @@ const ActiveProjectsScoped: React.FC = () => {
               to="/projects?state=open"
               className="inline-block mt-4 text-[13px] text-accent hover:text-accent-hover"
             >
-              View all {total} projects →
+              {t("progress.viewAllProjects", { count: total })}
             </Link>
           )}
         </>
@@ -548,7 +557,7 @@ const Progress: React.FC = () => {
       <main className="app-main page-wide">
         <PageHeader
           title={t("progress.page.title")}
-          meta={`${activeGoals} GOALS · ${activeProjects} ACTIVE PROJECTS · ${actionsDone} ACTIONS DONE ALL-TIME`}
+          meta={t("progress.meta", { goals: activeGoals, projects: activeProjects, actions: actionsDone })}
         />
         <div style={{ height: 24 }} />
 

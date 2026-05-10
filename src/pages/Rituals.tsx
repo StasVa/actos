@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
+import i18n from "@/i18n";
 import { LifetimeCounters } from "@/components/LifetimeCounters";
 import { Link, useNavigate } from "react-router-dom";
 import { Tooltip } from "@/components/Tooltip";
@@ -36,13 +37,13 @@ type RitualRow = {
 };
 
 /* Date helpers for tooltips */
-const MONTH_SHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 function dayLabel(daysFromToday: number): string {
-  if (daysFromToday === 0) return "Today";
-  if (daysFromToday === 1) return "Yesterday";
+  const t = i18n.t.bind(i18n);
+  if (daysFromToday === 0) return t("rituals.relDay.today");
+  if (daysFromToday === 1) return t("rituals.relDay.yesterday");
   const d = new Date();
   d.setDate(d.getDate() - daysFromToday);
-  return `${MONTH_SHORT[d.getMonth()]} ${d.getDate()}`;
+  return d.toLocaleDateString(i18n.language, { month: "short", day: "numeric" });
 }
 function weekLabel(weeksFromNow: number): string {
   const d = new Date();
@@ -50,13 +51,14 @@ function weekLabel(weeksFromNow: number): string {
   const day = d.getDay();
   const diff = (day + 6) % 7;
   d.setDate(d.getDate() - diff);
-  return `Week of ${MONTH_SHORT[d.getMonth()]} ${d.getDate()}`;
+  const md = d.toLocaleDateString(i18n.language, { month: "short", day: "numeric" });
+  return i18n.t("reviews.detail.weekLabel", { start: md, end: "" }).replace(/\s*[—–-]\s*$/, "").trim() || `Week of ${md}`;
 }
 function monthLabel(monthsFromNow: number): string {
   const d = new Date();
   d.setDate(1);
   d.setMonth(d.getMonth() - monthsFromNow);
-  return `${MONTH_SHORT[d.getMonth()]} ${d.getFullYear()}`;
+  return d.toLocaleDateString(i18n.language, { month: "short", year: "numeric" });
 }
 
 
@@ -66,6 +68,7 @@ const ConsistencyCalendar: React.FC<{ data: number[]; color: string; cellSize?: 
   color,
   cellSize = 12,
 }) => {
+  const { t } = useTranslation();
   const last = data.length - 1;
   return (
     <div className="flex items-center gap-[2px]">
@@ -73,10 +76,10 @@ const ConsistencyCalendar: React.FC<{ data: number[]; color: string; cellSize?: 
         const daysFromToday = last - i;
         const status =
           daysFromToday === 0 && v === 0
-            ? "Pending"
+            ? t("rituals.tip.pending")
             : v === 1
-            ? "Done"
-            : "Missed";
+            ? t("rituals.tip.done")
+            : t("rituals.tip.missed");
         const tip = (
           <div className="text-[12px] text-text-primary" style={{ fontFamily: "Inter, sans-serif" }}>
             {dayLabel(daysFromToday)} · <span className="font-mono text-text-secondary">{status}</span>
@@ -184,6 +187,7 @@ const FrequencyChart: React.FC<{ data: number[]; max: number; color: string; uni
 
 /* ===== Ritual card ===== */
 const RitualCard: React.FC<{ r: RitualRow; onOpen: (r: RitualRow) => void; onMarkDone: (r: RitualRow) => void }> = ({ r, onOpen, onMarkDone }) => {
+  const { t } = useTranslation();
   const isMonthly = r.isMonthly;
   return (
     <div
@@ -210,7 +214,7 @@ const RitualCard: React.FC<{ r: RitualRow; onOpen: (r: RitualRow) => void; onMar
             {r.multiplier}
           </div>
           <div className="mt-1 font-mono text-[11px] text-text-tertiary tabular-nums">
-            {r.totalCompletions} completions
+            {t("rituals.completions", { count: r.totalCompletions })}
           </div>
         </div>
       </div>
@@ -220,7 +224,7 @@ const RitualCard: React.FC<{ r: RitualRow; onOpen: (r: RitualRow) => void; onMar
       {/* Chart 1 */}
       <div>
         <div className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary mb-1">
-          LAST 30 DAYS · CONSISTENCY
+          {t("rituals.card.consistencyHeading")}
         </div>
         <ConsistencyCalendar data={r.consistency} color={r.goalColor} />
       </div>
@@ -231,9 +235,9 @@ const RitualCard: React.FC<{ r: RitualRow; onOpen: (r: RitualRow) => void; onMar
       <div>
         <div className="flex items-baseline justify-between mb-1">
           <div className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">
-            12 WEEKS · FREQUENCY
+            {t("rituals.card.frequencyHeading")}
           </div>
-          <div className="font-mono text-[9px] text-text-tertiary">max: {r.freqMax}</div>
+          <div className="font-mono text-[9px] text-text-tertiary">{t("rituals.card.frequencyMax", { n: r.freqMax })}</div>
         </div>
         <FrequencyChart data={r.frequency} max={r.freqMax} color={r.goalColor} />
       </div>
@@ -243,7 +247,7 @@ const RitualCard: React.FC<{ r: RitualRow; onOpen: (r: RitualRow) => void; onMar
       {/* Footer */}
       <div className="flex items-center justify-between mt-2">
         <div className="font-mono text-[11px] text-text-secondary tabular-nums">
-          Last done: {r.lastDoneLabel}
+          {t("rituals.card.lastDone", { label: r.lastDoneLabel })}
         </div>
         {r.pendingToday ? (
           <button
@@ -254,16 +258,16 @@ const RitualCard: React.FC<{ r: RitualRow; onOpen: (r: RitualRow) => void; onMar
             }}
             className="px-3 py-1 rounded-[4px] border border-accent bg-transparent text-[12px] font-medium text-text-primary hover:bg-surface-hover transition-colors"
           >
-            Mark today done
+            {t("rituals.card.markTodayDone")}
           </button>
         ) : isMonthly ? null : (
-          <span className="font-mono text-[11px] text-text-tertiary">Not due today</span>
+          <span className="font-mono text-[11px] text-text-tertiary">{t("rituals.notDueToday")}</span>
         )}
       </div>
 
       {isMonthly && r.pendingToday && (
         <div className="mt-1 font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary tabular-nums">
-          DUE THIS MONTH
+          {t("rituals.card.dueThisMonth")}
         </div>
       )}
     </div>
@@ -461,23 +465,25 @@ function buildFrequency(history: { date: string }[], unit: "week" | "month", buc
 }
 
 function lastDoneLabel(history: { date: string }[]): string {
-  if (history.length === 0) return "never";
+  const t = i18n.t.bind(i18n);
+  if (history.length === 0) return t("rituals.lastDone.never");
   const sorted = [...history].sort((a, b) => b.date.localeCompare(a.date));
   const last = sorted[0].date;
-  if (last === TODAY_ISO) return "today";
+  if (last === TODAY_ISO) return t("rituals.lastDone.today");
   const yest = new Date();
   yest.setDate(yest.getDate() - 1);
-  if (last === yest.toISOString().slice(0, 10)) return "yesterday";
+  if (last === yest.toISOString().slice(0, 10)) return t("rituals.lastDone.yesterday");
   const d = new Date(last);
-  return `${MONTH_SHORT[d.getMonth()]} ${d.getDate()}`;
+  return d.toLocaleDateString(i18n.language, { month: "short", day: "numeric" });
 }
 
 function archivedAgoLabel(iso?: string): string | undefined {
   if (!iso) return undefined;
+  const t = i18n.t.bind(i18n);
   const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
-  if (days < 7) return `${days}d ago`;
-  if (days < 30) return `${Math.round(days / 7)}w ago`;
-  return `${Math.round(days / 30)}mo ago`;
+  if (days < 7) return t("rituals.archivedAgo.daysAgo", { n: days });
+  if (days < 30) return t("rituals.archivedAgo.weeksAgo", { n: Math.round(days / 7) });
+  return t("rituals.archivedAgo.monthsAgo", { n: Math.round(days / 30) });
 }
 
 function buildRitualRow(
@@ -498,19 +504,29 @@ function buildRitualRow(
   const doneToday = r.completionHistory.some((c) => c.date === TODAY_ISO);
   const dueToday = ritualDueToday(r.schedule, r.scheduleConfig);
   const scheduleLabel = (() => {
-    const base = r.schedule.toUpperCase();
-    const names = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
-    if (r.schedule === "weekly" && r.scheduleConfig?.weekday !== undefined) {
-      return `${base} · ${names[r.scheduleConfig.weekday]}`;
+    const t = i18n.t.bind(i18n);
+    const dayKeys = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+    const dayName = (idx: number) => t(`rituals.weekday.${dayKeys[idx]}`);
+    if (r.schedule === "weekly") {
+      const base = t("rituals.scheduleLabel.weekly");
+      if (r.scheduleConfig?.weekday !== undefined) {
+        return t("rituals.scheduleLabel.weeklyOn", { day: dayName(r.scheduleConfig.weekday) });
+      }
+      return base;
     }
-    if (r.schedule === "custom" && r.scheduleConfig?.customDays?.length) {
-      return `${base} · ${r.scheduleConfig.customDays.map((d) => names[d]).join(" ")}`;
+    if (r.schedule === "custom") {
+      if (r.scheduleConfig?.customDays?.length) {
+        return t("rituals.scheduleLabel.customOn", { days: r.scheduleConfig.customDays.map(dayName).join(" ") });
+      }
+      return t("rituals.scheduleLabel.custom");
     }
     if (r.schedule === "monthly") {
       const day = r.scheduleConfig?.monthDay ?? 1;
-      return `MONTHLY · DAY ${day}`;
+      return t("rituals.scheduleLabel.monthlyDay", { n: day });
     }
-    return base;
+    if (r.schedule === "daily") return t("rituals.scheduleLabel.daily");
+    if (r.schedule === "weekdays") return t("rituals.scheduleLabel.weekdays");
+    return String(r.schedule).toUpperCase();
   })();
   return {
     id: r.id,

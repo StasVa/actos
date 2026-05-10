@@ -594,7 +594,9 @@ const Goals: React.FC = () => {
 
         {isFree && (
           <div className="mt-2 text-[12px] text-text-tertiary">
-            {t("goals.freePlan.line", { active: totalActive, cap: goalLimit, plural: goalLimit === 1 ? "" : "s" })}
+            {totalActive > goalLimit
+              ? t("goals.freePlan.lineOverCap", { count: totalActive, cap: goalLimit })
+              : t("goals.freePlan.line", { active: totalActive, cap: goalLimit, plural: totalActive === 1 ? "" : "s" })}
             <Link
               to="/settings/subscription"
               className="underline hover:text-text-secondary transition-colors"

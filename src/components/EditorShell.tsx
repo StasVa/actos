@@ -9,6 +9,7 @@
 // their own X/Cancel buttons.
 
 import { createContext, useContext, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const EditorCloseContext = createContext<() => void>(() => {});

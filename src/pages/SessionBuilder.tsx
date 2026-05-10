@@ -764,7 +764,7 @@ const SessionBuilder: React.FC = () => {
           {/* DURATION */}
           <section className="mt-8">
             <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-3">
-              DURATION
+              {t("sessionBuilder.section.duration")}
             </div>
             <div
               className="rounded-[8px] border border-border-subtle bg-surface-raised"

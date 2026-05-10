@@ -1565,6 +1565,7 @@ const TinyHeader: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 );
 
 export const RecentlyClosed: React.FC = () => {
+  const { t, i18n: i18nInst } = useTranslation();
   const projects = useStore((s) => s.projects);
   const goals = useStore((s) => s.goals);
   const items = projects
@@ -1578,15 +1579,15 @@ export const RecentlyClosed: React.FC = () => {
         id: p.id,
         c: g ? `hsl(var(--${g.color}))` : "hsl(var(--text-tertiary))",
         name: p.title,
-        date: d.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+        date: d.toLocaleDateString(i18nInst.language, { month: "short", day: "numeric" }),
       };
     });
   return (
     <div className="p-4">
-      <TinyHeader>RECENTLY CLOSED · {items.length}</TinyHeader>
+      <TinyHeader>{t("home.recentlyClosed.title", { count: items.length })}</TinyHeader>
       <div className="mt-3 space-y-1.5">
         {items.length === 0 && (
-          <div className="font-mono text-[11px] text-text-tertiary">No closed projects yet.</div>
+          <div className="font-mono text-[11px] text-text-tertiary">{t("home.recentlyClosed.empty")}</div>
         )}
         {items.map((it) => (
           <div key={it.id} className="flex items-center gap-2">

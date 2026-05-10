@@ -1276,19 +1276,26 @@ export const TodayZone: React.FC<{
                 const mult = ritualMultiplier(r.totalCompletions);
                 const color = colorVar(r.goalId);
                 const streak = computeRitualStreak(r);
-                const scheduleLabel = r.schedule[0].toUpperCase() + r.schedule.slice(1);
+                const scheduleKeyMap: Record<string, string> = {
+                  daily: "rituals.schedule.daily",
+                  weekdays: "rituals.schedule.weekdays",
+                  weekly: "rituals.schedule.weekly",
+                };
+                const scheduleLabel = scheduleKeyMap[r.schedule]
+                  ? t(scheduleKeyMap[r.schedule])
+                  : r.schedule[0].toUpperCase() + r.schedule.slice(1);
                 const metaParts: string[] = [scheduleLabel];
                 if (r.totalCompletions === 0) {
-                  metaParts.push("brand new");
+                  metaParts.push(t("home.rituals.brandNew"));
                 } else {
-                  metaParts.push(`${streak}d streak`);
-                  metaParts.push(`${r.totalCompletions} done`);
+                  metaParts.push(t("home.rituals.streak", { count: streak }));
+                  metaParts.push(t("home.rituals.totalDone", { count: r.totalCompletions }));
                 }
                 if (doneToday && doneEntry?.at) {
-                  const t = new Date(doneEntry.at);
-                  const hh = String(t.getHours()).padStart(2, "0");
-                  const mm = String(t.getMinutes()).padStart(2, "0");
-                  metaParts.push(`✓ Done at ${hh}:${mm}`);
+                  const dt = new Date(doneEntry.at);
+                  const hh = String(dt.getHours()).padStart(2, "0");
+                  const mm = String(dt.getMinutes()).padStart(2, "0");
+                  metaParts.push(t("home.rituals.doneAt", { time: `${hh}:${mm}` }));
                 }
                 const isTerminal = doneToday || isSkipped;
                 const reopenRitual = () => {

@@ -260,7 +260,8 @@ export default function SettingsSubscription() {
             <h2 className="text-[16px] font-medium text-text-primary">Downgrade to Free?</h2>
             <div className="mt-3 text-[13px] text-text-secondary leading-[1.5]">
               You'll keep all your data, but: history older than 90 days will be locked, and you
-              can't add new goals if you have 3 active. You can return to All-In anytime.
+              won't be able to add new goals until you're back to 1 active. You can return to
+              All-In anytime.
             </div>
             <div className="mt-4 text-[12px] text-text-tertiary">
               Type <span className="font-mono text-text-secondary">DOWNGRADE</span> to confirm.

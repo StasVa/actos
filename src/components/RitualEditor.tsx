@@ -280,6 +280,8 @@ function RitualEditorPanel({
     toast("Ritual duplicated");
     useStore.getState().openPanel({ kind: "ritual", mode: "edit", id: newId });
   };
+
+  const toggleCustomDay = (d: number) => {
     const next = customDays.includes(d)
       ? customDays.filter((x) => x !== d)
       : [...customDays, d].sort();

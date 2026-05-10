@@ -409,17 +409,17 @@ const ReviewDayDetail: React.FC = () => {
                 (settings.layers.logTime && actionTimeMin > 0);
               if (hasAny) {
                 if (outcome.valueAdded > 0)
-                  tiles.push({ key: "outcome", value: `+${outcome.valueAdded}`, label: "Value added" });
-                tiles.push({ key: "actions", value: String(doneToday.length), label: "Actions done" });
-                tiles.push({ key: "rituals", value: String(ritualsDone.length), label: "Rituals done" });
+                  tiles.push({ key: "outcome", value: `+${outcome.valueAdded}`, label: t("reviews.detail.tile.valueAdded") });
+                tiles.push({ key: "actions", value: String(doneToday.length), label: t("reviews.detail.tile.actionsDone") });
+                tiles.push({ key: "rituals", value: String(ritualsDone.length), label: t("reviews.detail.tile.ritualsDone") });
                 if (settings.layers.logTime && actionTimeMin > 0)
-                  tiles.push({ key: "time", value: formatHM(actionTimeMin), label: "Time invested" });
+                  tiles.push({ key: "time", value: formatHM(actionTimeMin), label: t("reviews.detail.tile.timeInvested") });
                 if (sessionsForDay.length > 0)
-                  tiles.push({ key: "sessions", value: String(sessionsForDay.length), label: "Sessions" });
+                  tiles.push({ key: "sessions", value: String(sessionsForDay.length), label: t("reviews.detail.tile.sessions") });
                 if (closedProjects.length > 0)
-                  tiles.push({ key: "projects", value: String(closedProjects.length), label: "Projects closed" });
+                  tiles.push({ key: "projects", value: String(closedProjects.length), label: t("reviews.detail.tile.projectsClosed") });
                 if (closedGoals.length > 0)
-                  tiles.push({ key: "goals", value: String(closedGoals.length), label: "Goals closed" });
+                  tiles.push({ key: "goals", value: String(closedGoals.length), label: t("reviews.detail.tile.goalsClosed") });
               }
               return <AccomplishmentsSection tiles={tiles} period="day" />;
             })()}

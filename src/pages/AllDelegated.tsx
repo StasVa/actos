@@ -19,13 +19,11 @@ function daysBetween(a: string, b: string): number {
   return Math.round((ta - tb) / 86400000);
 }
 
-function relativeShort(iso: string): string {
+function relativeShortKey(iso: string): { key: string; opts?: Record<string, unknown> } {
   const d = daysBetween(iso, TODAY_ISO);
-  if (d === 0) return "today";
-  if (d === -1) return "1d ago";
-  if (d < 0) return `${-d}d ago`;
-  if (d === 1) return "in 1d";
-  return `in ${d}d`;
+  if (d === 0) return { key: "delegated.return.today" };
+  if (d < 0) return { key: "delegated.return.daysAgo", opts: { count: -d } };
+  return { key: "delegated.return.inDays", opts: { count: d } };
 }
 
 /* ===== Pills ===== */

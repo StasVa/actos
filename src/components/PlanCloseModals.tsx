@@ -1104,13 +1104,14 @@ export const PlanTodayPage: React.FC<{ onCancel: () => void; onComplete: () => v
       plannedRitualIds: Array.from(merged.keptRitualIds),
       skippedRitualIds: Array.from(merged.skippedRitualIds),
     });
-    const aLabel = DAY_TYPE_META.find((m) => m.value === merged.dayType)?.label ?? "Day";
+    const meta = DAY_TYPE_META.find((m) => m.value === merged.dayType);
+    const aLabel = meta ? t(meta.labelKey) : t("planToday.dayType.fallback");
     if (merged.selectedActionIds.length === 0 && merged.keptRitualIds.size === 0) {
-      toast.success(`${aLabel} day started.`);
+      toast.success(t("planToday.toast.dayStarted_simple", { label: aLabel }));
     } else {
-      toast.success(
-        `Day started. ${merged.selectedActionIds.length} action${merged.selectedActionIds.length === 1 ? "" : "s"}, ${merged.keptRitualIds.size} ritual${merged.keptRitualIds.size === 1 ? "" : "s"}.`,
-      );
+      const actionsPart = t("planToday.toast.actions", { count: merged.selectedActionIds.length });
+      const ritualsPart = t("planToday.toast.rituals", { count: merged.keptRitualIds.size });
+      toast.success(t("planToday.toast.dayStarted_full", { actions: actionsPart, rituals: ritualsPart }));
     }
     onComplete();
   };

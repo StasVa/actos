@@ -1105,7 +1105,7 @@ export const TodayZone: React.FC<{
                       className="font-mono text-[11px] uppercase tracking-[0.06em] shrink-0"
                       style={{ color: "hsl(var(--accent))" }}
                     >
-                      ✓ Day's win
+                      {t("home.mainTask.daysWin")}
                     </span>
                   )}
                   {mainTask.impact > 0 && (

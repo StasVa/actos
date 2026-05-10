@@ -154,6 +154,7 @@ const MonthlyConsistency: React.FC<{ data: number[]; color: string }> = ({ data,
 };
 
 const FrequencyChart: React.FC<{ data: number[]; max: number; color: string; unit?: "week" | "month" }> = ({ data, max, color, unit = "week" }) => {
+  const { t } = useTranslation();
   return (
     <div className="w-full flex items-end gap-[3px]" style={{ height: 44 }}>
       {data.map((v, i) => {
@@ -163,7 +164,7 @@ const FrequencyChart: React.FC<{ data: number[]; max: number; color: string; uni
           <div className="text-[12px] text-text-primary" style={{ fontFamily: "Inter, sans-serif" }}>
             {unit === "month" ? monthLabel(stepsFromNow) : weekLabel(stepsFromNow)} ·{" "}
             <span className="font-mono text-text-secondary">
-              {v === 0 ? "No completions" : `${v} done`}
+              {v === 0 ? t("rituals.consistency.noCompletions") : t("rituals.consistency.done", { count: v })}
             </span>
           </div>
         );

@@ -1044,10 +1044,12 @@ const NewIdeaModalBody: React.FC<{
   canSubmit: boolean;
   onCancel: () => void;
   onSubmit: () => void;
-}> = ({ inputRef, title, setTitle, goalId, setGoalId, note, setNote, activeGoals, canSubmit, onCancel, onSubmit }) => (
+}> = ({ inputRef, title, setTitle, goalId, setGoalId, note, setNote, activeGoals, canSubmit, onCancel, onSubmit }) => {
+  const { t } = useTranslation();
+  return (
   <div className="p-6 flex flex-col gap-4">
     <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-secondary">
-      NEW IDEA
+      {t("ideas.heading.newIdea")}
     </div>
     <input
       ref={inputRef}
@@ -1057,12 +1059,12 @@ const NewIdeaModalBody: React.FC<{
         if (e.key === "Enter") onSubmit();
         if (e.key === "Escape") onCancel();
       }}
-      placeholder="Idea title…"
+      placeholder={t("ideas.placeholder.title")}
       className="bg-surface-hover rounded-[4px] px-3 py-3 text-[16px] text-text-primary outline-none border border-transparent focus:border-border-default placeholder:text-text-tertiary"
     />
     <div className="flex flex-col gap-1.5">
       <span className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
-        GOAL
+        {t("ideas.field.goalLabel")}
       </span>
       <select
         value={goalId}
@@ -1078,13 +1080,13 @@ const NewIdeaModalBody: React.FC<{
     </div>
     <div className="flex flex-col gap-1.5">
       <span className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
-        NOTE
+        {t("ideas.field.noteLabel")}
       </span>
       <textarea
         value={note}
         onChange={(e) => setNote(e.target.value)}
         rows={3}
-        placeholder="Optional…"
+        placeholder={t("ideas.placeholder.optional")}
         className="bg-surface-hover rounded-[4px] px-3 py-2 text-[14px] text-text-primary outline-none border border-transparent focus:border-border-default resize-none placeholder:text-text-tertiary"
       />
     </div>
@@ -1093,7 +1095,7 @@ const NewIdeaModalBody: React.FC<{
         onClick={onCancel}
         className="h-9 px-4 text-[13px] text-text-tertiary hover:text-text-secondary transition-colors"
       >
-        Cancel
+        {t("common.cancel")}
       </button>
       <button
         onClick={onSubmit}
@@ -1101,11 +1103,12 @@ const NewIdeaModalBody: React.FC<{
         className="h-9 px-4 text-[13px] font-medium rounded-[4px] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         style={{ background: "hsl(var(--accent))", color: "hsl(var(--accent-foreground))" }}
       >
-        Create
+        {t("ideas.button.create")}
       </button>
     </div>
   </div>
-);
+  );
+};
 
 /* ===== Idea editor sheet (right slide-in / bottom on mobile) ===== */
 const IdeaEditorSheet: React.FC<{

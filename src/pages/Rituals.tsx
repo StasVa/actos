@@ -324,15 +324,16 @@ const PendingToday: React.FC<{ items: RitualRow[]; onMarkDone: (r: RitualRow) =>
 
 /* ===== Top stats (live) ===== */
 const TopStats: React.FC<{ rows: RitualRow[]; allTime: number; activeCount: number; pendingCount: number; dueCount: number }> = ({ rows, allTime, activeCount, pendingCount, dueCount }) => {
+  const { t } = useTranslation();
   // Week consistency: across all active daily/weekly rituals, fraction of "due" days hit in last 7.
   const weekDone = rows.reduce((sum, r) => sum + r.consistency.slice(-7).reduce((a, b) => a + b, 0), 0);
   const weekDue = rows.length * 7;
   const weekPct = weekDue > 0 ? Math.round((weekDone / weekDue) * 100) : 0;
   const stats = [
-    { label: "ACTIVE", value: `${activeCount}`, sub: activeCount === 1 ? "ritual" : "rituals" },
-    { label: "PENDING TODAY", value: `${pendingCount}`, sub: `of ${dueCount} due` },
-    { label: "WEEK CONSISTENCY", value: `${weekPct}%`, sub: `${weekDone} of ${weekDue}` },
-    { label: "ALL TIME", value: `${allTime}`, sub: "completions" },
+    { key: "active", label: t("rituals.stat.active.label"), value: `${activeCount}`, sub: activeCount === 1 ? t("rituals.stat.active.subOne") : t("rituals.stat.active.subOther") },
+    { key: "pending", label: t("rituals.stat.pendingToday.label"), value: `${pendingCount}`, sub: t("rituals.stat.pendingToday.sub", { due: dueCount }) },
+    { key: "week", label: t("rituals.stat.weekConsistency.label"), value: `${weekPct}%`, sub: t("rituals.stat.weekConsistency.sub", { done: weekDone, due: weekDue }) },
+    { key: "alltime", label: t("rituals.stat.allTime.label"), value: `${allTime}`, sub: t("rituals.stat.allTime.sub") },
   ];
   return (
     <div
@@ -340,7 +341,7 @@ const TopStats: React.FC<{ rows: RitualRow[]; allTime: number; activeCount: numb
       style={{ minHeight: 88 }}
     >
       {stats.map((s) => (
-        <div key={s.label} style={{ padding: "20px 24px" }}>
+        <div key={s.key} style={{ padding: "20px 24px" }}>
           <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
             {s.label}
           </div>

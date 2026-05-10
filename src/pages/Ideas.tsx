@@ -1213,8 +1213,8 @@ const Ideas: React.FC = () => {
       (i) => i.status === "converted_to_action" || i.status === "converted_to_project",
     ).length;
     const discarded = ideas.filter((i) => i.status === "discarded").length;
-    return `${captured} CAPTURED · ${converted} CONVERTED · ${discarded} DISCARDED`;
-  }, [ideas]);
+    return t("ideas.meta", { captured, converted, discarded });
+  }, [ideas, t]);
 
   const anyApplied =
     statusFilter !== "captured" ||

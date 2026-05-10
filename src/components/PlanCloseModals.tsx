@@ -979,9 +979,9 @@ const DayTypeStep: React.FC<{ onPick: (m: DayTypeMeta) => void }> = ({ onPick })
               >
                 <m.Icon size={20} />
               </span>
-              <div className="text-[18px] font-medium text-text-primary">{m.label}</div>
+              <div className="text-[18px] font-medium text-text-primary">{t(m.labelKey)}</div>
               <div className="text-[13px] text-text-secondary leading-snug">
-                {m.description}
+                {t(m.descriptionKey)}
               </div>
             </button>
           );

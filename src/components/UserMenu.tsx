@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { Sparkles, LogOut, Wrench, HelpCircle } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -60,6 +61,7 @@ export { Avatar, TierBadge };
 
 export const UserMenu: React.FC<{ collapsed: boolean }> = ({ collapsed }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const settings = useStore((s) => s.settings);
   const [open, setOpen] = React.useState(false);
   const [confirmSignOut, setConfirmSignOut] = React.useState(false);
@@ -76,7 +78,7 @@ export const UserMenu: React.FC<{ collapsed: boolean }> = ({ collapsed }) => {
   const triggerButton = collapsed ? (
     <button
       type="button"
-      aria-label="Account menu"
+      aria-label={t("menu.account.aria")}
       className="flex items-center justify-center w-10 h-10 mx-auto rounded-[4px] hover:bg-surface-hover transition-colors duration-150"
       data-state={open ? "open" : "closed"}
     >
@@ -85,7 +87,7 @@ export const UserMenu: React.FC<{ collapsed: boolean }> = ({ collapsed }) => {
   ) : (
     <button
       type="button"
-      aria-label="Account menu"
+      aria-label={t("menu.account.aria")}
       className="flex-1 min-w-0 flex items-center gap-[10px] rounded-[4px] hover:bg-surface-hover transition-colors duration-150 data-[state=open]:bg-surface-hover"
       style={{ padding: "6px 8px" }}
       data-state={open ? "open" : "closed"}
@@ -114,7 +116,7 @@ export const UserMenu: React.FC<{ collapsed: boolean }> = ({ collapsed }) => {
         <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>
       </TooltipTrigger>
       <TooltipContent side="right" className="text-[12px]">
-        Account · {name}
+        {t("menu.account.tooltip", { name })}
       </TooltipContent>
     </Tooltip>
   ) : (
@@ -164,7 +166,7 @@ export const UserMenu: React.FC<{ collapsed: boolean }> = ({ collapsed }) => {
             style={{ padding: "8px 14px" }}
           >
             <Sparkles size={16} className="text-text-secondary group-hover:text-text-primary" />
-            <span className="text-[13px] text-text-primary flex-1">Subscription</span>
+            <span className="text-[13px] text-text-primary flex-1">{t("menu.subscription")}</span>
             {tier === "all-in" && <TierBadge tier="all-in" />}
           </button>
 
@@ -178,7 +180,7 @@ export const UserMenu: React.FC<{ collapsed: boolean }> = ({ collapsed }) => {
             style={{ padding: "8px 14px" }}
           >
             <HelpCircle size={16} className="text-text-secondary group-hover:text-text-primary" />
-            <span className="text-[13px] text-text-primary flex-1">Help</span>
+            <span className="text-[13px] text-text-primary flex-1">{t("common.help")}</span>
           </a>
 
           {/* Admin (gated by demo flag) */}
@@ -190,7 +192,7 @@ export const UserMenu: React.FC<{ collapsed: boolean }> = ({ collapsed }) => {
               style={{ padding: "8px 14px" }}
             >
               <Wrench size={16} className="text-text-secondary group-hover:text-text-primary" />
-              <span className="text-[13px] text-text-primary flex-1">Admin</span>
+              <span className="text-[13px] text-text-primary flex-1">{t("menu.admin")}</span>
             </button>
           )}
 
@@ -210,21 +212,21 @@ export const UserMenu: React.FC<{ collapsed: boolean }> = ({ collapsed }) => {
             style={{ padding: "8px 14px" }}
           >
             <LogOut size={16} className="text-text-secondary group-hover:text-text-primary" />
-            <span className="text-[13px] text-text-primary flex-1">Sign out</span>
+            <span className="text-[13px] text-text-primary flex-1">{t("common.signOut")}</span>
           </button>
         </PopoverContent>
       </Popover>
 
       <ConfirmModal
         open={confirmSignOut}
-        title="Sign out of ActOS?"
-        body="You'll need to sign back in to access your data."
-        cancelLabel="Cancel"
-        confirmLabel="Sign out"
+        title={t("signOut.heading")}
+        body={t("signOut.body")}
+        cancelLabel={t("common.cancel")}
+        confirmLabel={t("common.signOut")}
         onCancel={() => setConfirmSignOut(false)}
         onConfirm={() => {
           setConfirmSignOut(false);
-          toast.success("Signed out (demo).");
+          toast.success(t("signOut.toast"));
         }}
       />
     </>

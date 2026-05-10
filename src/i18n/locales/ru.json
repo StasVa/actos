@@ -1777,7 +1777,7 @@
   "setup.theme.heading": "Выберите оформление.",
   "setup.theme.sub": "Это можно поменять в любой момент в Настройках.",
   "setup.theme.system": "Системная",
-  "setup.welcome.heading": "Привет, {{name}}.",
+  "setup.welcome.heading": "Привет.",
   "setup.welcome.sub": "Давайте всё настроим.",
   "shortcuts.close": "Закрыть панели и оверлеи",
   "shortcuts.global": "ГЛОБАЛЬНЫЕ",

@@ -132,20 +132,21 @@ export type DayInfo = {
   actions: string[];
 };
 
-const WEEKDAY = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-const MONTH = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-
 export function formatDayLabel(daysFromToday: number): string {
-  if (daysFromToday === 0) return "Today";
-  if (daysFromToday === 1) return "Yesterday";
+  const lang = i18n.language || "en";
+  if (daysFromToday === 0) return i18n.t("tooltip.today");
+  if (daysFromToday === 1) return i18n.t("tooltip.yesterday");
   const d = new Date();
   d.setDate(d.getDate() - daysFromToday);
-  return `${WEEKDAY[d.getDay()]}, ${MONTH[d.getMonth()]} ${d.getDate()}`;
+  return new Intl.DateTimeFormat(lang, { weekday: "long", month: "long", day: "numeric" }).format(d);
 }
 
 export const SparkTooltipContent: React.FC<{ info: DayInfo }> = ({ info }) => {
+  const { t } = useTranslation();
   const countLabel =
-    info.count === 0 ? "No activity" : info.count === 1 ? "1 action done" : `${info.count} actions done`;
+    info.count === 0
+      ? t("tooltip.noActivity")
+      : t("tooltip.actionsDone", { count: info.count });
   const shown = info.actions.slice(0, 4);
   const more = info.actions.length - shown.length;
   return (
@@ -164,13 +165,13 @@ export const SparkTooltipContent: React.FC<{ info: DayInfo }> = ({ info }) => {
             }}
           />
           <div className="flex flex-col" style={{ gap: 2 }}>
-            {shown.map((t, i) => (
+            {shown.map((tt, i) => (
               <div key={i} className="text-[11px] text-text-secondary leading-snug">
-                {t}
+                {tt}
               </div>
             ))}
             {more > 0 && (
-              <div className="text-[11px] text-text-tertiary italic">… and {more} more</div>
+              <div className="text-[11px] text-text-tertiary italic">{t("tooltip.andMore", { count: more })}</div>
             )}
           </div>
         </>
@@ -181,19 +182,22 @@ export const SparkTooltipContent: React.FC<{ info: DayInfo }> = ({ info }) => {
 
 export const StateDotTooltip: React.FC<{ state: "active" | "stalled"; lastActivity?: string; stalledFor?: string }> = ({
   state,
-  lastActivity = "today",
-  stalledFor = "9 days",
+  lastActivity,
+  stalledFor,
 }) => {
+  const { t } = useTranslation();
+  const last = lastActivity ?? t("tooltip.lastActivityToday");
+  const stalled = stalledFor ?? t("tooltip.stalledDefault");
   if (state === "active") {
     return (
       <div className="text-[12px] text-text-primary" style={{ fontFamily: "Inter, sans-serif" }}>
-        Active · last activity {lastActivity}
+        {t("tooltip.activeLast", { last })}
       </div>
     );
   }
   return (
     <div className="text-[12px] text-text-primary" style={{ fontFamily: "Inter, sans-serif" }}>
-      Stalled · <span style={{ color: "hsl(var(--text-warning))" }}>{stalledFor}</span> no activity
+      <span dangerouslySetInnerHTML={{ __html: t("tooltip.stalledNoActivity", { stalled: `<span style="color: hsl(var(--text-warning))">${stalled}</span>` }) }} />
     </div>
   );
 };

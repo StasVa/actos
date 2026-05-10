@@ -94,7 +94,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ projectId, goalLabel, 
       .filter(Boolean)
       .sort()
       .at(-1);
-    const ago = fmtAgo(lastIso ?? undefined);
+    const ago = fmtAgo(lastIso ?? undefined, t, locale);
 
     // Time investment: full time for Done + 20% of time for Delegated.
     const investedMin = liveActs.reduce((sum, a) => sum + timeInvestedMinutes(a), 0);

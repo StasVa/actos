@@ -1163,6 +1163,7 @@ export function DateChipPicker({
   onChange: (iso: string) => void;
   optional?: boolean;
 }) {
+  const { t } = useTranslation();
   const [showCalendar, setShowCalendar] = useState(false);
   const today = TODAY_ISO();
   const tomorrow = addDaysISO(today, 1);
@@ -1173,7 +1174,7 @@ export function DateChipPicker({
   // Summary view when a custom date is set
   if (isCustom && !showCalendar) {
     const d = new Date(value + "T00:00:00");
-    const label = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    const label = d.toLocaleDateString(i18n.language || "en", { month: "short", day: "numeric" });
     return (
       <div className="flex items-center gap-2">
         <span className="text-[13px] text-text-primary">{label}</span>
@@ -1183,7 +1184,7 @@ export function DateChipPicker({
           onClick={() => setShowCalendar(true)}
           className="ml-2 text-[13px] text-text-secondary hover:text-text-primary transition-colors"
         >
-          Change
+          {t("actionEditor.dateChip.change")}
         </button>
         {optional && (
           <button
@@ -1191,7 +1192,7 @@ export function DateChipPicker({
             onClick={() => onChange("")}
             className="text-[13px] text-text-secondary hover:text-text-primary transition-colors"
           >
-            Clear
+            {t("actionEditor.dateChip.clear")}
           </button>
         )}
       </div>
@@ -1202,7 +1203,7 @@ export function DateChipPicker({
     <div>
       <div className="flex items-center gap-2 flex-wrap">
         <DateChip
-          label="Today"
+          label={t("actionEditor.dateChip.today")}
           selected={isToday}
           onClick={() => {
             onChange(today);
@@ -1210,7 +1211,7 @@ export function DateChipPicker({
           }}
         />
         <DateChip
-          label="Tomorrow"
+          label={t("actionEditor.dateChip.tomorrow")}
           selected={isTomorrow}
           onClick={() => {
             onChange(tomorrow);
@@ -1224,7 +1225,7 @@ export function DateChipPicker({
           className="inline-flex items-center gap-1.5 text-[13px] text-text-secondary hover:text-text-primary transition-colors"
         >
           <CalendarIcon size={12} />
-          Pick another date
+          {t("actionEditor.dateChip.pickAnother")}
         </button>
         {optional && value && (
           <button
@@ -1235,7 +1236,7 @@ export function DateChipPicker({
             }}
             className="text-[13px] text-text-secondary hover:text-text-primary transition-colors"
           >
-            Clear
+            {t("actionEditor.dateChip.clear")}
           </button>
         )}
       </div>

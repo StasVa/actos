@@ -584,7 +584,7 @@ function ActionEditorPanel({
                       }}
                     >
                       <span className="truncate">
-                        {goals.find((g) => g.id === goalId)?.title ?? "Pick a goal"}
+                        {goals.find((g) => g.id === goalId)?.title ?? t("actionEditor.field.pickGoal")}
                       </span>
                       <ChevronDown size={12} className="text-text-tertiary shrink-0" />
                     </button>

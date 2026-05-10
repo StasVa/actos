@@ -616,7 +616,7 @@ const SessionBuilder: React.FC = () => {
     <div className="rounded-[6px] border border-border-subtle bg-surface-raised">
       <div className="flex items-center gap-2 flex-wrap px-3 pt-3 pb-4 border-b border-border-subtle">
         <FilterDropdown
-          label="GOAL"
+          label={t("sessionBuilder.filter.goal")}
           value={goalFilter}
           defaultValue="all"
           options={goalOpts}
@@ -626,7 +626,7 @@ const SessionBuilder: React.FC = () => {
           }}
         />
         <FilterDropdown
-          label="PROJECT"
+          label={t("sessionBuilder.filter.project")}
           value={projectFilter}
           defaultValue="all"
           options={projectOpts}

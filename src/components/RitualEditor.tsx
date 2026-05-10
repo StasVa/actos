@@ -666,22 +666,22 @@ function RitualEditorPanel({
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 onBlur={() => persistField("title", title.trim())}
-                placeholder="Ritual title"
+                placeholder={t("ritualEditor.titlePlaceholder")}
                 className="w-full bg-transparent outline-none text-[18px] font-medium text-text-primary placeholder:text-text-tertiary"
               />
             </div>
 
             {/* Stats strip */}
             <div className="grid grid-cols-3 gap-3 pb-2 border-b border-border-subtle">
-              <Stat label="Completions" value={String(completions)} />
-              <Stat label="Multiplier" value={`×${mult.toFixed(2)}`} />
-              <Stat label="Effective" value={effective.toFixed(1)} />
+              <Stat label={t("ritualEditor.stat.completions")} value={String(completions)} />
+              <Stat label={t("ritualEditor.stat.multiplier")} value={`×${mult.toFixed(2)}`} />
+              <Stat label={t("ritualEditor.stat.effective")} value={effective.toFixed(1)} />
             </div>
 
             {/* Parent (goal + project) */}
             <div>
               <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-2">
-                Parent
+                {t("ritualEditor.section.parent")}
               </div>
               <div className="flex flex-col gap-2">
                 <select
@@ -724,7 +724,7 @@ function RitualEditorPanel({
             {/* Schedule */}
             <div>
               <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-2">
-                Schedule
+                {t("ritualEditor.section.schedule")}
               </div>
               <select
                 value={schedule}
@@ -838,7 +838,7 @@ function RitualEditorPanel({
             {/* Notes */}
             <div>
               <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-2">
-                Notes
+                {t("ritualEditor.section.notes")}
               </div>
               <textarea
                 value={notes}
@@ -852,7 +852,7 @@ function RitualEditorPanel({
 
             {/* Impact + costs */}
             <div className="grid grid-cols-2 gap-3">
-              <FieldRow label="Base impact (0-10)">
+              <FieldRow label={t("ritualEditor.field.baseImpactEdit")}>
                 <input
                   type="number"
                   min={0}
@@ -865,7 +865,7 @@ function RitualEditorPanel({
                   className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
                 />
               </FieldRow>
-              <FieldRow label="Time (min)">
+              <FieldRow label={t("ritualEditor.field.timeOptional")}>
                 <input
                   type="number"
                   min={0}
@@ -892,7 +892,7 @@ function RitualEditorPanel({
                   color: "hsl(var(--text-secondary))",
                 }}
               >
-                Archived. Restore to resume tracking and multiplier growth.
+                {t("ritualEditor.archived.notice")}
               </div>
             )}
           </>
@@ -912,7 +912,7 @@ function RitualEditorPanel({
                 color: "hsl(var(--surface-base))",
               }}
             >
-              Create ritual
+              {t("ritualEditor.create.cta")}
             </button>
           </>
         ) : status === "archived" ? (
@@ -930,7 +930,7 @@ function RitualEditorPanel({
               onClick={handleRestore}
               className="text-[13px] font-medium px-3 py-1.5 rounded-[4px] border border-border-subtle text-text-primary hover:bg-surface-hover"
             >
-              Restore
+              {t("common.restore")}
             </button>
           </>
         ) : (
@@ -939,7 +939,7 @@ function RitualEditorPanel({
               <EditorOverflowMenu
                 items={[
                   overflowDuplicate(handleDuplicate),
-                  overflowDrop(() => setConfirmArchive(true), "Archive"),
+                  overflowDrop(() => setConfirmArchive(true), t("ritualEditor.overflow.archive")),
                   overflowDelete(() => setConfirmDelete(true)),
                 ]}
               />
@@ -948,8 +948,8 @@ function RitualEditorPanel({
             <MarkDoneButton
               onClick={handleMarkDone}
               disabled={doneToday}
-              disabledTooltip={doneToday ? "Already logged today" : undefined}
-              label={doneToday ? "Done today" : "Mark today done"}
+              disabledTooltip={doneToday ? t("ritualEditor.markDone.alreadyToday") : undefined}
+              label={doneToday ? t("ritualEditor.markDone.label.done") : t("ritualEditor.markDone.label.markToday")}
             />
           </>
         )}
@@ -957,16 +957,16 @@ function RitualEditorPanel({
 
       <ConfirmModal
         open={confirmArchive}
-        title="Archive this ritual?"
-        body="Completion history is preserved. You can restore it later."
-        confirmLabel="Archive"
+        title={t("ritualEditor.confirm.archive.heading")}
+        body={t("ritualEditor.confirm.archive.body")}
+        confirmLabel={t("ritualEditor.confirm.archive.cta")}
         onCancel={() => setConfirmArchive(false)}
         onConfirm={handleArchive}
       />
       <DeleteTypeConfirm
         open={confirmDelete}
-        title="Delete this ritual?"
-        body="This permanently removes the ritual and its completion history. This cannot be undone."
+        title={t("confirm.delete.ritual.heading")}
+        body={t("ritualEditor.confirm.delete.body")}
         onCancel={() => setConfirmDelete(false)}
         onConfirm={handleDelete}
       />

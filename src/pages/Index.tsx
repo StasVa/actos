@@ -996,10 +996,15 @@ export const TodayZone: React.FC<{
       <section>
         <div className="bg-surface-elevated border border-border-subtle rounded-[6px] p-5 space-y-3">
           <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
-            DAY CLOSED
+            {t("home.todayZone.dayClosed.label")}
           </div>
           <div className="font-mono text-[13px] text-text-secondary tabular-nums">
-            {doneActions} actions done · {ritualsDoneCount} rituals done · +{valueAdded} value · {focusH}h focused
+            {t("home.todayZone.dayClosed.summary", {
+              actions: doneActions,
+              rituals: ritualsDoneCount,
+              value: valueAdded,
+              hours: focusH,
+            })}
           </div>
           {/* reflection removed */}
           <button
@@ -1007,7 +1012,7 @@ export const TodayZone: React.FC<{
             onClick={handleReopen}
             className="text-[12px] text-text-warning hover:brightness-110 transition"
           >
-            Re-open day
+            {t("home.todayZone.dayClosed.reopen")}
           </button>
         </div>
       </section>

@@ -7,7 +7,7 @@ import { ConfirmModal } from "@/components/ConfirmModal";
 import { toast } from "sonner";
 
 const FREE_FEATURES = [
-  "Up to 2 active goals",
+  "1 active goal",
   "All current features",
   "Last 90 days of history",
   "Standard support",

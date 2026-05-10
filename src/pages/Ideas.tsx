@@ -424,6 +424,7 @@ const ConvertProjectOverlay: React.FC<{ idea: Idea; onDone: () => void }> = ({ i
 
 /* ===== References section ===== */
 const ReferencesSection: React.FC<{ idea: Idea }> = ({ idea }) => {
+  const { t } = useTranslation();
   const updateIdea = useStore((s) => s.updateIdea);
   const refs = idea.references ?? [];
   const [adding, setAdding] = useState(false);

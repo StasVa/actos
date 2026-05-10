@@ -265,7 +265,21 @@ function RitualEditorPanel({
     onClose();
   };
 
-  const toggleCustomDay = (d: number) => {
+  const handleDuplicate = () => {
+    if (!ritual) return;
+    const newId = createRitual({
+      title: "Copy of " + ritual.title,
+      goalId: ritual.goalId,
+      projectId: ritual.projectId,
+      schedule: ritual.schedule,
+      scheduleConfig: ritual.scheduleConfig,
+      baseImpact: ritual.baseImpact,
+      notes: ritual.notes,
+      timeEstimateMinutes: ritual.timeEstimateMinutes,
+    });
+    toast("Ritual duplicated");
+    useStore.getState().openPanel({ kind: "ritual", mode: "edit", id: newId });
+  };
     const next = customDays.includes(d)
       ? customDays.filter((x) => x !== d)
       : [...customDays, d].sort();

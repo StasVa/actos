@@ -1,42 +1,47 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useStore } from "@/store/useStore";
 import { TierBadge } from "@/components/UserMenu";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { toast } from "sonner";
 
-const FREE_FEATURES = [
-  "1 active goal",
-  "All current features",
-  "Last 90 days of history",
-  "Standard support",
+const FREE_FEATURE_KEYS = [
+  "subscription.page.free.feature.activeGoal",
+  "subscription.page.free.feature.allCurrent",
+  "subscription.page.free.feature.history",
+  "subscription.page.free.feature.support",
 ];
 
-const ALL_IN_FEATURES = [
-  "Up to 3 active goals",
-  "All current features",
-  "Full history forever",
-  "Priority support",
-  "Every future feature, included",
+const ALL_IN_FEATURE_KEYS = [
+  "subscription.page.allIn.feature.activeGoals",
+  "subscription.page.allIn.feature.allCurrent",
+  "subscription.page.allIn.feature.fullHistory",
+  "subscription.page.allIn.feature.support",
+  "subscription.page.allIn.feature.future",
 ];
 
 const Check: React.FC = () => (
   <span style={{ color: "hsl(var(--state-active))", fontWeight: 600 }}>✓</span>
 );
 
-const FeatureList: React.FC<{ items: string[] }> = ({ items }) => (
-  <ul className="mt-4 space-y-2 text-[13px] text-text-secondary">
-    {items.map((f) => (
-      <li key={f} className="flex items-start gap-2">
-        <Check />
-        <span>{f}</span>
-      </li>
-    ))}
-  </ul>
-);
+const FeatureList: React.FC<{ itemKeys: string[] }> = ({ itemKeys }) => {
+  const { t } = useTranslation();
+  return (
+    <ul className="mt-4 space-y-2 text-[13px] text-text-secondary">
+      {itemKeys.map((k) => (
+        <li key={k} className="flex items-start gap-2">
+          <Check />
+          <span>{t(k)}</span>
+        </li>
+      ))}
+    </ul>
+  );
+};
 
 export default function SettingsSubscription() {
+  const { t } = useTranslation();
   const settings = useStore((s) => s.settings);
   const setSubscriptionTier = useStore((s) => s.setSubscriptionTier);
   const navigate = useNavigate();
@@ -50,9 +55,8 @@ export default function SettingsSubscription() {
 
   const handleUpgrade = () => {
     setConfirmUpgrade(false);
-    // Demo: flip tier locally and show welcome toast.
     setSubscriptionTier("all-in");
-    toast.success("Welcome to All-In. Full history is back.");
+    toast.success(t("subscription.page.toast.upgraded"));
     setTimeout(() => navigate("/today"), 400);
   };
 
@@ -61,7 +65,7 @@ export default function SettingsSubscription() {
     setSubscriptionTier("free");
     setDowngradeOpen(false);
     setDowngradeText("");
-    toast("Switched to Free. Your data is safe.");
+    toast(t("subscription.page.toast.downgraded"));
   };
 
   return (
@@ -73,13 +77,13 @@ export default function SettingsSubscription() {
             to="/settings"
             className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary hover:text-text-primary transition-colors"
           >
-            ← SETTINGS
+            {t("subscription.page.backToSettings")}
           </Link>
           <h1 className="mt-2 text-[24px] sm:text-[28px] md:text-[32px] font-medium text-text-primary leading-tight">
-            Subscription
+            {t("subscription.page.title")}
           </h1>
           <div className="mt-2 text-[14px] text-text-secondary">
-            {isAllIn ? "You're All-In." : "You're on Free."}
+            {isAllIn ? t("subscription.page.statusAllIn") : t("subscription.page.statusFree")}
           </div>
           <div className="mt-4 border-t border-border-subtle" />
 
@@ -93,22 +97,26 @@ export default function SettingsSubscription() {
             }}
           >
             <div className="flex items-center justify-between gap-3">
-              <div className="text-[20px] font-medium text-text-primary">Free plan</div>
+              <div className="text-[20px] font-medium text-text-primary">
+                {t("subscription.page.free.title")}
+              </div>
               <TierBadge tier="free" />
             </div>
             <div
               className="mt-1 font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary"
             >
-              {isAllIn ? "AVAILABLE — DOWNGRADE" : "ACTIVE · NO PAYMENT"}
+              {isAllIn
+                ? t("subscription.page.availableDowngrade")
+                : t("subscription.page.activeNoPayment")}
             </div>
-            <FeatureList items={FREE_FEATURES} />
+            <FeatureList itemKeys={FREE_FEATURE_KEYS} />
             {isAllIn && (
               <button
                 type="button"
                 onClick={() => setDowngradeOpen(true)}
                 className="mt-4 h-9 px-3 text-[13px] rounded-[4px] text-text-tertiary hover:text-text-primary hover:bg-surface-hover transition-colors"
               >
-                Switch to Free
+                {t("subscription.page.switchToFree")}
               </button>
             )}
           </div>
@@ -127,16 +135,18 @@ export default function SettingsSubscription() {
                 className="text-[20px] font-medium"
                 style={{ color: "hsl(var(--accent))", fontWeight: 600 }}
               >
-                {isAllIn ? "Your plan: All-In" : "Go All-In — $12/mo"}
+                {isAllIn
+                  ? t("subscription.page.allInPlanTitle")
+                  : t("subscription.page.upgradeCta")}
               </div>
               <TierBadge tier="all-in" />
             </div>
             <div className="mt-2 text-[13px] text-text-secondary">
               {isAllIn
-                ? "Active · Next billing 2026-06-08 · $12/mo"
-                : "Everything we ever build."}
+                ? t("subscription.page.allInActive", { date: "2026-06-08" })
+                : t("subscription.page.everythingWeBuild")}
             </div>
-            <FeatureList items={ALL_IN_FEATURES} />
+            <FeatureList itemKeys={ALL_IN_FEATURE_KEYS} />
 
             {!isAllIn ? (
               <>
@@ -146,21 +156,21 @@ export default function SettingsSubscription() {
                   className="mt-5 w-full h-10 text-[14px] font-medium rounded-[4px] text-white transition-colors"
                   style={{ background: "hsl(var(--accent))" }}
                 >
-                  Go All-In — $12/mo
+                  {t("subscription.page.upgradeCta")}
                 </button>
                 <div className="mt-3 flex items-center justify-between text-[12px] text-text-tertiary">
-                  <span>Save 17% with annual — $120/yr (vs. $144 monthly)</span>
+                  <span>{t("subscription.page.annual.save")}</span>
                   <button
                     type="button"
                     onClick={() =>
                       setDemoModal({
-                        title: "Annual billing coming soon",
-                        body: "We'll email you when annual is live.",
+                        title: t("subscription.page.annual.title"),
+                        body: t("subscription.page.annual.body"),
                       })
                     }
                     className="text-text-secondary hover:text-text-primary transition-colors"
                   >
-                    Switch to annual →
+                    {t("subscription.page.annual.cta")}
                   </button>
                 </div>
               </>
@@ -170,26 +180,26 @@ export default function SettingsSubscription() {
                   type="button"
                   onClick={() =>
                     setDemoModal({
-                      title: "Manage subscription",
-                      body: "Subscription management is coming soon.",
+                      title: t("subscription.page.manage.title"),
+                      body: t("subscription.page.manage.body"),
                     })
                   }
                   className="h-9 px-3 text-[13px] font-medium rounded-[4px] text-text-primary hover:bg-surface-hover transition-colors"
                   style={{ border: "1px solid hsl(var(--border-default))" }}
                 >
-                  Manage subscription
+                  {t("subscription.page.manage.cta")}
                 </button>
                 <button
                   type="button"
                   onClick={() =>
                     setDemoModal({
-                      title: "Annual billing coming soon",
-                      body: "We'll email you when annual is live.",
+                      title: t("subscription.page.annual.title"),
+                      body: t("subscription.page.annual.body"),
                     })
                   }
                   className="h-9 px-3 text-[13px] rounded-[4px] text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-colors"
                 >
-                  Switch to annual
+                  {t("subscription.page.annual.ctaShort")}
                 </button>
               </div>
             )}
@@ -205,43 +215,43 @@ export default function SettingsSubscription() {
           >
             <div className="flex items-baseline justify-between gap-3">
               <div className="text-[15px] font-medium text-text-primary">
-                All-In Lifetime — $200 once
+                {t("subscription.page.lifetime.title")}
               </div>
               <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">
-                LIMITED
+                {t("subscription.page.lifetime.limited")}
               </span>
             </div>
             <div className="mt-1 text-[13px] text-text-secondary">
-              For believers. Pay once, never billed again, every feature ever.
+              {t("subscription.page.lifetime.body")}
             </div>
             <button
               type="button"
               onClick={() =>
                 setDemoModal({
-                  title: "Lifetime is coming soon",
-                  body: "We'll email you when Lifetime opens.",
+                  title: t("subscription.page.lifetime.soonTitle"),
+                  body: t("subscription.page.lifetime.soonBody"),
                 })
               }
               className="mt-3 h-9 px-3 text-[13px] rounded-[4px] text-text-primary hover:bg-surface-hover transition-colors"
               style={{ border: "1px solid hsl(var(--border-default))" }}
             >
-              Go Lifetime
+              {t("subscription.page.lifetime.cta")}
             </button>
           </div>
 
           {/* Footer */}
           <div className="mt-8 text-[12px] text-text-tertiary">
-            Questions about subscription? hello@actos.app
+            {t("subscription.page.contact")}
           </div>
         </div>
       </main>
 
       <ConfirmModal
         open={confirmUpgrade}
-        title="Subscribe to All-In?"
-        body="$12/mo, billed monthly. Cancel anytime."
-        confirmLabel="Subscribe"
-        cancelLabel="Cancel"
+        title={t("subscription.page.confirmUpgrade.title")}
+        body={t("subscription.page.confirmUpgrade.body")}
+        confirmLabel={t("subscription.page.confirmUpgrade.cta")}
+        cancelLabel={t("common.cancel")}
         onCancel={() => setConfirmUpgrade(false)}
         onConfirm={handleUpgrade}
       />
@@ -257,14 +267,16 @@ export default function SettingsSubscription() {
             className="w-[460px] max-w-[90vw] bg-surface-elevated border border-border-subtle rounded-[6px] p-6 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-[16px] font-medium text-text-primary">Downgrade to Free?</h2>
+            <h2 className="text-[16px] font-medium text-text-primary">
+              {t("subscription.page.downgrade.title")}
+            </h2>
             <div className="mt-3 text-[13px] text-text-secondary leading-[1.5]">
-              You'll keep all your data, but: history older than 90 days will be locked, and you
-              won't be able to add new goals until you're back to 1 active. You can return to
-              All-In anytime.
+              {t("subscription.page.downgrade.body")}
             </div>
             <div className="mt-4 text-[12px] text-text-tertiary">
-              Type <span className="font-mono text-text-secondary">DOWNGRADE</span> to confirm.
+              {t("subscription.page.downgrade.typePromptPre")}
+              <span className="font-mono text-text-secondary">DOWNGRADE</span>
+              {t("subscription.page.downgrade.typePromptPost")}
             </div>
             <input
               autoFocus
@@ -281,7 +293,7 @@ export default function SettingsSubscription() {
                 }}
                 className="text-[13px] text-text-secondary hover:text-text-primary transition-colors px-3 py-1.5"
               >
-                Cancel
+                {t("common.cancel")}
               </button>
               <button
                 type="button"
@@ -293,7 +305,7 @@ export default function SettingsSubscription() {
                   background: "hsl(var(--surface-hover))",
                 }}
               >
-                Downgrade
+                {t("subscription.page.downgrade.cta")}
               </button>
             </div>
           </div>
@@ -305,7 +317,7 @@ export default function SettingsSubscription() {
         title={demoModal?.title ?? ""}
         body={demoModal?.body}
         cancelLabel=""
-        confirmLabel="Got it"
+        confirmLabel={t("subscription.page.gotIt")}
         onCancel={() => setDemoModal(null)}
         onConfirm={() => setDemoModal(null)}
       />

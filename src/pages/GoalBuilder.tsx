@@ -179,25 +179,23 @@ const GoalStep: React.FC<{
   onSubmit: (title: string, color: GoalColorVar) => void;
   onSkip: () => void;
 }> = ({ initialTitle, initialColor, onSubmit, onSkip }) => {
+  const { t } = useTranslation();
   const [title, setTitle] = React.useState(initialTitle);
   const [color, setColor] = React.useState<GoalColorVar>(initialColor);
   const [showExamples, setShowExamples] = React.useState(false);
 
-  const submit = () => { const t = title.trim(); if (t) onSubmit(t, color); };
+  const submit = () => { const tt = title.trim(); if (tt) onSubmit(tt, color); };
 
   return (
     <>
-      <Heading>Create your first goal</Heading>
-      <Lede>
-        A goal is a result you want to reach — months or years of work
-        toward something concrete you'll know you've achieved.
-      </Lede>
+      <Heading>{t("goalBuilder.heading")}</Heading>
+      <Lede>{t("goalBuilder.description")}</Lede>
       <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
         <input
           autoFocus
           type="text"
           value={title}
-          placeholder="e.g. Get my SaaS to $10k MRR"
+          placeholder={t("goalBuilder.titlePlaceholder")}
           onChange={(e) => setTitle(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter") submit(); }}
           style={inputStyle}
@@ -217,7 +215,7 @@ const GoalStep: React.FC<{
             <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace" }}>
               {showExamples ? "−" : "+"}
             </span>
-            Examples
+            {t("goalBuilder.examples")}
           </button>
           {showExamples && (
             <div style={{
@@ -250,7 +248,7 @@ const GoalStep: React.FC<{
             fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase",
             color: "hsl(var(--text-tertiary))", marginBottom: 8,
             fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-          }}>Color</div>
+          }}>{t("goalBuilder.colorLabel")}</div>
           <div style={{ display: "flex", gap: 10 }}>
             {COLORS.map((c) => {
               const sel = color === c.value;
@@ -272,7 +270,7 @@ const GoalStep: React.FC<{
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 16 }}>
-          <PrimaryBtn onClick={submit} disabled={!title.trim()}>Create goal</PrimaryBtn>
+          <PrimaryBtn onClick={submit} disabled={!title.trim()}>{t("goalBuilder.createButton")}</PrimaryBtn>
         </div>
       </div>
     </>

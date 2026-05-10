@@ -841,7 +841,7 @@ const PlanForm: React.FC<{
                         onClick={() => toggleRitualSkip(r.id, !skipped)}
                         className="text-[12px] text-text-tertiary hover:text-text-primary transition shrink-0 px-2"
                       >
-                        {skipped ? "Restore" : "Skip"}
+                        {skipped ? t("planToday.rituals.restore") : t("planToday.rituals.skip")}
                       </button>
                     </div>
                   </div>

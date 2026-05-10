@@ -87,16 +87,16 @@ export default function Settings() {
   const fileRef = React.useRef<HTMLInputElement>(null);
 
   const handleClearSample = () => {
-    if (!confirm("Clear all sample goals, projects, actions, rituals, and ideas? This can't be undone.")) return;
+    if (!confirm(t("settings.clearSampleData.confirm"))) return;
     clearSampleData();
-    toast.success("Sample data cleared.");
+    toast.success(t("settings.toast.sampleCleared"));
   };
 
   const handleReset = () => {
-    if (confirm("Reset everything to seed data? This wipes all your changes.")) {
+    if (confirm(t("settings.confirm.reset"))) {
       localStorage.removeItem(STORAGE_KEY);
       resetToSeed();
-      toast.success("Reset to seed data");
+      toast.success(t("settings.toast.resetSeed"));
     }
   };
   const handleExport = () => {
@@ -104,25 +104,25 @@ export default function Settings() {
     const payload = raw ? JSON.parse(raw) : { state: useStore.getState() };
     const stamp = new Date().toISOString().slice(0, 10);
     downloadJSON(`actos-backup-${stamp}.json`, payload);
-    toast.success("Backup downloaded");
+    toast.success(t("settings.toast.backupDownloaded"));
   };
   const handleImportPick = () => fileRef.current?.click();
   const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
-    if (!confirm(`Import "${file.name}"? This replaces all current data.`)) return;
+    if (!confirm(t("settings.panel.confirm.import", { name: file.name }))) return;
     try {
       const text = await file.text();
       const parsed = JSON.parse(text);
       const envelope = parsed?.state ? parsed : { state: parsed, version: 0 };
       if (!envelope.state || typeof envelope.state !== "object") throw new Error("Missing state");
       localStorage.setItem(STORAGE_KEY, JSON.stringify(envelope));
-      toast.success("Import complete — reloading…");
+      toast.success(t("settings.panel.toast.imported"));
       setTimeout(() => window.location.reload(), 600);
     } catch (err) {
       console.error(err);
-      toast.error("Import failed — invalid JSON");
+      toast.error(t("settings.panel.toast.importFailed"));
     }
   };
 

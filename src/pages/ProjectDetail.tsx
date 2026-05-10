@@ -684,12 +684,12 @@ const ProjectDetail: React.FC = () => {
 
             <section>
               <h2 className="text-[12px] font-medium uppercase tracking-[0.08em] text-text-secondary mb-2">
-                Description
+                {t("projectDetail.description.heading")}
               </h2>
               <RichTextEditor
                 value={project.description ?? ""}
                 onChange={(html) => updateProject(project.id, { description: html })}
-                placeholder="Describe the project, add references, materials..."
+                placeholder={t("projectDetail.description.placeholder")}
               />
             </section>
 
@@ -717,17 +717,22 @@ const ProjectDetail: React.FC = () => {
             <section>
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-[12px] font-medium uppercase tracking-[0.08em] text-text-secondary">
-                  Actions · {actions.length}
+                  {t("projectDetail.actions.title", { count: actions.length })}
                 </h2>
                 <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
-                  {grouped.done.length} DONE · {grouped.backlog.length} BACKLOG · {grouped.planned.length} PLANNED · {grouped.delegated.length} DELEGATED
+                  {t("projectDetail.actions.meta", {
+                    done: grouped.done.length,
+                    backlog: grouped.backlog.length,
+                    planned: grouped.planned.length,
+                    delegated: grouped.delegated.length,
+                  })}
                 </div>
               </div>
 
               <div className="border-t border-border-subtle">
                 {activeList.length === 0 ? (
                   <div className="py-3 font-mono text-[11px] text-text-tertiary px-3">
-                    No active actions in this project.
+                    {t("projectDetail.actions.empty")}
                   </div>
                 ) : (
                   activeList.map((a) => <ActionRow key={a.id} a={a} color={color} />)
@@ -745,7 +750,7 @@ const ProjectDetail: React.FC = () => {
                       submitQuickAdd();
                     }
                   }}
-                  placeholder="Add an action…"
+                  placeholder={t("projectDetail.actions.placeholder")}
                   className="flex-1 bg-transparent outline-none text-[13px] text-text-primary placeholder:text-text-tertiary"
                 />
                 <span className="font-mono text-[11px] text-text-tertiary">↵</span>
@@ -756,7 +761,7 @@ const ProjectDetail: React.FC = () => {
                   <div className="flex items-center gap-2 h-7 px-3">
                     <span className="text-text-secondary text-[10px]">▾</span>
                     <span className="text-[12px] font-medium uppercase tracking-[0.08em] text-text-secondary">
-                      Delegated · {grouped.delegated.length}
+                      {t("projectDetail.delegated.title", { count: grouped.delegated.length })}
                     </span>
                   </div>
                   <div className="border-t border-border-subtle">
@@ -772,7 +777,7 @@ const ProjectDetail: React.FC = () => {
                   <div className="flex items-center gap-2 h-7 px-3">
                     <span className="text-text-tertiary text-[10px]">▾</span>
                     <span className="text-[12px] font-medium uppercase tracking-[0.08em] text-text-tertiary">
-                      Done · {grouped.done.length}
+                      {t("projectDetail.done.title", { count: grouped.done.length })}
                     </span>
                   </div>
                   <div className="border-t border-border-subtle">
@@ -791,33 +796,33 @@ const ProjectDetail: React.FC = () => {
           <div className="h-12 px-6 flex items-center justify-end gap-2 border-b border-border-subtle">
             {!isDraft && (
               <CardMenu
-                ariaLabel="Project actions"
+                ariaLabel={t("projectDetail.menu.aria")}
                 items={[
                   ...(project.status === "active"
                     ? [
                         {
-                          label: "Mark complete",
+                          label: t("projectDetail.menu.markComplete"),
                           onSelect: () => handleStatusChange("completed"),
                         },
                         {
-                          label: "Drop project",
+                          label: t("projectDetail.menu.drop"),
                           destructive: true,
                           onSelect: () => handleStatusChange("dropped"),
                         },
                       ]
                     : [
                         {
-                          label: "Re-open",
+                          label: t("projectDetail.menu.reopen"),
                           onSelect: () => handleStatusChange("active"),
                         },
                       ]),
                   {
-                    label: "Delete project",
+                    label: t("projectDetail.menu.delete"),
                     destructive: true,
                     onSelect: () => {
-                      if (confirm("Delete this project? This cannot be undone.")) {
+                      if (confirm(t("projectDetail.confirm.delete"))) {
                         deleteProject(project.id);
-                        toast("Project deleted");
+                        toast(t("projectDetail.toast.deleted"));
                         navigate("/projects");
                       }
                     },
@@ -830,9 +835,9 @@ const ProjectDetail: React.FC = () => {
             <div>
               {([
                 [
-                  "STATUS",
+                  t("projectDetail.sidebar.status"),
                   <span className="inline-flex items-center gap-1.5">
-                    <Tooltip content={<StateDotTooltip state={stateInd} lastActivity={lastTs ? fmtAgo(lastTs) : "—"} />}>
+                    <Tooltip content={<StateDotTooltip state={stateInd} lastActivity={lastTs ? fmtAgo(lastTs) : t("goalDetail.hero.dash")} />}>
                       <span
                         className="w-1.5 h-1.5 rounded-full"
                         style={{
@@ -841,11 +846,11 @@ const ProjectDetail: React.FC = () => {
                         }}
                       />
                     </Tooltip>
-                    {projStatusText.charAt(0) + projStatusText.slice(1).toLowerCase()}
+                    {projStatusDisplay}
                   </span>,
                 ],
                 [
-                  "PARENT GOAL",
+                  t("projectDetail.sidebar.parentGoal"),
                   <Link
                     to={`/goals/${goal.id}`}
                     className="inline-flex items-center gap-1.5 hover:text-accent transition-colors"
@@ -854,8 +859,8 @@ const ProjectDetail: React.FC = () => {
                     {goal.title}
                   </Link>,
                 ],
-                ["CREATED", new Date(project.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })],
-                ["AGE", `${ageDays} days`],
+                [t("projectDetail.sidebar.created"), fmtFullDate(project.createdAt)],
+                [t("projectDetail.sidebar.age"), t("projectDetail.age", { count: ageDays })],
               ] as [string, React.ReactNode][]).map(([k, v], i, arr) => (
                 <div
                   key={k}
@@ -872,12 +877,12 @@ const ProjectDetail: React.FC = () => {
             {!isDraft && (
               <div>
                 <h3 className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-secondary mb-3">
-                  State
+                  {t("projectDetail.sidebar.state")}
                 </h3>
                 <div>
                   {[
-                    { label: "VALUE", value: `${progress.outcome}%`, pct: progress.outcome, opacity: 1 },
-                    { label: "EFFORT", value: `${progress.effort}%`, pct: progress.effort, opacity: 0.6 },
+                    { label: t("projectDetail.progressLabel.value"), isEffort: false, value: `${progress.outcome}%`, pct: progress.outcome, opacity: 1 },
+                    { label: t("projectDetail.progressLabel.effort"), isEffort: true, value: `${progress.effort}%`, pct: progress.effort, opacity: 0.6 },
                   ].map((row, i) => (
                     <div
                       key={row.label}
@@ -898,15 +903,15 @@ const ProjectDetail: React.FC = () => {
                         />
                       </div>
                       <span className="w-[14px] flex justify-center shrink-0">
-                        {row.label === "EFFORT" ? (
-                          <MetricInfoPopover variant="valueEffort" ariaLabel="What do Value and Effort mean?" />
+                        {row.isEffort ? (
+                          <MetricInfoPopover variant="valueEffort" ariaLabel={t("goalDetail.hero.metricInfoAria")} />
                         ) : null}
                       </span>
                     </div>
                   ))}
                   <div className="h-8 flex items-center gap-3 py-1.5">
                     <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary w-[70px] shrink-0">
-                      TIME
+                      {t("projectDetail.sidebar.time")}
                     </span>
                     <span className="flex-1 font-mono tabular-nums">
                       <span className="text-[14px] text-text-primary">{fmtHM(doneMinutes)}</span>

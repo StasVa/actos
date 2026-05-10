@@ -661,11 +661,11 @@ const AttachmentsSection: React.FC<{ idea: Idea }> = ({ idea }) => {
             onClick={() => fileInputRef.current?.click()}
             className="text-[12px] text-[hsl(var(--accent))] hover:underline"
           >
-            + Upload
+            {t("ideas.atts.add")}
           </button>
         }
       >
-        {`ATTACHMENTS · ${atts.length}`}
+        {t("ideas.atts.heading", { count: atts.length })}
       </SectionHeading>
       <input
         ref={fileInputRef}
@@ -681,7 +681,7 @@ const AttachmentsSection: React.FC<{ idea: Idea }> = ({ idea }) => {
 
       {atts.length === 0 ? (
         <div className="text-[12px] text-text-tertiary">
-          No attachments yet. Upload images for visual references.
+          {t("ideas.atts.empty")}
         </div>
       ) : (
         <div className="grid grid-cols-[repeat(auto-fill,minmax(80px,80px))] gap-2">
@@ -698,7 +698,7 @@ const AttachmentsSection: React.FC<{ idea: Idea }> = ({ idea }) => {
                   remove(a.id);
                 }}
                 className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 text-white text-[11px] leading-none opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
-                aria-label="Remove image"
+                aria-label={t("ideas.aria.removeImage")}
               >
                 ×
               </button>

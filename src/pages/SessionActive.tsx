@@ -633,7 +633,7 @@ const SessionActive: React.FC = () => {
                     color: "hsl(var(--accent-foreground))",
                   }}
                 >
-                  Mark done
+                  {t("sessionActive.action.markDone")}
                 </button>
                 <button
                   onClick={() => setConfirmDrop(currentAction.id)}

@@ -764,6 +764,7 @@ export const TodayZone: React.FC<{
   onPlanClick: () => void;
   onCloseClick: () => void;
 }> = ({ onPlanClick, onCloseClick }) => {
+  const { t } = useTranslation();
   const goals = useStore((s) => s.goals);
   const projects = useStore((s) => s.projects);
   const actions = useStore((s) => s.actions);

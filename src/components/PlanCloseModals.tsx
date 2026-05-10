@@ -935,15 +935,16 @@ const DAY_TYPE_META: DayTypeMeta[] = [
 
 /* Step 1 — centered hero with four colored Day Type cards. */
 const DayTypeStep: React.FC<{ onPick: (m: DayTypeMeta) => void }> = ({ onPick }) => {
+  const { t } = useTranslation();
   const [hover, setHover] = useState<DayType | null>(null);
   return (
     <div className="flex-1 flex flex-col items-center justify-center py-10">
       <div className="flex flex-col items-center text-center">
         <h2 className="text-[22px] md:text-[26px] font-medium text-text-primary leading-tight">
-          What kind of day is it?
+          {t("planToday.dayTypeStep.heading")}
         </h2>
         <div className="text-[14px] text-text-secondary mt-2">
-          Pick one to start planning.
+          {t("planToday.dayTypeStep.sub")}
         </div>
       </div>
       <div className="h-8 md:h-11" />

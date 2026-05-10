@@ -3,6 +3,7 @@
 
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ArrowRight, Sparkles, Target } from "lucide-react";
 import { useStore } from "@/store/useStore";
 import { themeStore, useThemeChoice, type ThemeChoice } from "@/lib/theme";

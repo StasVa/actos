@@ -92,7 +92,6 @@ function buildDayRows(
 }
 
 type SortKey = ReviewSortKey;
-const SORT_OPTIONS = REVIEW_SORT_OPTIONS;
 
 const DayRowItem: React.FC<{
   row: DayRow;

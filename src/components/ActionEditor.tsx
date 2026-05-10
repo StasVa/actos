@@ -440,7 +440,7 @@ function ActionEditorPanel({
   const handleDuplicate = () => {
     if (!action) return;
     const newId = createAction({
-      title: "Copy of " + action.title,
+      title: t("actionEditor.copyOf", { title: action.title }),
       projectId: action.projectId,
       goalId: action.goalId,
       notes: action.notes,
@@ -448,14 +448,14 @@ function ActionEditorPanel({
       timeEstimateMinutes: action.timeEstimateMinutes,
       status: "backlog",
     });
-    toast("Action duplicated · view in Backlog.");
+    toast(t("actionEditor.toast.duplicated"));
     useStore.getState().openPanel({ kind: "action", mode: "edit", id: newId });
   };
 
   const handleDelete = () => {
     if (!actionId) return;
     deleteAction(actionId);
-    toast("Action deleted");
+    toast(t("actionEditor.toast.deleted"));
     setConfirmDelete(false);
     onClose();
   };

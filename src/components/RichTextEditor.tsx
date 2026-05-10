@@ -389,7 +389,7 @@ export const RichTextEditor: React.FC<Props> = ({
               flushSave();
             }}
             className="hover:text-text-primary"
-            title="Retry"
+            title={t("richTextEditor.retry")}
           >
             <RotateCw size={12} />
           </button>
@@ -407,28 +407,28 @@ export const RichTextEditor: React.FC<Props> = ({
       <div className="sticky top-0 z-10 flex items-center gap-1 flex-wrap bg-surface-elevated border-b border-border-subtle px-2 py-1.5 rounded-t-[4px] min-h-[40px]">
         {/* Group 1: text formatting */}
         <ToolbarBtn
-          title="Bold (⌘B)"
+          title={t("richTextEditor.bold")}
           onClick={() => editor.chain().focus().toggleBold().run()}
           active={editor.isActive("bold")}
         >
           <Bold size={16} />
         </ToolbarBtn>
         <ToolbarBtn
-          title="Italic (⌘I)"
+          title={t("richTextEditor.italic")}
           onClick={() => editor.chain().focus().toggleItalic().run()}
           active={editor.isActive("italic")}
         >
           <Italic size={16} />
         </ToolbarBtn>
         <ToolbarBtn
-          title="Underline (⌘U)"
+          title={t("richTextEditor.underline")}
           onClick={() => editor.chain().focus().toggleUnderline().run()}
           active={editor.isActive("underline")}
         >
           <UnderlineIcon size={16} />
         </ToolbarBtn>
         <ToolbarBtn
-          title="Strikethrough"
+          title={t("richTextEditor.strikethrough")}
           onClick={() => editor.chain().focus().toggleStrike().run()}
           active={editor.isActive("strike")}
         >
@@ -439,14 +439,14 @@ export const RichTextEditor: React.FC<Props> = ({
 
         {/* Group 2: headings */}
         <ToolbarBtn
-          title="Heading 2"
+          title={t("richTextEditor.h2")}
           onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
           active={editor.isActive("heading", { level: 2 })}
         >
           <Heading2 size={16} />
         </ToolbarBtn>
         <ToolbarBtn
-          title="Heading 3"
+          title={t("richTextEditor.h3")}
           onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
           active={editor.isActive("heading", { level: 3 })}
         >
@@ -457,21 +457,21 @@ export const RichTextEditor: React.FC<Props> = ({
 
         {/* Group 3: lists & quotes */}
         <ToolbarBtn
-          title="Bullet list"
+          title={t("richTextEditor.bulletList")}
           onClick={() => editor.chain().focus().toggleBulletList().run()}
           active={editor.isActive("bulletList")}
         >
           <List size={16} />
         </ToolbarBtn>
         <ToolbarBtn
-          title="Numbered list"
+          title={t("richTextEditor.numberedList")}
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
           active={editor.isActive("orderedList")}
         >
           <ListOrdered size={16} />
         </ToolbarBtn>
         <ToolbarBtn
-          title="Quote"
+          title={t("richTextEditor.quote")}
           onClick={() => editor.chain().focus().toggleBlockquote().run()}
           active={editor.isActive("blockquote")}
         >
@@ -483,7 +483,7 @@ export const RichTextEditor: React.FC<Props> = ({
         {/* Group 4: insertions */}
         <div className="relative">
           <ToolbarBtn
-            title="Link (⌘K)"
+            title={t("richTextEditor.link")}
             onClick={openLinkPopover}
             active={editor.isActive("link")}
           >
@@ -509,7 +509,7 @@ export const RichTextEditor: React.FC<Props> = ({
                       setLinkPopoverOpen(false);
                     }
                   }}
-                  placeholder="Paste link..."
+                  placeholder={t("richTextEditor.pasteLink")}
                   className="flex-1 bg-surface-base border border-border-subtle rounded-[3px] px-2 py-1 text-[13px] text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-accent"
                 />
               </div>
@@ -539,14 +539,14 @@ export const RichTextEditor: React.FC<Props> = ({
           )}
         </div>
         <ToolbarBtn
-          title="Insert image"
+          title={t("richTextEditor.insertImage")}
           onClick={() => imageInputRef.current?.click()}
         >
           <ImageIcon size={16} />
         </ToolbarBtn>
         {onAttachmentsChange && (
           <ToolbarBtn
-            title="Attach file"
+            title={t("richTextEditor.attachFile")}
             onClick={() => fileInputRef.current?.click()}
           >
             <Paperclip size={16} />
@@ -633,7 +633,7 @@ export const RichTextEditor: React.FC<Props> = ({
                     onAttachmentsChange?.(attachments.filter((x) => x.id !== a.id))
                   }
                   className="text-[11px] text-text-tertiary hover:text-text-primary px-1"
-                  title="Remove attachment"
+                  title={t("richTextEditor.removeAttachment")}
                 >
                   ×
                 </button>

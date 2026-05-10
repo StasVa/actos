@@ -1201,7 +1201,7 @@ export const PlanTodayPage: React.FC<{ onCancel: () => void; onComplete: () => v
               onClick={() => setStep(1)}
               className="ml-2 text-[12px] text-text-tertiary hover:text-text-primary transition"
             >
-              ← Back
+              {t("planToday.back")}
             </button>
           </div>
 

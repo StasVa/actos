@@ -1394,7 +1394,7 @@ export const TodayZone: React.FC<{
                             onClick={(e) => { e.stopPropagation(); reopenRitual(); }}
                             className="text-[11px] text-text-tertiary hover:text-text-primary transition"
                           >
-                            Re-open
+                            {t("common.reopen")}
                           </button>
                         ) : (
                           <button
@@ -1405,7 +1405,7 @@ export const TodayZone: React.FC<{
                             }}
                             className="text-[11px] text-text-tertiary hover:text-text-primary transition"
                           >
-                            {isSkipped ? "Restore" : "Skip"}
+                            {isSkipped ? t("common.restore") : t("common.skip")}
                           </button>
                         )}
                       </div>
@@ -1425,7 +1425,7 @@ export const TodayZone: React.FC<{
             onClick={onCloseClick}
             className="w-full md:w-auto px-5 py-2 rounded-[4px] border border-[hsl(var(--accent))] text-[hsl(var(--accent))] text-[13px] font-medium hover:bg-surface-hover transition"
           >
-            Close day
+            {t("home.closeDay")}
           </button>
         )}
       </div>

@@ -83,11 +83,11 @@ function addDaysISO(iso: string, n: number): string {
 
 function fmtRelDate(iso: string): string {
   const today = TODAY_ISO();
-  if (iso === today) return "today";
-  if (iso === addDaysISO(today, 1)) return "tomorrow";
-  if (iso === addDaysISO(today, -1)) return "yesterday";
+  if (iso === today) return i18n.t("actionEditor.relDays.today");
+  if (iso === addDaysISO(today, 1)) return i18n.t("actionEditor.relDays.tomorrow");
+  if (iso === addDaysISO(today, -1)) return i18n.t("actionEditor.relDays.yesterday");
   const d = new Date(iso + "T00:00:00");
-  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  return d.toLocaleDateString(i18n.language || "en", { month: "short", day: "numeric" });
 }
 function fmtRelFromNow(isoTime: string): string {
   const dDate = isoTime.slice(0, 10);
@@ -97,10 +97,10 @@ function fmtRelFromNow(isoTime: string): string {
       new Date(dDate + "T00:00:00").getTime()) /
       86400000,
   );
-  if (days <= 0) return "today";
-  if (days === 1) return "yesterday";
-  if (days < 30) return `${days} days ago`;
-  return new Date(dDate + "T00:00:00").toLocaleDateString("en-US", {
+  if (days <= 0) return i18n.t("actionEditor.relFromNow.today");
+  if (days === 1) return i18n.t("actionEditor.relFromNow.yesterday");
+  if (days < 30) return i18n.t("actionEditor.relFromNow.daysAgo", { count: days });
+  return new Date(dDate + "T00:00:00").toLocaleDateString(i18n.language || "en", {
     month: "short",
     day: "numeric",
   });

@@ -557,7 +557,7 @@ const Progress: React.FC = () => {
       <main className="app-main page-wide">
         <PageHeader
           title={t("progress.page.title")}
-          meta={`${activeGoals} GOALS · ${activeProjects} ACTIVE PROJECTS · ${actionsDone} ACTIONS DONE ALL-TIME`}
+          meta={t("progress.meta", { goals: activeGoals, projects: activeProjects, actions: actionsDone })}
         />
         <div style={{ height: 24 }} />
 

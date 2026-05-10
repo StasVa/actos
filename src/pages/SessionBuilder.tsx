@@ -747,7 +747,7 @@ const SessionBuilder: React.FC = () => {
           {/* MODE */}
           <section className="mt-8">
             <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-3">
-              MODE
+              {t("sessionBuilder.section.mode")}
             </div>
             <div className={`flex ${isMobile ? "flex-col" : "flex-row"} gap-3`}>
               {PRESETS.map((p) => (

@@ -270,18 +270,18 @@ const AllProjects: React.FC = () => {
         .filter(Boolean)
         .sort()
         .at(-1);
-      const ago = fmtAgo(lastIso ?? undefined);
+      const ago = fmtAgo(lastIso ?? undefined, t);
 
       let state: ProjectState;
       let closedLabel: string | undefined;
       let closedSort: number | undefined;
       if (p.status === "completed") {
         state = "completed";
-        closedLabel = p.completedAt ? fmtAgo(p.completedAt).label : undefined;
+        closedLabel = p.completedAt ? fmtAgo(p.completedAt, t).label : undefined;
         closedSort = p.completedAt ? new Date(p.completedAt).getTime() : 0;
       } else if (p.status === "dropped") {
         state = "dropped";
-        closedLabel = p.droppedAt ? fmtAgo(p.droppedAt).label : undefined;
+        closedLabel = p.droppedAt ? fmtAgo(p.droppedAt, t).label : undefined;
         closedSort = p.droppedAt ? new Date(p.droppedAt).getTime() : 0;
       } else {
         const pct = total > 0 ? done / total : 0;

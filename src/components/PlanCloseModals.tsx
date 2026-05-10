@@ -623,9 +623,9 @@ const PlanForm: React.FC<{
                           });
                           addMany([newId]);
                           setQuickTitle("");
-                          toast.success("Action created and added to today");
+                          toast.success(t("planToday.actions.toast.created"));
                         }}
-                        placeholder="Quick add new action..."
+                        placeholder={t("planToday.actions.quickAddPlaceholder")}
                         className="flex-1 min-w-0 bg-transparent text-[14px] text-text-primary outline-none placeholder:text-text-tertiary"
                       />
                     </div>

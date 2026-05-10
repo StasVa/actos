@@ -1471,7 +1471,7 @@ const HeavyLift: React.FC = () => {
               >
                 <Strip color={c} />
                 <div className="w-[52px] pl-2">
-                  <div className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary leading-none">IMPACT</div>
+                  <div className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary leading-none">{t("home.heavyLift.impact")}</div>
                   <div className="font-mono text-[16px] text-text-primary leading-tight">{a.impact}</div>
                 </div>
                 <div className="min-w-0 flex-1 py-1.5">
@@ -1480,16 +1480,16 @@ const HeavyLift: React.FC = () => {
                 </div>
                 {time && <span className="font-mono text-[12px] text-text-secondary whitespace-nowrap">{time}</span>}
                 <button
-                  onClick={() => { changeStatus(a.id, "done"); toast.success("Action completed"); }}
+                  onClick={() => { changeStatus(a.id, "done"); toast.success(t("home.heavyLift.toast.completed")); }}
                   className="text-[12px] text-accent hover:text-accent-hover whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity"
                 >
-                  Mark done
+                  {t("home.heavyLift.markDone")}
                 </button>
                 <button
                   onClick={() => openPanel({ kind: "action", mode: "edit", id: a.id })}
                   className="text-[12px] text-text-secondary hover:text-text-primary whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity"
                 >
-                  Open
+                  {t("home.heavyLift.open")}
                 </button>
               </div>
             );

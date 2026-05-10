@@ -374,7 +374,7 @@ const AllProjects: React.FC = () => {
     return { near, active, stalled, closed };
   }, [filtered, sortFn]);
 
-  const meta = `${counts.total} PROJECTS · ${counts.active} ACTIVE · ${counts.near} NEAR DONE · ${counts.stalled} STALLED · ${counts.closed} CLOSED`;
+  const meta = t("allProjects.meta", { total: counts.total, active: counts.active, near: counts.near, stalled: counts.stalled, closed: counts.closed });
 
   const anyApplied =
     goalFilter !== "all" ||

@@ -9,11 +9,12 @@
 // equivalent display by passing pre-built bottom segments via `bottomSegments`.
 
 import React from "react";
-import { Star } from "lucide-react";
+import { Star, Send } from "lucide-react";
 import { useStore } from "@/store/useStore";
 import type { Action } from "@/types";
 
 import { ImpactPill, TimePill } from "@/components/MetaPills";
+import { Tooltip } from "@/components/Tooltip";
 
 type RightPill =
   | { kind: "date"; label: string } // "TODAY", "MAY 12"
@@ -70,29 +71,28 @@ export const ActionRow: React.FC<ActionRowProps> = ({
       action.status === "dropped" ||
       action.status === "cancelled");
   const isDone = action.status === "done";
+  const isDelegated = action.status === "delegated";
 
   // Derive default right pill from status when not overridden.
   let pill: RightPill = rightPill ?? null;
   if (rightPill === undefined) {
     if (action.status === "planned" && action.scheduledDate) {
       pill = { kind: "date", label: formatScheduledLabel(action.scheduledDate) };
-    } else if (action.status === "delegated" && action.delegateName) {
-      pill = { kind: "delegate", name: action.delegateName };
     } else if (isDone) {
       pill = { kind: "done" };
     }
+    // Delegated: no right-side text pill — Send icon + return-time pill carry the info.
   }
 
   // Default bottom segments. Time and Impact moved to right-side pill cluster
-  // — only Goal · Project · → Delegate live in the meta line.
+  // — only Goal · Project live in the meta line. For delegated rows the
+  // "→ Maria" segment is dropped (the Send icon + tooltip carry that info).
   const segs: React.ReactNode[] =
     bottomSegments ??
     (() => {
       const out: React.ReactNode[] = [];
       if (goal) out.push(<span key="g">{goal.title}</span>);
       if (project) out.push(<span key="p">{project.title}</span>);
-      if (action.status === "delegated" && action.delegateName)
-        out.push(<span key="d">→ {action.delegateName}</span>);
       return out;
     })();
 
@@ -120,9 +120,35 @@ export const ActionRow: React.FC<ActionRowProps> = ({
         {/* Top line */}
         <div className="flex items-center justify-between gap-3 min-w-0">
           <div className="flex items-center gap-3 min-w-0 flex-1">
-            {!hideCheckbox && (() => {
+            {!hideCheckbox && isDelegated && (
+              <Tooltip
+                content={
+                  <span className="text-[12px] text-text-primary">
+                    Delegated to {action.delegateName ?? "—"}
+                    {" · "}
+                    {action.expectedReturnDate
+                      ? `returns ${action.expectedReturnDate}`
+                      : "no return date set"}
+                  </span>
+                }
+                showDelay={300}
+              >
+                <span
+                  role="button"
+                  aria-label="Delegated — open action"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onClick?.();
+                  }}
+                  className="inline-flex items-center justify-center shrink-0 cursor-pointer"
+                  style={{ width: 16, height: 16, color: "hsl(var(--accent))" }}
+                >
+                  <Send size={16} />
+                </span>
+              </Tooltip>
+            )}
+            {!hideCheckbox && !isDelegated && (() => {
               const disabled =
-                action.status === "delegated" ||
                 action.status === "dropped" ||
                 action.status === "cancelled";
               return (
@@ -161,16 +187,20 @@ export const ActionRow: React.FC<ActionRowProps> = ({
               />
             )}
             <span
-              className={`text-[15px] font-medium truncate ${
+              className={`text-[15px] font-medium truncate transition-opacity ${
                 isTerminal ? "text-text-secondary line-through" : "text-text-primary"
-              }`}
+              } ${isDelegated ? "opacity-[0.85] hover:opacity-100" : ""}`}
             >
               {action.title}
             </span>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <ImpactPill impact={action.impact} goalColor={color} dimmed={isTerminal} />
-            <TimePill minutes={action.timeEstimateMinutes} dimmed={isTerminal} />
+            {isDelegated ? (
+              <ReturnTimePill expectedReturnDate={action.expectedReturnDate} />
+            ) : (
+              <TimePill minutes={action.timeEstimateMinutes} dimmed={isTerminal} />
+            )}
             {pill && <span className="ml-1">{renderPill(pill)}</span>}
           </div>
         </div>
@@ -243,3 +273,44 @@ function formatScheduledLabel(iso: string): string {
     .toLocaleDateString("en-US", { month: "short", day: "numeric" })
     .toUpperCase();
 }
+
+const ReturnTimePill: React.FC<{ expectedReturnDate?: string }> = ({ expectedReturnDate }) => {
+  let label = "—";
+  let color = "hsl(var(--text-tertiary))";
+  if (expectedReturnDate) {
+    const today = new Date();
+    const t = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+    const r = new Date(expectedReturnDate + "T00:00:00").getTime();
+    const diff = Math.round((r - t) / 86400000);
+    if (diff < 0) {
+      label = `${Math.abs(diff)}d ago`;
+      color = "hsl(var(--text-warning))";
+    } else if (diff === 0) {
+      label = "today";
+      color = "hsl(var(--text-secondary))";
+    } else if (diff === 1) {
+      label = "tomorrow";
+      color = "hsl(var(--text-secondary))";
+    } else {
+      label = `in ${diff}d`;
+      color = "hsl(var(--text-secondary))";
+    }
+  }
+  return (
+    <span
+      className="inline-flex items-center justify-center font-mono tabular-nums shrink-0"
+      style={{
+        padding: "4px 10px",
+        borderRadius: 4,
+        fontSize: 12,
+        width: 64,
+        textAlign: "center",
+        boxSizing: "border-box",
+        background: "hsl(var(--surface-hover))",
+        color,
+      }}
+    >
+      {label}
+    </span>
+  );
+};

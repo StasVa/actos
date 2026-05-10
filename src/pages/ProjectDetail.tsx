@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import i18n from "@/i18n";
 import { toast } from "sonner";
 import { Tooltip, StateDotTooltip } from "@/components/Tooltip";
 import { MetricInfoPopover } from "@/components/MetricInfoPopover";
@@ -18,10 +20,22 @@ const COLOR_VAR: Record<GoalColorVar, string> = {
 
 function fmtAgo(iso: string): string {
   const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
-  if (days <= 0) return "today";
-  if (days === 1) return "yesterday";
-  if (days < 30) return `${days}d ago`;
-  return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  if (days <= 0) return i18n.t("time.today");
+  if (days === 1) return i18n.t("time.yesterday");
+  if (days < 30) return i18n.t("time.daysAgo_other", { count: days });
+  return new Date(iso).toLocaleDateString(i18n.language || "en", { month: "short", day: "numeric" });
+}
+
+function fmtFullDate(iso: string): string {
+  return new Date(iso).toLocaleDateString(i18n.language || "en", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+function fmtShortDate(iso: string): string {
+  return new Date(iso).toLocaleDateString(i18n.language || "en", { month: "short", day: "numeric" });
 }
 
 const Check: React.FC<{ done?: boolean; color: string; onClick?: () => void }> = ({

@@ -14,6 +14,7 @@ import {
 } from "date-fns";
 import type { Action, DayEntry, DayType, Goal, ID, ISODate, Project, Ritual } from "@/types";
 import { timeInvestedMinutes } from "@/lib/timeStats";
+import i18n from "@/i18n";
 
 const ISO_DATE = (d: Date): ISODate => format(d, "yyyy-MM-dd");
 
@@ -43,21 +44,24 @@ export function weekRange(yw: string): { start: Date; end: Date; days: ISODate[]
 export function formatWeekLabel(yw: string): string {
   const r = weekRange(yw);
   if (!r) return yw;
+  const lang = i18n.language || "en";
   const sameMonth = r.start.getMonth() === r.end.getMonth();
-  const startLabel = format(r.start, "MMM d");
-  const endLabel = sameMonth ? format(r.end, "d") : format(r.end, "MMM d");
-  return `Week of ${startLabel} — ${endLabel}`;
+  const startLabel = new Intl.DateTimeFormat(lang, { month: "short", day: "numeric" }).format(r.start);
+  const endLabel = sameMonth
+    ? new Intl.DateTimeFormat(lang, { day: "numeric" }).format(r.end)
+    : new Intl.DateTimeFormat(lang, { month: "short", day: "numeric" }).format(r.end);
+  return i18n.t("reviews.detail.weekLabel", { start: startLabel, end: endLabel });
 }
 
 export function formatWeekRelative(yw: string, today = new Date()): string {
   const start = dateFromYearWeek(yw);
   if (!start) return "";
   const diff = differenceInCalendarWeeks(startOfISOWeek(today), start, { weekStartsOn: 1 });
-  if (diff === 0) return "This week";
-  if (diff === 1) return "Last week";
-  if (diff > 0) return `${diff} weeks ago`;
-  if (diff === -1) return "Next week";
-  return `${Math.abs(diff)} weeks ahead`;
+  if (diff === 0) return i18n.t("reviews.period.thisWeek");
+  if (diff === 1) return i18n.t("reviews.period.lastWeek");
+  if (diff > 0) return i18n.t("reviews.period.weeksAgo", { count: diff });
+  if (diff === -1) return i18n.t("reviews.period.nextWeek");
+  return i18n.t("reviews.period.weeksAhead", { count: Math.abs(diff) });
 }
 
 export interface PerGoalProjectTime {
@@ -278,10 +282,17 @@ export const DAY_TYPE_SHORT_LABEL: Record<DayType, string> = {
   sick: "Sick",
 };
 
+const DAY_TYPE_COUNT_KEY: Record<DayType, string> = {
+  execution: "reviews.dayCount.execution",
+  recovery: "reviews.dayCount.recovery",
+  "day-off": "reviews.dayCount.dayOff",
+  sick: "reviews.dayCount.sick",
+};
+
 export function formatDayTypeDistribution(d: Record<DayType, number>): string {
   const parts: string[] = [];
   (Object.keys(d) as DayType[]).forEach((k) => {
-    if (d[k] > 0) parts.push(`${d[k]} ${DAY_TYPE_SHORT_LABEL[k]}`);
+    if (d[k] > 0) parts.push(i18n.t(DAY_TYPE_COUNT_KEY[k], { count: d[k] }));
   });
   return parts.join(" · ");
 }

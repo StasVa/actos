@@ -1,5 +1,6 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useTranslation } from "react-i18next";
 import { FilterOption } from "./FilterDropdown";
 
 type Props<T extends string> = {
@@ -13,8 +14,10 @@ export function SortDropdown<T extends string>({
   value,
   options,
   onChange,
-  label = "Sort",
+  label,
 }: Props<T>) {
+  const { t } = useTranslation();
+  const resolvedLabel = label ?? t("common.sort");
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -64,7 +67,7 @@ export function SortDropdown<T extends string>({
         className="inline-flex items-center gap-1 text-[12px] text-text-secondary hover:text-text-primary transition-colors whitespace-nowrap"
       >
         <span className="whitespace-nowrap">
-          {label}: {current?.label ?? ""}
+          {resolvedLabel}: {current?.label ?? ""}
         </span>
         <span className="text-text-tertiary" style={{ fontSize: 10 }}>▾</span>
       </button>

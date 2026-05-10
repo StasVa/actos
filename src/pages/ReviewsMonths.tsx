@@ -18,12 +18,12 @@ import { PageHeader } from "@/components/PageHeader";
 import { FilterDropdown } from "@/components/FilterDropdown";
 import { SortDropdown } from "@/components/SortDropdown";
 import {
-  REVIEW_SORT_OPTIONS,
   ReviewSortKey,
   computeAggregates,
   loadReviewSort,
   saveReviewSort,
   sortReviewEntries,
+  useReviewSortOptions,
 } from "@/lib/reviewSort";
 
 
@@ -61,6 +61,7 @@ const ReviewsMonths: React.FC = () => {
   const [goalFilter, setGoalFilter] = React.useState<string>("all");
   const [sortKey, setSortKey] = React.useState<ReviewSortKey>(() => loadReviewSort("actos.reviews.months.sort"));
   React.useEffect(() => saveReviewSort("actos.reviews.months.sort", sortKey), [sortKey]);
+  const SORT_OPTIONS = useReviewSortOptions();
 
   const RANGE_OPTIONS = React.useMemo(() => [
     { value: "12m", label: t("reviews.filters.range.last12m") },
@@ -130,7 +131,7 @@ const ReviewsMonths: React.FC = () => {
               <FilterDropdown label={t("reviews.filters.label.date")} value={range} defaultValue={range} options={RANGE_OPTIONS} onChange={setRange} />
             </>
           }
-          sort={<SortDropdown<ReviewSortKey> value={sortKey} options={REVIEW_SORT_OPTIONS} onChange={setSortKey} />}
+          sort={<SortDropdown<ReviewSortKey> value={sortKey} options={SORT_OPTIONS} onChange={setSortKey} />}
         />
         <div style={{ height: 24 }} />
 

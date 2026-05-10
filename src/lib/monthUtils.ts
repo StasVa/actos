@@ -22,6 +22,7 @@ import type {
 } from "@/types";
 import { yearWeekFromDate } from "./weekUtils";
 import { timeInvestedMinutes } from "./timeStats";
+import i18n from "@/i18n";
 
 const ISO_DATE = (d: Date): ISODate => format(d, "yyyy-MM-dd");
 
@@ -50,18 +51,21 @@ export function monthRange(ym: string): { start: Date; end: Date; days: ISODate[
 export function formatMonthLabel(ym: string): string {
   const d = dateFromYearMonth(ym);
   if (!d) return ym;
-  return format(d, "MMMM yyyy");
+  return new Intl.DateTimeFormat(i18n.language || "en", {
+    month: "long",
+    year: "numeric",
+  }).format(d);
 }
 
 export function formatMonthRelative(ym: string, today = new Date()): string {
   const d = dateFromYearMonth(ym);
   if (!d) return "";
   const diff = differenceInCalendarMonths(startOfMonth(today), d);
-  if (diff === 0) return "This month";
-  if (diff === 1) return "Last month";
-  if (diff > 0) return `${diff} months ago`;
-  if (diff === -1) return "Next month";
-  return `${Math.abs(diff)} months ahead`;
+  if (diff === 0) return i18n.t("reviews.period.thisMonth");
+  if (diff === 1) return i18n.t("reviews.period.lastMonth");
+  if (diff > 0) return i18n.t("reviews.period.monthsAgo", { count: diff });
+  if (diff === -1) return i18n.t("reviews.period.nextMonth");
+  return i18n.t("reviews.period.monthsAhead", { count: Math.abs(diff) });
 }
 
 export interface MonthPerGoalProjectTime {
@@ -359,17 +363,17 @@ export function getMonthsWithActivity(
   return Array.from(set).sort((a, b) => b.localeCompare(a));
 }
 
-const DAY_TYPE_SHORT_LABEL: Record<DayType, string> = {
-  execution: "Execution",
-  recovery: "Recovery",
-  "day-off": "Day Off",
-  sick: "Sick",
+const DAY_TYPE_COUNT_KEY: Record<DayType, string> = {
+  execution: "reviews.dayCount.execution",
+  recovery: "reviews.dayCount.recovery",
+  "day-off": "reviews.dayCount.dayOff",
+  sick: "reviews.dayCount.sick",
 };
 
 export function formatMonthDayTypeDistribution(d: Record<DayType, number>): string {
   const parts: string[] = [];
   (Object.keys(d) as DayType[]).forEach((k) => {
-    if (d[k] > 0) parts.push(`${d[k]} ${DAY_TYPE_SHORT_LABEL[k]}`);
+    if (d[k] > 0) parts.push(i18n.t(DAY_TYPE_COUNT_KEY[k], { count: d[k] }));
   });
   return parts.join(" · ");
 }

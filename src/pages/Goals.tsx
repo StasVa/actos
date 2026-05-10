@@ -241,7 +241,7 @@ const GoalCard: React.FC<{ m: GoalMeta; logTimeOn: boolean }> = ({ m, logTimeOn 
                       letterSpacing: "0.06em",
                     }}
                   >
-                    READY TO CLOSE
+                    {t("goals.card.readyToClose")}
                   </span>
                 )}
                 <Tooltip content={<StateDotTooltip state={state} lastActivity={fmtAgo(lastIso)} />}>

@@ -442,9 +442,9 @@ export const Hero: React.FC = () => {
   if (activeGoals.length === 0) {
     return (
       <div className="bg-surface-elevated border border-border-subtle rounded-[6px] p-10 text-center">
-        <div className="text-[14px] text-text-secondary">No active goals.</div>
+        <div className="text-[14px] text-text-secondary">{t("home.hero.empty.heading")}</div>
         <div className="font-mono text-[11px] text-text-tertiary mt-1">
-          Press ⌘K → “New goal” to start.
+          {t("home.hero.empty.body")}
         </div>
       </div>
     );

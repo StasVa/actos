@@ -1,6 +1,7 @@
 import React from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { format, parseISO } from "date-fns";
+import { useTranslation } from "react-i18next";
 import { AppSidebar } from "@/components/AppSidebar";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { useStore, ritualMultiplier } from "@/store/useStore";
@@ -39,6 +40,7 @@ const SectionHead: React.FC<{ children: React.ReactNode; meta?: string }> = ({ c
 );
 
 const ReviewMonthDetail: React.FC = () => {
+  const { t } = useTranslation();
   const { yearMonth = "" } = useParams();
   const navigate = useNavigate();
   const [settingsOpen, setSettingsOpen] = React.useState(false);
@@ -81,9 +83,9 @@ const ReviewMonthDetail: React.FC = () => {
             to="/reviews/months"
             className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary hover:text-text-primary transition-colors"
           >
-            ← REVIEWS / MONTHS
+            {t("reviews.detail.backMonths")}
           </Link>
-          <div className="mt-8 text-[14px] text-text-secondary">Invalid month.</div>
+          <div className="mt-8 text-[14px] text-text-secondary">{t("reviews.detail.invalidMonth")}</div>
         </main>
       </div>
     );
@@ -117,7 +119,6 @@ const ReviewMonthDetail: React.FC = () => {
       )
     : null;
 
-  // Top contributing actions: top 15 by impact, grouped by goal
   const topActions = [...summary.doneActions]
     .sort((a, b) => (b.impact ?? 0) - (a.impact ?? 0))
     .slice(0, 15);
@@ -130,14 +131,6 @@ const ReviewMonthDetail: React.FC = () => {
 
   const openActionEdit = (id: string) => openPanel({ kind: "action", mode: "edit", id });
 
-  // Energy weekly bars
-  const energyMax = 10;
-  const weekRangeLabel = (yw: string): string => {
-    const r = weekRange(yw);
-    if (!r) return yw;
-    return `${format(r.start, "MMM d")} — ${format(r.end, "MMM d")}`;
-  };
-
   const ritualMonthRows = summary.ritualMonth.filter((r) => r.scheduledCount > 0);
 
   return (
@@ -149,13 +142,13 @@ const ReviewMonthDetail: React.FC = () => {
           to="/reviews/months"
           className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary hover:text-text-primary transition-colors"
         >
-          ← REVIEWS / MONTHS
+          {t("reviews.detail.backMonths")}
         </Link>
         <h1 className="mt-3 text-[28px] font-medium text-text-primary leading-tight">
           {formatMonthLabel(yearMonth)}
         </h1>
         <div className="mt-1 font-mono text-[12px] text-text-secondary">
-          {summary.days.length} days · {summary.weeks.length} weeks tracked
+          {t("reviews.detail.monthHeader", { count: summary.weeks.length, daysCount: summary.days.length })}
         </div>
         {dayTypeLine && (
           <div className="mt-0.5 font-mono text-[12px] text-text-secondary">{dayTypeLine}</div>
@@ -187,26 +180,26 @@ const ReviewMonthDetail: React.FC = () => {
                 tiles.push({
                   key: "outcome",
                   value: `+${outcome.valueAdded}`,
-                  label: "Value added",
+                  label: t("reviews.detail.tile.valueAdded"),
                   delta:
                     prevOutcome != null
                       ? outcome.valueAdded - prevOutcome.valueAdded
                       : null,
-                  deltaLabel: "vs last month",
+                  deltaLabel: t("reviews.detail.delta.vsLastMonth"),
                 });
               tiles.push({
                 key: "actions",
                 value: String(actionsCount),
-                label: "Actions done",
+                label: t("reviews.detail.tile.actionsDone"),
                 delta: prevActionsCount != null ? actionsCount - prevActionsCount : null,
-                deltaLabel: "vs last month",
+                deltaLabel: t("reviews.detail.delta.vsLastMonth"),
               });
               tiles.push({
                 key: "rituals",
                 value: String(ritualsCount),
-                label: "Rituals done",
+                label: t("reviews.detail.tile.ritualsDone"),
                 delta: prevRitualsCount != null ? ritualsCount - prevRitualsCount : null,
-                deltaLabel: "vs last month",
+                deltaLabel: t("reviews.detail.delta.vsLastMonth"),
               });
               if (settings.layers.logTime && totalMin > 0) {
                 const deltaH =
@@ -216,22 +209,22 @@ const ReviewMonthDetail: React.FC = () => {
                 tiles.push({
                   key: "time",
                   value: formatHM(totalMin),
-                  label: "Time invested",
+                  label: t("reviews.detail.tile.timeInvested"),
                   delta: deltaH,
-                  deltaLabel: "h vs last month",
+                  deltaLabel: t("reviews.detail.delta.hVsLastMonth"),
                 });
               }
               if (summary.closedProjects.length > 0)
                 tiles.push({
                   key: "projects",
                   value: String(summary.closedProjects.length),
-                  label: "Projects closed",
+                  label: t("reviews.detail.tile.projectsClosed"),
                 });
               if (summary.closedGoals.length > 0)
                 tiles.push({
                   key: "goals",
                   value: String(summary.closedGoals.length),
-                  label: "Goals closed",
+                  label: t("reviews.detail.tile.goalsClosed"),
                 });
             }
             return <AccomplishmentsSection tiles={tiles} period="month" />;
@@ -240,7 +233,7 @@ const ReviewMonthDetail: React.FC = () => {
           {/* GOALS CLOSED */}
           {summary.closedGoals.length > 0 && (
             <section>
-              <SectionHead meta={`${summary.closedGoals.length}`}>Goals closed</SectionHead>
+              <SectionHead meta={`${summary.closedGoals.length}`}>{t("reviews.detail.section.goalsClosedHead")}</SectionHead>
               <div className="space-y-1">
                 {summary.closedGoals.map(({ entity: g, type, at }) => {
                   const goalColor = `hsl(var(--${g.color}))`;
@@ -263,11 +256,11 @@ const ReviewMonthDetail: React.FC = () => {
                             className="font-mono text-[10px] uppercase tracking-[0.08em] tabular-nums shrink-0"
                             style={{ color: pillColor }}
                           >
-                            {type === "completed" ? "COMPLETED" : "DROPPED"}
+                            {type === "completed" ? t("reviews.detail.pill.completed") : t("reviews.detail.pill.dropped")}
                           </div>
                         </div>
                         <div className="mt-0.5 font-mono text-[11px] text-text-tertiary">
-                          {g.type === "mid-term" ? "MID-TERM" : "SHORT-TERM"} · {format(parseISO(at), "MMM d")}
+                          {g.type === "mid-term" ? t("reviews.detail.goalType.midTerm") : t("reviews.detail.goalType.shortTerm")} · {format(parseISO(at), "MMM d")}
                         </div>
                       </div>
                     </button>
@@ -280,7 +273,7 @@ const ReviewMonthDetail: React.FC = () => {
           {/* PROJECTS CLOSED */}
           {summary.closedProjects.length > 0 && (
             <section>
-              <SectionHead meta={`${summary.closedProjects.length}`}>Projects closed</SectionHead>
+              <SectionHead meta={`${summary.closedProjects.length}`}>{t("reviews.detail.section.projectsClosedHead")}</SectionHead>
               <div className="space-y-1">
                 {summary.closedProjects.map(({ entity: p, type, at }) => {
                   const g = goalById(p.goalId);
@@ -304,11 +297,11 @@ const ReviewMonthDetail: React.FC = () => {
                             className="font-mono text-[10px] uppercase tracking-[0.08em] tabular-nums shrink-0"
                             style={{ color: pillColor }}
                           >
-                            {type === "completed" ? "COMPLETED" : "DROPPED"}
+                            {type === "completed" ? t("reviews.detail.pill.completed") : t("reviews.detail.pill.dropped")}
                           </div>
                         </div>
                         <div className="mt-0.5 font-mono text-[11px] text-text-tertiary">
-                          {g?.title ?? "—"} · {format(parseISO(at), "MMM d")}
+                          {g?.title ?? t("reviews.detail.dash")} · {format(parseISO(at), "MMM d")}
                         </div>
                       </div>
                     </button>
@@ -321,12 +314,10 @@ const ReviewMonthDetail: React.FC = () => {
           {/* VALUE ADDED */}
           <OutcomeAddedSection outcome={outcome} period="month" />
 
-          {/* ENERGY section removed */}
-
           {/* TIME INVESTED */}
           {settings.layers.logTime && totalMin > 0 && (
             <section>
-              <SectionHead meta={formatHM(totalMin).toUpperCase()}>Time invested</SectionHead>
+              <SectionHead meta={formatHM(totalMin).toUpperCase()}>{t("reviews.detail.section.timeInvested")}</SectionHead>
               <div className="space-y-2">
                 {summary.perGoalTime
                   .filter((row) => row.minutes > 0)
@@ -367,7 +358,7 @@ const ReviewMonthDetail: React.FC = () => {
                                     └
                                   </span>
                                   <span className="text-[13px] text-text-secondary truncate flex-1">
-                                    {proj?.title ?? "—"}
+                                    {proj?.title ?? t("reviews.detail.dash")}
                                   </span>
                                   <span className="font-mono text-[12px] tabular-nums text-text-tertiary">
                                     {formatHM(p.minutes)}
@@ -391,8 +382,8 @@ const ReviewMonthDetail: React.FC = () => {
             const focusMin = sessionsForMo.reduce((s, x) => s + sessionDurationMinutes(x), 0);
             return (
               <section>
-                <SectionHead meta={`${formatHM(focusMin).toUpperCase()} FOCUSED`}>
-                  Sessions · {sessionsForMo.length}
+                <SectionHead meta={t("reviews.detail.section.sessionsMeta", { time: formatHM(focusMin).toUpperCase() })}>
+                  {t("reviews.detail.section.sessions", { count: sessionsForMo.length })}
                 </SectionHead>
                 <SessionsSection sessions={sessionsForMo} variant="by-week" showStats />
               </section>
@@ -401,7 +392,7 @@ const ReviewMonthDetail: React.FC = () => {
 
           {/* WEEKS */}
           <section>
-            <SectionHead meta={`${summary.weeks.length}`}>Weeks</SectionHead>
+            <SectionHead meta={`${summary.weeks.length}`}>{t("reviews.detail.section.weeks")}</SectionHead>
             <div className="rounded-[6px] border border-border-subtle overflow-hidden">
               {summary.weeks.map((wk) => {
                 const r = weekRange(wk);
@@ -411,12 +402,10 @@ const ReviewMonthDetail: React.FC = () => {
                   wkDays.includes(a.completedAt?.slice(0, 10) ?? ""),
                 );
                 const wkMin = wkActions.reduce((s, a) => s + (a.timeEstimateMinutes ?? 0), 0);
-                // Rituals: sum done across days in this week intersected with month
                 const wkRitualsDone = summary.ritualMonth.reduce((s, rm) => {
                   const slot = rm.weeks.find((w) => w.yearWeek === wk);
                   return s + (slot?.doneCount ?? 0);
                 }, 0);
-                // Per-goal time for this week
                 const perGoalWk = goals
                   .filter((g) => g.status === "active")
                   .map((g) => ({
@@ -444,11 +433,11 @@ const ReviewMonthDetail: React.FC = () => {
                         </span>
                       </div>
                       <div className="mt-0.5 font-mono text-[12px] text-text-secondary tabular-nums">
-                        <span className="text-text-primary">{wkActions.length}</span> actions
+                        <span className="text-text-primary">{wkActions.length}</span> {t("reviews.row.actionsDoneWord")}
                         {wkRitualsDone > 0 && (
                           <>
                             <span className="text-text-tertiary"> · </span>
-                            <span className="text-text-primary">{wkRitualsDone}</span> rituals
+                            <span className="text-text-primary">{wkRitualsDone}</span> {t("reviews.row.rituals", { count: wkRitualsDone }).replace(/^\d+\s*/, "")}
                           </>
                         )}
                         {settings.layers.logTime && wkMin > 0 && (
@@ -483,7 +472,7 @@ const ReviewMonthDetail: React.FC = () => {
           {/* TOP CONTRIBUTING ACTIONS */}
           {topActions.length > 0 && (
             <section>
-              <SectionHead meta={`${topActions.length}`}>Top contributing actions</SectionHead>
+              <SectionHead meta={`${topActions.length}`}>{t("reviews.detail.section.topContributing")}</SectionHead>
               <div className="space-y-3">
                 {Array.from(topByGoal.entries()).map(([gid, list]) => {
                   const g = goalById(gid);
@@ -495,7 +484,7 @@ const ReviewMonthDetail: React.FC = () => {
                           style={{ background: `hsl(var(--${g?.color ?? "goal-1"}))` }}
                         />
                         <span className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
-                          {g?.title ?? "—"} · {list.length} action{list.length === 1 ? "" : "s"}
+                          {g?.title ?? t("reviews.detail.dash")} · {t("reviews.detail.actionsCount", { count: list.length })}
                         </span>
                       </div>
                       {list.map((a) => (
@@ -518,7 +507,7 @@ const ReviewMonthDetail: React.FC = () => {
           {/* RITUALS */}
           {ritualMonthRows.length > 0 && (
             <section>
-              <SectionHead meta={`${ritualMonthRows.length} ACTIVE`}>Rituals</SectionHead>
+              <SectionHead meta={t("reviews.detail.section.activeMeta", { count: ritualMonthRows.length })}>{t("reviews.detail.section.ritualsHead")}</SectionHead>
               <div className="space-y-2">
                 {ritualMonthRows.map((rm) => {
                   const r = ritualById(rm.ritualId);
@@ -553,7 +542,7 @@ const ReviewMonthDetail: React.FC = () => {
                               return (
                                 <span
                                   key={i}
-                                  title={`Week ${w.yearWeek.slice(-2)}: ${w.doneCount}/${w.scheduledCount}`}
+                                  title={t("reviewMonthDetail.ritualWeekTitle", { week: w.yearWeek.slice(-2), done: w.doneCount, scheduled: w.scheduledCount })}
                                   className="w-4 h-3 rounded-[2px]"
                                   style={{
                                     background: bg,
@@ -572,18 +561,17 @@ const ReviewMonthDetail: React.FC = () => {
                           </span>
                         </div>
                         <div className="mt-0.5 font-mono text-[11px] text-text-tertiary tabular-nums">
-                          {r.schedule} · <span className="text-text-secondary">{rm.doneCount}</span>{" "}
-                          of {rm.scheduledCount} done
+                          {t("reviews.detail.ritual.scheduleSummary", { schedule: r.schedule, done: rm.doneCount, scheduled: rm.scheduledCount })}
                           {rm.skippedCount > 0 && (
                             <>
                               {" · "}
-                              <span className="text-text-secondary">{rm.skippedCount}</span> skipped
+                              {t("reviews.detail.ritual.skippedExtra", { count: rm.skippedCount })}
                             </>
                           )}
                           {rm.missedCount > 0 && (
                             <>
                               {" · "}
-                              <span className="text-text-secondary">{rm.missedCount}</span> missed
+                              {t("reviews.detail.ritual.missedExtra", { count: rm.missedCount })}
                             </>
                           )}
                         </div>
@@ -600,7 +588,7 @@ const ReviewMonthDetail: React.FC = () => {
             (summary.substantiveReflections.length > 0 ||
               summary.shortReflections.length > 0) && (
               <section>
-                <SectionHead>Reflections</SectionHead>
+                <SectionHead>{t("reviews.detail.section.reflections")}</SectionHead>
                 <div className="space-y-3">
                   {summary.substantiveReflections.map((r) => (
                     <div key={r.date} className="border-l-2 border-border-default pl-3">
@@ -620,8 +608,7 @@ const ReviewMonthDetail: React.FC = () => {
                       onClick={() => setShowAllReflections(true)}
                       className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary hover:text-text-primary transition-colors"
                     >
-                      And {summary.shortReflections.length} short reflection
-                      {summary.shortReflections.length === 1 ? "" : "s"} — view all →
+                      {t("reviews.detail.shortReflectionsLink", { count: summary.shortReflections.length })}
                     </button>
                   )}
 
@@ -647,7 +634,7 @@ const ReviewMonthDetail: React.FC = () => {
             summary.substantiveReflections.length === 0 &&
             summary.shortReflections.length === 0 && (
               <div className="text-center py-12 text-[14px] text-text-secondary">
-                No activity tracked this month.
+                {t("reviews.detail.month.noActivity")}
               </div>
             )}
         </div>

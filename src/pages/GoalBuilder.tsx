@@ -634,7 +634,7 @@ const GoalBuilder: React.FC = () => {
           })),
         });
         if (!res.ok) {
-          toast.error("Goal limit reached");
+          toast.error(t("goalBuilder.toast.goalLimit"));
           return;
         }
         goalId = res.id;
@@ -654,7 +654,7 @@ const GoalBuilder: React.FC = () => {
     return (
       <ScreenWrap step={2} onBack={() => setPersisted({ step: 1 })}>
         <CriteriaStep
-          goalTitle={goalDraft.title || "your goal"}
+          goalTitle={goalDraft.title || t("goalBuilder.defaultGoal")}
           initial={criteriaDraft}
           onContinue={onContinue}
           onBack={() => setPersisted({ step: 1 })}
@@ -677,7 +677,7 @@ const GoalBuilder: React.FC = () => {
     return (
       <ScreenWrap step={3} onBack={() => setPersisted({ step: 2, goalId: persisted.goalId })}>
         <ProjectStep
-          goalTitle={goal?.title ?? goalDraft.title ?? "your goal"}
+          goalTitle={goal?.title ?? goalDraft.title ?? t("goalBuilder.defaultGoal")}
           initialTitle=""
           initialDesc=""
           onSubmit={onSubmit}
@@ -701,13 +701,13 @@ const GoalBuilder: React.FC = () => {
           timeEstimateMinutes: Number.isFinite(time) && time > 0 ? time : undefined,
         });
       });
-      toast.success(`Added ${drafts.length} action${drafts.length === 1 ? "" : "s"}`);
+      toast.success(t("goalBuilder.toast.actionsAdded", { count: drafts.length }));
       finish();
     };
     return (
       <ScreenWrap step={4} onBack={() => setPersisted({ step: 3, goalId: persisted.goalId, projectId: persisted.projectId })}>
         <ActionsStep
-          goalTitle={goal?.title ?? goalDraft.title ?? "your goal"}
+          goalTitle={goal?.title ?? goalDraft.title ?? t("goalBuilder.defaultGoal")}
           onSubmit={onSubmit}
           onSkip={finish}
         />

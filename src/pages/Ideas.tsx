@@ -949,6 +949,7 @@ const NewIdeaModal: React.FC<{
   onClose: () => void;
   defaultGoalId?: ID;
 }> = ({ open, onClose, defaultGoalId }) => {
+  const { t } = useTranslation();
   const goals = useStore((s) => s.goals);
   const activeGoals = useMemo(() => goals.filter((g) => g.status === "active"), [goals]);
   const captureIdea = useStore((s) => s.captureIdea);
@@ -974,7 +975,7 @@ const NewIdeaModal: React.FC<{
 
   const tryClose = () => {
     if (dirty) {
-      const ok = window.confirm("Discard this idea?");
+      const ok = window.confirm(t("ideas.confirm.discard.title"));
       if (!ok) return;
     }
     onClose();
@@ -984,7 +985,7 @@ const NewIdeaModal: React.FC<{
     if (!canSubmit) return;
     const id = captureIdea({ title: title.trim(), goalId, note: note.trim() || undefined });
     selectIdea(id);
-    toast.success("Idea captured");
+    toast.success(t("ideas.toast.captured"));
     onClose();
   };
 

@@ -317,10 +317,10 @@ function RitualEditorPanel({
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full" style={{ background: goalColor }} />
           {mode === "new" ? (
-            <div className="text-[18px] font-medium text-text-primary">New ritual</div>
+            <div className="text-[18px] font-medium text-text-primary">{t("ritualEditor.header.new")}</div>
           ) : (
             <div className="font-mono text-[11px] uppercase tracking-[0.08em] text-text-tertiary">
-              {status === "archived" ? "Archived ritual" : "Edit ritual"}
+              {status === "archived" ? t("ritualEditor.header.archived") : t("ritualEditor.header.edit")}
             </div>
           )}
         </div>

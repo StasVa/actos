@@ -19,13 +19,11 @@ function daysBetween(a: string, b: string): number {
   return Math.round((ta - tb) / 86400000);
 }
 
-function relativeShort(iso: string): string {
+function relativeShortKey(iso: string): { key: string; opts?: Record<string, unknown> } {
   const d = daysBetween(iso, TODAY_ISO);
-  if (d === 0) return "today";
-  if (d === -1) return "1d ago";
-  if (d < 0) return `${-d}d ago`;
-  if (d === 1) return "in 1d";
-  return `in ${d}d`;
+  if (d === 0) return { key: "delegated.return.today" };
+  if (d < 0) return { key: "delegated.return.daysAgo", opts: { count: -d } };
+  return { key: "delegated.return.inDays", opts: { count: d } };
 }
 
 /* ===== Pills ===== */
@@ -49,8 +47,11 @@ const ImpactPill: React.FC<{ impact?: number; color: string }> = ({ impact, colo
   ) : null;
 
 const ReturnedPill: React.FC<{ completedAt?: string }> = ({ completedAt }) => {
+  const { t } = useTranslation();
   if (!completedAt) return null;
   const iso = completedAt.slice(0, 10);
+  const rs = relativeShortKey(iso);
+  const label = t(rs.key, rs.opts);
   return (
     <span
       className="font-mono tabular-nums shrink-0"
@@ -63,7 +64,7 @@ const ReturnedPill: React.FC<{ completedAt?: string }> = ({ completedAt }) => {
         whiteSpace: "nowrap",
       }}
     >
-      returned {relativeShort(iso)}
+      {t("delegated.return.returned", { label })}
     </span>
   );
 };
@@ -183,53 +184,38 @@ type TabKey = "active" | "returned";
 const TabBar: React.FC<{ value: TabKey; onChange: (v: TabKey) => void }> = ({
   value,
   onChange,
-}) => (
-  <div className="flex items-center gap-6 border-b border-border-subtle">
-    {(["active", "returned"] as TabKey[]).map((k) => {
-      const active = value === k;
-      return (
-        <button
-          key={k}
-          onClick={() => onChange(k)}
-          className="relative pb-2 text-[14px] font-medium transition-colors"
-          style={{
-            color: active ? "hsl(var(--text-primary))" : "hsl(var(--text-secondary))",
-          }}
-        >
-          {k === "active" ? "Active" : "Returned"}
-          {active && (
-            <span
-              className="absolute left-0 right-0 -bottom-px h-[2px]"
-              style={{ background: "hsl(var(--accent))" }}
-            />
-          )}
-        </button>
-      );
-    })}
-  </div>
-);
+}) => {
+  const { t } = useTranslation();
+  return (
+    <div className="flex items-center gap-6 border-b border-border-subtle">
+      {(["active", "returned"] as TabKey[]).map((k) => {
+        const active = value === k;
+        return (
+          <button
+            key={k}
+            onClick={() => onChange(k)}
+            className="relative pb-2 text-[14px] font-medium transition-colors"
+            style={{
+              color: active ? "hsl(var(--text-primary))" : "hsl(var(--text-secondary))",
+            }}
+          >
+            {k === "active" ? t("delegated.tab.active") : t("delegated.tab.returned")}
+            {active && (
+              <span
+                className="absolute left-0 right-0 -bottom-px h-[2px]"
+                style={{ background: "hsl(var(--accent))" }}
+              />
+            )}
+          </button>
+        );
+      })}
+    </div>
+  );
+};
 
 /* ===== Date range ===== */
 type DateRange = "all" | "30" | "90" | "365";
-const DATE_OPTIONS: FilterOption<DateRange>[] = [
-  { value: "all", label: "All time" },
-  { value: "30", label: "Last 30 days" },
-  { value: "90", label: "Last 90 days" },
-  { value: "365", label: "Last year" },
-];
-
 type SortKey = "due" | "delegated" | "impact" | "title";
-const ACTIVE_SORT_OPTIONS: FilterOption<SortKey>[] = [
-  { value: "due", label: "By due date" },
-  { value: "delegated", label: "Recently delegated" },
-  { value: "impact", label: "By impact" },
-  { value: "title", label: "By title" },
-];
-const RETURNED_SORT_OPTIONS: FilterOption<SortKey>[] = [
-  { value: "delegated", label: "Recently returned" },
-  { value: "impact", label: "By impact" },
-  { value: "title", label: "By title" },
-];
 
 /* ===== Page ===== */
 const AllDelegated: React.FC = () => {
@@ -281,22 +267,42 @@ const AllDelegated: React.FC = () => {
     const set = new Set<string>();
     for (const a of actions) if (a.delegateName) set.add(a.delegateName);
     return [
-      { value: "all", label: "All" },
+      { value: "all", label: t("common.all") },
       ...Array.from(set)
         .sort()
         .map((n) => ({ value: n, label: n })),
     ];
-  }, [actions]);
+  }, [actions, t]);
 
   const goalOptions = useMemo<FilterOption<string>[]>(
     () => [
-      { value: "all", label: "All" },
+      { value: "all", label: t("common.all") },
       ...goals
         .filter((g) => g.status === "active")
         .map((g) => ({ value: g.id, label: g.title, dot: g.color })),
     ],
-    [goals],
+    [goals, t],
   );
+
+  const dateOptions: FilterOption<DateRange>[] = useMemo(() => [
+    { value: "all", label: t("delegated.filter.dateAllTime") },
+    { value: "30", label: t("delegated.filter.dateLast30") },
+    { value: "90", label: t("delegated.filter.dateLast90") },
+    { value: "365", label: t("delegated.filter.dateLastYear") },
+  ], [t]);
+
+  const activeSortOptions: FilterOption<SortKey>[] = useMemo(() => [
+    { value: "due", label: t("delegated.sort.due") },
+    { value: "delegated", label: t("delegated.sort.delegatedActive") },
+    { value: "impact", label: t("delegated.sort.impact") },
+    { value: "title", label: t("delegated.sort.title") },
+  ], [t]);
+
+  const returnedSortOptions: FilterOption<SortKey>[] = useMemo(() => [
+    { value: "delegated", label: t("delegated.sort.delegatedReturned") },
+    { value: "impact", label: t("delegated.sort.impact") },
+    { value: "title", label: t("delegated.sort.title") },
+  ], [t]);
 
   const applyFilters = (list: Action[], useDate: boolean): Action[] => {
     return list.filter((a) => {
@@ -378,14 +384,14 @@ const AllDelegated: React.FC = () => {
 
   const metaLine = (
     <>
-      <span>{aggregates.active} ACTIVE</span>
+      <span>{t("delegated.meta.active", { count: aggregates.active })}</span>
       <span className="mx-1.5">·</span>
       <span style={{ color: aggregates.overdue > 0 ? "hsl(var(--text-warning))" : undefined }}>
-        {aggregates.overdue} OVERDUE
+        {t("delegated.meta.overdue", { count: aggregates.overdue })}
       </span>
       <span className="mx-1.5">·</span>
       <span style={{ color: aggregates.today > 0 ? "hsl(var(--accent))" : undefined }}>
-        {aggregates.today} DUE TODAY
+        {t("delegated.meta.dueToday", { count: aggregates.today })}
       </span>
     </>
   );
@@ -399,22 +405,22 @@ const AllDelegated: React.FC = () => {
             title={t("delegated.page.title")}
             meta={metaLine}
             cta={{
-              label: "+ Delegate",
+              label: t("delegated.actions.create.cta"),
               onClick: newDelegated,
-              ariaLabel: "Create a delegated action",
+              ariaLabel: t("delegated.actions.create.aria"),
             }}
             belowMeta={<TabBar value={tab} onChange={setTab} />}
             filters={
               <>
                 <FilterDropdown
-                  label="DELEGATE"
+                  label={t("delegated.filter.delegate")}
                   value={delegateFilter}
                   defaultValue="all"
                   options={delegateOptions}
                   onChange={setDelegateFilter}
                 />
                 <FilterDropdown
-                  label="GOAL"
+                  label={t("delegated.filter.goal")}
                   value={goalFilter}
                   defaultValue="all"
                   options={goalOptions}
@@ -422,10 +428,10 @@ const AllDelegated: React.FC = () => {
                 />
                 {tab === "returned" && (
                   <FilterDropdown
-                    label="DATE"
+                    label={t("delegated.filter.date")}
                     value={dateRange}
                     defaultValue="all"
-                    options={DATE_OPTIONS}
+                    options={dateOptions}
                     onChange={(v) => setDateRange(v as DateRange)}
                   />
                 )}
@@ -434,7 +440,7 @@ const AllDelegated: React.FC = () => {
                     onClick={clearFilters}
                     className="ml-1 text-[12px] text-text-tertiary hover:text-text-secondary transition-colors shrink-0"
                   >
-                    Clear filters
+                    {t("common.clearFilters")}
                   </button>
                 )}
               </>
@@ -442,7 +448,7 @@ const AllDelegated: React.FC = () => {
             sort={
               <SortDropdown<SortKey>
                 value={sortKey}
-                options={tab === "active" ? ACTIVE_SORT_OPTIONS : RETURNED_SORT_OPTIONS}
+                options={tab === "active" ? activeSortOptions : returnedSortOptions}
                 onChange={setSortKey}
               />
             }
@@ -454,15 +460,15 @@ const AllDelegated: React.FC = () => {
           {(tab === "active" ? allActive.length === 0 : allReturned.length === 0) ? (
             tab === "active" ? (
               <SharedEmptyState
-                headline="Nothing delegated yet."
-                description="When you delegate an action to someone, it appears here with the expected return date so you can track what's outstanding."
-                ctaLabel="Delegate"
+                headline={t("delegated.empty.active.heading")}
+                description={t("delegated.empty.active.body")}
+                ctaLabel={t("delegated.actions.create")}
                 onCta={newDelegated}
               />
             ) : (
               <SharedEmptyState
-                headline="No returned delegations yet."
-                description="Once a delegated action is returned and marked done, it appears here as history."
+                headline={t("delegated.empty.returned.heading")}
+                description={t("delegated.empty.returned.body")}
               />
             )
           ) : list.length === 0 ? (

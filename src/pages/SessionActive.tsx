@@ -377,7 +377,7 @@ const SessionActive: React.FC = () => {
     );
     const nextId = remaining[0];
     const next = nextId ? actions.find((a) => a.id === nextId) : null;
-    toast.success(next ? `Marked done. ${next.title} next.` : "Marked done.");
+    toast.success(next ? t("sessionActive.action.markedDoneNext", { title: next.title }) : t("sessionActive.action.markedDone"));
   };
 
   const handleConfirmDrop = () => {
@@ -389,7 +389,7 @@ const SessionActive: React.FC = () => {
     }
     changeActionStatus(a.id, "dropped");
     addDroppedActionToSession(session.id, a.id);
-    toast("Dropped. Moving on.");
+    toast(t("sessionActive.action.dropped"));
     setConfirmDrop(null);
   };
 
@@ -408,10 +408,10 @@ const SessionActive: React.FC = () => {
   /* ─── Labels ─── */
   const topLabel = (() => {
     if (timer.phase === "work" || timer.phase === "workEnd")
-      return `WORK · CYCLE ${timer.cycleIndex + 1}/${session.cyclesPlanned}`;
+      return t("sessionActive.label.workCycle", { current: timer.cycleIndex + 1, total: session.cyclesPlanned });
     if (timer.phase === "break" || timer.phase === "breakEnd")
-      return `BREAK · ${session.breakDuration}MIN`;
-    return "SESSION COMPLETE";
+      return t("sessionActive.label.breakMin", { count: session.breakDuration });
+    return t("sessionActive.label.sessionComplete");
   })();
 
   const timerColor =
@@ -430,7 +430,7 @@ const SessionActive: React.FC = () => {
     const future = remainingCyclesAfterCurrent * (session.workDuration + session.breakDuration);
     return Math.max(0, cur + future);
   })();
-  const minutesLabel = `${remainingMinutesTotal} ${remainingMinutesTotal === 1 ? "minute" : "minutes"}`;
+  const minutesLabel = t("sessionActive.empty.minutes", { count: remainingMinutesTotal });
 
   // Actions available for in-session add (exclude already in this session).
   const sessionActionIdSet = new Set(session.plannedActionIds);
@@ -452,7 +452,7 @@ const SessionActive: React.FC = () => {
       return;
     }
     addPlannedActionsToSession(session.id, pickerSelected);
-    toast.success(`Added ${pickerSelected.length} action${pickerSelected.length === 1 ? "" : "s"}.`);
+    toast.success(t("sessionActive.toast.added", { count: pickerSelected.length }));
     setPickerSelected([]);
     setPickerOpen(false);
   };
@@ -483,16 +483,16 @@ const SessionActive: React.FC = () => {
             <button
               onClick={() => setSound((v) => !v)}
               className="w-8 h-8 inline-flex items-center justify-center rounded-[3px] text-text-tertiary hover:bg-surface-hover hover:text-text-primary transition-colors"
-              aria-label={sound ? "Sound on" : "Sound off"}
-              title={sound ? "Sound on" : "Sound off"}
+              aria-label={sound ? t("sessionActive.controls.soundOn") : t("sessionActive.controls.soundOff")}
+              title={sound ? t("sessionActive.controls.soundOn") : t("sessionActive.controls.soundOff")}
             >
               {sound ? <Volume2 size={16} /> : <VolumeX size={16} />}
             </button>
             <button
               onClick={toggleFocus}
               className="w-8 h-8 inline-flex items-center justify-center rounded-[3px] text-text-tertiary hover:bg-surface-hover hover:text-text-primary transition-colors"
-              aria-label={focusMode ? "Exit focus mode" : "Focus mode"}
-              title={focusMode ? "Exit focus mode" : "Focus mode"}
+              aria-label={focusMode ? t("sessionActive.controls.exitFocus") : t("sessionActive.controls.focusMode")}
+              title={focusMode ? t("sessionActive.controls.exitFocus") : t("sessionActive.controls.focusMode")}
             >
               {focusMode ? <Minimize size={16} /> : <Maximize size={16} />}
             </button>
@@ -510,7 +510,7 @@ const SessionActive: React.FC = () => {
               className="font-mono uppercase tracking-[0.06em] text-text-tertiary"
               style={{ fontSize: 11 }}
             >
-              {isPaused ? "PAUSED" : topLabel}
+              {isPaused ? t("sessionActive.label.paused") : topLabel}
             </div>
             <div
               className="mt-3 font-mono tabular-nums"
@@ -573,14 +573,13 @@ const SessionActive: React.FC = () => {
                         {currentAction.title}
                       </h2>
                       <div className="mt-2 font-mono text-[12px] text-text-secondary tabular-nums">
-                        Impact {currentAction.impact ?? 0}
                         {currentAction.timeEstimateMinutes
-                          ? ` · ${currentAction.timeEstimateMinutes}min`
-                          : ""}
+                          ? t("sessionActive.action.impactWithTime", { count: currentAction.impact ?? 0, minutes: currentAction.timeEstimateMinutes })
+                          : t("sessionActive.action.impact", { count: currentAction.impact ?? 0 })}
                       </div>
                     </div>
                     <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary shrink-0">
-                      ACTION {currentIndex + 1}/{session.plannedActionIds.length}
+                      {t("sessionActive.action.title", { current: currentIndex + 1, total: session.plannedActionIds.length })}
                     </div>
                   </div>
                 </div>
@@ -591,10 +590,10 @@ const SessionActive: React.FC = () => {
                 style={{ background: "hsl(var(--surface-raised))" }}
               >
                 <div className="text-[18px] text-text-primary font-medium">
-                  All planned actions completed.
+                  {t("sessionActive.empty.allDone")}
                 </div>
                 <div className="mt-2 text-[14px] text-text-secondary">
-                  You still have {minutesLabel} of focus time.
+                  {t("sessionActive.empty.remainingFocus", { label: minutesLabel })}
                 </div>
                 <div className="mt-4 flex flex-col items-center gap-3">
                   <button
@@ -609,14 +608,14 @@ const SessionActive: React.FC = () => {
                       color: "hsl(var(--accent-foreground))",
                     }}
                   >
-                    + Add action
+                    {t("sessionActive.empty.addAction")}
                   </button>
                   <button
                     onClick={() => setConfirmEndEarly(true)}
                     className="text-[13px] hover:underline"
                     style={{ color: "hsl(var(--text-warning))" }}
                   >
-                    End session
+                    {t("sessionActive.empty.endSession")}
                   </button>
                 </div>
               </div>
@@ -634,7 +633,7 @@ const SessionActive: React.FC = () => {
                     color: "hsl(var(--accent-foreground))",
                   }}
                 >
-                  Mark done
+                  {t("sessionActive.action.markDone")}
                 </button>
                 <button
                   onClick={() => setConfirmDrop(currentAction.id)}
@@ -645,7 +644,7 @@ const SessionActive: React.FC = () => {
                     color: "hsl(var(--text-primary))",
                   }}
                 >
-                  Drop
+                  {t("sessionActive.action.drop")}
                 </button>
               </div>
             )}
@@ -662,10 +661,10 @@ const SessionActive: React.FC = () => {
                 style={{ boxShadow: "0 20px 50px rgba(0,0,0,0.4)" }}
               >
                 <h2 className="text-[16px] font-medium text-text-primary">
-                  Work block done · time for a break
+                  {t("sessionActive.workEnd.title")}
                 </h2>
                 <p className="mt-2 text-[13px] text-text-secondary">
-                  Cycle {timer.cycleIndex + 1} of {session.cyclesPlanned} complete.
+                  {t("sessionActive.workEnd.body", { current: timer.cycleIndex + 1, total: session.cyclesPlanned })}
                 </p>
                 <div className="mt-6 flex items-center justify-end gap-3">
                   <button
@@ -673,7 +672,7 @@ const SessionActive: React.FC = () => {
                     className="text-[13px] font-medium px-3 py-1.5"
                     style={{ color: "hsl(var(--text-warning))" }}
                   >
-                    End session
+                    {t("sessionActive.controls.endSession")}
                   </button>
                   <button
                     onClick={handleContinueToBreak}
@@ -683,7 +682,7 @@ const SessionActive: React.FC = () => {
                       color: "hsl(var(--accent-foreground))",
                     }}
                   >
-                    {session.breakDuration > 0 ? "Continue to break" : "Continue to next cycle"}
+                    {session.breakDuration > 0 ? t("sessionActive.workEnd.continueBreak") : t("sessionActive.workEnd.continueNext")}
                   </button>
                 </div>
               </div>
@@ -700,7 +699,7 @@ const SessionActive: React.FC = () => {
                 style={{ boxShadow: "0 20px 50px rgba(0,0,0,0.4)" }}
               >
                 <h2 className="text-[16px] font-medium text-text-primary">
-                  Break done · ready for next cycle?
+                  {t("sessionActive.breakEnd.title")}
                 </h2>
                 <div className="mt-6 flex items-center justify-end gap-3">
                   <button
@@ -708,7 +707,7 @@ const SessionActive: React.FC = () => {
                     className="text-[13px] font-medium px-3 py-1.5"
                     style={{ color: "hsl(var(--text-warning))" }}
                   >
-                    End session
+                    {t("sessionActive.controls.endSession")}
                   </button>
                   <button
                     onClick={handleStartNextWork}
@@ -718,7 +717,7 @@ const SessionActive: React.FC = () => {
                       color: "hsl(var(--accent-foreground))",
                     }}
                   >
-                    Continue to work
+                    {t("sessionActive.breakEnd.continueWork")}
                   </button>
                 </div>
               </div>
@@ -735,11 +734,10 @@ const SessionActive: React.FC = () => {
                 style={{ boxShadow: "0 20px 50px rgba(0,0,0,0.4)" }}
               >
                 <h2 className="text-[18px] font-medium text-text-primary">
-                  Session complete · {session.workDuration * session.cyclesPlanned}min focused
+                  {t("sessionActive.sessionEnd.title", { count: session.workDuration * session.cyclesPlanned })}
                 </h2>
                 <div className="mt-3 font-mono text-[13px] text-text-secondary">
-                  {session.completedActionIds.length} actions done ·{" "}
-                  {session.droppedActionIds.length} dropped · +{sessionOutcome} value added
+                  {t("sessionActive.sessionEnd.summary", { done: session.completedActionIds.length, dropped: session.droppedActionIds.length, value: sessionOutcome })}
                 </div>
                 <div className="mt-6 flex items-center justify-end gap-3">
                   <button
@@ -750,7 +748,7 @@ const SessionActive: React.FC = () => {
                       color: "hsl(var(--accent-foreground))",
                     }}
                   >
-                    Review session
+                    {t("sessionActive.sessionEnd.review")}
                   </button>
                 </div>
               </div>
@@ -770,7 +768,7 @@ const SessionActive: React.FC = () => {
                     color: "hsl(var(--text-primary))",
                   }}
                 >
-                  {isPaused ? "Resume" : "Pause"}
+                  {isPaused ? t("sessionActive.controls.resume") : t("sessionActive.controls.pause")}
                 </button>
               )}
               {isBreak && (
@@ -783,7 +781,7 @@ const SessionActive: React.FC = () => {
                     color: "hsl(var(--text-primary))",
                   }}
                 >
-                  Skip break
+                  {t("sessionActive.controls.skipBreak")}
                 </button>
               )}
               {isPaused && (
@@ -796,7 +794,7 @@ const SessionActive: React.FC = () => {
                     color: "hsl(var(--text-secondary))",
                   }}
                 >
-                  Restart cycle
+                  {t("sessionActive.controls.restartCycle")}
                 </button>
               )}
             </div>
@@ -805,7 +803,7 @@ const SessionActive: React.FC = () => {
               className="text-[12px] hover:underline"
               style={{ color: "hsl(var(--text-warning))" }}
             >
-              End session
+              {t("sessionActive.controls.endSession")}
             </button>
           </section>
         </div>
@@ -813,18 +811,18 @@ const SessionActive: React.FC = () => {
 
       <ConfirmModal
         open={confirmDrop != null}
-        title="Drop this action?"
-        body="It won't count toward value."
-        confirmLabel="Drop"
+        title={t("sessionActive.confirm.dropTitle")}
+        body={t("sessionActive.confirm.dropBody")}
+        confirmLabel={t("sessionActive.confirm.dropConfirm")}
         destructive
         onCancel={() => setConfirmDrop(null)}
         onConfirm={handleConfirmDrop}
       />
       <ConfirmModal
         open={confirmAbort}
-        title="End session early?"
-        body="Your progress will be saved."
-        confirmLabel="End session"
+        title={t("sessionActive.confirm.abortTitle")}
+        body={t("sessionActive.confirm.abortBody")}
+        confirmLabel={t("sessionActive.confirm.abortConfirm")}
         destructive
         onCancel={() => setConfirmAbort(false)}
         onConfirm={() => {
@@ -834,9 +832,9 @@ const SessionActive: React.FC = () => {
       />
       <ConfirmModal
         open={confirmRestart}
-        title="Restart current cycle?"
-        body="Time elapsed in this block will be lost."
-        confirmLabel="Restart"
+        title={t("sessionActive.confirm.restartTitle")}
+        body={t("sessionActive.confirm.restartBody")}
+        confirmLabel={t("sessionActive.confirm.restartConfirm")}
         onCancel={() => setConfirmRestart(false)}
         onConfirm={() => {
           setConfirmRestart(false);
@@ -845,9 +843,9 @@ const SessionActive: React.FC = () => {
       />
       <ConfirmModal
         open={confirmEndEarly}
-        title="End session early?"
-        body={`You completed all planned actions in ${actualFocusedMinutes}min of ${plannedFocusMinutes}min. End now?`}
-        confirmLabel="End session"
+        title={t("sessionActive.confirm.abortTitle")}
+        body={t("sessionActive.confirm.endEarlyBody", { actual: actualFocusedMinutes, planned: plannedFocusMinutes })}
+        confirmLabel={t("sessionActive.confirm.abortConfirm")}
         destructive
         onCancel={() => setConfirmEndEarly(false)}
         onConfirm={handleEndSessionEarly}
@@ -865,15 +863,15 @@ const SessionActive: React.FC = () => {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="px-5 py-4 border-b border-border-subtle">
-              <h2 className="text-[16px] font-medium text-text-primary">Add actions to session</h2>
+              <h2 className="text-[16px] font-medium text-text-primary">{t("sessionActive.picker.title")}</h2>
               <p className="mt-1 text-[12px] text-text-secondary">
-                Pick from your active backlog and planned actions.
+                {t("sessionActive.picker.body")}
               </p>
             </div>
             <div className="flex-1 overflow-y-auto">
               {pickerAvailable.length === 0 ? (
                 <div className="p-6 text-[13px] text-text-tertiary text-center">
-                  No more actions available. Create one from /actions first.
+                  {t("sessionActive.picker.empty")}
                 </div>
               ) : (
                 pickerAvailable.map((a) => {
@@ -901,7 +899,7 @@ const SessionActive: React.FC = () => {
                       <span className="min-w-0 flex-1">
                         <span className="block text-[14px] text-text-primary">{a.title}</span>
                         <span className="block mt-0.5 font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">
-                          {goal?.title ?? "—"}
+                          {goal?.title ?? t("sessionActive.picker.noGoal")}
                           {project ? ` · ${project.title}` : ""}
                           {a.timeEstimateMinutes ? ` · ${a.timeEstimateMinutes}min` : ""}
                         </span>
@@ -916,7 +914,7 @@ const SessionActive: React.FC = () => {
                 onClick={() => setPickerOpen(false)}
                 className="text-[13px] text-text-secondary hover:text-text-primary px-3 py-1.5"
               >
-                Cancel
+                {t("sessionActive.picker.cancel")}
               </button>
               <button
                 onClick={handleConfirmAddActions}
@@ -927,7 +925,7 @@ const SessionActive: React.FC = () => {
                   color: "hsl(var(--accent-foreground))",
                 }}
               >
-                Add {pickerSelected.length > 0 ? `(${pickerSelected.length})` : ""}
+                {pickerSelected.length > 0 ? t("sessionActive.picker.addCount", { count: pickerSelected.length }) : t("sessionActive.picker.add")}
               </button>
             </div>
           </div>

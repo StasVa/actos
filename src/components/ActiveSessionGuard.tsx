@@ -8,6 +8,7 @@
 
 import React from "react";
 import { Link, useLocation, useNavigate, useNavigationType } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useStore } from "@/store/useStore";
 import type { Session } from "@/types";
 
@@ -53,6 +54,7 @@ const NavConfirmModal: React.FC<{
   onContinue: () => void;
   onEnd: () => void;
 }> = ({ open, remainingLabel, plannedTotal, onCancel, onContinue, onEnd }) => {
+  const { t } = useTranslation();
   React.useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -72,9 +74,9 @@ const NavConfirmModal: React.FC<{
         className="w-[460px] max-w-[90vw] bg-surface-elevated border border-border-subtle rounded-[6px] p-6 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-[16px] font-medium text-text-primary">Session in progress</h2>
+        <h2 className="text-[16px] font-medium text-text-primary">{t("sessionGuard.modal.title")}</h2>
         <p className="mt-3 text-[13px] text-text-secondary leading-[1.5]">
-          You have an active session running. {remainingLabel} left of {plannedTotal}min total.
+          {t("sessionGuard.modal.body", { remaining: remainingLabel, total: plannedTotal })}
         </p>
         <div className="mt-6 flex items-center justify-end gap-3">
           <button
@@ -82,7 +84,7 @@ const NavConfirmModal: React.FC<{
             onClick={onCancel}
             className="text-[13px] text-text-secondary hover:text-text-primary transition-colors px-3 py-1.5"
           >
-            Cancel
+            {t("sessionGuard.modal.cancel")}
           </button>
           <button
             type="button"
@@ -93,7 +95,7 @@ const NavConfirmModal: React.FC<{
               background: "hsl(var(--surface-hover))",
             }}
           >
-            Continue session
+            {t("sessionGuard.modal.continue")}
           </button>
           <button
             type="button"
@@ -104,7 +106,7 @@ const NavConfirmModal: React.FC<{
               background: "hsl(var(--accent))",
             }}
           >
-            End session
+            {t("sessionGuard.modal.end")}
           </button>
         </div>
       </div>
@@ -115,6 +117,7 @@ const NavConfirmModal: React.FC<{
 /* ───────── Banner ───────── */
 
 const ActiveSessionBanner: React.FC<{ session: Session }> = ({ session }) => {
+  const { t } = useTranslation();
   const [now, setNow] = React.useState(Date.now());
   React.useEffect(() => {
     const i = window.setInterval(() => setNow(Date.now()), 1000);
@@ -129,10 +132,10 @@ const ActiveSessionBanner: React.FC<{ session: Session }> = ({ session }) => {
     return Math.max(0, timer.endsAt - now);
   })();
   const phaseLabel = (() => {
-    if (!timer) return "session";
-    if (timer.phase === "break" || timer.phase === "breakEnd") return "break";
-    if (timer.phase === "sessionEnd") return "session";
-    return `cycle ${timer.cycleIndex + 1}/${session.cyclesPlanned}`;
+    if (!timer) return t("sessionGuard.banner.phase.session");
+    if (timer.phase === "break" || timer.phase === "breakEnd") return t("sessionGuard.banner.phase.break");
+    if (timer.phase === "sessionEnd") return t("sessionGuard.banner.phase.session");
+    return t("sessionGuard.banner.phase.work", { current: timer.cycleIndex + 1, total: session.cyclesPlanned });
   })();
 
   return (
@@ -149,9 +152,9 @@ const ActiveSessionBanner: React.FC<{ session: Session }> = ({ session }) => {
           className="inline-block w-2 h-2 rounded-full shrink-0"
           style={{ background: "hsl(var(--state-active))" }}
         />
-        <span className="text-[12px] font-medium text-text-primary">Session in progress</span>
+        <span className="text-[12px] font-medium text-text-primary">{t("sessionGuard.banner.label")}</span>
         <span className="font-mono text-[12px] tabular-nums text-text-secondary truncate">
-          · {fmtMS(remainingMs)} left of {phaseLabel}
+          {t("sessionGuard.banner.suffix", { time: fmtMS(remainingMs), phase: phaseLabel })}
         </span>
       </div>
       <Link
@@ -159,7 +162,7 @@ const ActiveSessionBanner: React.FC<{ session: Session }> = ({ session }) => {
         className="text-[13px] font-medium shrink-0 hover:underline"
         style={{ color: "hsl(var(--accent))" }}
       >
-        Return →
+        {t("sessionGuard.banner.return")}
       </Link>
     </div>
   );

@@ -491,7 +491,7 @@ function ActionEditorPanel({
       </div>
 
       {/* Body */}
-      <div className="flex-1 overflow-y-auto px-6 py-5">
+      <div ref={bodyRef} className="flex-1 overflow-y-auto px-6 py-5">
         {hasMigrationWarning && (
           <div
             className="mb-4 p-3 rounded-[4px] text-[12px]"

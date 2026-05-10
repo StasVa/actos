@@ -384,14 +384,14 @@ const AllDelegated: React.FC = () => {
 
   const metaLine = (
     <>
-      <span>{aggregates.active} ACTIVE</span>
+      <span>{t("delegated.meta.active", { count: aggregates.active })}</span>
       <span className="mx-1.5">·</span>
       <span style={{ color: aggregates.overdue > 0 ? "hsl(var(--text-warning))" : undefined }}>
-        {aggregates.overdue} OVERDUE
+        {t("delegated.meta.overdue", { count: aggregates.overdue })}
       </span>
       <span className="mx-1.5">·</span>
       <span style={{ color: aggregates.today > 0 ? "hsl(var(--accent))" : undefined }}>
-        {aggregates.today} DUE TODAY
+        {t("delegated.meta.dueToday", { count: aggregates.today })}
       </span>
     </>
   );
@@ -405,22 +405,22 @@ const AllDelegated: React.FC = () => {
             title={t("delegated.page.title")}
             meta={metaLine}
             cta={{
-              label: "+ Delegate",
+              label: t("delegated.actions.create.cta"),
               onClick: newDelegated,
-              ariaLabel: "Create a delegated action",
+              ariaLabel: t("delegated.actions.create.aria"),
             }}
             belowMeta={<TabBar value={tab} onChange={setTab} />}
             filters={
               <>
                 <FilterDropdown
-                  label="DELEGATE"
+                  label={t("delegated.filter.delegate")}
                   value={delegateFilter}
                   defaultValue="all"
                   options={delegateOptions}
                   onChange={setDelegateFilter}
                 />
                 <FilterDropdown
-                  label="GOAL"
+                  label={t("delegated.filter.goal")}
                   value={goalFilter}
                   defaultValue="all"
                   options={goalOptions}
@@ -428,10 +428,10 @@ const AllDelegated: React.FC = () => {
                 />
                 {tab === "returned" && (
                   <FilterDropdown
-                    label="DATE"
+                    label={t("delegated.filter.date")}
                     value={dateRange}
                     defaultValue="all"
-                    options={DATE_OPTIONS}
+                    options={dateOptions}
                     onChange={(v) => setDateRange(v as DateRange)}
                   />
                 )}
@@ -440,7 +440,7 @@ const AllDelegated: React.FC = () => {
                     onClick={clearFilters}
                     className="ml-1 text-[12px] text-text-tertiary hover:text-text-secondary transition-colors shrink-0"
                   >
-                    Clear filters
+                    {t("common.clearFilters")}
                   </button>
                 )}
               </>
@@ -448,7 +448,7 @@ const AllDelegated: React.FC = () => {
             sort={
               <SortDropdown<SortKey>
                 value={sortKey}
-                options={tab === "active" ? ACTIVE_SORT_OPTIONS : RETURNED_SORT_OPTIONS}
+                options={tab === "active" ? activeSortOptions : returnedSortOptions}
                 onChange={setSortKey}
               />
             }
@@ -460,15 +460,15 @@ const AllDelegated: React.FC = () => {
           {(tab === "active" ? allActive.length === 0 : allReturned.length === 0) ? (
             tab === "active" ? (
               <SharedEmptyState
-                headline="Nothing delegated yet."
-                description="When you delegate an action to someone, it appears here with the expected return date so you can track what's outstanding."
-                ctaLabel="Delegate"
+                headline={t("delegated.empty.active.heading")}
+                description={t("delegated.empty.active.body")}
+                ctaLabel={t("delegated.actions.create")}
                 onCta={newDelegated}
               />
             ) : (
               <SharedEmptyState
-                headline="No returned delegations yet."
-                description="Once a delegated action is returned and marked done, it appears here as history."
+                headline={t("delegated.empty.returned.heading")}
+                description={t("delegated.empty.returned.body")}
               />
             )
           ) : list.length === 0 ? (

@@ -17,13 +17,16 @@ import {
   SectionLabel,
 } from "./Index";
 
-function fmtAgo(iso?: string): string {
-  if (!iso) return "—";
-  const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
-  if (days <= 0) return "today";
-  if (days === 1) return "yesterday";
-  if (days < 30) return `${days}d ago`;
-  return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+function useFmtAgo() {
+  const { t, i18n } = useTranslation();
+  return (iso?: string): string => {
+    if (!iso) return "—";
+    const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+    if (days <= 0) return t("progress.relAgo.today");
+    if (days === 1) return t("progress.relAgo.yesterday");
+    if (days < 30) return t("progress.relAgo.daysAgo", { n: days });
+    return new Date(iso).toLocaleDateString(i18n.language, { month: "short", day: "numeric" });
+  };
 }
 
 const MS_DAY = 86400000;

@@ -833,7 +833,7 @@ function ActionEditorPanel({
                   }}
                   className="bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
                 >
-                  <option value="">— Goal-level backlog —</option>
+                  <option value="">{t("actionEditor.field.goalLevelOption")}</option>
                   {(projectsByGoal.find((g) => g.goal.id === goalId)?.projects ?? []).map((p) => (
                     <option key={p.id} value={p.id}>
                       {p.title}

@@ -682,7 +682,7 @@ function ActionEditorPanel({
 
             {/* DATE */}
             <div className="mb-6">
-              <SectionHead>Date</SectionHead>
+              <SectionHead>{t("actionEditor.section.date")}</SectionHead>
               <DateChipPicker
                 value={scheduledDate}
                 optional

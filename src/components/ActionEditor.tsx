@@ -19,6 +19,16 @@ import { useStore } from "@/store/useStore";
 import type { Action, ActionStatus, ID } from "@/types";
 import { ConfirmModal } from "./ConfirmModal";
 import { ClampedNumberInput } from "./ClampedNumberInput";
+import {
+  DeleteTypeConfirm,
+  EditorOverflowMenu,
+  MarkDoneButton,
+  SaveIndicator,
+  overflowDelete,
+  overflowDrop,
+  overflowDuplicate,
+  useSaveIndicator,
+} from "./EditorFooterControls";
 import { EditorShell, EditorCloseX, EditorCancelButton } from "./EditorShell";
 import { MetricInfoPopover } from "./MetricInfoPopover";
 import {

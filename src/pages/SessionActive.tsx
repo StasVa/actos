@@ -899,7 +899,7 @@ const SessionActive: React.FC = () => {
                       <span className="min-w-0 flex-1">
                         <span className="block text-[14px] text-text-primary">{a.title}</span>
                         <span className="block mt-0.5 font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">
-                          {goal?.title ?? "—"}
+                          {goal?.title ?? t("sessionActive.picker.noGoal")}
                           {project ? ` · ${project.title}` : ""}
                           {a.timeEstimateMinutes ? ` · ${a.timeEstimateMinutes}min` : ""}
                         </span>

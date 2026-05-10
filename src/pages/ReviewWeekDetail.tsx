@@ -1,16 +1,18 @@
 import React from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, addDays } from "date-fns";
+import { useTranslation } from "react-i18next";
+import i18n from "@/i18n";
 import { AppSidebar } from "@/components/AppSidebar";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { useStore } from "@/store/useStore";
 import { formatHM } from "@/lib/timeStats";
 import {
   formatWeekLabel,
-  formatDayTypeDistribution,
   getWeekSummary,
   dateFromYearWeek,
   yearWeekFromDate,
+  weekRange,
 } from "@/lib/weekUtils";
 import { ActionRow } from "@/components/ActionRow";
 import { AccomplishmentsSection, type AccomplishmentTile } from "@/components/AccomplishmentsSection";
@@ -18,9 +20,47 @@ import { OutcomeAddedSection } from "@/components/OutcomeAddedSection";
 import { SessionsSection } from "@/components/SessionsSection";
 import { getOutcomeSummary } from "@/lib/outcomeUtils";
 import { getSessionsForWeek, sessionDurationMinutes } from "@/lib/sessionUtils";
-import { addDays } from "date-fns";
-import { DAY_TYPE_LABELS } from "./Index";
-import type { Action } from "@/types";
+import type { Action, DayType } from "@/types";
+
+const dayTypeLabelKey = (dt?: string): string => {
+  switch (dt) {
+    case "execution": return "today.dayType.execution";
+    case "recovery": return "today.dayType.recovery";
+    case "day-off": return "today.dayType.dayOff";
+    case "sick": return "today.dayType.sick";
+    default: return "";
+  }
+};
+
+const localizedWeekLabel = (yw: string): string => {
+  const r = weekRange(yw);
+  if (!r) return formatWeekLabel(yw);
+  const sameMonth = r.start.getMonth() === r.end.getMonth();
+  const startLabel = r.start.toLocaleDateString(i18n.language, { month: "short", day: "numeric" });
+  const endLabel = sameMonth
+    ? r.end.toLocaleDateString(i18n.language, { day: "numeric" })
+    : r.end.toLocaleDateString(i18n.language, { month: "short", day: "numeric" });
+  return i18n.t("reviews.detail.weekLabel", { start: startLabel, end: endLabel });
+};
+
+const localizedDayTypeDist = (d: Record<DayType, number>): string => {
+  const parts: string[] = [];
+  (Object.keys(d) as DayType[]).forEach((k) => {
+    if (d[k] > 0) {
+      const key = dayTypeLabelKey(k);
+      const label = key ? i18n.t(key) : k;
+      parts.push(`${d[k]} ${label}`);
+    }
+  });
+  return parts.join(" · ");
+};
+
+const localizedEEEMMMd = (iso: string): string =>
+  new Date(iso + "T00:00:00").toLocaleDateString(i18n.language, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
 
 const SectionHead: React.FC<{ children: React.ReactNode; meta?: string }> = ({ children, meta }) => (
   <div className="flex items-baseline justify-between mb-3">
@@ -42,6 +82,7 @@ const RITUAL_CELL_BG: Record<string, string> = {
 };
 
 const ReviewWeekDetail: React.FC = () => {
+  const { t } = useTranslation();
   const { yearWeek = "" } = useParams();
   const navigate = useNavigate();
   const [settingsOpen, setSettingsOpen] = React.useState(false);
@@ -83,9 +124,9 @@ const ReviewWeekDetail: React.FC = () => {
             to="/reviews/weeks"
             className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary hover:text-text-primary transition-colors"
           >
-            ← REVIEWS / WEEKS
+            {t("reviews.detail.backWeeks")}
           </Link>
-          <div className="mt-8 text-[14px] text-text-secondary">Invalid week.</div>
+          <div className="mt-8 text-[14px] text-text-secondary">{t("reviews.detail.invalidWeek")}</div>
         </main>
       </div>
     );
@@ -99,7 +140,7 @@ const ReviewWeekDetail: React.FC = () => {
   const isoWeekNum = format(startD, "I");
   const isoWeekYear = format(startD, "RRRR");
   const dayTypeLine = settings.layers.planAndReview
-    ? formatDayTypeDistribution(summary.dayTypeDistribution)
+    ? localizedDayTypeDist(summary.dayTypeDistribution)
     : "";
 
   const totalMin = summary.totalTimeMinutes;
@@ -135,16 +176,6 @@ const ReviewWeekDetail: React.FC = () => {
 
   const openActionEdit = (id: string) => openPanel({ kind: "action", mode: "edit", id });
 
-  // Energy bar chart
-  const energyBars = summary.days.map((d) => {
-    const e = summary.dayEntriesByDate[d];
-    return {
-      date: d,
-      morning: e?.morningEnergyScore ?? null,
-      evening: e?.eveningEnergyScore ?? null,
-    };
-  });
-
   return (
     <div className="min-h-screen bg-surface-base text-text-primary">
       <AppSidebar onOpenSettings={() => setSettingsOpen(true)} />
@@ -154,13 +185,13 @@ const ReviewWeekDetail: React.FC = () => {
           to="/reviews/weeks"
           className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary hover:text-text-primary transition-colors"
         >
-          ← REVIEWS / WEEKS
+          {t("reviews.detail.backWeeks")}
         </Link>
         <h1 className="mt-3 text-[28px] font-medium text-text-primary leading-tight">
-          {formatWeekLabel(yearWeek)}
+          {localizedWeekLabel(yearWeek)}
         </h1>
         <div className="mt-1 font-mono text-[12px] text-text-secondary">
-          Week {isoWeekNum} · {isoWeekYear} · 7 days
+          {t("reviews.detail.weekHeader", { num: isoWeekNum, year: isoWeekYear })}
         </div>
         {dayTypeLine && (
           <div className="mt-0.5 font-mono text-[12px] text-text-secondary">{dayTypeLine}</div>
@@ -192,26 +223,26 @@ const ReviewWeekDetail: React.FC = () => {
                 tiles.push({
                   key: "outcome",
                   value: `+${outcome.valueAdded}`,
-                  label: "Value added",
+                  label: t("reviews.detail.tile.valueAdded"),
                   delta:
                     prevOutcome != null
                       ? outcome.valueAdded - prevOutcome.valueAdded
                       : null,
-                  deltaLabel: "vs last week",
+                  deltaLabel: t("reviews.detail.delta.vsLastWeek"),
                 });
               tiles.push({
                 key: "actions",
                 value: String(actionsCount),
-                label: "Actions done",
+                label: t("reviews.detail.tile.actionsDone"),
                 delta: prevActionsCount != null ? actionsCount - prevActionsCount : null,
-                deltaLabel: "vs last week",
+                deltaLabel: t("reviews.detail.delta.vsLastWeek"),
               });
               tiles.push({
                 key: "rituals",
                 value: String(ritualsCount),
-                label: "Rituals done",
+                label: t("reviews.detail.tile.ritualsDone"),
                 delta: prevRitualsCount != null ? ritualsCount - prevRitualsCount : null,
-                deltaLabel: "vs last week",
+                deltaLabel: t("reviews.detail.delta.vsLastWeek"),
               });
               if (settings.layers.logTime && totalMin > 0) {
                 const deltaH =
@@ -221,22 +252,22 @@ const ReviewWeekDetail: React.FC = () => {
                 tiles.push({
                   key: "time",
                   value: formatHM(totalMin),
-                  label: "Time invested",
+                  label: t("reviews.detail.tile.timeInvested"),
                   delta: deltaH,
-                  deltaLabel: "h vs last week",
+                  deltaLabel: t("reviews.detail.delta.hVsLastWeek"),
                 });
               }
               if (summary.closedProjects.length > 0)
                 tiles.push({
                   key: "projects",
                   value: String(summary.closedProjects.length),
-                  label: "Projects closed",
+                  label: t("reviews.detail.tile.projectsClosed"),
                 });
               if (summary.closedGoals.length > 0)
                 tiles.push({
                   key: "goals",
                   value: String(summary.closedGoals.length),
-                  label: "Goals closed",
+                  label: t("reviews.detail.tile.goalsClosed"),
                 });
             }
             return <AccomplishmentsSection tiles={tiles} period="week" />;
@@ -245,7 +276,7 @@ const ReviewWeekDetail: React.FC = () => {
           {/* GOALS CLOSED */}
           {summary.closedGoals.length > 0 && (
             <section>
-              <SectionHead meta={`${summary.closedGoals.length}`}>Goals closed</SectionHead>
+              <SectionHead>{t("reviews.detail.section.goalsClosed", { count: summary.closedGoals.length })}</SectionHead>
               <div className="space-y-1">
                 {summary.closedGoals.map(({ entity: g, type, at }) => {
                   const goalColor = `hsl(var(--${g.color}))`;
@@ -268,11 +299,11 @@ const ReviewWeekDetail: React.FC = () => {
                             className="font-mono text-[10px] uppercase tracking-[0.08em] tabular-nums shrink-0"
                             style={{ color: pillColor }}
                           >
-                            {type === "completed" ? "COMPLETED" : "DROPPED"}
+                            {type === "completed" ? t("reviews.detail.pill.completed") : t("reviews.detail.pill.dropped")}
                           </div>
                         </div>
                         <div className="mt-0.5 font-mono text-[11px] text-text-tertiary">
-                          {g.type === "mid-term" ? "MID-TERM" : "SHORT-TERM"} · {format(parseISO(at), "MMM d")}
+                          {g.type === "mid-term" ? t("reviews.detail.goalType.midTerm") : t("reviews.detail.goalType.shortTerm")} · {parseISO(at).toLocaleDateString(i18n.language, { month: "short", day: "numeric" })}
                         </div>
                       </div>
                     </button>
@@ -285,7 +316,7 @@ const ReviewWeekDetail: React.FC = () => {
           {/* PROJECTS CLOSED */}
           {summary.closedProjects.length > 0 && (
             <section>
-              <SectionHead meta={`${summary.closedProjects.length}`}>Projects closed</SectionHead>
+              <SectionHead>{t("reviews.detail.section.projectsClosed", { count: summary.closedProjects.length })}</SectionHead>
               <div className="space-y-1">
                 {summary.closedProjects.map(({ entity: p, type, at }) => {
                   const g = goalById(p.goalId);
@@ -309,11 +340,11 @@ const ReviewWeekDetail: React.FC = () => {
                             className="font-mono text-[10px] uppercase tracking-[0.08em] tabular-nums shrink-0"
                             style={{ color: pillColor }}
                           >
-                            {type === "completed" ? "COMPLETED" : "DROPPED"}
+                            {type === "completed" ? t("reviews.detail.pill.completed") : t("reviews.detail.pill.dropped")}
                           </div>
                         </div>
                         <div className="mt-0.5 font-mono text-[11px] text-text-tertiary">
-                          {g?.title ?? "—"} · {format(parseISO(at), "MMM d")}
+                          {g?.title ?? t("reviews.detail.dash")} · {parseISO(at).toLocaleDateString(i18n.language, { month: "short", day: "numeric" })}
                         </div>
                       </div>
                     </button>
@@ -326,12 +357,10 @@ const ReviewWeekDetail: React.FC = () => {
           {/* VALUE ADDED */}
           <OutcomeAddedSection outcome={outcome} period="week" />
 
-          {/* ENERGY section removed */}
-
           {/* TIME INVESTED */}
           {settings.layers.logTime && totalMin > 0 && (
             <section>
-              <SectionHead meta={formatHM(totalMin).toUpperCase()}>Time invested</SectionHead>
+              <SectionHead meta={formatHM(totalMin).toUpperCase()}>{t("reviews.detail.section.timeInvested")}</SectionHead>
               <div className="space-y-2">
                 {summary.perGoalTime
                   .filter((row) => row.minutes > 0)
@@ -372,7 +401,7 @@ const ReviewWeekDetail: React.FC = () => {
                                     └
                                   </span>
                                   <span className="text-[13px] text-text-secondary truncate flex-1">
-                                    {proj?.title ?? "—"}
+                                    {proj?.title ?? t("reviews.detail.dash")}
                                   </span>
                                   <span className="font-mono text-[12px] tabular-nums text-text-tertiary">
                                     {formatHM(p.minutes)}
@@ -396,8 +425,8 @@ const ReviewWeekDetail: React.FC = () => {
             const focusMin = sessionsForWk.reduce((s, x) => s + sessionDurationMinutes(x), 0);
             return (
               <section>
-                <SectionHead meta={`${formatHM(focusMin).toUpperCase()} FOCUSED`}>
-                  Sessions · {sessionsForWk.length}
+                <SectionHead meta={t("reviews.detail.section.sessionsMeta", { time: formatHM(focusMin).toUpperCase() })}>
+                  {t("reviews.detail.section.sessions", { count: sessionsForWk.length })}
                 </SectionHead>
                 <SessionsSection sessions={sessionsForWk} variant="by-day" showStats initialLimit={10} />
               </section>
@@ -406,7 +435,7 @@ const ReviewWeekDetail: React.FC = () => {
 
           {/* DAYS */}
           <section>
-            <SectionHead meta={`${summary.days.length}`}>Days</SectionHead>
+            <SectionHead meta={String(summary.days.length)}>{t("reviews.detail.section.days")}</SectionHead>
             <div className="rounded-[6px] border border-border-subtle overflow-hidden">
               {summary.days.map((d) => {
                 const entry = summary.dayEntriesByDate[d];
@@ -426,10 +455,10 @@ const ReviewWeekDetail: React.FC = () => {
                       className="flex items-center gap-3 px-4 py-3 border-b border-border-subtle last:border-b-0"
                     >
                       <span className="text-[13px] text-text-tertiary w-[80px]">
-                        {format(parseISO(d), "EEE MMM d")}
+                        {localizedEEEMMMd(d)}
                       </span>
                       <span className="font-mono text-[12px] text-text-tertiary italic">
-                        No activity logged
+                        {t("reviews.detail.day.noActivity")}
                       </span>
                     </div>
                   );
@@ -442,19 +471,19 @@ const ReviewWeekDetail: React.FC = () => {
                     className="w-full flex items-center gap-3 px-4 py-3 border-b border-border-subtle last:border-b-0 hover:bg-surface-hover transition-colors text-left"
                   >
                     <span className="text-[13px] font-medium text-text-primary w-[80px] shrink-0">
-                      {format(parseISO(d), "EEE MMM d")}
+                      {localizedEEEMMMd(d)}
                     </span>
                     {entry?.dayType && (
                       <span className="font-mono text-[10px] uppercase tracking-[0.06em] px-1.5 py-0.5 rounded-[3px] bg-surface-hover text-text-secondary">
-                        {DAY_TYPE_LABELS[entry.dayType]}
+                        {t(dayTypeLabelKey(entry.dayType))}
                       </span>
                     )}
                     <span className="font-mono text-[12px] text-text-secondary tabular-nums flex-1 truncate">
-                      <span className="text-text-primary">{dayActs.length}</span> actions
+                      {t("reviews.detail.actionsCount", { count: dayActs.length })}
                       {ritualsDoneCount > 0 && (
                         <>
                           <span className="text-text-tertiary"> · </span>
-                          <span className="text-text-primary">{ritualsDoneCount}</span> rituals
+                          {t("reviews.detail.ritualsCount", { count: ritualsDoneCount })}
                         </>
                       )}
                       {settings.layers.logTime && dayMin > 0 && (
@@ -478,15 +507,17 @@ const ReviewWeekDetail: React.FC = () => {
             summary.cancelledActions.length > 0) && (
             <section>
               <SectionHead
-                meta={`${topActions.length + summary.delegatedActions.length + summary.droppedActions.length + summary.cancelledActions.length}`}
+                meta={String(topActions.length + summary.delegatedActions.length + summary.droppedActions.length + summary.cancelledActions.length)}
               >
-                Actions this week
+                {t("reviews.detail.section.actionsThisWeek")}
               </SectionHead>
               <div className="space-y-5">
                 {topActions.length > 0 && (
                   <div>
                     <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-1.5">
-                      Done · {topActions.length}{topActions.length === summary.doneActions.length ? "" : ` (top ${topActions.length})`}
+                      {topActions.length === summary.doneActions.length
+                        ? t("reviews.detail.subgroup.done", { count: topActions.length })
+                        : t("reviews.detail.subgroup.doneTop", { count: topActions.length })}
                     </div>
                     {Array.from(topByGoal.entries()).map(([gid, list]) => {
                       const g = goalById(gid);
@@ -498,7 +529,7 @@ const ReviewWeekDetail: React.FC = () => {
                               style={{ background: `hsl(var(--${g?.color ?? "goal-1"}))` }}
                             />
                             <span className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
-                              {g?.title ?? "—"} · {list.length}
+                              {g?.title ?? t("reviews.detail.dash")} · {list.length}
                             </span>
                           </div>
                           {list.map((a) => (
@@ -519,7 +550,7 @@ const ReviewWeekDetail: React.FC = () => {
                 {summary.delegatedActions.length > 0 && (
                   <div>
                     <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-1.5">
-                      Delegated · {summary.delegatedActions.length}
+                      {t("reviews.detail.subgroup.delegated", { count: summary.delegatedActions.length })}
                     </div>
                     {summary.delegatedActions.map((a) => (
                       <ActionRow
@@ -535,7 +566,7 @@ const ReviewWeekDetail: React.FC = () => {
                 {summary.droppedActions.length > 0 && (
                   <div>
                     <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-1.5">
-                      Dropped · {summary.droppedActions.length}
+                      {t("reviews.detail.subgroup.dropped", { count: summary.droppedActions.length })}
                     </div>
                     {summary.droppedActions.map((a) => (
                       <ActionRow
@@ -551,7 +582,7 @@ const ReviewWeekDetail: React.FC = () => {
                 {summary.cancelledActions.length > 0 && (
                   <div>
                     <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-1.5">
-                      Cancelled · {summary.cancelledActions.length}
+                      {t("reviews.detail.subgroup.cancelled", { count: summary.cancelledActions.length })}
                     </div>
                     {summary.cancelledActions.map((a) => (
                       <ActionRow
@@ -572,9 +603,9 @@ const ReviewWeekDetail: React.FC = () => {
           {summary.ritualWeek.filter((r) => r.scheduledCount > 0).length > 0 && (
             <section>
               <SectionHead
-                meta={`${summary.ritualWeek.filter((r) => r.scheduledCount > 0).length} ACTIVE`}
+                meta={t("reviews.detail.section.activeMeta", { count: summary.ritualWeek.filter((r) => r.scheduledCount > 0).length })}
               >
-                Rituals
+                {t("reviews.detail.section.rituals", { count: summary.ritualWeek.filter((r) => r.scheduledCount > 0).length })}
               </SectionHead>
               <div className="space-y-2">
                 {summary.ritualWeek
@@ -603,7 +634,7 @@ const ReviewWeekDetail: React.FC = () => {
                               {rw.instances.map((inst, i) => (
                                 <span
                                   key={i}
-                                  title={`${format(parseISO(inst.date), "EEE")}: ${inst.status}`}
+                                  title={`${parseISO(inst.date).toLocaleDateString(i18n.language, { weekday: "short" })}: ${t(`reviews.detail.ritualStatus.${inst.status === "n/a" ? "na" : inst.status}`, { defaultValue: inst.status })}`}
                                   className="w-3 h-3 rounded-[2px]"
                                   style={{
                                     background: RITUAL_CELL_BG[inst.status] ?? "transparent",
@@ -617,18 +648,17 @@ const ReviewWeekDetail: React.FC = () => {
                             </div>
                           </div>
                           <div className="mt-0.5 font-mono text-[11px] text-text-tertiary tabular-nums">
-                            {r.schedule} · <span className="text-text-secondary">{rw.doneCount}</span>{" "}
-                            of {rw.scheduledCount} done
+                            {t("reviews.detail.ritual.scheduleSummary", { schedule: r.schedule, done: rw.doneCount, scheduled: rw.scheduledCount })}
                             {rw.skippedCount > 0 && (
                               <>
                                 {" · "}
-                                <span className="text-text-secondary">{rw.skippedCount}</span> skipped
+                                {t("reviews.detail.ritual.skippedExtra", { count: rw.skippedCount })}
                               </>
                             )}
                             {rw.missedCount > 0 && (
                               <>
                                 {" · "}
-                                <span className="text-text-secondary">{rw.missedCount}</span> missed
+                                {t("reviews.detail.ritual.missedExtra", { count: rw.missedCount })}
                               </>
                             )}
                           </div>
@@ -640,14 +670,12 @@ const ReviewWeekDetail: React.FC = () => {
             </section>
           )}
 
-          {/* REFLECTIONS section removed */}
-
           {summary.doneActions.length === 0 &&
             summary.closedProjects.length === 0 &&
             summary.closedGoals.length === 0 &&
             summary.reflections.length === 0 && (
               <div className="text-center py-12 text-[14px] text-text-secondary">
-                No activity tracked this week.
+                {t("reviews.detail.week.noActivity")}
               </div>
             )}
         </div>

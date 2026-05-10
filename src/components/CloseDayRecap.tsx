@@ -4,6 +4,7 @@
 // (reflection has been removed from the model).
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "sonner";
 import { useStore, ritualMultiplier } from "@/store/useStore";
@@ -52,6 +53,7 @@ function fmtHM(min: number) {
 }
 
 export const CloseDayRecap: React.FC = () => {
+  const { t } = useTranslation();
   const date = TODAY_ISO;
   const navigate = useNavigate();
   const reopenDay = useStore((s) => s.reopenDay);
@@ -163,13 +165,15 @@ export const CloseDayRecap: React.FC = () => {
   });
   const dayType = dayEntry?.dayType;
   const Icon = dayType ? DAY_TYPE_ICONS[dayType] : null;
-  const dayTypeLabel = dayType ? `${(DAY_TYPE_LABELS[dayType] ?? "").toUpperCase()} DAY` : null;
+  const dayTypeLabel = dayType
+    ? t("closeDay.dayTypeSuffix", { label: (DAY_TYPE_LABELS[dayType] ?? "").toUpperCase() })
+    : null;
 
   const showGreeting = focusedMin >= 120;
 
   const handleReopen = () => {
     reopenDay(date);
-    toast("Day re-opened");
+    toast(t("closeDay.toast.reopened"));
   };
 
   return (
@@ -177,7 +181,7 @@ export const CloseDayRecap: React.FC = () => {
       {/* Header */}
       <header>
         <h1 className="text-[28px] md:text-[32px] font-medium text-text-primary leading-tight">
-          Day closed
+          {t("closeDay.heading")}
         </h1>
         <div className="flex items-center gap-2 mt-2 text-text-secondary">
           <span className="text-[14px]">{dateLabel}</span>
@@ -192,7 +196,7 @@ export const CloseDayRecap: React.FC = () => {
           )}
         </div>
         {showGreeting && (
-          <div className="mt-2 text-[16px] text-text-primary">Solid work today.</div>
+          <div className="mt-2 text-[16px] text-text-primary">{t("closeDay.greeting")}</div>
         )}
       </header>
 
@@ -204,23 +208,23 @@ export const CloseDayRecap: React.FC = () => {
           sessionsToday.length > 0 ? "md:grid-cols-5" : "md:grid-cols-4"
         }`}
       >
-        <Tile value={`+${valueAdded}`} label="VALUE ADDED" />
-        <Tile value={doneActions.length} label="ACTIONS DONE" />
-        <Tile value={ritualsDoneCount} label="RITUALS DONE" />
+        <Tile value={`+${valueAdded}`} label={t("closeDay.tile.valueAdded")} />
+        <Tile value={doneActions.length} label={t("closeDay.tile.actionsDone")} />
+        <Tile value={ritualsDoneCount} label={t("closeDay.tile.ritualsDone")} />
         {sessionsToday.length > 0 && (
           <Tile
             value={sessionsToday.length}
-            label="SESSIONS"
-            sub={sessionsFocusedMin > 0 ? `${fmtHM(sessionsFocusedMin)} focused` : undefined}
+            label={t("closeDay.tile.sessions")}
+            sub={sessionsFocusedMin > 0 ? t("closeDay.tile.sessionsFocusedSub", { time: fmtHM(sessionsFocusedMin) }) : undefined}
           />
         )}
-        <Tile value={fmtHM(investedMinTotal)} label="TIME INVESTED" />
+        <Tile value={fmtHM(investedMinTotal)} label={t("closeDay.tile.timeInvested")} />
       </section>
 
       {/* PROJECTS */}
       {touchedProjects.length > 0 && (
         <section>
-          <SectionHeader>PROJECTS · {touchedProjects.length}</SectionHeader>
+          <SectionHeader>{t("closeDay.section.projects", { count: touchedProjects.length })}</SectionHeader>
           <div>
             {touchedProjects.map(({ project, acts }) => {
               const c = colorVar(project!.goalId);
@@ -239,7 +243,7 @@ export const CloseDayRecap: React.FC = () => {
                     {project!.title}
                   </span>
                   <span className="font-mono text-[12px] text-text-secondary tabular-nums shrink-0">
-                    {acts.length} action{acts.length === 1 ? "" : "s"} done
+                    {t("closeDay.actionsDoneCount", { count: acts.length })}
                   </span>
                 </Link>
               );
@@ -251,7 +255,7 @@ export const CloseDayRecap: React.FC = () => {
       {/* GOALS */}
       {perGoal.length > 0 && (
         <section>
-          <SectionHeader>GOALS</SectionHeader>
+          <SectionHeader>{t("closeDay.section.goals")}</SectionHeader>
           <div className="space-y-1.5">
             {perGoal.map(({ g, value, min }) => (
               <Link
@@ -265,7 +269,7 @@ export const CloseDayRecap: React.FC = () => {
                 />
                 <span className="text-[14px] text-text-primary truncate flex-1">{g.title}</span>
                 <span className="font-mono text-[12px] text-text-secondary tabular-nums shrink-0">
-                  +{value} value · {fmtHM(min)}
+                  {t("closeDay.goal.summary", { value, time: fmtHM(min) })}
                 </span>
               </Link>
             ))}
@@ -275,10 +279,10 @@ export const CloseDayRecap: React.FC = () => {
 
       {/* ACTIONS */}
       <section>
-        <SectionHeader>ACTIONS DONE · {doneActions.length}</SectionHeader>
+        <SectionHeader>{t("closeDay.section.actionsDone", { count: doneActions.length })}</SectionHeader>
         {doneActions.length === 0 ? (
           <div className="text-[13px] text-text-tertiary italic">
-            No actions completed today.
+            {t("closeDay.empty.noActions")}
           </div>
         ) : (
           <div>
@@ -321,8 +325,7 @@ export const CloseDayRecap: React.FC = () => {
       {ritualsTotalScheduled > 0 && (
         <section>
           <SectionHeader>
-            RITUALS · {ritualsDoneList.length} done · {ritualsSkippedList.length} skipped ·{" "}
-            {ritualsMissedList.length} missed
+            {t("closeDay.section.rituals", { done: ritualsDoneList.length, skipped: ritualsSkippedList.length, missed: ritualsMissedList.length })}
           </SectionHeader>
           <div className="space-y-1">
             {[
@@ -370,22 +373,22 @@ export const CloseDayRecap: React.FC = () => {
           onClick={() => setConfirmReopen(true)}
           className="text-[13px] text-text-secondary hover:text-text-primary transition"
         >
-          Re-open day
+          {t("closeDay.reopen")}
         </button>
         <button
           type="button"
           onClick={() => navigate(`/reviews/days/${date}`)}
           className="text-[13px] text-[hsl(var(--accent))] hover:brightness-110 transition"
         >
-          View in Days →
+          {t("closeDay.viewInDays")}
         </button>
       </div>
 
       <ConfirmModal
         open={confirmReopen}
-        title="Re-open this day?"
-        body="You'll be able to mark more actions and re-close it later."
-        confirmLabel="Re-open"
+        title={t("closeDay.confirm.reopen.heading")}
+        body={t("closeDay.confirm.reopen.body")}
+        confirmLabel={t("closeDay.confirm.reopen.cta")}
         onCancel={() => setConfirmReopen(false)}
         onConfirm={() => {
           handleReopen();

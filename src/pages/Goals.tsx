@@ -315,21 +315,21 @@ const GoalCard: React.FC<{ m: GoalMeta; logTimeOn: boolean }> = ({ m, logTimeOn 
 
       <ConfirmModal
         open={confirmDrop}
-        title="Drop this goal?"
-        body="Open projects, actions, and rituals under this goal will be dropped."
-        confirmLabel="Drop goal"
+        title={t("goals.confirm.drop.title")}
+        body={t("goals.confirm.drop.body")}
+        confirmLabel={t("goals.confirm.drop.confirmLabel")}
         destructive
         onCancel={() => setConfirmDrop(false)}
-        onConfirm={() => { dropGoal(g.id); toast("Goal dropped"); setConfirmDrop(false); }}
+        onConfirm={() => { dropGoal(g.id); toast(t("toast.goalDropped") || t("home.hero.toast.dropped")); setConfirmDrop(false); }}
       />
       <ConfirmModal
         open={confirmDelete}
-        title="Delete this goal?"
-        body="This permanently removes the goal and ALL its projects, actions, rituals, and ideas."
-        confirmLabel="Delete"
+        title={t("goals.confirm.delete.title")}
+        body={t("goals.confirm.delete.body")}
+        confirmLabel={t("goals.confirm.delete.confirmLabel")}
         destructive
         onCancel={() => setConfirmDelete(false)}
-        onConfirm={() => { deleteGoal(g.id); toast("Goal deleted"); setConfirmDelete(false); }}
+        onConfirm={() => { deleteGoal(g.id); toast(t("toast.goalDeleted")); setConfirmDelete(false); }}
       />
     </>
   );

@@ -502,19 +502,29 @@ function buildRitualRow(
   const doneToday = r.completionHistory.some((c) => c.date === TODAY_ISO);
   const dueToday = ritualDueToday(r.schedule, r.scheduleConfig);
   const scheduleLabel = (() => {
-    const base = r.schedule.toUpperCase();
-    const names = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
-    if (r.schedule === "weekly" && r.scheduleConfig?.weekday !== undefined) {
-      return `${base} · ${names[r.scheduleConfig.weekday]}`;
+    const t = i18n.t.bind(i18n);
+    const dayKeys = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+    const dayName = (idx: number) => t(`rituals.weekday.${dayKeys[idx]}`);
+    if (r.schedule === "weekly") {
+      const base = t("rituals.scheduleLabel.weekly");
+      if (r.scheduleConfig?.weekday !== undefined) {
+        return t("rituals.scheduleLabel.weeklyOn", { day: dayName(r.scheduleConfig.weekday) });
+      }
+      return base;
     }
-    if (r.schedule === "custom" && r.scheduleConfig?.customDays?.length) {
-      return `${base} · ${r.scheduleConfig.customDays.map((d) => names[d]).join(" ")}`;
+    if (r.schedule === "custom") {
+      if (r.scheduleConfig?.customDays?.length) {
+        return t("rituals.scheduleLabel.customOn", { days: r.scheduleConfig.customDays.map(dayName).join(" ") });
+      }
+      return t("rituals.scheduleLabel.custom");
     }
     if (r.schedule === "monthly") {
       const day = r.scheduleConfig?.monthDay ?? 1;
-      return `MONTHLY · DAY ${day}`;
+      return t("rituals.scheduleLabel.monthlyDay", { n: day });
     }
-    return base;
+    if (r.schedule === "daily") return t("rituals.scheduleLabel.daily");
+    if (r.schedule === "weekdays") return t("rituals.scheduleLabel.weekdays");
+    return r.schedule.toUpperCase();
   })();
   return {
     id: r.id,

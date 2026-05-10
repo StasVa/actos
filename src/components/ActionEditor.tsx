@@ -932,7 +932,7 @@ function ActionEditorPanel({
                 color: "hsl(var(--surface-base))",
               }}
             >
-              Create action
+              {t("actionEditor.create.cta")}
             </button>
           </>
         ) : (

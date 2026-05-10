@@ -349,6 +349,7 @@ const GoalColumn: React.FC<{
 
 /* ===== Goal column menu (composed in Hero) ===== */
 const GoalColumnMenu: React.FC<{ goalId: string }> = ({ goalId }) => {
+  const { t } = useTranslation();
   const openPanel = useStore((s) => s.openPanel);
   const markGoalComplete = useStore((s) => s.markGoalComplete);
   const dropGoal = useStore((s) => s.dropGoal);
@@ -358,31 +359,31 @@ const GoalColumnMenu: React.FC<{ goalId: string }> = ({ goalId }) => {
   return (
     <>
       <CardMenu
-        ariaLabel="Goal menu"
+        ariaLabel={t("home.hero.menu.aria")}
         items={[
-          { label: "Edit", onSelect: () => openPanel({ kind: "goal", mode: "edit", id: goalId }) },
-          { label: "Mark complete", onSelect: () => { markGoalComplete(goalId); toast("Goal completed"); } },
-          { label: "Drop", destructive: true, onSelect: () => setConfirmDrop(true) },
-          { label: "Delete", destructive: true, onSelect: () => setConfirmDelete(true) },
+          { label: t("common.edit"), onSelect: () => openPanel({ kind: "goal", mode: "edit", id: goalId }) },
+          { label: t("common.markComplete"), onSelect: () => { markGoalComplete(goalId); toast(t("toast.goalCompleted")); } },
+          { label: t("common.drop"), destructive: true, onSelect: () => setConfirmDrop(true) },
+          { label: t("common.delete"), destructive: true, onSelect: () => setConfirmDelete(true) },
         ]}
       />
       <ConfirmModal
         open={confirmDrop}
-        title="Drop this goal?"
-        body="Open projects, actions, and rituals under this goal will be dropped."
-        confirmLabel="Drop goal"
+        title={t("home.hero.confirm.drop.heading")}
+        body={t("home.hero.confirm.drop.body")}
+        confirmLabel={t("home.hero.confirm.drop.cta")}
         destructive
         onCancel={() => setConfirmDrop(false)}
-        onConfirm={() => { dropGoal(goalId); toast("Goal dropped"); setConfirmDrop(false); }}
+        onConfirm={() => { dropGoal(goalId); toast(t("home.hero.toast.dropped")); setConfirmDrop(false); }}
       />
       <ConfirmModal
         open={confirmDelete}
-        title="Delete this goal?"
-        body="This permanently removes the goal and ALL its projects, actions, rituals, and ideas."
-        confirmLabel="Delete"
+        title={t("home.hero.confirm.delete.heading")}
+        body={t("home.hero.confirm.delete.body")}
+        confirmLabel={t("common.delete")}
         destructive
         onCancel={() => setConfirmDelete(false)}
-        onConfirm={() => { deleteGoal(goalId); toast("Goal deleted"); setConfirmDelete(false); }}
+        onConfirm={() => { deleteGoal(goalId); toast(t("toast.goalDeleted")); setConfirmDelete(false); }}
       />
     </>
   );

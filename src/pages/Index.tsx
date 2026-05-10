@@ -1141,8 +1141,8 @@ export const TodayZone: React.FC<{
                 <Star size={16} className="text-text-tertiary" />
                 <span className="text-[14px] text-text-tertiary">
                   {todays.length === 0
-                    ? "No actions planned · add some first"
-                    : "Pick a Main Task"}
+                    ? t("home.mainTask.empty.noActions")
+                    : t("home.mainTask.empty.pick")}
                 </span>
               </button>
               {pickMainTaskOpen && todays.length > 0 && (

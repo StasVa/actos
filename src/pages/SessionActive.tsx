@@ -661,10 +661,10 @@ const SessionActive: React.FC = () => {
                 style={{ boxShadow: "0 20px 50px rgba(0,0,0,0.4)" }}
               >
                 <h2 className="text-[16px] font-medium text-text-primary">
-                  Work block done · time for a break
+                  {t("sessionActive.workEnd.title")}
                 </h2>
                 <p className="mt-2 text-[13px] text-text-secondary">
-                  Cycle {timer.cycleIndex + 1} of {session.cyclesPlanned} complete.
+                  {t("sessionActive.workEnd.body", { current: timer.cycleIndex + 1, total: session.cyclesPlanned })}
                 </p>
                 <div className="mt-6 flex items-center justify-end gap-3">
                   <button
@@ -672,7 +672,7 @@ const SessionActive: React.FC = () => {
                     className="text-[13px] font-medium px-3 py-1.5"
                     style={{ color: "hsl(var(--text-warning))" }}
                   >
-                    End session
+                    {t("sessionActive.controls.endSession")}
                   </button>
                   <button
                     onClick={handleContinueToBreak}
@@ -682,7 +682,7 @@ const SessionActive: React.FC = () => {
                       color: "hsl(var(--accent-foreground))",
                     }}
                   >
-                    {session.breakDuration > 0 ? "Continue to break" : "Continue to next cycle"}
+                    {session.breakDuration > 0 ? t("sessionActive.workEnd.continueBreak") : t("sessionActive.workEnd.continueNext")}
                   </button>
                 </div>
               </div>

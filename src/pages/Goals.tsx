@@ -375,6 +375,9 @@ const Goals: React.FC = () => {
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
   const [sortKey, setSortKey] = useState<SortKey>("recent");
   const [query, setQuery] = useState("");
+  const STATE_OPTIONS = useStateOptions(t);
+  const TYPE_OPTIONS = useTypeOptions(t);
+  const SORT_OPTIONS = useSortOptions(t);
 
   const goals = useStore((s) => s.goals);
   const storeProjects = useStore((s) => s.projects);

@@ -4,6 +4,7 @@
 
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useStore } from "@/store/useStore";
 import { emitAppEvent } from "@/lib/appEvents";
 import { getRecent, pushRecent, type RecentKind } from "@/lib/recentlyViewed";

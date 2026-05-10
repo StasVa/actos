@@ -719,6 +719,7 @@
   "nav.settings": "Einstellungen",
   "nav.today": "Heute",
   "noGoals.title": "Erstes Ziel einrichten — ActOS",
+  "notFound.returnHome": "Zur Startseite",
   "notFound.title": "Hoppla! Seite nicht gefunden",
   "outcome.delegatedSuffix": ", {{count}} delegiert",
   "outcome.empty.day": "An diesem Tag wurde aktiven Zielen kein Wert hinzugefügt.",

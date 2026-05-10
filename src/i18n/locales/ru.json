@@ -730,6 +730,7 @@
   "nav.settings": "Настройки",
   "nav.today": "Сегодня",
   "noGoals.title": "Создайте первую цель — ActOS",
+  "notFound.returnHome": "На главную",
   "notFound.title": "Упс! Страница не найдена",
   "outcome.delegatedSuffix": ", {{count}} делегировано",
   "outcome.empty.day": "В этот день в активные цели ничего не добавлено.",

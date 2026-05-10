@@ -719,6 +719,7 @@
   "nav.settings": "Ajustes",
   "nav.today": "Hoy",
   "noGoals.title": "Configura tu primera meta — ActOS",
+  "notFound.returnHome": "Volver al inicio",
   "notFound.title": "¡Vaya! Página no encontrada",
   "outcome.delegatedSuffix": ", {{count}} delegadas",
   "outcome.empty.day": "No se añadió valor a las metas activas en este día.",

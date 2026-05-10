@@ -720,6 +720,7 @@
   "nav.settings": "Settings",
   "nav.today": "Today",
   "noGoals.title": "Set up your first goal — ActOS",
+  "notFound.returnHome": "Return to Home",
   "notFound.title": "Oops! Page not found",
   "outcome.delegatedSuffix": ", {{count}} delegated",
   "outcome.empty.day": "No outcome added to active goals this day.",

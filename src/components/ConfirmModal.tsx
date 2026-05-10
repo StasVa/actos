@@ -5,6 +5,7 @@
 // styled as warning (amber) for destructive actions.
 
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 
 interface ConfirmModalProps {
   open: boolean;
@@ -21,12 +22,15 @@ export function ConfirmModal({
   open,
   title,
   body,
-  cancelLabel = "Cancel",
-  confirmLabel = "Confirm",
+  cancelLabel,
+  confirmLabel,
   destructive = false,
   onCancel,
   onConfirm,
 }: ConfirmModalProps) {
+  const { t } = useTranslation();
+  const resolvedCancel = cancelLabel ?? t("common.cancel");
+  const resolvedConfirm = confirmLabel ?? t("common.confirm");
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -54,13 +58,13 @@ export function ConfirmModal({
           <div className="mt-3 text-[13px] text-text-secondary leading-[1.5]">{body}</div>
         )}
         <div className="mt-6 flex items-center justify-end gap-3">
-          {cancelLabel && (
+          {resolvedCancel && (
             <button
               type="button"
               onClick={onCancel}
               className="text-[13px] text-text-secondary hover:text-text-primary transition-colors px-3 py-1.5"
             >
-              {cancelLabel}
+              {resolvedCancel}
             </button>
           )}
           <button
@@ -72,7 +76,7 @@ export function ConfirmModal({
               background: "hsl(var(--surface-hover))",
             }}
           >
-            {confirmLabel}
+            {resolvedConfirm}
           </button>
         </div>
       </div>

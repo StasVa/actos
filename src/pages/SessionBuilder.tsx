@@ -456,6 +456,7 @@ const SelectedRow: React.FC<{
 /* ───────── Page ───────── */
 
 const SessionBuilder: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const goals = useStore((s) => s.goals);

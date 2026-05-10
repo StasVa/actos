@@ -294,6 +294,7 @@ const PlanForm: React.FC<{
   state: PlanFormState;
   setState: React.Dispatch<React.SetStateAction<PlanFormState>>;
 }> = ({ date, state, setState }) => {
+  const { t } = useTranslation();
   const actions = useStore((s) => s.actions);
   const rituals = useStore((s) => s.rituals);
   const goals = useStore((s) => s.goals);

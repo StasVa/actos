@@ -596,6 +596,7 @@ const ReferencesSection: React.FC<{ idea: Idea }> = ({ idea }) => {
 
 /* ===== Attachments section ===== */
 const AttachmentsSection: React.FC<{ idea: Idea }> = ({ idea }) => {
+  const { t } = useTranslation();
   const updateIdea = useStore((s) => s.updateIdea);
   const atts = idea.imageAttachments ?? [];
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
@@ -607,7 +608,7 @@ const AttachmentsSection: React.FC<{ idea: Idea }> = ({ idea }) => {
   const addFiles = async (files: FileList | File[]) => {
     const list = Array.from(files).filter((f) => ALLOWED.test(f.type));
     if (list.length === 0) {
-      toast.error("Only PNG, JPG, GIF, or WebP images are accepted.");
+      toast.error(t("ideas.toast.imageType"));
       return;
     }
     const readAsDataUrl = (file: File) =>
@@ -622,9 +623,13 @@ const AttachmentsSection: React.FC<{ idea: Idea }> = ({ idea }) => {
         list.map(async (f) => ({ id: localId(), dataUrl: await readAsDataUrl(f) })),
       );
       updateIdea(idea.id, { imageAttachments: [...atts, ...newAtts] });
-      toast.success(newAtts.length === 1 ? "Image attached" : `${newAtts.length} images attached`);
+      toast.success(
+        newAtts.length === 1
+          ? t("ideas.toast.imageAttached")
+          : t("ideas.toast.imagesAttached", { count: newAtts.length }),
+      );
     } catch {
-      toast.error("Failed to read image.");
+      toast.error(t("ideas.toast.imageRead"));
     }
   };
 

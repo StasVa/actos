@@ -929,9 +929,9 @@ export const TodayZone: React.FC<{
   };
 
   const handleQuickAdd = () => {
-    const t = quickAdd.trim();
-    if (!t) return;
-    const id = createAction({ title: t, scheduledDate: TODAY_ISO });
+    const title = quickAdd.trim();
+    if (!title) return;
+    const id = createAction({ title, scheduledDate: TODAY_ISO });
     setQuickAdd("");
     // If a plan exists, append to plannedActionIds.
     if (isPlanned) {
@@ -939,7 +939,7 @@ export const TodayZone: React.FC<{
         plannedActionIds: [...(dayEntry?.plannedActionIds ?? []), id],
       });
     }
-    toast.success("Action added to today");
+    toast.success(t("home.actions.toast.added"));
     openPanel({ kind: "action", mode: "edit", id });
   };
 

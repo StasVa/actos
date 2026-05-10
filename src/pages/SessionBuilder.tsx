@@ -562,14 +562,14 @@ const SessionBuilder: React.FC = () => {
   const diff = estimateSum - focusTotal;
   let matchHint: { text: string; color: string } | null = null;
   if (estimateSum > 0 && focusTotal > 0) {
-    if (Math.abs(diff) <= 5) matchHint = { text: "Well-matched", color: "hsl(var(--text-secondary))" };
-    else if (diff < 0) matchHint = { text: `+${-diff}min buffer`, color: "hsl(var(--state-active))" };
-    else matchHint = { text: `+${diff}min over`, color: "hsl(var(--text-warning))" };
+    if (Math.abs(diff) <= 5) matchHint = { text: t("sessionBuilder.match.well"), color: "hsl(var(--text-secondary))" };
+    else if (diff < 0) matchHint = { text: t("sessionBuilder.match.buffer", { count: -diff }), color: "hsl(var(--state-active))" };
+    else matchHint = { text: t("sessionBuilder.match.over", { count: diff }), color: "hsl(var(--text-warning))" };
   }
 
   /* Filters */
   const goalOpts: FilterOption<string>[] = [
-    { value: "all", label: "All" },
+    { value: "all", label: t("sessionBuilder.filter.all") },
     ...activeGoals.map((g) => ({ value: g.id, label: g.title, dot: `hsl(var(--${g.color}))` })),
   ];
   const projectOpts: FilterOption<string>[] = useMemo(() => {
@@ -578,11 +578,11 @@ const SessionBuilder: React.FC = () => {
         ? projects.filter((p) => p.status === "active" && activeGoalIds.has(p.goalId))
         : projects.filter((p) => p.status === "active" && p.goalId === goalFilter);
     return [
-      { value: "all", label: "All" },
-      { value: "__none", label: "Goal-level (no project)" },
+      { value: "all", label: t("sessionBuilder.filter.all") },
+      { value: "__none", label: t("sessionBuilder.filter.goalLevel") },
       ...scope.map((p) => ({ value: p.id, label: p.title })),
     ];
-  }, [projects, goalFilter, activeGoalIds]);
+  }, [projects, goalFilter, activeGoalIds, t]);
 
   /* Validation */
   const validNums =

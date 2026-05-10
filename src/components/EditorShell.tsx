@@ -9,6 +9,7 @@
 // their own X/Cancel buttons.
 
 import { createContext, useContext, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const EditorCloseContext = createContext<() => void>(() => {});
@@ -17,12 +18,13 @@ export const useEditorClose = () => useContext(EditorCloseContext);
 
 /** X button that triggers the shell's guarded close. */
 export function EditorCloseX() {
+  const { t } = useTranslation();
   const requestClose = useEditorClose();
   return (
     <button
       onClick={requestClose}
       className="w-7 h-7 inline-flex items-center justify-center rounded-[4px] text-text-tertiary hover:bg-surface-hover hover:text-text-primary transition-colors"
-      aria-label="Close"
+      aria-label={t("common.close")}
     >
       ✕
     </button>
@@ -30,14 +32,15 @@ export function EditorCloseX() {
 }
 
 /** "Cancel" link button that triggers the shell's guarded close. */
-export function EditorCancelButton({ label = "Cancel" }: { label?: string }) {
+export function EditorCancelButton({ label }: { label?: string }) {
+  const { t } = useTranslation();
   const requestClose = useEditorClose();
   return (
     <button
       onClick={requestClose}
       className="text-[13px] text-text-secondary hover:text-text-primary px-3 py-1.5"
     >
-      {label}
+      {label ?? t("common.cancel")}
     </button>
   );
 }
@@ -53,6 +56,7 @@ export function EditorShell({
   onClose: () => void;
   children: React.ReactNode;
 }) {
+  const { t } = useTranslation();
   const isMobile = useIsMobile();
   const [confirmDiscard, setConfirmDiscard] = useState(false);
 
@@ -136,17 +140,17 @@ export function EditorShell({
           >
             <div className="text-center px-6 max-w-[420px]">
               <div className="text-[15px] font-medium text-text-primary mb-1">
-                Discard unsaved changes?
+                {t("confirm.discard.heading")}
               </div>
               <div className="text-[13px] text-text-secondary mb-5">
-                Your input will be lost.
+                {t("confirm.discard.body")}
               </div>
               <div className="flex items-center justify-center gap-3">
                 <button
                   onClick={() => setConfirmDiscard(false)}
                   className="text-[13px] text-text-secondary hover:text-text-primary px-3 py-1.5"
                 >
-                  Keep editing
+                  {t("confirm.discard.keepEditing")}
                 </button>
                 <button
                   onClick={() => {
@@ -159,7 +163,7 @@ export function EditorShell({
                     background: "hsl(var(--surface-hover))",
                   }}
                 >
-                  Discard
+                  {t("confirm.discard.confirmLabel")}
                 </button>
               </div>
             </div>

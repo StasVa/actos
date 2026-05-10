@@ -3,6 +3,7 @@
 
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ArrowRight, Sparkles, Target } from "lucide-react";
 import { useStore } from "@/store/useStore";
 import { themeStore, useThemeChoice, type ThemeChoice } from "@/lib/theme";
@@ -61,8 +62,9 @@ const ThemeMockup: React.FC<{ theme: "light" | "dark" }> = ({ theme }) => {
 };
 
 /* ───────── Shared bits ───────── */
-const StepIndicator: React.FC<{ n: Screen }> = ({ n }) =>
-  n >= 1 ? (
+const StepIndicator: React.FC<{ n: Screen }> = ({ n }) => {
+  const { t } = useTranslation();
+  return n >= 1 ? (
     <div
       className="absolute"
       style={{
@@ -72,59 +74,66 @@ const StepIndicator: React.FC<{ n: Screen }> = ({ n }) =>
         color: "hsl(var(--text-tertiary))",
       }}
     >
-      Step {n} of 3
+      {t("setup.stepCount", { n, total: 3 })}
     </div>
   ) : null;
+};
 
-const BackLink: React.FC<{ onClick: () => void }> = ({ onClick }) => (
-  <button
-    type="button"
-    onClick={onClick}
-    className="absolute transition-colors"
-    style={{
-      left: 32, bottom: 28,
-      fontFamily: "Inter, ui-sans-serif, system-ui",
-      fontSize: 14,
-      color: "hsl(var(--text-tertiary))",
-      background: "transparent", border: "none", cursor: "pointer",
-    }}
-    onMouseEnter={(e) => (e.currentTarget.style.color = "hsl(var(--text-secondary))")}
-    onMouseLeave={(e) => (e.currentTarget.style.color = "hsl(var(--text-tertiary))")}
-  >
-    ← Back
-  </button>
-);
+const BackLink: React.FC<{ onClick: () => void }> = ({ onClick }) => {
+  const { t } = useTranslation();
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="absolute transition-colors"
+      style={{
+        left: 32, bottom: 28,
+        fontFamily: "Inter, ui-sans-serif, system-ui",
+        fontSize: 14,
+        color: "hsl(var(--text-tertiary))",
+        background: "transparent", border: "none", cursor: "pointer",
+      }}
+      onMouseEnter={(e) => (e.currentTarget.style.color = "hsl(var(--text-secondary))")}
+      onMouseLeave={(e) => (e.currentTarget.style.color = "hsl(var(--text-tertiary))")}
+    >
+      ← {t("setup.back")}
+    </button>
+  );
+};
 
 const ContinueCTA: React.FC<{ onClick: () => void; disabled?: boolean; label?: string }> = ({
-  onClick, disabled, label = "Continue",
-}) => (
-  <button
-    type="button"
-    onClick={onClick}
-    disabled={disabled}
-    className="group inline-flex items-center gap-2 transition-all"
-    style={{
-      fontFamily: "Inter, ui-sans-serif, system-ui",
-      fontSize: 16, fontWeight: 500,
-      color: "hsl(var(--accent))",
-      background: "transparent", border: "none",
-      cursor: disabled ? "not-allowed" : "pointer",
-      opacity: disabled ? 0.4 : 1,
-      padding: "8px 4px",
-    }}
-  >
-    <span>{label}</span>
-    <ArrowRight
-      size={18}
-      className="transition-transform"
-      style={{ transitionDuration: "150ms" }}
-    />
-    <style>{`
-      .group:not(:disabled):hover svg { transform: translateX(2px); }
-      .group:not(:disabled):hover { color: hsl(var(--accent-hover)); }
-    `}</style>
-  </button>
-);
+  onClick, disabled, label,
+}) => {
+  const { t } = useTranslation();
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className="group inline-flex items-center gap-2 transition-all"
+      style={{
+        fontFamily: "Inter, ui-sans-serif, system-ui",
+        fontSize: 16, fontWeight: 500,
+        color: "hsl(var(--accent))",
+        background: "transparent", border: "none",
+        cursor: disabled ? "not-allowed" : "pointer",
+        opacity: disabled ? 0.4 : 1,
+        padding: "8px 4px",
+      }}
+    >
+      <span>{label ?? t("setup.continue")}</span>
+      <ArrowRight
+        size={18}
+        className="transition-transform"
+        style={{ transitionDuration: "150ms" }}
+      />
+      <style>{`
+        .group:not(:disabled):hover svg { transform: translateX(2px); }
+        .group:not(:disabled):hover { color: hsl(var(--accent-hover)); }
+      `}</style>
+    </button>
+  );
+};
 
 /* ───────── Screens ───────── */
 const ScreenWrap: React.FC<{ children: React.ReactNode; keyId: string }> = ({ children, keyId }) => (
@@ -146,48 +155,52 @@ const ScreenWrap: React.FC<{ children: React.ReactNode; keyId: string }> = ({ ch
   </div>
 );
 
-const WelcomeScreen: React.FC<{ name: string; onContinue: () => void }> = ({ name, onContinue }) => (
-  <ScreenWrap keyId="s0">
-    <div className="flex flex-col items-center justify-center min-h-screen px-6 text-center">
-      <div
-        style={{
-          width: 40, height: 40, borderRadius: 8,
-          background: "hsl(var(--text-primary))",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          color: "hsl(var(--surface-base))",
-          fontFamily: "Inter", fontWeight: 700, fontSize: 18,
-        }}
-        aria-label="ActOS"
-      >A</div>
-      <div style={{ height: 80 }} />
-      <h1
-        style={{
-          fontFamily: "Inter, ui-sans-serif, system-ui",
-          fontWeight: 400,
-          fontSize: "clamp(36px, 6vw, 56px)",
-          lineHeight: 1.1,
-          color: "hsl(var(--text-primary))",
-          margin: 0,
-        }}
-      >
-        Welcome, {name}.
-      </h1>
-      <div style={{ height: 16 }} />
-      <p
-        style={{
-          fontFamily: "Inter", fontWeight: 400,
-          fontSize: 18, color: "hsl(var(--text-secondary))", margin: 0,
-        }}
-      >
-        Let's set this up.
-      </p>
-      <div style={{ height: 96 }} />
-      <ContinueCTA onClick={onContinue} />
-    </div>
-  </ScreenWrap>
-);
+const WelcomeScreen: React.FC<{ name: string; onContinue: () => void }> = ({ name, onContinue }) => {
+  const { t } = useTranslation();
+  return (
+    <ScreenWrap keyId="s0">
+      <div className="flex flex-col items-center justify-center min-h-screen px-6 text-center">
+        <div
+          style={{
+            width: 40, height: 40, borderRadius: 8,
+            background: "hsl(var(--text-primary))",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            color: "hsl(var(--surface-base))",
+            fontFamily: "Inter", fontWeight: 700, fontSize: 18,
+          }}
+          aria-label="ActOS"
+        >A</div>
+        <div style={{ height: 80 }} />
+        <h1
+          style={{
+            fontFamily: "Inter, ui-sans-serif, system-ui",
+            fontWeight: 400,
+            fontSize: "clamp(36px, 6vw, 56px)",
+            lineHeight: 1.1,
+            color: "hsl(var(--text-primary))",
+            margin: 0,
+          }}
+        >
+          {t("setup.welcome.heading", { name })}
+        </h1>
+        <div style={{ height: 16 }} />
+        <p
+          style={{
+            fontFamily: "Inter", fontWeight: 400,
+            fontSize: 18, color: "hsl(var(--text-secondary))", margin: 0,
+          }}
+        >
+          {t("setup.welcome.sub")}
+        </p>
+        <div style={{ height: 96 }} />
+        <ContinueCTA onClick={onContinue} />
+      </div>
+    </ScreenWrap>
+  );
+};
 
 const ThemeScreen: React.FC<{ onContinue: () => void; onBack: () => void }> = ({ onContinue, onBack }) => {
+  const { t } = useTranslation();
   const [choice, , setChoice] = useThemeChoice();
   // Wizard pre-selects Dark on entry (set by Setup root). Treat as a valid
   // initial selection so Continue is enabled immediately.
@@ -208,9 +221,9 @@ const ThemeScreen: React.FC<{ onContinue: () => void; onBack: () => void }> = ({
   }, [hover, choice]);
 
   const tiles: { value: ThemeChoice; label: string; mockup: "light" | "dark" }[] = [
-    { value: "system", label: "System", mockup: window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light" },
-    { value: "light", label: "Light", mockup: "light" },
-    { value: "dark", label: "Dark", mockup: "dark" },
+    { value: "system", label: t("setup.theme.system"), mockup: window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light" },
+    { value: "light", label: t("settings.theme.light"), mockup: "light" },
+    { value: "dark", label: t("settings.theme.dark"), mockup: "dark" },
   ];
 
   return (
@@ -220,12 +233,12 @@ const ThemeScreen: React.FC<{ onContinue: () => void; onBack: () => void }> = ({
           fontFamily: "Inter", fontWeight: 400,
           fontSize: "clamp(32px, 5vw, 48px)", margin: 0,
           color: "hsl(var(--text-primary))", textAlign: "center",
-        }}>Pick your look.</h1>
+        }}>{t("setup.theme.heading")}</h1>
         <div style={{ height: 12 }} />
         <p style={{
           fontFamily: "Inter", fontSize: 15,
           color: "hsl(var(--text-tertiary))", margin: 0, textAlign: "center",
-        }}>You can change this anytime in Settings.</p>
+        }}>{t("setup.theme.sub")}</p>
         <div style={{ height: 80 }} />
 
         <div
@@ -283,18 +296,19 @@ const ChoiceScreen: React.FC<{
   onContinue: () => void;
   onBack: () => void;
 }> = ({ selected, setSelected, onContinue, onBack }) => {
+  const { t } = useTranslation();
   const cards: { id: Path; icon: typeof Sparkles; title: string; desc: string }[] = [
     {
       id: "sample",
       icon: Sparkles,
-      title: "Show me how it works",
-      desc: "Start with sample goals and tasks. See the product in motion. Clear it whenever you're ready.",
+      title: t("setup.choice.sample.title"),
+      desc: t("setup.choice.sample.body"),
     },
     {
       id: "own",
       icon: Target,
-      title: "Set up my own goal",
-      desc: "Walk through creating your first goal, project, and a few actions. Start working immediately on what matters.",
+      title: t("setup.choice.own.title"),
+      desc: t("setup.choice.own.body"),
     },
   ];
   return (
@@ -304,7 +318,7 @@ const ChoiceScreen: React.FC<{
           fontFamily: "Inter", fontWeight: 400,
           fontSize: "clamp(32px, 5vw, 48px)", margin: 0, textAlign: "center",
           color: "hsl(var(--text-primary))",
-        }}>How would you like to start?</h1>
+        }}>{t("setup.choice.heading")}</h1>
         <div style={{ height: 80 }} />
 
         <div
@@ -367,32 +381,35 @@ const ChoiceScreen: React.FC<{
   );
 };
 
-const PauseScreen: React.FC<{ fade: boolean }> = ({ fade }) => (
-  <ScreenWrap keyId="s3">
-    <div
-      className="flex flex-col items-center justify-center min-h-screen px-6 text-center"
-      style={{
-        animation: fade && !reducedMotion() ? "setupFadeOut 250ms forwards" : undefined,
-      }}
-    >
-      <div style={{
-        fontFamily: "Inter", fontSize: 18, color: "hsl(var(--text-secondary))",
-      }}>Setting up your workspace…</div>
-      <div style={{ height: 24 }} />
-      <div style={{
-        width: 200, height: 2, borderRadius: 2,
-        background: "hsl(var(--surface-hover))", overflow: "hidden",
-      }}>
+const PauseScreen: React.FC<{ fade: boolean }> = ({ fade }) => {
+  const { t } = useTranslation();
+  return (
+    <ScreenWrap keyId="s3">
+      <div
+        className="flex flex-col items-center justify-center min-h-screen px-6 text-center"
+        style={{
+          animation: fade && !reducedMotion() ? "setupFadeOut 250ms forwards" : undefined,
+        }}
+      >
         <div style={{
-          height: "100%", background: "hsl(var(--accent))",
-          width: reducedMotion() ? "100%" : 0,
-          animation: reducedMotion() ? undefined : "setupBarFill 1200ms cubic-bezier(0.32,0.72,0,1) forwards",
-        }} />
+          fontFamily: "Inter", fontSize: 18, color: "hsl(var(--text-secondary))",
+        }}>{t("setup.pause.text")}</div>
+        <div style={{ height: 24 }} />
+        <div style={{
+          width: 200, height: 2, borderRadius: 2,
+          background: "hsl(var(--surface-hover))", overflow: "hidden",
+        }}>
+          <div style={{
+            height: "100%", background: "hsl(var(--accent))",
+            width: reducedMotion() ? "100%" : 0,
+            animation: reducedMotion() ? undefined : "setupBarFill 1200ms cubic-bezier(0.32,0.72,0,1) forwards",
+          }} />
+        </div>
       </div>
-    </div>
-    <StepIndicator n={3} />
-  </ScreenWrap>
-);
+      <StepIndicator n={3} />
+    </ScreenWrap>
+  );
+};
 
 /* ───────── Wizard root ───────── */
 export default function Setup() {

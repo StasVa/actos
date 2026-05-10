@@ -9,6 +9,7 @@
 
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ArrowRight, X, Plus, Trash2 } from "lucide-react";
 import { useStore } from "@/store/useStore";
 import type { GoalColorVar } from "@/types";
@@ -47,10 +48,10 @@ const GOAL_EXAMPLES = [
   "Publish my novel on Amazon",
 ];
 
-const COLORS: { value: GoalColorVar; label: string }[] = [
-  { value: "goal-1", label: "Teal" },
-  { value: "goal-2", label: "Orange" },
-  { value: "goal-3", label: "Purple" },
+const COLORS: { value: GoalColorVar; labelKey: string }[] = [
+  { value: "goal-1", labelKey: "Teal" },
+  { value: "goal-2", labelKey: "Orange" },
+  { value: "goal-3", labelKey: "Purple" },
 ];
 
 /* ───────── Shell ───────── */
@@ -58,50 +59,53 @@ const ScreenWrap: React.FC<{
   step: Step;
   onBack?: () => void;
   children: React.ReactNode;
-}> = ({ step, onBack, children }) => (
-  <div
-    className="relative min-h-screen w-full"
-    style={{
-      background: "hsl(var(--surface-base))",
-      color: "hsl(var(--text-primary))",
-      animation: reducedMotion() ? undefined : "gbFadeIn 250ms cubic-bezier(0.32,0.72,0,1)",
-    }}
-  >
-    <style>{`@keyframes gbFadeIn { from { opacity:0; transform: translateY(8px) } to { opacity:1; transform: none } }`}</style>
-    <div className="mx-auto" style={{ maxWidth: 640, padding: "80px 24px 120px" }}>
-      {children}
-    </div>
-    {onBack && (
-      <button
-        type="button"
-        onClick={onBack}
-        className="absolute transition-colors"
-        style={{
-          left: 32, bottom: 28,
-          fontFamily: "Inter, ui-sans-serif, system-ui",
-          fontSize: 14,
-          color: "hsl(var(--text-tertiary))",
-          background: "transparent", border: "none", cursor: "pointer",
-        }}
-        onMouseEnter={(e) => (e.currentTarget.style.color = "hsl(var(--text-secondary))")}
-        onMouseLeave={(e) => (e.currentTarget.style.color = "hsl(var(--text-tertiary))")}
-      >
-        ← Back
-      </button>
-    )}
+}> = ({ step, onBack, children }) => {
+  const { t } = useTranslation();
+  return (
     <div
-      className="absolute"
+      className="relative min-h-screen w-full"
       style={{
-        right: 32, bottom: 28,
-        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-        fontSize: 11, letterSpacing: "0.06em", textTransform: "uppercase",
-        color: "hsl(var(--text-tertiary))",
+        background: "hsl(var(--surface-base))",
+        color: "hsl(var(--text-primary))",
+        animation: reducedMotion() ? undefined : "gbFadeIn 250ms cubic-bezier(0.32,0.72,0,1)",
       }}
     >
-      Step {step} of 4
+      <style>{`@keyframes gbFadeIn { from { opacity:0; transform: translateY(8px) } to { opacity:1; transform: none } }`}</style>
+      <div className="mx-auto" style={{ maxWidth: 640, padding: "80px 24px 120px" }}>
+        {children}
+      </div>
+      {onBack && (
+        <button
+          type="button"
+          onClick={onBack}
+          className="absolute transition-colors"
+          style={{
+            left: 32, bottom: 28,
+            fontFamily: "Inter, ui-sans-serif, system-ui",
+            fontSize: 14,
+            color: "hsl(var(--text-tertiary))",
+            background: "transparent", border: "none", cursor: "pointer",
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = "hsl(var(--text-secondary))")}
+          onMouseLeave={(e) => (e.currentTarget.style.color = "hsl(var(--text-tertiary))")}
+        >
+          ← {t("common.back")}
+        </button>
+      )}
+      <div
+        className="absolute"
+        style={{
+          right: 32, bottom: 28,
+          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+          fontSize: 11, letterSpacing: "0.06em", textTransform: "uppercase",
+          color: "hsl(var(--text-tertiary))",
+        }}
+      >
+        {t("goalBuilder.step", { n: step, total: 4 })}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const PrimaryBtn: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement>> = ({ children, style, ...rest }) => (
   <button
@@ -175,25 +179,23 @@ const GoalStep: React.FC<{
   onSubmit: (title: string, color: GoalColorVar) => void;
   onSkip: () => void;
 }> = ({ initialTitle, initialColor, onSubmit, onSkip }) => {
+  const { t } = useTranslation();
   const [title, setTitle] = React.useState(initialTitle);
   const [color, setColor] = React.useState<GoalColorVar>(initialColor);
   const [showExamples, setShowExamples] = React.useState(false);
 
-  const submit = () => { const t = title.trim(); if (t) onSubmit(t, color); };
+  const submit = () => { const tt = title.trim(); if (tt) onSubmit(tt, color); };
 
   return (
     <>
-      <Heading>Create your first goal</Heading>
-      <Lede>
-        A goal is a result you want to reach — months or years of work
-        toward something concrete you'll know you've achieved.
-      </Lede>
+      <Heading>{t("goalBuilder.heading")}</Heading>
+      <Lede>{t("goalBuilder.description")}</Lede>
       <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
         <input
           autoFocus
           type="text"
           value={title}
-          placeholder="e.g. Get my SaaS to $10k MRR"
+          placeholder={t("goalBuilder.titlePlaceholder")}
           onChange={(e) => setTitle(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter") submit(); }}
           style={inputStyle}
@@ -213,7 +215,7 @@ const GoalStep: React.FC<{
             <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace" }}>
               {showExamples ? "−" : "+"}
             </span>
-            Examples
+            {t("goalBuilder.examples")}
           </button>
           {showExamples && (
             <div style={{
@@ -246,7 +248,7 @@ const GoalStep: React.FC<{
             fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase",
             color: "hsl(var(--text-tertiary))", marginBottom: 8,
             fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-          }}>Color</div>
+          }}>{t("goalBuilder.colorLabel")}</div>
           <div style={{ display: "flex", gap: 10 }}>
             {COLORS.map((c) => {
               const sel = color === c.value;
@@ -254,7 +256,7 @@ const GoalStep: React.FC<{
                 <button
                   key={c.value}
                   type="button"
-                  aria-label={c.label}
+                  aria-label={c.labelKey}
                   onClick={() => setColor(c.value)}
                   style={{
                     width: 36, height: 36, borderRadius: 8,
@@ -268,7 +270,7 @@ const GoalStep: React.FC<{
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 16 }}>
-          <PrimaryBtn onClick={submit} disabled={!title.trim()}>Create goal</PrimaryBtn>
+          <PrimaryBtn onClick={submit} disabled={!title.trim()}>{t("goalBuilder.createButton")}</PrimaryBtn>
         </div>
       </div>
     </>
@@ -282,6 +284,7 @@ const CriteriaStep: React.FC<{
   onContinue: (criteria: string[]) => void;
   onBack: () => void;
 }> = ({ goalTitle, initial, onContinue, onBack }) => {
+  const { t } = useTranslation();
   const [items, setItems] = React.useState<string[]>(initial.length ? initial : []);
   const max = 5;
 
@@ -295,12 +298,8 @@ const CriteriaStep: React.FC<{
 
   return (
     <>
-      <Heading>What does "done" look like?</Heading>
-      <Lede>
-        Add up to 5 concrete signs you've reached "{goalTitle}". You'll
-        check these off as you make progress. You can add or change these
-        anytime on the goal page.
-      </Lede>
+      <Heading>{t("goalBuilder.criteria.heading")}</Heading>
+      <Lede>{t("goalBuilder.criteria.description", { goalTitle })}</Lede>
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         {items.map((val, i) => (
           <div key={i} style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -308,14 +307,14 @@ const CriteriaStep: React.FC<{
               autoFocus={i === items.length - 1 && val === ""}
               type="text"
               value={val}
-              placeholder="e.g. Reached MRR threshold for 3 consecutive months"
+              placeholder={t("goalBuilder.criteria.placeholder")}
               onChange={(e) => update(i, e.target.value)}
               style={inputStyle}
               maxLength={120}
             />
             <button
               type="button"
-              aria-label="Remove criterion"
+              aria-label={t("common.delete")}
               onClick={() => remove(i)}
               style={{
                 background: "transparent", border: "none", cursor: "pointer",
@@ -342,12 +341,12 @@ const CriteriaStep: React.FC<{
               padding: "6px 0",
             }}
           >
-            <Plus size={14} /> Add criterion
+            <Plus size={14} /> {t("goalBuilder.criteria.add")}
           </button>
         )}
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 16 }}>
-          <PrimaryBtn onClick={submit}>Continue</PrimaryBtn>
-          <GhostLink onClick={skip}>Skip — add later</GhostLink>
+          <PrimaryBtn onClick={submit}>{t("common.continue")}</PrimaryBtn>
+          <GhostLink onClick={skip}>{t("goalBuilder.criteria.skip")}</GhostLink>
         </div>
       </div>
       {/* back affordance */}
@@ -361,7 +360,7 @@ const CriteriaStep: React.FC<{
           fontSize: 13, fontFamily: "Inter", cursor: "pointer",
           padding: 0,
         }}
-      >← Back to goal</button>
+      >{t("goalBuilder.criteria.backToGoal")}</button>
     </>
   );
 };
@@ -374,22 +373,20 @@ const ProjectStep: React.FC<{
   onSubmit: (title: string, desc: string) => void;
   onSkip: () => void;
 }> = ({ goalTitle, initialTitle, initialDesc, onSubmit, onSkip }) => {
+  const { t } = useTranslation();
   const [title, setTitle] = React.useState(initialTitle);
   const [desc, setDesc] = React.useState(initialDesc);
-  const submit = () => { const t = title.trim(); if (t) onSubmit(t, desc.trim()); };
+  const submit = () => { const tt = title.trim(); if (tt) onSubmit(tt, desc.trim()); };
   return (
     <>
-      <Heading>Add a project to "{goalTitle}"</Heading>
-      <Lede>
-        A project is a chunk of work that finishes — usually in days or weeks.
-        Break a goal into projects, projects into actions.
-      </Lede>
+      <Heading>{t("goalBuilder.project.heading", { goalTitle })}</Heading>
+      <Lede>{t("goalBuilder.project.lede")}</Lede>
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         <input
           autoFocus
           type="text"
           value={title}
-          placeholder="e.g. Set up landing page"
+          placeholder={t("goalBuilder.project.titlePlaceholder")}
           onChange={(e) => setTitle(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter") submit(); }}
           style={inputStyle}
@@ -397,7 +394,7 @@ const ProjectStep: React.FC<{
         />
         <textarea
           value={desc}
-          placeholder="What's this project about? Optional."
+          placeholder={t("goalBuilder.project.descriptionPlaceholder")}
           onChange={(e) => setDesc(e.target.value)}
           rows={3}
           style={{ ...inputStyle, resize: "vertical", minHeight: 72 }}
@@ -409,11 +406,11 @@ const ProjectStep: React.FC<{
           fontSize: 13,
           color: "hsl(var(--text-tertiary))",
         }}>
-          Detailed editor with images, links, and references is available on the project page.
+          {t("goalBuilder.project.hint")}
         </p>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 12 }}>
-          <PrimaryBtn onClick={submit} disabled={!title.trim()}>Create project</PrimaryBtn>
-          <GhostLink onClick={onSkip}>Skip</GhostLink>
+          <PrimaryBtn onClick={submit} disabled={!title.trim()}>{t("goalBuilder.project.cta")}</PrimaryBtn>
+          <GhostLink onClick={onSkip}>{t("common.skip")}</GhostLink>
         </div>
       </div>
     </>
@@ -432,6 +429,7 @@ const ActionsStep: React.FC<{
   onSubmit: (drafts: Draft[]) => void;
   onSkip: () => void;
 }> = ({ goalTitle, onSubmit, onSkip }) => {
+  const { t } = useTranslation();
   const [drafts, setDrafts] = React.useState<Draft[]>([newDraft(), newDraft()]);
   const update = (id: string, p: Partial<Draft>) =>
     setDrafts((d) => d.map((x) => (x.id === id ? { ...x, ...p } : x)));
@@ -441,14 +439,16 @@ const ActionsStep: React.FC<{
 
   const valid = drafts.filter((d) => d.title.trim());
   const canSubmit = valid.length >= 1;
+  const placeholders = [
+    t("goalBuilder.actions.placeholder1"),
+    t("goalBuilder.actions.placeholder2"),
+    t("goalBuilder.actions.placeholder3"),
+  ];
 
   return (
     <>
-      <Heading>Add actions to "{goalTitle}"</Heading>
-      <Lede>
-        Actions are the small, concrete next steps. Add 2–3 you could do
-        this week. You'll see them on Today.
-      </Lede>
+      <Heading>{t("goalBuilder.actions.heading", { goalTitle })}</Heading>
+      <Lede>{t("goalBuilder.actions.description")}</Lede>
       <div
         style={{
           fontSize: 13,
@@ -459,20 +459,20 @@ const ActionsStep: React.FC<{
         }}
       >
         <div style={{ marginBottom: 6, color: "hsl(var(--text-primary))" }}>
-          About these fields:
+          {t("goalBuilder.actions.explainerHeading")}
         </div>
         <ul style={{ paddingLeft: 18, margin: 0, display: "flex", flexDirection: "column", gap: 4 }}>
           <li>
-            <strong style={{ color: "hsl(var(--text-primary))", fontWeight: 600 }}>IMPACT</strong> (1–10) —
-            how much this task moves your goal. Critical ones are 8–10, supporting ones are 3–5. You decide.
+            <strong style={{ color: "hsl(var(--text-primary))", fontWeight: 600 }}>IMPACT</strong>{" "}
+            {t("goalBuilder.actions.explainerImpact")}
           </li>
           <li>
-            <strong style={{ color: "hsl(var(--text-primary))", fontWeight: 600 }}>TIME</strong> —
-            your estimate in minutes. Powers progress tracking ("how much time invested" in Reviews).
+            <strong style={{ color: "hsl(var(--text-primary))", fontWeight: 600 }}>TIME</strong>{" "}
+            {t("goalBuilder.actions.explainerTime")}
           </li>
         </ul>
         <div style={{ marginTop: 8, color: "hsl(var(--text-tertiary))" }}>
-          Both are required so we can calculate Value, Effort, and time investment automatically — you focus on doing the work.
+          {t("goalBuilder.actions.explainerBoth")}
         </div>
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -484,7 +484,10 @@ const ActionsStep: React.FC<{
           color: "hsl(var(--text-tertiary))",
           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
         }}>
-          <span>Title</span><span>Impact</span><span>Time (min)</span><span />
+          <span>{t("goalBuilder.actions.colTitle")}</span>
+          <span>{t("goalBuilder.actions.colImpact")}</span>
+          <span>{t("goalBuilder.actions.colTime")}</span>
+          <span />
         </div>
         {drafts.map((d, idx) => (
           <div key={d.id} style={{
@@ -495,7 +498,7 @@ const ActionsStep: React.FC<{
             <input
               type="text"
               value={d.title}
-              placeholder={`e.g. ${["Read Stripe API docs", "Implement webhook handler", "Set up test environment"][idx % 3]}`}
+              placeholder={placeholders[idx % 3]}
               onChange={(e) => update(d.id, { title: e.target.value })}
               style={inputStyle}
               maxLength={140}
@@ -504,20 +507,20 @@ const ActionsStep: React.FC<{
               type="number" min={0} max={10}
               value={d.impact}
               onChange={(e) => update(d.id, { impact: parseInt(e.target.value, 10) || 0 })}
-              aria-label="Impact 0–10"
+              aria-label={t("goalBuilder.actions.colImpact")}
               style={inputStyle}
             />
             <input
               type="number" min={0}
               value={d.time}
-              placeholder="e.g. 30"
+              placeholder={t("goalBuilder.actions.timePlaceholder")}
               onChange={(e) => update(d.id, { time: e.target.value })}
-              aria-label="Time estimate (minutes)"
+              aria-label={t("goalBuilder.actions.colTime")}
               style={inputStyle}
             />
             <button
               type="button"
-              aria-label="Remove row"
+              aria-label={t("common.delete")}
               onClick={() => remove(d.id)}
               disabled={drafts.length <= 1}
               style={{
@@ -546,14 +549,16 @@ const ActionsStep: React.FC<{
               padding: "6px 0",
             }}
           >
-            <Plus size={14} /> Add another
+            <Plus size={14} /> {t("goalBuilder.actions.add").replace(/^\+\s*/, "")}
           </button>
         )}
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 16 }}>
           <PrimaryBtn onClick={() => canSubmit && onSubmit(valid)} disabled={!canSubmit}>
-            Add {valid.length || ""} action{valid.length === 1 ? "" : "s"}
+            {valid.length > 0
+              ? t("goalBuilder.actions.cta", { count: valid.length })
+              : t("goalBuilder.actions.ctaEmpty")}
           </PrimaryBtn>
-          <GhostLink onClick={onSkip}>Skip</GhostLink>
+          <GhostLink onClick={onSkip}>{t("common.skip")}</GhostLink>
         </div>
       </div>
     </>
@@ -562,6 +567,7 @@ const ActionsStep: React.FC<{
 
 /* ───────── Root ───────── */
 const GoalBuilder: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [persisted, setPersisted] = React.useState<Persisted>(() => read());
 
@@ -628,7 +634,7 @@ const GoalBuilder: React.FC = () => {
           })),
         });
         if (!res.ok) {
-          toast.error("Goal limit reached");
+          toast.error(t("goalBuilder.toast.goalLimit"));
           return;
         }
         goalId = res.id;
@@ -648,7 +654,7 @@ const GoalBuilder: React.FC = () => {
     return (
       <ScreenWrap step={2} onBack={() => setPersisted({ step: 1 })}>
         <CriteriaStep
-          goalTitle={goalDraft.title || "your goal"}
+          goalTitle={goalDraft.title || t("goalBuilder.defaultGoal")}
           initial={criteriaDraft}
           onContinue={onContinue}
           onBack={() => setPersisted({ step: 1 })}
@@ -671,7 +677,7 @@ const GoalBuilder: React.FC = () => {
     return (
       <ScreenWrap step={3} onBack={() => setPersisted({ step: 2, goalId: persisted.goalId })}>
         <ProjectStep
-          goalTitle={goal?.title ?? goalDraft.title ?? "your goal"}
+          goalTitle={goal?.title ?? goalDraft.title ?? t("goalBuilder.defaultGoal")}
           initialTitle=""
           initialDesc=""
           onSubmit={onSubmit}
@@ -695,13 +701,13 @@ const GoalBuilder: React.FC = () => {
           timeEstimateMinutes: Number.isFinite(time) && time > 0 ? time : undefined,
         });
       });
-      toast.success(`Added ${drafts.length} action${drafts.length === 1 ? "" : "s"}`);
+      toast.success(t("goalBuilder.toast.actionsAdded", { count: drafts.length }));
       finish();
     };
     return (
       <ScreenWrap step={4} onBack={() => setPersisted({ step: 3, goalId: persisted.goalId, projectId: persisted.projectId })}>
         <ActionsStep
-          goalTitle={goal?.title ?? goalDraft.title ?? "your goal"}
+          goalTitle={goal?.title ?? goalDraft.title ?? t("goalBuilder.defaultGoal")}
           onSubmit={onSubmit}
           onSkip={finish}
         />

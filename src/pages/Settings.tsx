@@ -1,5 +1,9 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import i18n from "@/i18n";
+
+const SUPPORTED_LANGS = ["en", "de", "es", "ru"] as const;
+type SupportedLang = (typeof SUPPORTED_LANGS)[number];
 import { AppSidebar } from "@/components/AppSidebar";
 import { PageHeader } from "@/components/PageHeader";
 import { useStore } from "@/store/useStore";
@@ -207,15 +211,16 @@ export default function Settings() {
               {t("settings.language.description")}
             </div>
             <select
-              disabled
-              value="en"
-              className="w-full max-w-[400px] bg-surface-hover rounded-[4px] px-3 py-2 text-[13px] text-text-primary outline-none border border-transparent disabled:opacity-70 disabled:cursor-not-allowed"
+              value={(SUPPORTED_LANGS as readonly string[]).includes(i18n.language) ? i18n.language : "en"}
+              onChange={(e) => i18n.changeLanguage(e.target.value as SupportedLang)}
+              className="w-full max-w-[400px] bg-surface-hover rounded-[4px] px-3 py-2 text-[13px] text-text-primary outline-none border border-transparent focus:border-border-default"
             >
-              <option value="en">{t("settings.language.option.en")}</option>
+              {SUPPORTED_LANGS.map((lng) => (
+                <option key={lng} value={lng}>
+                  {t(`settings.language.option.${lng}`)}
+                </option>
+              ))}
             </select>
-            <div className="text-[12px] text-text-tertiary mt-2">
-              {t("settings.language.placeholder")}
-            </div>
           </section>
 
           {/* Default goal */}

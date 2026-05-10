@@ -968,7 +968,7 @@ export const TodayZone: React.FC<{
           skippedRitualIds: [...(dayEntry?.skippedRitualIds ?? []), ritualId],
         });
       }
-      toast("Ritual skipped today");
+      toast(t("home.rituals.toast.skipped"));
     }
   };
 

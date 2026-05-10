@@ -61,6 +61,7 @@ const ReviewsMonths: React.FC = () => {
   const [goalFilter, setGoalFilter] = React.useState<string>("all");
   const [sortKey, setSortKey] = React.useState<ReviewSortKey>(() => loadReviewSort("actos.reviews.months.sort"));
   React.useEffect(() => saveReviewSort("actos.reviews.months.sort", sortKey), [sortKey]);
+  const SORT_OPTIONS = useReviewSortOptions();
 
   const RANGE_OPTIONS = React.useMemo(() => [
     { value: "12m", label: t("reviews.filters.range.last12m") },

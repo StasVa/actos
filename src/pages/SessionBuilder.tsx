@@ -791,36 +791,36 @@ const SessionBuilder: React.FC = () => {
               {/* Breaks toggle + frequency + length */}
               <div className={`mt-8 flex ${isMobile ? "flex-col items-start gap-4" : "flex-row items-center flex-wrap gap-x-6 gap-y-3"}`}>
                 <label className="flex items-center gap-3 cursor-pointer">
-                  <Switch checked={breaksOn} onCheckedChange={setBreaksOn} aria-label="Toggle breaks" />
-                  <span className="text-[14px] text-text-primary">Breaks</span>
+                  <Switch checked={breaksOn} onCheckedChange={setBreaksOn} aria-label={t("sessionBuilder.breaksAria")} />
+                  <span className="text-[14px] text-text-primary">{t("sessionBuilder.breaks")}</span>
                 </label>
 
                 {breaksOn && (
                   <>
                     <div className="flex items-center gap-3">
-                      <span className="text-[14px] text-text-secondary">every</span>
+                      <span className="text-[14px] text-text-secondary">{t("sessionBuilder.every")}</span>
                       <StepperField
                         value={work}
                         onChange={setWork}
                         min={5}
                         max={60}
                         step={5}
-                        suffix="min"
+                        suffix={t("sessionBuilder.suffix.min")}
                         size="md"
-                        ariaLabel="Frequency between breaks"
+                        ariaLabel={t("sessionBuilder.frequencyAria")}
                       />
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className="text-[14px] text-text-secondary">break length</span>
+                      <span className="text-[14px] text-text-secondary">{t("sessionBuilder.breakLength")}</span>
                       <StepperField
                         value={brk}
                         onChange={setBrk}
                         min={1}
                         max={15}
                         step={1}
-                        suffix="min"
+                        suffix={t("sessionBuilder.suffix.min")}
                         size="sm"
-                        ariaLabel="Break length"
+                        ariaLabel={t("sessionBuilder.breakLengthAria")}
                       />
                     </div>
                   </>

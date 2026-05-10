@@ -1958,9 +1958,7 @@ const Index: React.FC = () => {
                       type="button"
                       onClick={() => {
                         if (
-                          !confirm(
-                            "Switch day type? You'll need to plan your day again.",
-                          )
+                          !confirm(t("home.header.changeDayType.confirm"))
                         )
                           return;
                         updateDayEntry(TODAY_ISO, {
@@ -1975,7 +1973,7 @@ const Index: React.FC = () => {
                       }}
                       className="text-[12px] text-text-tertiary hover:text-text-primary underline-offset-2 hover:underline transition"
                     >
-                      Change day type
+                      {t("home.header.changeDayType")}
                     </button>
                   )}
                 </div>
@@ -1986,7 +1984,7 @@ const Index: React.FC = () => {
               onPlanClick={() => setPlanningMode(true)}
               onCloseClick={() => {
                 closeDay(TODAY_ISO);
-                toast.success("Day closed");
+                toast.success(t("home.toast.dayClosed"));
               }}
             />
 

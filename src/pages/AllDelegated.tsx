@@ -47,8 +47,11 @@ const ImpactPill: React.FC<{ impact?: number; color: string }> = ({ impact, colo
   ) : null;
 
 const ReturnedPill: React.FC<{ completedAt?: string }> = ({ completedAt }) => {
+  const { t } = useTranslation();
   if (!completedAt) return null;
   const iso = completedAt.slice(0, 10);
+  const rs = relativeShortKey(iso);
+  const label = t(rs.key, rs.opts);
   return (
     <span
       className="font-mono tabular-nums shrink-0"
@@ -61,7 +64,7 @@ const ReturnedPill: React.FC<{ completedAt?: string }> = ({ completedAt }) => {
         whiteSpace: "nowrap",
       }}
     >
-      returned {relativeShort(iso)}
+      {t("delegated.return.returned", { label })}
     </span>
   );
 };

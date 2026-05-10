@@ -1844,7 +1844,7 @@ const Index: React.FC = () => {
       subscribeAppEvent("open-close-day", () => {
         if (isPlanned && !isClosed) {
           closeDay(TODAY_ISO);
-          toast.success("Day closed");
+          toast.success(t("home.toast.dayClosed"));
         }
       }),
       subscribeAppEvent("open-settings", () => setSettingsOpen(true)),

@@ -307,6 +307,7 @@ const TertiaryLink: React.FC<{ children: React.ReactNode; onClick?: () => void }
 type OverlayMode = null | "action" | "project" | "discard";
 
 const ConvertActionOverlay: React.FC<{ idea: Idea; onDone: () => void }> = ({ idea, onDone }) => {
+  const { t } = useTranslation();
   const projects = useStore((s) =>
     s.projects.filter((p) => p.goalId === idea.goalId && p.status === "active"),
   );
@@ -323,14 +324,14 @@ const ConvertActionOverlay: React.FC<{ idea: Idea; onDone: () => void }> = ({ id
       goalId: idea.goalId,
       notes: notes.trim() || undefined,
     });
-    toast.success("Idea converted to action");
+    toast.success(t("ideas.toast.convertedAction"));
     onDone();
   };
 
   return (
     <div className="bg-surface-elevated border border-border-default rounded-[4px] p-5">
       <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-secondary">
-        CONVERT TO ACTION
+        {t("ideas.heading.convertAction")}
       </div>
       <div className="mt-4 flex flex-col gap-3">
         <input
@@ -343,7 +344,7 @@ const ConvertActionOverlay: React.FC<{ idea: Idea; onDone: () => void }> = ({ id
           onChange={(e) => setProjectId(e.target.value)}
           className="bg-surface-hover rounded-[4px] px-3 py-2 text-[14px] text-text-primary outline-none border border-transparent focus:border-border-default"
         >
-          <option value="">— Goal-level (no project) —</option>
+          <option value="">{t("ideas.field.goalLevelOption")}</option>
           {projects.map((p) => (
             <option key={p.id} value={p.id}>
               {p.title}
@@ -354,21 +355,22 @@ const ConvertActionOverlay: React.FC<{ idea: Idea; onDone: () => void }> = ({ id
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           rows={3}
-          placeholder="Notes (optional)"
+          placeholder={t("ideas.placeholder.notesOptional")}
           className="bg-surface-hover rounded-[4px] px-3 py-2 text-[14px] text-text-primary outline-none border border-transparent focus:border-border-default resize-none placeholder:text-text-tertiary"
         />
       </div>
       <div className="mt-4 flex items-center gap-3">
         <GhostButton accent onClick={submit}>
-          Create action
+          {t("ideas.button.createAction")}
         </GhostButton>
-        <TertiaryLink onClick={onDone}>Cancel</TertiaryLink>
+        <TertiaryLink onClick={onDone}>{t("common.cancel")}</TertiaryLink>
       </div>
     </div>
   );
 };
 
 const ConvertProjectOverlay: React.FC<{ idea: Idea; onDone: () => void }> = ({ idea, onDone }) => {
+  const { t } = useTranslation();
   const convertIdeaToProject = useStore((s) => s.convertIdeaToProject);
   const [title, setTitle] = useState(idea.title);
   const [desc, setDesc] = useState("");
@@ -382,14 +384,14 @@ const ConvertProjectOverlay: React.FC<{ idea: Idea; onDone: () => void }> = ({ i
       description: (desc.trim() || notes.trim() || undefined),
       references: (idea.references ?? []).map((r) => ({ ...r })),
     });
-    toast.success("Idea converted to project");
+    toast.success(t("ideas.toast.convertedProject"));
     onDone();
   };
 
   return (
     <div className="bg-surface-elevated border border-border-default rounded-[4px] p-5">
       <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-secondary">
-        CONVERT TO PROJECT
+        {t("ideas.heading.convertProject")}
       </div>
       <div className="mt-4 flex flex-col gap-3">
         <input
@@ -400,7 +402,7 @@ const ConvertProjectOverlay: React.FC<{ idea: Idea; onDone: () => void }> = ({ i
         <input
           value={desc}
           onChange={(e) => setDesc(e.target.value)}
-          placeholder="Short description"
+          placeholder={t("ideas.placeholder.shortDesc")}
           className="bg-surface-hover rounded-[4px] px-3 py-2 text-[14px] text-text-primary outline-none border border-transparent focus:border-border-default placeholder:text-text-tertiary"
         />
         <textarea
@@ -412,9 +414,9 @@ const ConvertProjectOverlay: React.FC<{ idea: Idea; onDone: () => void }> = ({ i
       </div>
       <div className="mt-4 flex items-center gap-3">
         <GhostButton accent onClick={submit}>
-          Create project
+          {t("ideas.button.createProject")}
         </GhostButton>
-        <TertiaryLink onClick={onDone}>Cancel</TertiaryLink>
+        <TertiaryLink onClick={onDone}>{t("common.cancel")}</TertiaryLink>
       </div>
     </div>
   );

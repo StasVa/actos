@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 type EmptyStateProps = {
   headline: string;
@@ -60,22 +61,25 @@ type FilteredEmptyProps = {
 
 export const FilteredEmpty: React.FC<FilteredEmptyProps> = ({
   onClear,
-  message = "No items match these filters.",
-}) => (
-  <div
-    className="flex flex-col items-center text-center"
-    style={{ padding: "48px 24px", gap: 12 }}
-  >
-    <div className="text-[14px] text-text-secondary">{message}</div>
-    <button
-      type="button"
-      onClick={onClear}
-      className="text-[13px] text-text-secondary hover:text-text-primary transition-colors"
+  message,
+}) => {
+  const { t } = useTranslation();
+  return (
+    <div
+      className="flex flex-col items-center text-center"
+      style={{ padding: "48px 24px", gap: 12 }}
     >
-      Clear filters
-    </button>
-  </div>
-);
+      <div className="text-[14px] text-text-secondary">{message ?? t("empty.filtered")}</div>
+      <button
+        type="button"
+        onClick={onClear}
+        className="text-[13px] text-text-secondary hover:text-text-primary transition-colors"
+      >
+        {t("common.clearFilters")}
+      </button>
+    </div>
+  );
+};
 
 type ReviewEmptyProps = {
   message: string;

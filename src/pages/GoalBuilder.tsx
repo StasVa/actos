@@ -567,6 +567,7 @@ const ActionsStep: React.FC<{
 
 /* ───────── Root ───────── */
 const GoalBuilder: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [persisted, setPersisted] = React.useState<Persisted>(() => read());
 

@@ -1517,10 +1517,10 @@ const QuickMoves: React.FC = () => {
 
   return (
     <section>
-      <SectionLabel meta="HIGH IMPACT · LOW EFFORT">Quick moves</SectionLabel>
+      <SectionLabel meta={t("home.quickMoves.meta")}>{t("home.quickMoves.title")}</SectionLabel>
       {items.length === 0 ? (
         <div className="font-mono text-[11px] text-text-tertiary px-3 py-2">
-          No quick wins available. Add actions with impact ≥ 4 and time ≤ 30m.
+          {t("home.quickMoves.empty")}
         </div>
       ) : (
         <div className="space-y-0.5">

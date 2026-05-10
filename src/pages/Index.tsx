@@ -1450,10 +1450,10 @@ const HeavyLift: React.FC = () => {
 
   return (
     <section>
-      <SectionLabel meta="HIGH IMPACT · HIGH EFFORT">Heavy lift today</SectionLabel>
+      <SectionLabel meta={t("home.heavyLift.meta")}>{t("home.heavyLift.title")}</SectionLabel>
       {items.length === 0 ? (
         <div className="font-mono text-[11px] text-text-tertiary px-3 py-2">
-          No heavy-lift candidates. Add actions with impact ≥ 6 and time ≥ 1h.
+          {t("home.heavyLift.empty")}
         </div>
       ) : (
         <div className="space-y-1">

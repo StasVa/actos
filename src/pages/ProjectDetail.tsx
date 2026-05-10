@@ -899,10 +899,10 @@ const ProjectDetail: React.FC = () => {
                   key={f.label}
                   className={`py-3 ${i < fields.length - 1 ? "border-b border-border-subtle" : ""}`}
                 >
-                  <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-2">
+                  <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-2 break-words whitespace-normal">
                     {f.label}
                   </div>
-                  <div className="text-[14px] leading-[1.4] text-text-primary break-words">
+                  <div className="text-[14px] leading-[1.4] text-text-primary break-words min-w-0">
                     {f.value}
                   </div>
                 </div>

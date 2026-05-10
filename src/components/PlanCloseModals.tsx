@@ -579,7 +579,7 @@ const PlanForm: React.FC<{
                   {preScheduled.length > 0 && (
                     <>
                       <div className="px-2 py-1.5 font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary border-b border-border-subtle bg-surface-elevated">
-                        Already scheduled · {preScheduled.length}
+                        {t("planToday.actions.alreadyScheduled", { count: preScheduled.length })}
                       </div>
                       <div>{preScheduled.map(renderAvailableRow)}</div>
                     </>

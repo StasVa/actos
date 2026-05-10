@@ -182,10 +182,10 @@ const RecentlyClosedHigherSection: React.FC = () => {
                   <span> {r.countLabel.split(" ").slice(1).join(" ")}</span>
                   <span className="mx-1.5 text-text-tertiary">·</span>
                   <span className="text-text-primary">+{r.valueAdded}</span>
-                  <span> value</span>
+                  <span> {t("progress.row.value")}</span>
                   <span className="mx-1.5 text-text-tertiary">·</span>
                   <span className="text-text-primary">{formatHM(r.timeInvestedMin)}</span>
-                  <span> invested</span>
+                  <span> {t("progress.row.invested")}</span>
                 </div>
               </div>
             </Link>

@@ -182,36 +182,36 @@ function RitualEditorPanel({
 
   const missingForCreate = useMemo(() => {
     const missing: string[] = [];
-    if (!title.trim()) missing.push("Title");
-    if (!(baseImpactNum >= 1 && baseImpactNum <= 10)) missing.push("Base Impact");
-    if (!(timeNum > 0)) missing.push("Time");
-    if (!goalId) missing.push("Goal");
-    if (!schedule) missing.push("Schedule");
+    if (!title.trim()) missing.push(t("ritualEditor.required.title"));
+    if (!(baseImpactNum >= 1 && baseImpactNum <= 10)) missing.push(t("ritualEditor.required.baseImpact"));
+    if (!(timeNum > 0)) missing.push(t("ritualEditor.required.time"));
+    if (!goalId) missing.push(t("ritualEditor.required.goal"));
+    if (!schedule) missing.push(t("ritualEditor.required.schedule"));
     return missing;
-  }, [title, baseImpactNum, timeNum, goalId, schedule]);
+  }, [title, baseImpactNum, timeNum, goalId, schedule, t]);
   const canCreate = missingForCreate.length === 0;
 
   const handleSaveNew = () => {
     if (!canCreate) {
       let firstFocus: "title" | "impact" | "time" | "goal" | "schedule" | null = null;
       if (!title.trim()) {
-        setTitleError("Add a title.");
+        setTitleError(t("ritualEditor.error.titleRequired"));
         firstFocus = firstFocus ?? "title";
       }
       if (!(baseImpactNum >= 1 && baseImpactNum <= 10)) {
-        setImpactError("Base Impact is required (1-10).");
+        setImpactError(t("ritualEditor.error.baseImpactRequired"));
         firstFocus = firstFocus ?? "impact";
       }
       if (!(timeNum > 0)) {
-        setTimeError("Time is required.");
+        setTimeError(t("ritualEditor.error.timeRequired"));
         firstFocus = firstFocus ?? "time";
       }
       if (!goalId) {
-        setGoalError("Pick a goal.");
+        setGoalError(t("ritualEditor.error.goalRequired"));
         firstFocus = firstFocus ?? "goal";
       }
       if (!schedule) {
-        setScheduleError("Pick a schedule.");
+        setScheduleError(t("ritualEditor.error.scheduleRequired"));
         firstFocus = firstFocus ?? "schedule";
       }
       if (firstFocus === "title") titleRef.current?.focus();
@@ -239,24 +239,24 @@ function RitualEditorPanel({
       notes: notes || undefined,
       timeEstimateMinutes: Number(timeMin),
     });
-    toast(`Ritual "${title.trim()}" created`);
+    toast(t("ritualEditor.toast.created", { title: title.trim() }));
     onClose();
   };
 
   const handleMarkDone = () => {
     if (!ritualId) return;
     if (doneToday) {
-      toast("Already logged today");
+      toast(t("ritualEditor.toast.alreadyLogged"));
       return;
     }
     markDone(ritualId);
-    toast(`Logged · ${completions + 1} completion${completions + 1 === 1 ? "" : "s"}`);
+    toast(t("ritualEditor.toast.logged", { count: completions + 1 }));
   };
 
   const handleArchive = () => {
     if (!ritualId) return;
     archiveRitual(ritualId);
-    toast("Ritual archived");
+    toast(t("ritualEditor.toast.archived"));
     setConfirmArchive(false);
     onClose();
   };
@@ -264,13 +264,13 @@ function RitualEditorPanel({
   const handleRestore = () => {
     if (!ritualId) return;
     restoreRitual(ritualId);
-    toast("Ritual restored");
+    toast(t("ritualEditor.toast.restored"));
   };
 
   const handleDelete = () => {
     if (!ritualId) return;
     deleteRitual(ritualId);
-    toast("Ritual deleted");
+    toast(t("ritualEditor.toast.deleted"));
     setConfirmDelete(false);
     onClose();
   };
@@ -278,7 +278,7 @@ function RitualEditorPanel({
   const handleDuplicate = () => {
     if (!ritual) return;
     const newId = createRitual({
-      title: "Copy of " + ritual.title,
+      title: t("actionEditor.copyOf", { title: ritual.title }),
       goalId: ritual.goalId,
       projectId: ritual.projectId,
       schedule: ritual.schedule,
@@ -287,7 +287,7 @@ function RitualEditorPanel({
       notes: ritual.notes,
       timeEstimateMinutes: ritual.timeEstimateMinutes,
     });
-    toast("Ritual duplicated");
+    toast(t("ritualEditor.toast.duplicated"));
     useStore.getState().openPanel({ kind: "ritual", mode: "edit", id: newId });
   };
 

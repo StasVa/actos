@@ -1338,7 +1338,7 @@ export function StatusDropdown({
               >
                 <span className="flex items-center gap-2">
                   <StatusDot status={s} />
-                  <span>{STATUS_LABEL[s]}</span>
+                  <span>{t(`actionEditor.status.${s}`)}</span>
                 </span>
                 {selected && <Check size={14} className="text-[hsl(var(--accent))]" />}
               </button>

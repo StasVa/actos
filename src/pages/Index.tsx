@@ -1159,7 +1159,7 @@ export const TodayZone: React.FC<{
                           onClick={() => {
                             updateDayEntry(TODAY_ISO, { mainTaskActionId: a.id });
                             setPickMainTaskOpen(false);
-                            toast.success("Main Task set");
+                            toast.success(t("home.mainTask.toast.set"));
                           }}
                           className="w-full text-left px-4 py-2.5 hover:bg-surface-hover transition-colors border-b border-border-subtle last:border-b-0"
                         >

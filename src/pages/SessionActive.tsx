@@ -573,14 +573,13 @@ const SessionActive: React.FC = () => {
                         {currentAction.title}
                       </h2>
                       <div className="mt-2 font-mono text-[12px] text-text-secondary tabular-nums">
-                        Impact {currentAction.impact ?? 0}
                         {currentAction.timeEstimateMinutes
-                          ? ` · ${currentAction.timeEstimateMinutes}min`
-                          : ""}
+                          ? t("sessionActive.action.impactWithTime", { count: currentAction.impact ?? 0, minutes: currentAction.timeEstimateMinutes })
+                          : t("sessionActive.action.impact", { count: currentAction.impact ?? 0 })}
                       </div>
                     </div>
                     <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary shrink-0">
-                      ACTION {currentIndex + 1}/{session.plannedActionIds.length}
+                      {t("sessionActive.action.title", { current: currentIndex + 1, total: session.plannedActionIds.length })}
                     </div>
                   </div>
                 </div>

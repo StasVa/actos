@@ -281,10 +281,10 @@ function GoalEditorPanel({
             <span className="w-2 h-2 rounded-full" style={{ background: goalColor }} />
           )}
           {mode === "new" ? (
-            <div className="text-[18px] font-medium text-text-primary">New goal</div>
+            <div className="text-[18px] font-medium text-text-primary">{t("goalEditor.header.new")}</div>
           ) : (
             <div className="font-mono text-[11px] uppercase tracking-[0.08em] text-text-tertiary">
-              Edit goal
+              {t("goalEditor.header.edit")}
             </div>
           )}
         </div>
@@ -313,14 +313,14 @@ function GoalEditorPanel({
             }}
           >
             {isFree
-              ? "Free plan: 1 active goal · Go All-In for 3."
-              : "You already have 3 active goals. Complete or drop one first."}
+              ? t("goalEditor.atCap.free")
+              : t("goalEditor.atCap.allIn")}
           </div>
         )}
 
         {mode === "new" && (
           <div className="text-[13px] text-text-tertiary leading-[1.5]">
-            A goal is a result you want to reach — concrete, measurable, achievable in months or years.
+            {t("goalEditor.lede")}
           </div>
         )}
 
@@ -331,7 +331,7 @@ function GoalEditorPanel({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             onBlur={() => persistField("title", title.trim())}
-            placeholder={mode === "new" ? "e.g. Get my SaaS to $10k MRR" : "Goal title"}
+            placeholder={mode === "new" ? t("goalEditor.titlePlaceholderNew") : t("goalEditor.titlePlaceholderEdit")}
             className="w-full bg-transparent outline-none text-[18px] font-medium text-text-primary placeholder:text-text-tertiary"
           />
           {mode === "new" && <GoalExamplesToggle onPick={(v) => setTitle(v)} />}
@@ -341,7 +341,7 @@ function GoalEditorPanel({
         {mode === "edit" && (
           <div>
             <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-2">
-              Status
+              {t("goalEditor.section.status")}
             </div>
             <div className="flex flex-wrap gap-1.5">
               {STATUS_ORDER.map((s) => (
@@ -357,7 +357,7 @@ function GoalEditorPanel({
                     color: s === status ? "hsl(var(--text-primary))" : "hsl(var(--text-secondary))",
                   }}
                 >
-                  {STATUS_LABEL[s]}
+                  {t(STATUS_LABEL_KEY[s])}
                 </button>
               ))}
             </div>
@@ -368,7 +368,7 @@ function GoalEditorPanel({
         <div className="grid grid-cols-2 gap-3">
           <div>
             <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-2">
-              Type
+              {t("goalEditor.section.type")}
             </div>
             <select
               value={type}
@@ -381,14 +381,14 @@ function GoalEditorPanel({
             >
               {TYPE_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>
-                  {o.label}
+                  {t(o.labelKey)}
                 </option>
               ))}
             </select>
           </div>
           <div>
             <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-2">
-              Target date
+              {t("goalEditor.section.targetDate")}
             </div>
             <input
               type="date"
@@ -405,13 +405,13 @@ function GoalEditorPanel({
         {/* Description */}
         <div>
           <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-2">
-            Description
+            {t("goalEditor.section.description")}
           </div>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             onBlur={() => persistField("description", description || undefined)}
-            placeholder="Why does this goal matter?"
+            placeholder={t("goalEditor.descriptionPlaceholder")}
             rows={3}
             className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary placeholder:text-text-tertiary outline-none resize-y"
           />
@@ -420,7 +420,7 @@ function GoalEditorPanel({
         {/* Success criteria */}
         <div>
           <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-2">
-            Success criteria
+            {t("goalEditor.section.successCriteria")}
           </div>
           <div className="space-y-1.5">
             {criteria.map((c) => (
@@ -465,14 +465,14 @@ function GoalEditorPanel({
                     addCriterion();
                   }
                 }}
-                placeholder="Add a criterion..."
+                placeholder={t("goalEditor.criteriaPlaceholder")}
                 className="flex-1 bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[12px] text-text-primary placeholder:text-text-tertiary outline-none"
               />
               <button
                 onClick={addCriterion}
                 className="text-[12px] px-2.5 py-1 rounded-[4px] border border-border-subtle text-text-secondary hover:text-text-primary"
               >
-                Add
+                {t("goalEditor.criteriaAdd")}
               </button>
             </div>
           </div>
@@ -481,9 +481,9 @@ function GoalEditorPanel({
         {/* Stats */}
         {mode === "edit" && (
           <div className="grid grid-cols-3 gap-3 pt-2 border-t border-border-subtle">
-            <Stat label="Projects" value={childStats.projects} />
-            <Stat label="Open projects" value={childStats.openProjects} />
-            <Stat label="Open actions" value={childStats.openActions} />
+            <Stat label={t("goalEditor.stat.projects")} value={childStats.projects} />
+            <Stat label={t("goalEditor.stat.openProjects")} value={childStats.openProjects} />
+            <Stat label={t("goalEditor.stat.openActions")} value={childStats.openActions} />
           </div>
         )}
       </div>

@@ -401,22 +401,26 @@ function loadStoredSort(): SortKey {
   return "recent";
 }
 
-const STATUS_OPTIONS: FilterOption<StatusFilter>[] = [
-  { value: "all", label: "All" },
-  { value: "backlog", label: "Backlog" },
-  { value: "planned", label: "Planned" },
-  { value: "done", label: "Done" },
-  { value: "delegated", label: "Delegated" },
-  { value: "dropped", label: "Dropped" },
-  { value: "cancelled", label: "Cancelled" },
-];
+function makeStatusOptions(t: (k: string) => string): FilterOption<StatusFilter>[] {
+  return [
+    { value: "all", label: t("common.all") },
+    { value: "backlog", label: t("status.backlog") },
+    { value: "planned", label: t("status.planned") },
+    { value: "done", label: t("status.done") },
+    { value: "delegated", label: t("status.delegated") },
+    { value: "dropped", label: t("status.dropped") },
+    { value: "cancelled", label: t("status.cancelled") },
+  ];
+}
 
-const DATE_OPTIONS: FilterOption<DateFilter>[] = [
-  { value: "all", label: "All time" },
-  { value: "today", label: "Today" },
-  { value: "week", label: "This week" },
-  { value: "month", label: "This month" },
-];
+function makeDateOptions(t: (k: string) => string): FilterOption<DateFilter>[] {
+  return [
+    { value: "all", label: t("actions.filter.allTime") },
+    { value: "today", label: t("actions.filter.today") },
+    { value: "week", label: t("actions.filter.week") },
+    { value: "month", label: t("actions.filter.month") },
+  ];
+}
 
 const GOAL_OPTIONS: FilterOption<GoalFilter>[] = [
   { value: "all", label: "All" },
@@ -425,14 +429,16 @@ const GOAL_OPTIONS: FilterOption<GoalFilter>[] = [
   { value: "g3", label: "Read 24 books", dot: GOALS.g3.color },
 ];
 
-const SORT_OPTIONS: FilterOption<SortKey>[] = [
-  { value: "recent", label: "Recent first" },
-  { value: "oldest", label: "Oldest first" },
-  { value: "impact-desc", label: "Highest impact" },
-  { value: "impact-asc", label: "Lowest impact" },
-  { value: "time-desc", label: "Longest first" },
-  { value: "time-asc", label: "Shortest first" },
-];
+function makeSortOptions(t: (k: string) => string): FilterOption<SortKey>[] {
+  return [
+    { value: "recent", label: t("actions.sort.recent") },
+    { value: "oldest", label: t("actions.sort.oldest") },
+    { value: "impact-desc", label: t("actions.sort.impactDesc") },
+    { value: "impact-asc", label: t("actions.sort.impactAsc") },
+    { value: "time-desc", label: t("actions.sort.timeDesc") },
+    { value: "time-asc", label: t("actions.sort.timeAsc") },
+  ];
+}
 
 const AllActions: React.FC = () => {
   const { t } = useTranslation();

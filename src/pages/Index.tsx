@@ -424,15 +424,16 @@ function buildSparkFromActions(
 }
 
 function relativeDayLabel(iso?: string): string {
-  if (!iso) return "no activity yet";
-  const t = new Date(iso).getTime();
-  const days = Math.floor((Date.now() - t) / 86400000);
-  if (days <= 0) return "today";
-  if (days === 1) return "yesterday";
-  return `${days} days ago`;
+  if (!iso) return i18n.t("home.relative.noActivity");
+  const ts = new Date(iso).getTime();
+  const days = Math.floor((Date.now() - ts) / 86400000);
+  if (days <= 0) return i18n.t("home.relative.today");
+  if (days === 1) return i18n.t("home.relative.yesterday");
+  return i18n.t("home.relative.daysAgo", { count: days });
 }
 
 export const Hero: React.FC = () => {
+  const { t } = useTranslation();
   const goals = useStore((s) => s.goals);
   const projects = useStore((s) => s.projects);
   const actions = useStore((s) => s.actions);

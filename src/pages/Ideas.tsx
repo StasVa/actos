@@ -16,30 +16,35 @@ import { SortDropdown } from "@/components/SortDropdown";
 import { EmptyState, FilteredEmpty } from "@/components/EmptyState";
 import { PageHeader } from "@/components/PageHeader";
 
- function relativeAgo(iso: string): { label: string; full: string; sort: number } {
-  const d = new Date(iso);
-  const now = new Date();
-  const days = Math.floor((now.getTime() - d.getTime()) / 86400000);
-  const monthDay = d
-    .toLocaleDateString("en-US", { month: "short", day: "numeric" })
-    .toUpperCase();
-  let label: string;
-  let fullPrefix: string;
-  if (days <= 0) {
-    label = "Captured today";
-    fullPrefix = "TODAY";
-  } else if (days === 1) {
-    label = "Captured 1d ago";
-    fullPrefix = "1 DAY AGO";
-  } else if (days < 14) {
-    label = `Captured ${days}d ago`;
-    fullPrefix = `${days} DAYS AGO`;
-  } else {
-    label = `Captured ${monthDay}`;
-    fullPrefix = "";
-  }
-  const full = fullPrefix ? `CAPTURED · ${fullPrefix} · ${monthDay}` : `CAPTURED · ${monthDay}`;
-  return { label, full, sort: d.getTime() };
+function useRelativeAgo() {
+  const { t, i18n } = useTranslation();
+  return (iso: string): { label: string; full: string; sort: number } => {
+    const d = new Date(iso);
+    const now = new Date();
+    const days = Math.floor((now.getTime() - d.getTime()) / 86400000);
+    const monthDay = d
+      .toLocaleDateString(i18n.language, { month: "short", day: "numeric" })
+      .toUpperCase();
+    let label: string;
+    let fullPrefix: string;
+    if (days <= 0) {
+      label = t("ideas.label.capturedToday");
+      fullPrefix = t("ideas.label.capturedFullToday");
+    } else if (days === 1) {
+      label = t("ideas.relCaptured.captured1d");
+      fullPrefix = t("ideas.relCaptured.dayAgoUpper");
+    } else if (days < 14) {
+      label = t("ideas.relCaptured.capturedDays", { count: days });
+      fullPrefix = t("ideas.relCaptured.daysAgoUpper", { count: days });
+    } else {
+      label = t("ideas.relCaptured.capturedOnDate", { date: monthDay });
+      fullPrefix = "";
+    }
+    const full = fullPrefix
+      ? t("ideas.label.capturedFullPrefix", { prefix: fullPrefix, date: monthDay })
+      : t("ideas.label.capturedFullNoPrefix", { date: monthDay });
+    return { label, full, sort: d.getTime() };
+  };
 }
 
 /* ===== Pill / FilterPillRow ===== */

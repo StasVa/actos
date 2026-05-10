@@ -11,6 +11,8 @@ import { SortDropdown } from "@/components/SortDropdown";
 import { EmptyState, FilteredEmpty } from "@/components/EmptyState";
 import { PageHeader } from "@/components/PageHeader";
 import { Tooltip, SparkTooltipContent, StateDotTooltip, type DayInfo } from "@/components/Tooltip";
+import { formatDuration } from "@/lib/format";
+import i18n from "@/i18n";
 import { toast } from "sonner";
 import type { Goal } from "@/types";
 
@@ -44,19 +46,10 @@ function useSortOptions(t: (k: string) => string): FilterOption<SortKey>[] {
 function fmtAgo(iso?: string): string {
   if (!iso) return "—";
   const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
-  if (days <= 0) return "today";
-  if (days === 1) return "1d ago";
-  if (days < 30) return `${days}d ago`;
-  return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
-}
-
-function fmtTime(minutes: number): string {
-  if (!minutes || minutes <= 0) return "0m";
-  const h = Math.floor(minutes / 60);
-  const m = Math.round(minutes - h * 60);
-  if (h === 0) return `${m}m`;
-  if (m === 0) return `${h}h`;
-  return `${h}h ${m}m`;
+  if (days <= 0) return i18n.t("progress.relAgo.today");
+  if (days === 1) return i18n.t("progress.relAgo.yesterday");
+  if (days < 30) return i18n.t("progress.relAgo.daysAgo", { n: days });
+  return new Date(iso).toLocaleDateString(i18n.language || "en", { month: "short", day: "numeric" });
 }
 
 type GoalMeta = {
@@ -159,22 +152,35 @@ const GoalCard: React.FC<{ m: GoalMeta; logTimeOn: boolean }> = ({ m, logTimeOn 
     !archived && progress >= 100 && projects.active === 0 && projects.closed > 0;
 
   const projectsValue = (() => {
-    const parts = [`${projects.active} active`, `${projects.closed} closed`];
-    if (projects.dropped > 0) parts.push(`${projects.dropped} dropped`);
-    return parts.join(" · ");
+    if (projects.dropped > 0) {
+      return t("goals.card.projectsLineWithDropped", {
+        active: projects.active,
+        closed: projects.closed,
+        dropped: projects.dropped,
+        count: projects.active,
+      });
+    }
+    return t("goals.card.projectsLine", {
+      active: projects.active,
+      closed: projects.closed,
+      count: projects.active,
+    });
   })();
 
   const ritualsValue =
     rituals.active === 0
       ? "—"
-      : `${rituals.active} active · ×${rituals.avgMultiplier.toFixed(2)} avg`;
+      : t("goals.card.ritualsLine", {
+          active: rituals.active,
+          mult: rituals.avgMultiplier.toFixed(2),
+        });
 
   const closedLabel =
     g.status === "completed"
-      ? `Completed ${fmtAgo(g.completedAt)}`
+      ? t("goals.card.completedAgo", { relative: fmtAgo(g.completedAt) })
       : g.status === "dropped"
-      ? `Dropped ${fmtAgo(g.droppedAt)}`
-      : `Last activity: ${fmtAgo(lastIso)}`;
+      ? t("goals.card.droppedAgo", { relative: fmtAgo(g.droppedAt) })
+      : t("goals.card.lastActivityLabel", { relative: fmtAgo(lastIso) });
 
   const onCardClick = (e: React.MouseEvent) => {
     // Avoid navigation when interacting with menu/tooltips.
@@ -235,7 +241,7 @@ const GoalCard: React.FC<{ m: GoalMeta; logTimeOn: boolean }> = ({ m, logTimeOn 
                       letterSpacing: "0.06em",
                     }}
                   >
-                    READY TO CLOSE
+                    {t("goals.card.readyToClose")}
                   </span>
                 )}
                 <Tooltip content={<StateDotTooltip state={state} lastActivity={fmtAgo(lastIso)} />}>
@@ -273,7 +279,7 @@ const GoalCard: React.FC<{ m: GoalMeta; logTimeOn: boolean }> = ({ m, logTimeOn 
               {progress}%
             </div>
             <div className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary mt-1">
-              PROGRESS · VALUE
+              {t("goalDetail.hero.progressValue")}
             </div>
           </div>
 
@@ -293,7 +299,7 @@ const GoalCard: React.FC<{ m: GoalMeta; logTimeOn: boolean }> = ({ m, logTimeOn 
             {showTime && (
               <StatRow
                 label={t("common.label.time")}
-                value={`${fmtTime(time.spent)} invested · ${fmtTime(time.remaining)} estimated remaining`}
+                value={t("goals.card.timeLine", { spent: formatDuration(time.spent), remaining: formatDuration(time.remaining) })}
               />
             )}
           </div>
@@ -301,7 +307,7 @@ const GoalCard: React.FC<{ m: GoalMeta; logTimeOn: boolean }> = ({ m, logTimeOn 
           {/* Section 5 — Sparkline */}
           <div className="border-t border-border-subtle pt-3" data-no-nav onClick={(e) => e.stopPropagation()}>
             <div className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary mb-2">
-              ACTIVITY · LAST 30 DAYS
+              {t("goals.card.activityHeading")}
             </div>
             <Sparkline data={spark} color={color} tips={sparkTips} />
           </div>

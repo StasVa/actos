@@ -35,18 +35,18 @@ const MeasureBar: React.FC<{
   </div>
 );
 
-function fmtAgo(iso?: string): { label: string; days: number } {
+function fmtAgo(iso: string | undefined, t: (k: string, o?: any) => string, locale: string): { label: string; days: number } {
   if (!iso) return { label: "—", days: 999 };
   const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
-  if (days <= 0) return { label: "today", days: 0 };
-  if (days === 1) return { label: "1d ago", days: 1 };
-  if (days < 30) return { label: `${days}d ago`, days };
+  if (days <= 0) return { label: t("progress.relAgo.today"), days: 0 };
+  if (days === 1) return { label: t("progress.relAgo.yesterday"), days: 1 };
+  if (days < 30) return { label: t("progress.relAgo.daysAgo", { n: days }), days };
   const d = new Date(iso);
-  return { label: d.toLocaleDateString("en-US", { month: "short", day: "numeric" }), days };
+  return { label: d.toLocaleDateString(locale, { month: "short", day: "numeric" }), days };
 }
 
-function fmtShortDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+function fmtShortDate(iso: string, locale: string): string {
+  return new Date(iso).toLocaleDateString(locale, { month: "short", day: "numeric" });
 }
 
 function daysBetween(aIso: string, bIso?: string): number {
@@ -61,7 +61,8 @@ export type ProjectCardProps = {
 };
 
 export const ProjectCard: React.FC<ProjectCardProps> = ({ projectId, goalLabel, goalColor }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language || "en";
   const project = useStore((s) => s.projects.find((p) => p.id === projectId));
   const allActions = useStore((s) => s.actions);
   const actions = useMemo(
@@ -93,7 +94,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ projectId, goalLabel, 
       .filter(Boolean)
       .sort()
       .at(-1);
-    const ago = fmtAgo(lastIso ?? undefined);
+    const ago = fmtAgo(lastIso ?? undefined, t, locale);
 
     // Time investment: full time for Done + 20% of time for Delegated.
     const investedMin = liveActs.reduce((sum, a) => sum + timeInvestedMinutes(a), 0);
@@ -112,7 +113,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ projectId, goalLabel, 
       remainingMin,
       hasTimeData,
     };
-  }, [actions]);
+  }, [actions, locale, t]);
 
   if (!project) return null;
 
@@ -220,7 +221,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ projectId, goalLabel, 
             <div className="flex items-center justify-between gap-3 min-h-[22px]">
               <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">{t("projects.card.started")}</span>
               <span className="font-mono text-[11px] text-right truncate">
-                <span className="text-text-primary">{fmtShortDate(project.createdAt)}</span>
+                <span className="text-text-primary">{fmtShortDate(project.createdAt, locale)}</span>
                 <span className="text-text-tertiary"> · </span>
                 <span className="text-text-secondary">
                   {isClosed

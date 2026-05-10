@@ -583,30 +583,30 @@ const AllActions: React.FC = () => {
             title={t("actions.page.title")}
             meta={meta}
             cta={{
-              label: "+ New action",
+              label: t("actions.newAction"),
               onClick: goNew,
-              ariaLabel: "New action",
+              ariaLabel: t("actions.newAction"),
               disabled: !hasActiveGoals,
-              disabledTooltip: "Create a goal first",
+              disabledTooltip: t("validation.createGoalFirst"),
             }}
             filters={
               <>
                 <FilterDropdown
-                  label="STATUS"
+                  label={t("actions.filter.status")}
                   value={statusFilter}
                   defaultValue="all"
                   options={STATUS_OPTIONS}
                   onChange={(v) => setStatusFilter(v)}
                 />
                 <FilterDropdown
-                  label="GOAL"
+                  label={t("actions.filter.goal")}
                   value={goalFilter}
                   defaultValue="all"
                   options={GOAL_OPTIONS}
                   onChange={(v) => setGoalFilter(v)}
                 />
                 <FilterDropdown
-                  label="DATE"
+                  label={t("actions.filter.date")}
                   value={dateFilter}
                   defaultValue="all"
                   options={DATE_OPTIONS}
@@ -617,7 +617,7 @@ const AllActions: React.FC = () => {
                     onClick={clearFilters}
                     className="ml-1 text-[12px] text-text-tertiary hover:text-text-secondary transition-colors shrink-0"
                   >
-                    Clear filters
+                    {t("common.clearFilters")}
                   </button>
                 )}
               </>

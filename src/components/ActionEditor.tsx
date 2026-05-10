@@ -735,7 +735,7 @@ function ActionEditorPanel({
                 status !== "delegated" && (
                   <div className="mt-3">
                     <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-2">
-                      Scheduled date
+                      {t("actionEditor.field.scheduledDate")}
                     </div>
                     <DateChipPicker
                       value={scheduledDate}

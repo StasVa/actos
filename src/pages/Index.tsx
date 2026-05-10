@@ -1697,6 +1697,7 @@ function selectLookingBackDate(
 }
 
 const LookingBackCard: React.FC<{ date: string }> = ({ date }) => {
+  const { t, i18n: i18nInst } = useTranslation();
   const goals = useStore((s) => s.goals);
   const actions = useStore((s) => s.actions);
   const rituals = useStore((s) => s.rituals);
@@ -1704,15 +1705,23 @@ const LookingBackCard: React.FC<{ date: string }> = ({ date }) => {
 
   const dObj = new Date(date + "T00:00:00");
   const fullDate = dObj
-    .toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
+    .toLocaleDateString(i18nInst.language, { weekday: "short", month: "short", day: "numeric" })
     .toUpperCase();
   const daysAgo = Math.round((Date.now() - dObj.getTime()) / 86400000);
   const relLabel =
-    daysAgo <= 1 ? "YESTERDAY" : `${daysAgo} DAYS AGO`;
+    daysAgo <= 1 ? t("home.lookingBack.relYesterday") : t("home.lookingBack.relDaysAgo", { count: daysAgo });
 
   const dayType = yEntry?.dayType;
   const Icon = dayType ? DAY_TYPE_ICONS[dayType] : null;
-  const dtLabel = dayType ? `${DAY_TYPE_LABELS[dayType]} day` : "Active day";
+  const dayTypeKeyMap: Record<string, string> = {
+    execution: "today.dayType.execution",
+    recovery: "today.dayType.recovery",
+    "day-off": "today.dayType.dayOff",
+    sick: "today.dayType.sick",
+  };
+  const dtLabel = dayType
+    ? t("home.lookingBack.dayLabel", { label: t(dayTypeKeyMap[dayType] ?? "") })
+    : t("home.lookingBack.activeDay");
 
   const yActions = actions.filter(
     (a) => a.completedAt?.slice(0, 10) === date && a.status === "done",

@@ -1334,17 +1334,17 @@ export const TodayZone: React.FC<{
                             reopenRitual();
                           } else {
                             if (!r.baseImpact || !r.timeEstimateMinutes) {
-                              toast.error("Set base impact and time before marking done");
+                              toast.error(t("home.rituals.toast.needBaseImpactTime"));
                               openPanel({ kind: "ritual", mode: "edit", id: r.id });
                               return;
                             }
                             handleRitualDone(r.id, false);
                             const newMult = ritualMultiplier(r.totalCompletions + 1);
-                            toast.success(`Ritual marked done — multiplier now ×${newMult.toFixed(2)}`);
+                            toast.success(t("home.rituals.toast.markedDone", { mult: newMult.toFixed(2) }));
                           }
                         }}
                         disabled={isSkipped}
-                        aria-label={doneToday ? "Re-open ritual" : "Mark ritual done"}
+                        aria-label={doneToday ? t("home.rituals.aria.reopen") : t("home.rituals.aria.markDone")}
                         className="inline-flex items-center justify-center rounded-[2px] border shrink-0 disabled:cursor-not-allowed"
                         style={{
                           width: 16,

@@ -9,6 +9,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import i18n from "@/i18n";
 import { Check, Copy, MoreHorizontal, Trash2, XCircle, type LucideIcon } from "lucide-react";
 import {
   Popover,

@@ -430,7 +430,7 @@ const SessionActive: React.FC = () => {
     const future = remainingCyclesAfterCurrent * (session.workDuration + session.breakDuration);
     return Math.max(0, cur + future);
   })();
-  const minutesLabel = `${remainingMinutesTotal} ${remainingMinutesTotal === 1 ? "minute" : "minutes"}`;
+  const minutesLabel = t("sessionActive.empty.minutes", { count: remainingMinutesTotal });
 
   // Actions available for in-session add (exclude already in this session).
   const sessionActionIdSet = new Set(session.plannedActionIds);

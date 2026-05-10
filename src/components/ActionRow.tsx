@@ -71,29 +71,28 @@ export const ActionRow: React.FC<ActionRowProps> = ({
       action.status === "dropped" ||
       action.status === "cancelled");
   const isDone = action.status === "done";
+  const isDelegated = action.status === "delegated";
 
   // Derive default right pill from status when not overridden.
   let pill: RightPill = rightPill ?? null;
   if (rightPill === undefined) {
     if (action.status === "planned" && action.scheduledDate) {
       pill = { kind: "date", label: formatScheduledLabel(action.scheduledDate) };
-    } else if (action.status === "delegated" && action.delegateName) {
-      pill = { kind: "delegate", name: action.delegateName };
     } else if (isDone) {
       pill = { kind: "done" };
     }
+    // Delegated: no right-side text pill — Send icon + return-time pill carry the info.
   }
 
   // Default bottom segments. Time and Impact moved to right-side pill cluster
-  // — only Goal · Project · → Delegate live in the meta line.
+  // — only Goal · Project live in the meta line. For delegated rows the
+  // "→ Maria" segment is dropped (the Send icon + tooltip carry that info).
   const segs: React.ReactNode[] =
     bottomSegments ??
     (() => {
       const out: React.ReactNode[] = [];
       if (goal) out.push(<span key="g">{goal.title}</span>);
       if (project) out.push(<span key="p">{project.title}</span>);
-      if (action.status === "delegated" && action.delegateName)
-        out.push(<span key="d">→ {action.delegateName}</span>);
       return out;
     })();
 

@@ -373,22 +373,20 @@ const ProjectStep: React.FC<{
   onSubmit: (title: string, desc: string) => void;
   onSkip: () => void;
 }> = ({ goalTitle, initialTitle, initialDesc, onSubmit, onSkip }) => {
+  const { t } = useTranslation();
   const [title, setTitle] = React.useState(initialTitle);
   const [desc, setDesc] = React.useState(initialDesc);
-  const submit = () => { const t = title.trim(); if (t) onSubmit(t, desc.trim()); };
+  const submit = () => { const tt = title.trim(); if (tt) onSubmit(tt, desc.trim()); };
   return (
     <>
-      <Heading>Add a project to "{goalTitle}"</Heading>
-      <Lede>
-        A project is a chunk of work that finishes — usually in days or weeks.
-        Break a goal into projects, projects into actions.
-      </Lede>
+      <Heading>{t("goalBuilder.project.heading", { goalTitle })}</Heading>
+      <Lede>{t("goalBuilder.project.lede")}</Lede>
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         <input
           autoFocus
           type="text"
           value={title}
-          placeholder="e.g. Set up landing page"
+          placeholder={t("goalBuilder.project.titlePlaceholder")}
           onChange={(e) => setTitle(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter") submit(); }}
           style={inputStyle}
@@ -396,7 +394,7 @@ const ProjectStep: React.FC<{
         />
         <textarea
           value={desc}
-          placeholder="What's this project about? Optional."
+          placeholder={t("goalBuilder.project.descriptionPlaceholder")}
           onChange={(e) => setDesc(e.target.value)}
           rows={3}
           style={{ ...inputStyle, resize: "vertical", minHeight: 72 }}
@@ -408,11 +406,11 @@ const ProjectStep: React.FC<{
           fontSize: 13,
           color: "hsl(var(--text-tertiary))",
         }}>
-          Detailed editor with images, links, and references is available on the project page.
+          {t("goalBuilder.project.hint")}
         </p>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 12 }}>
-          <PrimaryBtn onClick={submit} disabled={!title.trim()}>Create project</PrimaryBtn>
-          <GhostLink onClick={onSkip}>Skip</GhostLink>
+          <PrimaryBtn onClick={submit} disabled={!title.trim()}>{t("goalBuilder.project.cta")}</PrimaryBtn>
+          <GhostLink onClick={onSkip}>{t("common.skip")}</GhostLink>
         </div>
       </div>
     </>

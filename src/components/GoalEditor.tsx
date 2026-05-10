@@ -171,8 +171,8 @@ function GoalEditorPanel({
       toast.error("Title is required");
       return;
     }
-    const isFree = settings.subscriptionTier !== "all-in";
-    if (isFree && activeCount >= 2) {
+    const isFreeNow = settings.subscriptionTier !== "all-in";
+    if (isFreeNow && activeCount >= freeCap) {
       setSoftBlock(true);
       return;
     }
@@ -184,7 +184,11 @@ function GoalEditorPanel({
       successCriteria: criteria,
     });
     if (!result.ok) {
-      toast.error("You already have 3 active goals. Complete or drop one first.");
+      toast.error(
+        isFreeNow
+          ? "Free plan: 1 active goal · Go All-In for 3."
+          : "You already have 3 active goals. Complete or drop one first.",
+      );
       return;
     }
     toast("Goal created");

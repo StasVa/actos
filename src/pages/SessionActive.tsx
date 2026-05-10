@@ -7,6 +7,7 @@
 //   • Audio cues opt-in (default ON), muted via "Sound off" toggle.
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { Maximize, Minimize, Volume2, VolumeX } from "lucide-react";
 import { toast } from "sonner";

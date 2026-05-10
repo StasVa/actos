@@ -76,10 +76,10 @@ const ConsistencyCalendar: React.FC<{ data: number[]; color: string; cellSize?: 
         const daysFromToday = last - i;
         const status =
           daysFromToday === 0 && v === 0
-            ? "Pending"
+            ? t("rituals.tip.pending")
             : v === 1
-            ? "Done"
-            : "Missed";
+            ? t("rituals.tip.done")
+            : t("rituals.tip.missed");
         const tip = (
           <div className="text-[12px] text-text-primary" style={{ fontFamily: "Inter, sans-serif" }}>
             {dayLabel(daysFromToday)} · <span className="font-mono text-text-secondary">{status}</span>

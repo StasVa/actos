@@ -72,6 +72,9 @@ const SetupGuard = () => {
         return;
       }
     } catch {}
+    if (location.pathname === "/") return;
+    if (location.pathname.startsWith("/pricing")) return;
+    if (location.pathname.startsWith("/legal")) return;
     if (location.pathname.startsWith("/setup")) return;
     if (location.pathname.startsWith("/onboarding")) return;
     if (location.pathname.startsWith("/admin")) return;
@@ -83,6 +86,9 @@ const SetupGuard = () => {
 const ChromeOnlyOutsideSetup: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { pathname } = useLocation();
   const hasActiveGoal = useStore((s) => s.goals.some((g) => g.status === "active"));
+  if (pathname === "/") return null;
+  if (pathname.startsWith("/pricing")) return null;
+  if (pathname.startsWith("/legal")) return null;
   if (pathname.startsWith("/setup")) return null;
   if (pathname.startsWith("/onboarding")) return null;
   // No-goals mode also hides global chrome.
@@ -100,6 +106,9 @@ const NoGoalsGate: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { pathname } = useLocation();
   const hasActiveGoal = useStore((s) => s.goals.some((g) => g.status === "active"));
   const exempt =
+    pathname === "/" ||
+    pathname.startsWith("/pricing") ||
+    pathname.startsWith("/legal") ||
     pathname.startsWith("/setup") ||
     pathname.startsWith("/admin") ||
     pathname.startsWith("/settings") ||

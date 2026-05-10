@@ -1095,7 +1095,7 @@ export const TodayZone: React.FC<{
                         mtDone ? "text-text-tertiary" : "text-text-secondary"
                       }`}
                     >
-                      {doneAtLabel ? `Done at ${doneAtLabel}` : null}
+                      {doneAtLabel ? t("home.mainTask.doneAt", { time: doneAtLabel }) : null}
                       {doneAtLabel && parentLabel ? " · " : null}
                       {parentLabel}
                     </span>

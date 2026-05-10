@@ -578,6 +578,7 @@ type ActiveProjectMeta = {
 };
 
 const ActiveProjectCard: React.FC<{ p: ActiveProjectMeta; pct: number }> = ({ p, pct }) => {
+  const { t } = useTranslation();
   const markProjectComplete = useStore((s) => s.markProjectComplete);
   const dropProject = useStore((s) => s.dropProject);
   const deleteProject = useStore((s) => s.deleteProject);
@@ -603,11 +604,11 @@ const ActiveProjectCard: React.FC<{ p: ActiveProjectMeta; pct: number }> = ({ p,
                 />
               </Tooltip>
               <CardMenu
-                ariaLabel="Project menu"
+                ariaLabel={t("home.activeProjects.menu.aria")}
                 items={[
-                  { label: "Mark complete", onSelect: () => { markProjectComplete(p.id); toast("Project completed"); } },
-                  { label: "Drop", destructive: true, onSelect: () => setConfirmDrop(true) },
-                  { label: "Delete", destructive: true, onSelect: () => setConfirmDelete(true) },
+                  { label: t("common.markComplete"), onSelect: () => { markProjectComplete(p.id); toast(t("home.activeProjects.toast.completed")); } },
+                  { label: t("common.drop"), destructive: true, onSelect: () => setConfirmDrop(true) },
+                  { label: t("common.delete"), destructive: true, onSelect: () => setConfirmDelete(true) },
                 ]}
               />
             </div>
@@ -624,10 +625,10 @@ const ActiveProjectCard: React.FC<{ p: ActiveProjectMeta; pct: number }> = ({ p,
           <div className="flex items-center justify-between font-mono text-[11px] tabular-nums">
             <div>
               <span className="text-text-secondary">{p.done}/{p.hasActions ? p.total : 0}</span>
-              <span className="text-text-tertiary"> actions</span>
+              <span className="text-text-tertiary">{t("home.activeProjects.actionsSuffix")}</span>
             </div>
             <div>
-              <span className="text-text-tertiary">Last: </span>
+              <span className="text-text-tertiary">{t("home.activeProjects.lastPrefix")}</span>
               <span className={p.warnLast ? "text-text-warning" : "text-text-secondary"}>{p.last}</span>
             </div>
           </div>
@@ -635,21 +636,21 @@ const ActiveProjectCard: React.FC<{ p: ActiveProjectMeta; pct: number }> = ({ p,
       </Link>
       <ConfirmModal
         open={confirmDrop}
-        title="Drop this project?"
-        body="Open actions in this project will be dropped. You can re-open it later."
-        confirmLabel="Drop project"
+        title={t("home.activeProjects.confirm.drop.heading")}
+        body={t("home.activeProjects.confirm.drop.body")}
+        confirmLabel={t("home.activeProjects.confirm.drop.cta")}
         destructive
         onCancel={() => setConfirmDrop(false)}
-        onConfirm={() => { dropProject(p.id); toast("Project dropped"); setConfirmDrop(false); }}
+        onConfirm={() => { dropProject(p.id); toast(t("home.activeProjects.toast.dropped")); setConfirmDrop(false); }}
       />
       <ConfirmModal
         open={confirmDelete}
-        title="Delete this project?"
-        body="This permanently removes the project and all its actions. This cannot be undone."
-        confirmLabel="Delete"
+        title={t("home.activeProjects.confirm.delete.heading")}
+        body={t("home.activeProjects.confirm.delete.body")}
+        confirmLabel={t("common.delete")}
         destructive
         onCancel={() => setConfirmDelete(false)}
-        onConfirm={() => { deleteProject(p.id); toast("Project deleted"); setConfirmDelete(false); }}
+        onConfirm={() => { deleteProject(p.id); toast(t("home.activeProjects.toast.deleted")); setConfirmDelete(false); }}
       />
     </>
   );

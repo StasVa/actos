@@ -776,7 +776,7 @@ function ActionEditorPanel({
                   </FieldRow>
                   <div>
                     <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-2">
-                      Expected back
+                      {t("actionEditor.delegation.expectedBack")}
                     </div>
                     <DateChipPicker
                       value={expectedReturn}

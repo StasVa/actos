@@ -20,6 +20,8 @@ import { MultiplierPill, TimePill as SharedTimePill } from "@/components/MetaPil
 import { toast } from "sonner";
 import { subscribeAppEvent } from "@/lib/appEvents";
 import { formatTime } from "@/lib/format";
+import { formatDate } from "@/i18n/format";
+import i18n from "@/i18n";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 export const TODAY_ISO = new Date().toISOString().slice(0, 10);

@@ -120,9 +120,35 @@ export const ActionRow: React.FC<ActionRowProps> = ({
         {/* Top line */}
         <div className="flex items-center justify-between gap-3 min-w-0">
           <div className="flex items-center gap-3 min-w-0 flex-1">
-            {!hideCheckbox && (() => {
+            {!hideCheckbox && isDelegated && (
+              <Tooltip
+                content={
+                  <span className="text-[12px] text-text-primary">
+                    Delegated to {action.delegateName ?? "—"}
+                    {" · "}
+                    {action.expectedReturnDate
+                      ? `returns ${action.expectedReturnDate}`
+                      : "no return date set"}
+                  </span>
+                }
+                showDelay={300}
+              >
+                <span
+                  role="button"
+                  aria-label="Delegated — open action"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onClick?.();
+                  }}
+                  className="inline-flex items-center justify-center shrink-0 cursor-pointer"
+                  style={{ width: 16, height: 16, color: "hsl(var(--accent))" }}
+                >
+                  <Send size={16} />
+                </span>
+              </Tooltip>
+            )}
+            {!hideCheckbox && !isDelegated && (() => {
               const disabled =
-                action.status === "delegated" ||
                 action.status === "dropped" ||
                 action.status === "cancelled";
               return (
@@ -161,16 +187,20 @@ export const ActionRow: React.FC<ActionRowProps> = ({
               />
             )}
             <span
-              className={`text-[15px] font-medium truncate ${
+              className={`text-[15px] font-medium truncate transition-opacity ${
                 isTerminal ? "text-text-secondary line-through" : "text-text-primary"
-              }`}
+              } ${isDelegated ? "opacity-[0.85] hover:opacity-100" : ""}`}
             >
               {action.title}
             </span>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <ImpactPill impact={action.impact} goalColor={color} dimmed={isTerminal} />
-            <TimePill minutes={action.timeEstimateMinutes} dimmed={isTerminal} />
+            {isDelegated ? (
+              <ReturnTimePill expectedReturnDate={action.expectedReturnDate} />
+            ) : (
+              <TimePill minutes={action.timeEstimateMinutes} dimmed={isTerminal} />
+            )}
             {pill && <span className="ml-1">{renderPill(pill)}</span>}
           </div>
         </div>

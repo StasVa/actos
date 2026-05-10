@@ -1306,7 +1306,7 @@ export const TodayZone: React.FC<{
                     completionHistory: newHistory,
                     totalCompletions: Math.max(0, r.totalCompletions - 1),
                   });
-                  toast("Ritual re-opened");
+                  toast(t("home.rituals.toast.reopened"));
                 };
                 return (
                   <div

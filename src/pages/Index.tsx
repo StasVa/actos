@@ -925,7 +925,7 @@ export const TodayZone: React.FC<{
     }
     changeActionStatus(id, "done");
     toast.dismiss();
-    toast.success("Action marked done");
+    toast.success(t("home.actions.toast.markedDone"));
   };
 
   const handleQuickAdd = () => {

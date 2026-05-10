@@ -15,22 +15,23 @@
 //   Esc          Close help overlay
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useStore } from "@/store/useStore";
 import { hasActiveGoal } from "@/lib/goalGuard";
 
-const NAV_MAP: Record<string, { path: string; label: string }> = {
-  t: { path: "/today", label: "Today" },
-  h: { path: "/today", label: "Today" },
-  s: { path: "/progress", label: "Progress" },
-  o: { path: "/goals", label: "Goals" },
-  p: { path: "/projects", label: "Projects" },
-  a: { path: "/actions", label: "Actions" },
-  d: { path: "/delegated", label: "Delegated" },
-  r: { path: "/rituals", label: "Rituals" },
-  i: { path: "/ideas", label: "Ideas" },
-  v: { path: "/reviews", label: "Reviews" },
+const NAV_PATHS: Record<string, string> = {
+  t: "/today",
+  h: "/today",
+  s: "/progress",
+  o: "/goals",
+  p: "/projects",
+  a: "/actions",
+  d: "/delegated",
+  r: "/rituals",
+  i: "/ideas",
+  v: "/reviews",
 };
 
 function isEditableTarget(t: EventTarget | null): boolean {
@@ -42,6 +43,7 @@ function isEditableTarget(t: EventTarget | null): boolean {
 }
 
 export function KeyboardShortcuts() {
+  const { t } = useTranslation();
   const [helpOpen, setHelpOpen] = React.useState(false);
   const navigate = useNavigate();
   const openPanel = useStore((s) => s.openPanel);
@@ -69,12 +71,12 @@ export function KeyboardShortcuts() {
 
       // g-prefix nav
       if (gPendingRef.current !== null) {
-        const target = NAV_MAP[key.toLowerCase()];
+        const path = NAV_PATHS[key.toLowerCase()];
         window.clearTimeout(gPendingRef.current);
         gPendingRef.current = null;
-        if (target) {
+        if (path) {
           e.preventDefault();
-          navigate(target.path);
+          navigate(path);
         }
         return;
       }
@@ -106,26 +108,26 @@ export function KeyboardShortcuts() {
       <DialogContent className="bg-surface-elevated border-border-subtle max-w-md">
         <DialogHeader>
           <DialogTitle className="text-text-primary text-[15px] font-medium">
-            Keyboard shortcuts
+            {t("shortcuts.title")}
           </DialogTitle>
         </DialogHeader>
         <div className="mt-2 space-y-4 text-[13px] text-text-secondary">
-          <Section title="GLOBAL">
-            <Row keys={["⌘", "K"]} label="Search / command palette" />
-            <Row keys={["?"]} label="Toggle this help" />
-            <Row keys={["n"]} label="New action" />
-            <Row keys={["Esc"]} label="Close panels & overlays" />
+          <Section title={t("shortcuts.global")}>
+            <Row keys={["⌘", "K"]} label={t("shortcuts.search")} />
+            <Row keys={["?"]} label={t("shortcuts.help")} />
+            <Row keys={["n"]} label={t("shortcuts.newAction")} />
+            <Row keys={["Esc"]} label={t("shortcuts.close")} />
           </Section>
-          <Section title="NAVIGATE">
-            <Row keys={["g", "t"]} label="Today" />
-            <Row keys={["g", "s"]} label="Progress" />
-            <Row keys={["g", "o"]} label="Goals" />
-            <Row keys={["g", "p"]} label="Projects" />
-            <Row keys={["g", "a"]} label="Actions" />
-            <Row keys={["g", "d"]} label="Delegated" />
-            <Row keys={["g", "r"]} label="Rituals" />
-            <Row keys={["g", "i"]} label="Ideas" />
-            <Row keys={["g", "v"]} label="Reviews" />
+          <Section title={t("shortcuts.navigate")}>
+            <Row keys={["g", "t"]} label={t("nav.today")} />
+            <Row keys={["g", "s"]} label={t("progress.page.title")} />
+            <Row keys={["g", "o"]} label={t("nav.goals")} />
+            <Row keys={["g", "p"]} label={t("nav.projects")} />
+            <Row keys={["g", "a"]} label={t("nav.actions")} />
+            <Row keys={["g", "d"]} label={t("nav.delegated")} />
+            <Row keys={["g", "r"]} label={t("nav.rituals")} />
+            <Row keys={["g", "i"]} label={t("nav.ideas")} />
+            <Row keys={["g", "v"]} label={t("nav.reviews")} />
           </Section>
         </div>
       </DialogContent>

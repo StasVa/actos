@@ -885,7 +885,7 @@ const SessionBuilder: React.FC = () => {
               to="/sessions"
               className="text-[13px] text-text-tertiary hover:text-text-secondary transition-colors"
             >
-              Cancel
+              {t("sessionBuilder.cancel")}
             </Link>
             <button
               type="button"
@@ -893,9 +893,9 @@ const SessionBuilder: React.FC = () => {
               disabled={!canStart}
               title={
                 hasActiveSession
-                  ? "A session is already in progress"
+                  ? t("sessionBuilder.tooltip.activeExists")
                   : selectedIds.length === 0
-                  ? "Select at least one action"
+                  ? t("sessionBuilder.tooltip.selectAction")
                   : ""
               }
               className="text-[15px] font-medium rounded-[4px] transition-colors disabled:cursor-not-allowed"
@@ -905,7 +905,7 @@ const SessionBuilder: React.FC = () => {
                 color: canStart ? "hsl(var(--accent-foreground))" : "hsl(var(--text-tertiary))",
               }}
             >
-              Start session
+              {t("sessionBuilder.start")}
             </button>
           </div>
         </div>

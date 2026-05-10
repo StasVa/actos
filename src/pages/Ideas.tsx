@@ -453,14 +453,14 @@ const ReferencesSection: React.FC<{ idea: Idea }> = ({ idea }) => {
   const submit = () => {
     const u = url.trim();
     if (!u) return;
-    const t = refTitle.trim() || undefined;
+    const ttl = refTitle.trim() || undefined;
     if (editingId) {
       updateIdea(idea.id, {
-        references: refs.map((r) => (r.id === editingId ? { ...r, url: u, title: t } : r)),
+        references: refs.map((r) => (r.id === editingId ? { ...r, url: u, title: ttl } : r)),
       });
     } else {
       updateIdea(idea.id, {
-        references: [...refs, { id: localId(), url: u, title: t }],
+        references: [...refs, { id: localId(), url: u, title: ttl }],
       });
     }
     resetForm();
@@ -524,7 +524,7 @@ const ReferencesSection: React.FC<{ idea: Idea }> = ({ idea }) => {
                     setOpenMenuId(openMenuId === r.id ? null : r.id);
                   }}
                   className="opacity-0 group-hover:opacity-100 inline-flex items-center justify-center w-6 h-6 rounded-[3px] text-text-tertiary hover:bg-surface-elevated hover:text-text-primary transition-colors leading-none"
-                  aria-label="Reference options"
+                  aria-label={t("ideas.aria.refOptions")}
                 >
                   <span className="text-[14px] -mt-1">⋯</span>
                 </button>
@@ -534,13 +534,13 @@ const ReferencesSection: React.FC<{ idea: Idea }> = ({ idea }) => {
                       onClick={() => startEdit(r.id)}
                       className="block w-full text-left text-[12px] px-2 py-1.5 rounded-[3px] hover:bg-surface-hover text-text-primary"
                     >
-                      Edit
+                      {t("common.edit")}
                     </button>
                     <button
                       onClick={() => remove(r.id)}
                       className="block w-full text-left text-[12px] px-2 py-1.5 rounded-[3px] hover:bg-surface-hover text-text-warning"
                     >
-                      Remove
+                      {t("common.remove")}
                     </button>
                   </div>
                 )}
@@ -560,7 +560,7 @@ const ReferencesSection: React.FC<{ idea: Idea }> = ({ idea }) => {
               if (e.key === "Escape") resetForm();
             }}
             autoFocus
-            placeholder="https://..."
+            placeholder={t("ideas.placeholder.url")}
             className="bg-surface-elevated rounded-[4px] px-3 py-2 text-[13px] text-text-primary outline-none border border-transparent focus:border-border-default placeholder:text-text-tertiary"
           />
           <input
@@ -570,7 +570,7 @@ const ReferencesSection: React.FC<{ idea: Idea }> = ({ idea }) => {
               if (e.key === "Enter") submit();
               if (e.key === "Escape") resetForm();
             }}
-            placeholder="Optional title"
+            placeholder={t("ideas.placeholder.optionalTitle")}
             className="bg-surface-elevated rounded-[4px] px-3 py-2 text-[13px] text-text-primary outline-none border border-transparent focus:border-border-default placeholder:text-text-tertiary"
           />
           <div className="flex items-center gap-2">
@@ -579,13 +579,13 @@ const ReferencesSection: React.FC<{ idea: Idea }> = ({ idea }) => {
               disabled={!url.trim()}
               className="h-8 px-3 text-[12px] font-medium rounded-[4px] border border-[hsl(var(--accent))] text-[hsl(var(--accent))] hover:bg-surface-elevated transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              {editingId ? "Save" : "Add"}
+              {editingId ? t("ideas.button.save") : t("ideas.button.add")}
             </button>
             <button
               onClick={resetForm}
               className="h-8 px-2 text-[12px] text-text-tertiary hover:text-text-secondary transition-colors"
             >
-              Cancel
+              {t("common.cancel")}
             </button>
           </div>
         </div>
@@ -596,6 +596,7 @@ const ReferencesSection: React.FC<{ idea: Idea }> = ({ idea }) => {
 
 /* ===== Attachments section ===== */
 const AttachmentsSection: React.FC<{ idea: Idea }> = ({ idea }) => {
+  const { t } = useTranslation();
   const updateIdea = useStore((s) => s.updateIdea);
   const atts = idea.imageAttachments ?? [];
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
@@ -607,7 +608,7 @@ const AttachmentsSection: React.FC<{ idea: Idea }> = ({ idea }) => {
   const addFiles = async (files: FileList | File[]) => {
     const list = Array.from(files).filter((f) => ALLOWED.test(f.type));
     if (list.length === 0) {
-      toast.error("Only PNG, JPG, GIF, or WebP images are accepted.");
+      toast.error(t("ideas.toast.imageType"));
       return;
     }
     const readAsDataUrl = (file: File) =>
@@ -622,9 +623,13 @@ const AttachmentsSection: React.FC<{ idea: Idea }> = ({ idea }) => {
         list.map(async (f) => ({ id: localId(), dataUrl: await readAsDataUrl(f) })),
       );
       updateIdea(idea.id, { imageAttachments: [...atts, ...newAtts] });
-      toast.success(newAtts.length === 1 ? "Image attached" : `${newAtts.length} images attached`);
+      toast.success(
+        newAtts.length === 1
+          ? t("ideas.toast.imageAttached")
+          : t("ideas.toast.imagesAttached", { count: newAtts.length }),
+      );
     } catch {
-      toast.error("Failed to read image.");
+      toast.error(t("ideas.toast.imageRead"));
     }
   };
 
@@ -656,11 +661,11 @@ const AttachmentsSection: React.FC<{ idea: Idea }> = ({ idea }) => {
             onClick={() => fileInputRef.current?.click()}
             className="text-[12px] text-[hsl(var(--accent))] hover:underline"
           >
-            + Upload
+            {t("ideas.atts.add")}
           </button>
         }
       >
-        {`ATTACHMENTS · ${atts.length}`}
+        {t("ideas.atts.heading", { count: atts.length })}
       </SectionHeading>
       <input
         ref={fileInputRef}
@@ -676,7 +681,7 @@ const AttachmentsSection: React.FC<{ idea: Idea }> = ({ idea }) => {
 
       {atts.length === 0 ? (
         <div className="text-[12px] text-text-tertiary">
-          No attachments yet. Upload images for visual references.
+          {t("ideas.atts.empty")}
         </div>
       ) : (
         <div className="grid grid-cols-[repeat(auto-fill,minmax(80px,80px))] gap-2">
@@ -693,7 +698,7 @@ const AttachmentsSection: React.FC<{ idea: Idea }> = ({ idea }) => {
                   remove(a.id);
                 }}
                 className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 text-white text-[11px] leading-none opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
-                aria-label="Remove image"
+                aria-label={t("ideas.aria.removeImage")}
               >
                 ×
               </button>
@@ -720,6 +725,7 @@ const AttachmentsSection: React.FC<{ idea: Idea }> = ({ idea }) => {
 
 /* ===== Detail panel ===== */
 const IdeaDetail: React.FC<{ idea: Idea; mobile?: boolean }> = ({ idea, mobile = false }) => {
+  const { t } = useTranslation();
   const [overlay, setOverlay] = useState<OverlayMode>(null);
   const [confirmDiscard, setConfirmDiscard] = useState(false);
   const goal = useStore((s) => s.goals.find((g) => g.id === idea.goalId));
@@ -741,11 +747,18 @@ const IdeaDetail: React.FC<{ idea: Idea; mobile?: boolean }> = ({ idea, mobile =
   const captured = relativeAgo(idea.capturedAt);
 
   const commitTitle = () => {
-    const t = title.trim();
-    if (t && t !== idea.title) updateIdea(idea.id, { title: t });
+    const trimmed = title.trim();
+    if (trimmed && trimmed !== idea.title) updateIdea(idea.id, { title: trimmed });
   };
   const commitNote = () => {
     if ((idea.note ?? "") !== note) updateIdea(idea.id, { note: note.trim() || undefined });
+  };
+
+  const detailStatusLabel = (s: IdeaStatus): string => {
+    if (s === "converted_to_action") return t("ideas.detailStatus.convertedAction");
+    if (s === "converted_to_project") return t("ideas.detailStatus.convertedProject");
+    if (s === "discarded") return t("ideas.detailStatus.discarded");
+    return "";
   };
 
   return (
@@ -768,7 +781,7 @@ const IdeaDetail: React.FC<{ idea: Idea; mobile?: boolean }> = ({ idea, mobile =
           </div>
           {idea.status !== "captured" && (
             <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
-              {idea.status.replace(/_/g, " ")}
+              {detailStatusLabel(idea.status)}
             </span>
           )}
         </div>
@@ -787,13 +800,13 @@ const IdeaDetail: React.FC<{ idea: Idea; mobile?: boolean }> = ({ idea, mobile =
         </div>
 
         <div className="h-6" />
-        <SectionHeading>NOTE</SectionHeading>
+        <SectionHeading>{t("ideas.field.noteLabel")}</SectionHeading>
         <textarea
           value={note}
           onChange={(e) => setNote(e.target.value)}
           onBlur={commitNote}
           rows={4}
-          placeholder="Add a note…"
+          placeholder={t("ideas.placeholder.note")}
           className="w-full bg-surface-hover rounded-[4px] px-3 py-2 text-[14px] text-text-primary leading-[1.6] outline-none border border-transparent focus:border-border-default resize-none placeholder:text-text-tertiary"
         />
 
@@ -814,26 +827,26 @@ const IdeaDetail: React.FC<{ idea: Idea; mobile?: boolean }> = ({ idea, mobile =
                 onClick={() => setOverlay("action")}
                 className="w-full h-11 text-[14px] font-medium rounded-[4px] border border-border-default text-text-primary bg-transparent hover:bg-surface-hover transition-colors"
               >
-                Convert to action
+                {t("ideas.button.convertAction")}
               </button>
               <button
                 onClick={() => setOverlay("project")}
                 className="w-full h-11 text-[14px] font-medium rounded-[4px] border border-border-default text-text-primary bg-transparent hover:bg-surface-hover transition-colors"
               >
-                Convert to project
+                {t("ideas.button.convertProject")}
               </button>
               <button
                 onClick={() => setConfirmDiscard(true)}
                 className="mt-2 w-full h-11 text-[13px] text-text-tertiary hover:text-text-secondary transition-colors"
               >
-                Discard
+                {t("ideas.button.discard")}
               </button>
             </div>
           ) : (
             <div className="flex items-center gap-3">
-              <GhostButton onClick={() => setOverlay("action")}>Convert to action</GhostButton>
-              <GhostButton onClick={() => setOverlay("project")}>Convert to project</GhostButton>
-              <TertiaryLink onClick={() => setConfirmDiscard(true)}>Discard</TertiaryLink>
+              <GhostButton onClick={() => setOverlay("action")}>{t("ideas.button.convertAction")}</GhostButton>
+              <GhostButton onClick={() => setOverlay("project")}>{t("ideas.button.convertProject")}</GhostButton>
+              <TertiaryLink onClick={() => setConfirmDiscard(true)}>{t("ideas.button.discard")}</TertiaryLink>
             </div>
           )
         )}
@@ -847,13 +860,13 @@ const IdeaDetail: React.FC<{ idea: Idea; mobile?: boolean }> = ({ idea, mobile =
 
       <ConfirmModal
         open={confirmDiscard}
-        title="Discard this idea?"
-        body="It will be archived (visible under Discarded) but not deleted."
-        confirmLabel="Discard"
+        title={t("ideas.confirm.discard.title")}
+        body={t("ideas.confirm.discard.body")}
+        confirmLabel={t("ideas.confirm.discard.confirmLabel")}
         destructive
         onConfirm={() => {
           discardIdea(idea.id);
-          toast.success("Idea discarded");
+          toast.success(t("ideas.toast.discarded"));
           setConfirmDiscard(false);
         }}
         onCancel={() => setConfirmDiscard(false)}
@@ -863,24 +876,30 @@ const IdeaDetail: React.FC<{ idea: Idea; mobile?: boolean }> = ({ idea, mobile =
 };
 
 /* ===== Empty states ===== */
-const EmptyDetail: React.FC = () => (
-  <div className="h-full flex flex-col items-center justify-center text-center px-10">
-    <div className="text-[14px] text-text-secondary">Select an idea to view details</div>
-    <div className="mt-1 font-mono text-[11px] text-text-tertiary">or click "+ New idea" to capture one</div>
-  </div>
-);
+const EmptyDetail: React.FC = () => {
+  const { t } = useTranslation();
+  return (
+    <div className="h-full flex flex-col items-center justify-center text-center px-10">
+      <div className="text-[14px] text-text-secondary">{t("ideas.empty.select")}</div>
+      <div className="mt-1 font-mono text-[11px] text-text-tertiary">{t("ideas.empty.selectHint")}</div>
+    </div>
+  );
+};
 
-const EmptyFiltered: React.FC<{ onClear: () => void }> = ({ onClear }) => (
-  <div className="h-full flex flex-col items-center justify-center text-center px-10">
-    <div className="text-[14px] text-text-secondary">No ideas match these filters</div>
-    <div className="mt-1 font-mono text-[11px] text-text-tertiary">
-      Clear filters or change them above.
+const EmptyFiltered: React.FC<{ onClear: () => void }> = ({ onClear }) => {
+  const { t } = useTranslation();
+  return (
+    <div className="h-full flex flex-col items-center justify-center text-center px-10">
+      <div className="text-[14px] text-text-secondary">{t("ideas.empty.noMatch")}</div>
+      <div className="mt-1 font-mono text-[11px] text-text-tertiary">
+        {t("ideas.empty.filteredHint")}
+      </div>
+      <div className="mt-4">
+        <GhostButton onClick={onClear}>{t("common.clearFilters")}</GhostButton>
+      </div>
     </div>
-    <div className="mt-4">
-      <GhostButton onClick={onClear}>Clear filters</GhostButton>
-    </div>
-  </div>
-);
+  );
+};
 
 /* ===== Page ===== */
 
@@ -889,25 +908,34 @@ type GoalFilter = "all" | ID;
 type DateFilter = "all" | "7d" | "30d" | "month";
 type SortKey = "recent" | "oldest" | "title";
 
-const STATUS_OPTIONS: FilterOption<StatusFilter>[] = [
-  { value: "all", label: "All" },
-  { value: "captured", label: "Captured" },
-  { value: "converted", label: "Converted" },
-  { value: "discarded", label: "Discarded" },
-];
+const useStatusOptions = (): FilterOption<StatusFilter>[] => {
+  const { t } = useTranslation();
+  return [
+    { value: "all", label: t("ideas.filter.all") },
+    { value: "captured", label: t("ideas.status.captured") },
+    { value: "converted", label: t("ideas.status.converted") },
+    { value: "discarded", label: t("ideas.status.discarded") },
+  ];
+};
 
-const DATE_OPTIONS: FilterOption<DateFilter>[] = [
-  { value: "all", label: "All time" },
-  { value: "7d", label: "Last 7 days" },
-  { value: "30d", label: "Last 30 days" },
-  { value: "month", label: "This month" },
-];
+const useDateOptions = (): FilterOption<DateFilter>[] => {
+  const { t } = useTranslation();
+  return [
+    { value: "all", label: t("ideas.filter.allTime") },
+    { value: "7d", label: t("ideas.filter.last7days") },
+    { value: "30d", label: t("ideas.filter.last30days") },
+    { value: "month", label: t("ideas.filter.month") },
+  ];
+};
 
-const SORT_OPTIONS: FilterOption<SortKey>[] = [
-  { value: "recent", label: "Recent first" },
-  { value: "oldest", label: "Oldest first" },
-  { value: "title", label: "Title A–Z" },
-];
+const useSortOptions = (): FilterOption<SortKey>[] => {
+  const { t } = useTranslation();
+  return [
+    { value: "recent", label: t("ideas.sort.recent") },
+    { value: "oldest", label: t("ideas.sort.oldest") },
+    { value: "title", label: t("ideas.sort.titleAZ") },
+  ];
+};
 
 const useQueryGoal = (): ID | null => {
   const { search } = useLocation();
@@ -921,6 +949,7 @@ const NewIdeaModal: React.FC<{
   onClose: () => void;
   defaultGoalId?: ID;
 }> = ({ open, onClose, defaultGoalId }) => {
+  const { t } = useTranslation();
   const goals = useStore((s) => s.goals);
   const activeGoals = useMemo(() => goals.filter((g) => g.status === "active"), [goals]);
   const captureIdea = useStore((s) => s.captureIdea);
@@ -946,7 +975,7 @@ const NewIdeaModal: React.FC<{
 
   const tryClose = () => {
     if (dirty) {
-      const ok = window.confirm("Discard this idea?");
+      const ok = window.confirm(t("ideas.confirm.discard.title"));
       if (!ok) return;
     }
     onClose();
@@ -956,7 +985,7 @@ const NewIdeaModal: React.FC<{
     if (!canSubmit) return;
     const id = captureIdea({ title: title.trim(), goalId, note: note.trim() || undefined });
     selectIdea(id);
-    toast.success("Idea captured");
+    toast.success(t("ideas.toast.captured"));
     onClose();
   };
 
@@ -1015,10 +1044,12 @@ const NewIdeaModalBody: React.FC<{
   canSubmit: boolean;
   onCancel: () => void;
   onSubmit: () => void;
-}> = ({ inputRef, title, setTitle, goalId, setGoalId, note, setNote, activeGoals, canSubmit, onCancel, onSubmit }) => (
+}> = ({ inputRef, title, setTitle, goalId, setGoalId, note, setNote, activeGoals, canSubmit, onCancel, onSubmit }) => {
+  const { t } = useTranslation();
+  return (
   <div className="p-6 flex flex-col gap-4">
     <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-secondary">
-      NEW IDEA
+      {t("ideas.heading.newIdea")}
     </div>
     <input
       ref={inputRef}
@@ -1028,12 +1059,12 @@ const NewIdeaModalBody: React.FC<{
         if (e.key === "Enter") onSubmit();
         if (e.key === "Escape") onCancel();
       }}
-      placeholder="Idea title…"
+      placeholder={t("ideas.placeholder.title")}
       className="bg-surface-hover rounded-[4px] px-3 py-3 text-[16px] text-text-primary outline-none border border-transparent focus:border-border-default placeholder:text-text-tertiary"
     />
     <div className="flex flex-col gap-1.5">
       <span className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
-        GOAL
+        {t("ideas.field.goalLabel")}
       </span>
       <select
         value={goalId}
@@ -1049,13 +1080,13 @@ const NewIdeaModalBody: React.FC<{
     </div>
     <div className="flex flex-col gap-1.5">
       <span className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
-        NOTE
+        {t("ideas.field.noteLabel")}
       </span>
       <textarea
         value={note}
         onChange={(e) => setNote(e.target.value)}
         rows={3}
-        placeholder="Optional…"
+        placeholder={t("ideas.placeholder.optional")}
         className="bg-surface-hover rounded-[4px] px-3 py-2 text-[14px] text-text-primary outline-none border border-transparent focus:border-border-default resize-none placeholder:text-text-tertiary"
       />
     </div>
@@ -1064,7 +1095,7 @@ const NewIdeaModalBody: React.FC<{
         onClick={onCancel}
         className="h-9 px-4 text-[13px] text-text-tertiary hover:text-text-secondary transition-colors"
       >
-        Cancel
+        {t("common.cancel")}
       </button>
       <button
         onClick={onSubmit}
@@ -1072,11 +1103,12 @@ const NewIdeaModalBody: React.FC<{
         className="h-9 px-4 text-[13px] font-medium rounded-[4px] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         style={{ background: "hsl(var(--accent))", color: "hsl(var(--accent-foreground))" }}
       >
-        Create
+        {t("ideas.button.create")}
       </button>
     </div>
   </div>
-);
+  );
+};
 
 /* ===== Idea editor sheet (right slide-in / bottom on mobile) ===== */
 const IdeaEditorSheet: React.FC<{
@@ -1181,8 +1213,8 @@ const Ideas: React.FC = () => {
       (i) => i.status === "converted_to_action" || i.status === "converted_to_project",
     ).length;
     const discarded = ideas.filter((i) => i.status === "discarded").length;
-    return `${captured} CAPTURED · ${converted} CONVERTED · ${discarded} DISCARDED`;
-  }, [ideas]);
+    return t("ideas.meta", { captured, converted, discarded });
+  }, [ideas, t]);
 
   const anyApplied =
     statusFilter !== "captured" ||
@@ -1199,15 +1231,19 @@ const Ideas: React.FC = () => {
 
   const goalOptions: FilterOption<GoalFilter>[] = useMemo(
     () => [
-      { value: "all", label: "All" },
+      { value: "all", label: t("ideas.filter.all") },
       ...activeGoals.map((g) => ({
         value: g.id as GoalFilter,
         label: g.title,
         dot: `hsl(var(--${g.color}))`,
       })),
     ],
-    [activeGoals],
+    [activeGoals, t],
   );
+
+  const statusOptions = useStatusOptions();
+  const dateOptions = useDateOptions();
+  const sortOptions = useSortOptions();
 
   const editorOpen = !!selectedIdeaId && ideas.some((i) => i.id === selectedIdeaId);
   const selected = ideas.find((i) => i.id === selectedIdeaId) ?? null;
@@ -1246,31 +1282,31 @@ const Ideas: React.FC = () => {
             title={t("ideas.page.title")}
             meta={meta}
             cta={{
-              label: "+ New idea",
+              label: t("ideas.newIdea"),
               onClick: () => setShowNew(true),
-              ariaLabel: "New idea",
+              ariaLabel: t("ideas.aria.new"),
             }}
             filters={
               <>
                 <FilterDropdown
-                  label="STATUS"
+                  label={t("ideas.filter.label.status")}
                   value={statusFilter}
                   defaultValue="captured"
-                  options={STATUS_OPTIONS}
+                  options={statusOptions}
                   onChange={(v) => setStatusFilter(v)}
                 />
                 <FilterDropdown
-                  label="GOAL"
+                  label={t("ideas.filter.label.goal")}
                   value={goalFilter}
                   defaultValue="all"
                   options={goalOptions}
                   onChange={(v) => setGoalFilter(v)}
                 />
                 <FilterDropdown
-                  label="DATE"
+                  label={t("ideas.filter.label.date")}
                   value={dateFilter}
                   defaultValue="all"
-                  options={DATE_OPTIONS}
+                  options={dateOptions}
                   onChange={(v) => setDateFilter(v)}
                 />
                 {anyApplied && (
@@ -1278,13 +1314,13 @@ const Ideas: React.FC = () => {
                     onClick={clearFilters}
                     className="ml-1 text-[12px] text-text-tertiary hover:text-text-secondary transition-colors shrink-0"
                   >
-                    Clear filters
+                    {t("common.clearFilters")}
                   </button>
                 )}
               </>
             }
             sort={
-              <SortDropdown value={sortKey} options={SORT_OPTIONS} onChange={(v) => setSortKey(v)} />
+              <SortDropdown value={sortKey} options={sortOptions} onChange={(v) => setSortKey(v)} />
             }
           />
         </div>
@@ -1293,9 +1329,9 @@ const Ideas: React.FC = () => {
         <div className="flex-1 overflow-y-auto min-h-0">
           {ideas.length === 0 ? (
             <EmptyState
-              headline="No ideas yet."
-              description="Capture rough thoughts here before they become actions or projects. Ideas wait until you decide what to do with them."
-              ctaLabel="+ New idea"
+              headline={t("ideas.empty.headline")}
+              description={t("ideas.empty.description")}
+              ctaLabel={t("ideas.newIdea")}
               onCta={() => setShowNew(true)}
             />
           ) : filtered.length === 0 ? (
@@ -1308,7 +1344,7 @@ const Ideas: React.FC = () => {
               {grouped.terminal!.length > 0 && (
                 <>
                   <GroupHeader
-                    label="TERMINAL"
+                    label={t("ideas.group.terminal")}
                     count={grouped.terminal!.length}
                     collapsed={terminalCollapsed}
                     onToggle={() => setTerminalCollapsed((v) => !v)}

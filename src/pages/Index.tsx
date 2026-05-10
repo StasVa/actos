@@ -1602,14 +1602,15 @@ export const RecentlyClosed: React.FC = () => {
 };
 
 export const Delegated: React.FC = () => {
+  const { t } = useTranslation();
   const actions = useStore((s) => s.actions);
   const items = actions.filter((a) => a.status === "delegated").slice(0, 4);
   return (
     <div className="p-4">
-      <TinyHeader>DELEGATED · {items.length} ACTIVE</TinyHeader>
+      <TinyHeader>{t("home.delegated.title", { count: items.length })}</TinyHeader>
       <div className="mt-3 space-y-1.5">
         {items.length === 0 && (
-          <div className="font-mono text-[11px] text-text-tertiary">No delegations.</div>
+          <div className="font-mono text-[11px] text-text-tertiary">{t("home.delegated.empty")}</div>
         )}
         {items.map((a) => (
           <div key={a.id} className="flex items-baseline gap-1 min-w-0">
@@ -1621,7 +1622,7 @@ export const Delegated: React.FC = () => {
         ))}
       </div>
       <Link to="/delegated" className="inline-block mt-2 text-[12px] text-accent hover:text-accent-hover">
-        View all →
+        {t("home.delegated.viewAll")}
       </Link>
     </div>
   );

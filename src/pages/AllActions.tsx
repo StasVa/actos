@@ -77,6 +77,7 @@ const ActionRow: React.FC<{ action: Action; selected: boolean; onSelect: () => v
   selected,
   onSelect,
 }) => {
+  const { t } = useTranslation();
   const changeStatus = useStore((s) => s.changeActionStatus);
   const storeAction = useStore((s) => s.actions.find((x) => x.id === action.id));
   const openPanel = useStore((s) => s.openPanel);
@@ -95,17 +96,17 @@ const ActionRow: React.FC<{ action: Action; selected: boolean; onSelect: () => v
       const today = new Date().toISOString().slice(0, 10);
       changeStatus(action.id, "planned", { scheduledDate: today });
       toast.dismiss();
-      toast.success("Action re-opened");
+      toast.success(t("allActions.toast.reopened"));
       return;
     }
     if (!storeAction?.impact || !storeAction?.timeEstimateMinutes) {
-      toast.error("Set Impact and Time before marking done");
+      toast.error(t("allActions.toast.markDoneRequired"));
       openPanel({ kind: "action", mode: "edit", id: action.id });
       return;
     }
     changeStatus(action.id, "done");
     toast.dismiss();
-    toast.success("Action marked done");
+    toast.success(t("allActions.toast.markedDone"));
   };
 
   const bottomBits: React.ReactNode[] = [];
@@ -140,7 +141,7 @@ const ActionRow: React.FC<{ action: Action; selected: boolean; onSelect: () => v
               onClick={handleToggle}
               disabled={checkboxDisabled}
               title={checkboxDisabled ? "Re-open this action via the editor" : undefined}
-              aria-label={isDone ? "Re-open" : "Mark done"}
+              aria-label={isDone ? t("allActions.aria.reopen") : t("allActions.aria.markDone")}
               className="inline-flex items-center justify-center rounded-[2px] border shrink-0"
               style={{
                 width: 16,
@@ -234,17 +235,18 @@ const StatusPill: React.FC<{ status: ActionStatus }> = ({ status }) => (
 );
 
 const ActionDetail: React.FC<{ action: Action }> = ({ action }) => {
+  const { t } = useTranslation();
   const openPanel = useStore((s) => s.openPanel);
   const changeActionStatus = useStore((s) => s.changeActionStatus);
   const handleEdit = () =>
     openPanel({ kind: "action", mode: "edit", id: action.id });
   const handleMarkDone = () => {
     changeActionStatus(action.id, "done");
-    toast.success("Action completed");
+    toast.success(t("allActions.toast.completed"));
   };
   const handleReopen = () => {
     changeActionStatus(action.id, "planned");
-    toast.success("Action re-opened");
+    toast.success(t("allActions.toast.reopened"));
   };
   const goal = GOALS[action.goal];
   const isOverdue =
@@ -253,13 +255,13 @@ const ActionDetail: React.FC<{ action: Action }> = ({ action }) => {
     action.expectedReturnDelta < 0;
 
   const quickInfoBits: React.ReactNode[] = [
-    `IMPACT ${action.impact}`,
+    t("allActions.detail.impact", { n: action.impact }),
     formatTime(action.timeMinutes),
   ];
   if (action.status === "planned" && action.scheduledLabel) {
-    quickInfoBits.push(`SCHEDULED ${action.scheduledLabel}`);
+    quickInfoBits.push(t("allActions.detail.scheduled", { label: action.scheduledLabel }));
   }
-  quickInfoBits.push(`CREATED ${action.createdLabel.toUpperCase()}`);
+  quickInfoBits.push(t("allActions.detail.created", { label: action.createdLabel.toUpperCase() }));
 
   return (
     <div className="px-10 py-8">
@@ -296,7 +298,7 @@ const ActionDetail: React.FC<{ action: Action }> = ({ action }) => {
             <span>→ {action.delegate.toUpperCase()}</span>
             {action.expectedReturnLabel && (
               <>
-                <span> · EXPECTED </span>
+                <span> · {t("allActions.detail.expected")} </span>
                 <span style={{ color: isOverdue ? "hsl(var(--text-warning))" : undefined }}>
                   {action.expectedReturnLabel}
                 </span>
@@ -310,7 +312,7 @@ const ActionDetail: React.FC<{ action: Action }> = ({ action }) => {
         <>
           <div className="h-8" />
           <div className="font-mono text-[11px] uppercase tracking-[0.08em] text-text-secondary">
-            NOTES
+            {t("allActions.detail.notesHeading")}
           </div>
           <div className="h-3" />
           <p className="text-[14px] text-text-primary leading-[1.6]">{action.notes}</p>
@@ -320,24 +322,24 @@ const ActionDetail: React.FC<{ action: Action }> = ({ action }) => {
       <div className="h-12" />
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <GhostButton onClick={handleEdit}>Edit action</GhostButton>
+          <GhostButton onClick={handleEdit}>{t("allActions.editAction")}</GhostButton>
           {isActive(action.status) && (
             <GhostButton accent onClick={handleMarkDone}>
-              Mark done
+              {t("common.markDone")}
             </GhostButton>
           )}
           {action.status === "delegated" && (
             <>
               <GhostButton accent onClick={handleMarkDone}>
-                Mark done
+                {t("common.markDone")}
               </GhostButton>
-              <GhostButton onClick={handleReopen}>Re-open</GhostButton>
+              <GhostButton onClick={handleReopen}>{t("common.reopen")}</GhostButton>
             </>
           )}
           {(action.status === "done" ||
             action.status === "dropped" ||
             action.status === "cancelled") && (
-            <GhostButton onClick={handleReopen}>Re-open</GhostButton>
+            <GhostButton onClick={handleReopen}>{t("common.reopen")}</GhostButton>
           )}
         </div>
         <button
@@ -353,23 +355,29 @@ const ActionDetail: React.FC<{ action: Action }> = ({ action }) => {
 };
 
 /* ===== Empty states ===== */
-const EmptyDetail: React.FC = () => (
-  <div className="h-full flex flex-col items-center justify-center text-center px-10">
-    <div className="text-[14px] text-text-secondary">Select an action to view details</div>
-  </div>
-);
+const EmptyDetail: React.FC = () => {
+  const { t } = useTranslation();
+  return (
+    <div className="h-full flex flex-col items-center justify-center text-center px-10">
+      <div className="text-[14px] text-text-secondary">{t("allActions.empty.select")}</div>
+    </div>
+  );
+};
 
-const EmptyFiltered: React.FC<{ onClear: () => void }> = ({ onClear }) => (
-  <div className="h-full flex flex-col items-center justify-center text-center px-10">
-    <div className="text-[14px] text-text-secondary">No actions match these filters</div>
-    <div className="mt-1 font-mono text-[11px] text-text-tertiary">
-      Clear filters or change them above.
+const EmptyFiltered: React.FC<{ onClear: () => void }> = ({ onClear }) => {
+  const { t } = useTranslation();
+  return (
+    <div className="h-full flex flex-col items-center justify-center text-center px-10">
+      <div className="text-[14px] text-text-secondary">{t("allActions.empty.noMatch")}</div>
+      <div className="mt-1 font-mono text-[11px] text-text-tertiary">
+        {t("allActions.filteredEmpty.hint")}
+      </div>
+      <div className="mt-4">
+        <GhostButton onClick={onClear}>{t("common.clearFilters")}</GhostButton>
+      </div>
     </div>
-    <div className="mt-4">
-      <GhostButton onClick={onClear}>Clear filters</GhostButton>
-    </div>
-  </div>
-);
+  );
+};
 
 /* ===== Page ===== */
 type StatusFilter = "all" | ActionStatus;
@@ -422,12 +430,14 @@ function makeDateOptions(t: (k: string) => string): FilterOption<DateFilter>[] {
   ];
 }
 
-const GOAL_OPTIONS: FilterOption<GoalFilter>[] = [
-  { value: "all", label: "All" },
-  { value: "g1", label: "Launch YouTube", dot: GOALS.g1.color },
-  { value: "g2", label: "Lose 5 kg", dot: GOALS.g2.color },
-  { value: "g3", label: "Read 24 books", dot: GOALS.g3.color },
-];
+function makeGoalOptions(t: (k: string) => string): FilterOption<GoalFilter>[] {
+  return [
+    { value: "all", label: t("common.all") },
+    { value: "g1", label: "Launch YouTube", dot: GOALS.g1.color },
+    { value: "g2", label: "Lose 5 kg", dot: GOALS.g2.color },
+    { value: "g3", label: "Read 24 books", dot: GOALS.g3.color },
+  ];
+}
 
 function makeSortOptions(t: (k: string) => string): FilterOption<SortKey>[] {
   return [
@@ -455,6 +465,7 @@ const AllActions: React.FC = () => {
   const STATUS_OPTIONS = useMemo(() => makeStatusOptions(t), [t]);
   const DATE_OPTIONS = useMemo(() => makeDateOptions(t), [t]);
   const SORT_OPTIONS = useMemo(() => makeSortOptions(t), [t]);
+  const GOAL_OPTIONS = useMemo(() => makeGoalOptions(t), [t]);
 
   // Live store data → legacy renderer shape (rendering JSX is unchanged).
   const storeActions = useStore((s) => s.actions);
@@ -490,8 +501,8 @@ const AllActions: React.FC = () => {
     const active = ACTIONS.filter((a) => isActive(a.status)).length;
     const done = ACTIONS.filter((a) => a.status === "done").length;
     const delegated = ACTIONS.filter((a) => a.status === "delegated").length;
-    return `${total} ACTIONS · ${active} ACTIVE · ${done} DONE · ${delegated} DELEGATED`;
-  }, [ACTIONS]);
+    return t("allActions.meta", { total, active, done, delegated });
+  }, [ACTIONS, t]);
 
   const createdAtById = useMemo(() => {
     const m: Record<string, number> = {};
@@ -637,20 +648,20 @@ const AllActions: React.FC = () => {
           {ACTIONS.length === 0 ? (
             !hasActiveGoals ? (
               <EmptyState
-                headline="Goals come first."
-                description={`A goal is a result you want to reach — like "$10k MRR" or "Pass C1 Spanish exam". Create one, then add actions under its projects.`}
-                ctaLabel="+ Create your first goal"
+                headline={t("allActions.empty.noGoals.headline")}
+                description={t("allActions.empty.noGoals.description")}
+                ctaLabel={t("goals.empty.noGoals.cta")}
                 onCta={() => navigate("/onboarding/goal")}
               />
             ) : (
               <EmptyState
-                headline="No actions yet."
-                description="Actions are the concrete next steps under your projects. Capture them here as you think of them, then mark them done as you complete them."
-                ctaLabel="+ New action"
+                headline={t("allActions.empty.noActions.headline")}
+                description={t("allActions.empty.noActions.description")}
+                ctaLabel={t("allActions.empty.noActions.cta")}
                 onCta={goNew}
                 hint={
                   storeProjects.filter((p) => !p.isDraft && p.status === "active").length === 0
-                    ? "You'll need a goal and project first."
+                    ? t("allActions.empty.noActions.hint")
                     : null
                 }
               />
@@ -670,7 +681,7 @@ const AllActions: React.FC = () => {
               {grouped.terminal!.length > 0 && (
                 <>
                   <GroupHeader
-                    label="TERMINAL"
+                    label={t("common.label.terminal")}
                     count={grouped.terminal!.length}
                     collapsible
                     collapsed={terminalCollapsed}

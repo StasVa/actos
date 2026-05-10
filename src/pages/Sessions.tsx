@@ -11,6 +11,7 @@ import { FilterDropdown, FilterOption } from "@/components/FilterDropdown";
 import { SortDropdown } from "@/components/SortDropdown";
 import type { Action, Goal, ID, Session } from "@/types";
 import { formatTime } from "@/lib/format";
+import i18n from "@/i18n";
 
 /* ───────── Helpers ───────── */
 
@@ -30,7 +31,7 @@ function outcomeFromSession(s: Session, actions: Action[]): number {
     .reduce((sum, a) => sum + (a?.impact ?? 0), 0);
 }
 
-function fmtDateTime(iso: string): string {
+function fmtDateTime(iso: string, t: (k: string, opts?: any) => string): string {
   const d = new Date(iso);
   const today = new Date();
   const yesterday = new Date(today);
@@ -39,32 +40,40 @@ function fmtDateTime(iso: string): string {
     a.getFullYear() === b.getFullYear() &&
     a.getMonth() === b.getMonth() &&
     a.getDate() === b.getDate();
-  const time = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
-  if (isSameDay(d, today)) return `Today, ${time}`;
-  if (isSameDay(d, yesterday)) return `Yesterday, ${time}`;
-  return `${d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}, ${time}`;
+  const lng = i18n.language || "en";
+  const time = d.toLocaleTimeString(lng, { hour: "numeric", minute: "2-digit" });
+  if (isSameDay(d, today)) return t("sessions.dateTime.today", { time });
+  if (isSameDay(d, yesterday)) return t("sessions.dateTime.yesterday", { time });
+  const date = d.toLocaleDateString(lng, { weekday: "short", month: "short", day: "numeric" });
+  return t("sessions.dateTime.other", { date, time });
 }
 
-function fmtRelative(iso: string): string {
+function fmtRelative(iso: string, t: (k: string, opts?: any) => string): string {
   const ms = Date.now() - new Date(iso).getTime();
   const m = Math.floor(ms / 60000);
-  if (m < 1) return "just now";
-  if (m < 60) return `${m}m ago`;
+  if (m < 1) return t("sessions.relTime.justNow");
+  if (m < 60) return t("sessions.relTime.minAgo", { n: m });
   const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h ago`;
-  return `${Math.floor(h / 24)}d ago`;
+  if (h < 24) return t("sessions.relTime.hoursAgo", { n: h });
+  return t("sessions.relTime.daysAgo", { n: Math.floor(h / 24) });
 }
 
 /* ───────── Status pill ───────── */
 
 const StatusPill: React.FC<{ status: Session["status"] }> = ({ status }) => {
+  const { t } = useTranslation();
   const color =
     status === "completed"
       ? "hsl(var(--state-active))"
       : status === "aborted"
       ? "hsl(var(--text-warning))"
       : "hsl(var(--accent))";
-  const label = status === "in_progress" ? "ACTIVE" : status.toUpperCase();
+  const label =
+    status === "in_progress"
+      ? t("sessions.statusActive")
+      : status === "completed"
+      ? t("sessions.statusCompleted")
+      : t("sessions.statusAborted");
   return (
     <span
       className="font-mono text-[11px] uppercase tracking-[0.06em] px-2 py-[2px] rounded-[3px]"
@@ -82,6 +91,7 @@ const SessionRow: React.FC<{
   outcome: number;
   onClick: () => void;
 }> = ({ session, outcome, onClick }) => {
+  const { t } = useTranslation();
   const dur = durationMinutes(session);
   const planned = plannedMinutes(session);
   const doneCount = session.completedActionIds.length;
@@ -90,20 +100,29 @@ const SessionRow: React.FC<{
 
   let modeLine: string;
   if (session.mode === "continuous") {
-    modeLine = `Continuous · ${dur != null ? `${dur}min focused` : `${session.workDuration}min planned`}`;
+    const label =
+      dur != null
+        ? t("sessions.row.minFocused", { n: dur })
+        : t("sessions.row.minPlanned", { n: session.workDuration });
+    modeLine = t("sessions.row.continuous", { label });
   } else {
-    const mode = session.mode === "pomodoro" ? "Pomodoro" : "Custom";
-    modeLine = `${mode} · ${session.workDuration}min × ${session.cyclesCompleted}/${session.cyclesPlanned} cycles`;
+    const mode = session.mode === "pomodoro" ? t("sessions.section.modePomodoro") : t("sessions.modeCustom");
+    modeLine = t("sessions.row.cycles", {
+      mode,
+      work: session.workDuration,
+      done: session.cyclesCompleted,
+      total: session.cyclesPlanned,
+    });
   }
 
   const stats: string[] = [];
-  if (outcome > 0) stats.push(`+${outcome} value`);
-  if (doneCount > 0) stats.push(`${doneCount} done`);
-  if (droppedCount > 0) stats.push(`${droppedCount} dropped`);
+  if (outcome > 0) stats.push(t("sessions.stats.value", { n: outcome }));
+  if (doneCount > 0) stats.push(t("sessions.stats.done", { n: doneCount }));
+  if (droppedCount > 0) stats.push(t("sessions.stats.dropped", { n: droppedCount }));
 
   const rightLabel =
     session.status === "aborted" && dur != null
-      ? `${formatTime(dur)} of ${formatTime(planned)} planned`
+      ? t("sessions.row.ofPlanned", { actual: formatTime(dur), planned: formatTime(planned) })
       : durStr;
 
   return (
@@ -114,7 +133,7 @@ const SessionRow: React.FC<{
     >
       <div className="flex items-center justify-between gap-3">
         <div className="text-[14px] font-medium text-text-primary">
-          {fmtDateTime(session.startedAt)}
+          {fmtDateTime(session.startedAt, t)}
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <StatusPill status={session.status} />
@@ -141,6 +160,7 @@ const DetailRow: React.FC<{
   goal: Goal | undefined;
   onClick: () => void;
 }> = ({ action, status, goal, onClick }) => {
+  const { t } = useTranslation();
   if (!action) return null;
   const goalColor = goal ? `hsl(var(--${goal.color}))` : "hsl(var(--border-default))";
   const pillColor =
@@ -149,7 +169,12 @@ const DetailRow: React.FC<{
       : status === "dropped"
       ? "hsl(var(--text-warning))"
       : "hsl(var(--text-tertiary))";
-  const pillLabel = status === "untouched" ? "NOT TOUCHED" : status.toUpperCase();
+  const pillLabel =
+    status === "untouched"
+      ? t("common.label.notTouched")
+      : status === "done"
+      ? t("common.label.done")
+      : t("common.label.dropped");
   return (
     <div
       onClick={onClick}
@@ -181,6 +206,7 @@ const SessionDetailPanel: React.FC<{
   onClose: () => void;
   onDelete: () => void;
 }> = ({ session, onClose, onDelete }) => {
+  const { t } = useTranslation();
   const actions = useStore((s) => s.actions);
   const goals = useStore((s) => s.goals);
   const openPanel = useStore((s) => s.openPanel);
@@ -189,8 +215,19 @@ const SessionDetailPanel: React.FC<{
   const dur = durationMinutes(session);
   const outcome = outcomeFromSession(session, actions);
 
-  const breakStr = session.mode === "continuous" ? "—" : `${session.breakDuration}min break`;
-  const config = `${session.mode[0].toUpperCase() + session.mode.slice(1)} · ${session.workDuration}min work / ${breakStr} · ${session.cyclesPlanned} cycles planned`;
+  const breakStr = session.mode === "continuous" ? "—" : t("sessions.detail.breakMin", { n: session.breakDuration });
+  const modeLabel =
+    session.mode === "pomodoro"
+      ? t("sessions.section.modePomodoro")
+      : session.mode === "continuous"
+      ? t("sessions.modeContinuous")
+      : t("sessions.modeCustom");
+  const config = t("sessions.detail.config", {
+    mode: modeLabel,
+    work: session.workDuration,
+    breakStr,
+    cycles: session.cyclesPlanned,
+  });
 
   return (
     <div
@@ -205,7 +242,7 @@ const SessionDetailPanel: React.FC<{
         <div className="flex items-start justify-between p-5 border-b border-border-subtle">
           <div>
             <div className="text-[18px] font-medium text-text-primary">
-              {fmtDateTime(session.startedAt)}
+              {fmtDateTime(session.startedAt, t)}
             </div>
             <div className="mt-2">
               <StatusPill status={session.status} />
@@ -215,7 +252,7 @@ const SessionDetailPanel: React.FC<{
             <button
               onClick={() => setMenuOpen((v) => !v)}
               className="w-7 h-7 inline-flex items-center justify-center rounded-[3px] text-text-tertiary hover:bg-surface-hover hover:text-text-primary"
-              aria-label="Session options"
+              aria-label={t("sessions.detail.aria.options")}
             >
               <span className="text-[16px] -mt-1">⋯</span>
             </button>
@@ -228,14 +265,14 @@ const SessionDetailPanel: React.FC<{
                   }}
                   className="block w-full text-left text-[12px] px-2 py-1.5 rounded-[3px] hover:bg-surface-hover text-text-warning"
                 >
-                  Delete session
+                  {t("sessions.detail.menu.delete")}
                 </button>
               </div>
             )}
             <button
               onClick={onClose}
               className="w-7 h-7 inline-flex items-center justify-center rounded-[3px] text-text-tertiary hover:bg-surface-hover hover:text-text-primary"
-              aria-label="Close"
+              aria-label={t("sessions.detail.aria.close")}
             >
               ✕
             </button>
@@ -248,10 +285,10 @@ const SessionDetailPanel: React.FC<{
 
             <div className="space-y-1.5">
               <div className="text-[14px] text-text-primary">
-                Actual: {dur != null ? `${dur}min` : "—"}
+                {t("sessions.detail.actual", { label: dur != null ? `${dur}min` : "—" })}
               </div>
               <div className="text-[14px] text-text-primary">
-                Completed {session.cyclesCompleted} of {session.cyclesPlanned} cycles
+                {t("sessions.detail.completedCycles", { done: session.cyclesCompleted, total: session.cyclesPlanned })}
               </div>
               <div
                 className="text-[14px]"
@@ -259,16 +296,16 @@ const SessionDetailPanel: React.FC<{
                   color: outcome > 0 ? "hsl(var(--state-active))" : "hsl(var(--text-secondary))",
                 }}
               >
-                {outcome > 0 ? `+${outcome} Impact added to active goals` : "+0 Impact added"}
+                {outcome > 0 ? t("sessions.detail.impactAdded", { n: outcome }) : t("sessions.detail.zeroImpact")}
               </div>
             </div>
 
             <div>
               <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-secondary mb-2">
-                ACTIONS · {session.plannedActionIds.length} PLANNED
+                {t("sessions.detail.actionsHeader", { n: session.plannedActionIds.length })}
               </div>
               {session.plannedActionIds.length === 0 ? (
-                <div className="text-[13px] text-text-tertiary">No actions were planned.</div>
+                <div className="text-[13px] text-text-tertiary">{t("sessions.detail.noActions")}</div>
               ) : (
                 <div className="border-t border-border-subtle">
                   {session.plannedActionIds.map((aid) => {
@@ -302,12 +339,18 @@ const SessionDetailPanel: React.FC<{
 /* ───────── Active session banner ───────── */
 
 const ActiveSessionBanner: React.FC<{ session: Session }> = ({ session }) => {
+  const { t } = useTranslation();
   const planned = plannedMinutes(session);
   const elapsed = Math.max(0, Math.round((Date.now() - new Date(session.startedAt).getTime()) / 60000));
   const progress =
     session.mode === "continuous"
-      ? `${elapsed}min elapsed`
-      : `${session.cyclesCompleted}/${session.cyclesPlanned} cycles · ${elapsed}min of ~${planned}min`;
+      ? t("sessions.banner.elapsed", { n: elapsed })
+      : t("sessions.banner.cyclesProgress", {
+          done: session.cyclesCompleted,
+          total: session.cyclesPlanned,
+          elapsed,
+          planned,
+        });
   return (
     <div
       className="rounded-[6px] border border-border-subtle p-5 flex items-center justify-between gap-4"
@@ -318,10 +361,10 @@ const ActiveSessionBanner: React.FC<{ session: Session }> = ({ session }) => {
           className="font-mono text-[11px] uppercase tracking-[0.06em]"
           style={{ color: "hsl(var(--accent))" }}
         >
-          ACTIVE SESSION
+          {t("sessions.banner.label")}
         </div>
         <div className="mt-1 font-mono text-[12px] text-text-secondary">
-          Started {fmtRelative(session.startedAt)} · {progress}
+          {t("sessions.banner.startedProgress", { rel: fmtRelative(session.startedAt, t), progress })}
         </div>
       </div>
       <Link
@@ -332,7 +375,7 @@ const ActiveSessionBanner: React.FC<{ session: Session }> = ({ session }) => {
           color: "hsl(var(--accent-foreground))",
         }}
       >
-        Resume
+        {t("sessions.banner.resume")}
       </Link>
     </div>
   );
@@ -340,43 +383,33 @@ const ActiveSessionBanner: React.FC<{ session: Session }> = ({ session }) => {
 
 /* ───────── Page ───────── */
 
-const PrimaryButton: React.FC<{ onClick?: () => void; children: React.ReactNode }> = ({
-  onClick,
-  children,
-}) => (
-  <button
-    onClick={onClick}
-    className="text-[15px] font-medium rounded-[4px] transition-colors"
-    style={{
-      padding: "12px 24px",
-      background: "hsl(var(--accent))",
-      color: "hsl(var(--accent-foreground))",
-    }}
-  >
-    {children}
-  </button>
-);
-
 type ModeFilter = "all" | "pomodoro" | "continuous";
 type DateFilter = "all" | "7" | "30" | "90";
 type SSortKey = "recent" | "oldest" | "duration" | "outcome";
-const MODE_OPTIONS: FilterOption<ModeFilter>[] = [
-  { value: "all", label: "All" },
-  { value: "pomodoro", label: "Pomodoro" },
-  { value: "continuous", label: "Continuous" },
-];
-const SDATE_OPTIONS: FilterOption<DateFilter>[] = [
-  { value: "all", label: "All time" },
-  { value: "7", label: "Last 7 days" },
-  { value: "30", label: "Last 30 days" },
-  { value: "90", label: "Last 90 days" },
-];
-const SSORT_OPTIONS: FilterOption<SSortKey>[] = [
-  { value: "recent", label: "Recent first" },
-  { value: "oldest", label: "Oldest first" },
-  { value: "duration", label: "Longest" },
-  { value: "outcome", label: "Most value" },
-];
+
+function useModeOptions(t: (k: string) => string): FilterOption<ModeFilter>[] {
+  return [
+    { value: "all", label: t("common.all") },
+    { value: "pomodoro", label: t("sessions.section.modePomodoro") },
+    { value: "continuous", label: t("sessions.modeContinuous") },
+  ];
+}
+function useDateOptions(t: (k: string) => string): FilterOption<DateFilter>[] {
+  return [
+    { value: "all", label: t("actions.filter.allTime") },
+    { value: "7", label: t("sessions.filter.dateLast7") },
+    { value: "30", label: t("sessions.filter.dateLast30") },
+    { value: "90", label: t("sessions.filter.dateLast90") },
+  ];
+}
+function useSortOptions(t: (k: string) => string): FilterOption<SSortKey>[] {
+  return [
+    { value: "recent", label: t("actions.sort.recent") },
+    { value: "oldest", label: t("actions.sort.oldest") },
+    { value: "duration", label: t("common.sort.longest") },
+    { value: "outcome", label: t("common.sort.mostValue") },
+  ];
+}
 
 const Sessions: React.FC = () => {
   const { t } = useTranslation();
@@ -391,6 +424,10 @@ const Sessions: React.FC = () => {
   const [modeFilter, setModeFilter] = useState<ModeFilter>("all");
   const [dateFilter, setDateFilter] = useState<DateFilter>("all");
   const [sortKey, setSortKey] = useState<SSortKey>("recent");
+
+  const MODE_OPTIONS = useModeOptions(t);
+  const SDATE_OPTIONS = useDateOptions(t);
+  const SSORT_OPTIONS = useSortOptions(t);
 
   const activeSession = useMemo(
     () => sessions.find((s) => s.status === "in_progress") ?? null,
@@ -453,23 +490,23 @@ const Sessions: React.FC = () => {
         <div className="px-4 md:px-10 pt-6 pb-4">
           <PageHeader
             title={t("sessions.page.title")}
-            meta={`${stats.count} SESSIONS · ${totalHours}H TRACKED`}
+            meta={t("sessions.meta", { count: stats.count, hours: totalHours })}
             cta={{
-              label: "+ Start session",
+              label: t("sessions.cta.start"),
               onClick: handleStart,
-              ariaLabel: "Start a session",
+              ariaLabel: t("sessions.aria.start"),
             }}
             filters={
               <>
                 <FilterDropdown<ModeFilter>
-                  label="MODE"
+                  label={t("common.label.mode")}
                   value={modeFilter}
                   defaultValue="all"
                   options={MODE_OPTIONS}
                   onChange={setModeFilter}
                 />
                 <FilterDropdown<DateFilter>
-                  label="DATE"
+                  label={t("common.label.date")}
                   value={dateFilter}
                   defaultValue="all"
                   options={SDATE_OPTIONS}
@@ -488,13 +525,13 @@ const Sessions: React.FC = () => {
           {/* States */}
           {!activeSession && !hasHistory && (
             <EmptyState
-              headline="No sessions yet."
-              description="Sessions are timed focus blocks where you commit to a specific list of actions. Use Pomodoro, continuous, or custom timing."
-              ctaLabel="+ Start a session"
+              headline={t("sessions.empty.headline")}
+              description={t("sessions.empty.description")}
+              ctaLabel={t("sessions.empty.cta")}
               onCta={handleStart}
               hint={
                 actions.filter((a) => a.status === "backlog" || a.status === "planned").length === 0
-                  ? "You'll need at least one action in Backlog or Planned."
+                  ? t("sessions.empty.hint")
                   : null
               }
             />
@@ -507,13 +544,17 @@ const Sessions: React.FC = () => {
               {hasHistory && (
                 <>
                   <div className="font-mono text-[12px] text-text-secondary tabular-nums">
-                    {stats.count} sessions · {formatTime(stats.totalMinutes)} focused time ·{" "}
-                    +{stats.totalOutcome} value added · {stats.completionRate}% completion rate
+                    {t("sessions.history.statsLine", {
+                      count: stats.count,
+                      focused: formatTime(stats.totalMinutes),
+                      value: stats.totalOutcome,
+                      rate: stats.completionRate,
+                    })}
                   </div>
 
                   <div>
                     <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-secondary mb-2">
-                      RECENT SESSIONS
+                      {t("sessions.history.recentHeading")}
                     </div>
                     <div className="border-t border-border-subtle">
                       {history.slice(0, visibleCount).map((s) => (
@@ -532,7 +573,7 @@ const Sessions: React.FC = () => {
                           className="text-[13px] hover:underline"
                           style={{ color: "hsl(var(--accent))" }}
                         >
-                          Load more
+                          {t("sessions.history.loadMore")}
                         </button>
                       </div>
                     )}
@@ -554,16 +595,16 @@ const Sessions: React.FC = () => {
 
       <ConfirmModal
         open={!!confirmDeleteId}
-        title="Delete this session?"
-        body="The session record will be removed. Actions completed during it remain Done/Dropped."
-        confirmLabel="Delete"
+        title={t("sessions.confirm.delete.title")}
+        body={t("sessions.confirm.delete.body")}
+        confirmLabel={t("sessions.confirm.delete.confirmLabel")}
         destructive
         onCancel={() => setConfirmDeleteId(null)}
         onConfirm={() => {
           if (confirmDeleteId) {
             deleteSession(confirmDeleteId);
             if (selectedId === confirmDeleteId) setSelectedId(null);
-            toast.success("Session deleted");
+            toast.success(t("sessions.toast.deleted"));
           }
           setConfirmDeleteId(null);
         }}

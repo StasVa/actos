@@ -398,28 +398,28 @@ const AllProjects: React.FC = () => {
             title={t("projects.page.title")}
             meta={meta}
             cta={{
-              label: "+ New project",
+              label: t("allProjects.cta.newProject"),
               onClick: () => {
                 if (storeGoals.filter((g) => g.status === "active").length === 0) {
                   navigate("/onboarding/goal"); return;
                 }
                 handleNewProject();
               },
-              ariaLabel: "New project",
+              ariaLabel: t("allProjects.aria.newProject"),
               disabled: storeGoals.filter((g) => g.status === "active").length === 0,
-              disabledTooltip: "Create a goal first",
+              disabledTooltip: t("allProjects.disabledTooltip"),
             }}
             filters={
               <>
                 <FilterDropdown
-                  label="GOAL"
+                  label={t("common.label.goal")}
                   value={goalFilter}
                   defaultValue="all"
                   options={GOAL_OPTIONS}
                   onChange={(v) => setGoalFilter(v)}
                 />
                 <FilterDropdown
-                  label="STATE"
+                  label={t("common.label.state")}
                   value={stateFilter}
                   defaultValue="all"
                   options={STATE_OPTIONS}
@@ -430,7 +430,7 @@ const AllProjects: React.FC = () => {
                     onClick={clearFilters}
                     className="ml-1 text-[12px] text-text-tertiary hover:text-text-secondary transition-colors shrink-0"
                   >
-                    Clear filters
+                    {t("common.clearFilters")}
                   </button>
                 )}
               </>

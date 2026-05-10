@@ -876,24 +876,30 @@ const IdeaDetail: React.FC<{ idea: Idea; mobile?: boolean }> = ({ idea, mobile =
 };
 
 /* ===== Empty states ===== */
-const EmptyDetail: React.FC = () => (
-  <div className="h-full flex flex-col items-center justify-center text-center px-10">
-    <div className="text-[14px] text-text-secondary">Select an idea to view details</div>
-    <div className="mt-1 font-mono text-[11px] text-text-tertiary">or click "+ New idea" to capture one</div>
-  </div>
-);
+const EmptyDetail: React.FC = () => {
+  const { t } = useTranslation();
+  return (
+    <div className="h-full flex flex-col items-center justify-center text-center px-10">
+      <div className="text-[14px] text-text-secondary">{t("ideas.empty.select")}</div>
+      <div className="mt-1 font-mono text-[11px] text-text-tertiary">{t("ideas.empty.selectHint")}</div>
+    </div>
+  );
+};
 
-const EmptyFiltered: React.FC<{ onClear: () => void }> = ({ onClear }) => (
-  <div className="h-full flex flex-col items-center justify-center text-center px-10">
-    <div className="text-[14px] text-text-secondary">No ideas match these filters</div>
-    <div className="mt-1 font-mono text-[11px] text-text-tertiary">
-      Clear filters or change them above.
+const EmptyFiltered: React.FC<{ onClear: () => void }> = ({ onClear }) => {
+  const { t } = useTranslation();
+  return (
+    <div className="h-full flex flex-col items-center justify-center text-center px-10">
+      <div className="text-[14px] text-text-secondary">{t("ideas.empty.noMatch")}</div>
+      <div className="mt-1 font-mono text-[11px] text-text-tertiary">
+        {t("ideas.empty.filteredHint")}
+      </div>
+      <div className="mt-4">
+        <GhostButton onClick={onClear}>{t("common.clearFilters")}</GhostButton>
+      </div>
     </div>
-    <div className="mt-4">
-      <GhostButton onClick={onClear}>Clear filters</GhostButton>
-    </div>
-  </div>
-);
+  );
+};
 
 /* ===== Page ===== */
 
@@ -902,25 +908,34 @@ type GoalFilter = "all" | ID;
 type DateFilter = "all" | "7d" | "30d" | "month";
 type SortKey = "recent" | "oldest" | "title";
 
-const STATUS_OPTIONS: FilterOption<StatusFilter>[] = [
-  { value: "all", label: "All" },
-  { value: "captured", label: "Captured" },
-  { value: "converted", label: "Converted" },
-  { value: "discarded", label: "Discarded" },
-];
+const useStatusOptions = (): FilterOption<StatusFilter>[] => {
+  const { t } = useTranslation();
+  return [
+    { value: "all", label: t("ideas.filter.all") },
+    { value: "captured", label: t("ideas.status.captured") },
+    { value: "converted", label: t("ideas.status.converted") },
+    { value: "discarded", label: t("ideas.status.discarded") },
+  ];
+};
 
-const DATE_OPTIONS: FilterOption<DateFilter>[] = [
-  { value: "all", label: "All time" },
-  { value: "7d", label: "Last 7 days" },
-  { value: "30d", label: "Last 30 days" },
-  { value: "month", label: "This month" },
-];
+const useDateOptions = (): FilterOption<DateFilter>[] => {
+  const { t } = useTranslation();
+  return [
+    { value: "all", label: t("ideas.filter.allTime") },
+    { value: "7d", label: t("ideas.filter.last7days") },
+    { value: "30d", label: t("ideas.filter.last30days") },
+    { value: "month", label: t("ideas.filter.month") },
+  ];
+};
 
-const SORT_OPTIONS: FilterOption<SortKey>[] = [
-  { value: "recent", label: "Recent first" },
-  { value: "oldest", label: "Oldest first" },
-  { value: "title", label: "Title A–Z" },
-];
+const useSortOptions = (): FilterOption<SortKey>[] => {
+  const { t } = useTranslation();
+  return [
+    { value: "recent", label: t("ideas.sort.recent") },
+    { value: "oldest", label: t("ideas.sort.oldest") },
+    { value: "title", label: t("ideas.sort.titleAZ") },
+  ];
+};
 
 const useQueryGoal = (): ID | null => {
   const { search } = useLocation();

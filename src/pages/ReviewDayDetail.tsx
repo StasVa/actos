@@ -301,7 +301,7 @@ const ReviewDayDetail: React.FC = () => {
     } else if (typeof updateDayEntry === "function") {
       updateDayEntry(date, { isClosed: false });
     }
-    toast("Day re-opened");
+    toast(t("reviews.detail.toast.dayReopened"));
   };
 
   const startEditReflection = () => {

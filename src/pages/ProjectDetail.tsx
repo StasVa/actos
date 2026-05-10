@@ -11,6 +11,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { ActionRow as SharedActionRow } from "@/components/ActionRow";
 import { RichTextEditor } from "@/components/RichTextEditor";
 import { CardMenu } from "@/components/CardMenu";
+import { formatDuration } from "@/lib/format";
 
 const COLOR_VAR: Record<GoalColorVar, string> = {
   "goal-1": "hsl(var(--goal-1))",

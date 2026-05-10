@@ -567,9 +567,9 @@ function ActionEditorPanel({
 
             {/* PARENT — inline pill popovers */}
             <div className="mb-6">
-              <SectionHeadRequired label="Parent" required />
+              <SectionHeadRequired label={t("actionEditor.section.parent")} required />
               <div className="flex items-center gap-2 flex-wrap text-[13px]">
-                <span className="text-text-tertiary">Goal</span>
+                <span className="text-text-tertiary">{t("actionEditor.field.goal")}</span>
                 <Popover open={goalPopoverOpen} onOpenChange={setGoalPopoverOpen}>
                   <PopoverTrigger asChild>
                     <button

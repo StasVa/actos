@@ -580,7 +580,7 @@ const ReviewDayDetail: React.FC = () => {
                     <>
                       {actionSubgroupCount > 1 && (
                         <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mt-2 mb-1">
-                          Done · {doneToday.length}
+                          {t("reviews.detail.subgroup.done", { count: doneToday.length })}
                         </div>
                       )}
                       {doneToday.map((a) => (
@@ -601,7 +601,7 @@ const ReviewDayDetail: React.FC = () => {
                     <>
                       {actionSubgroupCount > 1 && (
                         <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mt-3 mb-1">
-                          Delegated · {delegatedToday.length}
+                          {t("reviews.detail.subgroup.delegated", { count: delegatedToday.length })}
                         </div>
                       )}
                       {delegatedToday.map((a) => (
@@ -621,7 +621,7 @@ const ReviewDayDetail: React.FC = () => {
                     <>
                       {actionSubgroupCount > 1 && (
                         <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mt-3 mb-1">
-                          Dropped · {droppedToday.length}
+                          {t("reviews.detail.subgroup.dropped", { count: droppedToday.length })}
                         </div>
                       )}
                       {droppedToday.map((a) => (
@@ -641,7 +641,7 @@ const ReviewDayDetail: React.FC = () => {
                     <>
                       {actionSubgroupCount > 1 && (
                         <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mt-3 mb-1">
-                          Cancelled · {cancelledToday.length}
+                          {t("reviews.detail.subgroup.cancelled", { count: cancelledToday.length })}
                         </div>
                       )}
                       {cancelledToday.map((a) => (
@@ -662,7 +662,7 @@ const ReviewDayDetail: React.FC = () => {
                     <>
                       {actionSubgroupCount > 1 && (
                         <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mt-3 mb-1">
-                          Not completed · {notCompleted.length}
+                          {t("reviews.detail.subgroup.notCompleted", { count: notCompleted.length })}
                         </div>
                       )}
                       {notCompleted.map((a) => (
@@ -681,7 +681,7 @@ const ReviewDayDetail: React.FC = () => {
                 </div>
               )}
 
-              {/* + Add action to this day */}
+              {/* + {t("reviews.detail.actions.add")} */}
               <button
                 type="button"
                 onClick={openActionAddRetro}
@@ -691,19 +691,19 @@ const ReviewDayDetail: React.FC = () => {
                   +
                 </span>
                 <span className="text-[13px] text-text-secondary group-hover:text-text-primary transition-colors">
-                  Add action to this day
+                  {t("reviews.detail.actions.add")}
                 </span>
               </button>
             </section>
             {/* RITUALS */}
             {plannedRituals.length > 0 && (
               <section>
-                <SectionHead>Rituals · {ritualTotal}</SectionHead>
+                <SectionHead>{t("reviews.detail.section.rituals", { count: ritualTotal })}</SectionHead>
                 {ritualsDone.length > 0 && (
                   <>
                     {ritualSubgroupCount > 1 && (
                       <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mt-2 mb-1">
-                        Done · {ritualsDone.length}
+                        {t("reviews.detail.subgroup.done", { count: ritualsDone.length })}
                       </div>
                     )}
                     {ritualsDone.map((r) => (
@@ -722,7 +722,7 @@ const ReviewDayDetail: React.FC = () => {
                   <>
                     {ritualSubgroupCount > 1 && (
                       <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mt-3 mb-1">
-                        Skipped · {ritualsSkippedList.length}
+                        {t("reviews.detail.subgroup.skipped", { count: ritualsSkippedList.length })}
                       </div>
                     )}
                     {ritualsSkippedList.map((r) => (
@@ -734,7 +734,7 @@ const ReviewDayDetail: React.FC = () => {
                   <>
                     {ritualSubgroupCount > 1 && (
                       <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mt-3 mb-1">
-                        Missed · {ritualsMissed.length}
+                        {t("reviews.detail.subgroup.missed", { count: ritualsMissed.length })}
                       </div>
                     )}
                     {ritualsMissed.map((r) => (
@@ -755,7 +755,7 @@ const ReviewDayDetail: React.FC = () => {
                   onClick={handleReopen}
                   className="text-[13px] text-text-secondary hover:text-text-primary transition-colors"
                 >
-                  Re-open day
+                  {t("reviews.detail.reopenDay")}
                 </button>
               )}
             </section>

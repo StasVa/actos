@@ -209,6 +209,7 @@ function isOpen(p: Project) {
 }
 
 const AllProjects: React.FC = () => {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const initialState = ((): StateFilter => {
     const s = searchParams.get("state");

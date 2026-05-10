@@ -233,6 +233,7 @@ const RETURNED_SORT_OPTIONS: FilterOption<SortKey>[] = [
 
 /* ===== Page ===== */
 const AllDelegated: React.FC = () => {
+  const { t } = useTranslation();
   const actions = useStore((s) => s.actions);
   const goals = useStore((s) => s.goals);
   const projects = useStore((s) => s.projects);

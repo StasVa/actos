@@ -435,6 +435,7 @@ const SORT_OPTIONS: FilterOption<SortKey>[] = [
 ];
 
 const AllActions: React.FC = () => {
+  const { t } = useTranslation();
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [goalFilter, setGoalFilter] = useState<GoalFilter>("all");
   const [dateFilter, setDateFilter] = useState<DateFilter>("all");

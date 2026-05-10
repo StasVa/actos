@@ -379,6 +379,7 @@ const SSORT_OPTIONS: FilterOption<SSortKey>[] = [
 ];
 
 const Sessions: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const sessions = useStore((s) => s.sessions);
   const actions = useStore((s) => s.actions);

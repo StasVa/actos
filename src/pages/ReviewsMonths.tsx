@@ -48,6 +48,7 @@ function rangeStart(value: string): Date | null {
 }
 
 const ReviewsMonths: React.FC = () => {
+  const { t } = useTranslation();
   const [settingsOpen, setSettingsOpen] = React.useState(false);
   const actions = useStore((s) => s.actions);
   const dayEntries = useStore((s) => s.dayEntries);
@@ -60,6 +61,13 @@ const ReviewsMonths: React.FC = () => {
   const [goalFilter, setGoalFilter] = React.useState<string>("all");
   const [sortKey, setSortKey] = React.useState<ReviewSortKey>(() => loadReviewSort("actos.reviews.months.sort"));
   React.useEffect(() => saveReviewSort("actos.reviews.months.sort", sortKey), [sortKey]);
+
+  const RANGE_OPTIONS = React.useMemo(() => [
+    { value: "12m", label: t("reviews.filters.range.last12m") },
+    { value: "6m", label: t("reviews.filters.range.last6m") },
+    { value: "ytd", label: t("reviews.filters.range.thisYear") },
+    { value: "all", label: t("reviews.filters.range.all") },
+  ], [t]);
 
   const allMonths = React.useMemo(
     () => getMonthsWithActivity(actions, dayEntries),

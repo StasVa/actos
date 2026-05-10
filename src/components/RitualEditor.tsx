@@ -423,14 +423,14 @@ function RitualEditorPanel({
                           : "hsl(var(--border-default))",
                         height: 32,
                       }}
-                      title={goals.find((g) => g.id === goalId)?.title ?? "Pick a goal"}
+                      title={goals.find((g) => g.id === goalId)?.title ?? t("ritualEditor.field.pickGoal")}
                     >
                       <span
                         className="w-2 h-2 rounded-full shrink-0"
                         style={{ background: goalColor }}
                       />
                       <span className="truncate">
-                        {goals.find((g) => g.id === goalId)?.title ?? "Pick a goal"}
+                        {goals.find((g) => g.id === goalId)?.title ?? t("ritualEditor.field.pickGoal")}
                       </span>
                       <ChevronDown size={12} className="text-text-tertiary shrink-0" />
                     </button>
@@ -483,13 +483,13 @@ function RitualEditorPanel({
                       title={
                         projectId
                           ? projects.find((p) => p.id === projectId)?.title ?? ""
-                          : "Goal-level ritual"
+                          : t("ritualEditor.field.goalLevel")
                       }
                     >
                       <span className="truncate">
                         {projectId
-                          ? projects.find((p) => p.id === projectId)?.title ?? "Project"
-                          : "Goal-level ritual"}
+                          ? projects.find((p) => p.id === projectId)?.title ?? t("ritualEditor.section.parent")
+                          : t("ritualEditor.field.goalLevel")}
                       </span>
                       <ChevronDown size={12} className="text-text-tertiary shrink-0" />
                     </button>
@@ -508,7 +508,7 @@ function RitualEditorPanel({
                         !projectId ? "text-[hsl(var(--accent))]" : "text-text-primary"
                       }`}
                     >
-                      <span className="truncate">— Goal-level ritual —</span>
+                      <span className="truncate">{t("ritualEditor.field.goalLevelOption")}</span>
                       {!projectId && (
                         <Check size={14} className="text-[hsl(var(--accent))]" />
                       )}
@@ -711,7 +711,7 @@ function RitualEditorPanel({
                   }}
                   className="bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
                 >
-                  <option value="">— Goal-level ritual —</option>
+                  <option value="">{t("ritualEditor.field.goalLevelOption")}</option>
                   {projectsForGoal.map((p) => (
                     <option key={p.id} value={p.id}>
                       {p.title}

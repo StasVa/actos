@@ -975,6 +975,7 @@
   "projectDetail.sidebar.state": "State",
   "projectDetail.sidebar.status": "STATUS",
   "projectDetail.sidebar.time": "TIME",
+  "projectDetail.sidebar.timeInvested": "TIME INVESTED",
   "projectDetail.status.active": "Active",
   "projectDetail.status.completed": "Completed",
   "projectDetail.status.dropped": "Dropped",

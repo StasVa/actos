@@ -452,6 +452,9 @@ const AllActions: React.FC = () => {
   };
   const [query, setQuery] = useState("");
   const [terminalCollapsed, setTerminalCollapsed] = useState(false);
+  const STATUS_OPTIONS = useMemo(() => makeStatusOptions(t), [t]);
+  const DATE_OPTIONS = useMemo(() => makeDateOptions(t), [t]);
+  const SORT_OPTIONS = useMemo(() => makeSortOptions(t), [t]);
 
   // Live store data → legacy renderer shape (rendering JSX is unchanged).
   const storeActions = useStore((s) => s.actions);

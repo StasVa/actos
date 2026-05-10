@@ -681,7 +681,7 @@ const AllActions: React.FC = () => {
               {grouped.terminal!.length > 0 && (
                 <>
                   <GroupHeader
-                    label="TERMINAL"
+                    label={t("common.label.terminal")}
                     count={grouped.terminal!.length}
                     collapsible
                     collapsed={terminalCollapsed}

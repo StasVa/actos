@@ -175,7 +175,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ projectId, goalLabel, 
               <CardMenu
                 ariaLabel={t("projects.menu.aria")}
                 items={[
-                  { label: t("common.markComplete"), onSelect: () => { markProjectComplete(projectId); toast(t("toast.projectCompleted")); } },
+                  { label: t("common.markDone"), onSelect: () => { markProjectComplete(projectId); toast(t("toast.projectCompleted")); } },
                   { label: t("common.drop"), destructive: true, onSelect: () => setConfirmDrop(true) },
                   { label: t("common.delete"), destructive: true, onSelect: () => setConfirmDelete(true) },
                 ]}

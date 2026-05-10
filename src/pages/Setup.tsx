@@ -74,7 +74,7 @@ const StepIndicator: React.FC<{ n: Screen }> = ({ n }) => {
         color: "hsl(var(--text-tertiary))",
       }}
     >
-      {t("setup.stepCount", { n, total: 3 })}
+      {t("setup.step", { n, total: 3 })}
     </div>
   ) : null;
 };

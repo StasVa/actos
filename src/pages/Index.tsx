@@ -364,24 +364,24 @@ const GoalColumnMenu: React.FC<{ goalId: string }> = ({ goalId }) => {
         ariaLabel={t("home.hero.menu.aria")}
         items={[
           { label: t("common.edit"), onSelect: () => openPanel({ kind: "goal", mode: "edit", id: goalId }) },
-          { label: t("common.markComplete"), onSelect: () => { markGoalComplete(goalId); toast(t("toast.goalCompleted")); } },
+          { label: t("common.markDone"), onSelect: () => { markGoalComplete(goalId); toast(t("toast.goalCompleted")); } },
           { label: t("common.drop"), destructive: true, onSelect: () => setConfirmDrop(true) },
           { label: t("common.delete"), destructive: true, onSelect: () => setConfirmDelete(true) },
         ]}
       />
       <ConfirmModal
         open={confirmDrop}
-        title={t("home.hero.confirm.drop.heading")}
-        body={t("home.hero.confirm.drop.body")}
-        confirmLabel={t("home.hero.confirm.drop.cta")}
+        title={t("confirm.drop.goal.heading")}
+        body={t("confirm.drop.goal.body")}
+        confirmLabel={t("confirm.drop.goal.cta")}
         destructive
         onCancel={() => setConfirmDrop(false)}
         onConfirm={() => { dropGoal(goalId); toast(t("home.hero.toast.dropped")); setConfirmDrop(false); }}
       />
       <ConfirmModal
         open={confirmDelete}
-        title={t("home.hero.confirm.delete.heading")}
-        body={t("home.hero.confirm.delete.body")}
+        title={t("confirm.delete.goal.heading")}
+        body={t("confirm.delete.goal.body")}
         confirmLabel={t("common.delete")}
         destructive
         onCancel={() => setConfirmDelete(false)}
@@ -606,7 +606,7 @@ const ActiveProjectCard: React.FC<{ p: ActiveProjectMeta; pct: number }> = ({ p,
               <CardMenu
                 ariaLabel={t("home.activeProjects.menu.aria")}
                 items={[
-                  { label: t("common.markComplete"), onSelect: () => { markProjectComplete(p.id); toast(t("home.activeProjects.toast.completed")); } },
+                  { label: t("common.markDone"), onSelect: () => { markProjectComplete(p.id); toast(t("home.activeProjects.toast.completed")); } },
                   { label: t("common.drop"), destructive: true, onSelect: () => setConfirmDrop(true) },
                   { label: t("common.delete"), destructive: true, onSelect: () => setConfirmDelete(true) },
                 ]}
@@ -636,17 +636,17 @@ const ActiveProjectCard: React.FC<{ p: ActiveProjectMeta; pct: number }> = ({ p,
       </Link>
       <ConfirmModal
         open={confirmDrop}
-        title={t("home.activeProjects.confirm.drop.heading")}
-        body={t("home.activeProjects.confirm.drop.body")}
-        confirmLabel={t("home.activeProjects.confirm.drop.cta")}
+        title={t("confirm.drop.project.heading")}
+        body={t("confirm.drop.project.body")}
+        confirmLabel={t("confirm.drop.project.cta")}
         destructive
         onCancel={() => setConfirmDrop(false)}
         onConfirm={() => { dropProject(p.id); toast(t("home.activeProjects.toast.dropped")); setConfirmDrop(false); }}
       />
       <ConfirmModal
         open={confirmDelete}
-        title={t("home.activeProjects.confirm.delete.heading")}
-        body={t("home.activeProjects.confirm.delete.body")}
+        title={t("confirm.delete.project.heading")}
+        body={t("confirm.delete.project.body")}
         confirmLabel={t("common.delete")}
         destructive
         onCancel={() => setConfirmDelete(false)}

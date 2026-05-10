@@ -579,7 +579,10 @@ function GoalEditorPanel({
             <div className="mt-6 flex items-center justify-end gap-2">
               <button
                 type="button"
-                onClick={() => setSoftBlock(false)}
+                onClick={() => {
+                  setSoftBlock(false);
+                  onClose();
+                }}
                 className="text-[13px] text-text-secondary hover:text-text-primary transition-colors px-3 py-1.5"
               >
                 Cancel

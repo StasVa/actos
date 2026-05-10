@@ -362,7 +362,7 @@ function ActionEditorPanel({
   const confirmMarkDoneOnPast = () => {
     const iso = confirmPastDate;
     if (!iso) return;
-    const shortLabel = new Date(iso + "T00:00:00").toLocaleDateString("en-US", {
+    const shortLabel = new Date(iso + "T00:00:00").toLocaleDateString(i18n.language || "en", {
       month: "short",
       day: "numeric",
     });
@@ -373,7 +373,7 @@ function ActionEditorPanel({
     if (mode === "new") {
       setNewStatus("done");
       setConfirmPastDate(null);
-      toast(`Marked done on ${shortLabel}`);
+      toast(t("actionEditor.toast.markedDoneOn", { date: shortLabel }));
       return;
     }
     if (!actionId) {
@@ -389,7 +389,7 @@ function ActionEditorPanel({
       plannedAt: undefined,
     });
     setConfirmPastDate(null);
-    toast(`Marked done on ${shortLabel}`);
+    toast(t("actionEditor.toast.markedDoneOn", { date: shortLabel }));
   };
 
   const handleSaveNew = () => {

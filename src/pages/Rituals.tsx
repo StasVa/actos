@@ -463,23 +463,25 @@ function buildFrequency(history: { date: string }[], unit: "week" | "month", buc
 }
 
 function lastDoneLabel(history: { date: string }[]): string {
-  if (history.length === 0) return "never";
+  const t = i18n.t.bind(i18n);
+  if (history.length === 0) return t("rituals.lastDone.never");
   const sorted = [...history].sort((a, b) => b.date.localeCompare(a.date));
   const last = sorted[0].date;
-  if (last === TODAY_ISO) return "today";
+  if (last === TODAY_ISO) return t("rituals.lastDone.today");
   const yest = new Date();
   yest.setDate(yest.getDate() - 1);
-  if (last === yest.toISOString().slice(0, 10)) return "yesterday";
+  if (last === yest.toISOString().slice(0, 10)) return t("rituals.lastDone.yesterday");
   const d = new Date(last);
-  return `${MONTH_SHORT[d.getMonth()]} ${d.getDate()}`;
+  return d.toLocaleDateString(i18n.language, { month: "short", day: "numeric" });
 }
 
 function archivedAgoLabel(iso?: string): string | undefined {
   if (!iso) return undefined;
+  const t = i18n.t.bind(i18n);
   const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
-  if (days < 7) return `${days}d ago`;
-  if (days < 30) return `${Math.round(days / 7)}w ago`;
-  return `${Math.round(days / 30)}mo ago`;
+  if (days < 7) return t("rituals.archivedAgo.daysAgo", { n: days });
+  if (days < 30) return t("rituals.archivedAgo.weeksAgo", { n: Math.round(days / 7) });
+  return t("rituals.archivedAgo.monthsAgo", { n: Math.round(days / 30) });
 }
 
 function buildRitualRow(

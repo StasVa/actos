@@ -526,7 +526,7 @@ const Goals: React.FC = () => {
   const totalCompleted = goals.filter((g) => g.status === "completed").length;
   const totalAll = goals.length;
   const isFree = settings.subscriptionTier !== "all-in";
-  const goalLimit = isFree ? 2 : 3;
+  const goalLimit = isFree ? 1 : 3;
   const ghostDisabled = totalActive >= goalLimit;
 
   const noResults = sorted.length === 0;
@@ -544,11 +544,12 @@ const Goals: React.FC = () => {
             label: "+ New goal",
             onClick: () => useStore.getState().openPanel({ kind: "goal", mode: "new" }),
             ariaLabel: "New goal",
-            disabled: ghostDisabled && !isFree,
-            disabledTooltip:
-              ghostDisabled && !isFree
-                ? "You have 3 active goals. Complete or drop one to add another."
-                : undefined,
+            disabled: ghostDisabled,
+            disabledTooltip: ghostDisabled
+              ? isFree
+                ? "Free plan: 1 active goal · Go All-In for 3."
+                : "You have 3 active goals. Complete or drop one to add another."
+              : undefined,
           }}
           filters={
             <>

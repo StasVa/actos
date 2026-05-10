@@ -1293,7 +1293,7 @@ export function StatusDropdown({
         >
           <span className="flex items-center gap-2">
             <StatusDot status={current} />
-            <span>{STATUS_LABEL[current]}</span>
+            <span>{t(`actionEditor.status.${current}`)}</span>
           </span>
           <ChevronDown size={14} className="text-text-tertiary" />
         </button>

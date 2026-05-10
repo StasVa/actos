@@ -748,9 +748,9 @@ function ActionEditorPanel({
               {status === "delegated" && (
                 <div className="mt-2 p-3 rounded-[4px] bg-surface-raised border border-border-subtle space-y-3">
                   <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
-                    Delegation
+                    {t("actionEditor.delegation.heading")}
                   </div>
-                  <FieldRow label="Delegate name">
+                  <FieldRow label={t("actionEditor.delegation.name")}>
                     <input
                       value={delegateName}
                       onChange={(e) => {
@@ -758,7 +758,7 @@ function ActionEditorPanel({
                         if (e.target.value.trim()) setDelegateError(null);
                       }}
                       onBlur={() => persistField("delegateName", delegateName || undefined)}
-                      placeholder="Maria, AI, etc."
+                      placeholder={t("actionEditor.delegation.namePlaceholder")}
                       list="delegate-names"
                       className="w-full bg-surface-base border rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
                       style={{

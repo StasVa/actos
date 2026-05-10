@@ -12,7 +12,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { ChevronDown, Check, MoreHorizontal, Calendar as CalendarIcon } from "lucide-react";
+import { ChevronDown, Check, Calendar as CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { toast } from "sonner";
 import { useStore } from "@/store/useStore";

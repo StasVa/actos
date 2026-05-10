@@ -915,37 +915,23 @@ function ActionEditorPanel({
           </>
         ) : (
           <>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  className="w-8 h-8 inline-flex items-center justify-center rounded-[4px] text-text-tertiary hover:bg-surface-hover hover:text-text-primary transition-colors"
-                  aria-label="More actions"
-                >
-                  <MoreHorizontal size={16} />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="bg-surface-raised border border-border-default">
-                <DropdownMenuItem onSelect={handleDuplicate}>Duplicate</DropdownMenuItem>
-                <DropdownMenuItem
-                  onSelect={() => setConfirmDelete(true)}
-                  className="text-[hsl(var(--text-warning))] focus:text-[hsl(var(--text-warning))]"
-                >
-                  Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <div className="flex items-center gap-3">
+              <EditorOverflowMenu
+                items={[
+                  overflowDuplicate(handleDuplicate),
+                  overflowDrop(() => setConfirmDrop("dropped")),
+                  overflowDelete(() => setConfirmDelete(true)),
+                ]}
+              />
+              <SaveIndicator state={saveState} />
+            </div>
             <div className="flex items-center gap-2">
               {(status === "backlog" || status === "planned") && !isGoalLevel && (
-                <button
+                <MarkDoneButton
                   onClick={() => handleStatusChange("done")}
-                  className="text-[13px] font-medium px-3 py-1.5 rounded-[4px]"
-                  style={{
-                    background: "hsl(var(--accent))",
-                    color: "hsl(var(--surface-base))",
-                  }}
-                >
-                  Mark done
-                </button>
+                  disabled={!(impactNum > 0) || (requireTime && !(timeNum > 0))}
+                  disabledTooltip="Add Impact and Time first"
+                />
               )}
               {status === "delegated" && (
                 <>
@@ -955,16 +941,11 @@ function ActionEditorPanel({
                   >
                     Re-open
                   </button>
-                  <button
+                  <MarkDoneButton
                     onClick={() => handleStatusChange("done")}
-                    className="text-[13px] font-medium px-3 py-1.5 rounded-[4px]"
-                    style={{
-                      background: "hsl(var(--accent))",
-                      color: "hsl(var(--surface-base))",
-                    }}
-                  >
-                    Mark done
-                  </button>
+                    disabled={!(impactNum > 0) || (requireTime && !(timeNum > 0))}
+                    disabledTooltip="Add Impact and Time first"
+                  />
                 </>
               )}
               {(status === "done" || status === "dropped" || status === "cancelled") && (

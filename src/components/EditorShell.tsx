@@ -56,6 +56,7 @@ export function EditorShell({
   onClose: () => void;
   children: React.ReactNode;
 }) {
+  const { t } = useTranslation();
   const isMobile = useIsMobile();
   const [confirmDiscard, setConfirmDiscard] = useState(false);
 

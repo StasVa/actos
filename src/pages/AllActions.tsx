@@ -430,12 +430,14 @@ function makeDateOptions(t: (k: string) => string): FilterOption<DateFilter>[] {
   ];
 }
 
-const GOAL_OPTIONS: FilterOption<GoalFilter>[] = [
-  { value: "all", label: "All" },
-  { value: "g1", label: "Launch YouTube", dot: GOALS.g1.color },
-  { value: "g2", label: "Lose 5 kg", dot: GOALS.g2.color },
-  { value: "g3", label: "Read 24 books", dot: GOALS.g3.color },
-];
+function makeGoalOptions(t: (k: string) => string): FilterOption<GoalFilter>[] {
+  return [
+    { value: "all", label: t("common.all") },
+    { value: "g1", label: "Launch YouTube", dot: GOALS.g1.color },
+    { value: "g2", label: "Lose 5 kg", dot: GOALS.g2.color },
+    { value: "g3", label: "Read 24 books", dot: GOALS.g3.color },
+  ];
+}
 
 function makeSortOptions(t: (k: string) => string): FilterOption<SortKey>[] {
   return [

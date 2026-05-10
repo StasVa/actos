@@ -233,12 +233,12 @@ const ThemeScreen: React.FC<{ onContinue: () => void; onBack: () => void }> = ({
           fontFamily: "Inter", fontWeight: 400,
           fontSize: "clamp(32px, 5vw, 48px)", margin: 0,
           color: "hsl(var(--text-primary))", textAlign: "center",
-        }}>Pick your look.</h1>
+        }}>{t("setup.theme.heading")}</h1>
         <div style={{ height: 12 }} />
         <p style={{
           fontFamily: "Inter", fontSize: 15,
           color: "hsl(var(--text-tertiary))", margin: 0, textAlign: "center",
-        }}>You can change this anytime in Settings.</p>
+        }}>{t("setup.theme.sub")}</p>
         <div style={{ height: 80 }} />
 
         <div

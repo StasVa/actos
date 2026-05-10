@@ -630,7 +630,7 @@ function ActionEditorPanel({
                       <span className="truncate">
                         {projectId
                           ? projects.find((p) => p.id === projectId)?.title ?? "—"
-                          : "Goal-level backlog"}
+                          : t("actionEditor.field.goalLevelBacklog")}
                       </span>
                       <ChevronDown size={12} className="text-text-tertiary shrink-0" />
                     </button>

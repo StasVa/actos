@@ -61,7 +61,8 @@ export type ProjectCardProps = {
 };
 
 export const ProjectCard: React.FC<ProjectCardProps> = ({ projectId, goalLabel, goalColor }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language || "en";
   const project = useStore((s) => s.projects.find((p) => p.id === projectId));
   const allActions = useStore((s) => s.actions);
   const actions = useMemo(

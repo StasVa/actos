@@ -427,11 +427,11 @@ const ReviewDayDetail: React.FC = () => {
             {/* GOALS CLOSED */}
             {closedGoals.length > 0 && (
               <section>
-                <SectionHead>Goals closed · {closedGoals.length}</SectionHead>
+                <SectionHead>{t("reviews.detail.section.goalsClosed", { count: closedGoals.length })}</SectionHead>
                 <div className="space-y-1">
                   {closedGoals.map(({ entity: g, type }) => {
                     const goalColor = `hsl(var(--${g.color}))`;
-                    const typeBadge = g.type === "mid-term" ? "MID-TERM" : "SHORT-TERM";
+                    const typeBadge = g.type === "mid-term" ? t("reviews.detail.goalType.midTerm") : t("reviews.detail.goalType.shortTerm");
                     const days = daysActive(g);
                     return (
                       <ClosedRow
@@ -439,7 +439,7 @@ const ReviewDayDetail: React.FC = () => {
                         title={g.title}
                         stripeColor={goalColor}
                         pillLabel={type === "completed" ? "COMPLETED" : "DROPPED"}
-                        subline={`${typeBadge} · ${days} day${days === 1 ? "" : "s"} active`}
+                        subline={t("reviews.detail.daysActive", { count: days, typeBadge })}
                         onClick={() => navigate(`/goals/${g.id}`)}
                       />
                     );

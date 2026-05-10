@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { useTranslation } from "react-i18next";
 import { Tooltip } from "@/components/Tooltip";
 
 const G1 = "hsl(var(--goal-1))";
@@ -10,8 +11,8 @@ type Props = {
   mode?: "edit" | "new";
 };
 
-const SCHEDULE_OPTIONS = ["Daily", "Weekdays", "Weekly", "Custom"] as const;
-type ScheduleOpt = (typeof SCHEDULE_OPTIONS)[number];
+const SCHEDULE_KEYS = ["daily", "weekdays", "weekly", "custom"] as const;
+type ScheduleOpt = (typeof SCHEDULE_KEYS)[number];
 
 /* 12 weeks consistency: positions 4 and 8 (1-indexed) missed */
 const WEEKS: { label: string; done: boolean }[] = [
@@ -51,10 +52,11 @@ const Divider: React.FC = () => (
 );
 
 const RitualPanel: React.FC<Props> = ({ open, onClose, mode = "edit" }) => {
+  const { t } = useTranslation();
   const isNew = mode === "new";
   const [mounted, setMounted] = useState(open);
   const [visible, setVisible] = useState(false);
-  const [schedule, setSchedule] = useState<ScheduleOpt>(isNew ? "Daily" : "Weekly");
+  const [schedule, setSchedule] = useState<ScheduleOpt>(isNew ? "daily" : "weekly");
   const [title, setTitle] = useState(isNew ? "" : "Weekly project audit");
   const [impact, setImpact] = useState(5);
   const [time, setTime] = useState("30m");
@@ -68,16 +70,15 @@ const RitualPanel: React.FC<Props> = ({ open, onClose, mode = "edit" }) => {
   // Mount / animate + reset form state on each open
   useEffect(() => {
     if (open) {
-      // Reset form to mode defaults whenever panel opens
       if (isNew) {
         setTitle("");
-        setSchedule("Daily");
+        setSchedule("daily");
         setImpact(5);
         setTime("30m");
         setNotes("");
       } else {
         setTitle("Weekly project audit");
-        setSchedule("Weekly");
+        setSchedule("weekly");
         setImpact(5);
         setTime("30m");
         setNotes(

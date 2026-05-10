@@ -94,7 +94,7 @@ const ClosedRow: React.FC<{ p: Project }> = ({ p }) => {
               color: isDropped ? "hsl(var(--status-dropped))" : "hsl(var(--status-done))",
             }}
           >
-            {isDropped ? "DROPPED" : "DONE"}
+            {isDropped ? t("common.label.dropped") : t("common.label.done")}
           </span>
           <span
             className={`text-[13px] truncate ${

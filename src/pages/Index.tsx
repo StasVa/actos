@@ -1436,6 +1436,7 @@ export const TodayZone: React.FC<{
 
 /* ===== Heavy Lift (live) ===== */
 const HeavyLift: React.FC = () => {
+  const { t } = useTranslation();
   const actions = useStore((s) => s.actions);
   const goals = useStore((s) => s.goals);
   const projects = useStore((s) => s.projects);
@@ -1450,10 +1451,10 @@ const HeavyLift: React.FC = () => {
 
   return (
     <section>
-      <SectionLabel meta="HIGH IMPACT · HIGH EFFORT">Heavy lift today</SectionLabel>
+      <SectionLabel meta={t("home.heavyLift.meta")}>{t("home.heavyLift.title")}</SectionLabel>
       {items.length === 0 ? (
         <div className="font-mono text-[11px] text-text-tertiary px-3 py-2">
-          No heavy-lift candidates. Add actions with impact ≥ 6 and time ≥ 1h.
+          {t("home.heavyLift.empty")}
         </div>
       ) : (
         <div className="space-y-1">
@@ -1470,7 +1471,7 @@ const HeavyLift: React.FC = () => {
               >
                 <Strip color={c} />
                 <div className="w-[52px] pl-2">
-                  <div className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary leading-none">IMPACT</div>
+                  <div className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary leading-none">{t("home.heavyLift.impact")}</div>
                   <div className="font-mono text-[16px] text-text-primary leading-tight">{a.impact}</div>
                 </div>
                 <div className="min-w-0 flex-1 py-1.5">
@@ -1479,16 +1480,16 @@ const HeavyLift: React.FC = () => {
                 </div>
                 {time && <span className="font-mono text-[12px] text-text-secondary whitespace-nowrap">{time}</span>}
                 <button
-                  onClick={() => { changeStatus(a.id, "done"); toast.success("Action completed"); }}
+                  onClick={() => { changeStatus(a.id, "done"); toast.success(t("home.heavyLift.toast.completed")); }}
                   className="text-[12px] text-accent hover:text-accent-hover whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity"
                 >
-                  Mark done
+                  {t("home.heavyLift.markDone")}
                 </button>
                 <button
                   onClick={() => openPanel({ kind: "action", mode: "edit", id: a.id })}
                   className="text-[12px] text-text-secondary hover:text-text-primary whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity"
                 >
-                  Open
+                  {t("home.heavyLift.open")}
                 </button>
               </div>
             );
@@ -1501,6 +1502,7 @@ const HeavyLift: React.FC = () => {
 
 /* ===== Quick Moves (live) ===== */
 const QuickMoves: React.FC = () => {
+  const { t } = useTranslation();
   const actions = useStore((s) => s.actions);
   const goals = useStore((s) => s.goals);
   const projects = useStore((s) => s.projects);
@@ -1515,10 +1517,10 @@ const QuickMoves: React.FC = () => {
 
   return (
     <section>
-      <SectionLabel meta="HIGH IMPACT · LOW EFFORT">Quick moves</SectionLabel>
+      <SectionLabel meta={t("home.quickMoves.meta")}>{t("home.quickMoves.title")}</SectionLabel>
       {items.length === 0 ? (
         <div className="font-mono text-[11px] text-text-tertiary px-3 py-2">
-          No quick wins available. Add actions with impact ≥ 4 and time ≤ 30m.
+          {t("home.quickMoves.empty")}
         </div>
       ) : (
         <div className="space-y-0.5">
@@ -1536,10 +1538,10 @@ const QuickMoves: React.FC = () => {
               >
                 <Strip color={c} />
                 <button
-                  onClick={(e) => { e.stopPropagation(); changeStatus(a.id, "done"); toast.success("Action completed"); }}
+                  onClick={(e) => { e.stopPropagation(); changeStatus(a.id, "done"); toast.success(t("home.heavyLift.toast.completed")); }}
                   className="ml-1 inline-block rounded-[2px] border border-text-tertiary hover:border-accent shrink-0"
                   style={{ width: 14, height: 14 }}
-                  aria-label="Mark done"
+                  aria-label={t("home.quickMoves.markDoneAria")}
                 />
                 <span className="text-[13px] text-text-primary truncate">{a.title}</span>
                 <span className="text-[12px] text-text-secondary truncate">· {g?.title}{p ? ` · ${p.title}` : ""}</span>
@@ -1563,6 +1565,7 @@ const TinyHeader: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 );
 
 export const RecentlyClosed: React.FC = () => {
+  const { t, i18n: i18nInst } = useTranslation();
   const projects = useStore((s) => s.projects);
   const goals = useStore((s) => s.goals);
   const items = projects
@@ -1576,15 +1579,15 @@ export const RecentlyClosed: React.FC = () => {
         id: p.id,
         c: g ? `hsl(var(--${g.color}))` : "hsl(var(--text-tertiary))",
         name: p.title,
-        date: d.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+        date: d.toLocaleDateString(i18nInst.language, { month: "short", day: "numeric" }),
       };
     });
   return (
     <div className="p-4">
-      <TinyHeader>RECENTLY CLOSED · {items.length}</TinyHeader>
+      <TinyHeader>{t("home.recentlyClosed.title", { count: items.length })}</TinyHeader>
       <div className="mt-3 space-y-1.5">
         {items.length === 0 && (
-          <div className="font-mono text-[11px] text-text-tertiary">No closed projects yet.</div>
+          <div className="font-mono text-[11px] text-text-tertiary">{t("home.recentlyClosed.empty")}</div>
         )}
         {items.map((it) => (
           <div key={it.id} className="flex items-center gap-2">
@@ -1599,14 +1602,15 @@ export const RecentlyClosed: React.FC = () => {
 };
 
 export const Delegated: React.FC = () => {
+  const { t } = useTranslation();
   const actions = useStore((s) => s.actions);
   const items = actions.filter((a) => a.status === "delegated").slice(0, 4);
   return (
     <div className="p-4">
-      <TinyHeader>DELEGATED · {items.length} ACTIVE</TinyHeader>
+      <TinyHeader>{t("home.delegated.title", { count: items.length })}</TinyHeader>
       <div className="mt-3 space-y-1.5">
         {items.length === 0 && (
-          <div className="font-mono text-[11px] text-text-tertiary">No delegations.</div>
+          <div className="font-mono text-[11px] text-text-tertiary">{t("home.delegated.empty")}</div>
         )}
         {items.map((a) => (
           <div key={a.id} className="flex items-baseline gap-1 min-w-0">
@@ -1618,13 +1622,14 @@ export const Delegated: React.FC = () => {
         ))}
       </div>
       <Link to="/delegated" className="inline-block mt-2 text-[12px] text-accent hover:text-accent-hover">
-        View all →
+        {t("home.delegated.viewAll")}
       </Link>
     </div>
   );
 };
 
 const ThisWeek: React.FC = () => {
+  const { t } = useTranslation();
   const actions = useStore((s) => s.actions);
   const projects = useStore((s) => s.projects);
   const cutoff = Date.now() - 7 * 86400000;
@@ -1636,14 +1641,14 @@ const ThisWeek: React.FC = () => {
   ).length;
   const projClosed = projects.filter((p) => p.status === "completed" && inWeek(p.completedAt)).length;
   const stats = [
-    { n: `${done}`, label: "actions done" },
-    { n: `${delegated}`, label: "delegated" },
-    { n: `${dropped}`, label: "dropped" },
-    { n: `${projClosed}`, label: "projects closed" },
+    { n: `${done}`, label: t("home.thisWeek.actionsDone") },
+    { n: `${delegated}`, label: t("home.thisWeek.delegated") },
+    { n: `${dropped}`, label: t("home.thisWeek.dropped") },
+    { n: `${projClosed}`, label: t("home.thisWeek.projectsClosed") },
   ];
   return (
     <div className="p-4">
-      <TinyHeader>THIS WEEK</TinyHeader>
+      <TinyHeader>{t("home.thisWeek.title")}</TinyHeader>
       <div className="mt-3 space-y-1.5 font-mono text-[12px]">
         {stats.map((s, i) => (
           <div key={i} className="flex items-baseline gap-3">
@@ -1692,6 +1697,7 @@ function selectLookingBackDate(
 }
 
 const LookingBackCard: React.FC<{ date: string }> = ({ date }) => {
+  const { t, i18n: i18nInst } = useTranslation();
   const goals = useStore((s) => s.goals);
   const actions = useStore((s) => s.actions);
   const rituals = useStore((s) => s.rituals);
@@ -1699,15 +1705,23 @@ const LookingBackCard: React.FC<{ date: string }> = ({ date }) => {
 
   const dObj = new Date(date + "T00:00:00");
   const fullDate = dObj
-    .toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
+    .toLocaleDateString(i18nInst.language, { weekday: "short", month: "short", day: "numeric" })
     .toUpperCase();
   const daysAgo = Math.round((Date.now() - dObj.getTime()) / 86400000);
   const relLabel =
-    daysAgo <= 1 ? "YESTERDAY" : `${daysAgo} DAYS AGO`;
+    daysAgo <= 1 ? t("home.lookingBack.relYesterday") : t("home.lookingBack.relDaysAgo", { count: daysAgo });
 
   const dayType = yEntry?.dayType;
   const Icon = dayType ? DAY_TYPE_ICONS[dayType] : null;
-  const dtLabel = dayType ? `${DAY_TYPE_LABELS[dayType]} day` : "Active day";
+  const dayTypeKeyMap: Record<string, string> = {
+    execution: "today.dayType.execution",
+    recovery: "today.dayType.recovery",
+    "day-off": "today.dayType.dayOff",
+    sick: "today.dayType.sick",
+  };
+  const dtLabel = dayType
+    ? t("home.lookingBack.dayLabel", { label: t(dayTypeKeyMap[dayType] ?? "") })
+    : t("home.lookingBack.activeDay");
 
   const yActions = actions.filter(
     (a) => a.completedAt?.slice(0, 10) === date && a.status === "done",
@@ -1753,7 +1767,7 @@ const LookingBackCard: React.FC<{ date: string }> = ({ date }) => {
   return (
     <section>
       <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-3">
-        LOOKING BACK
+        {t("home.lookingBack.label")}
       </div>
       <div className="bg-surface-elevated border border-border-subtle rounded-[6px] p-6">
         <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
@@ -1764,7 +1778,7 @@ const LookingBackCard: React.FC<{ date: string }> = ({ date }) => {
           <span>{dtLabel}</span>
         </div>
         <div className="mt-2 font-mono text-[13px] text-text-secondary tabular-nums">
-          {actionsDone} actions done · {ritualsDone} rituals · {hours} invested
+          {t("home.lookingBack.summary", { actions: actionsDone, rituals: ritualsDone, time: hours })}
         </div>
         {perGoal.length > 0 && (
           <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5">
@@ -1788,14 +1802,14 @@ const LookingBackCard: React.FC<{ date: string }> = ({ date }) => {
         )}
         {lastTime && (
           <div className="mt-3 font-mono text-[11px] text-text-tertiary">
-            Last activity: {lastTime}
+            {t("home.lookingBack.lastActivity", { time: lastTime })}
           </div>
         )}
         <Link
           to={`/reviews/days/${date}`}
           className="inline-block mt-4 text-[12px] text-[hsl(var(--accent))] hover:brightness-110 transition-colors"
         >
-          View full review →
+          {t("home.lookingBack.viewFull")}
         </Link>
       </div>
     </section>
@@ -1804,6 +1818,7 @@ const LookingBackCard: React.FC<{ date: string }> = ({ date }) => {
 
 /* ===== Page (Today) ===== */
 const Index: React.FC = () => {
+  const { t, i18n: i18nInst } = useTranslation();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [planningMode, setPlanningMode] = useState(false);
 
@@ -1829,7 +1844,7 @@ const Index: React.FC = () => {
       subscribeAppEvent("open-close-day", () => {
         if (isPlanned && !isClosed) {
           closeDay(TODAY_ISO);
-          toast.success("Day closed");
+          toast.success(t("home.toast.dayClosed"));
         }
       }),
       subscribeAppEvent("open-settings", () => setSettingsOpen(true)),
@@ -1878,7 +1893,7 @@ const Index: React.FC = () => {
 
   // Header date + meta
   const today = new Date();
-  const headerDate = today.toLocaleDateString("en-US", {
+  const headerDate = today.toLocaleDateString(i18nInst.language, {
     weekday: "long",
     month: "long",
     day: "numeric",
@@ -1899,7 +1914,7 @@ const Index: React.FC = () => {
     (r) => r.status === "active" && (planAndReview && isPlanned ? plannedRitualSet.has(r.id) : true),
   ).length;
   const aggMeta = isPlanned && !isClosed && !planningMode
-    ? `${todaysActionCount} actions · ${todaysRitualCount} rituals`
+    ? t("home.header.aggMeta", { actions: todaysActionCount, rituals: todaysRitualCount })
     : "";
 
   const lookingBackDate = selectLookingBackDate(dayEntries, actions, rituals);
@@ -1943,9 +1958,7 @@ const Index: React.FC = () => {
                       type="button"
                       onClick={() => {
                         if (
-                          !confirm(
-                            "Switch day type? You'll need to plan your day again.",
-                          )
+                          !confirm(t("home.header.changeDayType.confirm"))
                         )
                           return;
                         updateDayEntry(TODAY_ISO, {
@@ -1960,7 +1973,7 @@ const Index: React.FC = () => {
                       }}
                       className="text-[12px] text-text-tertiary hover:text-text-primary underline-offset-2 hover:underline transition"
                     >
-                      Change day type
+                      {t("home.header.changeDayType")}
                     </button>
                   )}
                 </div>
@@ -1971,7 +1984,7 @@ const Index: React.FC = () => {
               onPlanClick={() => setPlanningMode(true)}
               onCloseClick={() => {
                 closeDay(TODAY_ISO);
-                toast.success("Day closed");
+                toast.success(t("home.toast.dayClosed"));
               }}
             />
 

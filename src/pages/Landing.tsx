@@ -40,7 +40,7 @@ const Landing: React.FC = () => {
             margin: 0,
           }}
         >
-          Action moves you forward.
+          The OS for getting things done.
         </h1>
         <p
           style={{
@@ -51,7 +51,7 @@ const Landing: React.FC = () => {
             fontSize: "clamp(16px, 1.6vw, 20px)",
           }}
         >
-          The OS for getting things done.
+          Action moves you forward.
         </p>
 
         <a

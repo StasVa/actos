@@ -209,6 +209,8 @@ const RecentlyClosedHigherSection: React.FC = () => {
 
 /* ===== Recently Closed Actions (enriched ActionRow-style) ===== */
 const RecentlyClosedActionsSection: React.FC = () => {
+  const { t } = useTranslation();
+  const fmtAgo = useFmtAgo();
   const actions = useStore((s) => s.actions);
   const goals = useStore((s) => s.goals);
   const projects = useStore((s) => s.projects);

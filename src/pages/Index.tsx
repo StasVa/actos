@@ -1029,7 +1029,7 @@ export const TodayZone: React.FC<{
         {/* MAIN TASK */}
         <div>
           <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-2">
-            MAIN TASK
+            {t("home.mainTask.label")}
           </div>
           {mainTask ? (
             (() => {

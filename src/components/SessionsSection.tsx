@@ -226,7 +226,7 @@ export const SessionDetailPanel: React.FC<{
         <div className="flex items-start justify-between p-5 border-b border-border-subtle">
           <div>
             <div className="text-[18px] font-medium text-text-primary">
-              {fmtPanelDateTime(session.startedAt)}
+              {fmtPanelDateTime(session.startedAt, t)}
             </div>
             <div className="mt-2">
               <StatusPill status={session.status} />
@@ -235,7 +235,7 @@ export const SessionDetailPanel: React.FC<{
           <button
             onClick={onClose}
             className="w-7 h-7 inline-flex items-center justify-center rounded-[3px] text-text-tertiary hover:bg-surface-hover hover:text-text-primary"
-            aria-label="Close"
+            aria-label={t("sessions.section.closeAria")}
           >
             ✕
           </button>
@@ -246,10 +246,12 @@ export const SessionDetailPanel: React.FC<{
             <div className="font-mono text-[12px] text-text-secondary">{config}</div>
             <div className="space-y-1.5">
               <div className="text-[14px] text-text-primary">
-                Actual: {dur > 0 ? `${dur}min` : "—"}
+                {t("sessions.section.actual", {
+                  detail: dur > 0 ? t("sessions.section.actualMin", { count: dur }) : t("sessions.section.dash"),
+                })}
               </div>
               <div className="text-[14px] text-text-primary">
-                Completed {session.cyclesCompleted} of {session.cyclesPlanned} cycles
+                {t("sessions.section.cyclesCompleted", { done: session.cyclesCompleted, planned: session.cyclesPlanned })}
               </div>
               <div
                 className="text-[14px]"
@@ -257,16 +259,18 @@ export const SessionDetailPanel: React.FC<{
                   color: outcome > 0 ? "hsl(var(--state-active))" : "hsl(var(--text-secondary))",
                 }}
               >
-                {outcome > 0 ? `+${outcome} Impact added to active goals` : "+0 Impact added"}
+                {outcome > 0
+                  ? t("sessions.section.impactAdded", { count: outcome })
+                  : t("sessions.section.impactZero")}
               </div>
             </div>
 
             <div>
               <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-secondary mb-2">
-                ACTIONS · {session.plannedActionIds.length} PLANNED
+                {t("sessions.section.actionsHeader", { count: session.plannedActionIds.length })}
               </div>
               {session.plannedActionIds.length === 0 ? (
-                <div className="text-[13px] text-text-tertiary">No actions were planned.</div>
+                <div className="text-[13px] text-text-tertiary">{t("sessions.section.noActionsPlanned")}</div>
               ) : (
                 <div className="border-t border-border-subtle">
                   {session.plannedActionIds.map((aid) => {

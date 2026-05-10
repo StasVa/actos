@@ -251,7 +251,7 @@ export function CommandPalette() {
     const rows: Row[] = NAV_ITEMS.map((n) => ({
       key: `nav-${n.path}`,
       kind: "nav" as const,
-      title: `Go to ${n.label}`,
+      title: t("commandPalette.nav.goTo", { label: t(n.labelKey) }),
       rightHint: "→",
       onSelect: () => {
         navigate(n.path);
@@ -261,7 +261,7 @@ export function CommandPalette() {
     rows.push({
       key: "nav-settings",
       kind: "nav",
-      title: "Settings",
+      title: t("commandPalette.nav.settings"),
       rightHint: "→",
       onSelect: () => {
         close();

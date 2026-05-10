@@ -147,7 +147,7 @@ const GoalCard: React.FC<{ m: GoalMeta; logTimeOn: boolean }> = ({ m, logTimeOn 
 
   const archived = g.status !== "active";
   const color = `hsl(var(--${g.color}))`;
-  const typeLabel = g.type === "mid-term" ? "MID-TERM" : "SHORT-TERM";
+  const typeLabel = g.type === "mid-term" ? t("goals.type.midTerm") : t("goals.type.shortTerm");
   const stateColor =
     state === "active" ? "hsl(var(--state-active))" : "hsl(var(--state-stalled))";
 

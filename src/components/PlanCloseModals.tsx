@@ -675,7 +675,7 @@ const PlanForm: React.FC<{
               {/* RIGHT: selected */}
               <div className="border border-border-subtle rounded-[6px] bg-surface-base flex flex-col min-h-[280px] flex-1 min-w-0 md:basis-[40%]">
                 <div className="px-3 py-2 border-b border-border-subtle font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">
-                  Selected · {state.selectedActionIds.length}
+                  {t("planToday.actions.selected", { count: state.selectedActionIds.length })}
                 </div>
                 <div className="flex-1 overflow-y-auto p-2 space-y-1.5 max-h-[360px]">
                   {state.selectedActionIds.length === 0 ? (

@@ -553,14 +553,14 @@ const ReviewDayDetail: React.FC = () => {
 
             {main && (
               <section>
-                <SectionHead>Main task</SectionHead>
+                <SectionHead>{t("reviews.detail.section.mainTask")}</SectionHead>
                 <div className="flex items-center gap-2 text-[14px]">
                   <span className="w-2 h-2 rounded-full" style={{ background: goalColorOf(main) }} />
                   {main.status === "done" ? (
-                    <span className="text-text-primary">✓ Done — {main.title}</span>
+                    <span className="text-text-primary">{t("reviews.detail.actions.mainDone", { title: main.title })}</span>
                   ) : (
                     <span className="text-[hsl(var(--state-stalled))]">
-                      ✗ Not completed — {main.title}
+                      {t("reviews.detail.actions.mainNot", { title: main.title })}
                     </span>
                   )}
                 </div>

@@ -325,7 +325,7 @@ function ActionEditorPanel({
   const confirmDropAction = () => {
     if (!actionId || !confirmDrop) return;
     changeActionStatus(actionId, confirmDrop);
-    toast(confirmDrop === "dropped" ? "Action dropped" : "Action cancelled");
+    toast(confirmDrop === "dropped" ? t("actionEditor.toast.dropped") : t("actionEditor.toast.cancelled"));
     setConfirmDrop(null);
   };
 

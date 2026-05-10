@@ -391,6 +391,7 @@ const SelectedRow: React.FC<{
   onDrop,
   isDragging,
 }) => {
+  const { t } = useTranslation();
   const impact = action.impact ?? 0;
   return (
     <div

@@ -155,46 +155,49 @@ const ScreenWrap: React.FC<{ children: React.ReactNode; keyId: string }> = ({ ch
   </div>
 );
 
-const WelcomeScreen: React.FC<{ name: string; onContinue: () => void }> = ({ name, onContinue }) => (
-  <ScreenWrap keyId="s0">
-    <div className="flex flex-col items-center justify-center min-h-screen px-6 text-center">
-      <div
-        style={{
-          width: 40, height: 40, borderRadius: 8,
-          background: "hsl(var(--text-primary))",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          color: "hsl(var(--surface-base))",
-          fontFamily: "Inter", fontWeight: 700, fontSize: 18,
-        }}
-        aria-label="ActOS"
-      >A</div>
-      <div style={{ height: 80 }} />
-      <h1
-        style={{
-          fontFamily: "Inter, ui-sans-serif, system-ui",
-          fontWeight: 400,
-          fontSize: "clamp(36px, 6vw, 56px)",
-          lineHeight: 1.1,
-          color: "hsl(var(--text-primary))",
-          margin: 0,
-        }}
-      >
-        Welcome, {name}.
-      </h1>
-      <div style={{ height: 16 }} />
-      <p
-        style={{
-          fontFamily: "Inter", fontWeight: 400,
-          fontSize: 18, color: "hsl(var(--text-secondary))", margin: 0,
-        }}
-      >
-        Let's set this up.
-      </p>
-      <div style={{ height: 96 }} />
-      <ContinueCTA onClick={onContinue} />
-    </div>
-  </ScreenWrap>
-);
+const WelcomeScreen: React.FC<{ name: string; onContinue: () => void }> = ({ name, onContinue }) => {
+  const { t } = useTranslation();
+  return (
+    <ScreenWrap keyId="s0">
+      <div className="flex flex-col items-center justify-center min-h-screen px-6 text-center">
+        <div
+          style={{
+            width: 40, height: 40, borderRadius: 8,
+            background: "hsl(var(--text-primary))",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            color: "hsl(var(--surface-base))",
+            fontFamily: "Inter", fontWeight: 700, fontSize: 18,
+          }}
+          aria-label="ActOS"
+        >A</div>
+        <div style={{ height: 80 }} />
+        <h1
+          style={{
+            fontFamily: "Inter, ui-sans-serif, system-ui",
+            fontWeight: 400,
+            fontSize: "clamp(36px, 6vw, 56px)",
+            lineHeight: 1.1,
+            color: "hsl(var(--text-primary))",
+            margin: 0,
+          }}
+        >
+          {t("setup.welcome.heading", { name })}
+        </h1>
+        <div style={{ height: 16 }} />
+        <p
+          style={{
+            fontFamily: "Inter", fontWeight: 400,
+            fontSize: 18, color: "hsl(var(--text-secondary))", margin: 0,
+          }}
+        >
+          {t("setup.welcome.sub")}
+        </p>
+        <div style={{ height: 96 }} />
+        <ContinueCTA onClick={onContinue} />
+      </div>
+    </ScreenWrap>
+  );
+};
 
 const ThemeScreen: React.FC<{ onContinue: () => void; onBack: () => void }> = ({ onContinue, onBack }) => {
   const [choice, , setChoice] = useThemeChoice();

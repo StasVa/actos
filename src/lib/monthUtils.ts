@@ -51,18 +51,21 @@ export function monthRange(ym: string): { start: Date; end: Date; days: ISODate[
 export function formatMonthLabel(ym: string): string {
   const d = dateFromYearMonth(ym);
   if (!d) return ym;
-  return format(d, "MMMM yyyy");
+  return new Intl.DateTimeFormat(i18n.language || "en", {
+    month: "long",
+    year: "numeric",
+  }).format(d);
 }
 
 export function formatMonthRelative(ym: string, today = new Date()): string {
   const d = dateFromYearMonth(ym);
   if (!d) return "";
   const diff = differenceInCalendarMonths(startOfMonth(today), d);
-  if (diff === 0) return "This month";
-  if (diff === 1) return "Last month";
-  if (diff > 0) return `${diff} months ago`;
-  if (diff === -1) return "Next month";
-  return `${Math.abs(diff)} months ahead`;
+  if (diff === 0) return i18n.t("reviews.period.thisMonth");
+  if (diff === 1) return i18n.t("reviews.period.lastMonth");
+  if (diff > 0) return i18n.t("reviews.period.monthsAgo", { count: diff });
+  if (diff === -1) return i18n.t("reviews.period.nextMonth");
+  return i18n.t("reviews.period.monthsAhead", { count: Math.abs(diff) });
 }
 
 export interface MonthPerGoalProjectTime {

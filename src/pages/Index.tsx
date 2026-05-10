@@ -658,6 +658,7 @@ const ActiveProjectCard: React.FC<{ p: ActiveProjectMeta; pct: number }> = ({ p,
 
 /* ===== Active Projects (live store-wired) ===== */
 export const ActiveProjects: React.FC = () => {
+  const { t } = useTranslation();
   const goals = useStore((s) => s.goals);
   const projects = useStore((s) => s.projects);
   const actions = useStore((s) => s.actions);
@@ -681,9 +682,9 @@ export const ActiveProjects: React.FC = () => {
     const state: "active" | "stalled" = days <= 7 ? "active" : "stalled";
     let last: string;
     if (!lastIso) last = "—";
-    else if (days <= 0) last = "today";
-    else if (days === 1) last = "1d ago";
-    else last = `${days}d ago`;
+    else if (days <= 0) last = t("home.activeProjects.lastShort.today");
+    else if (days === 1) last = t("home.activeProjects.lastShort.oneDay");
+    else last = t("home.activeProjects.lastShort.daysAgo", { count: days });
     return {
       id: p.id,
       goalLabel: (goal?.title ?? "").toUpperCase(),
@@ -702,14 +703,14 @@ export const ActiveProjects: React.FC = () => {
 
   return (
     <section>
-      <SectionLabel meta={`${projectsWithMeta.length} ACTIVE · ${stalledCount} STALLED`}>
-        Active projects · {projectsWithMeta.length}
+      <SectionLabel meta={t("home.activeProjects.meta", { active: projectsWithMeta.length, stalled: stalledCount })}>
+        {t("home.activeProjects.title", { count: projectsWithMeta.length })}
       </SectionLabel>
       {projectsWithMeta.length === 0 ? (
         <div className="bg-surface-raised border border-dashed border-border-subtle rounded-[6px] py-8 text-center">
-          <div className="text-[13px] text-text-secondary">No active projects.</div>
+          <div className="text-[13px] text-text-secondary">{t("home.activeProjects.empty.heading")}</div>
           <div className="font-mono text-[11px] text-text-tertiary mt-1">
-            Press ⌘K → “New project”.
+            {t("home.activeProjects.empty.body")}
           </div>
         </div>
       ) : (

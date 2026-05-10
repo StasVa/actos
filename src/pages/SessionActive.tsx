@@ -871,7 +871,7 @@ const SessionActive: React.FC = () => {
             <div className="flex-1 overflow-y-auto">
               {pickerAvailable.length === 0 ? (
                 <div className="p-6 text-[13px] text-text-tertiary text-center">
-                  No more actions available. Create one from /actions first.
+                  {t("sessionActive.picker.empty")}
                 </div>
               ) : (
                 pickerAvailable.map((a) => {

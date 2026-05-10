@@ -271,7 +271,7 @@ function ActionEditorPanel({
   // option). Planned transitions are handled by handleScheduledDateChange.
   const handleStatusChange = (next: ActionStatus) => {
     if (isGoalLevel && next !== "backlog") {
-      toast.error("Assign to a Project to plan or complete this action.");
+      toast.error(t("actionEditor.toast.needAssignProjectPlan"));
       return;
     }
     if (mode === "new") {
@@ -283,24 +283,24 @@ function ActionEditorPanel({
     // Block Done if Impact / Time missing
     if (next === "done") {
       if (!(impactNum > 0)) {
-        setImpactError("Impact is required to mark this action Done.");
-        toast.error("Set Impact to mark Done");
+        setImpactError(t("actionEditor.error.impactDone"));
+        toast.error(t("actionEditor.toast.needImpact"));
         return;
       }
       if (requireTime && !(timeNum > 0)) {
-        setTimeError("Set time estimate first.");
-        toast.error("Set Time estimate to mark Done");
+        setTimeError(t("actionEditor.error.timeDone"));
+        toast.error(t("actionEditor.toast.needTime"));
         return;
       }
     }
     if (next === "delegated") {
       if (!delegateName.trim()) {
-        setDelegateError("Enter delegate name.");
+        setDelegateError(t("actionEditor.error.delegateName"));
         // Switch UI into delegated state so the field appears
         changeActionStatus(actionId, "delegated", {
           delegateName: "",
         });
-        toast.error("Enter delegate name");
+        toast.error(t("actionEditor.toast.needDelegateName"));
         return;
       }
       changeActionStatus(actionId, "delegated", {
@@ -308,7 +308,7 @@ function ActionEditorPanel({
         delegateNote: delegateNote || undefined,
         expectedReturnDate: expectedReturn || undefined,
       });
-      toast(`Delegated${delegateName ? ` to ${delegateName}` : ""}`);
+      toast(delegateName ? t("actionEditor.toast.delegatedTo", { name: delegateName }) : t("actionEditor.toast.delegated"));
       return;
     }
     if (next === "dropped" || next === "cancelled") {
@@ -318,8 +318,8 @@ function ActionEditorPanel({
     setImpactError(null);
     setTimeError(null);
     changeActionStatus(actionId, next);
-    if (next === "done") toast("Action marked done");
-    if (next === "backlog") toast("Action re-opened");
+    if (next === "done") toast(t("actionEditor.toast.markedDone"));
+    if (next === "backlog") toast(t("actionEditor.toast.reopened"));
   };
 
   const confirmDropAction = () => {

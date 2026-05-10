@@ -243,19 +243,19 @@ const GoalCard: React.FC<{ m: GoalMeta; logTimeOn: boolean }> = ({ m, logTimeOn 
                 </Tooltip>
                 <div data-card-menu onClick={(e) => e.stopPropagation()}>
                   <CardMenu
-                    ariaLabel="Goal menu"
+                    ariaLabel={t("goals.aria.menu")}
                     items={
                       archived
                         ? [
-                            { label: "Re-open", onSelect: () => { useStore.getState().reopenGoal?.(g.id); toast("Goal re-opened"); } },
-                            { label: "Edit", onSelect: () => openPanel({ kind: "goal", mode: "edit", id: g.id }) },
-                            { label: "Delete", destructive: true, onSelect: () => setConfirmDelete(true) },
+                            { label: t("common.reopen"), onSelect: () => { useStore.getState().reopenGoal?.(g.id); toast(t("toast.goalReopened")); } },
+                            { label: t("goals.menu.edit"), onSelect: () => openPanel({ kind: "goal", mode: "edit", id: g.id }) },
+                            { label: t("goals.menu.delete"), destructive: true, onSelect: () => setConfirmDelete(true) },
                           ]
                         : [
-                            { label: "Edit", onSelect: () => openPanel({ kind: "goal", mode: "edit", id: g.id }) },
-                            { label: "Mark complete", onSelect: () => { markGoalComplete(g.id); toast("Goal completed"); } },
-                            { label: "Drop", destructive: true, onSelect: () => setConfirmDrop(true) },
-                            { label: "Delete", destructive: true, onSelect: () => setConfirmDelete(true) },
+                            { label: t("goals.menu.edit"), onSelect: () => openPanel({ kind: "goal", mode: "edit", id: g.id }) },
+                            { label: t("goalEditor.markComplete"), onSelect: () => { markGoalComplete(g.id); toast(t("toast.goalCompleted")); } },
+                            { label: t("goals.menu.drop"), destructive: true, onSelect: () => setConfirmDrop(true) },
+                            { label: t("goals.menu.delete"), destructive: true, onSelect: () => setConfirmDelete(true) },
                           ]
                     }
                   />

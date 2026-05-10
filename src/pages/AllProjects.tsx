@@ -231,6 +231,9 @@ const AllProjects: React.FC = () => {
   const [query, setQuery] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("recent");
   const [archivedCollapsed, setArchivedCollapsed] = useState(false);
+  const GOAL_OPTIONS = useGoalOptions(t);
+  const STATE_OPTIONS = useStateOptions(t);
+  const SORT_OPTIONS = useSortOptions(t);
 
   const storeProjects = useStore((s) => s.projects);
   const storeGoals = useStore((s) => s.goals);

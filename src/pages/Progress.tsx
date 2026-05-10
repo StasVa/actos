@@ -255,10 +255,10 @@ const RecentlyClosedActionsSection: React.FC = () => {
 
   return (
     <section>
-      <SectionLabel>Recently closed</SectionLabel>
+      <SectionLabel>{t("progress.recentlyClosed")}</SectionLabel>
       {top.length === 0 ? (
         <div className="font-mono text-[11px] text-text-tertiary px-3 py-2">
-          Nothing closed yet.
+          {t("progress.section.nothingClosed")}
         </div>
       ) : (
         <div className="bg-surface-elevated border border-border-subtle rounded-[6px] overflow-hidden">

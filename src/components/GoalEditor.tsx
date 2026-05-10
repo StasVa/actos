@@ -174,7 +174,7 @@ function GoalEditorPanel({
 
   const handleSaveNew = () => {
     if (!title.trim()) {
-      toast.error("Title is required");
+      toast.error(t("goalEditor.error.titleRequired"));
       return;
     }
     const isFreeNow = settings.subscriptionTier !== "all-in";
@@ -192,12 +192,12 @@ function GoalEditorPanel({
     if (!result.ok) {
       toast.error(
         isFreeNow
-          ? "Free plan: 1 active goal · Go All-In for 3."
-          : "You already have 3 active goals. Complete or drop one first.",
+          ? t("goalEditor.atCap.free")
+          : t("goalEditor.atCap.allIn"),
       );
       return;
     }
-    toast("Goal created");
+    toast(t("goalEditor.toast.created"));
     useStore.getState().openPanel({ kind: "goal", mode: "edit", id: result.id });
   };
 
@@ -214,17 +214,17 @@ function GoalEditorPanel({
     }
     // re-activate
     if (activeCount >= 3) {
-      toast.error("You already have 3 active goals. Complete or drop one first.");
+      toast.error(t("goalEditor.error.tooManyActive"));
       return;
     }
     reopenGoal(goalId);
-    toast("Goal re-opened");
+    toast(t("goalEditor.toast.reopened"));
   };
 
   const handleDelete = () => {
     if (!goalId) return;
     deleteGoal(goalId);
-    toast("Goal deleted");
+    toast(t("goalEditor.toast.deleted"));
     setConfirmDelete(false);
     onClose();
   };
@@ -232,17 +232,17 @@ function GoalEditorPanel({
   const handleConfirmDrop = () => {
     if (!goalId) return;
     dropGoal(goalId);
-    const parts = [];
-    if (childStats.openProjects > 0) parts.push(`${childStats.openProjects} project${childStats.openProjects === 1 ? "" : "s"}`);
-    if (childStats.openActions > 0) parts.push(`${childStats.openActions} action${childStats.openActions === 1 ? "" : "s"}`);
-    toast(parts.length > 0 ? `Goal dropped · ${parts.join(", ")} dropped` : "Goal dropped");
+    const parts: string[] = [];
+    if (childStats.openProjects > 0) parts.push(t("goalEditor.summary.openProjects", { count: childStats.openProjects }));
+    if (childStats.openActions > 0) parts.push(t("goalEditor.summary.openActions", { count: childStats.openActions }));
+    toast(parts.length > 0 ? t("goalEditor.toast.droppedWith", { summary: parts.join(", ") }) : t("goalEditor.toast.dropped"));
     setConfirmDrop(false);
   };
 
   const handleConfirmComplete = () => {
     if (!goalId) return;
     markGoalComplete(goalId);
-    toast("Goal completed");
+    toast(t("goalEditor.toast.completed"));
     setConfirmComplete(false);
   };
 

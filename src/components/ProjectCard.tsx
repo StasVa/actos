@@ -35,18 +35,18 @@ const MeasureBar: React.FC<{
   </div>
 );
 
-function fmtAgo(iso?: string): { label: string; days: number } {
+function fmtAgo(iso: string | undefined, t: (k: string, o?: any) => string, locale: string): { label: string; days: number } {
   if (!iso) return { label: "—", days: 999 };
   const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
-  if (days <= 0) return { label: "today", days: 0 };
-  if (days === 1) return { label: "1d ago", days: 1 };
-  if (days < 30) return { label: `${days}d ago`, days };
+  if (days <= 0) return { label: t("progress.relAgo.today"), days: 0 };
+  if (days === 1) return { label: t("progress.relAgo.yesterday"), days: 1 };
+  if (days < 30) return { label: t("progress.relAgo.daysAgo", { n: days }), days };
   const d = new Date(iso);
-  return { label: d.toLocaleDateString("en-US", { month: "short", day: "numeric" }), days };
+  return { label: d.toLocaleDateString(locale, { month: "short", day: "numeric" }), days };
 }
 
-function fmtShortDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+function fmtShortDate(iso: string, locale: string): string {
+  return new Date(iso).toLocaleDateString(locale, { month: "short", day: "numeric" });
 }
 
 function daysBetween(aIso: string, bIso?: string): number {

@@ -194,14 +194,14 @@ const RecentlyClosedHigherSection: React.FC = () => {
       </div>
       {remaining > 0 && (
         <div className="mt-2 px-1 font-mono text-[11px] text-text-tertiary">
-          + {remaining} more
+          {t("progress.moreCount", { count: remaining })}
         </div>
       )}
       <Link
         to="/projects"
         className="inline-block mt-3 text-[13px] text-accent hover:text-accent-hover"
       >
-        {goalCount > 0 ? "View all closed →" : "View all closed projects →"}
+        {goalCount > 0 ? t("progress.viewAllClosed") : t("progress.viewAllClosedProjects")}
       </Link>
     </section>
   );

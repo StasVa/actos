@@ -93,7 +93,7 @@ const RecentlyClosedHigherSection: React.FC = () => {
       goal: g,
       closureIso: stamp,
       isDropped: g.status === "dropped",
-      countLabel: `${goalProjects.length} project${goalProjects.length === 1 ? "" : "s"}`,
+      countLabel: t("common.count.projects", { count: goalProjects.length }),
       valueAdded,
       timeInvestedMin: timeMin,
     });

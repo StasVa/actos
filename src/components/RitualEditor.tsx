@@ -8,6 +8,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDown, Check } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import { useStore } from "@/store/useStore";
 import type { ID, Ritual, RitualSchedule } from "@/types";
 import { ConfirmModal } from "./ConfirmModal";
@@ -31,15 +32,23 @@ import {
   PopoverContent,
 } from "@/components/ui/popover";
 
-const SCHEDULE_OPTIONS: { value: RitualSchedule; label: string }[] = [
-  { value: "daily", label: "Daily" },
-  { value: "weekdays", label: "Weekdays (Mon–Fri)" },
-  { value: "weekly", label: "Weekly" },
-  { value: "monthly", label: "Monthly" },
-  { value: "custom", label: "Custom days" },
+const SCHEDULE_OPTIONS: { value: RitualSchedule; labelKey: string }[] = [
+  { value: "daily", labelKey: "ritualEditor.schedule.daily" },
+  { value: "weekdays", labelKey: "ritualEditor.schedule.weekdays" },
+  { value: "weekly", labelKey: "ritualEditor.schedule.weekly" },
+  { value: "monthly", labelKey: "ritualEditor.schedule.monthly" },
+  { value: "custom", labelKey: "ritualEditor.schedule.custom" },
 ];
 
-const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const WEEKDAY_LABEL_KEYS = [
+  "ritualEditor.weekday.sun",
+  "ritualEditor.weekday.mon",
+  "ritualEditor.weekday.tue",
+  "ritualEditor.weekday.wed",
+  "ritualEditor.weekday.thu",
+  "ritualEditor.weekday.fri",
+  "ritualEditor.weekday.sat",
+];
 
 const todayISO = () => new Date().toISOString().slice(0, 10);
 
@@ -72,6 +81,7 @@ function RitualEditorPanel({
   prefill?: Partial<Ritual>;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const ritual = useStore((s) => (ritualId ? s.rituals.find((r) => r.id === ritualId) : undefined));
   const goals = useStore((s) => s.goals);
   const projects = useStore((s) => s.projects);
@@ -172,36 +182,36 @@ function RitualEditorPanel({
 
   const missingForCreate = useMemo(() => {
     const missing: string[] = [];
-    if (!title.trim()) missing.push("Title");
-    if (!(baseImpactNum >= 1 && baseImpactNum <= 10)) missing.push("Base Impact");
-    if (!(timeNum > 0)) missing.push("Time");
-    if (!goalId) missing.push("Goal");
-    if (!schedule) missing.push("Schedule");
+    if (!title.trim()) missing.push(t("ritualEditor.required.title"));
+    if (!(baseImpactNum >= 1 && baseImpactNum <= 10)) missing.push(t("ritualEditor.required.baseImpact"));
+    if (!(timeNum > 0)) missing.push(t("ritualEditor.required.time"));
+    if (!goalId) missing.push(t("ritualEditor.required.goal"));
+    if (!schedule) missing.push(t("ritualEditor.required.schedule"));
     return missing;
-  }, [title, baseImpactNum, timeNum, goalId, schedule]);
+  }, [title, baseImpactNum, timeNum, goalId, schedule, t]);
   const canCreate = missingForCreate.length === 0;
 
   const handleSaveNew = () => {
     if (!canCreate) {
       let firstFocus: "title" | "impact" | "time" | "goal" | "schedule" | null = null;
       if (!title.trim()) {
-        setTitleError("Add a title.");
+        setTitleError(t("ritualEditor.error.titleRequired"));
         firstFocus = firstFocus ?? "title";
       }
       if (!(baseImpactNum >= 1 && baseImpactNum <= 10)) {
-        setImpactError("Base Impact is required (1-10).");
+        setImpactError(t("ritualEditor.error.baseImpactRequired"));
         firstFocus = firstFocus ?? "impact";
       }
       if (!(timeNum > 0)) {
-        setTimeError("Time is required.");
+        setTimeError(t("ritualEditor.error.timeRequired"));
         firstFocus = firstFocus ?? "time";
       }
       if (!goalId) {
-        setGoalError("Pick a goal.");
+        setGoalError(t("ritualEditor.error.goalRequired"));
         firstFocus = firstFocus ?? "goal";
       }
       if (!schedule) {
-        setScheduleError("Pick a schedule.");
+        setScheduleError(t("ritualEditor.error.scheduleRequired"));
         firstFocus = firstFocus ?? "schedule";
       }
       if (firstFocus === "title") titleRef.current?.focus();
@@ -229,24 +239,24 @@ function RitualEditorPanel({
       notes: notes || undefined,
       timeEstimateMinutes: Number(timeMin),
     });
-    toast(`Ritual "${title.trim()}" created`);
+    toast(t("ritualEditor.toast.created", { title: title.trim() }));
     onClose();
   };
 
   const handleMarkDone = () => {
     if (!ritualId) return;
     if (doneToday) {
-      toast("Already logged today");
+      toast(t("ritualEditor.toast.alreadyLogged"));
       return;
     }
     markDone(ritualId);
-    toast(`Logged · ${completions + 1} completion${completions + 1 === 1 ? "" : "s"}`);
+    toast(t("ritualEditor.toast.logged", { count: completions + 1 }));
   };
 
   const handleArchive = () => {
     if (!ritualId) return;
     archiveRitual(ritualId);
-    toast("Ritual archived");
+    toast(t("ritualEditor.toast.archived"));
     setConfirmArchive(false);
     onClose();
   };
@@ -254,13 +264,13 @@ function RitualEditorPanel({
   const handleRestore = () => {
     if (!ritualId) return;
     restoreRitual(ritualId);
-    toast("Ritual restored");
+    toast(t("ritualEditor.toast.restored"));
   };
 
   const handleDelete = () => {
     if (!ritualId) return;
     deleteRitual(ritualId);
-    toast("Ritual deleted");
+    toast(t("ritualEditor.toast.deleted"));
     setConfirmDelete(false);
     onClose();
   };
@@ -268,7 +278,7 @@ function RitualEditorPanel({
   const handleDuplicate = () => {
     if (!ritual) return;
     const newId = createRitual({
-      title: "Copy of " + ritual.title,
+      title: t("actionEditor.copyOf", { title: ritual.title }),
       goalId: ritual.goalId,
       projectId: ritual.projectId,
       schedule: ritual.schedule,
@@ -277,7 +287,7 @@ function RitualEditorPanel({
       notes: ritual.notes,
       timeEstimateMinutes: ritual.timeEstimateMinutes,
     });
-    toast("Ritual duplicated");
+    toast(t("ritualEditor.toast.duplicated"));
     useStore.getState().openPanel({ kind: "ritual", mode: "edit", id: newId });
   };
 
@@ -307,10 +317,10 @@ function RitualEditorPanel({
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full" style={{ background: goalColor }} />
           {mode === "new" ? (
-            <div className="text-[18px] font-medium text-text-primary">New ritual</div>
+            <div className="text-[18px] font-medium text-text-primary">{t("ritualEditor.header.new")}</div>
           ) : (
             <div className="font-mono text-[11px] uppercase tracking-[0.08em] text-text-tertiary">
-              {status === "archived" ? "Archived ritual" : "Edit ritual"}
+              {status === "archived" ? t("ritualEditor.header.archived") : t("ritualEditor.header.edit")}
             </div>
           )}
         </div>
@@ -345,7 +355,7 @@ function RitualEditorPanel({
                     handleSaveNew();
                   }
                 }}
-                placeholder="Ritual title"
+                placeholder={t("ritualEditor.titlePlaceholder")}
                 className="w-full bg-transparent outline-none text-[18px] font-medium text-text-primary placeholder:text-text-tertiary"
               />
               {titleError && <InlineError text={titleError} />}
@@ -353,17 +363,17 @@ function RitualEditorPanel({
 
             {/* ESTIMATES */}
             <div>
-              <SectionHeadRequired label="Estimates" required />
+              <SectionHeadRequired label={t("ritualEditor.section.estimates")} required />
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <FieldRow label="Base Impact (1-10) · required" info={<MetricInfoPopover variant="ritualImpact" ariaLabel="What is Base Impact?" />}>
+                <FieldRow label={t("ritualEditor.field.baseImpact")} info={<MetricInfoPopover variant="ritualImpact" ariaLabel={t("ritualEditor.field.baseImpactInfoAria")} />}>
                   <ClampedNumberInput
                     value={baseImpact}
                     min={1}
                     max={10}
                     step={1}
-                    placeholder="1–10"
+                    placeholder={t("ritualEditor.field.baseImpactPlaceholder")}
                     required
-                    requiredMessage="Base Impact is required (1-10)."
+                    requiredMessage={t("ritualEditor.error.baseImpactRequired")}
                     ariaLabel="Base Impact"
                     onChange={(v) => {
                       setBaseImpact(v);
@@ -375,15 +385,15 @@ function RitualEditorPanel({
                   />
                   {impactError && <InlineError text={impactError} />}
                 </FieldRow>
-                <FieldRow label="Time (min) · required">
+                <FieldRow label={t("ritualEditor.field.timeRequired")}>
                   <ClampedNumberInput
                     value={timeMin}
                     min={1}
                     max={600}
                     step={5}
-                    placeholder="e.g. 30"
+                    placeholder={t("ritualEditor.field.timePlaceholder")}
                     required
-                    requiredMessage="Time is required."
+                    requiredMessage={t("ritualEditor.error.timeRequired")}
                     ariaLabel="Time in minutes"
                     onChange={(v) => {
                       setTimeMin(v);
@@ -398,7 +408,7 @@ function RitualEditorPanel({
 
             {/* PARENT — inline pill popovers */}
             <div>
-              <SectionHeadRequired label="Parent" required />
+              <SectionHeadRequired label={t("ritualEditor.section.parent")} required />
               <div className="flex items-center gap-2 flex-wrap text-[13px]">
                 <Popover open={goalPopoverOpen} onOpenChange={setGoalPopoverOpen}>
                   <PopoverTrigger asChild>
@@ -413,14 +423,14 @@ function RitualEditorPanel({
                           : "hsl(var(--border-default))",
                         height: 32,
                       }}
-                      title={goals.find((g) => g.id === goalId)?.title ?? "Pick a goal"}
+                      title={goals.find((g) => g.id === goalId)?.title ?? t("ritualEditor.field.pickGoal")}
                     >
                       <span
                         className="w-2 h-2 rounded-full shrink-0"
                         style={{ background: goalColor }}
                       />
                       <span className="truncate">
-                        {goals.find((g) => g.id === goalId)?.title ?? "Pick a goal"}
+                        {goals.find((g) => g.id === goalId)?.title ?? t("ritualEditor.field.pickGoal")}
                       </span>
                       <ChevronDown size={12} className="text-text-tertiary shrink-0" />
                     </button>
@@ -473,13 +483,13 @@ function RitualEditorPanel({
                       title={
                         projectId
                           ? projects.find((p) => p.id === projectId)?.title ?? ""
-                          : "Goal-level ritual"
+                          : t("ritualEditor.field.goalLevel")
                       }
                     >
                       <span className="truncate">
                         {projectId
-                          ? projects.find((p) => p.id === projectId)?.title ?? "Project"
-                          : "Goal-level ritual"}
+                          ? projects.find((p) => p.id === projectId)?.title ?? t("ritualEditor.section.parent")
+                          : t("ritualEditor.field.goalLevel")}
                       </span>
                       <ChevronDown size={12} className="text-text-tertiary shrink-0" />
                     </button>
@@ -498,7 +508,7 @@ function RitualEditorPanel({
                         !projectId ? "text-[hsl(var(--accent))]" : "text-text-primary"
                       }`}
                     >
-                      <span className="truncate">— Goal-level ritual —</span>
+                      <span className="truncate">{t("ritualEditor.field.goalLevelOption")}</span>
                       {!projectId && (
                         <Check size={14} className="text-[hsl(var(--accent))]" />
                       )}
@@ -529,7 +539,7 @@ function RitualEditorPanel({
 
             {/* SCHEDULE */}
             <div>
-              <SectionHeadRequired label="Schedule" required />
+              <SectionHeadRequired label={t("ritualEditor.section.schedule")} required />
               <select
                 value={schedule}
                 onChange={(e) => {
@@ -540,7 +550,7 @@ function RitualEditorPanel({
               >
                 {SCHEDULE_OPTIONS.map((o) => (
                   <option key={o.value} value={o.value}>
-                    {o.label}
+                    {t(o.labelKey)}
                   </option>
                 ))}
               </select>
@@ -548,10 +558,10 @@ function RitualEditorPanel({
               {schedule === "weekly" && (
                 <div className="mt-2">
                   <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-1">
-                    Day of week
+                    {t("ritualEditor.field.dayOfWeek")}
                   </div>
                   <div className="flex gap-1">
-                    {WEEKDAY_LABELS.map((label, idx) => (
+                    {WEEKDAY_LABEL_KEYS.map((labelKey, idx) => (
                       <button
                         key={idx}
                         type="button"
@@ -563,7 +573,7 @@ function RitualEditorPanel({
                           color: weekday === idx ? "hsl(var(--text-primary))" : "hsl(var(--text-secondary))",
                         }}
                       >
-                        {label.slice(0, 1)}
+                        {t(labelKey).slice(0, 1)}
                       </button>
                     ))}
                   </div>
@@ -573,7 +583,7 @@ function RitualEditorPanel({
               {schedule === "monthly" && (
                 <div className="mt-2">
                   <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-1">
-                    Day of month
+                    {t("ritualEditor.field.dayOfMonth")}
                   </div>
                   <input
                     type="number"
@@ -592,10 +602,10 @@ function RitualEditorPanel({
               {schedule === "custom" && (
                 <div className="mt-2">
                   <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-1">
-                    Days of week
+                    {t("ritualEditor.field.daysOfWeek")}
                   </div>
                   <div className="flex gap-1">
-                    {WEEKDAY_LABELS.map((label, idx) => (
+                    {WEEKDAY_LABEL_KEYS.map((labelKey, idx) => (
                       <button
                         key={idx}
                         type="button"
@@ -613,7 +623,7 @@ function RitualEditorPanel({
                             : "hsl(var(--text-secondary))",
                         }}
                       >
-                        {label.slice(0, 1)}
+                        {t(labelKey).slice(0, 1)}
                       </button>
                     ))}
                   </div>
@@ -626,11 +636,11 @@ function RitualEditorPanel({
             <div>
               {notesExpanded ? (
                 <>
-                  <SectionHead>Notes</SectionHead>
+                  <SectionHead>{t("ritualEditor.section.notes")}</SectionHead>
                   <textarea
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Add notes..."
+                    placeholder={t("ritualEditor.field.notesPlaceholder")}
                     rows={3}
                     autoFocus
                     className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary placeholder:text-text-tertiary outline-none resize-y"
@@ -642,7 +652,7 @@ function RitualEditorPanel({
                   onClick={() => setNotesExpanded(true)}
                   className="text-[13px] text-text-tertiary hover:text-text-primary transition-colors"
                 >
-                  + Add notes
+                  {t("ritualEditor.field.addNotes")}
                 </button>
               )}
             </div>
@@ -656,22 +666,22 @@ function RitualEditorPanel({
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 onBlur={() => persistField("title", title.trim())}
-                placeholder="Ritual title"
+                placeholder={t("ritualEditor.titlePlaceholder")}
                 className="w-full bg-transparent outline-none text-[18px] font-medium text-text-primary placeholder:text-text-tertiary"
               />
             </div>
 
             {/* Stats strip */}
             <div className="grid grid-cols-3 gap-3 pb-2 border-b border-border-subtle">
-              <Stat label="Completions" value={String(completions)} />
-              <Stat label="Multiplier" value={`×${mult.toFixed(2)}`} />
-              <Stat label="Effective" value={effective.toFixed(1)} />
+              <Stat label={t("ritualEditor.stat.completions")} value={String(completions)} />
+              <Stat label={t("ritualEditor.stat.multiplier")} value={`×${mult.toFixed(2)}`} />
+              <Stat label={t("ritualEditor.stat.effective")} value={effective.toFixed(1)} />
             </div>
 
             {/* Parent (goal + project) */}
             <div>
               <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-2">
-                Parent
+                {t("ritualEditor.section.parent")}
               </div>
               <div className="flex flex-col gap-2">
                 <select
@@ -701,7 +711,7 @@ function RitualEditorPanel({
                   }}
                   className="bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
                 >
-                  <option value="">— Goal-level ritual —</option>
+                  <option value="">{t("ritualEditor.field.goalLevelOption")}</option>
                   {projectsForGoal.map((p) => (
                     <option key={p.id} value={p.id}>
                       {p.title}
@@ -714,7 +724,7 @@ function RitualEditorPanel({
             {/* Schedule */}
             <div>
               <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-2">
-                Schedule
+                {t("ritualEditor.section.schedule")}
               </div>
               <select
                 value={schedule}
@@ -727,7 +737,7 @@ function RitualEditorPanel({
               >
                 {SCHEDULE_OPTIONS.map((o) => (
                   <option key={o.value} value={o.value}>
-                    {o.label}
+                    {t(o.labelKey)}
                   </option>
                 ))}
               </select>
@@ -735,10 +745,10 @@ function RitualEditorPanel({
               {schedule === "weekly" && (
                 <div className="mt-2">
                   <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-1">
-                    Day of week
+                    {t("ritualEditor.field.dayOfWeek")}
                   </div>
                   <div className="flex gap-1">
-                    {WEEKDAY_LABELS.map((label, idx) => (
+                    {WEEKDAY_LABEL_KEYS.map((labelKey, idx) => (
                       <button
                         key={idx}
                         onClick={() => {
@@ -752,7 +762,7 @@ function RitualEditorPanel({
                           color: weekday === idx ? "hsl(var(--text-primary))" : "hsl(var(--text-secondary))",
                         }}
                       >
-                        {label.slice(0, 1)}
+                        {t(labelKey).slice(0, 1)}
                       </button>
                     ))}
                   </div>
@@ -762,7 +772,7 @@ function RitualEditorPanel({
               {schedule === "monthly" && (
                 <div className="mt-2">
                   <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-1">
-                    Day of month
+                    {t("ritualEditor.field.dayOfMonth")}
                   </div>
                   <input
                     type="number"
@@ -782,10 +792,10 @@ function RitualEditorPanel({
               {schedule === "custom" && (
                 <div className="mt-2">
                   <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-1">
-                    Days of week
+                    {t("ritualEditor.field.daysOfWeek")}
                   </div>
                   <div className="flex gap-1">
-                    {WEEKDAY_LABELS.map((label, idx) => (
+                    {WEEKDAY_LABEL_KEYS.map((labelKey, idx) => (
                       <button
                         key={idx}
                         onClick={() => toggleCustomDay(idx)}
@@ -802,7 +812,7 @@ function RitualEditorPanel({
                             : "hsl(var(--text-secondary))",
                         }}
                       >
-                        {label.slice(0, 1)}
+                        {t(labelKey).slice(0, 1)}
                       </button>
                     ))}
                   </div>
@@ -811,7 +821,7 @@ function RitualEditorPanel({
 
               <div className="mt-2">
                 <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-1">
-                  Time of day (optional)
+                  {t("ritualEditor.field.timeOfDay")}
                 </div>
                 <input
                   type="time"
@@ -828,13 +838,13 @@ function RitualEditorPanel({
             {/* Notes */}
             <div>
               <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-2">
-                Notes
+                {t("ritualEditor.section.notes")}
               </div>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 onBlur={() => persistField("notes", notes || undefined)}
-                placeholder="Add notes..."
+                placeholder={t("ritualEditor.field.notesPlaceholder")}
                 rows={3}
                 className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary placeholder:text-text-tertiary outline-none resize-y"
               />
@@ -842,7 +852,7 @@ function RitualEditorPanel({
 
             {/* Impact + costs */}
             <div className="grid grid-cols-2 gap-3">
-              <FieldRow label="Base impact (0-10)">
+              <FieldRow label={t("ritualEditor.field.baseImpactEdit")}>
                 <input
                   type="number"
                   min={0}
@@ -855,7 +865,7 @@ function RitualEditorPanel({
                   className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
                 />
               </FieldRow>
-              <FieldRow label="Time (min)">
+              <FieldRow label={t("ritualEditor.field.timeOptional")}>
                 <input
                   type="number"
                   min={0}
@@ -882,7 +892,7 @@ function RitualEditorPanel({
                   color: "hsl(var(--text-secondary))",
                 }}
               >
-                Archived. Restore to resume tracking and multiplier growth.
+                {t("ritualEditor.archived.notice")}
               </div>
             )}
           </>
@@ -902,7 +912,7 @@ function RitualEditorPanel({
                 color: "hsl(var(--surface-base))",
               }}
             >
-              Create ritual
+              {t("ritualEditor.create.cta")}
             </button>
           </>
         ) : status === "archived" ? (
@@ -920,7 +930,7 @@ function RitualEditorPanel({
               onClick={handleRestore}
               className="text-[13px] font-medium px-3 py-1.5 rounded-[4px] border border-border-subtle text-text-primary hover:bg-surface-hover"
             >
-              Restore
+              {t("common.restore")}
             </button>
           </>
         ) : (
@@ -929,7 +939,7 @@ function RitualEditorPanel({
               <EditorOverflowMenu
                 items={[
                   overflowDuplicate(handleDuplicate),
-                  overflowDrop(() => setConfirmArchive(true), "Archive"),
+                  overflowDrop(() => setConfirmArchive(true), t("ritualEditor.overflow.archive")),
                   overflowDelete(() => setConfirmDelete(true)),
                 ]}
               />
@@ -938,8 +948,8 @@ function RitualEditorPanel({
             <MarkDoneButton
               onClick={handleMarkDone}
               disabled={doneToday}
-              disabledTooltip={doneToday ? "Already logged today" : undefined}
-              label={doneToday ? "Done today" : "Mark today done"}
+              disabledTooltip={doneToday ? t("ritualEditor.markDone.alreadyToday") : undefined}
+              label={doneToday ? t("ritualEditor.markDone.label.done") : t("ritualEditor.markDone.label.markToday")}
             />
           </>
         )}
@@ -947,16 +957,16 @@ function RitualEditorPanel({
 
       <ConfirmModal
         open={confirmArchive}
-        title="Archive this ritual?"
-        body="Completion history is preserved. You can restore it later."
-        confirmLabel="Archive"
+        title={t("ritualEditor.confirm.archive.heading")}
+        body={t("ritualEditor.confirm.archive.body")}
+        confirmLabel={t("ritualEditor.confirm.archive.cta")}
         onCancel={() => setConfirmArchive(false)}
         onConfirm={handleArchive}
       />
       <DeleteTypeConfirm
         open={confirmDelete}
-        title="Delete this ritual?"
-        body="This permanently removes the ritual and its completion history. This cannot be undone."
+        title={t("confirm.delete.ritual.heading")}
+        body={t("ritualEditor.confirm.delete.body")}
         onCancel={() => setConfirmDelete(false)}
         onConfirm={handleDelete}
       />

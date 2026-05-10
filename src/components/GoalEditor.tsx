@@ -7,21 +7,23 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { useStore } from "@/store/useStore";
 import type { Goal, GoalType, GoalStatus, ID } from "@/types";
 import { ConfirmModal } from "./ConfirmModal";
 import { EditorShell, EditorCloseX, EditorCancelButton } from "./EditorShell";
 
-const GOAL_EXAMPLES = [
-  "$10k MRR from my side business",
-  "Reach 100k YouTube subscribers",
-  "Run a sub-2h half marathon",
-  "Pass C1 Spanish proficiency exam",
-  "Publish my novel on Amazon",
+const GOAL_EXAMPLE_KEYS = [
+  "goalEditor.examples.0",
+  "goalEditor.examples.1",
+  "goalEditor.examples.2",
+  "goalEditor.examples.3",
+  "goalEditor.examples.4",
 ];
 
 function GoalExamplesToggle({ onPick }: { onPick: (v: string) => void }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   return (
     <div className="mt-2">
@@ -30,20 +32,23 @@ function GoalExamplesToggle({ onPick }: { onPick: (v: string) => void }) {
         onClick={() => setOpen((v) => !v)}
         className="text-[13px] text-text-tertiary hover:text-text-secondary inline-flex items-center gap-1"
       >
-        <span className="font-mono">{open ? "−" : "+"}</span> Examples
+        <span className="font-mono">{open ? "−" : "+"}</span> {t("goalEditor.examplesToggle")}
       </button>
       {open && (
         <div className="mt-2 flex flex-col gap-1 font-mono text-[13px]">
-          {GOAL_EXAMPLES.map((ex) => (
-            <button
-              key={ex}
-              type="button"
-              onClick={() => onPick(ex)}
-              className="text-left text-text-secondary hover:text-text-primary"
-            >
-              {ex}
-            </button>
-          ))}
+          {GOAL_EXAMPLE_KEYS.map((key) => {
+            const ex = t(key);
+            return (
+              <button
+                key={ex}
+                type="button"
+                onClick={() => onPick(ex)}
+                className="text-left text-text-secondary hover:text-text-primary"
+              >
+                {ex}
+              </button>
+            );
+          })}
         </div>
       )}
     </div>
@@ -51,15 +56,15 @@ function GoalExamplesToggle({ onPick }: { onPick: (v: string) => void }) {
 }
 
 const STATUS_ORDER: GoalStatus[] = ["active", "completed", "dropped"];
-const STATUS_LABEL: Record<GoalStatus, string> = {
-  active: "Active",
-  completed: "Completed",
-  dropped: "Dropped",
+const STATUS_LABEL_KEY: Record<GoalStatus, string> = {
+  active: "goalEditor.status.active",
+  completed: "goalEditor.status.completed",
+  dropped: "goalEditor.status.dropped",
 };
 
-const TYPE_OPTIONS: { value: GoalType; label: string }[] = [
-  { value: "short-term", label: "Short-term" },
-  { value: "mid-term", label: "Mid-term" },
+const TYPE_OPTIONS: { value: GoalType; labelKey: string }[] = [
+  { value: "short-term", labelKey: "goalEditor.type.shortTerm" },
+  { value: "mid-term", labelKey: "goalEditor.type.midTerm" },
 ];
 
 const uid = () =>
@@ -102,6 +107,7 @@ function GoalEditorPanel({
   const goals = useStore((s) => s.goals);
   const settings = useStore((s) => s.settings);
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const createGoal = useStore((s) => s.createGoal);
   const updateGoal = useStore((s) => s.updateGoal);
@@ -168,7 +174,7 @@ function GoalEditorPanel({
 
   const handleSaveNew = () => {
     if (!title.trim()) {
-      toast.error("Title is required");
+      toast.error(t("goalEditor.error.titleRequired"));
       return;
     }
     const isFreeNow = settings.subscriptionTier !== "all-in";
@@ -186,12 +192,12 @@ function GoalEditorPanel({
     if (!result.ok) {
       toast.error(
         isFreeNow
-          ? "Free plan: 1 active goal · Go All-In for 3."
-          : "You already have 3 active goals. Complete or drop one first.",
+          ? t("goalEditor.atCap.free")
+          : t("goalEditor.atCap.allIn"),
       );
       return;
     }
-    toast("Goal created");
+    toast(t("goalEditor.toast.created"));
     useStore.getState().openPanel({ kind: "goal", mode: "edit", id: result.id });
   };
 
@@ -208,17 +214,17 @@ function GoalEditorPanel({
     }
     // re-activate
     if (activeCount >= 3) {
-      toast.error("You already have 3 active goals. Complete or drop one first.");
+      toast.error(t("goalEditor.error.tooManyActive"));
       return;
     }
     reopenGoal(goalId);
-    toast("Goal re-opened");
+    toast(t("goalEditor.toast.reopened"));
   };
 
   const handleDelete = () => {
     if (!goalId) return;
     deleteGoal(goalId);
-    toast("Goal deleted");
+    toast(t("goalEditor.toast.deleted"));
     setConfirmDelete(false);
     onClose();
   };
@@ -226,17 +232,17 @@ function GoalEditorPanel({
   const handleConfirmDrop = () => {
     if (!goalId) return;
     dropGoal(goalId);
-    const parts = [];
-    if (childStats.openProjects > 0) parts.push(`${childStats.openProjects} project${childStats.openProjects === 1 ? "" : "s"}`);
-    if (childStats.openActions > 0) parts.push(`${childStats.openActions} action${childStats.openActions === 1 ? "" : "s"}`);
-    toast(parts.length > 0 ? `Goal dropped · ${parts.join(", ")} dropped` : "Goal dropped");
+    const parts: string[] = [];
+    if (childStats.openProjects > 0) parts.push(t("goalEditor.summary.openProjects", { count: childStats.openProjects }));
+    if (childStats.openActions > 0) parts.push(t("goalEditor.summary.openActions", { count: childStats.openActions }));
+    toast(parts.length > 0 ? t("goalEditor.toast.droppedWith", { summary: parts.join(", ") }) : t("goalEditor.toast.dropped"));
     setConfirmDrop(false);
   };
 
   const handleConfirmComplete = () => {
     if (!goalId) return;
     markGoalComplete(goalId);
-    toast("Goal completed");
+    toast(t("goalEditor.toast.completed"));
     setConfirmComplete(false);
   };
 
@@ -275,10 +281,10 @@ function GoalEditorPanel({
             <span className="w-2 h-2 rounded-full" style={{ background: goalColor }} />
           )}
           {mode === "new" ? (
-            <div className="text-[18px] font-medium text-text-primary">New goal</div>
+            <div className="text-[18px] font-medium text-text-primary">{t("goalEditor.header.new")}</div>
           ) : (
             <div className="font-mono text-[11px] uppercase tracking-[0.08em] text-text-tertiary">
-              Edit goal
+              {t("goalEditor.header.edit")}
             </div>
           )}
         </div>
@@ -307,14 +313,14 @@ function GoalEditorPanel({
             }}
           >
             {isFree
-              ? "Free plan: 1 active goal · Go All-In for 3."
-              : "You already have 3 active goals. Complete or drop one first."}
+              ? t("goalEditor.atCap.free")
+              : t("goalEditor.atCap.allIn")}
           </div>
         )}
 
         {mode === "new" && (
           <div className="text-[13px] text-text-tertiary leading-[1.5]">
-            A goal is a result you want to reach — concrete, measurable, achievable in months or years.
+            {t("goalEditor.lede")}
           </div>
         )}
 
@@ -325,7 +331,7 @@ function GoalEditorPanel({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             onBlur={() => persistField("title", title.trim())}
-            placeholder={mode === "new" ? "e.g. Get my SaaS to $10k MRR" : "Goal title"}
+            placeholder={mode === "new" ? t("goalEditor.titlePlaceholderNew") : t("goalEditor.titlePlaceholderEdit")}
             className="w-full bg-transparent outline-none text-[18px] font-medium text-text-primary placeholder:text-text-tertiary"
           />
           {mode === "new" && <GoalExamplesToggle onPick={(v) => setTitle(v)} />}
@@ -335,7 +341,7 @@ function GoalEditorPanel({
         {mode === "edit" && (
           <div>
             <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-2">
-              Status
+              {t("goalEditor.section.status")}
             </div>
             <div className="flex flex-wrap gap-1.5">
               {STATUS_ORDER.map((s) => (
@@ -351,7 +357,7 @@ function GoalEditorPanel({
                     color: s === status ? "hsl(var(--text-primary))" : "hsl(var(--text-secondary))",
                   }}
                 >
-                  {STATUS_LABEL[s]}
+                  {t(STATUS_LABEL_KEY[s])}
                 </button>
               ))}
             </div>
@@ -362,7 +368,7 @@ function GoalEditorPanel({
         <div className="grid grid-cols-2 gap-3">
           <div>
             <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-2">
-              Type
+              {t("goalEditor.section.type")}
             </div>
             <select
               value={type}
@@ -375,14 +381,14 @@ function GoalEditorPanel({
             >
               {TYPE_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>
-                  {o.label}
+                  {t(o.labelKey)}
                 </option>
               ))}
             </select>
           </div>
           <div>
             <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-2">
-              Target date
+              {t("goalEditor.section.targetDate")}
             </div>
             <input
               type="date"
@@ -399,13 +405,13 @@ function GoalEditorPanel({
         {/* Description */}
         <div>
           <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-2">
-            Description
+            {t("goalEditor.section.description")}
           </div>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             onBlur={() => persistField("description", description || undefined)}
-            placeholder="Why does this goal matter?"
+            placeholder={t("goalEditor.descriptionPlaceholder")}
             rows={3}
             className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary placeholder:text-text-tertiary outline-none resize-y"
           />
@@ -414,7 +420,7 @@ function GoalEditorPanel({
         {/* Success criteria */}
         <div>
           <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-2">
-            Success criteria
+            {t("goalEditor.section.successCriteria")}
           </div>
           <div className="space-y-1.5">
             {criteria.map((c) => (
@@ -459,14 +465,14 @@ function GoalEditorPanel({
                     addCriterion();
                   }
                 }}
-                placeholder="Add a criterion..."
+                placeholder={t("goalEditor.criteriaPlaceholder")}
                 className="flex-1 bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[12px] text-text-primary placeholder:text-text-tertiary outline-none"
               />
               <button
                 onClick={addCriterion}
                 className="text-[12px] px-2.5 py-1 rounded-[4px] border border-border-subtle text-text-secondary hover:text-text-primary"
               >
-                Add
+                {t("goalEditor.criteriaAdd")}
               </button>
             </div>
           </div>
@@ -475,9 +481,9 @@ function GoalEditorPanel({
         {/* Stats */}
         {mode === "edit" && (
           <div className="grid grid-cols-3 gap-3 pt-2 border-t border-border-subtle">
-            <Stat label="Projects" value={childStats.projects} />
-            <Stat label="Open projects" value={childStats.openProjects} />
-            <Stat label="Open actions" value={childStats.openActions} />
+            <Stat label={t("goalEditor.stat.projects")} value={childStats.projects} />
+            <Stat label={t("goalEditor.stat.openProjects")} value={childStats.openProjects} />
+            <Stat label={t("goalEditor.stat.openActions")} value={childStats.openActions} />
           </div>
         )}
       </div>
@@ -496,7 +502,7 @@ function GoalEditorPanel({
                 color: "hsl(var(--surface-base))",
               }}
             >
-              Create goal
+              {t("goalEditor.create.cta")}
             </button>
           </>
         ) : (
@@ -505,7 +511,7 @@ function GoalEditorPanel({
               onClick={() => setConfirmDelete(true)}
               className="text-[13px] text-text-tertiary hover:text-text-warning px-3 py-1.5"
             >
-              Delete
+              {t("common.delete")}
             </button>
             <div className="flex items-center gap-2">
               {!isTerminal && (
@@ -517,7 +523,7 @@ function GoalEditorPanel({
                     color: "hsl(var(--surface-base))",
                   }}
                 >
-                  Mark complete
+                  {t("goalEditor.markComplete")}
                 </button>
               )}
             </div>
@@ -527,35 +533,41 @@ function GoalEditorPanel({
 
       <ConfirmModal
         open={confirmDelete}
-        title="Delete this goal?"
-        body="This permanently removes the goal and ALL its projects, actions, rituals, and ideas. This cannot be undone."
-        confirmLabel="Delete"
+        title={t("confirm.delete.goal.heading")}
+        body={t("goalEditor.confirm.delete.body")}
+        confirmLabel={t("common.delete")}
         destructive
         onCancel={() => setConfirmDelete(false)}
         onConfirm={handleDelete}
       />
       <ConfirmModal
         open={confirmDrop}
-        title="Drop this goal?"
+        title={t("confirm.drop.goal.heading")}
         body={
           childStats.openProjects + childStats.openActions > 0
-            ? `${childStats.openProjects} open project${childStats.openProjects === 1 ? "" : "s"} and ${childStats.openActions} open action${childStats.openActions === 1 ? "" : "s"} will be dropped along with it. You can re-open the goal later (subject to the 3-active limit).`
-            : "You can re-open the goal later (subject to the 3-active limit)."
+            ? t("goalEditor.confirm.drop.bodyWith", {
+                projects: t("goalEditor.summary.openProjects", { count: childStats.openProjects }),
+                actions: t("goalEditor.summary.openActions", { count: childStats.openActions }),
+              })
+            : t("goalEditor.confirm.drop.bodyEmpty")
         }
-        confirmLabel="Drop goal"
+        confirmLabel={t("goalEditor.confirm.drop.cta")}
         destructive
         onCancel={() => setConfirmDrop(false)}
         onConfirm={handleConfirmDrop}
       />
       <ConfirmModal
         open={confirmComplete}
-        title="Mark this goal complete?"
+        title={t("goalEditor.confirm.complete.heading")}
         body={
           childStats.openProjects + childStats.openActions > 0
-            ? `${childStats.openProjects} project${childStats.openProjects === 1 ? "" : "s"} and ${childStats.openActions} action${childStats.openActions === 1 ? "" : "s"} are still open. They will not be auto-closed.`
-            : "All projects and actions are accounted for."
+            ? t("goalEditor.confirm.complete.bodyWith", {
+                projects: t("goalEditor.summary.projects", { count: childStats.openProjects }),
+                actions: t("goalEditor.summary.actions", { count: childStats.openActions }),
+              })
+            : t("goalEditor.confirm.complete.bodyEmpty")
         }
-        confirmLabel="Mark complete"
+        confirmLabel={t("goalEditor.confirm.complete.cta")}
         onCancel={() => setConfirmComplete(false)}
         onConfirm={handleConfirmComplete}
       />
@@ -570,11 +582,10 @@ function GoalEditorPanel({
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-[16px] font-medium text-text-primary">
-              Free is built for one goal at a time.
+              {t("goalEditor.softBlock.heading")}
             </h2>
             <div className="mt-3 text-[13px] text-text-secondary leading-[1.5]">
-              Most ambitious people work on 2-3. All-In lifts the cap to 3 — the full focus range
-              ActOS is designed around. Your draft will be saved if you'd like to continue later.
+              {t("goalEditor.softBlock.body")}
             </div>
             <div className="mt-6 flex items-center justify-end gap-2">
               <button
@@ -585,18 +596,18 @@ function GoalEditorPanel({
                 }}
                 className="text-[13px] text-text-secondary hover:text-text-primary transition-colors px-3 py-1.5"
               >
-                Cancel
+                {t("common.cancel")}
               </button>
               <button
                 type="button"
                 onClick={() => {
                   setSoftBlock(false);
-                  toast("Draft saved");
+                  toast(t("goalEditor.toast.draftSaved"));
                   onClose();
                 }}
                 className="text-[13px] px-3 py-1.5 rounded-[4px] hover:bg-surface-hover text-text-secondary transition-colors"
               >
-                Save draft
+                {t("goalEditor.softBlock.saveDraft")}
               </button>
               <button
                 type="button"
@@ -607,7 +618,7 @@ function GoalEditorPanel({
                 className="text-[13px] font-medium px-3 py-1.5 rounded-[4px] text-white transition-colors"
                 style={{ background: "hsl(var(--accent))" }}
               >
-                Go All-In — $12/mo
+                {t("goalEditor.softBlock.goAllIn")}
               </button>
             </div>
           </div>

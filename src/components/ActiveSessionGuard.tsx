@@ -117,6 +117,7 @@ const NavConfirmModal: React.FC<{
 /* ───────── Banner ───────── */
 
 const ActiveSessionBanner: React.FC<{ session: Session }> = ({ session }) => {
+  const { t } = useTranslation();
   const [now, setNow] = React.useState(Date.now());
   React.useEffect(() => {
     const i = window.setInterval(() => setNow(Date.now()), 1000);
@@ -131,10 +132,10 @@ const ActiveSessionBanner: React.FC<{ session: Session }> = ({ session }) => {
     return Math.max(0, timer.endsAt - now);
   })();
   const phaseLabel = (() => {
-    if (!timer) return "session";
-    if (timer.phase === "break" || timer.phase === "breakEnd") return "break";
-    if (timer.phase === "sessionEnd") return "session";
-    return `cycle ${timer.cycleIndex + 1}/${session.cyclesPlanned}`;
+    if (!timer) return t("sessionGuard.banner.phase.session");
+    if (timer.phase === "break" || timer.phase === "breakEnd") return t("sessionGuard.banner.phase.break");
+    if (timer.phase === "sessionEnd") return t("sessionGuard.banner.phase.session");
+    return t("sessionGuard.banner.phase.work", { current: timer.cycleIndex + 1, total: session.cyclesPlanned });
   })();
 
   return (
@@ -151,9 +152,9 @@ const ActiveSessionBanner: React.FC<{ session: Session }> = ({ session }) => {
           className="inline-block w-2 h-2 rounded-full shrink-0"
           style={{ background: "hsl(var(--state-active))" }}
         />
-        <span className="text-[12px] font-medium text-text-primary">Session in progress</span>
+        <span className="text-[12px] font-medium text-text-primary">{t("sessionGuard.banner.label")}</span>
         <span className="font-mono text-[12px] tabular-nums text-text-secondary truncate">
-          · {fmtMS(remainingMs)} left of {phaseLabel}
+          {t("sessionGuard.banner.suffix", { time: fmtMS(remainingMs), phase: phaseLabel })}
         </span>
       </div>
       <Link
@@ -161,7 +162,7 @@ const ActiveSessionBanner: React.FC<{ session: Session }> = ({ session }) => {
         className="text-[13px] font-medium shrink-0 hover:underline"
         style={{ color: "hsl(var(--accent))" }}
       >
-        Return →
+        {t("sessionGuard.banner.return")}
       </Link>
     </div>
   );

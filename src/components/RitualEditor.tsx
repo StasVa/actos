@@ -539,7 +539,7 @@ function RitualEditorPanel({
 
             {/* SCHEDULE */}
             <div>
-              <SectionHeadRequired label="Schedule" required />
+              <SectionHeadRequired label={t("ritualEditor.section.schedule")} required />
               <select
                 value={schedule}
                 onChange={(e) => {
@@ -558,7 +558,7 @@ function RitualEditorPanel({
               {schedule === "weekly" && (
                 <div className="mt-2">
                   <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-1">
-                    Day of week
+                    {t("ritualEditor.field.dayOfWeek")}
                   </div>
                   <div className="flex gap-1">
                     {WEEKDAY_LABEL_KEYS.map((labelKey, idx) => (
@@ -583,7 +583,7 @@ function RitualEditorPanel({
               {schedule === "monthly" && (
                 <div className="mt-2">
                   <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-1">
-                    Day of month
+                    {t("ritualEditor.field.dayOfMonth")}
                   </div>
                   <input
                     type="number"
@@ -602,7 +602,7 @@ function RitualEditorPanel({
               {schedule === "custom" && (
                 <div className="mt-2">
                   <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-1">
-                    Days of week
+                    {t("ritualEditor.field.daysOfWeek")}
                   </div>
                   <div className="flex gap-1">
                     {WEEKDAY_LABEL_KEYS.map((labelKey, idx) => (
@@ -636,11 +636,11 @@ function RitualEditorPanel({
             <div>
               {notesExpanded ? (
                 <>
-                  <SectionHead>Notes</SectionHead>
+                  <SectionHead>{t("ritualEditor.section.notes")}</SectionHead>
                   <textarea
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Add notes..."
+                    placeholder={t("ritualEditor.field.notesPlaceholder")}
                     rows={3}
                     autoFocus
                     className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary placeholder:text-text-tertiary outline-none resize-y"
@@ -652,7 +652,7 @@ function RitualEditorPanel({
                   onClick={() => setNotesExpanded(true)}
                   className="text-[13px] text-text-tertiary hover:text-text-primary transition-colors"
                 >
-                  + Add notes
+                  {t("ritualEditor.field.addNotes")}
                 </button>
               )}
             </div>
@@ -745,7 +745,7 @@ function RitualEditorPanel({
               {schedule === "weekly" && (
                 <div className="mt-2">
                   <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-1">
-                    Day of week
+                    {t("ritualEditor.field.dayOfWeek")}
                   </div>
                   <div className="flex gap-1">
                     {WEEKDAY_LABEL_KEYS.map((labelKey, idx) => (
@@ -772,7 +772,7 @@ function RitualEditorPanel({
               {schedule === "monthly" && (
                 <div className="mt-2">
                   <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-1">
-                    Day of month
+                    {t("ritualEditor.field.dayOfMonth")}
                   </div>
                   <input
                     type="number"
@@ -792,7 +792,7 @@ function RitualEditorPanel({
               {schedule === "custom" && (
                 <div className="mt-2">
                   <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-1">
-                    Days of week
+                    {t("ritualEditor.field.daysOfWeek")}
                   </div>
                   <div className="flex gap-1">
                     {WEEKDAY_LABEL_KEYS.map((labelKey, idx) => (
@@ -821,7 +821,7 @@ function RitualEditorPanel({
 
               <div className="mt-2">
                 <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-1">
-                  Time of day (optional)
+                  {t("ritualEditor.field.timeOfDay")}
                 </div>
                 <input
                   type="time"
@@ -844,7 +844,7 @@ function RitualEditorPanel({
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 onBlur={() => persistField("notes", notes || undefined)}
-                placeholder="Add notes..."
+                placeholder={t("ritualEditor.field.notesPlaceholder")}
                 rows={3}
                 className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary placeholder:text-text-tertiary outline-none resize-y"
               />

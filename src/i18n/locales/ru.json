@@ -570,6 +570,8 @@
   "goals.cap.softBlock.heading": "Free сделан под одну цель за раз.",
   "goals.cap.softBlock.line": "{{count}} из {{cap}} целей активна · All-In даёт 3.",
   "goals.card.activityHeading": "АКТИВНОСТЬ · ПОСЛЕДНИЕ 30 ДНЕЙ",
+  "goals.card.completedAgo": "Завершено {{relative}}",
+  "goals.card.droppedAgo": "Отброшено {{relative}}",
   "goals.card.lastActivityLabel": "Последняя активность: {{relative}}",
   "goals.card.projectsLine_one": "{{active}} активен · {{closed}} закрыт",
   "goals.card.projectsLine_few": "{{active}} активны · {{closed}} закрыто",

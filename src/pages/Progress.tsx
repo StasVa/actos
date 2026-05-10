@@ -495,19 +495,19 @@ const ActiveProjectsScoped: React.FC = () => {
   const stalledCount = rows.filter((r) => r.state === "stalled").length;
   const visible = rows.slice(0, 6);
 
-  const metaParts: string[] = [`${total} ACTIVE`];
-  if (stalledCount > 0) metaParts.push(`${stalledCount} STALLED`);
+  const metaParts: string[] = [t("progress.metaActiveOnly", { count: total })];
+  if (stalledCount > 0) metaParts.push(t("progress.metaStalled", { count: stalledCount }));
 
   return (
     <section>
       <SectionLabel meta={metaParts.join(" · ")}>
-        Active projects · {total}
+        {t("progress.section.activeProjects", { count: total })}
       </SectionLabel>
       {total === 0 ? (
         <div className="bg-surface-raised border border-dashed border-border-subtle rounded-[6px] py-8 text-center">
-          <div className="text-[13px] text-text-secondary">No active projects.</div>
+          <div className="text-[13px] text-text-secondary">{t("progress.noActiveProjects")}</div>
           <div className="font-mono text-[11px] text-text-tertiary mt-1">
-            Press ⌘K → "New project".
+            {t("progress.newProjectHint")}
           </div>
         </div>
       ) : (
@@ -530,7 +530,7 @@ const ActiveProjectsScoped: React.FC = () => {
               to="/projects?state=open"
               className="inline-block mt-4 text-[13px] text-accent hover:text-accent-hover"
             >
-              View all {total} projects →
+              {t("progress.viewAllProjects", { count: total })}
             </Link>
           )}
         </>

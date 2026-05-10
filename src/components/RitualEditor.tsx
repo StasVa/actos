@@ -549,7 +549,7 @@ function RitualEditorPanel({
               >
                 {SCHEDULE_OPTIONS.map((o) => (
                   <option key={o.value} value={o.value}>
-                    {o.label}
+                    {t(o.labelKey)}
                   </option>
                 ))}
               </select>
@@ -736,7 +736,7 @@ function RitualEditorPanel({
               >
                 {SCHEDULE_OPTIONS.map((o) => (
                   <option key={o.value} value={o.value}>
-                    {o.label}
+                    {t(o.labelKey)}
                   </option>
                 ))}
               </select>

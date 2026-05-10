@@ -447,6 +447,7 @@ const DelegatedSection: React.FC = () => {
 
 /* ===== Active Projects (scoped: cap 6, sort recent activity) ===== */
 const ActiveProjectsScoped: React.FC = () => {
+  const { t } = useTranslation();
   const goals = useStore((s) => s.goals);
   const projects = useStore((s) => s.projects);
   const actions = useStore((s) => s.actions);

@@ -334,6 +334,13 @@ export const AppSidebar: React.FC<{ onOpenSettings?: () => void }> = ({ onOpenSe
               <div className="my-2 border-t border-border-subtle" />
             </>
           )}
+          <div className="mb-2">
+            <NavRow
+              item={{ label: "Settings", href: "/settings", icon: SettingsIcon }}
+              pathname={pathname}
+              collapsed={effectiveCollapsed}
+            />
+          </div>
           <div
             className={`flex items-center ${effectiveCollapsed ? "justify-center" : "justify-between"} gap-2`}
             style={effectiveCollapsed ? undefined : { padding: "8px 4px" }}

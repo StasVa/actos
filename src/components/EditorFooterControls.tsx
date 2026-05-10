@@ -269,12 +269,17 @@ export function DeleteTypeConfirm({
         )}
         <div className="mt-4">
           <label className="block text-[12px] text-text-secondary mb-1.5">
-            {t("confirm.delete.typeShort", { keyword: "" }).replace("  ", " ").trim().split(keyword)[0]}
-            <span className="font-mono text-text-primary">{keyword}</span>
             {(() => {
               const tpl = t("confirm.delete.typeShort", { keyword });
               const idx = tpl.indexOf(keyword);
-              return idx >= 0 ? tpl.slice(idx + keyword.length) : "";
+              if (idx < 0) return tpl;
+              return (
+                <>
+                  {tpl.slice(0, idx)}
+                  <span className="font-mono text-text-primary">{keyword}</span>
+                  {tpl.slice(idx + keyword.length)}
+                </>
+              );
             })()}
           </label>
           <input

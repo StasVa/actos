@@ -93,6 +93,7 @@ const NewIdeaForm: React.FC<{
   defaultGoalId?: ID;
   onClose: () => void;
 }> = ({ defaultGoalId, onClose }) => {
+  const { t } = useTranslation();
   const goals = useStore((s) => s.goals);
   const activeGoals = useMemo(() => goals.filter((g) => g.status === "active"), [goals]);
   const captureIdea = useStore((s) => s.captureIdea);
@@ -114,7 +115,7 @@ const NewIdeaForm: React.FC<{
     if (!canSubmit) return;
     const id = captureIdea({ title: title.trim(), goalId });
     selectIdea(id);
-    toast.success("Idea captured");
+    toast.success(t("ideas.toast.captured"));
     onClose();
   };
 
@@ -144,7 +145,7 @@ const NewIdeaForm: React.FC<{
             if (e.key === "Enter") submit();
             if (e.key === "Escape") onClose();
           }}
-          placeholder="Idea title…"
+          placeholder={t("ideas.placeholder.title")}
           className="flex-1 bg-transparent outline-none text-[14px] text-text-primary placeholder:text-text-tertiary"
         />
         <button
@@ -156,13 +157,13 @@ const NewIdeaForm: React.FC<{
             color: "hsl(var(--accent-foreground))",
           }}
         >
-          Save
+          {t("ideas.button.save")}
         </button>
         <button
           onClick={onClose}
           className="h-9 px-2 text-[13px] text-text-tertiary hover:text-text-secondary transition-colors"
         >
-          Cancel
+          {t("common.cancel")}
         </button>
       </div>
     </div>
@@ -170,11 +171,11 @@ const NewIdeaForm: React.FC<{
 };
 
 /* ===== Idea row (matches /actions row pattern) ===== */
-const STATUS_PILL_LABEL: Record<IdeaStatus, string> = {
-  captured: "CAPTURED",
-  converted_to_action: "CONVERTED",
-  converted_to_project: "CONVERTED",
-  discarded: "DISCARDED",
+const STATUS_PILL_KEY: Record<IdeaStatus, string> = {
+  captured: "ideas.statusPill.captured",
+  converted_to_action: "ideas.statusPill.converted",
+  converted_to_project: "ideas.statusPill.converted",
+  discarded: "ideas.statusPill.discarded",
 };
 
 const IdeaStatusPill: React.FC<{ status: IdeaStatus }> = ({ status }) => (

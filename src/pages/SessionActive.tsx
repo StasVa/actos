@@ -7,6 +7,7 @@
 //   • Audio cues opt-in (default ON), muted via "Sound off" toggle.
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { Maximize, Minimize, Volume2, VolumeX } from "lucide-react";
 import { toast } from "sonner";
@@ -106,6 +107,7 @@ function fmtMMSS(ms: number): string {
 /* ───────── Page ───────── */
 
 const SessionActive: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const sessions = useStore((s) => s.sessions);
   const actions = useStore((s) => s.actions);
@@ -361,7 +363,7 @@ const SessionActive: React.FC = () => {
     const needsTime = layers.logTime && !(currentAction.timeEstimateMinutes && currentAction.timeEstimateMinutes > 0);
     if (needsImpact || needsTime) {
       openPanel({ kind: "action", mode: "edit", id: currentAction.id });
-      toast.info("Fill required fields to mark done");
+      toast.info(t("sessionActive.action.fillFields"));
       return;
     }
     changeActionStatus(currentAction.id, "done");

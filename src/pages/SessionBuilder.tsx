@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, GripVertical, X as XIcon } from "lucide-react";
 import { toast } from "sonner";
@@ -33,7 +34,9 @@ const ModeCard: React.FC<{
   preset: ModePreset;
   selected: boolean;
   onClick: () => void;
-}> = ({ preset, selected, onClick }) => (
+}> = ({ preset, selected, onClick }) => {
+  const { t } = useTranslation();
+  return (
   <button
     type="button"
     onClick={onClick}
@@ -48,12 +51,13 @@ const ModeCard: React.FC<{
     }}
   >
     <div>
-      <div className="text-[16px] font-medium text-text-primary">{preset.title}</div>
-      <div className="mt-1 font-mono text-[12px] text-text-secondary">{preset.desc}</div>
+      <div className="text-[16px] font-medium text-text-primary">{t(`sessionBuilder.preset.${preset.key}.title`)}</div>
+      <div className="mt-1 font-mono text-[12px] text-text-secondary">{t(`sessionBuilder.preset.${preset.key}.desc`)}</div>
     </div>
-    <div className="mt-3 font-mono text-[11px] text-text-tertiary">{preset.sub}</div>
+    <div className="mt-3 font-mono text-[11px] text-text-tertiary">{t(`sessionBuilder.preset.${preset.key}.sub`)}</div>
   </button>
-);
+  );
+};
 
 /* ───────── Stepper number control (Duration centerpiece) ───────── */
 
@@ -78,6 +82,7 @@ const StepperField: React.FC<{
   isMobile?: boolean;
   ariaLabel?: string;
 }> = ({ label, value, onChange, min, max, step, suffix, size = "xl", isMobile, ariaLabel }) => {
+  const { t } = useTranslation();
   const [focused, setFocused] = useState(false);
   const [flash, setFlash] = useState(false);
   const flashTimer = React.useRef<number | null>(null);
@@ -158,7 +163,7 @@ const StepperField: React.FC<{
           type="button"
           onClick={dec}
           disabled={atMin}
-          aria-label={`Decrease ${ariaLabel ?? label ?? ""}`}
+          aria-label={t("sessionBuilder.stepper.decrease", { label: ariaLabel ?? label ?? "" })}
           className="inline-flex items-center justify-center rounded-[4px] transition-colors text-text-secondary hover:text-text-primary hover:bg-surface-hover disabled:opacity-30 disabled:hover:bg-transparent disabled:cursor-not-allowed"
           style={{ padding: spec.btnPad }}
         >
@@ -192,7 +197,7 @@ const StepperField: React.FC<{
           type="button"
           onClick={inc}
           disabled={atMax}
-          aria-label={`Increase ${ariaLabel ?? label ?? ""}`}
+          aria-label={t("sessionBuilder.stepper.increase", { label: ariaLabel ?? label ?? "" })}
           className="inline-flex items-center justify-center rounded-[4px] transition-colors text-text-secondary hover:text-text-primary hover:bg-surface-hover disabled:opacity-30 disabled:hover:bg-transparent disabled:cursor-not-allowed"
           style={{ padding: spec.btnPad }}
         >
@@ -220,6 +225,7 @@ const SessionTimelineBar: React.FC<{ work: number; brk: number; cycles: number; 
   cycles,
   breaksOn,
 }) => {
+  const { t } = useTranslation();
   const c = Math.max(1, cycles);
   const effectiveBrk = breaksOn ? brk : 0;
   const total = c * work + Math.max(0, c - 1) * effectiveBrk || 1;
@@ -259,8 +265,8 @@ const SessionTimelineBar: React.FC<{ work: number; brk: number; cycles: number; 
         ))}
       </div>
       <div className="mt-2 flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary tabular-nums">
-        <span>{fmtClock(start)} · NOW</span>
-        <span>ENDS {fmtClock(end)}</span>
+        <span>{t("sessionBuilder.timeline.now", { time: fmtClock(start) })}</span>
+        <span>{t("sessionBuilder.timeline.ends", { time: fmtClock(end) })}</span>
       </div>
     </div>
   );
@@ -294,6 +300,7 @@ const AvailableActionRow: React.FC<{
   selected: boolean;
   onToggle: () => void;
 }> = ({ action, goalColor, goalTitle, projectTitle, selected, onToggle }) => {
+  const { t } = useTranslation();
   const impact = action.impact ?? 0;
   return (
     <div
@@ -330,7 +337,7 @@ const AvailableActionRow: React.FC<{
           <div className="shrink-0 flex items-center gap-2">
             {selected ? (
               <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">
-                Already added
+                {t("sessionBuilder.selected.alreadyAdded")}
               </span>
             ) : impact > 0 ? (
               <ImpactPill impact={impact} goalColor={goalColor} />
@@ -384,6 +391,7 @@ const SelectedRow: React.FC<{
   onDrop,
   isDragging,
 }) => {
+  const { t } = useTranslation();
   const impact = action.impact ?? 0;
   return (
     <div
@@ -418,7 +426,7 @@ const SelectedRow: React.FC<{
             <button
               onClick={onRemove}
               className="w-6 h-6 inline-flex items-center justify-center rounded-[3px] text-text-tertiary opacity-0 group-hover:opacity-100 hover:text-text-primary hover:bg-surface-elevated transition-all"
-              aria-label="Remove"
+              aria-label={t("sessionBuilder.selected.removeAria")}
             >
               <XIcon size={14} />
             </button>
@@ -448,6 +456,7 @@ const SelectedRow: React.FC<{
 /* ───────── Page ───────── */
 
 const SessionBuilder: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const goals = useStore((s) => s.goals);
@@ -553,14 +562,14 @@ const SessionBuilder: React.FC = () => {
   const diff = estimateSum - focusTotal;
   let matchHint: { text: string; color: string } | null = null;
   if (estimateSum > 0 && focusTotal > 0) {
-    if (Math.abs(diff) <= 5) matchHint = { text: "Well-matched", color: "hsl(var(--text-secondary))" };
-    else if (diff < 0) matchHint = { text: `+${-diff}min buffer`, color: "hsl(var(--state-active))" };
-    else matchHint = { text: `+${diff}min over`, color: "hsl(var(--text-warning))" };
+    if (Math.abs(diff) <= 5) matchHint = { text: t("sessionBuilder.match.well"), color: "hsl(var(--text-secondary))" };
+    else if (diff < 0) matchHint = { text: t("sessionBuilder.match.buffer", { count: -diff }), color: "hsl(var(--state-active))" };
+    else matchHint = { text: t("sessionBuilder.match.over", { count: diff }), color: "hsl(var(--text-warning))" };
   }
 
   /* Filters */
   const goalOpts: FilterOption<string>[] = [
-    { value: "all", label: "All" },
+    { value: "all", label: t("sessionBuilder.filter.all") },
     ...activeGoals.map((g) => ({ value: g.id, label: g.title, dot: `hsl(var(--${g.color}))` })),
   ];
   const projectOpts: FilterOption<string>[] = useMemo(() => {
@@ -569,11 +578,11 @@ const SessionBuilder: React.FC = () => {
         ? projects.filter((p) => p.status === "active" && activeGoalIds.has(p.goalId))
         : projects.filter((p) => p.status === "active" && p.goalId === goalFilter);
     return [
-      { value: "all", label: "All" },
-      { value: "__none", label: "Goal-level (no project)" },
+      { value: "all", label: t("sessionBuilder.filter.all") },
+      { value: "__none", label: t("sessionBuilder.filter.goalLevel") },
       ...scope.map((p) => ({ value: p.id, label: p.title })),
     ];
-  }, [projects, goalFilter, activeGoalIds]);
+  }, [projects, goalFilter, activeGoalIds, t]);
 
   /* Validation */
   const validNums =
@@ -595,10 +604,10 @@ const SessionBuilder: React.FC = () => {
       plannedActionIds: selectedIds,
     });
     if (!result.ok) {
-      toast.error("A session is already in progress");
+      toast.error(t("sessionBuilder.toast.activeExists"));
       return;
     }
-    toast.success("Session started");
+    toast.success(t("sessionBuilder.toast.started"));
     navigate("/sessions/active");
   };
 
@@ -607,7 +616,7 @@ const SessionBuilder: React.FC = () => {
     <div className="rounded-[6px] border border-border-subtle bg-surface-raised">
       <div className="flex items-center gap-2 flex-wrap px-3 pt-3 pb-4 border-b border-border-subtle">
         <FilterDropdown
-          label="GOAL"
+          label={t("sessionBuilder.filter.goal")}
           value={goalFilter}
           defaultValue="all"
           options={goalOpts}
@@ -617,7 +626,7 @@ const SessionBuilder: React.FC = () => {
           }}
         />
         <FilterDropdown
-          label="PROJECT"
+          label={t("sessionBuilder.filter.project")}
           value={projectFilter}
           defaultValue="all"
           options={projectOpts}
@@ -635,14 +644,14 @@ const SessionBuilder: React.FC = () => {
               background: todayOnly ? "hsl(var(--surface-hover))" : "transparent",
             }}
           >
-            TODAY'S PLANNED · {(todayEntry?.plannedActionIds ?? []).length}
+            {t("sessionBuilder.filter.todayPlanned", { count: (todayEntry?.plannedActionIds ?? []).length })}
           </button>
         )}
       </div>
       <div className={`${isMobile ? "" : "max-h-[480px] overflow-y-auto"}`}>
         {available.length === 0 ? (
           <div className="p-6 text-[13px] text-text-tertiary text-center">
-            No actions available. Create some first or pick a different goal/project filter.
+            {t("sessionBuilder.empty.noAvailable")}
           </div>
         ) : (
           available.map((a) => {
@@ -668,7 +677,7 @@ const SessionBuilder: React.FC = () => {
   const RightPane = (
     <div className="rounded-[6px] border border-border-subtle bg-surface-raised flex flex-col">
       <div className="p-3 border-b border-border-subtle font-mono text-[11px] uppercase tracking-[0.06em] text-text-secondary">
-        SELECTED · {selectedIds.length}
+        {t("sessionBuilder.selectedHeader", { count: selectedIds.length })}
       </div>
       <div className={`flex-1 ${isMobile ? "" : "max-h-[480px] overflow-y-auto"}`}>
         {selectedIds.length === 0 ? (
@@ -676,7 +685,7 @@ const SessionBuilder: React.FC = () => {
             className="m-3 rounded-[4px] p-6 text-center text-[13px] text-text-tertiary"
             style={{ border: "1px dashed hsl(var(--border-default))" }}
           >
-            No actions selected yet. Pick from the list.
+            {t("sessionBuilder.empty.noSelected")}
           </div>
         ) : (
           selectedIds.map((id, idx) => {
@@ -705,9 +714,9 @@ const SessionBuilder: React.FC = () => {
       </div>
       {selectedIds.length > 0 && (
         <div className="p-3 border-t border-border-subtle font-mono text-[12px] text-text-secondary flex flex-wrap items-center gap-x-3 gap-y-1">
-          <span>Estimated time: {estimateSum}min</span>
+          <span>{t("sessionBuilder.totals.estimate", { count: estimateSum })}</span>
           <span>·</span>
-          <span>Session work: {focusTotal}min</span>
+          <span>{t("sessionBuilder.totals.work", { count: focusTotal })}</span>
           {matchHint && (
             <>
               <span>·</span>
@@ -730,15 +739,15 @@ const SessionBuilder: React.FC = () => {
               to="/sessions"
               className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary hover:text-text-secondary transition-colors"
             >
-              ← Sessions
+              {t("sessionBuilder.back")}
             </Link>
-            <h1 className="mt-2 text-[28px] font-medium tracking-tight">New Session</h1>
+            <h1 className="mt-2 text-[28px] font-medium tracking-tight">{t("sessionBuilder.heading")}</h1>
           </div>
 
           {/* MODE */}
           <section className="mt-8">
             <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-3">
-              MODE
+              {t("sessionBuilder.section.mode")}
             </div>
             <div className={`flex ${isMobile ? "flex-col" : "flex-row"} gap-3`}>
               {PRESETS.map((p) => (
@@ -755,7 +764,7 @@ const SessionBuilder: React.FC = () => {
           {/* DURATION */}
           <section className="mt-8">
             <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-3">
-              DURATION
+              {t("sessionBuilder.section.duration")}
             </div>
             <div
               className="rounded-[8px] border border-border-subtle bg-surface-raised"
@@ -764,7 +773,7 @@ const SessionBuilder: React.FC = () => {
               {/* Total session — primary stepper */}
               <div className="flex flex-col items-center">
                 <div className="font-mono text-[10px] uppercase text-text-tertiary mb-3" style={{ letterSpacing: "0.08em" }}>
-                  TOTAL SESSION
+                  {t("sessionBuilder.totalSession")}
                 </div>
                 <StepperField
                   value={totalSession}
@@ -772,46 +781,46 @@ const SessionBuilder: React.FC = () => {
                   min={15}
                   max={240}
                   step={5}
-                  suffix="min"
+                  suffix={t("sessionBuilder.suffix.min")}
                   size="xl"
                   isMobile={isMobile}
-                  ariaLabel="Total session"
+                  ariaLabel={t("sessionBuilder.totalSessionAria")}
                 />
               </div>
 
               {/* Breaks toggle + frequency + length */}
               <div className={`mt-8 flex ${isMobile ? "flex-col items-start gap-4" : "flex-row items-center flex-wrap gap-x-6 gap-y-3"}`}>
                 <label className="flex items-center gap-3 cursor-pointer">
-                  <Switch checked={breaksOn} onCheckedChange={setBreaksOn} aria-label="Toggle breaks" />
-                  <span className="text-[14px] text-text-primary">Breaks</span>
+                  <Switch checked={breaksOn} onCheckedChange={setBreaksOn} aria-label={t("sessionBuilder.breaksAria")} />
+                  <span className="text-[14px] text-text-primary">{t("sessionBuilder.breaks")}</span>
                 </label>
 
                 {breaksOn && (
                   <>
                     <div className="flex items-center gap-3">
-                      <span className="text-[14px] text-text-secondary">every</span>
+                      <span className="text-[14px] text-text-secondary">{t("sessionBuilder.every")}</span>
                       <StepperField
                         value={work}
                         onChange={setWork}
                         min={5}
                         max={60}
                         step={5}
-                        suffix="min"
+                        suffix={t("sessionBuilder.suffix.min")}
                         size="md"
-                        ariaLabel="Frequency between breaks"
+                        ariaLabel={t("sessionBuilder.frequencyAria")}
                       />
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className="text-[14px] text-text-secondary">break length</span>
+                      <span className="text-[14px] text-text-secondary">{t("sessionBuilder.breakLength")}</span>
                       <StepperField
                         value={brk}
                         onChange={setBrk}
                         min={1}
                         max={15}
                         step={1}
-                        suffix="min"
+                        suffix={t("sessionBuilder.suffix.min")}
                         size="sm"
-                        ariaLabel="Break length"
+                        ariaLabel={t("sessionBuilder.breakLengthAria")}
                       />
                     </div>
                   </>
@@ -825,18 +834,18 @@ const SessionBuilder: React.FC = () => {
               <div className="mt-5 flex flex-wrap items-baseline gap-x-6 gap-y-2">
                 <div className="flex items-baseline gap-2">
                   <span className="text-[14px] tabular-nums text-text-primary">
-                    {cyclesN} {cyclesN === 1 ? "session" : "sessions"}
+                    {t("sessionBuilder.derived.sessionsOfFocus", { count: cyclesN })}
                   </span>
-                  <span className="font-mono text-[12px] text-text-secondary">of focus</span>
+                  <span className="font-mono text-[12px] text-text-secondary">{t("sessionBuilder.derived.ofFocus")}</span>
                 </div>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-[14px] tabular-nums text-text-primary">{focusTotal} min</span>
-                  <span className="font-mono text-[12px] text-text-secondary">focused</span>
+                  <span className="text-[14px] tabular-nums text-text-primary">{t("sessionBuilder.derived.minFocused", { count: focusTotal })}</span>
+                  <span className="font-mono text-[12px] text-text-secondary">{t("sessionBuilder.derived.focused")}</span>
                 </div>
                 {breaksOn && breakTotal > 0 && (
                   <div className="flex items-baseline gap-2">
-                    <span className="text-[14px] tabular-nums text-text-primary">{breakTotal} min</span>
-                    <span className="font-mono text-[12px] text-text-secondary">breaks</span>
+                    <span className="text-[14px] tabular-nums text-text-primary">{t("sessionBuilder.derived.minBreaks", { count: breakTotal })}</span>
+                    <span className="font-mono text-[12px] text-text-secondary">{t("sessionBuilder.derived.breaks")}</span>
                   </div>
                 )}
               </div>
@@ -847,10 +856,10 @@ const SessionBuilder: React.FC = () => {
           {/* ACTIONS */}
           <section className="mt-8">
             <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-1">
-              ACTIONS · {selectedIds.length} SELECTED
+              {t("sessionBuilder.section.actions", { count: selectedIds.length })}
             </div>
             <div className="text-[13px] text-text-secondary mb-3">
-              Pick what you'll work on. The session will guide you through them in order.
+              {t("sessionBuilder.section.actionsHelp")}
             </div>
             {isMobile ? (
               <div className="flex flex-col gap-4">
@@ -876,7 +885,7 @@ const SessionBuilder: React.FC = () => {
               to="/sessions"
               className="text-[13px] text-text-tertiary hover:text-text-secondary transition-colors"
             >
-              Cancel
+              {t("sessionBuilder.cancel")}
             </Link>
             <button
               type="button"
@@ -884,9 +893,9 @@ const SessionBuilder: React.FC = () => {
               disabled={!canStart}
               title={
                 hasActiveSession
-                  ? "A session is already in progress"
+                  ? t("sessionBuilder.tooltip.activeExists")
                   : selectedIds.length === 0
-                  ? "Select at least one action"
+                  ? t("sessionBuilder.tooltip.selectAction")
                   : ""
               }
               className="text-[15px] font-medium rounded-[4px] transition-colors disabled:cursor-not-allowed"
@@ -896,7 +905,7 @@ const SessionBuilder: React.FC = () => {
                 color: canStart ? "hsl(var(--accent-foreground))" : "hsl(var(--text-tertiary))",
               }}
             >
-              Start session
+              {t("sessionBuilder.start")}
             </button>
           </div>
         </div>

@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Tooltip } from "@/components/Tooltip";
 import { useStore } from "@/store/useStore";
 import { computeTimeStats, formatHM, formatDateLabel } from "@/lib/timeStats";
@@ -12,6 +13,7 @@ const TimeSparkline: React.FC<{
   yMax: number;
   goalTitle: string;
 }> = ({ series, color, yMax, goalTitle }) => {
+  const { t } = useTranslation();
   return (
     <div className="w-full h-8 flex items-end gap-[1px]">
       {series.map((v, i) => {
@@ -22,7 +24,7 @@ const TimeSparkline: React.FC<{
             <div className="text-text-primary">
               {formatDateLabel(daysAgo)} — {v === 0 ? "0" : formatHM(v)}
             </div>
-            <div className="text-text-tertiary">on {goalTitle}</div>
+            <div className="text-text-tertiary">{t("timeInvest.tooltip.onGoal", { goal: goalTitle })}</div>
           </div>
         );
         return (
@@ -48,23 +50,22 @@ const ProjectRow: React.FC<{
   color: string;
   total30d: number;
   totalAllTime: number;
-  pctOfGoal: number; // 0..100, relative to goal's max-project-30d for bar width
+  pctOfGoal: number;
 }> = ({ title, color, total30d, totalAllTime, pctOfGoal }) => {
+  const { t } = useTranslation();
   const tip = (
     <div className="font-mono text-[11px] leading-snug">
       <div className="text-text-primary">{title}</div>
-      <div className="text-text-tertiary">All-time: {formatHM(totalAllTime)}</div>
+      <div className="text-text-tertiary">{t("timeInvest.tooltip.allTime", { time: formatHM(totalAllTime) })}</div>
     </div>
   );
   return (
     <Tooltip content={tip} className="block">
       <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-3 py-1 pl-6 hover:bg-surface-hover rounded-[3px] transition-colors">
-        {/* Label */}
         <div className="md:w-[200px] shrink-0 min-w-0 flex items-center gap-1.5">
           <span className="font-mono text-[12px] text-text-tertiary leading-none">└</span>
           <span className="text-[13px] text-text-secondary truncate">{title}</span>
         </div>
-        {/* Bar (60% opacity, h-4) */}
         <div className="flex-1 min-w-0 h-4 flex items-center">
           <div className="w-full h-1.5 rounded-[2px] bg-surface-hover overflow-hidden">
             <div
@@ -77,7 +78,6 @@ const ProjectRow: React.FC<{
             />
           </div>
         </div>
-        {/* Value (30 days only) */}
         <div className="md:w-[160px] shrink-0 md:text-right">
           <span className="font-mono text-[12px] tabular-nums text-text-secondary">
             {formatHM(total30d)}

@@ -641,7 +641,7 @@ const PlanForm: React.FC<{
                       <InlineTextPicker
                         value={quickGoalId ?? ""}
                         showDot={false}
-                        placeholder="Pick goal"
+                        placeholder={t("planToday.actions.pickGoal")}
                         options={activeGoals.map((g) => ({
                           value: g.id,
                           label: g.title,

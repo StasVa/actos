@@ -65,6 +65,7 @@ const TODAY_ISO = () => new Date().toISOString().slice(0, 10);
 
 // ───────── Component ─────────
 export function CommandPalette() {
+  const { t } = useTranslation();
   const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState("");
   const [selectedIdx, setSelectedIdx] = React.useState(0);

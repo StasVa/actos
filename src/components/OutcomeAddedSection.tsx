@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { useStore } from "@/store/useStore";
 import type { OutcomeSummary } from "@/lib/outcomeUtils";
 
@@ -21,20 +22,22 @@ const SectionHead: React.FC<{ children: React.ReactNode; meta?: string }> = ({ c
 );
 
 export const OutcomeAddedSection: React.FC<Props> = ({ outcome, period }) => {
+  const { t } = useTranslation();
   const goals = useStore((s) => s.goals);
   const projects = useStore((s) => s.projects);
   const goalById = (id: string) => goals.find((g) => g.id === id);
   const projectById = (id: string) => projects.find((p) => p.id === id);
 
-  // Hide when zero outcome and no fallback message needed.
   if (outcome.valueAdded === 0 && !outcome.hadOutcomeButNoneOnActiveGoals) return null;
 
   return (
     <section>
-      <SectionHead meta={`+${outcome.valueAdded} TOTAL`}>Value added</SectionHead>
+      <SectionHead meta={t("outcome.totalMeta", { value: outcome.valueAdded })}>
+        {t("outcome.heading")}
+      </SectionHead>
       {outcome.outcomePerGoal.length === 0 ? (
         <div className="text-[13px] text-text-tertiary italic">
-          No outcome added to active goals this {period}.
+          {t(`outcome.empty.${period}` as const)}
         </div>
       ) : (
         <div>
@@ -60,8 +63,9 @@ export const OutcomeAddedSection: React.FC<Props> = ({ outcome, period }) => {
                       </span>
                     </div>
                     <div className="mt-0.5 font-mono text-[12px] text-text-secondary tabular-nums">
-                      {row.actionsCount} action{row.actionsCount === 1 ? "" : "s"} done
-                      {row.delegatedCount > 0 && `, ${row.delegatedCount} delegated`}
+                      {t("outcome.actionsDone", { count: row.actionsCount })}
+                      {row.delegatedCount > 0 &&
+                        t("outcome.delegatedSuffix", { count: row.delegatedCount })}
                     </div>
                   </div>
                   <div className="text-right shrink-0">
@@ -70,7 +74,7 @@ export const OutcomeAddedSection: React.FC<Props> = ({ outcome, period }) => {
                     </div>
                     <div className="font-mono text-[12px] text-text-tertiary tabular-nums">
                       {row.percentageOfGoalCost > 0
-                        ? `${Math.round(row.percentageOfGoalCost)}% of goal`
+                        ? t("outcome.percentOfGoal", { pct: Math.round(row.percentageOfGoalCost) })
                         : "—"}
                     </div>
                   </div>
@@ -89,8 +93,10 @@ export const OutcomeAddedSection: React.FC<Props> = ({ outcome, period }) => {
                             {proj?.title ?? "—"}
                           </span>
                           <span className="text-text-tertiary">
-                            +{p.impactAdded} from {p.actionsCount} action
-                            {p.actionsCount === 1 ? "" : "s"}
+                            {t("outcome.projectFromActions", {
+                              count: p.actionsCount,
+                              value: p.impactAdded,
+                            })}
                           </span>
                         </div>
                       );

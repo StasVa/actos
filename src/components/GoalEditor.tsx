@@ -39,15 +39,16 @@ function GoalExamplesToggle({ onPick }: { onPick: (v: string) => void }) {
           {GOAL_EXAMPLE_KEYS.map((key) => {
             const ex = t(key);
             return (
-            <button
-              key={ex}
-              type="button"
-              onClick={() => onPick(ex)}
-              className="text-left text-text-secondary hover:text-text-primary"
-            >
-              {ex}
-            </button>
-          ))}
+              <button
+                key={ex}
+                type="button"
+                onClick={() => onPick(ex)}
+                className="text-left text-text-secondary hover:text-text-primary"
+              >
+                {ex}
+              </button>
+            );
+          })}
         </div>
       )}
     </div>
@@ -55,15 +56,15 @@ function GoalExamplesToggle({ onPick }: { onPick: (v: string) => void }) {
 }
 
 const STATUS_ORDER: GoalStatus[] = ["active", "completed", "dropped"];
-const STATUS_LABEL: Record<GoalStatus, string> = {
-  active: "Active",
-  completed: "Completed",
-  dropped: "Dropped",
+const STATUS_LABEL_KEY: Record<GoalStatus, string> = {
+  active: "goalEditor.status.active",
+  completed: "goalEditor.status.completed",
+  dropped: "goalEditor.status.dropped",
 };
 
-const TYPE_OPTIONS: { value: GoalType; label: string }[] = [
-  { value: "short-term", label: "Short-term" },
-  { value: "mid-term", label: "Mid-term" },
+const TYPE_OPTIONS: { value: GoalType; labelKey: string }[] = [
+  { value: "short-term", labelKey: "goalEditor.type.shortTerm" },
+  { value: "mid-term", labelKey: "goalEditor.type.midTerm" },
 ];
 
 const uid = () =>

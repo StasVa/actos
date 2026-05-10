@@ -870,10 +870,10 @@ const ProjectDetail: React.FC = () => {
                   value: (
                     <Link
                       to={`/goals/${goal.id}`}
-                      className="inline-flex items-center gap-2 hover:text-accent hover:underline transition-colors"
+                      className="flex items-start gap-2 hover:text-accent hover:underline transition-colors min-w-0"
                     >
-                      <span className="w-2 h-2 rounded-full shrink-0" style={{ background: color }} />
-                      <span>{goal.title}</span>
+                      <span className="w-2 h-2 rounded-full shrink-0 mt-[6px]" style={{ background: color }} />
+                      <span className="break-words min-w-0">{goal.title}</span>
                     </Link>
                   ),
                 },

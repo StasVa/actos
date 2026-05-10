@@ -811,18 +811,18 @@ const SessionActive: React.FC = () => {
 
       <ConfirmModal
         open={confirmDrop != null}
-        title="Drop this action?"
-        body="It won't count toward value."
-        confirmLabel="Drop"
+        title={t("sessionActive.confirm.dropTitle")}
+        body={t("sessionActive.confirm.dropBody")}
+        confirmLabel={t("sessionActive.confirm.dropConfirm")}
         destructive
         onCancel={() => setConfirmDrop(null)}
         onConfirm={handleConfirmDrop}
       />
       <ConfirmModal
         open={confirmAbort}
-        title="End session early?"
-        body="Your progress will be saved."
-        confirmLabel="End session"
+        title={t("sessionActive.confirm.abortTitle")}
+        body={t("sessionActive.confirm.abortBody")}
+        confirmLabel={t("sessionActive.confirm.abortConfirm")}
         destructive
         onCancel={() => setConfirmAbort(false)}
         onConfirm={() => {
@@ -832,9 +832,9 @@ const SessionActive: React.FC = () => {
       />
       <ConfirmModal
         open={confirmRestart}
-        title="Restart current cycle?"
-        body="Time elapsed in this block will be lost."
-        confirmLabel="Restart"
+        title={t("sessionActive.confirm.restartTitle")}
+        body={t("sessionActive.confirm.restartBody")}
+        confirmLabel={t("sessionActive.confirm.restartConfirm")}
         onCancel={() => setConfirmRestart(false)}
         onConfirm={() => {
           setConfirmRestart(false);
@@ -843,9 +843,9 @@ const SessionActive: React.FC = () => {
       />
       <ConfirmModal
         open={confirmEndEarly}
-        title="End session early?"
-        body={`You completed all planned actions in ${actualFocusedMinutes}min of ${plannedFocusMinutes}min. End now?`}
-        confirmLabel="End session"
+        title={t("sessionActive.confirm.abortTitle")}
+        body={t("sessionActive.confirm.endEarlyBody", { actual: actualFocusedMinutes, planned: plannedFocusMinutes })}
+        confirmLabel={t("sessionActive.confirm.abortConfirm")}
         destructive
         onCancel={() => setConfirmEndEarly(false)}
         onConfirm={handleEndSessionEarly}

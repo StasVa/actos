@@ -363,7 +363,7 @@ const SessionActive: React.FC = () => {
     const needsTime = layers.logTime && !(currentAction.timeEstimateMinutes && currentAction.timeEstimateMinutes > 0);
     if (needsImpact || needsTime) {
       openPanel({ kind: "action", mode: "edit", id: currentAction.id });
-      toast.info("Fill required fields to mark done");
+      toast.info(t("sessionActive.action.fillFields"));
       return;
     }
     changeActionStatus(currentAction.id, "done");

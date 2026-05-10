@@ -7,21 +7,23 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { useStore } from "@/store/useStore";
 import type { Goal, GoalType, GoalStatus, ID } from "@/types";
 import { ConfirmModal } from "./ConfirmModal";
 import { EditorShell, EditorCloseX, EditorCancelButton } from "./EditorShell";
 
-const GOAL_EXAMPLES = [
-  "$10k MRR from my side business",
-  "Reach 100k YouTube subscribers",
-  "Run a sub-2h half marathon",
-  "Pass C1 Spanish proficiency exam",
-  "Publish my novel on Amazon",
+const GOAL_EXAMPLE_KEYS = [
+  "goalEditor.examples.0",
+  "goalEditor.examples.1",
+  "goalEditor.examples.2",
+  "goalEditor.examples.3",
+  "goalEditor.examples.4",
 ];
 
 function GoalExamplesToggle({ onPick }: { onPick: (v: string) => void }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   return (
     <div className="mt-2">
@@ -30,11 +32,13 @@ function GoalExamplesToggle({ onPick }: { onPick: (v: string) => void }) {
         onClick={() => setOpen((v) => !v)}
         className="text-[13px] text-text-tertiary hover:text-text-secondary inline-flex items-center gap-1"
       >
-        <span className="font-mono">{open ? "−" : "+"}</span> Examples
+        <span className="font-mono">{open ? "−" : "+"}</span> {t("goalEditor.examplesToggle")}
       </button>
       {open && (
         <div className="mt-2 flex flex-col gap-1 font-mono text-[13px]">
-          {GOAL_EXAMPLES.map((ex) => (
+          {GOAL_EXAMPLE_KEYS.map((key) => {
+            const ex = t(key);
+            return (
             <button
               key={ex}
               type="button"

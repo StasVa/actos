@@ -389,7 +389,7 @@ const SessionActive: React.FC = () => {
     }
     changeActionStatus(a.id, "dropped");
     addDroppedActionToSession(session.id, a.id);
-    toast("Dropped. Moving on.");
+    toast(t("sessionActive.action.dropped"));
     setConfirmDrop(null);
   };
 

@@ -9,6 +9,7 @@
 
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ArrowRight, X, Plus, Trash2 } from "lucide-react";
 import { useStore } from "@/store/useStore";
 import type { GoalColorVar } from "@/types";

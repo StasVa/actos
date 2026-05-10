@@ -946,7 +946,7 @@ export const TodayZone: React.FC<{
   const handleRitualDone = (ritualId: string, alreadyDone: boolean) => {
     if (alreadyDone) return;
     markRitualInstanceDone(ritualId);
-    toast.success("Ritual logged");
+    toast.success(t("home.rituals.toast.logged"));
   };
 
 

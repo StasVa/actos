@@ -18,22 +18,28 @@ type StateFilter = "all" | "active" | "completed" | "dropped";
 type TypeFilter = "all" | "short-term" | "mid-term";
 type SortKey = "recent" | "created" | "progress";
 
-const STATE_OPTIONS: FilterOption<StateFilter>[] = [
-  { value: "all", label: "All" },
-  { value: "active", label: "Active" },
-  { value: "completed", label: "Completed" },
-  { value: "dropped", label: "Dropped" },
-];
-const TYPE_OPTIONS: FilterOption<TypeFilter>[] = [
-  { value: "all", label: "All" },
-  { value: "short-term", label: "Short-term" },
-  { value: "mid-term", label: "Mid-term" },
-];
-const SORT_OPTIONS: FilterOption<SortKey>[] = [
-  { value: "recent", label: "Recent activity" },
-  { value: "created", label: "Created date" },
-  { value: "progress", label: "Progress" },
-];
+function useStateOptions(t: (k: string) => string): FilterOption<StateFilter>[] {
+  return [
+    { value: "all", label: t("common.all") },
+    { value: "active", label: t("common.state.active") },
+    { value: "completed", label: t("common.state.completed") },
+    { value: "dropped", label: t("common.state.dropped") },
+  ];
+}
+function useTypeOptions(t: (k: string) => string): FilterOption<TypeFilter>[] {
+  return [
+    { value: "all", label: t("common.all") },
+    { value: "short-term", label: t("goals.filter.short") },
+    { value: "mid-term", label: t("goals.filter.mid") },
+  ];
+}
+function useSortOptions(t: (k: string) => string): FilterOption<SortKey>[] {
+  return [
+    { value: "recent", label: t("goals.sort.recent") },
+    { value: "created", label: t("goals.sort.created") },
+    { value: "progress", label: t("goals.sort.progress") },
+  ];
+}
 
 function fmtAgo(iso?: string): string {
   if (!iso) return "—";

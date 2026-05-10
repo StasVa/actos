@@ -215,25 +215,7 @@ const TabBar: React.FC<{ value: TabKey; onChange: (v: TabKey) => void }> = ({
 
 /* ===== Date range ===== */
 type DateRange = "all" | "30" | "90" | "365";
-const DATE_OPTIONS: FilterOption<DateRange>[] = [
-  { value: "all", label: "All time" },
-  { value: "30", label: "Last 30 days" },
-  { value: "90", label: "Last 90 days" },
-  { value: "365", label: "Last year" },
-];
-
 type SortKey = "due" | "delegated" | "impact" | "title";
-const ACTIVE_SORT_OPTIONS: FilterOption<SortKey>[] = [
-  { value: "due", label: "By due date" },
-  { value: "delegated", label: "Recently delegated" },
-  { value: "impact", label: "By impact" },
-  { value: "title", label: "By title" },
-];
-const RETURNED_SORT_OPTIONS: FilterOption<SortKey>[] = [
-  { value: "delegated", label: "Recently returned" },
-  { value: "impact", label: "By impact" },
-  { value: "title", label: "By title" },
-];
 
 /* ===== Page ===== */
 const AllDelegated: React.FC = () => {

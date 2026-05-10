@@ -416,6 +416,7 @@ const StatusToggle: React.FC<{
 };
 
 const ProjectDetail: React.FC = () => {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const project = useStore((s) => s.projects.find((p) => p.id === id));
@@ -466,7 +467,7 @@ const ProjectDetail: React.FC = () => {
   useEffect(() => {
     if (isDraft && hasMeaningfulContent && projectId) {
       updateProject(projectId, { isDraft: false });
-      if (goalTitle) toast(`Project created in “${goalTitle}”`);
+      if (goalTitle) toast(t("projectDetail.toast.created", { title: goalTitle }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDraft, hasMeaningfulContent, projectId]);
@@ -496,7 +497,7 @@ const ProjectDetail: React.FC = () => {
           // Promote with placeholder title instead of losing content.
           useStore
             .getState()
-            .updateProject(fresh.id, { title: "Untitled project", isDraft: false });
+            .updateProject(fresh.id, { title: i18n.t("projectDetail.untitled"), isDraft: false });
         }
       }
     };
@@ -511,9 +512,9 @@ const ProjectDetail: React.FC = () => {
       <div className="min-h-screen bg-surface-base text-text-primary">
         <AppSidebar />
       <main className="app-main page-medium">
-          <div className="text-[14px] text-text-secondary">Project not found.</div>
+          <div className="text-[14px] text-text-secondary">{t("projectDetail.notFound")}</div>
           <Link to="/" className="mt-4 inline-block text-[13px] text-accent hover:underline">
-            ← Back to home
+            {t("goalDetail.backHome")}
           </Link>
         </main>
       </div>
@@ -565,16 +566,26 @@ const ProjectDetail: React.FC = () => {
       ? "hsl(var(--status-dropped))"
       : "hsl(var(--status-done))";
   const projStatusText =
-    project.status === "completed" ? "COMPLETED" : project.status === "dropped" ? "DROPPED" : "ACTIVE";
+    project.status === "completed"
+      ? t("projectDetail.statusBadge.completed")
+      : project.status === "dropped"
+      ? t("projectDetail.statusBadge.dropped")
+      : t("projectDetail.statusBadge.active");
+  const projStatusDisplay =
+    project.status === "completed"
+      ? t("projectDetail.statusDisplay.completed")
+      : project.status === "dropped"
+      ? t("projectDetail.statusDisplay.dropped")
+      : t("projectDetail.statusDisplay.active");
 
   const handleStatusChange = (next: ProjectStatus) => {
     if (next === project.status) return;
     if (next === "completed") {
       markComplete(project.id);
-      toast("Project completed");
+      toast(t("projectDetail.toast.completed"));
     } else if (next === "dropped") {
       dropProject(project.id);
-      toast("Project dropped");
+      toast(t("projectDetail.toast.dropped"));
     } else {
       updateProject(project.id, {
         status: "active",

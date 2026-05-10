@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useTranslation } from "react-i18next";
+import i18n from "@/i18n";
 
 type Props = {
   content: React.ReactNode;

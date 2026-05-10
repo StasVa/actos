@@ -337,7 +337,7 @@ const AvailableActionRow: React.FC<{
           <div className="shrink-0 flex items-center gap-2">
             {selected ? (
               <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">
-                Already added
+                {t("sessionBuilder.selected.alreadyAdded")}
               </span>
             ) : impact > 0 ? (
               <ImpactPill impact={impact} goalColor={goalColor} />

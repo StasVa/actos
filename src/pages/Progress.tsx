@@ -389,7 +389,7 @@ const RecentlyClosedActionsSection: React.FC = () => {
         to="/actions"
         className="inline-block mt-3 text-[13px] text-accent hover:text-accent-hover"
       >
-        View all actions →
+        {t("progress.viewAllActions")}
       </Link>
     </section>
   );

@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import i18n from "@/i18n";
 import { toast } from "sonner";
 import { Tooltip, StateDotTooltip } from "@/components/Tooltip";
-import { MetricInfoPopover } from "@/components/MetricInfoPopover";
+
 import { useStore, selectors } from "@/store/useStore";
 import type { Action, ActionStatus, GoalColorVar, Project, ProjectReference, ProjectStatus } from "@/types";
 import { AppSidebar } from "@/components/AppSidebar";

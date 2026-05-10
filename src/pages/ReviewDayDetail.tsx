@@ -1,12 +1,13 @@
 import React from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
+import i18n from "@/i18n";
 import { AppSidebar } from "@/components/AppSidebar";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { useStore } from "@/store/useStore";
 import { formatHM } from "@/lib/timeStats";
 import type { Action, Goal, Project, Ritual } from "@/types";
-import { DAY_TYPE_LABELS } from "./Index";
 import { ActionRow as SharedActionRow } from "@/components/ActionRow";
 import { AccomplishmentsSection, type AccomplishmentTile } from "@/components/AccomplishmentsSection";
 import { OutcomeAddedSection } from "@/components/OutcomeAddedSection";
@@ -14,8 +15,18 @@ import { SessionsSection } from "@/components/SessionsSection";
 import { getOutcomeSummary } from "@/lib/outcomeUtils";
 import { getSessionsForDay, sessionDurationMinutes } from "@/lib/sessionUtils";
 
+const dayTypeLabelKey = (dt?: string): string => {
+  switch (dt) {
+    case "execution": return "today.dayType.execution";
+    case "recovery": return "today.dayType.recovery";
+    case "day-off": return "today.dayType.dayOff";
+    case "sick": return "today.dayType.sick";
+    default: return "";
+  }
+};
+
 const longDate = (iso: string) =>
-  new Date(iso + "T00:00:00").toLocaleDateString("en-US", {
+  new Date(iso + "T00:00:00").toLocaleDateString(i18n.language, {
     weekday: "long",
     month: "long",
     day: "numeric",
@@ -23,7 +34,7 @@ const longDate = (iso: string) =>
   });
 
 const timeOnly = (iso?: string) =>
-  iso ? new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : null;
+  iso ? new Date(iso).toLocaleTimeString(i18n.language, { hour: "2-digit", minute: "2-digit" }) : null;
 
 const SectionHead: React.FC<{ children: React.ReactNode; meta?: string }> = ({ children, meta }) => (
   <div className="flex items-baseline justify-between mb-3">
@@ -113,6 +124,7 @@ const ClosedRow: React.FC<{
 };
 
 const ReviewDayDetail: React.FC = () => {
+  const { t } = useTranslation();
   const { date = "" } = useParams();
   const navigate = useNavigate();
   const [settingsOpen, setSettingsOpen] = React.useState(false);
@@ -266,19 +278,21 @@ const ReviewDayDetail: React.FC = () => {
       ? actions.find((a) => a.id === dayEntry.mainTaskActionId)
       : undefined;
 
-  const dtLabel = dayEntry?.dayType ? `${DAY_TYPE_LABELS[dayEntry.dayType]} day` : null;
+  const dtLabel = dayEntry?.dayType
+    ? t("reviews.detail.dayTypeSuffix", { label: t(dayTypeLabelKey(dayEntry.dayType)) })
+    : null;
   const startedT = timeOnly(dayEntry?.startedAt);
   const closedT = timeOnly(dayEntry?.closedAt);
   const subParts: string[] = [];
   if (dtLabel) subParts.push(dtLabel);
-  if (startedT) subParts.push(`Started ${startedT}`);
-  if (dayEntry?.isClosed && closedT) subParts.push(`Closed ${closedT}`);
-  else if (dayEntry && !dayEntry.isClosed) subParts.push("Not closed");
+  if (startedT) subParts.push(t("reviews.detail.startedAt", { time: startedT }));
+  if (dayEntry?.isClosed && closedT) subParts.push(t("reviews.detail.closedAt", { time: closedT }));
+  else if (dayEntry && !dayEntry.isClosed) subParts.push(t("reviews.detail.notClosed"));
 
   // Part 6 — show "Not planned · X actions logged" when no formal plan but activity exists
   const isNotPlanned = !dayEntry || dayEntry.isPlanned === false;
   if (isNotPlanned && doneToday.length > 0 && subParts.length === 0) {
-    subParts.push(`Not planned · ${doneToday.length} action${doneToday.length === 1 ? "" : "s"} logged`);
+    subParts.push(t("reviews.detail.notPlannedLine", { count: doneToday.length }));
   }
 
   const handleReopen = () => {
@@ -287,7 +301,7 @@ const ReviewDayDetail: React.FC = () => {
     } else if (typeof updateDayEntry === "function") {
       updateDayEntry(date, { isClosed: false });
     }
-    toast("Day re-opened");
+    toast(t("reviews.detail.toast.dayReopened"));
   };
 
   const startEditReflection = () => {
@@ -299,7 +313,7 @@ const ReviewDayDetail: React.FC = () => {
       updateDayEntry(date, { reflectionText: reflectionDraft });
     }
     setEditingReflection(false);
-    toast("Reflection saved");
+    toast(t("reviews.detail.toast.reflectionSaved"));
   };
 
   const openActionEdit = (id: string) => {
@@ -356,10 +370,10 @@ const ReviewDayDetail: React.FC = () => {
           to="/reviews/days"
           className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary hover:text-text-primary transition-colors"
         >
-          ← REVIEWS
+          {t("reviews.detail.back")}
         </Link>
         <h1 className="mt-3 text-[24px] font-medium text-text-primary leading-tight">
-          {date ? longDate(date) : "—"}
+          {date ? longDate(date) : t("reviews.detail.dash")}
         </h1>
         {subParts.length > 0 && (
           <div className="mt-1 font-mono text-[13px] text-text-tertiary">
@@ -374,10 +388,10 @@ const ReviewDayDetail: React.FC = () => {
         {!hasAnyData ? (
           <div className="text-center py-16">
             <div className="text-[14px] text-text-secondary">
-              No activity logged for this day.
+              {t("reviews.detail.noActivityDay")}
             </div>
             <Link to="/reviews/days" className="inline-block mt-3 text-[12px] text-[hsl(var(--accent))]">
-              Back to reviews
+              {t("reviews.detail.backToReviews")}
             </Link>
           </div>
         ) : (
@@ -395,17 +409,17 @@ const ReviewDayDetail: React.FC = () => {
                 (settings.layers.logTime && actionTimeMin > 0);
               if (hasAny) {
                 if (outcome.valueAdded > 0)
-                  tiles.push({ key: "outcome", value: `+${outcome.valueAdded}`, label: "Value added" });
-                tiles.push({ key: "actions", value: String(doneToday.length), label: "Actions done" });
-                tiles.push({ key: "rituals", value: String(ritualsDone.length), label: "Rituals done" });
+                  tiles.push({ key: "outcome", value: `+${outcome.valueAdded}`, label: t("reviews.detail.tile.valueAdded") });
+                tiles.push({ key: "actions", value: String(doneToday.length), label: t("reviews.detail.tile.actionsDone") });
+                tiles.push({ key: "rituals", value: String(ritualsDone.length), label: t("reviews.detail.tile.ritualsDone") });
                 if (settings.layers.logTime && actionTimeMin > 0)
-                  tiles.push({ key: "time", value: formatHM(actionTimeMin), label: "Time invested" });
+                  tiles.push({ key: "time", value: formatHM(actionTimeMin), label: t("reviews.detail.tile.timeInvested") });
                 if (sessionsForDay.length > 0)
-                  tiles.push({ key: "sessions", value: String(sessionsForDay.length), label: "Sessions" });
+                  tiles.push({ key: "sessions", value: String(sessionsForDay.length), label: t("reviews.detail.tile.sessions") });
                 if (closedProjects.length > 0)
-                  tiles.push({ key: "projects", value: String(closedProjects.length), label: "Projects closed" });
+                  tiles.push({ key: "projects", value: String(closedProjects.length), label: t("reviews.detail.tile.projectsClosed") });
                 if (closedGoals.length > 0)
-                  tiles.push({ key: "goals", value: String(closedGoals.length), label: "Goals closed" });
+                  tiles.push({ key: "goals", value: String(closedGoals.length), label: t("reviews.detail.tile.goalsClosed") });
               }
               return <AccomplishmentsSection tiles={tiles} period="day" />;
             })()}
@@ -413,11 +427,11 @@ const ReviewDayDetail: React.FC = () => {
             {/* GOALS CLOSED */}
             {closedGoals.length > 0 && (
               <section>
-                <SectionHead>Goals closed · {closedGoals.length}</SectionHead>
+                <SectionHead>{t("reviews.detail.section.goalsClosed", { count: closedGoals.length })}</SectionHead>
                 <div className="space-y-1">
                   {closedGoals.map(({ entity: g, type }) => {
                     const goalColor = `hsl(var(--${g.color}))`;
-                    const typeBadge = g.type === "mid-term" ? "MID-TERM" : "SHORT-TERM";
+                    const typeBadge = g.type === "mid-term" ? t("reviews.detail.goalType.midTerm") : t("reviews.detail.goalType.shortTerm");
                     const days = daysActive(g);
                     return (
                       <ClosedRow
@@ -425,7 +439,7 @@ const ReviewDayDetail: React.FC = () => {
                         title={g.title}
                         stripeColor={goalColor}
                         pillLabel={type === "completed" ? "COMPLETED" : "DROPPED"}
-                        subline={`${typeBadge} · ${days} day${days === 1 ? "" : "s"} active`}
+                        subline={t("reviews.detail.daysActive", { count: days, typeBadge })}
                         onClick={() => navigate(`/goals/${g.id}`)}
                       />
                     );
@@ -437,7 +451,7 @@ const ReviewDayDetail: React.FC = () => {
             {/* PROJECTS CLOSED */}
             {closedProjects.length > 0 && (
               <section>
-                <SectionHead>Projects closed · {closedProjects.length}</SectionHead>
+                <SectionHead>{t("reviews.detail.section.projectsClosed", { count: closedProjects.length })}</SectionHead>
                 <div className="space-y-1">
                   {closedProjects.map(({ entity: p, type }) => {
                     const g = goalById(p.goalId);
@@ -454,7 +468,7 @@ const ReviewDayDetail: React.FC = () => {
                               className="w-1.5 h-1.5 rounded-full"
                               style={{ background: goalColor }}
                             />
-                            {g?.title ?? "—"}
+                            {g?.title ?? t("reviews.detail.dash")}
                           </span>
                         }
                         onClick={() => navigate(`/projects/${p.id}`)}
@@ -471,7 +485,7 @@ const ReviewDayDetail: React.FC = () => {
             {/* TIME INVESTED */}
             {settings.layers.logTime && totalMin > 0 && (
               <section>
-                <SectionHead meta={`Total: ${formatHM(totalMin)}`}>Time invested</SectionHead>
+                <SectionHead meta={t("reviews.detail.section.timeTotal", { time: formatHM(totalMin) })}>{t("reviews.detail.section.timeInvested")}</SectionHead>
                 <div className="space-y-2">
                   {perGoal.map(({ g, min, projectRows }) => {
                     const pct = yMax > 0 ? (min / yMax) * 100 : 0;
@@ -496,7 +510,7 @@ const ReviewDayDetail: React.FC = () => {
                             />
                           </div>
                           <div className="w-[80px] text-right font-mono text-[12px] tabular-nums text-text-secondary">
-                            {min > 0 ? formatHM(min) : "—"}
+                            {min > 0 ? formatHM(min) : t("reviews.detail.dash")}
                           </div>
                         </div>
                         {showProjects && (
@@ -527,11 +541,11 @@ const ReviewDayDetail: React.FC = () => {
             {sessionsForDay.length > 0 && (
               <section>
                 <SectionHead
-                  meta={`${formatHM(
+                  meta={t("reviews.detail.section.sessionsMeta", { time: formatHM(
                     sessionsForDay.reduce((s, x) => s + sessionDurationMinutes(x), 0),
-                  ).toUpperCase()} FOCUSED`}
+                  ).toUpperCase() })}
                 >
-                  Sessions · {sessionsForDay.length}
+                  {t("reviews.detail.section.sessions", { count: sessionsForDay.length })}
                 </SectionHead>
                 <SessionsSection sessions={sessionsForDay} variant="flat" />
               </section>
@@ -539,14 +553,14 @@ const ReviewDayDetail: React.FC = () => {
 
             {main && (
               <section>
-                <SectionHead>Main task</SectionHead>
+                <SectionHead>{t("reviews.detail.section.mainTask")}</SectionHead>
                 <div className="flex items-center gap-2 text-[14px]">
                   <span className="w-2 h-2 rounded-full" style={{ background: goalColorOf(main) }} />
                   {main.status === "done" ? (
-                    <span className="text-text-primary">✓ Done — {main.title}</span>
+                    <span className="text-text-primary">{t("reviews.detail.actions.mainDone", { title: main.title })}</span>
                   ) : (
                     <span className="text-[hsl(var(--state-stalled))]">
-                      ✗ Not completed — {main.title}
+                      {t("reviews.detail.actions.mainNot", { title: main.title })}
                     </span>
                   )}
                 </div>
@@ -556,17 +570,17 @@ const ReviewDayDetail: React.FC = () => {
             {/* ACTIONS */}
             <section>
               <SectionHead meta={showActionTimeMeta ? formatHM(actionTimeMin) : undefined}>
-                Actions · {actionTotal}
+                {t("reviews.detail.section.actions", { count: actionTotal })}
               </SectionHead>
               {actionTotal === 0 ? (
-                <div className="text-[13px] text-text-tertiary italic mb-3">No actions tracked.</div>
+                <div className="text-[13px] text-text-tertiary italic mb-3">{t("reviews.detail.actions.empty")}</div>
               ) : (
                 <div>
                   {doneToday.length > 0 && (
                     <>
                       {actionSubgroupCount > 1 && (
                         <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mt-2 mb-1">
-                          Done · {doneToday.length}
+                          {t("reviews.detail.subgroup.done", { count: doneToday.length })}
                         </div>
                       )}
                       {doneToday.map((a) => (
@@ -587,7 +601,7 @@ const ReviewDayDetail: React.FC = () => {
                     <>
                       {actionSubgroupCount > 1 && (
                         <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mt-3 mb-1">
-                          Delegated · {delegatedToday.length}
+                          {t("reviews.detail.subgroup.delegated", { count: delegatedToday.length })}
                         </div>
                       )}
                       {delegatedToday.map((a) => (
@@ -607,7 +621,7 @@ const ReviewDayDetail: React.FC = () => {
                     <>
                       {actionSubgroupCount > 1 && (
                         <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mt-3 mb-1">
-                          Dropped · {droppedToday.length}
+                          {t("reviews.detail.subgroup.dropped", { count: droppedToday.length })}
                         </div>
                       )}
                       {droppedToday.map((a) => (
@@ -627,7 +641,7 @@ const ReviewDayDetail: React.FC = () => {
                     <>
                       {actionSubgroupCount > 1 && (
                         <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mt-3 mb-1">
-                          Cancelled · {cancelledToday.length}
+                          {t("reviews.detail.subgroup.cancelled", { count: cancelledToday.length })}
                         </div>
                       )}
                       {cancelledToday.map((a) => (
@@ -648,7 +662,7 @@ const ReviewDayDetail: React.FC = () => {
                     <>
                       {actionSubgroupCount > 1 && (
                         <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mt-3 mb-1">
-                          Not completed · {notCompleted.length}
+                          {t("reviews.detail.subgroup.notCompleted", { count: notCompleted.length })}
                         </div>
                       )}
                       {notCompleted.map((a) => (
@@ -667,7 +681,7 @@ const ReviewDayDetail: React.FC = () => {
                 </div>
               )}
 
-              {/* + Add action to this day */}
+              {/* + {t("reviews.detail.actions.add")} */}
               <button
                 type="button"
                 onClick={openActionAddRetro}
@@ -677,19 +691,19 @@ const ReviewDayDetail: React.FC = () => {
                   +
                 </span>
                 <span className="text-[13px] text-text-secondary group-hover:text-text-primary transition-colors">
-                  Add action to this day
+                  {t("reviews.detail.actions.add")}
                 </span>
               </button>
             </section>
             {/* RITUALS */}
             {plannedRituals.length > 0 && (
               <section>
-                <SectionHead>Rituals · {ritualTotal}</SectionHead>
+                <SectionHead>{t("reviews.detail.section.rituals", { count: ritualTotal })}</SectionHead>
                 {ritualsDone.length > 0 && (
                   <>
                     {ritualSubgroupCount > 1 && (
                       <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mt-2 mb-1">
-                        Done · {ritualsDone.length}
+                        {t("reviews.detail.subgroup.done", { count: ritualsDone.length })}
                       </div>
                     )}
                     {ritualsDone.map((r) => (
@@ -708,7 +722,7 @@ const ReviewDayDetail: React.FC = () => {
                   <>
                     {ritualSubgroupCount > 1 && (
                       <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mt-3 mb-1">
-                        Skipped · {ritualsSkippedList.length}
+                        {t("reviews.detail.subgroup.skipped", { count: ritualsSkippedList.length })}
                       </div>
                     )}
                     {ritualsSkippedList.map((r) => (
@@ -720,7 +734,7 @@ const ReviewDayDetail: React.FC = () => {
                   <>
                     {ritualSubgroupCount > 1 && (
                       <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mt-3 mb-1">
-                        Missed · {ritualsMissed.length}
+                        {t("reviews.detail.subgroup.missed", { count: ritualsMissed.length })}
                       </div>
                     )}
                     {ritualsMissed.map((r) => (
@@ -741,7 +755,7 @@ const ReviewDayDetail: React.FC = () => {
                   onClick={handleReopen}
                   className="text-[13px] text-text-secondary hover:text-text-primary transition-colors"
                 >
-                  Re-open day
+                  {t("reviews.detail.reopenDay")}
                 </button>
               )}
             </section>

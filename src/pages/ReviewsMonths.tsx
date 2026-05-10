@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { AppSidebar } from "@/components/AppSidebar";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { useStore } from "@/store/useStore";
@@ -25,12 +26,7 @@ import {
   sortReviewEntries,
 } from "@/lib/reviewSort";
 
-const RANGE_OPTIONS = [
-  { value: "12m", label: "Last 12 months" },
-  { value: "6m", label: "Last 6 months" },
-  { value: "ytd", label: "This year" },
-  { value: "all", label: "All" },
-];
+
 
 
 function rangeStart(value: string): Date | null {
@@ -52,6 +48,7 @@ function rangeStart(value: string): Date | null {
 }
 
 const ReviewsMonths: React.FC = () => {
+  const { t } = useTranslation();
   const [settingsOpen, setSettingsOpen] = React.useState(false);
   const actions = useStore((s) => s.actions);
   const dayEntries = useStore((s) => s.dayEntries);
@@ -64,6 +61,13 @@ const ReviewsMonths: React.FC = () => {
   const [goalFilter, setGoalFilter] = React.useState<string>("all");
   const [sortKey, setSortKey] = React.useState<ReviewSortKey>(() => loadReviewSort("actos.reviews.months.sort"));
   React.useEffect(() => saveReviewSort("actos.reviews.months.sort", sortKey), [sortKey]);
+
+  const RANGE_OPTIONS = React.useMemo(() => [
+    { value: "12m", label: t("reviews.filters.range.last12m") },
+    { value: "6m", label: t("reviews.filters.range.last6m") },
+    { value: "ytd", label: t("reviews.filters.range.thisYear") },
+    { value: "all", label: t("reviews.filters.range.all") },
+  ], [t]);
 
   const allMonths = React.useMemo(
     () => getMonthsWithActivity(actions, dayEntries),
@@ -109,21 +113,21 @@ const ReviewsMonths: React.FC = () => {
       <SettingsPanel open={settingsOpen} onOpenChange={setSettingsOpen} />
       <main className="app-main page-medium">
         <PageHeader
-          title="Months"
-          meta={`${allMonths.length} MONTHS TRACKED`}
+          title={t("reviews.months.title")}
+          meta={t("reviews.months.meta", { count: allMonths.length })}
           filters={
             <>
               <FilterDropdown
-                label="GOAL"
+                label={t("reviews.filters.label.goal")}
                 value={goalFilter}
                 defaultValue="all"
                 options={[
-                  { value: "all", label: "All" },
+                  { value: "all", label: t("reviews.filters.all") },
                   ...goals.filter((g) => g.status === "active").map((g) => ({ value: g.id, label: g.title, dot: `hsl(var(--${g.color}))` })),
                 ]}
                 onChange={setGoalFilter}
               />
-              <FilterDropdown label="DATE" value={range} defaultValue={range} options={RANGE_OPTIONS} onChange={setRange} />
+              <FilterDropdown label={t("reviews.filters.label.date")} value={range} defaultValue={range} options={RANGE_OPTIONS} onChange={setRange} />
             </>
           }
           sort={<SortDropdown<ReviewSortKey> value={sortKey} options={REVIEW_SORT_OPTIONS} onChange={setSortKey} />}
@@ -135,8 +139,8 @@ const ReviewsMonths: React.FC = () => {
             <div className="p-10 text-center">
               <div className="text-[14px] text-text-secondary">
                 {allMonths.length === 0
-                  ? "No tracked months yet. Start logging actions and your monthly summaries will appear here."
-                  : "No months match these filters."}
+                  ? t("reviews.empty.months")
+                  : t("reviews.empty.monthsFiltered")}
               </div>
             </div>
           ) : (
@@ -180,21 +184,21 @@ const ReviewsMonths: React.FC = () => {
                       <div className="mt-1 font-mono text-[12px] text-text-secondary tabular-nums">
                         {o.valueAdded > 0 && (
                           <>
-                            <span className="text-text-primary">+{o.valueAdded}</span> value
+                            <span className="text-text-primary">+{o.valueAdded}</span> {t("reviews.row.valueWord")}
                             <span className="text-text-tertiary"> · </span>
                           </>
                         )}
-                        <span className="text-text-primary">{s.doneActions.length}</span> actions done
+                        <span className="text-text-primary">{s.doneActions.length}</span> {t("reviews.row.actionsDoneWord")}
                         {ritualConsistent > 0 && (
                           <>
                             <span className="text-text-tertiary"> · </span>
-                            <span className="text-text-primary">{ritualConsistent}</span> rituals consistent
+                            <span className="text-text-primary">{ritualConsistent}</span> {t("reviews.row.ritualsConsistent", { count: ritualConsistent })}
                           </>
                         )}
                         {settings.layers.logTime && s.totalTimeMinutes > 0 && (
                           <>
                             <span className="text-text-tertiary"> · </span>
-                            <span className="text-text-primary">{formatHM(s.totalTimeMinutes)}</span> invested
+                            <span className="text-text-primary">{formatHM(s.totalTimeMinutes)}</span> {t("reviews.row.investedWord")}
                           </>
                         )}
                       </div>

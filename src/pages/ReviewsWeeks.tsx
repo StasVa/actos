@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { AppSidebar } from "@/components/AppSidebar";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { useStore } from "@/store/useStore";
@@ -25,13 +26,7 @@ import {
   sortReviewEntries,
 } from "@/lib/reviewSort";
 
-const RANGE_OPTIONS = [
-  { value: "all", label: "All" },
-  { value: "1m", label: "Last month" },
-  { value: "3m", label: "Last 3 months" },
-  { value: "6m", label: "Last 6 months" },
-  { value: "ytd", label: "This year" },
-];
+
 
 
 function rangeStart(value: string): Date | null {
@@ -58,6 +53,7 @@ function rangeStart(value: string): Date | null {
 }
 
 const ReviewsWeeks: React.FC = () => {
+  const { t } = useTranslation();
   const [settingsOpen, setSettingsOpen] = React.useState(false);
   const actions = useStore((s) => s.actions);
   const dayEntries = useStore((s) => s.dayEntries);
@@ -70,6 +66,14 @@ const ReviewsWeeks: React.FC = () => {
   const [goalFilter, setGoalFilter] = React.useState<string>("all");
   const [sortKey, setSortKey] = React.useState<ReviewSortKey>(() => loadReviewSort("actos.reviews.weeks.sort"));
   React.useEffect(() => saveReviewSort("actos.reviews.weeks.sort", sortKey), [sortKey]);
+
+  const RANGE_OPTIONS = React.useMemo(() => [
+    { value: "all", label: t("reviews.filters.range.all") },
+    { value: "1m", label: t("reviews.filters.range.lastMonth") },
+    { value: "3m", label: t("reviews.filters.range.last3m") },
+    { value: "6m", label: t("reviews.filters.range.last6m") },
+    { value: "ytd", label: t("reviews.filters.range.thisYear") },
+  ], [t]);
 
   const allWeeks = React.useMemo(
     () => getWeeksWithActivity(actions, dayEntries),
@@ -115,21 +119,21 @@ const ReviewsWeeks: React.FC = () => {
       <SettingsPanel open={settingsOpen} onOpenChange={setSettingsOpen} />
       <main className="app-main page-medium">
         <PageHeader
-          title="Weeks"
-          meta={`${allWeeks.length} WEEKS TRACKED`}
+          title={t("reviews.weeks.title")}
+          meta={t("reviews.weeks.meta", { count: allWeeks.length })}
           filters={
             <>
               <FilterDropdown
-                label="GOAL"
+                label={t("reviews.filters.label.goal")}
                 value={goalFilter}
                 defaultValue="all"
                 options={[
-                  { value: "all", label: "All" },
+                  { value: "all", label: t("reviews.filters.all") },
                   ...goals.filter((g) => g.status === "active").map((g) => ({ value: g.id, label: g.title, dot: `hsl(var(--${g.color}))` })),
                 ]}
                 onChange={setGoalFilter}
               />
-              <FilterDropdown label="DATE" value={range} defaultValue={range} options={RANGE_OPTIONS} onChange={setRange} />
+              <FilterDropdown label={t("reviews.filters.label.date")} value={range} defaultValue={range} options={RANGE_OPTIONS} onChange={setRange} />
             </>
           }
           sort={<SortDropdown<ReviewSortKey> value={sortKey} options={REVIEW_SORT_OPTIONS} onChange={setSortKey} />}
@@ -139,17 +143,17 @@ const ReviewsWeeks: React.FC = () => {
         <div className="bg-surface-elevated border border-border-subtle rounded-[6px] overflow-hidden">
           {allWeeks.length === 0 ? (
             <div className="text-center text-[14px] text-text-secondary" style={{ paddingTop: 80, paddingBottom: 80 }}>
-              No weeks tracked yet. Weeks appear here once you have day activity.
+              {t("reviews.empty.weeks")}
             </div>
           ) : filteredWeeks.length === 0 ? (
             <div className="p-10 text-center">
-              <div className="text-[14px] text-text-secondary">No items match these filters.</div>
+              <div className="text-[14px] text-text-secondary">{t("reviews.filters.noMatch")}</div>
               <button
                 type="button"
                 onClick={() => { setRange("all"); setGoalFilter("all"); }}
                 className="mt-3 text-[13px] text-text-secondary hover:text-text-primary transition-colors"
               >
-                Clear filters
+                {t("reviews.filters.clear")}
               </button>
             </div>
           ) : (
@@ -193,21 +197,21 @@ const ReviewsWeeks: React.FC = () => {
                       <div className="mt-1 font-mono text-[12px] text-text-secondary tabular-nums">
                         {o.valueAdded > 0 && (
                           <>
-                            <span className="text-text-primary">+{o.valueAdded}</span> value
+                            <span className="text-text-primary">+{o.valueAdded}</span> {t("reviews.row.valueWord")}
                             <span className="text-text-tertiary"> · </span>
                           </>
                         )}
-                        <span className="text-text-primary">{s.doneActions.length}</span> actions done
+                        <span className="text-text-primary">{s.doneActions.length}</span> {t("reviews.row.actionsDoneWord")}
                         {ritualConsistent > 0 && (
                           <>
                             <span className="text-text-tertiary"> · </span>
-                            <span className="text-text-primary">{ritualConsistent}</span> rituals consistent
+                            <span className="text-text-primary">{ritualConsistent}</span> {t("reviews.row.ritualsConsistent", { count: ritualConsistent })}
                           </>
                         )}
                         {settings.layers.logTime && s.totalTimeMinutes > 0 && (
                           <>
                             <span className="text-text-tertiary"> · </span>
-                            <span className="text-text-primary">{formatHM(s.totalTimeMinutes)}</span> invested
+                            <span className="text-text-primary">{formatHM(s.totalTimeMinutes)}</span> {t("reviews.row.investedWord")}
                           </>
                         )}
                       </div>

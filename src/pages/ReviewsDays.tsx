@@ -1,13 +1,14 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Lock } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import i18n from "@/i18n";
 import { AppSidebar } from "@/components/AppSidebar";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { LockModal, HistoryHint } from "@/components/LockModal";
 import { useStore } from "@/store/useStore";
 import { formatHM } from "@/lib/timeStats";
 import type { Action, DayEntry, Goal, ID, ISODate, Project } from "@/types";
-import { DAY_TYPE_LABELS } from "./Index";
 import { getOutcomeSummary } from "@/lib/outcomeUtils";
 import { PageHeader } from "@/components/PageHeader";
 import { FilterDropdown } from "@/components/FilterDropdown";
@@ -24,17 +25,27 @@ import {
 const TODAY = new Date();
 TODAY.setHours(0, 0, 0, 0);
 
+const dayTypeKey = (dt?: string): string => {
+  switch (dt) {
+    case "execution": return "today.dayType.execution";
+    case "recovery": return "today.dayType.recovery";
+    case "day-off": return "today.dayType.dayOff";
+    case "sick": return "today.dayType.sick";
+    default: return "";
+  }
+};
+
 function relativeLabel(iso: ISODate): string {
   const d = new Date(iso + "T00:00:00");
   const days = Math.round((TODAY.getTime() - d.getTime()) / 86400000);
-  if (days <= 0) return "today";
-  if (days === 1) return "yesterday";
-  if (days < 30) return `${days}d ago`;
-  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  if (days <= 0) return i18n.t("reviews.relative.today");
+  if (days === 1) return i18n.t("reviews.relative.yesterday");
+  if (days < 30) return i18n.t("reviews.relative.daysAgo", { count: days });
+  return d.toLocaleDateString(i18n.language, { month: "short", day: "numeric" });
 }
 
 function longDate(iso: ISODate): string {
-  return new Date(iso + "T00:00:00").toLocaleDateString("en-US", {
+  return new Date(iso + "T00:00:00").toLocaleDateString(i18n.language, {
     weekday: "short",
     month: "short",
     day: "numeric",
@@ -80,21 +91,6 @@ function buildDayRows(
   return rows;
 }
 
-const RANGE_OPTIONS = [
-  { value: "30", label: "Last 30 days", days: 30 },
-  { value: "7", label: "Last 7 days", days: 7 },
-  { value: "90", label: "Last 90 days", days: 90 },
-  { value: "all", label: "All time", days: Infinity },
-];
-
-const DAY_TYPE_FILTERS = [
-  { value: "all", label: "All" },
-  { value: "execution", label: "Execution" },
-  { value: "recovery", label: "Recovery" },
-  { value: "day-off", label: "Day Off" },
-  { value: "sick", label: "Sick" },
-];
-
 type SortKey = ReviewSortKey;
 const SORT_OPTIONS = REVIEW_SORT_OPTIONS;
 
@@ -107,22 +103,23 @@ const DayRowItem: React.FC<{
   locked?: boolean;
   onLockedClick?: () => void;
 }> = ({ row, goals, projects, allActions, logTime, locked, onLockedClick }) => {
+  const { t } = useTranslation();
   const { date, entry, doneActions, delegatedActions } = row;
   const ritualCount = entry
     ? Math.max(0, (entry.plannedRitualIds?.length ?? 0) - (entry.skippedRitualIds?.length ?? 0))
     : 0;
   const investedMin = (a: Action) => {
-    const t = a.timeEstimateMinutes ?? 0;
-    if (t <= 0) return 0;
-    if (a.status === "done") return t;
-    if (a.status === "delegated") return Math.round(t * 0.2);
+    const tm = a.timeEstimateMinutes ?? 0;
+    if (tm <= 0) return 0;
+    if (a.status === "done") return tm;
+    if (a.status === "delegated") return Math.round(tm * 0.2);
     return 0;
   };
   const investedAll = [...doneActions, ...delegatedActions];
   const totalMin = investedAll.reduce((s, a) => s + investedMin(a), 0);
 
   const dt = entry?.dayType;
-  const noPlan = !entry?.isPlanned && doneActions.length > 0 ? "(no plan)" : null;
+  const noPlan = !entry?.isPlanned && doneActions.length > 0 ? t("reviews.row.noPlan") : null;
 
   const perGoal = goals
     .filter((g) => g.status === "active")
@@ -136,26 +133,28 @@ const DayRowItem: React.FC<{
   const outcome = getOutcomeSummary(doneActions, delegatedActions, goals, projects, allActions);
 
   const stats: string[] = [];
-  if (outcome.valueAdded > 0) stats.push(`+${outcome.valueAdded} value`);
-  stats.push(`${doneActions.length} actions done`);
-  if (ritualCount > 0) stats.push(`${ritualCount} rituals`);
-  if (logTime && totalMin > 0) stats.push(`${formatHM(totalMin)} invested`);
+  if (outcome.valueAdded > 0) stats.push(t("reviews.row.valueAdded", { count: outcome.valueAdded }));
+  stats.push(t("reviews.row.actionsDone", { count: doneActions.length }));
+  if (ritualCount > 0) stats.push(t("reviews.row.rituals", { count: ritualCount }));
+  if (logTime && totalMin > 0) stats.push(t("reviews.row.invested", { time: formatHM(totalMin) }));
   let mainPrefix = "";
   if (entry?.mainTaskActionId) {
     const main = doneActions.find((a) => a.id === entry.mainTaskActionId);
-    mainPrefix = main ? "Main: ✓ Done · " : "Main: ✗ Not completed · ";
+    mainPrefix = main ? t("reviews.row.mainDone") : t("reviews.row.mainNotCompleted");
   }
+
+  const dtLabelKey = dayTypeKey(dt);
 
   const inner = (
     <>
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
           <span className="text-[14px] font-medium text-text-primary">{longDate(date)}</span>
-          {dt && (
+          {dt && dtLabelKey && (
             <span
               className={`font-mono text-[10px] uppercase px-1.5 py-0.5 rounded-[3px] ${DAY_TYPE_TONE[dt] ?? "bg-surface-hover text-text-tertiary"}`}
             >
-              {DAY_TYPE_LABELS[dt]}
+              {t(dtLabelKey)}
             </span>
           )}
           {noPlan && (
@@ -216,6 +215,7 @@ const DayRowItem: React.FC<{
 };
 
 const ReviewsDays: React.FC = () => {
+  const { t } = useTranslation();
   const [settingsOpen, setSettingsOpen] = React.useState(false);
   const [lockOpen, setLockOpen] = React.useState(false);
   const dayEntries = useStore((s) => s.dayEntries);
@@ -231,6 +231,21 @@ const ReviewsDays: React.FC = () => {
   const [search, setSearch] = React.useState("");
   const [sortKey, setSortKey] = React.useState<SortKey>(() => loadReviewSort("actos.reviews.days.sort"));
   React.useEffect(() => saveReviewSort("actos.reviews.days.sort", sortKey), [sortKey]);
+
+  const RANGE_OPTIONS = React.useMemo(() => [
+    { value: "30", label: t("reviews.filters.range.last30"), days: 30 },
+    { value: "7", label: t("reviews.filters.range.last7"), days: 7 },
+    { value: "90", label: t("reviews.filters.range.last90"), days: 90 },
+    { value: "all", label: t("reviews.filters.range.allTime"), days: Infinity },
+  ], [t]);
+
+  const DAY_TYPE_FILTERS = React.useMemo(() => [
+    { value: "all", label: t("reviews.filters.all") },
+    { value: "execution", label: t("today.dayType.execution") },
+    { value: "recovery", label: t("today.dayType.recovery") },
+    { value: "day-off", label: t("today.dayType.dayOff") },
+    { value: "sick", label: t("today.dayType.sick") },
+  ], [t]);
 
   const allRows = React.useMemo(
     () => buildDayRows(dayEntries, actions),
@@ -271,7 +286,6 @@ const ReviewsDays: React.FC = () => {
     return sortReviewEntries(sortable, sortKey);
   }, [filtered, sortKey]);
 
-  const lastActivity = allRows[0]?.date;
   const hasFilters =
     dayType !== "all" || goalFilter !== "all" || range !== "30" || search.trim() !== "";
 
@@ -281,24 +295,24 @@ const ReviewsDays: React.FC = () => {
       <SettingsPanel open={settingsOpen} onOpenChange={setSettingsOpen} />
       <main className="app-main page-medium">
         <PageHeader
-          title="Days"
-          meta={`${allRows.length} DAYS TRACKED`}
+          title={t("reviews.days.title")}
+          meta={t("reviews.days.meta", { count: allRows.length })}
           filters={
             <>
-              <FilterDropdown label="DAY TYPE" value={dayType} defaultValue="all" options={DAY_TYPE_FILTERS} onChange={setDayType} />
+              <FilterDropdown label={t("reviews.filters.label.dayType")} value={dayType} defaultValue="all" options={DAY_TYPE_FILTERS} onChange={setDayType} />
               <FilterDropdown
-                label="GOAL"
+                label={t("reviews.filters.label.goal")}
                 value={goalFilter}
                 defaultValue="all"
                 options={[
-                  { value: "all", label: "All" },
+                  { value: "all", label: t("reviews.filters.all") },
                   ...goals.filter((g) => g.status === "active").map((g) => ({
                     value: g.id, label: g.title, dot: `hsl(var(--${g.color}))`,
                   })),
                 ]}
                 onChange={setGoalFilter}
               />
-              <FilterDropdown label="DATE" value={range} defaultValue="30" options={RANGE_OPTIONS.map(({ value, label }) => ({ value, label }))} onChange={setRange} />
+              <FilterDropdown label={t("reviews.filters.label.date")} value={range} defaultValue="30" options={RANGE_OPTIONS.map(({ value, label }) => ({ value, label }))} onChange={setRange} />
             </>
           }
           sort={<SortDropdown<SortKey> value={sortKey} options={SORT_OPTIONS} onChange={setSortKey} />}
@@ -308,11 +322,11 @@ const ReviewsDays: React.FC = () => {
         <div className="bg-surface-elevated border border-border-subtle rounded-[6px] overflow-hidden">
           {allRows.length === 0 ? (
             <div className="text-center text-[14px] text-text-secondary" style={{ paddingTop: 80, paddingBottom: 80 }}>
-              No days tracked yet. Days appear here once you plan or close them.
+              {t("reviews.empty.days")}
             </div>
           ) : filtered.length === 0 ? (
             <div className="p-10 text-center">
-              <div className="text-[14px] text-text-secondary">No items match these filters.</div>
+              <div className="text-[14px] text-text-secondary">{t("reviews.filters.noMatch")}</div>
               {hasFilters && (
                 <button
                   type="button"
@@ -324,7 +338,7 @@ const ReviewsDays: React.FC = () => {
                   }}
                   className="mt-3 text-[13px] text-text-secondary hover:text-text-primary transition-colors"
                 >
-                  Clear filters
+                  {t("reviews.filters.clear")}
                 </button>
               )}
             </div>

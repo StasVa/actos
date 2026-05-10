@@ -465,6 +465,7 @@ const AllActions: React.FC = () => {
   const STATUS_OPTIONS = useMemo(() => makeStatusOptions(t), [t]);
   const DATE_OPTIONS = useMemo(() => makeDateOptions(t), [t]);
   const SORT_OPTIONS = useMemo(() => makeSortOptions(t), [t]);
+  const GOAL_OPTIONS = useMemo(() => makeGoalOptions(t), [t]);
 
   // Live store data → legacy renderer shape (rendering JSX is unchanged).
   const storeActions = useStore((s) => s.actions);

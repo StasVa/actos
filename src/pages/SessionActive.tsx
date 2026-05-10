@@ -644,7 +644,7 @@ const SessionActive: React.FC = () => {
                     color: "hsl(var(--text-primary))",
                   }}
                 >
-                  Drop
+                  {t("sessionActive.action.drop")}
                 </button>
               </div>
             )}

@@ -451,7 +451,7 @@ const ReviewDayDetail: React.FC = () => {
             {/* PROJECTS CLOSED */}
             {closedProjects.length > 0 && (
               <section>
-                <SectionHead>Projects closed · {closedProjects.length}</SectionHead>
+                <SectionHead>{t("reviews.detail.section.projectsClosed", { count: closedProjects.length })}</SectionHead>
                 <div className="space-y-1">
                   {closedProjects.map(({ entity: p, type }) => {
                     const g = goalById(p.goalId);
@@ -468,7 +468,7 @@ const ReviewDayDetail: React.FC = () => {
                               className="w-1.5 h-1.5 rounded-full"
                               style={{ background: goalColor }}
                             />
-                            {g?.title ?? "—"}
+                            {g?.title ?? t("reviews.detail.dash")}
                           </span>
                         }
                         onClick={() => navigate(`/projects/${p.id}`)}

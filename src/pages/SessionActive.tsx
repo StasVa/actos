@@ -452,7 +452,7 @@ const SessionActive: React.FC = () => {
       return;
     }
     addPlannedActionsToSession(session.id, pickerSelected);
-    toast.success(`Added ${pickerSelected.length} action${pickerSelected.length === 1 ? "" : "s"}.`);
+    toast.success(t("sessionActive.toast.added", { count: pickerSelected.length }));
     setPickerSelected([]);
     setPickerOpen(false);
   };

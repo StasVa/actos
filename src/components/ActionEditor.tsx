@@ -1282,6 +1282,7 @@ export function StatusDropdown({
   isGoalLevel: boolean;
   onPick: (s: ActionStatus) => void;
 }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   return (
     <Popover open={open} onOpenChange={setOpen}>

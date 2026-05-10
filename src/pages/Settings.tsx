@@ -226,10 +226,10 @@ export default function Settings() {
           {/* Default goal */}
           <section>
             <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-3">
-              DEFAULT GOAL
+              {t("settings.panel.defaultGoal.label")}
             </div>
             <div className="text-[13px] text-text-tertiary mb-2">
-              New ideas and unattached actions land here.
+              {t("settings.panel.defaultGoal.hint")}
             </div>
             <select
               value={settings.defaultGoalId ?? ""}
@@ -247,11 +247,10 @@ export default function Settings() {
           {/* Backup */}
           <section>
             <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-3">
-              DATA
+              {t("settings.data.heading").toUpperCase()}
             </div>
             <div className="text-[13px] text-text-tertiary mb-3">
-              Export a JSON snapshot of every goal, project, action, ritual, idea, and day entry.
-              Import replaces all current data — make a backup first.
+              {t("settings.panel.backup.hint")}
             </div>
             <div className="flex items-center gap-2 flex-wrap">
               <button
@@ -259,14 +258,14 @@ export default function Settings() {
                 onClick={handleExport}
                 className="h-9 px-4 text-[13px] font-medium rounded-[4px] border border-border-default text-text-primary hover:border-[hsl(var(--accent))] hover:bg-surface-hover transition-colors"
               >
-                Export JSON
+                {t("settings.panel.backup.export")}
               </button>
               <button
                 type="button"
                 onClick={handleImportPick}
                 className="h-9 px-4 text-[13px] font-medium rounded-[4px] border border-border-default text-text-primary hover:border-[hsl(var(--accent))] hover:bg-surface-hover transition-colors"
               >
-                Import JSON
+                {t("settings.panel.backup.import")}
               </button>
               <input
                 ref={fileRef}
@@ -279,16 +278,16 @@ export default function Settings() {
 
             {hasSample && (
               <div className="mt-6 pt-5 border-t border-border-subtle">
-                <div className="text-[13px] text-text-primary mb-1">Clear sample data</div>
+                <div className="text-[13px] text-text-primary mb-1">{t("settings.clearSampleData.heading")}</div>
                 <div className="text-[12px] text-text-tertiary mb-3">
-                  Removes the sample goals, projects, actions, rituals, and ideas seeded by Setup Wizard. Your own entries stay.
+                  {t("settings.clearSampleData.description")}
                 </div>
                 <button
                   type="button"
                   onClick={handleClearSample}
                   className="h-9 px-4 text-[13px] font-medium rounded-[4px] border border-border-default text-text-primary hover:border-[hsl(var(--accent))] hover:bg-surface-hover transition-colors"
                 >
-                  Clear sample data
+                  {t("settings.clearSampleData.heading")}
                 </button>
               </div>
             )}
@@ -297,43 +296,43 @@ export default function Settings() {
           {/* Danger */}
           <section>
             <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-3">
-              DANGER ZONE
+              {t("settings.panel.danger.label")}
             </div>
             <button
               type="button"
               onClick={handleReset}
               className="h-9 px-4 text-[13px] font-medium rounded-[4px] border border-[hsl(var(--text-warning))] text-text-warning hover:bg-surface-hover transition-colors"
             >
-              Reset to seed data
+              {t("settings.panel.danger.reset")}
             </button>
             <div className="text-[13px] text-text-tertiary mt-2">
-              Wipes localStorage and restores the demo dataset.
+              {t("settings.danger.hint")}
             </div>
           </section>
 
           {/* Help · Concepts */}
           <section>
             <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-3">
-              GOALS, PROJECTS, ACTIONS
+              {t("settings.help.heading")}
             </div>
             <div className="space-y-4 text-[13px] text-text-secondary leading-[1.6] max-w-[640px]">
               <div>
-                <div className="text-text-primary font-medium">Goal — a result you want to reach. Months or years.</div>
-                <div>Examples: "$10k MRR", "100k YouTube subs", "Sub-2h half marathon."</div>
-                <div>You can have up to 3 active goals.</div>
+                <div className="text-text-primary font-medium">{t("settings.help.goal.title")}</div>
+                <div>{t("settings.help.goal.examples")}</div>
+                <div>{t("settings.help.goal.cap")}</div>
               </div>
               <div>
-                <div className="text-text-primary font-medium">Project — a chunk of work that finishes. Days to weeks.</div>
-                <div>Belongs to a goal. Has a clear "done" state.</div>
-                <div>Example under "$10k MRR" goal: "Set up Stripe billing", "Launch v1 on Product Hunt."</div>
+                <div className="text-text-primary font-medium">{t("settings.help.project.title")}</div>
+                <div>{t("settings.help.project.body")}</div>
+                <div>{t("settings.help.project.example")}</div>
               </div>
               <div>
-                <div className="text-text-primary font-medium">Action — what you do today. Up to 2 hours.</div>
-                <div>Belongs to a project (or directly to a goal as Goal-level Backlog).</div>
-                <div>Example under "Set up Stripe billing": "Read Stripe API docs", "Implement webhook handler."</div>
+                <div className="text-text-primary font-medium">{t("settings.help.action.title")}</div>
+                <div>{t("settings.help.action.body")}</div>
+                <div>{t("settings.help.action.example")}</div>
               </div>
               <div className="text-text-tertiary italic">
-                Goals are reached. Projects close. Actions get done.
+                {t("settings.help.summary")}
               </div>
             </div>
           </section>

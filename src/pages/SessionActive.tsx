@@ -590,10 +590,10 @@ const SessionActive: React.FC = () => {
                 style={{ background: "hsl(var(--surface-raised))" }}
               >
                 <div className="text-[18px] text-text-primary font-medium">
-                  All planned actions completed.
+                  {t("sessionActive.empty.allDone")}
                 </div>
                 <div className="mt-2 text-[14px] text-text-secondary">
-                  You still have {minutesLabel} of focus time.
+                  {t("sessionActive.empty.remainingFocus", { label: minutesLabel })}
                 </div>
                 <div className="mt-4 flex flex-col items-center gap-3">
                   <button
@@ -608,14 +608,14 @@ const SessionActive: React.FC = () => {
                       color: "hsl(var(--accent-foreground))",
                     }}
                   >
-                    + Add action
+                    {t("sessionActive.empty.addAction")}
                   </button>
                   <button
                     onClick={() => setConfirmEndEarly(true)}
                     className="text-[13px] hover:underline"
                     style={{ color: "hsl(var(--text-warning))" }}
                   >
-                    End session
+                    {t("sessionActive.empty.endSession")}
                   </button>
                 </div>
               </div>

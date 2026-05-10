@@ -348,7 +348,7 @@ export const RichTextEditor: React.FC<Props> = ({
           className="absolute top-2 right-2 inline-flex items-center gap-1.5 rounded-[4px] border border-border-subtle bg-surface-elevated px-2.5 py-1 text-[12px] text-text-secondary opacity-0 transition-opacity hover:text-text-primary hover:border-border-default group-hover:opacity-100 md:group-hover:opacity-100 max-md:opacity-100"
         >
           <Pencil size={12} />
-          Edit
+          {t("richTextEditor.edit")}
         </button>
         <div
           className="tiptap-editor text-[14px] text-text-primary leading-[1.6]"
@@ -522,7 +522,7 @@ export const RichTextEditor: React.FC<Props> = ({
                   }}
                   className="px-2 py-1 text-[12px] text-text-secondary hover:text-text-primary rounded-[3px]"
                 >
-                  Cancel
+                  {t("richTextEditor.cancel")}
                 </button>
                 <button
                   type="button"
@@ -532,7 +532,7 @@ export const RichTextEditor: React.FC<Props> = ({
                   }}
                   className="px-3 py-1 text-[12px] font-medium bg-accent text-white rounded-[3px] hover:bg-accent-hover"
                 >
-                  Add
+                  {t("richTextEditor.add")}
                 </button>
               </div>
             </div>
@@ -568,7 +568,7 @@ export const RichTextEditor: React.FC<Props> = ({
             className="inline-flex items-center gap-1 px-3 py-1 text-[12px] font-medium text-text-primary bg-surface-hover hover:bg-surface-base border border-border-subtle hover:border-border-default rounded-[4px] transition-colors"
           >
             <Check size={12} />
-            Done
+            {t("richTextEditor.done")}
           </button>
         </div>
 

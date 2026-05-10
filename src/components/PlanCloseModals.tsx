@@ -1180,7 +1180,7 @@ export const PlanTodayPage: React.FC<{ onCancel: () => void; onComplete: () => v
           onClick={handleCancel}
           className="text-[13px] text-text-secondary hover:text-text-primary transition shrink-0"
         >
-          Cancel
+          {t("planToday.cancel")}
         </button>
       </header>
 

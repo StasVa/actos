@@ -113,21 +113,21 @@ const ReviewsMonths: React.FC = () => {
       <SettingsPanel open={settingsOpen} onOpenChange={setSettingsOpen} />
       <main className="app-main page-medium">
         <PageHeader
-          title="Months"
-          meta={`${allMonths.length} MONTHS TRACKED`}
+          title={t("reviews.months.title")}
+          meta={t("reviews.months.meta", { count: allMonths.length })}
           filters={
             <>
               <FilterDropdown
-                label="GOAL"
+                label={t("reviews.filters.label.goal")}
                 value={goalFilter}
                 defaultValue="all"
                 options={[
-                  { value: "all", label: "All" },
+                  { value: "all", label: t("reviews.filters.all") },
                   ...goals.filter((g) => g.status === "active").map((g) => ({ value: g.id, label: g.title, dot: `hsl(var(--${g.color}))` })),
                 ]}
                 onChange={setGoalFilter}
               />
-              <FilterDropdown label="DATE" value={range} defaultValue={range} options={RANGE_OPTIONS} onChange={setRange} />
+              <FilterDropdown label={t("reviews.filters.label.date")} value={range} defaultValue={range} options={RANGE_OPTIONS} onChange={setRange} />
             </>
           }
           sort={<SortDropdown<ReviewSortKey> value={sortKey} options={REVIEW_SORT_OPTIONS} onChange={setSortKey} />}
@@ -139,8 +139,8 @@ const ReviewsMonths: React.FC = () => {
             <div className="p-10 text-center">
               <div className="text-[14px] text-text-secondary">
                 {allMonths.length === 0
-                  ? "No tracked months yet. Start logging actions and your monthly summaries will appear here."
-                  : "No months match these filters."}
+                  ? t("reviews.empty.months")
+                  : t("reviews.empty.monthsFiltered")}
               </div>
             </div>
           ) : (

@@ -1063,7 +1063,7 @@ export const TodayZone: React.FC<{
                       e.stopPropagation();
                       handleToggleDone(mainTask.id);
                     }}
-                    aria-label={mtDone ? "Re-open" : "Mark done"}
+                    aria-label={mtDone ? t("home.mainTask.aria.reopen") : t("home.mainTask.aria.markDone")}
                     className="inline-flex items-center justify-center rounded-[2px] border shrink-0 ml-1"
                     style={{
                       width: 16,

@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, GripVertical, X as XIcon } from "lucide-react";
 import { toast } from "sonner";

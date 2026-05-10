@@ -48,10 +48,10 @@ const GOAL_EXAMPLES = [
   "Publish my novel on Amazon",
 ];
 
-const COLORS: { value: GoalColorVar; label: string }[] = [
-  { value: "goal-1", label: "Teal" },
-  { value: "goal-2", label: "Orange" },
-  { value: "goal-3", label: "Purple" },
+const COLORS: { value: GoalColorVar; labelKey: string }[] = [
+  { value: "goal-1", labelKey: "Teal" },
+  { value: "goal-2", labelKey: "Orange" },
+  { value: "goal-3", labelKey: "Purple" },
 ];
 
 /* ───────── Shell ───────── */

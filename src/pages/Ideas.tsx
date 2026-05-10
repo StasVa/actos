@@ -524,7 +524,7 @@ const ReferencesSection: React.FC<{ idea: Idea }> = ({ idea }) => {
                     setOpenMenuId(openMenuId === r.id ? null : r.id);
                   }}
                   className="opacity-0 group-hover:opacity-100 inline-flex items-center justify-center w-6 h-6 rounded-[3px] text-text-tertiary hover:bg-surface-elevated hover:text-text-primary transition-colors leading-none"
-                  aria-label="Reference options"
+                  aria-label={t("ideas.aria.refOptions")}
                 >
                   <span className="text-[14px] -mt-1">⋯</span>
                 </button>
@@ -534,13 +534,13 @@ const ReferencesSection: React.FC<{ idea: Idea }> = ({ idea }) => {
                       onClick={() => startEdit(r.id)}
                       className="block w-full text-left text-[12px] px-2 py-1.5 rounded-[3px] hover:bg-surface-hover text-text-primary"
                     >
-                      Edit
+                      {t("common.edit")}
                     </button>
                     <button
                       onClick={() => remove(r.id)}
                       className="block w-full text-left text-[12px] px-2 py-1.5 rounded-[3px] hover:bg-surface-hover text-text-warning"
                     >
-                      Remove
+                      {t("common.remove")}
                     </button>
                   </div>
                 )}

@@ -4,13 +4,14 @@ import { useTranslation } from "react-i18next";
 import i18n from "@/i18n";
 import { toast } from "sonner";
 import { Tooltip, StateDotTooltip } from "@/components/Tooltip";
-import { MetricInfoPopover } from "@/components/MetricInfoPopover";
+
 import { useStore, selectors } from "@/store/useStore";
 import type { Action, ActionStatus, GoalColorVar, Project, ProjectReference, ProjectStatus } from "@/types";
 import { AppSidebar } from "@/components/AppSidebar";
 import { ActionRow as SharedActionRow } from "@/components/ActionRow";
 import { RichTextEditor } from "@/components/RichTextEditor";
 import { CardMenu } from "@/components/CardMenu";
+import { formatDuration } from "@/lib/format";
 
 const COLOR_VAR: Record<GoalColorVar, string> = {
   "goal-1": "hsl(var(--goal-1))",
@@ -551,12 +552,20 @@ const ProjectDetail: React.FC = () => {
     if (a.status === "delegated") return s + Math.round(t * 0.2);
     return s;
   }, 0);
-  const fmtHM = (m: number) => {
-    if (m === 0) return "0h";
-    const h = Math.floor(m / 60);
-    const min = m % 60;
-    return `${h ? `${h}h` : ""}${min ? ` ${min}m` : ""}`.trim() || "0h";
-  };
+  const fmtHM = (m: number) => formatDuration(m);
+  const fmtLongDate = (iso: string) =>
+    new Date(iso).toLocaleDateString(i18n.language || "en", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  const lastActivityLabel = (() => {
+    if (!lastTs) return t("progress.relAgo.today");
+    const days = Math.floor((Date.now() - new Date(lastTs).getTime()) / 86400000);
+    if (days <= 0) return t("progress.relAgo.today");
+    if (days === 1) return t("progress.relAgo.yesterday");
+    return t("progress.relAgo.daysAgo", { n: days });
+  })();
 
   const ageDays = Math.floor((Date.now() - new Date(project.createdAt).getTime()) / 86400000);
   const projStatusColor =
@@ -611,7 +620,7 @@ const ProjectDetail: React.FC = () => {
   return (
     <div className="min-h-screen bg-surface-base text-text-primary">
       <AppSidebar />
-      <div className="app-main page-medium min-h-screen flex">
+      <div className="app-main page-medium min-h-screen flex flex-col md:flex-row">
         {/* Left column */}
         <div className="flex-1 min-w-0 flex flex-col">
           <div className="h-12 px-8 flex items-center justify-between border-b border-border-subtle">
@@ -792,7 +801,7 @@ const ProjectDetail: React.FC = () => {
         </div>
 
         {/* Right column */}
-        <aside className="w-[320px] shrink-0 bg-surface-raised border-l border-border-subtle">
+        <aside className="w-full md:w-[320px] shrink-0 bg-surface-raised border-t md:border-t-0 md:border-l border-border-subtle">
           <div className="h-12 px-6 flex items-center justify-end gap-2 border-b border-border-subtle">
             {!isDraft && (
               <CardMenu
@@ -831,107 +840,74 @@ const ProjectDetail: React.FC = () => {
               />
             )}
           </div>
-          <div className="p-6 space-y-6">
-            <div>
-              {([
-                [
-                  t("projectDetail.sidebar.status"),
-                  <span className="inline-flex items-center gap-1.5">
-                    <Tooltip content={<StateDotTooltip state={stateInd} lastActivity={lastTs ? fmtAgo(lastTs) : t("goalDetail.hero.dash")} />}>
-                      <span
-                        className="w-1.5 h-1.5 rounded-full"
-                        style={{
-                          background:
-                            stateInd === "active" ? "hsl(var(--state-active))" : "hsl(var(--state-stalled))",
-                        }}
-                      />
-                    </Tooltip>
-                    {projStatusDisplay}
-                  </span>,
-                ],
-                [
-                  t("projectDetail.sidebar.parentGoal"),
-                  <Link
-                    to={`/goals/${goal.id}`}
-                    className="inline-flex items-center gap-1.5 hover:text-accent transition-colors"
-                  >
-                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: color }} />
-                    {goal.title}
-                  </Link>,
-                ],
-                [t("projectDetail.sidebar.created"), fmtFullDate(project.createdAt)],
-                [t("projectDetail.sidebar.age"), t("projectDetail.age", { count: ageDays })],
-              ] as [string, React.ReactNode][]).map(([k, v], i, arr) => (
-                <div
-                  key={k}
-                  className={`flex items-center justify-between h-6 ${
-                    i < arr.length - 1 ? "border-b border-border-subtle" : ""
-                  }`}
-                >
-                  <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">{k}</span>
-                  <span className="text-[12px] text-text-primary">{v}</span>
-                </div>
-              ))}
-            </div>
-
-            {!isDraft && (
-              <div>
-                <h3 className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-secondary mb-3">
-                  {t("projectDetail.sidebar.state")}
-                </h3>
-                <div>
-                  {[
-                    { label: t("projectDetail.progressLabel.value"), isEffort: false, value: `${progress.outcome}%`, pct: progress.outcome, opacity: 1 },
-                    { label: t("projectDetail.progressLabel.effort"), isEffort: true, value: `${progress.effort}%`, pct: progress.effort, opacity: 0.6 },
-                  ].map((row, i) => (
-                    <div
-                      key={row.label}
-                      className={`h-8 flex items-center gap-3 py-1.5 ${
-                        i < 2 ? "border-b border-border-subtle" : ""
-                      }`}
-                    >
-                      <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary w-[70px] shrink-0">
-                        {row.label}
-                      </span>
-                      <span className="flex-1 font-mono text-[14px] text-text-primary tabular-nums">
-                        {row.value}
-                      </span>
-                      <div className="w-[80px] h-[5px] bg-surface-hover rounded-[2px] overflow-hidden shrink-0">
-                        <div
-                          className="h-full rounded-[2px]"
-                          style={{ width: `${row.pct}%`, background: color, opacity: row.opacity }}
+          <div className="p-6">
+            {(() => {
+              const dotColor =
+                project.status === "completed"
+                  ? "hsl(var(--status-done))"
+                  : project.status === "dropped"
+                  ? "hsl(var(--status-dropped))"
+                  : stateInd === "active"
+                  ? "hsl(var(--state-active))"
+                  : "hsl(var(--state-stalled))";
+              const fields: { label: string; value: React.ReactNode }[] = [
+                {
+                  label: t("projectDetail.sidebar.status"),
+                  value: (
+                    <span className="inline-flex items-center gap-2">
+                      <Tooltip content={<StateDotTooltip state={stateInd} lastActivity={lastTs ? fmtAgo(lastTs) : t("goalDetail.hero.dash")} />}>
+                        <span
+                          className="w-2 h-2 rounded-full"
+                          style={{ background: dotColor }}
                         />
-                      </div>
-                      <span className="w-[14px] flex justify-center shrink-0">
-                        {row.isEffort ? (
-                          <MetricInfoPopover variant="valueEffort" ariaLabel={t("goalDetail.hero.metricInfoAria")} />
-                        ) : null}
-                      </span>
-                    </div>
-                  ))}
-                  <div className="h-8 flex items-center gap-3 py-1.5">
-                    <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary w-[70px] shrink-0">
-                      {t("projectDetail.sidebar.time")}
+                      </Tooltip>
+                      {projStatusDisplay}
                     </span>
-                    <span className="flex-1 font-mono tabular-nums">
-                      <span className="text-[14px] text-text-primary">{fmtHM(doneMinutes)}</span>
-                      <span className="text-text-tertiary"> / </span>
-                      <span className="text-[12px] text-text-secondary">{fmtHM(totalMinutes)}</span>
-                    </span>
-                    <div className="w-[80px] h-[5px] bg-surface-hover rounded-[2px] overflow-hidden shrink-0">
-                      <div
-                        className="h-full rounded-[2px]"
-                        style={{
-                          width: `${totalMinutes > 0 ? Math.round((doneMinutes / totalMinutes) * 100) : 0}%`,
-                          background: color,
-                        }}
-                      />
-                    </div>
-                    <span className="w-[14px] shrink-0" />
+                  ),
+                },
+                {
+                  label: t("projectDetail.sidebar.parentGoal"),
+                  value: (
+                    <Link
+                      to={`/goals/${goal.id}`}
+                      className="inline-flex items-center gap-2 hover:text-accent hover:underline transition-colors"
+                    >
+                      <span className="w-2 h-2 rounded-full shrink-0" style={{ background: color }} />
+                      <span>{goal.title}</span>
+                    </Link>
+                  ),
+                },
+                {
+                  label: t("projectDetail.sidebar.created"),
+                  value: fmtLongDate(project.createdAt),
+                },
+                {
+                  label: t("projectDetail.sidebar.age"),
+                  value: t("projectDetail.age", { count: ageDays }),
+                },
+                {
+                  label: t("projectDetail.sidebar.timeInvested"),
+                  value: doneMinutes > 0 ? fmtHM(doneMinutes) : "—",
+                },
+                {
+                  label: t("projectDetail.sidebar.lastActivity"),
+                  value: lastActivityLabel,
+                },
+              ];
+              return fields.map((f, i) => (
+                <div
+                  key={f.label}
+                  className={`py-3 ${i < fields.length - 1 ? "border-b border-border-subtle" : ""}`}
+                >
+                  <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-2">
+                    {f.label}
+                  </div>
+                  <div className="text-[14px] leading-[1.4] text-text-primary break-words">
+                    {f.value}
                   </div>
                 </div>
-              </div>
-            )}
+              ));
+            })()}
           </div>
         </aside>
       </div>

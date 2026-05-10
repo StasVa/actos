@@ -226,7 +226,7 @@ export const TimeInvestmentSection: React.FC = () => {
           );
         })}
       </div>
-      {isFree && <HistoryHint>Showing last 90 days · </HistoryHint>}
+      {isFree && <HistoryHint />}
     </section>
   );
 };

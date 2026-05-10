@@ -1122,7 +1122,7 @@ export const TodayZone: React.FC<{
                       e.stopPropagation();
                       setClearMainTaskOpen(true);
                     }}
-                    aria-label="Clear Main Task"
+                    aria-label={t("home.mainTask.clearAria")}
                     className="shrink-0 text-text-tertiary hover:text-text-primary transition-colors p-1 -mr-1"
                   >
                     <X size={14} />

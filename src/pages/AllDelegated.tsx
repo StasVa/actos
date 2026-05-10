@@ -267,22 +267,42 @@ const AllDelegated: React.FC = () => {
     const set = new Set<string>();
     for (const a of actions) if (a.delegateName) set.add(a.delegateName);
     return [
-      { value: "all", label: "All" },
+      { value: "all", label: t("common.all") },
       ...Array.from(set)
         .sort()
         .map((n) => ({ value: n, label: n })),
     ];
-  }, [actions]);
+  }, [actions, t]);
 
   const goalOptions = useMemo<FilterOption<string>[]>(
     () => [
-      { value: "all", label: "All" },
+      { value: "all", label: t("common.all") },
       ...goals
         .filter((g) => g.status === "active")
         .map((g) => ({ value: g.id, label: g.title, dot: g.color })),
     ],
-    [goals],
+    [goals, t],
   );
+
+  const dateOptions: FilterOption<DateRange>[] = useMemo(() => [
+    { value: "all", label: t("delegated.filter.dateAllTime") },
+    { value: "30", label: t("delegated.filter.dateLast30") },
+    { value: "90", label: t("delegated.filter.dateLast90") },
+    { value: "365", label: t("delegated.filter.dateLastYear") },
+  ], [t]);
+
+  const activeSortOptions: FilterOption<SortKey>[] = useMemo(() => [
+    { value: "due", label: t("delegated.sort.due") },
+    { value: "delegated", label: t("delegated.sort.delegatedActive") },
+    { value: "impact", label: t("delegated.sort.impact") },
+    { value: "title", label: t("delegated.sort.title") },
+  ], [t]);
+
+  const returnedSortOptions: FilterOption<SortKey>[] = useMemo(() => [
+    { value: "delegated", label: t("delegated.sort.delegatedReturned") },
+    { value: "impact", label: t("delegated.sort.impact") },
+    { value: "title", label: t("delegated.sort.title") },
+  ], [t]);
 
   const applyFilters = (list: Action[], useDate: boolean): Action[] => {
     return list.filter((a) => {

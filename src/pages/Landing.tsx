@@ -70,7 +70,7 @@ const Landing: React.FC = () => {
             textDecoration: "none",
           }}
         >
-          Why we don't do tasks <span style={{ color: "hsl(var(--goal-2))" }}>→</span>
+        Stop scheduling. Start moving. <span style={{ color: "hsl(var(--goal-2))" }}>→</span>
         </a>
 
         <button
@@ -100,27 +100,6 @@ const Landing: React.FC = () => {
           <ArrowRight size={16} />
         </button>
 
-        <p
-          style={{
-            marginTop: 24,
-            fontFamily: "Inter, system-ui, sans-serif",
-            fontSize: 13,
-            color: "hsl(var(--text-tertiary))",
-          }}
-        >
-          Already have an account?{" "}
-          <a
-            href="/login"
-            onClick={(e) => {
-              e.preventDefault();
-              navigate("/login");
-            }}
-            className="signin-inline"
-            style={{ color: "hsl(var(--text-secondary))", textDecoration: "none" }}
-          >
-            Sign in
-          </a>
-        </p>
       </main>
 
       <div className="relative" style={{ zIndex: 1 }}>
@@ -152,7 +131,6 @@ const Landing: React.FC = () => {
         }
         .manifesto-link:hover { color: hsl(var(--text-primary)) !important; }
         .manifesto-link:hover span { filter: brightness(1.1); }
-        .signin-inline:hover { color: hsl(var(--text-primary)) !important; }
       `}</style>
     </div>
   );

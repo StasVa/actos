@@ -126,7 +126,7 @@ const Manifesto: React.FC = () => {
                 margin: 0,
               }}
             >
-              Stop managing tasks. Start moving goals.
+              Stop scheduling tasks. Start moving on goals.
             </p>
             <button
               type="button"

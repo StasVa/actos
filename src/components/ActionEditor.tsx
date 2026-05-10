@@ -618,8 +618,8 @@ function ActionEditorPanel({
                   </PopoverContent>
                 </Popover>
 
-                <span className="text-text-tertiary">·</span>
-                <span className="text-text-tertiary">Project</span>
+                <span className="text-text-tertiary">{t("actionEditor.field.parentDivider")}</span>
+                <span className="text-text-tertiary">{t("actionEditor.field.project")}</span>
                 <Popover open={projectPopoverOpen} onOpenChange={setProjectPopoverOpen}>
                   <PopoverTrigger asChild>
                     <button

@@ -959,7 +959,7 @@ export const TodayZone: React.FC<{
           skippedRitualIds: (dayEntry?.skippedRitualIds ?? []).filter((id) => id !== ritualId),
         });
       }
-      toast("Ritual restored");
+      toast(t("home.rituals.toast.restored"));
     } else {
       skipRitualInstance(ritualId);
       if (isPlanned) {

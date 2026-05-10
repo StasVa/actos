@@ -794,7 +794,7 @@ const SessionActive: React.FC = () => {
                     color: "hsl(var(--text-secondary))",
                   }}
                 >
-                  Restart cycle
+                  {t("sessionActive.controls.restartCycle")}
                 </button>
               )}
             </div>

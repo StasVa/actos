@@ -44,21 +44,24 @@ export function weekRange(yw: string): { start: Date; end: Date; days: ISODate[]
 export function formatWeekLabel(yw: string): string {
   const r = weekRange(yw);
   if (!r) return yw;
+  const lang = i18n.language || "en";
   const sameMonth = r.start.getMonth() === r.end.getMonth();
-  const startLabel = format(r.start, "MMM d");
-  const endLabel = sameMonth ? format(r.end, "d") : format(r.end, "MMM d");
-  return `Week of ${startLabel} — ${endLabel}`;
+  const startLabel = new Intl.DateTimeFormat(lang, { month: "short", day: "numeric" }).format(r.start);
+  const endLabel = sameMonth
+    ? new Intl.DateTimeFormat(lang, { day: "numeric" }).format(r.end)
+    : new Intl.DateTimeFormat(lang, { month: "short", day: "numeric" }).format(r.end);
+  return i18n.t("reviews.detail.weekLabel", { start: startLabel, end: endLabel });
 }
 
 export function formatWeekRelative(yw: string, today = new Date()): string {
   const start = dateFromYearWeek(yw);
   if (!start) return "";
   const diff = differenceInCalendarWeeks(startOfISOWeek(today), start, { weekStartsOn: 1 });
-  if (diff === 0) return "This week";
-  if (diff === 1) return "Last week";
-  if (diff > 0) return `${diff} weeks ago`;
-  if (diff === -1) return "Next week";
-  return `${Math.abs(diff)} weeks ahead`;
+  if (diff === 0) return i18n.t("reviews.period.thisWeek");
+  if (diff === 1) return i18n.t("reviews.period.lastWeek");
+  if (diff > 0) return i18n.t("reviews.period.weeksAgo", { count: diff });
+  if (diff === -1) return i18n.t("reviews.period.nextWeek");
+  return i18n.t("reviews.period.weeksAhead", { count: Math.abs(diff) });
 }
 
 export interface PerGoalProjectTime {

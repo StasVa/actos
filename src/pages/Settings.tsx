@@ -136,10 +136,10 @@ export default function Settings() {
           {/* Account */}
           <section>
             <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-3">
-              ACCOUNT
+              {t("settings.account.heading").toUpperCase()}
             </div>
             <div className="text-[13px] text-text-secondary mb-4">
-              Signed in as <span className="text-text-primary">{settings.userEmail ?? "ak@email"}</span>
+              {t("settings.account.signedInAs")} <span className="text-text-primary">{settings.userEmail ?? "ak@email"}</span>
             </div>
 
             {/* Demo controls */}
@@ -148,18 +148,18 @@ export default function Settings() {
               style={{ padding: 16, border: "1px solid hsl(var(--border-subtle))" }}
             >
               <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-3">
-                DEMO CONTROLS (WILL BE REMOVED)
+                {t("settings.demo.heading").toUpperCase()}
               </div>
 
               <ToggleRow
-                label="All-In tier (preview All-In UI)"
+                label={t("settings.account.allInTier")}
                 checked={settings.subscriptionTier === "all-in"}
                 onChange={(v) => setSubscriptionTier(v ? "all-in" : "free")}
               />
               <div className="my-3 border-t border-border-subtle" />
               <ToggleRow
-                label="Show admin tools"
-                description="Adds /admin/components link to the user menu."
+                label={t("settings.adminToggle.label")}
+                description={t("settings.adminToggle.description")}
                 checked={!!settings.showAdminTools}
                 onChange={(v) => setShowAdminTools(v)}
               />
@@ -167,13 +167,13 @@ export default function Settings() {
 
             {/* Theme */}
             <div className="mt-6">
-              <div className="text-[13px] text-text-primary mb-1">Theme</div>
+              <div className="text-[13px] text-text-primary mb-1">{t("settings.theme.label")}</div>
               <div className="text-[12px] text-text-tertiary mb-2">
-                Defaults to your system setting.
+                {t("settings.theme.systemHint")}
               </div>
               <div
                 role="radiogroup"
-                aria-label="Theme"
+                aria-label={t("settings.theme.ariaLabel")}
                 className="inline-flex items-stretch rounded-[4px] overflow-hidden"
                 style={{ border: "1px solid hsl(var(--border-default))", height: 32 }}
               >
@@ -186,7 +186,7 @@ export default function Settings() {
                       role="radio"
                       aria-checked={active}
                       onClick={() => setThemeChoice(opt)}
-                      className="px-4 text-[13px] capitalize transition-colors"
+                      className="px-4 text-[13px] transition-colors"
                       style={{
                         background: active ? "hsl(var(--surface-hover))" : "transparent",
                         color: active ? "hsl(var(--text-primary))" : "hsl(var(--text-secondary))",
@@ -194,7 +194,7 @@ export default function Settings() {
                         minWidth: 80,
                       }}
                     >
-                      {opt}
+                      {t(`settings.theme.${opt}`)}
                     </button>
                   );
                 })}

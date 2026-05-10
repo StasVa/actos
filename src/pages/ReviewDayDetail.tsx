@@ -278,19 +278,21 @@ const ReviewDayDetail: React.FC = () => {
       ? actions.find((a) => a.id === dayEntry.mainTaskActionId)
       : undefined;
 
-  const dtLabel = dayEntry?.dayType ? `${DAY_TYPE_LABELS[dayEntry.dayType]} day` : null;
+  const dtLabel = dayEntry?.dayType
+    ? t("reviews.detail.dayTypeSuffix", { label: t(dayTypeLabelKey(dayEntry.dayType)) })
+    : null;
   const startedT = timeOnly(dayEntry?.startedAt);
   const closedT = timeOnly(dayEntry?.closedAt);
   const subParts: string[] = [];
   if (dtLabel) subParts.push(dtLabel);
-  if (startedT) subParts.push(`Started ${startedT}`);
-  if (dayEntry?.isClosed && closedT) subParts.push(`Closed ${closedT}`);
-  else if (dayEntry && !dayEntry.isClosed) subParts.push("Not closed");
+  if (startedT) subParts.push(t("reviews.detail.startedAt", { time: startedT }));
+  if (dayEntry?.isClosed && closedT) subParts.push(t("reviews.detail.closedAt", { time: closedT }));
+  else if (dayEntry && !dayEntry.isClosed) subParts.push(t("reviews.detail.notClosed"));
 
   // Part 6 — show "Not planned · X actions logged" when no formal plan but activity exists
   const isNotPlanned = !dayEntry || dayEntry.isPlanned === false;
   if (isNotPlanned && doneToday.length > 0 && subParts.length === 0) {
-    subParts.push(`Not planned · ${doneToday.length} action${doneToday.length === 1 ? "" : "s"} logged`);
+    subParts.push(t("reviews.detail.notPlannedLine", { count: doneToday.length }));
   }
 
   const handleReopen = () => {

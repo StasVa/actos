@@ -42,24 +42,27 @@ const Check: React.FC<{ done?: boolean; color: string; onClick?: () => void }> =
   done,
   color,
   onClick,
-}) => (
-  <button
-    onClick={onClick}
-    type="button"
-    className="inline-flex items-center justify-center w-4 h-4 rounded-[2px] shrink-0"
-    style={{
-      border: done ? "none" : "1px solid hsl(var(--text-tertiary))",
-      background: done ? color : "transparent",
-      color: "hsl(var(--surface-base))",
-      fontSize: 10,
-      lineHeight: 1,
-      cursor: "pointer",
-    }}
-    aria-label={done ? "Mark not done" : "Mark done"}
-  >
-    {done ? "✓" : ""}
-  </button>
-);
+}) => {
+  const { t } = useTranslation();
+  return (
+    <button
+      onClick={onClick}
+      type="button"
+      className="inline-flex items-center justify-center w-4 h-4 rounded-[2px] shrink-0"
+      style={{
+        border: done ? "none" : "1px solid hsl(var(--text-tertiary))",
+        background: done ? color : "transparent",
+        color: "hsl(var(--surface-base))",
+        fontSize: 10,
+        lineHeight: 1,
+        cursor: "pointer",
+      }}
+      aria-label={done ? t("projectDetail.markNotDone") : t("common.markDone")}
+    >
+      {done ? "✓" : ""}
+    </button>
+  );
+};
 
 const STATUS_LABEL: Record<ActionStatus, string> = {
   backlog: "BACKLOG",
@@ -71,6 +74,7 @@ const STATUS_LABEL: Record<ActionStatus, string> = {
 };
 
 const ActionRow: React.FC<{ a: Action; color: string }> = ({ a, color }) => {
+  const { t } = useTranslation();
   const openPanel = useStore((s) => s.openPanel);
   const changeStatus = useStore((s) => s.changeActionStatus);
   const handleToggle = () => {
@@ -79,17 +83,17 @@ const ActionRow: React.FC<{ a: Action; color: string }> = ({ a, color }) => {
       const today = new Date().toISOString().slice(0, 10);
       changeStatus(a.id, "planned", { scheduledDate: today });
       toast.dismiss();
-      toast.success("Action re-opened");
+      toast.success(t("home.actions.toast.reopened"));
       return;
     }
     if (!a.impact || !a.timeEstimateMinutes) {
-      toast.error("Set Impact and Time before marking done");
+      toast.error(t("home.actions.toast.needImpactTime"));
       openPanel({ kind: "action", mode: "edit", id: a.id });
       return;
     }
     changeStatus(a.id, "done");
     toast.dismiss();
-    toast.success("Action marked done");
+    toast.success(t("home.actions.toast.markedDone"));
   };
   return (
     <SharedActionRow

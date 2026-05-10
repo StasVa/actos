@@ -365,23 +365,23 @@ export const RichTextEditor: React.FC<Props> = ({
     if (saveState === "editing")
       return (
         <span className="font-mono text-[11px] text-text-tertiary animate-pulse">
-          Editing...
+          {t("richTextEditor.editing")}
         </span>
       );
     if (saveState === "saving")
       return (
-        <span className="font-mono text-[11px] text-text-tertiary">Saving...</span>
+        <span className="font-mono text-[11px] text-text-tertiary">{t("richTextEditor.saving")}</span>
       );
     if (saveState === "saved")
       return (
         <span className="inline-flex items-center gap-1 font-mono text-[11px] text-state-active">
-          <Check size={12} /> Saved
+          <Check size={12} /> {t("richTextEditor.saved")}
         </span>
       );
     if (saveState === "error")
       return (
         <span className="inline-flex items-center gap-1 font-mono text-[11px] text-text-warning">
-          Save failed
+          {t("richTextEditor.saveFailed")}
           <button
             type="button"
             onClick={(e) => {

@@ -136,6 +136,7 @@ function ActionEditorPanel({
   prefill?: Partial<Action>;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const action = useStore((s) =>
     actionId ? s.actions.find((a) => a.id === actionId) : undefined,
   );

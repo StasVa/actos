@@ -32,6 +32,8 @@ import Setup, { isSetupCompleted } from "./pages/Setup.tsx";
 import GoalBuilder from "./pages/GoalBuilder.tsx";
 import Landing from "./pages/Landing.tsx";
 import Pricing from "./pages/Pricing.tsx";
+import Manifesto from "./pages/Manifesto.tsx";
+import Login from "./pages/Login.tsx";
 import { LegalPrivacy, LegalTerms } from "./pages/LegalPlaceholder.tsx";
 import { NoGoalsLayout } from "./components/NoGoalsLayout";
 import { useStore } from "./store/useStore";

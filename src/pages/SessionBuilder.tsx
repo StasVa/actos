@@ -714,9 +714,9 @@ const SessionBuilder: React.FC = () => {
       </div>
       {selectedIds.length > 0 && (
         <div className="p-3 border-t border-border-subtle font-mono text-[12px] text-text-secondary flex flex-wrap items-center gap-x-3 gap-y-1">
-          <span>Estimated time: {estimateSum}min</span>
+          <span>{t("sessionBuilder.totals.estimate", { count: estimateSum })}</span>
           <span>·</span>
-          <span>Session work: {focusTotal}min</span>
+          <span>{t("sessionBuilder.totals.work", { count: focusTotal })}</span>
           {matchHint && (
             <>
               <span>·</span>

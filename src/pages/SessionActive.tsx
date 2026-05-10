@@ -914,7 +914,7 @@ const SessionActive: React.FC = () => {
                 onClick={() => setPickerOpen(false)}
                 className="text-[13px] text-text-secondary hover:text-text-primary px-3 py-1.5"
               >
-                Cancel
+                {t("sessionActive.picker.cancel")}
               </button>
               <button
                 onClick={handleConfirmAddActions}

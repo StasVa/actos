@@ -119,8 +119,8 @@ const ReviewsWeeks: React.FC = () => {
       <SettingsPanel open={settingsOpen} onOpenChange={setSettingsOpen} />
       <main className="app-main page-medium">
         <PageHeader
-          title="Weeks"
-          meta={`${allWeeks.length} WEEKS TRACKED`}
+          title={t("reviews.weeks.title")}
+          meta={t("reviews.weeks.meta", { count: allWeeks.length })}
           filters={
             <>
               <FilterDropdown

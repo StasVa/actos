@@ -273,3 +273,44 @@ function formatScheduledLabel(iso: string): string {
     .toLocaleDateString("en-US", { month: "short", day: "numeric" })
     .toUpperCase();
 }
+
+const ReturnTimePill: React.FC<{ expectedReturnDate?: string }> = ({ expectedReturnDate }) => {
+  let label = "—";
+  let color = "hsl(var(--text-tertiary))";
+  if (expectedReturnDate) {
+    const today = new Date();
+    const t = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+    const r = new Date(expectedReturnDate + "T00:00:00").getTime();
+    const diff = Math.round((r - t) / 86400000);
+    if (diff < 0) {
+      label = `${Math.abs(diff)}d ago`;
+      color = "hsl(var(--text-warning))";
+    } else if (diff === 0) {
+      label = "today";
+      color = "hsl(var(--text-secondary))";
+    } else if (diff === 1) {
+      label = "tomorrow";
+      color = "hsl(var(--text-secondary))";
+    } else {
+      label = `in ${diff}d`;
+      color = "hsl(var(--text-secondary))";
+    }
+  }
+  return (
+    <span
+      className="inline-flex items-center justify-center font-mono tabular-nums shrink-0"
+      style={{
+        padding: "4px 10px",
+        borderRadius: 4,
+        fontSize: 12,
+        width: 64,
+        textAlign: "center",
+        boxSizing: "border-box",
+        background: "hsl(var(--surface-hover))",
+        color,
+      }}
+    >
+      {label}
+    </span>
+  );
+};

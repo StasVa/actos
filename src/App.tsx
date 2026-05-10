@@ -30,6 +30,9 @@ import SettingsSubscription from "./pages/SettingsSubscription.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Setup, { isSetupCompleted } from "./pages/Setup.tsx";
 import GoalBuilder from "./pages/GoalBuilder.tsx";
+import Landing from "./pages/Landing.tsx";
+import Pricing from "./pages/Pricing.tsx";
+import { LegalPrivacy, LegalTerms } from "./pages/LegalPlaceholder.tsx";
 import { NoGoalsLayout } from "./components/NoGoalsLayout";
 import { useStore } from "./store/useStore";
 import { ActionEditor } from "./components/ActionEditor";
@@ -72,6 +75,9 @@ const SetupGuard = () => {
         return;
       }
     } catch {}
+    if (location.pathname === "/") return;
+    if (location.pathname.startsWith("/pricing")) return;
+    if (location.pathname.startsWith("/legal")) return;
     if (location.pathname.startsWith("/setup")) return;
     if (location.pathname.startsWith("/onboarding")) return;
     if (location.pathname.startsWith("/admin")) return;
@@ -83,6 +89,9 @@ const SetupGuard = () => {
 const ChromeOnlyOutsideSetup: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { pathname } = useLocation();
   const hasActiveGoal = useStore((s) => s.goals.some((g) => g.status === "active"));
+  if (pathname === "/") return null;
+  if (pathname.startsWith("/pricing")) return null;
+  if (pathname.startsWith("/legal")) return null;
   if (pathname.startsWith("/setup")) return null;
   if (pathname.startsWith("/onboarding")) return null;
   // No-goals mode also hides global chrome.
@@ -100,6 +109,9 @@ const NoGoalsGate: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { pathname } = useLocation();
   const hasActiveGoal = useStore((s) => s.goals.some((g) => g.status === "active"));
   const exempt =
+    pathname === "/" ||
+    pathname.startsWith("/pricing") ||
+    pathname.startsWith("/legal") ||
     pathname.startsWith("/setup") ||
     pathname.startsWith("/admin") ||
     pathname.startsWith("/settings") ||
@@ -145,7 +157,10 @@ const App = () => (
           <Route path="/admin/components" element={<AdminComponents />} />
 
           {/* Default + legacy redirects */}
-          <Route path="/" element={<Navigate to="/today" replace />} />
+          <Route path="/" element={<Landing />} />
+          <Route path="/pricing" element={<Pricing />} />
+          <Route path="/legal/privacy" element={<LegalPrivacy />} />
+          <Route path="/legal/terms" element={<LegalTerms />} />
           <Route path="/home" element={<Navigate to="/today" replace />} />
           <Route path="/all-actions" element={<Navigate to="/actions" replace />} />
           <Route path="/all-projects" element={<Navigate to="/projects" replace />} />

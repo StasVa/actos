@@ -11,6 +11,8 @@ import { SortDropdown } from "@/components/SortDropdown";
 import { EmptyState, FilteredEmpty } from "@/components/EmptyState";
 import { PageHeader } from "@/components/PageHeader";
 import { Tooltip, SparkTooltipContent, StateDotTooltip, type DayInfo } from "@/components/Tooltip";
+import { formatDuration } from "@/lib/format";
+import i18n from "@/i18n";
 import { toast } from "sonner";
 import type { Goal } from "@/types";
 

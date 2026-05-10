@@ -649,7 +649,7 @@ function ActionEditorPanel({
                         !projectId ? "text-[hsl(var(--accent))]" : "text-text-primary"
                       }`}
                     >
-                      <span className="truncate">Goal-level backlog</span>
+                      <span className="truncate">{t("actionEditor.field.goalLevelBacklog")}</span>
                       {!projectId && (
                         <Check size={14} className="text-[hsl(var(--accent))]" />
                       )}

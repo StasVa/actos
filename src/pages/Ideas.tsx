@@ -725,6 +725,7 @@ const AttachmentsSection: React.FC<{ idea: Idea }> = ({ idea }) => {
 
 /* ===== Detail panel ===== */
 const IdeaDetail: React.FC<{ idea: Idea; mobile?: boolean }> = ({ idea, mobile = false }) => {
+  const { t } = useTranslation();
   const [overlay, setOverlay] = useState<OverlayMode>(null);
   const [confirmDiscard, setConfirmDiscard] = useState(false);
   const goal = useStore((s) => s.goals.find((g) => g.id === idea.goalId));
@@ -746,11 +747,18 @@ const IdeaDetail: React.FC<{ idea: Idea; mobile?: boolean }> = ({ idea, mobile =
   const captured = relativeAgo(idea.capturedAt);
 
   const commitTitle = () => {
-    const t = title.trim();
-    if (t && t !== idea.title) updateIdea(idea.id, { title: t });
+    const trimmed = title.trim();
+    if (trimmed && trimmed !== idea.title) updateIdea(idea.id, { title: trimmed });
   };
   const commitNote = () => {
     if ((idea.note ?? "") !== note) updateIdea(idea.id, { note: note.trim() || undefined });
+  };
+
+  const detailStatusLabel = (s: IdeaStatus): string => {
+    if (s === "converted_to_action") return t("ideas.detailStatus.convertedAction");
+    if (s === "converted_to_project") return t("ideas.detailStatus.convertedProject");
+    if (s === "discarded") return t("ideas.detailStatus.discarded");
+    return "";
   };
 
   return (
@@ -773,7 +781,7 @@ const IdeaDetail: React.FC<{ idea: Idea; mobile?: boolean }> = ({ idea, mobile =
           </div>
           {idea.status !== "captured" && (
             <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
-              {idea.status.replace(/_/g, " ")}
+              {detailStatusLabel(idea.status)}
             </span>
           )}
         </div>
@@ -792,13 +800,13 @@ const IdeaDetail: React.FC<{ idea: Idea; mobile?: boolean }> = ({ idea, mobile =
         </div>
 
         <div className="h-6" />
-        <SectionHeading>NOTE</SectionHeading>
+        <SectionHeading>{t("ideas.field.noteLabel")}</SectionHeading>
         <textarea
           value={note}
           onChange={(e) => setNote(e.target.value)}
           onBlur={commitNote}
           rows={4}
-          placeholder="Add a note…"
+          placeholder={t("ideas.placeholder.note")}
           className="w-full bg-surface-hover rounded-[4px] px-3 py-2 text-[14px] text-text-primary leading-[1.6] outline-none border border-transparent focus:border-border-default resize-none placeholder:text-text-tertiary"
         />
 
@@ -819,26 +827,26 @@ const IdeaDetail: React.FC<{ idea: Idea; mobile?: boolean }> = ({ idea, mobile =
                 onClick={() => setOverlay("action")}
                 className="w-full h-11 text-[14px] font-medium rounded-[4px] border border-border-default text-text-primary bg-transparent hover:bg-surface-hover transition-colors"
               >
-                Convert to action
+                {t("ideas.button.convertAction")}
               </button>
               <button
                 onClick={() => setOverlay("project")}
                 className="w-full h-11 text-[14px] font-medium rounded-[4px] border border-border-default text-text-primary bg-transparent hover:bg-surface-hover transition-colors"
               >
-                Convert to project
+                {t("ideas.button.convertProject")}
               </button>
               <button
                 onClick={() => setConfirmDiscard(true)}
                 className="mt-2 w-full h-11 text-[13px] text-text-tertiary hover:text-text-secondary transition-colors"
               >
-                Discard
+                {t("ideas.button.discard")}
               </button>
             </div>
           ) : (
             <div className="flex items-center gap-3">
-              <GhostButton onClick={() => setOverlay("action")}>Convert to action</GhostButton>
-              <GhostButton onClick={() => setOverlay("project")}>Convert to project</GhostButton>
-              <TertiaryLink onClick={() => setConfirmDiscard(true)}>Discard</TertiaryLink>
+              <GhostButton onClick={() => setOverlay("action")}>{t("ideas.button.convertAction")}</GhostButton>
+              <GhostButton onClick={() => setOverlay("project")}>{t("ideas.button.convertProject")}</GhostButton>
+              <TertiaryLink onClick={() => setConfirmDiscard(true)}>{t("ideas.button.discard")}</TertiaryLink>
             </div>
           )
         )}
@@ -852,13 +860,13 @@ const IdeaDetail: React.FC<{ idea: Idea; mobile?: boolean }> = ({ idea, mobile =
 
       <ConfirmModal
         open={confirmDiscard}
-        title="Discard this idea?"
-        body="It will be archived (visible under Discarded) but not deleted."
-        confirmLabel="Discard"
+        title={t("ideas.confirm.discard.title")}
+        body={t("ideas.confirm.discard.body")}
+        confirmLabel={t("ideas.confirm.discard.confirmLabel")}
         destructive
         onConfirm={() => {
           discardIdea(idea.id);
-          toast.success("Idea discarded");
+          toast.success(t("ideas.toast.discarded"));
           setConfirmDiscard(false);
         }}
         onCancel={() => setConfirmDiscard(false)}

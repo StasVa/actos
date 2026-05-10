@@ -221,7 +221,7 @@ const InlineTextPicker: React.FC<{
 const todayISO = () => new Date().toISOString().slice(0, 10);
 
 const formatLong = (iso: string) =>
-  new Date(iso + "T00:00:00").toLocaleDateString("en-US", {
+  new Date(iso + "T00:00:00").toLocaleDateString(i18n.language || "en", {
     weekday: "long",
     month: "long",
     day: "numeric",

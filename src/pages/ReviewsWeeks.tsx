@@ -66,6 +66,7 @@ const ReviewsWeeks: React.FC = () => {
   const [goalFilter, setGoalFilter] = React.useState<string>("all");
   const [sortKey, setSortKey] = React.useState<ReviewSortKey>(() => loadReviewSort("actos.reviews.weeks.sort"));
   React.useEffect(() => saveReviewSort("actos.reviews.weeks.sort", sortKey), [sortKey]);
+  const SORT_OPTIONS = useReviewSortOptions();
 
   const RANGE_OPTIONS = React.useMemo(() => [
     { value: "all", label: t("reviews.filters.range.all") },

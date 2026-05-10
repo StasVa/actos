@@ -1282,31 +1282,31 @@ const Ideas: React.FC = () => {
             title={t("ideas.page.title")}
             meta={meta}
             cta={{
-              label: "+ New idea",
+              label: t("ideas.newIdea"),
               onClick: () => setShowNew(true),
-              ariaLabel: "New idea",
+              ariaLabel: t("ideas.aria.new"),
             }}
             filters={
               <>
                 <FilterDropdown
-                  label="STATUS"
+                  label={t("ideas.filter.label.status")}
                   value={statusFilter}
                   defaultValue="captured"
-                  options={STATUS_OPTIONS}
+                  options={statusOptions}
                   onChange={(v) => setStatusFilter(v)}
                 />
                 <FilterDropdown
-                  label="GOAL"
+                  label={t("ideas.filter.label.goal")}
                   value={goalFilter}
                   defaultValue="all"
                   options={goalOptions}
                   onChange={(v) => setGoalFilter(v)}
                 />
                 <FilterDropdown
-                  label="DATE"
+                  label={t("ideas.filter.label.date")}
                   value={dateFilter}
                   defaultValue="all"
-                  options={DATE_OPTIONS}
+                  options={dateOptions}
                   onChange={(v) => setDateFilter(v)}
                 />
                 {anyApplied && (
@@ -1314,13 +1314,13 @@ const Ideas: React.FC = () => {
                     onClick={clearFilters}
                     className="ml-1 text-[12px] text-text-tertiary hover:text-text-secondary transition-colors shrink-0"
                   >
-                    Clear filters
+                    {t("common.clearFilters")}
                   </button>
                 )}
               </>
             }
             sort={
-              <SortDropdown value={sortKey} options={SORT_OPTIONS} onChange={(v) => setSortKey(v)} />
+              <SortDropdown value={sortKey} options={sortOptions} onChange={(v) => setSortKey(v)} />
             }
           />
         </div>
@@ -1329,9 +1329,9 @@ const Ideas: React.FC = () => {
         <div className="flex-1 overflow-y-auto min-h-0">
           {ideas.length === 0 ? (
             <EmptyState
-              headline="No ideas yet."
-              description="Capture rough thoughts here before they become actions or projects. Ideas wait until you decide what to do with them."
-              ctaLabel="+ New idea"
+              headline={t("ideas.empty.headline")}
+              description={t("ideas.empty.description")}
+              ctaLabel={t("ideas.newIdea")}
               onCta={() => setShowNew(true)}
             />
           ) : filtered.length === 0 ? (
@@ -1344,7 +1344,7 @@ const Ideas: React.FC = () => {
               {grouped.terminal!.length > 0 && (
                 <>
                   <GroupHeader
-                    label="TERMINAL"
+                    label={t("ideas.group.terminal")}
                     count={grouped.terminal!.length}
                     collapsed={terminalCollapsed}
                     onToggle={() => setTerminalCollapsed((v) => !v)}

@@ -79,24 +79,27 @@ const StepIndicator: React.FC<{ n: Screen }> = ({ n }) => {
   ) : null;
 };
 
-const BackLink: React.FC<{ onClick: () => void }> = ({ onClick }) => (
-  <button
-    type="button"
-    onClick={onClick}
-    className="absolute transition-colors"
-    style={{
-      left: 32, bottom: 28,
-      fontFamily: "Inter, ui-sans-serif, system-ui",
-      fontSize: 14,
-      color: "hsl(var(--text-tertiary))",
-      background: "transparent", border: "none", cursor: "pointer",
-    }}
-    onMouseEnter={(e) => (e.currentTarget.style.color = "hsl(var(--text-secondary))")}
-    onMouseLeave={(e) => (e.currentTarget.style.color = "hsl(var(--text-tertiary))")}
-  >
-    ← Back
-  </button>
-);
+const BackLink: React.FC<{ onClick: () => void }> = ({ onClick }) => {
+  const { t } = useTranslation();
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="absolute transition-colors"
+      style={{
+        left: 32, bottom: 28,
+        fontFamily: "Inter, ui-sans-serif, system-ui",
+        fontSize: 14,
+        color: "hsl(var(--text-tertiary))",
+        background: "transparent", border: "none", cursor: "pointer",
+      }}
+      onMouseEnter={(e) => (e.currentTarget.style.color = "hsl(var(--text-secondary))")}
+      onMouseLeave={(e) => (e.currentTarget.style.color = "hsl(var(--text-tertiary))")}
+    >
+      ← {t("setup.back")}
+    </button>
+  );
+};
 
 const ContinueCTA: React.FC<{ onClick: () => void; disabled?: boolean; label?: string }> = ({
   onClick, disabled, label = "Continue",

@@ -773,7 +773,7 @@ const SessionBuilder: React.FC = () => {
               {/* Total session — primary stepper */}
               <div className="flex flex-col items-center">
                 <div className="font-mono text-[10px] uppercase text-text-tertiary mb-3" style={{ letterSpacing: "0.08em" }}>
-                  TOTAL SESSION
+                  {t("sessionBuilder.totalSession")}
                 </div>
                 <StepperField
                   value={totalSession}
@@ -781,10 +781,10 @@ const SessionBuilder: React.FC = () => {
                   min={15}
                   max={240}
                   step={5}
-                  suffix="min"
+                  suffix={t("sessionBuilder.suffix.min")}
                   size="xl"
                   isMobile={isMobile}
-                  ariaLabel="Total session"
+                  ariaLabel={t("sessionBuilder.totalSessionAria")}
                 />
               </div>
 

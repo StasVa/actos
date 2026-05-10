@@ -815,21 +815,20 @@ export const TodayZone: React.FC<{
           style={{ padding: "32px 40px" }}
         >
           <div className="text-[20px] font-medium text-text-primary leading-snug">
-            No goals yet.
+            {t("home.todayZone.noGoals.heading")}
           </div>
           <div
             className="text-text-secondary mx-auto"
             style={{ fontSize: 14, marginTop: 8, maxWidth: 480, lineHeight: 1.55 }}
           >
-            A goal is a result you want to reach — like "$10k MRR" or
-            "Pass C1 Spanish exam". Create one to start planning days.
+            {t("home.todayZone.noGoals.body")}
           </div>
           <Link
             to="/onboarding/goal"
             className="mt-6 inline-block rounded-[4px] bg-[hsl(var(--accent))] text-white font-medium hover:brightness-110 transition"
             style={{ padding: "12px 32px", fontSize: 15 }}
           >
-            + Create your first goal
+            {t("home.todayZone.noGoals.cta")}
           </Link>
         </div>
       </section>

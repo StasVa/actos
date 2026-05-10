@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { useStore } from "@/store/useStore";
@@ -1088,6 +1089,7 @@ const IdeaEditorSheet: React.FC<{
 };
 
 const Ideas: React.FC = () => {
+  const { t } = useTranslation();
   const initialGoalParam = useQueryGoal();
   const ideas = useStore((s) => s.ideas);
   const goals = useStore((s) => s.goals);
@@ -1226,7 +1228,7 @@ const Ideas: React.FC = () => {
       <main className="app-main page-medium flex flex-col h-screen">
         <div className="px-4 md:px-10 pt-6 pb-4 shrink-0">
           <PageHeader
-            title="Ideas"
+            title={t("ideas.page.title")}
             meta={meta}
             cta={{
               label: "+ New idea",

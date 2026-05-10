@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { AppSidebar } from "@/components/AppSidebar";
 import { PageHeader } from "@/components/PageHeader";
 import { useStore } from "@/store/useStore";
@@ -62,6 +63,7 @@ const ToggleRow: React.FC<{
 );
 
 export default function Settings() {
+  const { t } = useTranslation();
   const settings = useStore((s) => s.settings);
   const goals = useStore((s) => s.goals);
   const setDefaultGoal = useStore((s) => s.setDefaultGoal);
@@ -124,7 +126,7 @@ export default function Settings() {
     <div className="min-h-screen bg-surface-base text-text-primary">
       <AppSidebar />
       <main className="app-main page-medium">
-        <PageHeader title="Settings" />
+        <PageHeader title={t("settings.page.title")} />
 
         <div className="mt-8 space-y-10 max-w-[720px]">
           {/* Account */}
@@ -193,6 +195,26 @@ export default function Settings() {
                   );
                 })}
               </div>
+            </div>
+          </section>
+
+          {/* Language */}
+          <section>
+            <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-3">
+              {t("settings.language.heading").toUpperCase()}
+            </div>
+            <div className="text-[13px] text-text-tertiary mb-2">
+              {t("settings.language.description")}
+            </div>
+            <select
+              disabled
+              value="en"
+              className="w-full max-w-[400px] bg-surface-hover rounded-[4px] px-3 py-2 text-[13px] text-text-primary outline-none border border-transparent disabled:opacity-70 disabled:cursor-not-allowed"
+            >
+              <option value="en">{t("settings.language.option.en")}</option>
+            </select>
+            <div className="text-[12px] text-text-tertiary mt-2">
+              {t("settings.language.placeholder")}
             </div>
           </section>
 

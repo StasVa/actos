@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Zap, Leaf, Sun, Thermometer, Star, X, type LucideIcon } from "lucide-react";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Tooltip, SparkTooltipContent, StateDotTooltip } from "@/components/Tooltip";
@@ -24,6 +25,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 export const TODAY_ISO = new Date().toISOString().slice(0, 10);
 
 const SampleDataBanner: React.FC = () => {
+  const { t } = useTranslation();
   const hasSample = useStore((s) =>
     s.goals.some((g) => g.isSample) ||
     s.projects.some((p) => p.isSample) ||
@@ -56,7 +58,7 @@ const SampleDataBanner: React.FC = () => {
         }}
       >
         <span className="sample-banner-text">
-          You're exploring a sample workspace.
+          {t("sample.banner.text")}
         </span>
         <button
           type="button"
@@ -69,7 +71,7 @@ const SampleDataBanner: React.FC = () => {
             color: "hsl(var(--accent))",
           }}
         >
-          <span>Clear and start fresh</span>
+          <span>{t("sample.banner.cta").replace(/\s*→\s*$/, "")}</span>
           <span
             aria-hidden
             className="transition-transform group-hover:translate-x-[2px]"
@@ -80,16 +82,16 @@ const SampleDataBanner: React.FC = () => {
       </div>
       <ConfirmModal
         open={confirmOpen}
-        title="Clear sample workspace?"
-        body="This will delete all sample goals, projects, actions, rituals, and ideas. This can't be undone. Anything you've created yourself stays."
-        cancelLabel="Cancel"
-        confirmLabel="Clear and start fresh"
+        title={t("sample.clear.confirmHeading")}
+        body={t("sample.clear.confirmBody")}
+        cancelLabel={t("common.cancel")}
+        confirmLabel={t("sample.banner.cta").replace(/\s*→\s*$/, "")}
         destructive
         onCancel={() => setConfirmOpen(false)}
         onConfirm={() => {
           setConfirmOpen(false);
           clearSampleData();
-          toast.success("Sample workspace cleared. Let's set up your goal.");
+          toast.success(t("sample.clear.toast"));
         }}
       />
     </>

@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Tooltip } from "@/components/Tooltip";
 import { LifetimeCounters } from "@/components/LifetimeCounters";
@@ -208,6 +209,7 @@ function isOpen(p: Project) {
 }
 
 const AllProjects: React.FC = () => {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const initialState = ((): StateFilter => {
     const s = searchParams.get("state");
@@ -380,7 +382,7 @@ const AllProjects: React.FC = () => {
       <main className="app-main page-medium flex flex-col min-h-screen">
         <div className="px-4 md:px-10 pt-6 pb-4 shrink-0">
           <PageHeader
-            title="Projects"
+            title={t("projects.page.title")}
             meta={meta}
             cta={{
               label: "+ New project",

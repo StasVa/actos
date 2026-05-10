@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { AppSidebar } from "@/components/AppSidebar";
 import { ReturnDatePill } from "@/components/ReturnDatePill";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -232,6 +233,7 @@ const RETURNED_SORT_OPTIONS: FilterOption<SortKey>[] = [
 
 /* ===== Page ===== */
 const AllDelegated: React.FC = () => {
+  const { t } = useTranslation();
   const actions = useStore((s) => s.actions);
   const goals = useStore((s) => s.goals);
   const projects = useStore((s) => s.projects);
@@ -394,7 +396,7 @@ const AllDelegated: React.FC = () => {
       <main className="app-main page-medium flex flex-col h-screen">
         <div className="px-4 md:px-10 pt-6 pb-4 shrink-0">
           <PageHeader
-            title="Delegated"
+            title={t("delegated.page.title")}
             meta={metaLine}
             cta={{
               label: "+ Delegate",

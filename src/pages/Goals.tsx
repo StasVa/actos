@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import { useStore, ritualMultiplier } from "@/store/useStore";
 import { AppSidebar } from "@/components/AppSidebar";
@@ -361,6 +362,7 @@ const SectionGrid: React.FC<{
 };
 
 const Goals: React.FC = () => {
+  const { t } = useTranslation();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [stateFilter, setStateFilter] = useState<StateFilter>("all");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
@@ -538,7 +540,7 @@ const Goals: React.FC = () => {
       <SettingsPanel open={settingsOpen} onOpenChange={setSettingsOpen} />
       <main className="app-main page-medium">
         <PageHeader
-          title="Goals"
+          title={t("goals.page.title")}
           meta={`${totalAll} GOALS · ${totalActive} ACTIVE · ${totalCompleted} COMPLETED`}
           cta={{
             label: "+ New goal",

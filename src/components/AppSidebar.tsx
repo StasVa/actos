@@ -1,5 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   Search,
   Calendar,
@@ -33,26 +34,27 @@ import {
 import type { LucideIcon } from "lucide-react";
 type NavItem = { label: string; href: string; icon: LucideIcon };
 
-const GROUP_EXECUTION: NavItem[] = [
-  { label: "Today", href: "/today", icon: Sun },
-  { label: "Progress", href: "/progress", icon: TrendingUp },
-  { label: "Actions", href: "/actions", icon: CheckSquare },
-  { label: "Delegated", href: "/delegated", icon: Send },
-  { label: "Rituals", href: "/rituals", icon: Repeat },
-];
-
-const GROUP_STRATEGY: NavItem[] = [
-  { label: "Goals", href: "/goals", icon: Target },
-  { label: "Projects", href: "/projects", icon: FolderKanban },
-  { label: "Ideas", href: "/ideas", icon: Lightbulb },
-  { label: "Sessions", href: "/sessions", icon: Timer },
-];
-
-const GROUP_REVIEWS: NavItem[] = [
-  { label: "Days", href: "/reviews/days", icon: Calendar },
-  { label: "Weeks", href: "/reviews/weeks", icon: CalendarDays },
-  { label: "Months", href: "/reviews/months", icon: CalendarRange },
-];
+function buildGroups(t: (k: string) => string) {
+  const GROUP_EXECUTION: NavItem[] = [
+    { label: t("nav.today"), href: "/today", icon: Sun },
+    { label: t("nav.progress"), href: "/progress", icon: TrendingUp },
+    { label: t("nav.actions"), href: "/actions", icon: CheckSquare },
+    { label: t("nav.delegated"), href: "/delegated", icon: Send },
+    { label: t("nav.rituals"), href: "/rituals", icon: Repeat },
+  ];
+  const GROUP_STRATEGY: NavItem[] = [
+    { label: t("nav.goals"), href: "/goals", icon: Target },
+    { label: t("nav.projects"), href: "/projects", icon: FolderKanban },
+    { label: t("nav.ideas"), href: "/ideas", icon: Lightbulb },
+    { label: t("nav.sessions"), href: "/sessions", icon: Timer },
+  ];
+  const GROUP_REVIEWS: NavItem[] = [
+    { label: t("nav.reviews.days"), href: "/reviews/days", icon: Calendar },
+    { label: t("nav.reviews.weeks"), href: "/reviews/weeks", icon: CalendarDays },
+    { label: t("nav.reviews.months"), href: "/reviews/months", icon: CalendarRange },
+  ];
+  return { GROUP_EXECUTION, GROUP_STRATEGY, GROUP_REVIEWS };
+}
 
 function isActive(pathname: string, href: string): boolean {
   if (href === "/today") {
@@ -125,6 +127,8 @@ const NavGroup: React.FC<{
 const Divider: React.FC = () => <div className="my-4 border-t border-border-subtle" />;
 
 export const AppSidebar: React.FC<{ onOpenSettings?: () => void }> = ({ onOpenSettings: _onOpenSettings }) => {
+  const { t } = useTranslation();
+  const { GROUP_EXECUTION, GROUP_STRATEGY, GROUP_REVIEWS } = buildGroups(t);
   const { pathname } = useLocation();
   const isMobile = useIsMobile();
 
@@ -246,13 +250,13 @@ export const AppSidebar: React.FC<{ onOpenSettings?: () => void }> = ({ onOpenSe
                   type="button"
                   onClick={toggle}
                   className="p-1.5 rounded-[4px] text-text-tertiary hover:text-text-primary hover:bg-surface-hover transition-colors"
-                  aria-label={effectiveCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+                  aria-label={effectiveCollapsed ? t("sidebar.expand") : t("sidebar.collapse")}
                 >
                   {effectiveCollapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
                 </button>
               </TooltipTrigger>
               <TooltipContent side="right" className="text-[12px]">
-                {effectiveCollapsed ? "Expand sidebar" : "Collapse sidebar"} <span className="text-text-tertiary ml-1">⌘\</span>
+                {effectiveCollapsed ? t("sidebar.expand") : t("sidebar.collapse")} <span className="text-text-tertiary ml-1">⌘\</span>
               </TooltipContent>
             </Tooltip>
           )}
@@ -267,13 +271,13 @@ export const AppSidebar: React.FC<{ onOpenSettings?: () => void }> = ({ onOpenSe
                   type="button"
                   onClick={openSearch}
                   className="flex items-center justify-center w-10 h-10 mx-auto rounded-[4px] text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-colors"
-                  aria-label="Search"
+                  aria-label={t("sidebar.search")}
                 >
                   <Search size={16} />
                 </button>
               </TooltipTrigger>
               <TooltipContent side="right" className="text-[12px]">
-                Search <span className="text-text-tertiary ml-1">⌘K</span>
+                {t("sidebar.search")} <span className="text-text-tertiary ml-1">⌘K</span>
               </TooltipContent>
             </Tooltip>
           ) : (
@@ -283,7 +287,7 @@ export const AppSidebar: React.FC<{ onOpenSettings?: () => void }> = ({ onOpenSe
               className="search-row w-full group flex items-center gap-2 pl-2.5 pr-2 py-2 rounded-[4px] text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-colors"
             >
               <Search size={16} className="shrink-0" />
-              <span className="text-[14px] font-medium flex-1 text-left">Search</span>
+              <span className="text-[14px] font-medium flex-1 text-left">{t("sidebar.search")}</span>
               <span
                 className="kbd-hint inline-flex items-center justify-center font-mono text-text-secondary group-hover:text-text-primary transition-colors mr-2"
                 style={{
@@ -317,7 +321,7 @@ export const AppSidebar: React.FC<{ onOpenSettings?: () => void }> = ({ onOpenSe
                 padding: "8px 12px",
               }}
             >
-              Reviews
+              {t("nav.reviews")}
             </div>
           )}
           <NavGroup items={GROUP_REVIEWS} pathname={pathname} collapsed={effectiveCollapsed} />
@@ -336,7 +340,7 @@ export const AppSidebar: React.FC<{ onOpenSettings?: () => void }> = ({ onOpenSe
           )}
           <div className="mb-2">
             <NavRow
-              item={{ label: "Settings", href: "/settings", icon: SettingsIcon }}
+              item={{ label: t("nav.settings"), href: "/settings", icon: SettingsIcon }}
               pathname={pathname}
               collapsed={effectiveCollapsed}
             />
@@ -356,13 +360,13 @@ export const AppSidebar: React.FC<{ onOpenSettings?: () => void }> = ({ onOpenSe
                       document.dispatchEvent(ev);
                     }}
                     className="shrink-0 w-8 h-8 flex items-center justify-center rounded-[4px] text-text-tertiary hover:text-text-primary hover:bg-surface-hover transition-colors"
-                    aria-label="Keyboard shortcuts"
+                    aria-label={t("sidebar.shortcuts")}
                   >
                     <HelpCircle size={16} />
                   </button>
                 </TooltipTrigger>
                 <TooltipContent side="left" className="text-[12px]">
-                  Shortcuts <span className="text-text-tertiary ml-1">?</span>
+                  {t("sidebar.shortcuts")} <span className="text-text-tertiary ml-1">?</span>
                 </TooltipContent>
               </Tooltip>
             )}

@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { FolderOpen, Target } from "lucide-react";
 import { useStore } from "@/store/useStore";
@@ -530,6 +531,7 @@ const ActiveProjectsScoped: React.FC = () => {
 };
 
 const Progress: React.FC = () => {
+  const { t } = useTranslation();
   const [settingsOpen, setSettingsOpen] = React.useState(false);
   const goals = useStore((s) => s.goals);
   const projects = useStore((s) => s.projects);
@@ -545,7 +547,7 @@ const Progress: React.FC = () => {
       <SettingsPanel open={settingsOpen} onOpenChange={setSettingsOpen} />
       <main className="app-main page-wide">
         <PageHeader
-          title="Progress"
+          title={t("progress.page.title")}
           meta={`${activeGoals} GOALS · ${activeProjects} ACTIVE PROJECTS · ${actionsDone} ACTIONS DONE ALL-TIME`}
         />
         <div style={{ height: 24 }} />

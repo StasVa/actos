@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { AppSidebar } from "@/components/AppSidebar";
@@ -434,6 +435,7 @@ const SORT_OPTIONS: FilterOption<SortKey>[] = [
 ];
 
 const AllActions: React.FC = () => {
+  const { t } = useTranslation();
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [goalFilter, setGoalFilter] = useState<GoalFilter>("all");
   const [dateFilter, setDateFilter] = useState<DateFilter>("all");
@@ -569,7 +571,7 @@ const AllActions: React.FC = () => {
       <main className="app-main page-medium flex flex-col h-screen">
         <div className="px-4 md:px-10 pt-6 pb-4 shrink-0">
           <PageHeader
-            title="Actions"
+            title={t("actions.page.title")}
             meta={meta}
             cta={{
               label: "+ New action",

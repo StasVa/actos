@@ -541,7 +541,7 @@ const PlanForm: React.FC<{
                     onChange={(e) => setFilterGoal(e.target.value)}
                     className="bg-surface-hover text-[11px] text-text-secondary rounded-[3px] px-1.5 py-1 outline-none border border-transparent focus:border-border-default"
                   >
-                    <option value="all">All goals</option>
+                    <option value="all">{t("planToday.actions.filter.allGoals")}</option>
                     {goals
                       .filter((g) => g.status === "active")
                       .map((g) => (
@@ -555,7 +555,7 @@ const PlanForm: React.FC<{
                     onChange={(e) => setFilterProject(e.target.value)}
                     className="bg-surface-hover text-[11px] text-text-secondary rounded-[3px] px-1.5 py-1 outline-none border border-transparent focus:border-border-default"
                   >
-                    <option value="all">All projects</option>
+                    <option value="all">{t("planToday.actions.filter.allProjects")}</option>
                     {projects
                       .filter((p) => p.status === "active")
                       .map((p) => (
@@ -569,9 +569,9 @@ const PlanForm: React.FC<{
                     onChange={(e) => setFilterStatus(e.target.value as any)}
                     className="bg-surface-hover text-[11px] text-text-secondary rounded-[3px] px-1.5 py-1 outline-none border border-transparent focus:border-border-default"
                   >
-                    <option value="all">All</option>
-                    <option value="backlog">Backlog</option>
-                    <option value="planned">Planned</option>
+                    <option value="all">{t("planToday.actions.filter.all")}</option>
+                    <option value="backlog">{t("planToday.actions.filter.backlog")}</option>
+                    <option value="planned">{t("planToday.actions.filter.planned")}</option>
                   </select>
                 </div>
 

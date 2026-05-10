@@ -768,7 +768,7 @@ const SessionActive: React.FC = () => {
                     color: "hsl(var(--text-primary))",
                   }}
                 >
-                  {isPaused ? "Resume" : "Pause"}
+                  {isPaused ? t("sessionActive.controls.resume") : t("sessionActive.controls.pause")}
                 </button>
               )}
               {isBreak && (

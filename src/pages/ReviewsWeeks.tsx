@@ -124,11 +124,11 @@ const ReviewsWeeks: React.FC = () => {
           filters={
             <>
               <FilterDropdown
-                label="GOAL"
+                label={t("reviews.filters.label.goal")}
                 value={goalFilter}
                 defaultValue="all"
                 options={[
-                  { value: "all", label: "All" },
+                  { value: "all", label: t("reviews.filters.all") },
                   ...goals.filter((g) => g.status === "active").map((g) => ({ value: g.id, label: g.title, dot: `hsl(var(--${g.color}))` })),
                 ]}
                 onChange={setGoalFilter}

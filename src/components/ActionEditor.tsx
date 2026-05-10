@@ -1350,7 +1350,7 @@ export function StatusDropdown({
                     <span className="block">{item}</span>
                   </TooltipTrigger>
                   <TooltipContent side="left" className="text-[12px]">
-                    Assign to a Project to plan or complete this action.
+                    {t("actionEditor.statusDropdown.disabledTooltip")}
                   </TooltipContent>
                 </Tooltip>
               );

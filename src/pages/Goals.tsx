@@ -307,7 +307,7 @@ const GoalCard: React.FC<{ m: GoalMeta; logTimeOn: boolean }> = ({ m, logTimeOn 
           {/* Section 5 — Sparkline */}
           <div className="border-t border-border-subtle pt-3" data-no-nav onClick={(e) => e.stopPropagation()}>
             <div className="font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary mb-2">
-              ACTIVITY · LAST 30 DAYS
+              {t("goals.card.activityHeading")}
             </div>
             <Sparkline data={spark} color={color} tips={sparkTips} />
           </div>

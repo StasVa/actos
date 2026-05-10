@@ -355,7 +355,7 @@ function RitualEditorPanel({
                     handleSaveNew();
                   }
                 }}
-                placeholder="Ritual title"
+                placeholder={t("ritualEditor.titlePlaceholder")}
                 className="w-full bg-transparent outline-none text-[18px] font-medium text-text-primary placeholder:text-text-tertiary"
               />
               {titleError && <InlineError text={titleError} />}

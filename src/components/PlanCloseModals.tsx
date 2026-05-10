@@ -891,8 +891,8 @@ function usePrefilledPlanState(
 
 type DayTypeMeta = {
   value: DayType;
-  label: string;
-  description: string;
+  labelKey: string;
+  descriptionKey: string;
   Icon: LucideIcon;
   color: string; // hsl(var(--…))
   active: boolean; // execution / recovery → step 2; otherwise commit immediately
@@ -901,32 +901,32 @@ type DayTypeMeta = {
 const DAY_TYPE_META: DayTypeMeta[] = [
   {
     value: "execution",
-    label: "Execution",
-    description: "Full work day — normal expectations.",
+    labelKey: "planToday.dayType.execution.label",
+    descriptionKey: "planToday.dayType.execution.description",
     Icon: Zap,
     color: "hsl(var(--state-active))",
     active: true,
   },
   {
     value: "recovery",
-    label: "Recovery",
-    description: "Light day, intentional rest.",
+    labelKey: "planToday.dayType.recovery.label",
+    descriptionKey: "planToday.dayType.recovery.description",
     Icon: Leaf,
     color: "hsl(var(--goal-3))",
     active: true,
   },
   {
     value: "day-off",
-    label: "Day Off",
-    description: "No work, fully off.",
+    labelKey: "planToday.dayType.dayOff.label",
+    descriptionKey: "planToday.dayType.dayOff.description",
     Icon: Sun,
     color: "hsl(var(--state-stalled))",
     active: false,
   },
   {
     value: "sick",
-    label: "Sick",
-    description: "Illness — expectations suspended.",
+    labelKey: "planToday.dayType.sick.label",
+    descriptionKey: "planToday.dayType.sick.description",
     Icon: Thermometer,
     color: "hsl(var(--status-dropped))",
     active: false,

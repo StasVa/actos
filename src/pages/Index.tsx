@@ -912,7 +912,7 @@ export const TodayZone: React.FC<{
     if (a.status === "done") {
       changeActionStatus(id, "planned", { scheduledDate: TODAY_ISO });
       toast.dismiss();
-      toast.success("Action re-opened");
+      toast.success(t("home.actions.toast.reopened"));
       return;
     }
     if (a.status === "delegated" || a.status === "dropped" || a.status === "cancelled") {

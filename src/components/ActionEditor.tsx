@@ -15,6 +15,8 @@ import { Link } from "react-router-dom";
 import { ChevronDown, Check, Calendar as CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
+import i18n from "@/i18n";
 import { useStore } from "@/store/useStore";
 import type { Action, ActionStatus, ID } from "@/types";
 import { ConfirmModal } from "./ConfirmModal";
@@ -81,11 +83,11 @@ function addDaysISO(iso: string, n: number): string {
 
 function fmtRelDate(iso: string): string {
   const today = TODAY_ISO();
-  if (iso === today) return "today";
-  if (iso === addDaysISO(today, 1)) return "tomorrow";
-  if (iso === addDaysISO(today, -1)) return "yesterday";
+  if (iso === today) return i18n.t("actionEditor.relDays.today");
+  if (iso === addDaysISO(today, 1)) return i18n.t("actionEditor.relDays.tomorrow");
+  if (iso === addDaysISO(today, -1)) return i18n.t("actionEditor.relDays.yesterday");
   const d = new Date(iso + "T00:00:00");
-  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  return d.toLocaleDateString(i18n.language || "en", { month: "short", day: "numeric" });
 }
 function fmtRelFromNow(isoTime: string): string {
   const dDate = isoTime.slice(0, 10);
@@ -95,10 +97,10 @@ function fmtRelFromNow(isoTime: string): string {
       new Date(dDate + "T00:00:00").getTime()) /
       86400000,
   );
-  if (days <= 0) return "today";
-  if (days === 1) return "yesterday";
-  if (days < 30) return `${days} days ago`;
-  return new Date(dDate + "T00:00:00").toLocaleDateString("en-US", {
+  if (days <= 0) return i18n.t("actionEditor.relFromNow.today");
+  if (days === 1) return i18n.t("actionEditor.relFromNow.yesterday");
+  if (days < 30) return i18n.t("actionEditor.relFromNow.daysAgo", { count: days });
+  return new Date(dDate + "T00:00:00").toLocaleDateString(i18n.language || "en", {
     month: "short",
     day: "numeric",
   });
@@ -134,6 +136,7 @@ function ActionEditorPanel({
   prefill?: Partial<Action>;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const action = useStore((s) =>
     actionId ? s.actions.find((a) => a.id === actionId) : undefined,
   );
@@ -238,19 +241,19 @@ function ActionEditorPanel({
 
   const missingForCreate = useMemo(() => {
     const missing: string[] = [];
-    if (!title.trim()) missing.push("Title");
-    if (!goalId) missing.push("Goal");
-    if (!(impactNum > 0)) missing.push("Impact");
-    if (requireTime && !(timeNum > 0)) missing.push("Time estimate");
-    if (newStatus === "delegated" && !delegateName.trim()) missing.push("Delegate name");
+    if (!title.trim()) missing.push(t("actionEditor.field.required.title"));
+    if (!goalId) missing.push(t("actionEditor.field.required.goal"));
+    if (!(impactNum > 0)) missing.push(t("actionEditor.field.required.impact"));
+    if (requireTime && !(timeNum > 0)) missing.push(t("actionEditor.field.required.time"));
+    if (newStatus === "delegated" && !delegateName.trim()) missing.push(t("actionEditor.field.required.delegateName"));
     return missing;
-  }, [title, goalId, impactNum, requireTime, timeNum, newStatus, delegateName]);
+  }, [title, goalId, impactNum, requireTime, timeNum, newStatus, delegateName, t]);
 
   const canCreate = missingForCreate.length === 0;
   const createTooltip =
     missingForCreate.length === 0
       ? ""
-      : `Set ${missingForCreate.join(" and ")} to create`;
+      : t("actionEditor.create.tooltip", { fields: missingForCreate.join(t("actionEditor.create.fieldsJoin")) });
 
   // Create-modal local UI state.
   const [notesExpanded, setNotesExpanded] = useState<boolean>(!!seed.notes);
@@ -268,7 +271,7 @@ function ActionEditorPanel({
   // option). Planned transitions are handled by handleScheduledDateChange.
   const handleStatusChange = (next: ActionStatus) => {
     if (isGoalLevel && next !== "backlog") {
-      toast.error("Assign to a Project to plan or complete this action.");
+      toast.error(t("actionEditor.toast.needAssignProjectPlan"));
       return;
     }
     if (mode === "new") {
@@ -280,24 +283,24 @@ function ActionEditorPanel({
     // Block Done if Impact / Time missing
     if (next === "done") {
       if (!(impactNum > 0)) {
-        setImpactError("Impact is required to mark this action Done.");
-        toast.error("Set Impact to mark Done");
+        setImpactError(t("actionEditor.error.impactDone"));
+        toast.error(t("actionEditor.toast.needImpact"));
         return;
       }
       if (requireTime && !(timeNum > 0)) {
-        setTimeError("Set time estimate first.");
-        toast.error("Set Time estimate to mark Done");
+        setTimeError(t("actionEditor.error.timeDone"));
+        toast.error(t("actionEditor.toast.needTime"));
         return;
       }
     }
     if (next === "delegated") {
       if (!delegateName.trim()) {
-        setDelegateError("Enter delegate name.");
+        setDelegateError(t("actionEditor.error.delegateName"));
         // Switch UI into delegated state so the field appears
         changeActionStatus(actionId, "delegated", {
           delegateName: "",
         });
-        toast.error("Enter delegate name");
+        toast.error(t("actionEditor.toast.needDelegateName"));
         return;
       }
       changeActionStatus(actionId, "delegated", {
@@ -305,7 +308,7 @@ function ActionEditorPanel({
         delegateNote: delegateNote || undefined,
         expectedReturnDate: expectedReturn || undefined,
       });
-      toast(`Delegated${delegateName ? ` to ${delegateName}` : ""}`);
+      toast(delegateName ? t("actionEditor.toast.delegatedTo", { name: delegateName }) : t("actionEditor.toast.delegated"));
       return;
     }
     if (next === "dropped" || next === "cancelled") {
@@ -315,14 +318,14 @@ function ActionEditorPanel({
     setImpactError(null);
     setTimeError(null);
     changeActionStatus(actionId, next);
-    if (next === "done") toast("Action marked done");
-    if (next === "backlog") toast("Action re-opened");
+    if (next === "done") toast(t("actionEditor.toast.markedDone"));
+    if (next === "backlog") toast(t("actionEditor.toast.reopened"));
   };
 
   const confirmDropAction = () => {
     if (!actionId || !confirmDrop) return;
     changeActionStatus(actionId, confirmDrop);
-    toast(confirmDrop === "dropped" ? "Action dropped" : "Action cancelled");
+    toast(confirmDrop === "dropped" ? t("actionEditor.toast.dropped") : t("actionEditor.toast.cancelled"));
     setConfirmDrop(null);
   };
 
@@ -333,7 +336,7 @@ function ActionEditorPanel({
   // semantically wrong, so we offer to mark the action Done on that date.
   const handleScheduledDateChange = (iso: string) => {
     if (isGoalLevel && iso) {
-      toast.error("Assign to a Project to schedule this action.");
+      toast.error(t("actionEditor.toast.needAssignProjectSchedule"));
       return;
     }
     if (iso && iso < TODAY_ISO()) {
@@ -348,18 +351,18 @@ function ActionEditorPanel({
     if (!actionId) return;
     if (iso) {
       changeActionStatus(actionId, "planned", { scheduledDate: iso });
-      toast("Action scheduled");
+      toast(t("actionEditor.toast.scheduled"));
     } else {
       changeActionStatus(actionId, "backlog");
       persistField("scheduledDate", undefined);
-      toast("Action moved to Backlog");
+      toast(t("actionEditor.toast.movedToBacklog"));
     }
   };
 
   const confirmMarkDoneOnPast = () => {
     const iso = confirmPastDate;
     if (!iso) return;
-    const shortLabel = new Date(iso + "T00:00:00").toLocaleDateString("en-US", {
+    const shortLabel = new Date(iso + "T00:00:00").toLocaleDateString(i18n.language || "en", {
       month: "short",
       day: "numeric",
     });
@@ -370,7 +373,7 @@ function ActionEditorPanel({
     if (mode === "new") {
       setNewStatus("done");
       setConfirmPastDate(null);
-      toast(`Marked done on ${shortLabel}`);
+      toast(t("actionEditor.toast.markedDoneOn", { date: shortLabel }));
       return;
     }
     if (!actionId) {
@@ -386,7 +389,7 @@ function ActionEditorPanel({
       plannedAt: undefined,
     });
     setConfirmPastDate(null);
-    toast(`Marked done on ${shortLabel}`);
+    toast(t("actionEditor.toast.markedDoneOn", { date: shortLabel }));
   };
 
   const handleSaveNew = () => {
@@ -395,11 +398,11 @@ function ActionEditorPanel({
       let firstFocus: "title" | "impact" | "goal" | null = null;
       if (!title.trim()) firstFocus = firstFocus ?? "title";
       if (!(impactNum > 0)) {
-        setImpactError("Impact is required.");
+        setImpactError(t("actionEditor.error.impactRequired"));
         firstFocus = firstFocus ?? "impact";
       }
       if (!goalId) {
-        setGoalError("Pick a Goal.");
+        setGoalError(t("actionEditor.error.goalRequired"));
         firstFocus = firstFocus ?? "goal";
       }
       if (firstFocus === "title") titleRef.current?.focus();
@@ -430,14 +433,14 @@ function ActionEditorPanel({
       droppedAt: prefill?.droppedAt,
       cancelledAt: prefill?.cancelledAt,
     });
-    toast(`Action "${title.trim()}" created`);
+    toast(t("actionEditor.toast.created", { title: title.trim() }));
     onClose();
   };
 
   const handleDuplicate = () => {
     if (!action) return;
     const newId = createAction({
-      title: "Copy of " + action.title,
+      title: t("actionEditor.copyOf", { title: action.title }),
       projectId: action.projectId,
       goalId: action.goalId,
       notes: action.notes,
@@ -445,14 +448,14 @@ function ActionEditorPanel({
       timeEstimateMinutes: action.timeEstimateMinutes,
       status: "backlog",
     });
-    toast("Action duplicated · view in Backlog.");
+    toast(t("actionEditor.toast.duplicated"));
     useStore.getState().openPanel({ kind: "action", mode: "edit", id: newId });
   };
 
   const handleDelete = () => {
     if (!actionId) return;
     deleteAction(actionId);
-    toast("Action deleted");
+    toast(t("actionEditor.toast.deleted"));
     setConfirmDelete(false);
     onClose();
   };
@@ -472,10 +475,10 @@ function ActionEditorPanel({
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-border-subtle shrink-0">
         {mode === "new" ? (
-          <div className="text-[18px] font-medium text-text-primary">New action</div>
+          <div className="text-[18px] font-medium text-text-primary">{t("actionEditor.header.new")}</div>
         ) : (
           <div className="font-mono text-[11px] uppercase tracking-[0.08em] text-text-tertiary">
-            Edit action
+            {t("actionEditor.header.edit")}
           </div>
         )}
         {mode === "new" ? (
@@ -502,7 +505,7 @@ function ActionEditorPanel({
               fontFamily: "Inter, sans-serif",
             }}
           >
-            This action has no Impact set. Set a value to include it in progress calculations.
+            {t("actionEditor.migrationWarning")}
           </div>
         )}
         {/* Title */}
@@ -518,7 +521,7 @@ function ActionEditorPanel({
                 handleSaveNew();
               }
             }}
-            placeholder="Action title"
+            placeholder={t("actionEditor.titlePlaceholder")}
             className="w-full bg-transparent outline-none text-[18px] font-medium text-text-primary placeholder:text-text-tertiary"
           />
         </div>
@@ -527,17 +530,17 @@ function ActionEditorPanel({
           <>
             {/* ESTIMATES */}
             <div className="mb-6">
-              <SectionHeadRequired label="Estimates" required />
+              <SectionHeadRequired label={t("actionEditor.section.estimates")} required />
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <FieldRow label="Impact (1–10) *" info={<MetricInfoPopover variant="impact" ariaLabel="What is Impact?" />}>
+                <FieldRow label={t("actionEditor.field.impactRequired")} info={<MetricInfoPopover variant="impact" ariaLabel={t("actionEditor.field.metricImpactAria")} />}>
                   <ClampedNumberInput
                     value={impact}
                     min={1}
                     max={10}
                     step={1}
-                    placeholder="1–10"
+                    placeholder={t("actionEditor.field.impactPlaceholder")}
                     required
-                    requiredMessage="Impact is required."
+                    requiredMessage={t("actionEditor.error.impactRequired")}
                     ariaLabel="Impact"
                     onChange={(v) => {
                       setImpact(v);
@@ -547,13 +550,13 @@ function ActionEditorPanel({
                   />
                   {impactError && <InlineError text={impactError} />}
                 </FieldRow>
-                <FieldRow label="Time (min)">
+                <FieldRow label={t("actionEditor.field.timeOptional")}>
                   <ClampedNumberInput
                     value={timeMin}
                     min={1}
                     max={600}
                     step={5}
-                    placeholder="optional · e.g. 30"
+                    placeholder={t("actionEditor.field.timePlaceholderOptional")}
                     ariaLabel="Time in minutes"
                     onChange={(v) => setTimeMin(v)}
                     onCommit={() => {}}
@@ -564,9 +567,9 @@ function ActionEditorPanel({
 
             {/* PARENT — inline pill popovers */}
             <div className="mb-6">
-              <SectionHeadRequired label="Parent" required />
+              <SectionHeadRequired label={t("actionEditor.section.parent")} required />
               <div className="flex items-center gap-2 flex-wrap text-[13px]">
-                <span className="text-text-tertiary">Goal</span>
+                <span className="text-text-tertiary">{t("actionEditor.field.goal")}</span>
                 <Popover open={goalPopoverOpen} onOpenChange={setGoalPopoverOpen}>
                   <PopoverTrigger asChild>
                     <button
@@ -581,7 +584,7 @@ function ActionEditorPanel({
                       }}
                     >
                       <span className="truncate">
-                        {goals.find((g) => g.id === goalId)?.title ?? "Pick a goal"}
+                        {goals.find((g) => g.id === goalId)?.title ?? t("actionEditor.field.pickGoal")}
                       </span>
                       <ChevronDown size={12} className="text-text-tertiary shrink-0" />
                     </button>
@@ -615,8 +618,8 @@ function ActionEditorPanel({
                   </PopoverContent>
                 </Popover>
 
-                <span className="text-text-tertiary">·</span>
-                <span className="text-text-tertiary">Project</span>
+                <span className="text-text-tertiary">{t("actionEditor.field.parentDivider")}</span>
+                <span className="text-text-tertiary">{t("actionEditor.field.project")}</span>
                 <Popover open={projectPopoverOpen} onOpenChange={setProjectPopoverOpen}>
                   <PopoverTrigger asChild>
                     <button
@@ -627,7 +630,7 @@ function ActionEditorPanel({
                       <span className="truncate">
                         {projectId
                           ? projects.find((p) => p.id === projectId)?.title ?? "—"
-                          : "Goal-level backlog"}
+                          : t("actionEditor.field.goalLevelBacklog")}
                       </span>
                       <ChevronDown size={12} className="text-text-tertiary shrink-0" />
                     </button>
@@ -646,7 +649,7 @@ function ActionEditorPanel({
                         !projectId ? "text-[hsl(var(--accent))]" : "text-text-primary"
                       }`}
                     >
-                      <span className="truncate">Goal-level backlog</span>
+                      <span className="truncate">{t("actionEditor.field.goalLevelBacklog")}</span>
                       {!projectId && (
                         <Check size={14} className="text-[hsl(var(--accent))]" />
                       )}
@@ -679,7 +682,7 @@ function ActionEditorPanel({
 
             {/* DATE */}
             <div className="mb-6">
-              <SectionHead>Date</SectionHead>
+              <SectionHead>{t("actionEditor.section.date")}</SectionHead>
               <DateChipPicker
                 value={scheduledDate}
                 optional
@@ -691,11 +694,11 @@ function ActionEditorPanel({
             <div>
               {notesExpanded ? (
                 <>
-                  <SectionHead>Notes</SectionHead>
+                  <SectionHead>{t("actionEditor.section.notes")}</SectionHead>
                   <textarea
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Add notes..."
+                    placeholder={t("actionEditor.field.notesPlaceholder")}
                     rows={4}
                     autoFocus
                     className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary placeholder:text-text-tertiary outline-none resize-y"
@@ -707,7 +710,7 @@ function ActionEditorPanel({
                   onClick={() => setNotesExpanded(true)}
                   className="text-[13px] text-text-secondary hover:text-text-primary transition-colors"
                 >
-                  + Add notes
+                  {t("actionEditor.field.addNotes")}
                 </button>
               )}
             </div>
@@ -716,7 +719,7 @@ function ActionEditorPanel({
           <>
             {/* STATE */}
             <div className="mb-6">
-              <SectionHead>State</SectionHead>
+              <SectionHead>{t("actionEditor.section.state")}</SectionHead>
 
               <StatusDropdown
                 current={status}
@@ -732,7 +735,7 @@ function ActionEditorPanel({
                 status !== "delegated" && (
                   <div className="mt-3">
                     <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-2">
-                      Scheduled date
+                      {t("actionEditor.field.scheduledDate")}
                     </div>
                     <DateChipPicker
                       value={scheduledDate}
@@ -745,9 +748,9 @@ function ActionEditorPanel({
               {status === "delegated" && (
                 <div className="mt-2 p-3 rounded-[4px] bg-surface-raised border border-border-subtle space-y-3">
                   <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
-                    Delegation
+                    {t("actionEditor.delegation.heading")}
                   </div>
-                  <FieldRow label="Delegate name">
+                  <FieldRow label={t("actionEditor.delegation.name")}>
                     <input
                       value={delegateName}
                       onChange={(e) => {
@@ -755,7 +758,7 @@ function ActionEditorPanel({
                         if (e.target.value.trim()) setDelegateError(null);
                       }}
                       onBlur={() => persistField("delegateName", delegateName || undefined)}
-                      placeholder="Maria, AI, etc."
+                      placeholder={t("actionEditor.delegation.namePlaceholder")}
                       list="delegate-names"
                       className="w-full bg-surface-base border rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
                       style={{
@@ -773,7 +776,7 @@ function ActionEditorPanel({
                   </FieldRow>
                   <div>
                     <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-2">
-                      Expected back
+                      {t("actionEditor.delegation.expectedBack")}
                     </div>
                     <DateChipPicker
                       value={expectedReturn}
@@ -786,7 +789,7 @@ function ActionEditorPanel({
                       }}
                     />
                   </div>
-                  <FieldRow label="Delegate note">
+                  <FieldRow label={t("actionEditor.delegation.note")}>
                     <textarea
                       value={delegateNote}
                       onChange={(e) => setDelegateNote(e.target.value)}
@@ -801,7 +804,7 @@ function ActionEditorPanel({
 
             {/* PARENT */}
             <div className="mb-6">
-              <SectionHead>Parent</SectionHead>
+              <SectionHead>{t("actionEditor.section.parent")}</SectionHead>
               <div className="flex flex-col gap-2">
                 <select
                   value={goalId}
@@ -830,7 +833,7 @@ function ActionEditorPanel({
                   }}
                   className="bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary outline-none"
                 >
-                  <option value="">— Goal-level backlog —</option>
+                  <option value="">{t("actionEditor.field.goalLevelOption")}</option>
                   {(projectsByGoal.find((g) => g.goal.id === goalId)?.projects ?? []).map((p) => (
                     <option key={p.id} value={p.id}>
                       {p.title}
@@ -842,17 +845,17 @@ function ActionEditorPanel({
 
             {/* ESTIMATES */}
             <div className="mb-6">
-              <SectionHead>Estimates</SectionHead>
+              <SectionHead>{t("actionEditor.section.estimates")}</SectionHead>
               <div className="grid grid-cols-2 gap-3">
-                <FieldRow label="Impact (1-10) · required">
+                <FieldRow label={t("actionEditor.field.impactRequiredEdit")}>
                   <ClampedNumberInput
                     value={impact}
                     min={1}
                     max={10}
                     step={1}
-                    placeholder="1–10"
+                    placeholder={t("actionEditor.field.impactPlaceholder")}
                     required
-                    requiredMessage="Impact is required."
+                    requiredMessage={t("actionEditor.error.impactRequired")}
                     ariaLabel="Impact"
                     onChange={(v) => {
                       setImpact(v);
@@ -869,15 +872,15 @@ function ActionEditorPanel({
                   />
                   {impactError && <InlineError text={impactError} />}
                 </FieldRow>
-                <FieldRow label="Time (min) · required">
+                <FieldRow label={t("actionEditor.field.timeRequired")}>
                   <ClampedNumberInput
                     value={timeMin}
                     min={1}
                     max={600}
                     step={5}
-                    placeholder="e.g. 30"
+                    placeholder={t("actionEditor.field.timePlaceholderExample")}
                     required
-                    requiredMessage="Time estimate is required."
+                    requiredMessage={t("actionEditor.error.timeRequired")}
                     ariaLabel="Time in minutes"
                     onChange={(v) => {
                       setTimeMin(v);
@@ -894,12 +897,12 @@ function ActionEditorPanel({
 
             {/* NOTES */}
             <div>
-              <SectionHead>Notes</SectionHead>
+              <SectionHead>{t("actionEditor.section.notes")}</SectionHead>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 onBlur={() => persistField("notes", notes || undefined)}
-                placeholder="Add notes..."
+                placeholder={t("actionEditor.field.notesPlaceholder")}
                 rows={4}
                 className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary placeholder:text-text-tertiary outline-none resize-y"
               />
@@ -929,7 +932,7 @@ function ActionEditorPanel({
                 color: "hsl(var(--surface-base))",
               }}
             >
-              Create action
+              {t("actionEditor.create.cta")}
             </button>
           </>
         ) : (
@@ -949,7 +952,7 @@ function ActionEditorPanel({
                 <MarkDoneButton
                   onClick={() => handleStatusChange("done")}
                   disabled={!(impactNum > 0) || (requireTime && !(timeNum > 0))}
-                  disabledTooltip="Add Impact and Time first"
+                  disabledTooltip={t("actionEditor.action.markDoneDisabledTooltip")}
                 />
               )}
               {status === "delegated" && (
@@ -958,12 +961,12 @@ function ActionEditorPanel({
                     onClick={() => handleStatusChange("backlog")}
                     className="text-[13px] px-3 py-1.5 rounded-[4px] border border-border-subtle text-text-secondary hover:text-text-primary"
                   >
-                    Re-open
+                    {t("actionEditor.action.reopen")}
                   </button>
                   <MarkDoneButton
                     onClick={() => handleStatusChange("done")}
                     disabled={!(impactNum > 0) || (requireTime && !(timeNum > 0))}
-                    disabledTooltip="Add Impact and Time first"
+                    disabledTooltip={t("actionEditor.action.markDoneDisabledTooltip")}
                   />
                 </>
               )}
@@ -972,7 +975,7 @@ function ActionEditorPanel({
                   onClick={() => handleStatusChange("backlog")}
                   className="text-[13px] px-3 py-1.5 rounded-[4px] border border-border-subtle text-text-secondary hover:text-text-primary"
                 >
-                  Re-open
+                  {t("actionEditor.action.reopen")}
                 </button>
               )}
             </div>
@@ -982,20 +985,20 @@ function ActionEditorPanel({
 
       <DeleteTypeConfirm
         open={confirmDelete}
-        title="Delete this action?"
-        body="This permanently removes the action and its timeline. This cannot be undone."
+        title={t("confirm.delete.action.heading")}
+        body={t("confirm.delete.action.body")}
         onCancel={() => setConfirmDelete(false)}
         onConfirm={handleDelete}
       />
       <ConfirmModal
         open={confirmDrop !== null}
-        title={confirmDrop === "dropped" ? "Drop this action?" : "Cancel this action?"}
+        title={confirmDrop === "dropped" ? t("confirm.drop.action.heading") : t("actionEditor.confirm.cancel.heading")}
         body={
           confirmDrop === "dropped"
-            ? "It moves out of progress without counting against you."
-            : "Its impact contribution will be removed from the project. You can re-open it later."
+            ? t("confirm.drop.action.body")
+            : t("actionEditor.confirm.cancel.body")
         }
-        confirmLabel={confirmDrop === "dropped" ? "Drop" : "Cancel action"}
+        confirmLabel={confirmDrop === "dropped" ? t("confirm.drop.action.cta") : t("actionEditor.confirm.cancel.cta")}
         destructive
         onCancel={() => setConfirmDrop(null)}
         onConfirm={confirmDropAction}
@@ -1018,30 +1021,29 @@ function PastDateConfirmModal({
   onCancel: () => void;
   onConfirm: () => void;
 }) {
+  const { t } = useTranslation();
   if (!iso) return null;
   const d = new Date(iso + "T00:00:00");
-  const fullLabel = d.toLocaleDateString("en-US", {
+  const fullLabel = d.toLocaleDateString(i18n.language || "en", {
     weekday: "short",
     month: "short",
     day: "numeric",
     year: "numeric",
   });
-  const shortLabel = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  const shortLabel = d.toLocaleDateString(i18n.language || "en", { month: "short", day: "numeric" });
   return (
     <ConfirmModal
       open={true}
-      title="Schedule for past date?"
+      title={t("actionEditor.confirm.pastDate.heading")}
       body={
         <>
-          You picked <strong>{fullLabel}</strong> ({relDays(iso)}), which is in
-          the past.
+          {t("actionEditor.confirm.pastDate.bodyLine1Pre")}<strong>{fullLabel}</strong>{t("actionEditor.confirm.pastDate.bodyLine1Post", { rel: relDays(iso) })}
           <div className="mt-2">
-            This action will be marked as Done on that date and included in
-            progress calculations and reviews.
+            {t("actionEditor.confirm.pastDate.bodyLine2")}
           </div>
         </>
       }
-      confirmLabel={`Mark as Done on ${shortLabel}`}
+      confirmLabel={t("actionEditor.confirm.pastDate.cta", { date: shortLabel })}
       onCancel={onCancel}
       onConfirm={onConfirm}
     />
@@ -1145,11 +1147,11 @@ function relDays(iso: string): string {
       new Date(today + "T00:00:00").getTime()) /
       86400000,
   );
-  if (days === 0) return "today";
-  if (days === 1) return "tomorrow";
-  if (days === -1) return "yesterday";
-  if (days > 0) return `in ${days} days`;
-  return `${Math.abs(days)} days ago`;
+  if (days === 0) return i18n.t("actionEditor.relDays.today");
+  if (days === 1) return i18n.t("actionEditor.relDays.tomorrow");
+  if (days === -1) return i18n.t("actionEditor.relDays.yesterday");
+  if (days > 0) return i18n.t("actionEditor.relDays.inDays", { count: days });
+  return i18n.t("actionEditor.relDays.daysAgo", { count: Math.abs(days) });
 }
 
 export function DateChipPicker({
@@ -1161,6 +1163,7 @@ export function DateChipPicker({
   onChange: (iso: string) => void;
   optional?: boolean;
 }) {
+  const { t } = useTranslation();
   const [showCalendar, setShowCalendar] = useState(false);
   const today = TODAY_ISO();
   const tomorrow = addDaysISO(today, 1);
@@ -1171,7 +1174,7 @@ export function DateChipPicker({
   // Summary view when a custom date is set
   if (isCustom && !showCalendar) {
     const d = new Date(value + "T00:00:00");
-    const label = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    const label = d.toLocaleDateString(i18n.language || "en", { month: "short", day: "numeric" });
     return (
       <div className="flex items-center gap-2">
         <span className="text-[13px] text-text-primary">{label}</span>
@@ -1181,7 +1184,7 @@ export function DateChipPicker({
           onClick={() => setShowCalendar(true)}
           className="ml-2 text-[13px] text-text-secondary hover:text-text-primary transition-colors"
         >
-          Change
+          {t("actionEditor.dateChip.change")}
         </button>
         {optional && (
           <button
@@ -1189,7 +1192,7 @@ export function DateChipPicker({
             onClick={() => onChange("")}
             className="text-[13px] text-text-secondary hover:text-text-primary transition-colors"
           >
-            Clear
+            {t("actionEditor.dateChip.clear")}
           </button>
         )}
       </div>
@@ -1200,7 +1203,7 @@ export function DateChipPicker({
     <div>
       <div className="flex items-center gap-2 flex-wrap">
         <DateChip
-          label="Today"
+          label={t("actionEditor.dateChip.today")}
           selected={isToday}
           onClick={() => {
             onChange(today);
@@ -1208,7 +1211,7 @@ export function DateChipPicker({
           }}
         />
         <DateChip
-          label="Tomorrow"
+          label={t("actionEditor.dateChip.tomorrow")}
           selected={isTomorrow}
           onClick={() => {
             onChange(tomorrow);
@@ -1222,7 +1225,7 @@ export function DateChipPicker({
           className="inline-flex items-center gap-1.5 text-[13px] text-text-secondary hover:text-text-primary transition-colors"
         >
           <CalendarIcon size={12} />
-          Pick another date
+          {t("actionEditor.dateChip.pickAnother")}
         </button>
         {optional && value && (
           <button
@@ -1233,7 +1236,7 @@ export function DateChipPicker({
             }}
             className="text-[13px] text-text-secondary hover:text-text-primary transition-colors"
           >
-            Clear
+            {t("actionEditor.dateChip.clear")}
           </button>
         )}
       </div>
@@ -1279,6 +1282,7 @@ export function StatusDropdown({
   isGoalLevel: boolean;
   onPick: (s: ActionStatus) => void;
 }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -1289,7 +1293,7 @@ export function StatusDropdown({
         >
           <span className="flex items-center gap-2">
             <StatusDot status={current} />
-            <span>{STATUS_LABEL[current]}</span>
+            <span>{t(`actionEditor.status.${current}`)}</span>
           </span>
           <ChevronDown size={14} className="text-text-tertiary" />
         </button>
@@ -1334,7 +1338,7 @@ export function StatusDropdown({
               >
                 <span className="flex items-center gap-2">
                   <StatusDot status={s} />
-                  <span>{STATUS_LABEL[s]}</span>
+                  <span>{t(`actionEditor.status.${s}`)}</span>
                 </span>
                 {selected && <Check size={14} className="text-[hsl(var(--accent))]" />}
               </button>
@@ -1346,7 +1350,7 @@ export function StatusDropdown({
                     <span className="block">{item}</span>
                   </TooltipTrigger>
                   <TooltipContent side="left" className="text-[12px]">
-                    Assign to a Project to plan or complete this action.
+                    {t("actionEditor.statusDropdown.disabledTooltip")}
                   </TooltipContent>
                 </Tooltip>
               );
@@ -1360,6 +1364,7 @@ export function StatusDropdown({
 }
 
 function TimestampLine({ action, onClose }: { action: Action; onClose: () => void }) {
+  const { t } = useTranslation();
   const status = action.status;
   if (status === "backlog") return null;
 
@@ -1384,7 +1389,7 @@ function TimestampLine({ action, onClose }: { action: Action; onClose: () => voi
         className="mt-3 font-mono text-[12px]"
         style={{ color: overdue ? "hsl(var(--state-stalled))" : "hsl(var(--text-secondary))" }}
       >
-        {overdue ? "Overdue · scheduled for " : "Scheduled for "}
+        {overdue ? t("actionEditor.timestamp.overduePrefix") : t("actionEditor.timestamp.scheduledForPrefix")}
         {linkDate(sd, label)}
       </div>
     );
@@ -1398,11 +1403,11 @@ function TimestampLine({ action, onClose }: { action: Action; onClose: () => voi
     return (
       <div className="mt-3 space-y-0.5">
         <div className="font-mono text-[12px] text-text-secondary">
-          Completed {linkDate(cDate, cLabel)}
+          {t("actionEditor.timestamp.completed")}{linkDate(cDate, cLabel)}
         </div>
         {showOriginal && (
           <div className="font-mono text-[12px] text-text-tertiary">
-            Originally scheduled for {fmtRelDate(sd!)}
+            {t("actionEditor.timestamp.originallyScheduled", { label: fmtRelDate(sd!) })}
           </div>
         )}
       </div>
@@ -1413,7 +1418,9 @@ function TimestampLine({ action, onClose }: { action: Action; onClose: () => voi
     const dDate = action.delegatedAt.slice(0, 10);
     return (
       <div className="mt-3 font-mono text-[12px] text-text-secondary">
-        Delegated{action.delegateName ? ` to ${action.delegateName}` : ""} ·{" "}
+        {action.delegateName
+          ? t("actionEditor.timestamp.delegatedTo", { name: action.delegateName })
+          : t("actionEditor.timestamp.delegated")}
         {linkDate(dDate, fmtRelFromNow(action.delegatedAt))}
       </div>
     );
@@ -1423,7 +1430,7 @@ function TimestampLine({ action, onClose }: { action: Action; onClose: () => voi
     const dDate = action.droppedAt.slice(0, 10);
     return (
       <div className="mt-3 font-mono text-[12px] text-text-secondary">
-        Dropped on {linkDate(dDate, fmtRelDate(dDate))}
+        {t("actionEditor.timestamp.droppedOn")}{linkDate(dDate, fmtRelDate(dDate))}
       </div>
     );
   }
@@ -1432,7 +1439,7 @@ function TimestampLine({ action, onClose }: { action: Action; onClose: () => voi
     const dDate = action.cancelledAt.slice(0, 10);
     return (
       <div className="mt-3 font-mono text-[12px] text-text-secondary">
-        Cancelled on {linkDate(dDate, fmtRelDate(dDate))}
+        {t("actionEditor.timestamp.cancelledOn")}{linkDate(dDate, fmtRelDate(dDate))}
       </div>
     );
   }

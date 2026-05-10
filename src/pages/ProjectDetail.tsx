@@ -384,33 +384,36 @@ const GoalSelector: React.FC<{
 };
 
 /* ===== Inline status toggle ===== */
-const STATUSES: { value: ProjectStatus; label: string }[] = [
-  { value: "active", label: "Active" },
-  { value: "completed", label: "Completed" },
-  { value: "dropped", label: "Dropped" },
+const STATUS_KEYS: { value: ProjectStatus; key: string }[] = [
+  { value: "active", key: "projectDetail.status.active" },
+  { value: "completed", key: "projectDetail.status.completed" },
+  { value: "dropped", key: "projectDetail.status.dropped" },
 ];
 
 const StatusToggle: React.FC<{
   status: ProjectStatus;
   onChange: (next: ProjectStatus) => void;
-}> = ({ status, onChange }) => (
-  <div className="inline-flex items-center gap-0.5 p-0.5 rounded-[4px] bg-surface-raised border border-border-subtle">
-    {STATUSES.map((s) => (
-      <button
-        key={s.value}
-        type="button"
-        onClick={() => onChange(s.value)}
-        className="text-[11px] px-2 py-0.5 rounded-[3px] transition-colors"
-        style={{
-          background: s.value === status ? "hsl(var(--surface-elevated))" : "transparent",
-          color: s.value === status ? "hsl(var(--text-primary))" : "hsl(var(--text-tertiary))",
-        }}
-      >
-        {s.label}
-      </button>
-    ))}
-  </div>
-);
+}> = ({ status, onChange }) => {
+  const { t } = useTranslation();
+  return (
+    <div className="inline-flex items-center gap-0.5 p-0.5 rounded-[4px] bg-surface-raised border border-border-subtle">
+      {STATUS_KEYS.map((s) => (
+        <button
+          key={s.value}
+          type="button"
+          onClick={() => onChange(s.value)}
+          className="text-[11px] px-2 py-0.5 rounded-[3px] transition-colors"
+          style={{
+            background: s.value === status ? "hsl(var(--surface-elevated))" : "transparent",
+            color: s.value === status ? "hsl(var(--text-primary))" : "hsl(var(--text-tertiary))",
+          }}
+        >
+          {t(s.key)}
+        </button>
+      ))}
+    </div>
+  );
+};
 
 const ProjectDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();

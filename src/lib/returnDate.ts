@@ -6,10 +6,6 @@ export type ReturnInfo = {
   state: ReturnState;
   /** Days from today; negative = past. Undefined when no date. */
   diffDays?: number;
-  /** Pill text (e.g. "return 2026-04-30 · 7d ago"). */
-  text: string;
-  /** Tooltip content. */
-  tooltip: string;
   /** CSS color var for text. */
   color: string;
   /** CSS background (color-mix tint or "transparent"). */
@@ -38,8 +34,6 @@ export function getReturnInfo(expectedReturnDate?: string): ReturnInfo {
   if (!expectedReturnDate) {
     return {
       state: "none",
-      text: "no return date",
-      tooltip: "No expected return date set",
       color: "hsl(var(--text-tertiary))",
       background: "transparent",
       pill: false,
@@ -48,12 +42,9 @@ export function getReturnInfo(expectedReturnDate?: string): ReturnInfo {
   }
   const diff = diffInDays(expectedReturnDate);
   if (diff < 0) {
-    const n = Math.abs(diff);
     return {
       state: "overdue",
       diffDays: diff,
-      text: `return ${expectedReturnDate} · ${n}d ago`,
-      tooltip: `Overdue by ${n} day${n === 1 ? "" : "s"}`,
       color: "hsl(var(--text-warning))",
       background: "color-mix(in srgb, hsl(var(--text-warning)) 8%, transparent)",
       pill: true,
@@ -64,8 +55,6 @@ export function getReturnInfo(expectedReturnDate?: string): ReturnInfo {
     return {
       state: "today",
       diffDays: 0,
-      text: "return today",
-      tooltip: "Expected return today",
       color: "hsl(var(--accent))",
       background: "color-mix(in srgb, hsl(var(--accent)) 8%, transparent)",
       pill: true,
@@ -76,8 +65,6 @@ export function getReturnInfo(expectedReturnDate?: string): ReturnInfo {
     return {
       state: "tomorrow",
       diffDays: 1,
-      text: `return tomorrow · ${expectedReturnDate}`,
-      tooltip: "Expected return in 1 day",
       color: "hsl(var(--text-tertiary))",
       background: "transparent",
       pill: false,
@@ -88,8 +75,6 @@ export function getReturnInfo(expectedReturnDate?: string): ReturnInfo {
     return {
       state: "soon",
       diffDays: diff,
-      text: `return in ${diff}d · ${expectedReturnDate}`,
-      tooltip: `Expected return in ${diff} days`,
       color: "hsl(var(--text-tertiary))",
       background: "transparent",
       pill: false,
@@ -99,8 +84,6 @@ export function getReturnInfo(expectedReturnDate?: string): ReturnInfo {
   return {
     state: "later",
     diffDays: diff,
-    text: `return ${expectedReturnDate}`,
-    tooltip: `Expected return in ${diff} days`,
     color: "hsl(var(--text-tertiary))",
     background: "transparent",
     pill: false,

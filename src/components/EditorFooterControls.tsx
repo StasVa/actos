@@ -8,6 +8,7 @@
 //   - MarkDoneButton     — green-tinted Mark-done button with Check icon
 
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Check, Copy, MoreHorizontal, Trash2, XCircle, type LucideIcon } from "lucide-react";
 import {
   Popover,
@@ -72,13 +73,14 @@ export function SaveIndicator({
   state: SaveState;
   onRetry?: () => void;
 }) {
+  const { t } = useTranslation();
   if (state === "failed") {
     return (
       <div
         className="inline-flex items-center gap-1 text-[12px]"
         style={{ color: "hsl(var(--text-warning))", fontFamily: "Inter, sans-serif" }}
       >
-        <span>Save failed</span>
+        <span>{t("editor.autosave.failed")}</span>
         <span style={{ color: "hsl(var(--text-tertiary))" }}>·</span>
         <button
           type="button"
@@ -86,7 +88,7 @@ export function SaveIndicator({
           className="underline hover:no-underline"
           style={{ color: "hsl(var(--text-warning))" }}
         >
-          retry
+          {t("common.retry")}
         </button>
       </div>
     );
@@ -97,13 +99,13 @@ export function SaveIndicator({
       <div
         className="inline-flex items-center gap-1.5 text-[12px]"
         style={{ color: "hsl(var(--text-tertiary))", fontFamily: "Inter, sans-serif" }}
-        aria-label="Saving"
+        aria-label={t("editor.autosave.savingAria")}
       >
         <span
           className="inline-block w-1.5 h-1.5 rounded-full animate-pulse"
           style={{ background: "hsl(var(--text-tertiary))" }}
         />
-        <span>Saving…</span>
+        <span>{t("common.saving")}</span>
       </div>
     );
   }
@@ -114,10 +116,10 @@ export function SaveIndicator({
     <div
       className="inline-flex items-center gap-1 text-[12px] transition-colors"
       style={{ color, fontFamily: "Inter, sans-serif" }}
-      aria-label="Saved"
+      aria-label={t("editor.autosave.savedAria")}
     >
       <Check size={12} />
-      <span>Saved</span>
+      <span>{t("common.saved")}</span>
     </div>
   );
 }

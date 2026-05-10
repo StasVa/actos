@@ -329,7 +329,7 @@ const GoalColumn: React.FC<{
 
     <div>
       <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary mb-1.5">
-        Activity · Last 30 days
+        {t("home.hero.activity")}
       </div>
       <Sparkline data={spark} color={color} tips={sparkTips} />
     </div>

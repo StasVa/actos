@@ -312,7 +312,7 @@ const AllProjects: React.FC = () => {
   const handleNewProject = () => {
     const goalId = storeGoals.find((g) => g.status === "active")?.id ?? storeGoals[0]?.id;
     if (!goalId) {
-      toast.error("Create an active goal first");
+      toast.error(t("allProjects.toast.createGoalFirst"));
       return;
     }
     const id = createProject({ title: "", goalId, isDraft: true });

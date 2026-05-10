@@ -510,7 +510,7 @@ const SessionActive: React.FC = () => {
               className="font-mono uppercase tracking-[0.06em] text-text-tertiary"
               style={{ fontSize: 11 }}
             >
-              {isPaused ? "PAUSED" : topLabel}
+              {isPaused ? t("sessionActive.label.paused") : topLabel}
             </div>
             <div
               className="mt-3 font-mono tabular-nums"

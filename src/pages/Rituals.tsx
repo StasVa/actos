@@ -524,7 +524,7 @@ function buildRitualRow(
     }
     if (r.schedule === "daily") return t("rituals.scheduleLabel.daily");
     if (r.schedule === "weekdays") return t("rituals.scheduleLabel.weekdays");
-    return r.schedule.toUpperCase();
+    return String(r.schedule).toUpperCase();
   })();
   return {
     id: r.id,

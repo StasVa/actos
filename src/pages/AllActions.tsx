@@ -501,8 +501,8 @@ const AllActions: React.FC = () => {
     const active = ACTIONS.filter((a) => isActive(a.status)).length;
     const done = ACTIONS.filter((a) => a.status === "done").length;
     const delegated = ACTIONS.filter((a) => a.status === "delegated").length;
-    return `${total} ACTIONS · ${active} ACTIVE · ${done} DONE · ${delegated} DELEGATED`;
-  }, [ACTIONS]);
+    return t("allActions.meta", { total, active, done, delegated });
+  }, [ACTIONS, t]);
 
   const createdAtById = useMemo(() => {
     const m: Record<string, number> = {};

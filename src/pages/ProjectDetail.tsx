@@ -116,6 +116,7 @@ const ReferencesSection: React.FC<{
   onRemove: (id: string) => void;
   onUpdate: (id: string, partial: Partial<ProjectReference>) => void;
 }> = ({ project, onAdd, onRemove, onUpdate }) => {
+  const { t } = useTranslation();
   const [adding, setAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [url, setUrl] = useState("");
@@ -160,7 +161,7 @@ const ReferencesSection: React.FC<{
     <section>
       <div className="flex items-center justify-between mb-3">
         <h2 className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
-          REFERENCES · {project.references.length}
+          {t("projectDetail.references.title", { count: project.references.length })}
         </h2>
         {!formOpen && (
           <button
@@ -168,7 +169,7 @@ const ReferencesSection: React.FC<{
             onClick={startAdd}
             className="text-[12px] text-accent hover:text-accent-hover"
           >
-            + Add reference
+            {t("projectDetail.references.add")}
           </button>
         )}
       </div>
@@ -181,7 +182,7 @@ const ReferencesSection: React.FC<{
           <input
             autoFocus
             type="url"
-            placeholder="https://..."
+            placeholder={t("projectDetail.references.urlPlaceholder")}
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             required
@@ -189,7 +190,7 @@ const ReferencesSection: React.FC<{
           />
           <input
             type="text"
-            placeholder="Title (optional)"
+            placeholder={t("projectDetail.references.titlePlaceholder")}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className="bg-surface-base border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-accent"
@@ -200,13 +201,13 @@ const ReferencesSection: React.FC<{
               onClick={cancel}
               className="text-[12px] text-text-tertiary hover:text-text-secondary px-2 py-1"
             >
-              Cancel
+              {t("common.cancel")}
             </button>
             <button
               type="submit"
               className="text-[12px] bg-accent hover:bg-accent-hover text-white px-3 py-1 rounded-[4px]"
             >
-              {editingId ? "Save" : "Add"}
+              {editingId ? t("common.save") : t("common.add")}
             </button>
           </div>
         </form>
@@ -214,7 +215,7 @@ const ReferencesSection: React.FC<{
 
       {project.references.length === 0 && !formOpen ? (
         <div className="text-[13px] text-text-tertiary">
-          No references yet. Click + Add reference to add docs, links, materials.
+          {t("projectDetail.references.empty")}
         </div>
       ) : (
         <div className="flex flex-col">
@@ -241,10 +242,10 @@ const ReferencesSection: React.FC<{
               </a>
               <div className="opacity-0 group-hover:opacity-100 transition-opacity">
                 <CardMenu
-                  ariaLabel="Reference menu"
+                  ariaLabel={t("projectDetail.references.menu.aria")}
                   items={[
-                    { label: "Edit", onSelect: () => startEdit(r) },
-                    { label: "Remove", destructive: true, onSelect: () => onRemove(r.id) },
+                    { label: t("common.edit"), onSelect: () => startEdit(r) },
+                    { label: t("projectDetail.references.remove"), destructive: true, onSelect: () => onRemove(r.id) },
                   ]}
                 />
               </div>

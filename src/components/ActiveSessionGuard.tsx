@@ -8,6 +8,7 @@
 
 import React from "react";
 import { Link, useLocation, useNavigate, useNavigationType } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useStore } from "@/store/useStore";
 import type { Session } from "@/types";
 

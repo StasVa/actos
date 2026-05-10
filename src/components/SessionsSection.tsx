@@ -135,6 +135,7 @@ const DetailRow: React.FC<{
   goal: Goal | undefined;
   onClick: () => void;
 }> = ({ action, status, goal, onClick }) => {
+  const { t } = useTranslation();
   if (!action) return null;
   const goalColor = goal ? `hsl(var(--${goal.color}))` : "hsl(var(--border-default))";
   const pillColor =
@@ -143,7 +144,12 @@ const DetailRow: React.FC<{
       : status === "dropped"
       ? "hsl(var(--text-warning))"
       : "hsl(var(--text-tertiary))";
-  const pillLabel = status === "untouched" ? "NOT TOUCHED" : status.toUpperCase();
+  const pillLabel =
+    status === "untouched"
+      ? t("sessions.section.detail.notTouched")
+      : status === "done"
+        ? t("sessions.section.detail.done")
+        : t("sessions.section.detail.dropped");
   return (
     <div
       onClick={onClick}
@@ -170,7 +176,7 @@ const DetailRow: React.FC<{
   );
 };
 
-function fmtPanelDateTime(iso: string): string {
+function fmtPanelDateTime(iso: string, t: (k: string, opts?: Record<string, unknown>) => string): string {
   const d = new Date(iso);
   const today = new Date();
   const yesterday = new Date(today);
@@ -178,15 +184,17 @@ function fmtPanelDateTime(iso: string): string {
   const sameDay = (a: Date, b: Date) =>
     a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
   const time = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
-  if (sameDay(d, today)) return `Today, ${time}`;
-  if (sameDay(d, yesterday)) return `Yesterday, ${time}`;
-  return `${d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}, ${time}`;
+  if (sameDay(d, today)) return t("sessions.section.todayAt", { time });
+  if (sameDay(d, yesterday)) return t("sessions.section.yesterdayAt", { time });
+  const date = d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+  return t("sessions.section.dateAt", { date, time });
 }
 
 export const SessionDetailPanel: React.FC<{
   session: Session;
   onClose: () => void;
 }> = ({ session, onClose }) => {
+  const { t } = useTranslation();
   const actions = useStore((s) => s.actions);
   const goals = useStore((s) => s.goals);
   const openPanel = useStore((s) => s.openPanel);
@@ -194,8 +202,16 @@ export const SessionDetailPanel: React.FC<{
   const dur = sessionDurationMinutes(session);
   const outcome = sessionOutcome(session, actions);
 
-  const breakStr = session.mode === "continuous" ? "—" : `${session.breakDuration}min break`;
-  const config = `${session.mode[0].toUpperCase() + session.mode.slice(1)} · ${session.workDuration}min work / ${breakStr} · ${session.cyclesPlanned} cycles planned`;
+  const breakStr = session.mode === "continuous"
+    ? t("sessions.section.breakNone")
+    : t("sessions.section.breakMin", { count: session.breakDuration });
+  const modeName = session.mode[0].toUpperCase() + session.mode.slice(1);
+  const config = t("sessions.section.config", {
+    mode: modeName,
+    work: session.workDuration,
+    breakStr,
+    planned: session.cyclesPlanned,
+  });
 
   return (
     <div

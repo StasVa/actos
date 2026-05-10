@@ -863,9 +863,9 @@ const SessionActive: React.FC = () => {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="px-5 py-4 border-b border-border-subtle">
-              <h2 className="text-[16px] font-medium text-text-primary">Add actions to session</h2>
+              <h2 className="text-[16px] font-medium text-text-primary">{t("sessionActive.picker.title")}</h2>
               <p className="mt-1 text-[12px] text-text-secondary">
-                Pick from your active backlog and planned actions.
+                {t("sessionActive.picker.body")}
               </p>
             </div>
             <div className="flex-1 overflow-y-auto">

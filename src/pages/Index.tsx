@@ -849,14 +849,14 @@ export const TodayZone: React.FC<{
           style={{ padding: "32px 40px" }}
         >
           <div className="text-[20px] font-medium text-text-primary leading-snug">
-            What are you doing today?
+            {t("home.todayZone.notPlanned.heading")}
           </div>
           <div className="text-[14px] text-text-secondary mt-2">
-            Pick today's actions to start.
+            {t("home.todayZone.notPlanned.body")}
           </div>
           {preScheduledCount > 0 && (
             <div className="font-mono text-[12px] text-text-tertiary mt-3 tabular-nums">
-              {preScheduledCount} action{preScheduledCount === 1 ? "" : "s"} already scheduled for today
+              {t("home.todayZone.notPlanned.preScheduled", { count: preScheduledCount })}
             </div>
           )}
           <button
@@ -865,7 +865,7 @@ export const TodayZone: React.FC<{
             className="mt-6 inline-block rounded-[4px] bg-[hsl(var(--accent))] text-white font-medium hover:brightness-110 transition"
             style={{ padding: "12px 32px", fontSize: 15 }}
           >
-            Start your day →
+            {t("home.todayZone.notPlanned.cta")}
           </button>
         </div>
       </section>

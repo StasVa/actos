@@ -789,7 +789,7 @@ function ActionEditorPanel({
                       }}
                     />
                   </div>
-                  <FieldRow label="Delegate note">
+                  <FieldRow label={t("actionEditor.delegation.note")}>
                     <textarea
                       value={delegateNote}
                       onChange={(e) => setDelegateNote(e.target.value)}

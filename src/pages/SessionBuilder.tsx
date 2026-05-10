@@ -225,6 +225,7 @@ const SessionTimelineBar: React.FC<{ work: number; brk: number; cycles: number; 
   cycles,
   breaksOn,
 }) => {
+  const { t } = useTranslation();
   const c = Math.max(1, cycles);
   const effectiveBrk = breaksOn ? brk : 0;
   const total = c * work + Math.max(0, c - 1) * effectiveBrk || 1;

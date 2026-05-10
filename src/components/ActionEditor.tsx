@@ -897,12 +897,12 @@ function ActionEditorPanel({
 
             {/* NOTES */}
             <div>
-              <SectionHead>Notes</SectionHead>
+              <SectionHead>{t("actionEditor.section.notes")}</SectionHead>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 onBlur={() => persistField("notes", notes || undefined)}
-                placeholder="Add notes..."
+                placeholder={t("actionEditor.field.notesPlaceholder")}
                 rows={4}
                 className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary placeholder:text-text-tertiary outline-none resize-y"
               />

@@ -685,7 +685,7 @@ const SessionBuilder: React.FC = () => {
             className="m-3 rounded-[4px] p-6 text-center text-[13px] text-text-tertiary"
             style={{ border: "1px dashed hsl(var(--border-default))" }}
           >
-            No actions selected yet. Pick from the list.
+            {t("sessionBuilder.empty.noSelected")}
           </div>
         ) : (
           selectedIds.map((id, idx) => {

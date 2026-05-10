@@ -7,6 +7,8 @@ import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "re
 import { createPortal } from "react-dom";
 import { Zap, Leaf, Sun, Thermometer, GripVertical, Star, type LucideIcon } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
+import i18n from "@/i18n";
 import { useStore, ritualMultiplier } from "@/store/useStore";
 import type { Action, DayType, ID, Ritual } from "@/types";
 import { formatTime as formatTimeMin } from "@/lib/format";
@@ -21,6 +23,7 @@ const MiniDropdown: React.FC<{
   placeholder?: string;
   showDot?: boolean;
 }> = ({ value, options, onChange, placeholder, showDot }) => {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const current = options.find((o) => o.value === value);
@@ -65,7 +68,7 @@ const MiniDropdown: React.FC<{
           style={{ top: "calc(100% + 4px)", minWidth: Math.max(160, ref.current?.offsetWidth ?? 0), padding: "4px 0" }}
         >
           {options.length === 0 && (
-            <div className="px-3 py-1.5 text-[12px] text-text-tertiary">No options</div>
+            <div className="px-3 py-1.5 text-[12px] text-text-tertiary">{t("planToday.miniDropdown.noOptions")}</div>
           )}
           {options.map((o) => {
             const selected = o.value === value;
@@ -111,6 +114,7 @@ const InlineTextPicker: React.FC<{
   placeholder: string;
   showDot?: boolean;
 }> = ({ value, options, onChange, placeholder, showDot }) => {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -176,7 +180,7 @@ const InlineTextPicker: React.FC<{
           style={{ top: pos.top, left: pos.left, minWidth: pos.width, padding: "4px 0" }}
         >
           {options.length === 0 && (
-            <div className="px-3 py-1.5 text-[12px] text-text-tertiary">No options</div>
+            <div className="px-3 py-1.5 text-[12px] text-text-tertiary">{t("planToday.miniDropdown.noOptions")}</div>
           )}
           {options.map((o) => {
             const selected = o.value === value;
@@ -217,7 +221,7 @@ const InlineTextPicker: React.FC<{
 const todayISO = () => new Date().toISOString().slice(0, 10);
 
 const formatLong = (iso: string) =>
-  new Date(iso + "T00:00:00").toLocaleDateString("en-US", {
+  new Date(iso + "T00:00:00").toLocaleDateString(i18n.language || "en", {
     weekday: "long",
     month: "long",
     day: "numeric",
@@ -290,6 +294,7 @@ const PlanForm: React.FC<{
   state: PlanFormState;
   setState: React.Dispatch<React.SetStateAction<PlanFormState>>;
 }> = ({ date, state, setState }) => {
+  const { t } = useTranslation();
   const actions = useStore((s) => s.actions);
   const rituals = useStore((s) => s.rituals);
   const goals = useStore((s) => s.goals);
@@ -495,7 +500,7 @@ const PlanForm: React.FC<{
         <button
           type="button"
           onClick={() => removeAction(id)}
-          aria-label="Remove"
+          aria-label={t("planToday.actions.removeAria")}
           className="text-text-tertiary hover:text-text-primary text-[14px] px-1 shrink-0"
           style={{ marginLeft: 8 }}
         >
@@ -519,10 +524,10 @@ const PlanForm: React.FC<{
       {/* ACTIONS */}
           <section>
             <SectionHead
-              sub="Pick what you'll work on today."
-              meta={`${state.selectedActionIds.length} selected`}
+              sub={t("planToday.actions.sub")}
+              meta={t("planToday.actions.selectedCount", { count: state.selectedActionIds.length })}
             >
-              ACTIONS
+              {t("planToday.actions.heading")}
             </SectionHead>
 
             <div className="flex flex-col md:flex-row gap-3 min-w-0">
@@ -536,7 +541,7 @@ const PlanForm: React.FC<{
                     onChange={(e) => setFilterGoal(e.target.value)}
                     className="bg-surface-hover text-[11px] text-text-secondary rounded-[3px] px-1.5 py-1 outline-none border border-transparent focus:border-border-default"
                   >
-                    <option value="all">All goals</option>
+                    <option value="all">{t("planToday.actions.filter.allGoals")}</option>
                     {goals
                       .filter((g) => g.status === "active")
                       .map((g) => (
@@ -550,7 +555,7 @@ const PlanForm: React.FC<{
                     onChange={(e) => setFilterProject(e.target.value)}
                     className="bg-surface-hover text-[11px] text-text-secondary rounded-[3px] px-1.5 py-1 outline-none border border-transparent focus:border-border-default"
                   >
-                    <option value="all">All projects</option>
+                    <option value="all">{t("planToday.actions.filter.allProjects")}</option>
                     {projects
                       .filter((p) => p.status === "active")
                       .map((p) => (
@@ -564,9 +569,9 @@ const PlanForm: React.FC<{
                     onChange={(e) => setFilterStatus(e.target.value as any)}
                     className="bg-surface-hover text-[11px] text-text-secondary rounded-[3px] px-1.5 py-1 outline-none border border-transparent focus:border-border-default"
                   >
-                    <option value="all">All</option>
-                    <option value="backlog">Backlog</option>
-                    <option value="planned">Planned</option>
+                    <option value="all">{t("planToday.actions.filter.all")}</option>
+                    <option value="backlog">{t("planToday.actions.filter.backlog")}</option>
+                    <option value="planned">{t("planToday.actions.filter.planned")}</option>
                   </select>
                 </div>
 
@@ -574,7 +579,7 @@ const PlanForm: React.FC<{
                   {preScheduled.length > 0 && (
                     <>
                       <div className="px-2 py-1.5 font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary border-b border-border-subtle bg-surface-elevated">
-                        Already scheduled · {preScheduled.length}
+                        {t("planToday.actions.alreadyScheduled", { count: preScheduled.length })}
                       </div>
                       <div>{preScheduled.map(renderAvailableRow)}</div>
                     </>
@@ -583,7 +588,7 @@ const PlanForm: React.FC<{
                     <>
                       {preScheduled.length > 0 && (
                         <div className="px-2 py-1.5 font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary border-y border-border-subtle bg-surface-elevated">
-                          Available · {filteredAvailable.length}
+                          {t("planToday.actions.available", { count: filteredAvailable.length })}
                         </div>
                       )}
                       <div>{filteredAvailable.map(renderAvailableRow)}</div>
@@ -591,7 +596,7 @@ const PlanForm: React.FC<{
                   ) : (
                     preScheduled.length === 0 && (
                       <div className="px-3 py-8 text-center text-[12px] text-text-tertiary">
-                        No actions match.
+                        {t("planToday.actions.noMatch")}
                       </div>
                     )
                   )}
@@ -618,15 +623,15 @@ const PlanForm: React.FC<{
                           });
                           addMany([newId]);
                           setQuickTitle("");
-                          toast.success("Action created and added to today");
+                          toast.success(t("planToday.actions.toast.created"));
                         }}
-                        placeholder="Quick add new action..."
+                        placeholder={t("planToday.actions.quickAddPlaceholder")}
                         className="flex-1 min-w-0 bg-transparent text-[14px] text-text-primary outline-none placeholder:text-text-tertiary"
                       />
                     </div>
                     {/* Line 2: parent picker — inline text triggers */}
                     <div className="flex items-center gap-1.5 pl-[22px] flex-wrap">
-                      <span className="text-[13px] text-text-secondary">in</span>
+                      <span className="text-[13px] text-text-secondary">{t("planToday.actions.in")}</span>
                       {quickGoalId && (
                         <span
                           className="inline-block rounded-full shrink-0"
@@ -636,7 +641,7 @@ const PlanForm: React.FC<{
                       <InlineTextPicker
                         value={quickGoalId ?? ""}
                         showDot={false}
-                        placeholder="Pick goal"
+                        placeholder={t("planToday.actions.pickGoal")}
                         options={activeGoals.map((g) => ({
                           value: g.id,
                           label: g.title,
@@ -652,9 +657,9 @@ const PlanForm: React.FC<{
                       <span className="text-[13px] text-text-secondary">·</span>
                       <InlineTextPicker
                         value={quickProjectId ?? ""}
-                        placeholder="Pick project"
+                        placeholder={t("planToday.actions.pickProject")}
                         options={[
-                          { value: "", label: "No project" },
+                          { value: "", label: t("planToday.actions.noProject") },
                           ...projectsForQuickGoal.map((p) => ({
                             value: p.id,
                             label: p.title,
@@ -670,13 +675,13 @@ const PlanForm: React.FC<{
               {/* RIGHT: selected */}
               <div className="border border-border-subtle rounded-[6px] bg-surface-base flex flex-col min-h-[280px] flex-1 min-w-0 md:basis-[40%]">
                 <div className="px-3 py-2 border-b border-border-subtle font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">
-                  Selected · {state.selectedActionIds.length}
+                  {t("planToday.actions.selected", { count: state.selectedActionIds.length })}
                 </div>
                 <div className="flex-1 overflow-y-auto p-2 space-y-1.5 max-h-[360px]">
                   {state.selectedActionIds.length === 0 ? (
                     <div className="h-full min-h-[200px] flex items-center justify-center text-center px-4 border border-dashed border-border-subtle rounded-[4px]">
                       <span className="text-[12px] text-text-tertiary">
-                        No actions selected. Pick from the list or use Quick-start presets.
+                        {t("planToday.actions.noneSelected")}
                       </span>
                     </div>
                   ) : (
@@ -685,7 +690,7 @@ const PlanForm: React.FC<{
                 </div>
                 {state.selectedActionIds.length > 0 && totalEstMin > 0 && (
                   <div className="px-3 py-2 border-t border-border-subtle font-mono text-[11px] text-text-secondary tabular-nums">
-                    Estimated time: {formatTimeMin(totalEstMin)}
+                    {t("planToday.actions.estimatedTime", { time: formatTimeMin(totalEstMin) })}
                   </div>
                 )}
               </div>
@@ -698,11 +703,11 @@ const PlanForm: React.FC<{
               <div className="flex items-center gap-2">
                 <Star size={14} className="text-text-tertiary" />
                 <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
-                  MAIN TASK
+                  {t("planToday.mainTask.heading")}
                 </div>
               </div>
               <div className="text-[16px] md:text-[19px] font-medium text-text-primary mt-1 leading-snug">
-                What single thing makes today a win?
+                {t("planToday.mainTask.prompt")}
               </div>
             </div>
             {(() => {
@@ -724,7 +729,7 @@ const PlanForm: React.FC<{
                     <button
                       type="button"
                       onClick={() => setState((s) => ({ ...s, mainTaskId: undefined }))}
-                      aria-label="Clear main task"
+                      aria-label={t("planToday.mainTask.clearAria")}
                       className="absolute top-2 right-2 text-text-tertiary hover:text-text-primary text-[14px] px-1"
                     >
                       ×
@@ -763,7 +768,7 @@ const PlanForm: React.FC<{
                   className="w-full appearance-none bg-transparent rounded-[4px] px-4 py-3 text-[14px] text-text-tertiary outline-none border border-dashed border-border-default cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <option value="">
-                    {disabled ? "Add actions first" : "Pick from selected actions ▾"}
+                    {disabled ? t("planToday.mainTask.addActionsFirst") : t("planToday.mainTask.pickFromSelected")}
                   </option>
                   {selectedActions.map((a) => (
                     <option key={a.id} value={a.id}>
@@ -777,13 +782,13 @@ const PlanForm: React.FC<{
 
           {/* RITUALS */}
           <section>
-            <SectionHead meta={`${dueRituals.length}`} sub="Mark anything you want to skip.">
-              RITUALS TODAY
+            <SectionHead meta={`${dueRituals.length}`} sub={t("planToday.rituals.sub")}>
+              {t("planToday.rituals.heading")}
             </SectionHead>
             <div className="space-y-1">
               {dueRituals.length === 0 && (
                 <div className="font-mono text-[11px] text-text-tertiary py-2">
-                  No rituals scheduled for today.
+                  {t("planToday.rituals.none")}
                 </div>
               )}
               {dueRituals.map((r) => {
@@ -836,7 +841,7 @@ const PlanForm: React.FC<{
                         onClick={() => toggleRitualSkip(r.id, !skipped)}
                         className="text-[12px] text-text-tertiary hover:text-text-primary transition shrink-0 px-2"
                       >
-                        {skipped ? "Restore" : "Skip"}
+                        {skipped ? t("planToday.rituals.restore") : t("planToday.rituals.skip")}
                       </button>
                     </div>
                   </div>
@@ -886,8 +891,8 @@ function usePrefilledPlanState(
 
 type DayTypeMeta = {
   value: DayType;
-  label: string;
-  description: string;
+  labelKey: string;
+  descriptionKey: string;
   Icon: LucideIcon;
   color: string; // hsl(var(--…))
   active: boolean; // execution / recovery → step 2; otherwise commit immediately
@@ -896,32 +901,32 @@ type DayTypeMeta = {
 const DAY_TYPE_META: DayTypeMeta[] = [
   {
     value: "execution",
-    label: "Execution",
-    description: "Full work day — normal expectations.",
+    labelKey: "planToday.dayType.execution.label",
+    descriptionKey: "planToday.dayType.execution.description",
     Icon: Zap,
     color: "hsl(var(--state-active))",
     active: true,
   },
   {
     value: "recovery",
-    label: "Recovery",
-    description: "Light day, intentional rest.",
+    labelKey: "planToday.dayType.recovery.label",
+    descriptionKey: "planToday.dayType.recovery.description",
     Icon: Leaf,
     color: "hsl(var(--goal-3))",
     active: true,
   },
   {
     value: "day-off",
-    label: "Day Off",
-    description: "No work, fully off.",
+    labelKey: "planToday.dayType.dayOff.label",
+    descriptionKey: "planToday.dayType.dayOff.description",
     Icon: Sun,
     color: "hsl(var(--state-stalled))",
     active: false,
   },
   {
     value: "sick",
-    label: "Sick",
-    description: "Illness — expectations suspended.",
+    labelKey: "planToday.dayType.sick.label",
+    descriptionKey: "planToday.dayType.sick.description",
     Icon: Thermometer,
     color: "hsl(var(--status-dropped))",
     active: false,
@@ -930,15 +935,16 @@ const DAY_TYPE_META: DayTypeMeta[] = [
 
 /* Step 1 — centered hero with four colored Day Type cards. */
 const DayTypeStep: React.FC<{ onPick: (m: DayTypeMeta) => void }> = ({ onPick }) => {
+  const { t } = useTranslation();
   const [hover, setHover] = useState<DayType | null>(null);
   return (
     <div className="flex-1 flex flex-col items-center justify-center py-10">
       <div className="flex flex-col items-center text-center">
         <h2 className="text-[22px] md:text-[26px] font-medium text-text-primary leading-tight">
-          What kind of day is it?
+          {t("planToday.dayTypeStep.heading")}
         </h2>
         <div className="text-[14px] text-text-secondary mt-2">
-          Pick one to start planning.
+          {t("planToday.dayTypeStep.sub")}
         </div>
       </div>
       <div className="h-8 md:h-11" />
@@ -973,9 +979,9 @@ const DayTypeStep: React.FC<{ onPick: (m: DayTypeMeta) => void }> = ({ onPick })
               >
                 <m.Icon size={20} />
               </span>
-              <div className="text-[18px] font-medium text-text-primary">{m.label}</div>
+              <div className="text-[18px] font-medium text-text-primary">{t(m.labelKey)}</div>
               <div className="text-[13px] text-text-secondary leading-snug">
-                {m.description}
+                {t(m.descriptionKey)}
               </div>
             </button>
           );
@@ -990,6 +996,7 @@ const DayTypeChip: React.FC<{
   value: DayType;
   onChange: (next: DayTypeMeta) => void;
 }> = ({ value, onChange }) => {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const current = DAY_TYPE_META.find((m) => m.value === value)!;
@@ -1022,7 +1029,7 @@ const DayTypeChip: React.FC<{
           className="inline-block rounded-full shrink-0"
           style={{ width: 8, height: 8, background: current.color }}
         />
-        <span className="text-[13px] text-text-primary">{current.label}</span>
+        <span className="text-[13px] text-text-primary">{t(current.labelKey)}</span>
         <span className="font-mono text-[10px] text-text-tertiary">▾</span>
       </button>
       {open && (
@@ -1049,7 +1056,7 @@ const DayTypeChip: React.FC<{
                   className="inline-block rounded-full shrink-0"
                   style={{ width: 8, height: 8, background: m.color }}
                 />
-                <span className="flex-1 text-text-primary">{m.label}</span>
+                <span className="flex-1 text-text-primary">{t(m.labelKey)}</span>
                 {selected && (
                   <span style={{ color: "hsl(var(--accent))", fontSize: 12 }}>✓</span>
                 )}
@@ -1066,6 +1073,7 @@ export const PlanTodayPage: React.FC<{ onCancel: () => void; onComplete: () => v
   onCancel,
   onComplete,
 }) => {
+  const { t } = useTranslation();
   const date = todayISO();
   const startDayPlan = useStore((s) => s.startDayPlan);
   const updateAction = useStore((s) => s.updateAction);
@@ -1096,13 +1104,14 @@ export const PlanTodayPage: React.FC<{ onCancel: () => void; onComplete: () => v
       plannedRitualIds: Array.from(merged.keptRitualIds),
       skippedRitualIds: Array.from(merged.skippedRitualIds),
     });
-    const aLabel = DAY_TYPE_META.find((m) => m.value === merged.dayType)?.label ?? "Day";
+    const meta = DAY_TYPE_META.find((m) => m.value === merged.dayType);
+    const aLabel = meta ? t(meta.labelKey) : t("planToday.dayType.fallback");
     if (merged.selectedActionIds.length === 0 && merged.keptRitualIds.size === 0) {
-      toast.success(`${aLabel} day started.`);
+      toast.success(t("planToday.toast.dayStarted_simple", { label: aLabel }));
     } else {
-      toast.success(
-        `Day started. ${merged.selectedActionIds.length} action${merged.selectedActionIds.length === 1 ? "" : "s"}, ${merged.keptRitualIds.size} ritual${merged.keptRitualIds.size === 1 ? "" : "s"}.`,
-      );
+      const actionsPart = t("planToday.toast.actions", { count: merged.selectedActionIds.length });
+      const ritualsPart = t("planToday.toast.rituals", { count: merged.keptRitualIds.size });
+      toast.success(t("planToday.toast.dayStarted_full", { actions: actionsPart, rituals: ritualsPart }));
     }
     onComplete();
   };
@@ -1129,7 +1138,7 @@ export const PlanTodayPage: React.FC<{ onCancel: () => void; onComplete: () => v
     !!state.mainTaskId;
 
   const handleCancel = () => {
-    if (step === 2 && isDirty && !confirm("Discard your planning progress?")) return;
+    if (step === 2 && isDirty && !confirm(t("planToday.confirm.discardProgress"))) return;
     onCancel();
   };
 
@@ -1138,9 +1147,7 @@ export const PlanTodayPage: React.FC<{ onCancel: () => void; onComplete: () => v
       // Switching to Day Off / Sick — confirm + discard selections.
       if (
         isDirty &&
-        !confirm(
-          `Switch to ${next.label}? Your planned actions and main task will be discarded.`,
-        )
+        !confirm(t("planToday.confirm.switchDayType", { label: t(next.labelKey) }))
       ) {
         return;
       }
@@ -1164,7 +1171,7 @@ export const PlanTodayPage: React.FC<{ onCancel: () => void; onComplete: () => v
       <header className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-[28px] md:text-[32px] font-medium text-text-primary leading-tight">
-            Plan today
+            {t("planToday.title")}
           </h1>
           <div className="text-[14px] text-text-secondary mt-1">{formatLong(date)}</div>
         </div>
@@ -1173,7 +1180,7 @@ export const PlanTodayPage: React.FC<{ onCancel: () => void; onComplete: () => v
           onClick={handleCancel}
           className="text-[13px] text-text-secondary hover:text-text-primary transition shrink-0"
         >
-          Cancel
+          {t("planToday.cancel")}
         </button>
       </header>
 
@@ -1184,7 +1191,7 @@ export const PlanTodayPage: React.FC<{ onCancel: () => void; onComplete: () => v
           {/* Compact day-type row */}
           <div className="flex items-center gap-2 pb-4 border-b border-border-subtle">
             <span className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
-              DAY TYPE
+              {t("planToday.dayType.heading")}
             </span>
             {state.dayType && (
               <DayTypeChip value={state.dayType} onChange={handleChipChange} />
@@ -1194,7 +1201,7 @@ export const PlanTodayPage: React.FC<{ onCancel: () => void; onComplete: () => v
               onClick={() => setStep(1)}
               className="ml-2 text-[12px] text-text-tertiary hover:text-text-primary transition"
             >
-              ← Back
+              {t("planToday.back")}
             </button>
           </div>
 
@@ -1207,7 +1214,7 @@ export const PlanTodayPage: React.FC<{ onCancel: () => void; onComplete: () => v
               onClick={handleCancel}
               className="hidden md:inline text-[13px] text-text-secondary hover:text-text-primary transition"
             >
-              Cancel
+              {t("planToday.cancel")}
             </button>
             <button
               type="button"
@@ -1215,7 +1222,7 @@ export const PlanTodayPage: React.FC<{ onCancel: () => void; onComplete: () => v
               disabled={submitDisabled}
               className="ml-auto w-full md:w-auto px-5 py-2.5 rounded-[4px] bg-[hsl(var(--accent))] text-white text-[14px] font-medium hover:brightness-110 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Start day
+              {t("planToday.startDay")}
             </button>
           </div>
           <div className="h-16 md:hidden" />

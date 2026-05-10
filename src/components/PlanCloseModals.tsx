@@ -596,7 +596,7 @@ const PlanForm: React.FC<{
                   ) : (
                     preScheduled.length === 0 && (
                       <div className="px-3 py-8 text-center text-[12px] text-text-tertiary">
-                        No actions match.
+                        {t("planToday.actions.noMatch")}
                       </div>
                     )
                   )}

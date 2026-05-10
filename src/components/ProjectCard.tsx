@@ -113,7 +113,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ projectId, goalLabel, 
       remainingMin,
       hasTimeData,
     };
-  }, [actions]);
+  }, [actions, locale, t]);
 
   if (!project) return null;
 

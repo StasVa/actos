@@ -13,6 +13,16 @@ import type { ID, Ritual, RitualSchedule } from "@/types";
 import { ConfirmModal } from "./ConfirmModal";
 import { ritualMultiplier } from "@/store/useStore";
 import { EditorShell, EditorCloseX, EditorCancelButton } from "./EditorShell";
+import {
+  DeleteTypeConfirm,
+  EditorOverflowMenu,
+  MarkDoneButton,
+  SaveIndicator,
+  overflowDelete,
+  overflowDrop,
+  overflowDuplicate,
+  useSaveIndicator,
+} from "./EditorFooterControls";
 import { MetricInfoPopover } from "./MetricInfoPopover";
 import { ClampedNumberInput } from "./ClampedNumberInput";
 import {

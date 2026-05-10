@@ -703,11 +703,11 @@ const PlanForm: React.FC<{
               <div className="flex items-center gap-2">
                 <Star size={14} className="text-text-tertiary" />
                 <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary">
-                  MAIN TASK
+                  {t("planToday.mainTask.heading")}
                 </div>
               </div>
               <div className="text-[16px] md:text-[19px] font-medium text-text-primary mt-1 leading-snug">
-                What single thing makes today a win?
+                {t("planToday.mainTask.prompt")}
               </div>
             </div>
             {(() => {

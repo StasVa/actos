@@ -106,16 +106,16 @@ const RecentlyClosedHigherSection: React.FC = () => {
   const projCount = rows.filter((r) => r.kind === "project").length;
   const goalCount = rows.filter((r) => r.kind === "goal").length;
   const metaParts: string[] = [];
-  if (projCount > 0) metaParts.push(`${projCount} project${projCount === 1 ? "" : "s"}`);
-  if (goalCount > 0) metaParts.push(`${goalCount} goal${goalCount === 1 ? "" : "s"}`);
+  if (projCount > 0) metaParts.push(t("common.count.projects", { count: projCount }).toUpperCase());
+  if (goalCount > 0) metaParts.push(t("common.count.goals", { count: goalCount }).toUpperCase());
 
   const visible = rows.slice(0, 8);
   const remaining = rows.length - visible.length;
 
   return (
     <section>
-      <SectionLabel meta={metaParts.join(" · ").toUpperCase()}>
-        Recently closed · {rows.length}
+      <SectionLabel meta={metaParts.join(" · ")}>
+        {t("progress.section.recentlyClosed", { count: rows.length })}
       </SectionLabel>
       <div className="bg-surface-elevated border border-border-subtle rounded-[6px] overflow-hidden">
         {visible.map((r, i) => {

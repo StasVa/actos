@@ -106,6 +106,23 @@ function RitualEditorPanel({
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmArchive, setConfirmArchive] = useState(false);
   const titleRef = useRef<HTMLInputElement>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
+
+  // Auto-save indicator (edit mode only).
+  const { state: saveState, markEditing } = useSaveIndicator();
+  useEffect(() => {
+    if (mode !== "edit") return;
+    const el = bodyRef.current;
+    if (!el) return;
+    const handler = () => markEditing();
+    el.addEventListener("input", handler);
+    el.addEventListener("change", handler);
+    return () => {
+      el.removeEventListener("input", handler);
+      el.removeEventListener("change", handler);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode]);
 
   // New-mode UI state.
   const [titleError, setTitleError] = useState<string | null>(null);

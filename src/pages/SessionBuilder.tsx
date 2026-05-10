@@ -739,9 +739,9 @@ const SessionBuilder: React.FC = () => {
               to="/sessions"
               className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary hover:text-text-secondary transition-colors"
             >
-              ← Sessions
+              {t("sessionBuilder.back")}
             </Link>
-            <h1 className="mt-2 text-[28px] font-medium tracking-tight">New Session</h1>
+            <h1 className="mt-2 text-[28px] font-medium tracking-tight">{t("sessionBuilder.heading")}</h1>
           </div>
 
           {/* MODE */}

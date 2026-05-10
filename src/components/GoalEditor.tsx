@@ -489,7 +489,7 @@ function GoalEditorPanel({
             <EditorCancelButton />
             <button
               onClick={handleSaveNew}
-              disabled={activeCount >= 3}
+              disabled={atCap}
               className="text-[13px] font-medium px-3 py-1.5 rounded-[4px] disabled:opacity-50 disabled:cursor-not-allowed"
               style={{
                 background: "hsl(var(--accent))",

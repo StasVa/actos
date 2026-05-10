@@ -186,27 +186,33 @@ type GoalFilter = "all" | GoalKey;
 type StateFilter = "all" | "open" | "near" | "stalled" | "closed";
 type SortKey = "recent" | "stalled" | "progress" | "title";
 
-const GOAL_OPTIONS: FilterOption<GoalFilter>[] = [
-  { value: "all", label: "All" },
-  { value: "g1", label: "Launch YouTube", dot: G1 },
-  { value: "g2", label: "Lose 5 kg", dot: G2 },
-  { value: "g3", label: "Read 24 books", dot: G3 },
-];
+function useGoalOptions(t: (k: string) => string): FilterOption<GoalFilter>[] {
+  return [
+    { value: "all", label: t("common.all") },
+    { value: "g1", label: "Launch YouTube", dot: G1 },
+    { value: "g2", label: "Lose 5 kg", dot: G2 },
+    { value: "g3", label: "Read 24 books", dot: G3 },
+  ];
+}
 
-const STATE_OPTIONS: FilterOption<StateFilter>[] = [
-  { value: "all", label: "All" },
-  { value: "open", label: "Active" },
-  { value: "near", label: "Near completion" },
-  { value: "stalled", label: "Stalled" },
-  { value: "closed", label: "Closed" },
-];
+function useStateOptions(t: (k: string) => string): FilterOption<StateFilter>[] {
+  return [
+    { value: "all", label: t("common.all") },
+    { value: "open", label: t("common.state.active") },
+    { value: "near", label: t("common.state.nearCompletion") },
+    { value: "stalled", label: t("common.state.stalled") },
+    { value: "closed", label: t("common.state.closed") },
+  ];
+}
 
-const SORT_OPTIONS: FilterOption<SortKey>[] = [
-  { value: "recent", label: "Recent activity" },
-  { value: "stalled", label: "Stalled longest" },
-  { value: "progress", label: "By progress" },
-  { value: "title", label: "By title" },
-];
+function useSortOptions(t: (k: string) => string): FilterOption<SortKey>[] {
+  return [
+    { value: "recent", label: t("common.sort.recentActivity") },
+    { value: "stalled", label: t("common.sort.stalledLongest") },
+    { value: "progress", label: t("common.sort.byProgress") },
+    { value: "title", label: t("common.sort.byTitle") },
+  ];
+}
 
 function isOpen(p: Project) {
   return p.state === "active" || p.state === "near" || p.state === "stalled";

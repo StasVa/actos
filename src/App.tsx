@@ -97,6 +97,7 @@ const ChromeOnlyOutsideSetup: React.FC<{ children: React.ReactNode }> = ({ child
   const hasActiveGoal = useStore((s) => s.goals.some((g) => g.status === "active"));
   if (pathname === "/") return null;
   if (pathname.startsWith("/pricing")) return null;
+  if (pathname.startsWith("/start")) return null;
   if (pathname.startsWith("/manifesto")) return null;
   if (pathname.startsWith("/login")) return null;
   if (pathname.startsWith("/legal")) return null;

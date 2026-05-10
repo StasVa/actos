@@ -370,10 +370,10 @@ const ReviewDayDetail: React.FC = () => {
           to="/reviews/days"
           className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary hover:text-text-primary transition-colors"
         >
-          ← REVIEWS
+          {t("reviews.detail.back")}
         </Link>
         <h1 className="mt-3 text-[24px] font-medium text-text-primary leading-tight">
-          {date ? longDate(date) : "—"}
+          {date ? longDate(date) : t("reviews.detail.dash")}
         </h1>
         {subParts.length > 0 && (
           <div className="mt-1 font-mono text-[13px] text-text-tertiary">

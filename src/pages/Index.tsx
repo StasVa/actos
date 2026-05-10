@@ -1818,6 +1818,7 @@ const LookingBackCard: React.FC<{ date: string }> = ({ date }) => {
 
 /* ===== Page (Today) ===== */
 const Index: React.FC = () => {
+  const { t, i18n: i18nInst } = useTranslation();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [planningMode, setPlanningMode] = useState(false);
 

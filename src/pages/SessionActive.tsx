@@ -781,7 +781,7 @@ const SessionActive: React.FC = () => {
                     color: "hsl(var(--text-primary))",
                   }}
                 >
-                  Skip break
+                  {t("sessionActive.controls.skipBreak")}
                 </button>
               )}
               {isPaused && (

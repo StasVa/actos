@@ -588,7 +588,7 @@ const PlanForm: React.FC<{
                     <>
                       {preScheduled.length > 0 && (
                         <div className="px-2 py-1.5 font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary border-y border-border-subtle bg-surface-elevated">
-                          Available · {filteredAvailable.length}
+                          {t("planToday.actions.available", { count: filteredAvailable.length })}
                         </div>
                       )}
                       <div>{filteredAvailable.map(renderAvailableRow)}</div>

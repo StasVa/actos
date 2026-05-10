@@ -681,7 +681,7 @@ const PlanForm: React.FC<{
                   {state.selectedActionIds.length === 0 ? (
                     <div className="h-full min-h-[200px] flex items-center justify-center text-center px-4 border border-dashed border-border-subtle rounded-[4px]">
                       <span className="text-[12px] text-text-tertiary">
-                        No actions selected. Pick from the list or use Quick-start presets.
+                        {t("planToday.actions.noneSelected")}
                       </span>
                     </div>
                   ) : (

@@ -694,11 +694,11 @@ function ActionEditorPanel({
             <div>
               {notesExpanded ? (
                 <>
-                  <SectionHead>Notes</SectionHead>
+                  <SectionHead>{t("actionEditor.section.notes")}</SectionHead>
                   <textarea
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Add notes..."
+                    placeholder={t("actionEditor.field.notesPlaceholder")}
                     rows={4}
                     autoFocus
                     className="w-full bg-surface-raised border border-border-subtle rounded-[4px] px-2 py-1.5 text-[13px] text-text-primary placeholder:text-text-tertiary outline-none resize-y"
@@ -710,7 +710,7 @@ function ActionEditorPanel({
                   onClick={() => setNotesExpanded(true)}
                   className="text-[13px] text-text-secondary hover:text-text-primary transition-colors"
                 >
-                  + Add notes
+                  {t("actionEditor.field.addNotes")}
                 </button>
               )}
             </div>

@@ -277,10 +277,12 @@ const RitualCard: React.FC<{ r: RitualRow; onOpen: (r: RitualRow) => void; onMar
 };
 
 /* ===== Pending today list ===== */
-const PendingToday: React.FC<{ items: RitualRow[]; onMarkDone: (r: RitualRow) => void; onOpen: (r: RitualRow) => void }> = ({ items, onMarkDone, onOpen }) => (
+const PendingToday: React.FC<{ items: RitualRow[]; onMarkDone: (r: RitualRow) => void; onOpen: (r: RitualRow) => void }> = ({ items, onMarkDone, onOpen }) => {
+  const { t } = useTranslation();
+  return (
   <section>
     <div className="text-[12px] font-medium uppercase tracking-[0.08em] text-text-secondary mb-3">
-      Pending today · {items.length}
+      {t("rituals.section.pendingToday", { count: items.length })}
     </div>
     <div className="rounded-[4px] overflow-hidden border border-border-subtle">
       {items.map((r, i) => (
@@ -311,13 +313,14 @@ const PendingToday: React.FC<{ items: RitualRow[]; onMarkDone: (r: RitualRow) =>
             }}
             className="text-[12px] text-text-secondary hover:text-text-primary"
           >
-            Mark done
+            {t("common.markDone")}
           </button>
         </div>
       ))}
     </div>
   </section>
-);
+  );
+};
 
 /* ===== Top stats (live) ===== */
 const TopStats: React.FC<{ rows: RitualRow[]; allTime: number; activeCount: number; pendingCount: number; dueCount: number }> = ({ rows, allTime, activeCount, pendingCount, dueCount }) => {

@@ -952,7 +952,7 @@ function ActionEditorPanel({
                 <MarkDoneButton
                   onClick={() => handleStatusChange("done")}
                   disabled={!(impactNum > 0) || (requireTime && !(timeNum > 0))}
-                  disabledTooltip="Add Impact and Time first"
+                  disabledTooltip={t("actionEditor.action.markDoneDisabledTooltip")}
                 />
               )}
               {status === "delegated" && (
@@ -961,12 +961,12 @@ function ActionEditorPanel({
                     onClick={() => handleStatusChange("backlog")}
                     className="text-[13px] px-3 py-1.5 rounded-[4px] border border-border-subtle text-text-secondary hover:text-text-primary"
                   >
-                    Re-open
+                    {t("actionEditor.action.reopen")}
                   </button>
                   <MarkDoneButton
                     onClick={() => handleStatusChange("done")}
                     disabled={!(impactNum > 0) || (requireTime && !(timeNum > 0))}
-                    disabledTooltip="Add Impact and Time first"
+                    disabledTooltip={t("actionEditor.action.markDoneDisabledTooltip")}
                   />
                 </>
               )}

@@ -497,9 +497,9 @@ export const Hero: React.FC = () => {
         const progress = outcome;
 
         const targetLabel = g.targetDate
-          ? `TARGET ${new Date(g.targetDate)
-              .toLocaleDateString("en-US", { month: "short", day: "numeric" })
-              .toUpperCase()}`
+          ? t("home.hero.targetPrefix", {
+              date: formatDate(g.targetDate, { month: "short", day: "numeric" }).toUpperCase(),
+            })
           : undefined;
 
         const recentDone = goalActions
@@ -516,35 +516,43 @@ export const Hero: React.FC = () => {
             href={`/goals/${g.id}`}
             title={g.title}
             state={state}
-            type={g.type === "mid-term" ? "MID-TERM" : "SHORT-TERM"}
+            type={g.type === "mid-term" ? t("goals.type.midTerm") : t("goals.type.shortTerm")}
             target={targetLabel}
             progress={progress}
             meta={[
-              <><span className="text-text-primary tabular-nums">{projectsClosed}</span> of <span className="text-text-primary tabular-nums">{projectsTotal}</span> projects closed</>,
-              <><span className="text-text-primary tabular-nums">{actionsDone}</span> actions done</>,
-              <><span className="text-text-tertiary">Last activity:</span> <span className="text-text-primary">{lastLabel}</span></>,
+              <Trans
+                i18nKey="home.hero.projectsClosed"
+                values={{ closed: projectsClosed, total: projectsTotal }}
+                components={[<span className="text-text-primary tabular-nums" />]}
+              />,
+              <Trans
+                i18nKey="home.hero.actionsDone"
+                values={{ count: actionsDone }}
+                components={[<span className="text-text-primary tabular-nums" />]}
+              />,
+              <><span className="text-text-tertiary">{t("home.hero.lastActivityPrefix")}</span> <span className="text-text-primary">{lastLabel}</span></>,
             ]}
             outcome={outcome}
             effort={effort}
             spark={spark.data}
             sparkTips={spark.tips}
             lastActivity={state === "active" ? lastLabel : undefined}
-            stalledFor={state === "stalled" ? `${days} days` : undefined}
+            stalledFor={state === "stalled" ? t("home.hero.stalledFor", { count: days }) : undefined}
             color={`hsl(var(--${g.color}))`}
             recent={
               recentDone.length > 0 ? (
                 <>
-                  <span className="text-text-tertiary">Recent: </span>
-                  {recentDone.map((t, i) => (
+                  <span className="text-text-tertiary">{t("home.hero.recentPrefix")}</span>
+                  {recentDone.map((title, i) => (
                     <React.Fragment key={i}>
                       {i > 0 && <span className="text-text-tertiary"> · </span>}
                       <span className="text-text-tertiary">✓ </span>
-                      <span className="text-text-secondary">{t}</span>
+                      <span className="text-text-secondary">{title}</span>
                     </React.Fragment>
                   ))}
                 </>
               ) : (
-                <>No closed actions yet.</>
+                <>{t("home.hero.noClosedYet")}</>
               )
             }
             menu={<GoalColumnMenu goalId={g.id} />}

@@ -554,6 +554,8 @@
   "goals.cap.softBlock.heading": "Free está hecho para una meta a la vez.",
   "goals.cap.softBlock.line": "{{count}} de {{cap}} metas activa · All-In permite 3.",
   "goals.card.activityHeading": "ACTIVIDAD · ÚLTIMOS 30 DÍAS",
+  "goals.card.completedAgo": "Completada {{relative}}",
+  "goals.card.droppedAgo": "Descartada {{relative}}",
   "goals.card.lastActivityLabel": "Última actividad: {{relative}}",
   "goals.card.projectsLine_one": "{{active}} activo · {{closed}} cerrado",
   "goals.card.projectsLine_other": "{{active}} activos · {{closed}} cerrados",

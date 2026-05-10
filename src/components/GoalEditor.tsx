@@ -107,6 +107,7 @@ function GoalEditorPanel({
   const goals = useStore((s) => s.goals);
   const settings = useStore((s) => s.settings);
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const createGoal = useStore((s) => s.createGoal);
   const updateGoal = useStore((s) => s.updateGoal);

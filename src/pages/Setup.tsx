@@ -296,18 +296,19 @@ const ChoiceScreen: React.FC<{
   onContinue: () => void;
   onBack: () => void;
 }> = ({ selected, setSelected, onContinue, onBack }) => {
+  const { t } = useTranslation();
   const cards: { id: Path; icon: typeof Sparkles; title: string; desc: string }[] = [
     {
       id: "sample",
       icon: Sparkles,
-      title: "Show me how it works",
-      desc: "Start with sample goals and tasks. See the product in motion. Clear it whenever you're ready.",
+      title: t("setup.choice.sample.title"),
+      desc: t("setup.choice.sample.body"),
     },
     {
       id: "own",
       icon: Target,
-      title: "Set up my own goal",
-      desc: "Walk through creating your first goal, project, and a few actions. Start working immediately on what matters.",
+      title: t("setup.choice.own.title"),
+      desc: t("setup.choice.own.body"),
     },
   ];
   return (
@@ -317,7 +318,7 @@ const ChoiceScreen: React.FC<{
           fontFamily: "Inter", fontWeight: 400,
           fontSize: "clamp(32px, 5vw, 48px)", margin: 0, textAlign: "center",
           color: "hsl(var(--text-primary))",
-        }}>How would you like to start?</h1>
+        }}>{t("setup.choice.heading")}</h1>
         <div style={{ height: 80 }} />
 
         <div

@@ -510,7 +510,7 @@ const ReviewDayDetail: React.FC = () => {
                             />
                           </div>
                           <div className="w-[80px] text-right font-mono text-[12px] tabular-nums text-text-secondary">
-                            {min > 0 ? formatHM(min) : "—"}
+                            {min > 0 ? formatHM(min) : t("reviews.detail.dash")}
                           </div>
                         </div>
                         {showProjects && (

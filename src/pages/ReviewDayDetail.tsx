@@ -570,10 +570,10 @@ const ReviewDayDetail: React.FC = () => {
             {/* ACTIONS */}
             <section>
               <SectionHead meta={showActionTimeMeta ? formatHM(actionTimeMin) : undefined}>
-                Actions · {actionTotal}
+                {t("reviews.detail.section.actions", { count: actionTotal })}
               </SectionHead>
               {actionTotal === 0 ? (
-                <div className="text-[13px] text-text-tertiary italic mb-3">No actions tracked.</div>
+                <div className="text-[13px] text-text-tertiary italic mb-3">{t("reviews.detail.actions.empty")}</div>
               ) : (
                 <div>
                   {doneToday.length > 0 && (

@@ -1171,7 +1171,7 @@ export const PlanTodayPage: React.FC<{ onCancel: () => void; onComplete: () => v
       <header className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-[28px] md:text-[32px] font-medium text-text-primary leading-tight">
-            Plan today
+            {t("planToday.title")}
           </h1>
           <div className="text-[14px] text-text-secondary mt-1">{formatLong(date)}</div>
         </div>

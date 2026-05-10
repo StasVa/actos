@@ -181,7 +181,7 @@ const WelcomeScreen: React.FC<{ name: string; onContinue: () => void }> = ({ nam
             margin: 0,
           }}
         >
-          {t("setup.welcome.heading", { name })}
+          {t("setup.welcome.heading")}
         </h1>
         <div style={{ height: 16 }} />
         <p

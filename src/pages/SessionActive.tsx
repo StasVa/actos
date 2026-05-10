@@ -377,7 +377,7 @@ const SessionActive: React.FC = () => {
     );
     const nextId = remaining[0];
     const next = nextId ? actions.find((a) => a.id === nextId) : null;
-    toast.success(next ? `Marked done. ${next.title} next.` : "Marked done.");
+    toast.success(next ? t("sessionActive.action.markedDoneNext", { title: next.title }) : t("sessionActive.action.markedDone"));
   };
 
   const handleConfirmDrop = () => {

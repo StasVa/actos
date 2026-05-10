@@ -119,9 +119,17 @@ export const DAY_TYPE_ICONS: Record<string, LucideIcon> = {
 };
 
 export const DayTypeIndicator: React.FC<{ dayType?: string }> = ({ dayType }) => {
+  const { t } = useTranslation();
   if (!dayType) return null;
   const Icon = DAY_TYPE_ICONS[dayType];
-  const label = (DAY_TYPE_LABELS[dayType] ?? "").toUpperCase() + " DAY";
+  const dayTypeKeyMap: Record<string, string> = {
+    execution: "today.dayType.execution",
+    recovery: "today.dayType.recovery",
+    "day-off": "today.dayType.dayOff",
+    sick: "today.dayType.sick",
+  };
+  const localized = dayTypeKeyMap[dayType] ? t(dayTypeKeyMap[dayType]) : dayType;
+  const label = t("today.dayTypeSuffix", { label: localized.toUpperCase() });
   return (
     <div className="flex items-center text-text-secondary mt-2">
       {Icon && <Icon size={12} className="mr-1.5" />}

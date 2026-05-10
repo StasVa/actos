@@ -644,7 +644,7 @@ const SessionBuilder: React.FC = () => {
               background: todayOnly ? "hsl(var(--surface-hover))" : "transparent",
             }}
           >
-            TODAY'S PLANNED · {(todayEntry?.plannedActionIds ?? []).length}
+            {t("sessionBuilder.filter.todayPlanned", { count: (todayEntry?.plannedActionIds ?? []).length })}
           </button>
         )}
       </div>

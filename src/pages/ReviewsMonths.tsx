@@ -26,12 +26,7 @@ import {
   sortReviewEntries,
 } from "@/lib/reviewSort";
 
-const RANGE_OPTIONS = [
-  { value: "12m", label: "Last 12 months" },
-  { value: "6m", label: "Last 6 months" },
-  { value: "ytd", label: "This year" },
-  { value: "all", label: "All" },
-];
+
 
 
 function rangeStart(value: string): Date | null {

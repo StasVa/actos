@@ -265,8 +265,8 @@ const SessionTimelineBar: React.FC<{ work: number; brk: number; cycles: number; 
         ))}
       </div>
       <div className="mt-2 flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary tabular-nums">
-        <span>{fmtClock(start)} · NOW</span>
-        <span>ENDS {fmtClock(end)}</span>
+        <span>{t("sessionBuilder.timeline.now", { time: fmtClock(start) })}</span>
+        <span>{t("sessionBuilder.timeline.ends", { time: fmtClock(end) })}</span>
       </div>
     </div>
   );

@@ -870,10 +870,10 @@ const ProjectDetail: React.FC = () => {
                   value: (
                     <Link
                       to={`/goals/${goal.id}`}
-                      className="inline-flex items-center gap-2 hover:text-accent hover:underline transition-colors"
+                      className="flex items-start gap-2 hover:text-accent hover:underline transition-colors min-w-0"
                     >
-                      <span className="w-2 h-2 rounded-full shrink-0" style={{ background: color }} />
-                      <span>{goal.title}</span>
+                      <span className="w-2 h-2 rounded-full shrink-0 mt-[6px]" style={{ background: color }} />
+                      <span className="break-words min-w-0">{goal.title}</span>
                     </Link>
                   ),
                 },
@@ -899,10 +899,10 @@ const ProjectDetail: React.FC = () => {
                   key={f.label}
                   className={`py-3 ${i < fields.length - 1 ? "border-b border-border-subtle" : ""}`}
                 >
-                  <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-2">
+                  <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-tertiary mb-2 break-words whitespace-normal">
                     {f.label}
                   </div>
-                  <div className="text-[14px] leading-[1.4] text-text-primary break-words">
+                  <div className="text-[14px] leading-[1.4] text-text-primary break-words min-w-0">
                     {f.value}
                   </div>
                 </div>

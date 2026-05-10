@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { AppSidebar } from "@/components/AppSidebar";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { useStore } from "@/store/useStore";

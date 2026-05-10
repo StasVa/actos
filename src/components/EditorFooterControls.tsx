@@ -126,7 +126,7 @@ export function SaveIndicator({
 
 export type OverflowMenuItem = {
   label: string;
-  icon: React.ComponentType<{ size?: number }>;
+  icon: LucideIcon;
   onSelect: () => void;
   destructive?: boolean;
   /** Insert a divider above this item. */

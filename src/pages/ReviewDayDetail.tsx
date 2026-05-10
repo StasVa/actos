@@ -388,10 +388,10 @@ const ReviewDayDetail: React.FC = () => {
         {!hasAnyData ? (
           <div className="text-center py-16">
             <div className="text-[14px] text-text-secondary">
-              No activity logged for this day.
+              {t("reviews.detail.noActivityDay")}
             </div>
             <Link to="/reviews/days" className="inline-block mt-3 text-[12px] text-[hsl(var(--accent))]">
-              Back to reviews
+              {t("reviews.detail.backToReviews")}
             </Link>
           </div>
         ) : (

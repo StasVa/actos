@@ -1436,6 +1436,7 @@ export const TodayZone: React.FC<{
 
 /* ===== Heavy Lift (live) ===== */
 const HeavyLift: React.FC = () => {
+  const { t } = useTranslation();
   const actions = useStore((s) => s.actions);
   const goals = useStore((s) => s.goals);
   const projects = useStore((s) => s.projects);

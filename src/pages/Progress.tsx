@@ -70,7 +70,7 @@ const RecentlyClosedHigherSection: React.FC = () => {
       goal: goals.find((g) => g.id === p.goalId),
       closureIso: stamp,
       isDropped: p.status === "dropped",
-      countLabel: `${doneActs.length} action${doneActs.length === 1 ? "" : "s"} done`,
+      countLabel: t("progress.row.actionsDoneCount", { count: doneActs.length }),
       valueAdded,
       timeInvestedMin: timeMin,
     });

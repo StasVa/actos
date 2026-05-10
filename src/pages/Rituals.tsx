@@ -37,13 +37,13 @@ type RitualRow = {
 };
 
 /* Date helpers for tooltips */
-const MONTH_SHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 function dayLabel(daysFromToday: number): string {
-  if (daysFromToday === 0) return "Today";
-  if (daysFromToday === 1) return "Yesterday";
+  const t = i18n.t.bind(i18n);
+  if (daysFromToday === 0) return t("rituals.relDay.today");
+  if (daysFromToday === 1) return t("rituals.relDay.yesterday");
   const d = new Date();
   d.setDate(d.getDate() - daysFromToday);
-  return `${MONTH_SHORT[d.getMonth()]} ${d.getDate()}`;
+  return d.toLocaleDateString(i18n.language, { month: "short", day: "numeric" });
 }
 function weekLabel(weeksFromNow: number): string {
   const d = new Date();
@@ -51,13 +51,14 @@ function weekLabel(weeksFromNow: number): string {
   const day = d.getDay();
   const diff = (day + 6) % 7;
   d.setDate(d.getDate() - diff);
-  return `Week of ${MONTH_SHORT[d.getMonth()]} ${d.getDate()}`;
+  const md = d.toLocaleDateString(i18n.language, { month: "short", day: "numeric" });
+  return i18n.t("reviews.detail.weekLabel", { start: md, end: "" }).replace(/\s*[—–-]\s*$/, "").trim() || `Week of ${md}`;
 }
 function monthLabel(monthsFromNow: number): string {
   const d = new Date();
   d.setDate(1);
   d.setMonth(d.getMonth() - monthsFromNow);
-  return `${MONTH_SHORT[d.getMonth()]} ${d.getFullYear()}`;
+  return d.toLocaleDateString(i18n.language, { month: "short", year: "numeric" });
 }
 
 

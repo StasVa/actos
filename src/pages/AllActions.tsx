@@ -355,23 +355,29 @@ const ActionDetail: React.FC<{ action: Action }> = ({ action }) => {
 };
 
 /* ===== Empty states ===== */
-const EmptyDetail: React.FC = () => (
-  <div className="h-full flex flex-col items-center justify-center text-center px-10">
-    <div className="text-[14px] text-text-secondary">Select an action to view details</div>
-  </div>
-);
+const EmptyDetail: React.FC = () => {
+  const { t } = useTranslation();
+  return (
+    <div className="h-full flex flex-col items-center justify-center text-center px-10">
+      <div className="text-[14px] text-text-secondary">{t("allActions.empty.select")}</div>
+    </div>
+  );
+};
 
-const EmptyFiltered: React.FC<{ onClear: () => void }> = ({ onClear }) => (
-  <div className="h-full flex flex-col items-center justify-center text-center px-10">
-    <div className="text-[14px] text-text-secondary">No actions match these filters</div>
-    <div className="mt-1 font-mono text-[11px] text-text-tertiary">
-      Clear filters or change them above.
+const EmptyFiltered: React.FC<{ onClear: () => void }> = ({ onClear }) => {
+  const { t } = useTranslation();
+  return (
+    <div className="h-full flex flex-col items-center justify-center text-center px-10">
+      <div className="text-[14px] text-text-secondary">{t("allActions.empty.noMatch")}</div>
+      <div className="mt-1 font-mono text-[11px] text-text-tertiary">
+        {t("allActions.filteredEmpty.hint")}
+      </div>
+      <div className="mt-4">
+        <GhostButton onClick={onClear}>{t("common.clearFilters")}</GhostButton>
+      </div>
     </div>
-    <div className="mt-4">
-      <GhostButton onClick={onClear}>Clear filters</GhostButton>
-    </div>
-  </div>
-);
+  );
+};
 
 /* ===== Page ===== */
 type StatusFilter = "all" | ActionStatus;

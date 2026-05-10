@@ -359,6 +359,7 @@ const TopStats: React.FC<{ rows: RitualRow[]; allTime: number; activeCount: numb
 
 /* ===== Archived (live) ===== */
 const ArchivedSection: React.FC<{ rows: RitualRow[]; onRestore: (id: string) => void }> = ({ rows, onRestore }) => {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   if (rows.length === 0) return null;
   return (
@@ -368,7 +369,7 @@ const ArchivedSection: React.FC<{ rows: RitualRow[]; onRestore: (id: string) => 
         onClick={() => setOpen((v) => !v)}
         className="text-[12px] font-medium uppercase tracking-[0.08em] text-text-tertiary hover:text-text-secondary cursor-pointer"
       >
-        {open ? "▾" : "▸"} ARCHIVED · {rows.length}
+        {open ? "▾" : "▸"} {t("rituals.section.archived", { count: rows.length })}
       </button>
       {open && (
         <div className="mt-3 rounded-[4px] overflow-hidden border border-border-subtle">
@@ -384,7 +385,8 @@ const ArchivedSection: React.FC<{ rows: RitualRow[]; onRestore: (id: string) => 
               />
               <span className="text-[13px] text-text-tertiary">{r.title}</span>
               <span className="font-mono text-[11px] text-text-tertiary">
-                · {r.scheduleLabel} · {r.totalCompletions} completions{r.archivedAgoLabel ? ` · archived ${r.archivedAgoLabel}` : ""}
+                {t("rituals.archivedRow.body", { schedule: r.scheduleLabel, count: r.totalCompletions })}
+                {r.archivedAgoLabel ? t("rituals.archivedSuffix", { ago: r.archivedAgoLabel }) : ""}
               </span>
               <div className="flex-1" />
               <button
@@ -392,7 +394,7 @@ const ArchivedSection: React.FC<{ rows: RitualRow[]; onRestore: (id: string) => 
                 onClick={() => onRestore(r.id)}
                 className="text-[12px] text-text-tertiary hover:text-text-secondary"
               >
-                Restore
+                {t("common.restore")}
               </button>
             </div>
           ))}

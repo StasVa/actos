@@ -197,21 +197,21 @@ const ReviewsWeeks: React.FC = () => {
                       <div className="mt-1 font-mono text-[12px] text-text-secondary tabular-nums">
                         {o.valueAdded > 0 && (
                           <>
-                            <span className="text-text-primary">+{o.valueAdded}</span> value
+                            <span className="text-text-primary">+{o.valueAdded}</span> {t("reviews.row.valueWord")}
                             <span className="text-text-tertiary"> · </span>
                           </>
                         )}
-                        <span className="text-text-primary">{s.doneActions.length}</span> actions done
+                        <span className="text-text-primary">{s.doneActions.length}</span> {t("reviews.row.actionsDoneWord")}
                         {ritualConsistent > 0 && (
                           <>
                             <span className="text-text-tertiary"> · </span>
-                            <span className="text-text-primary">{ritualConsistent}</span> rituals consistent
+                            <span className="text-text-primary">{ritualConsistent}</span> {t("reviews.row.ritualsConsistent", { count: ritualConsistent })}
                           </>
                         )}
                         {settings.layers.logTime && s.totalTimeMinutes > 0 && (
                           <>
                             <span className="text-text-tertiary"> · </span>
-                            <span className="text-text-primary">{formatHM(s.totalTimeMinutes)}</span> invested
+                            <span className="text-text-primary">{formatHM(s.totalTimeMinutes)}</span> {t("reviews.row.investedWord")}
                           </>
                         )}
                       </div>

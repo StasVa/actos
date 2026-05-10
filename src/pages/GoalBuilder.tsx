@@ -284,6 +284,7 @@ const CriteriaStep: React.FC<{
   onContinue: (criteria: string[]) => void;
   onBack: () => void;
 }> = ({ goalTitle, initial, onContinue, onBack }) => {
+  const { t } = useTranslation();
   const [items, setItems] = React.useState<string[]>(initial.length ? initial : []);
   const max = 5;
 
@@ -297,12 +298,8 @@ const CriteriaStep: React.FC<{
 
   return (
     <>
-      <Heading>What does "done" look like?</Heading>
-      <Lede>
-        Add up to 5 concrete signs you've reached "{goalTitle}". You'll
-        check these off as you make progress. You can add or change these
-        anytime on the goal page.
-      </Lede>
+      <Heading>{t("goalBuilder.criteria.heading")}</Heading>
+      <Lede>{t("goalBuilder.criteria.description", { goalTitle })}</Lede>
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         {items.map((val, i) => (
           <div key={i} style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -310,14 +307,14 @@ const CriteriaStep: React.FC<{
               autoFocus={i === items.length - 1 && val === ""}
               type="text"
               value={val}
-              placeholder="e.g. Reached MRR threshold for 3 consecutive months"
+              placeholder={t("goalBuilder.criteria.placeholder")}
               onChange={(e) => update(i, e.target.value)}
               style={inputStyle}
               maxLength={120}
             />
             <button
               type="button"
-              aria-label="Remove criterion"
+              aria-label={t("common.delete")}
               onClick={() => remove(i)}
               style={{
                 background: "transparent", border: "none", cursor: "pointer",
@@ -344,12 +341,12 @@ const CriteriaStep: React.FC<{
               padding: "6px 0",
             }}
           >
-            <Plus size={14} /> Add criterion
+            <Plus size={14} /> {t("goalBuilder.criteria.add")}
           </button>
         )}
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 16 }}>
-          <PrimaryBtn onClick={submit}>Continue</PrimaryBtn>
-          <GhostLink onClick={skip}>Skip — add later</GhostLink>
+          <PrimaryBtn onClick={submit}>{t("common.continue")}</PrimaryBtn>
+          <GhostLink onClick={skip}>{t("goalBuilder.criteria.skip")}</GhostLink>
         </div>
       </div>
       {/* back affordance */}
@@ -363,7 +360,7 @@ const CriteriaStep: React.FC<{
           fontSize: 13, fontFamily: "Inter", cursor: "pointer",
           padding: 0,
         }}
-      >← Back to goal</button>
+      >{t("goalBuilder.criteria.backToGoal")}</button>
     </>
   );
 };

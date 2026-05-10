@@ -551,12 +551,20 @@ const ProjectDetail: React.FC = () => {
     if (a.status === "delegated") return s + Math.round(t * 0.2);
     return s;
   }, 0);
-  const fmtHM = (m: number) => {
-    if (m === 0) return "0h";
-    const h = Math.floor(m / 60);
-    const min = m % 60;
-    return `${h ? `${h}h` : ""}${min ? ` ${min}m` : ""}`.trim() || "0h";
-  };
+  const fmtHM = (m: number) => formatDuration(m);
+  const fmtLongDate = (iso: string) =>
+    new Date(iso).toLocaleDateString(i18n.language || "en", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  const lastActivityLabel = (() => {
+    if (!lastTs) return t("progress.relAgo.today");
+    const days = Math.floor((Date.now() - new Date(lastTs).getTime()) / 86400000);
+    if (days <= 0) return t("progress.relAgo.today");
+    if (days === 1) return t("progress.relAgo.yesterday");
+    return t("progress.relAgo.daysAgo", { n: days });
+  })();
 
   const ageDays = Math.floor((Date.now() - new Date(project.createdAt).getTime()) / 86400000);
   const projStatusColor =

@@ -9,6 +9,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import i18n from "@/i18n";
 import { Check, Copy, MoreHorizontal, Trash2, XCircle, type LucideIcon } from "lucide-react";
 import {
   Popover,
@@ -199,17 +200,17 @@ export function EditorOverflowMenu({
 
 /** Convenience helpers for standard items. */
 export const overflowDuplicate = (onSelect: () => void): OverflowMenuItem => ({
-  label: "Duplicate",
+  label: i18n.t("common.duplicate"),
   icon: Copy,
   onSelect,
 });
-export const overflowDrop = (onSelect: () => void, label = "Drop"): OverflowMenuItem => ({
-  label,
+export const overflowDrop = (onSelect: () => void, label?: string): OverflowMenuItem => ({
+  label: label ?? i18n.t("common.drop"),
   icon: XCircle,
   onSelect,
 });
 export const overflowDelete = (onSelect: () => void): OverflowMenuItem => ({
-  label: "Delete",
+  label: i18n.t("common.delete"),
   icon: Trash2,
   onSelect,
   destructive: true,

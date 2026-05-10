@@ -208,17 +208,17 @@ export const CloseDayRecap: React.FC = () => {
           sessionsToday.length > 0 ? "md:grid-cols-5" : "md:grid-cols-4"
         }`}
       >
-        <Tile value={`+${valueAdded}`} label={t("closeDay.tile.valueAdded")} />
-        <Tile value={doneActions.length} label={t("closeDay.tile.actionsDone")} />
-        <Tile value={ritualsDoneCount} label={t("closeDay.tile.ritualsDone")} />
+        <Tile value={`+${valueAdded}`} label={t("today.stats.valueAdded")} />
+        <Tile value={doneActions.length} label={t("today.stats.actionsDone")} />
+        <Tile value={ritualsDoneCount} label={t("today.stats.ritualsDone")} />
         {sessionsToday.length > 0 && (
           <Tile
             value={sessionsToday.length}
-            label={t("closeDay.tile.sessions")}
-            sub={sessionsFocusedMin > 0 ? t("closeDay.tile.sessionsFocusedSub", { time: fmtHM(sessionsFocusedMin) }) : undefined}
+            label={t("today.stats.sessions")}
+            sub={sessionsFocusedMin > 0 ? t("today.stats.sessionsFocusedSub", { time: fmtHM(sessionsFocusedMin) }) : undefined}
           />
         )}
-        <Tile value={fmtHM(investedMinTotal)} label={t("closeDay.tile.timeInvested")} />
+        <Tile value={fmtHM(investedMinTotal)} label={t("today.stats.timeInvested")} />
       </section>
 
       {/* PROJECTS */}
@@ -243,7 +243,7 @@ export const CloseDayRecap: React.FC = () => {
                     {project!.title}
                   </span>
                   <span className="font-mono text-[12px] text-text-secondary tabular-nums shrink-0">
-                    {t("closeDay.actionsDoneCount", { count: acts.length })}
+                    {t("common.count.actionsDone", { count: acts.length })}
                   </span>
                 </Link>
               );

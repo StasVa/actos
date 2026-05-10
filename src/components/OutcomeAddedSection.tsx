@@ -63,7 +63,7 @@ export const OutcomeAddedSection: React.FC<Props> = ({ outcome, period }) => {
                       </span>
                     </div>
                     <div className="mt-0.5 font-mono text-[12px] text-text-secondary tabular-nums">
-                      {t("outcome.actionsDone", { count: row.actionsCount })}
+                      {t("common.count.actionsDone", { count: row.actionsCount })}
                       {row.delegatedCount > 0 &&
                         t("outcome.delegatedSuffix", { count: row.delegatedCount })}
                     </div>

@@ -4,6 +4,7 @@
 
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useStore } from "@/store/useStore";
 import { emitAppEvent } from "@/lib/appEvents";
 import { getRecent, pushRecent, type RecentKind } from "@/lib/recentlyViewed";
@@ -48,22 +49,23 @@ const KIND_ICON: Record<RecentKind, string> = {
   day: "▤",
 };
 
-const NAV_ITEMS: { label: string; path: string }[] = [
-  { label: "Today", path: "/today" },
-  { label: "Progress", path: "/progress" },
-  { label: "Goals", path: "/goals" },
-  { label: "Projects", path: "/projects" },
-  { label: "Actions", path: "/actions" },
-  { label: "Delegated", path: "/delegated" },
-  { label: "Rituals", path: "/rituals" },
-  { label: "Ideas", path: "/ideas" },
-  { label: "Reviews/Days", path: "/reviews/days" },
+const NAV_ITEMS: { labelKey: string; path: string }[] = [
+  { labelKey: "nav.today", path: "/today" },
+  { labelKey: "nav.progress", path: "/progress" },
+  { labelKey: "nav.goals", path: "/goals" },
+  { labelKey: "nav.projects", path: "/projects" },
+  { labelKey: "nav.actions", path: "/actions" },
+  { labelKey: "nav.delegated", path: "/delegated" },
+  { labelKey: "nav.rituals", path: "/rituals" },
+  { labelKey: "nav.ideas", path: "/ideas" },
+  { labelKey: "nav.reviews.days", path: "/reviews/days" },
 ];
 
 const TODAY_ISO = () => new Date().toISOString().slice(0, 10);
 
 // ───────── Component ─────────
 export function CommandPalette() {
+  const { t } = useTranslation();
   const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState("");
   const [selectedIdx, setSelectedIdx] = React.useState(0);
@@ -151,7 +153,7 @@ export function CommandPalette() {
       items.push({
         key: "qa-plan",
         kind: "quick",
-        title: "Plan today",
+        title: t("commandPalette.quick.planToday"),
         iconChar: "▸",
         onSelect: () => {
           close();
@@ -164,7 +166,7 @@ export function CommandPalette() {
       items.push({
         key: "qa-close",
         kind: "quick",
-        title: "Close day",
+        title: t("commandPalette.quick.closeDay"),
         iconChar: "▸",
         onSelect: () => {
           close();
@@ -177,7 +179,7 @@ export function CommandPalette() {
       {
         key: "qa-new-action",
         kind: "quick",
-        title: "Create new action",
+        title: t("commandPalette.quick.newAction"),
         iconChar: "+",
         rightHint: "⌘N",
         onSelect: () => {
@@ -191,13 +193,13 @@ export function CommandPalette() {
       {
         key: "qa-new-project",
         kind: "quick",
-        title: "Create new project",
+        title: t("commandPalette.quick.newProject"),
         iconChar: "+",
         onSelect: () => {
           const goalId =
             goals.find((g) => g.status === "active")?.id ?? goals[0]?.id;
           if (!goalId) {
-            toast.error("Create an active goal first");
+            toast.error(t("commandPalette.toast.needActiveGoal"));
             close();
             return;
           }
@@ -209,7 +211,7 @@ export function CommandPalette() {
       {
         key: "qa-new-goal",
         kind: "quick",
-        title: "Create new goal",
+        title: t("commandPalette.quick.newGoal"),
         iconChar: "+",
         onSelect: () => {
           openPanel({ kind: "goal", mode: "new" });
@@ -219,7 +221,7 @@ export function CommandPalette() {
       {
         key: "qa-new-ritual",
         kind: "quick",
-        title: "Create new ritual",
+        title: t("commandPalette.quick.newRitual"),
         iconChar: "+",
         onSelect: () => {
           if (!goals.some((g) => g.status === "active")) {
@@ -232,7 +234,7 @@ export function CommandPalette() {
       {
         key: "qa-capture-idea",
         kind: "quick",
-        title: "Capture idea",
+        title: t("commandPalette.quick.captureIdea"),
         iconChar: "✦",
         onSelect: () => {
           close();
@@ -249,7 +251,7 @@ export function CommandPalette() {
     const rows: Row[] = NAV_ITEMS.map((n) => ({
       key: `nav-${n.path}`,
       kind: "nav" as const,
-      title: `Go to ${n.label}`,
+      title: t("commandPalette.nav.goTo", { label: t(n.labelKey) }),
       rightHint: "→",
       onSelect: () => {
         navigate(n.path);
@@ -259,7 +261,7 @@ export function CommandPalette() {
     rows.push({
       key: "nav-settings",
       kind: "nav",
-      title: "Settings",
+      title: t("commandPalette.nav.settings"),
       rightHint: "→",
       onSelect: () => {
         close();
@@ -284,7 +286,7 @@ export function CommandPalette() {
           title: g.title,
           iconChar: KIND_ICON.goal,
           dotColorVar: goalDot(g),
-          meta: "Goal",
+          meta: t("commandPalette.meta.goal"),
           onSelect: () => goEntity("goal", g.id, `/goals/${g.id}`),
         });
       } else if (r.kind === "project") {
@@ -297,7 +299,7 @@ export function CommandPalette() {
           title: p.title,
           iconChar: KIND_ICON.project,
           dotColorVar: goalDot(g),
-          meta: g?.title ?? "Project",
+          meta: g?.title ?? t("commandPalette.meta.project"),
           onSelect: () => goEntity("project", p.id, `/projects/${p.id}`),
         });
       } else if (r.kind === "action") {
@@ -324,7 +326,7 @@ export function CommandPalette() {
           title: rt.title,
           iconChar: KIND_ICON.ritual,
           dotColorVar: goalDot(g),
-          meta: g?.title ?? "Ritual",
+          meta: g?.title ?? t("commandPalette.meta.ritual"),
           onSelect: () => openEditor("ritual", rt.id, "ritual"),
         });
       } else if (r.kind === "idea") {
@@ -337,7 +339,7 @@ export function CommandPalette() {
           title: i.title,
           iconChar: KIND_ICON.idea,
           dotColorVar: goalDot(g),
-          meta: g?.title ?? "Idea",
+          meta: g?.title ?? t("commandPalette.meta.idea"),
           onSelect: () => goEntity("idea", i.id, `/ideas?selected=${i.id}`),
         });
       } else if (r.kind === "day") {
@@ -346,7 +348,7 @@ export function CommandPalette() {
           kind: "recent",
           title: r.id,
           iconChar: KIND_ICON.day,
-          meta: "Day",
+          meta: t("commandPalette.meta.day"),
           onSelect: () => goEntity("day", r.id, `/reviews/days/${r.id}`),
         });
       }
@@ -354,10 +356,10 @@ export function CommandPalette() {
 
     const out: Section[] = [];
     if (recentRows.length > 0)
-      out.push({ heading: "RECENTLY VIEWED", rows: recentRows });
+      out.push({ heading: t("commandPalette.section.recentlyViewed"), rows: recentRows });
     if (quickActions.length > 0)
-      out.push({ heading: "QUICK ACTIONS", rows: quickActions });
-    out.push({ heading: "NAVIGATION", rows: navRows });
+      out.push({ heading: t("commandPalette.section.quickActions"), rows: quickActions });
+    out.push({ heading: t("commandPalette.section.navigation"), rows: navRows });
     return out;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, quickActions, navRows, goals, projects, actions, rituals, ideas]);
@@ -376,7 +378,7 @@ export function CommandPalette() {
         title: g.title,
         iconChar: KIND_ICON.goal,
         dotColorVar: goalDot(g),
-        meta: g.status === "active" ? "Active" : g.status,
+        meta: g.status === "active" ? t("commandPalette.meta.active") : g.status,
         onSelect: () => goEntity("goal", g.id, `/goals/${g.id}`),
       }));
 
@@ -486,31 +488,31 @@ export function CommandPalette() {
 
     const out: Section[] = [];
     if (goalRows.length)
-      out.push({ heading: `GOALS · ${goalRows.length}`, rows: goalRows });
+      out.push({ heading: t("commandPalette.section.goals", { count: goalRows.length }), rows: goalRows });
     if (projectRows.length)
       out.push({
-        heading: `PROJECTS · ${projectRows.length}`,
+        heading: t("commandPalette.section.projects", { count: projectRows.length }),
         rows: projectRows,
       });
     if (actionRows.length)
       out.push({
-        heading: `ACTIONS · ${actionRows.length}`,
+        heading: t("commandPalette.section.actions", { count: actionRows.length }),
         rows: actionRows,
       });
     if (ritualRows.length)
       out.push({
-        heading: `RITUALS · ${ritualRows.length}`,
+        heading: t("commandPalette.section.rituals", { count: ritualRows.length }),
         rows: ritualRows,
       });
     if (ideaRows.length)
-      out.push({ heading: `IDEAS · ${ideaRows.length}`, rows: ideaRows });
+      out.push({ heading: t("commandPalette.section.ideas", { count: ideaRows.length }), rows: ideaRows });
     if (dayRows.length)
-      out.push({ heading: `DAYS · ${dayRows.length}`, rows: dayRows });
+      out.push({ heading: t("commandPalette.section.days", { count: dayRows.length }), rows: dayRows });
     if (cmdRows.length)
-      out.push({ heading: `COMMANDS · ${cmdRows.length}`, rows: cmdRows });
+      out.push({ heading: t("commandPalette.section.commands", { count: cmdRows.length }), rows: cmdRows });
     if (navMatches.length)
       out.push({
-        heading: `NAVIGATION · ${navMatches.length}`,
+        heading: t("commandPalette.section.navigationCount", { count: navMatches.length }),
         rows: navMatches,
       });
     return out;
@@ -548,7 +550,7 @@ export function CommandPalette() {
             return;
           }
           const id = createAction({ title: query.trim() });
-          toast.success("Action created");
+          toast.success(t("commandPalette.toast.actionCreated"));
           openPanel({ kind: "action", mode: "edit", id });
           close();
         }
@@ -625,7 +627,7 @@ export function CommandPalette() {
             ref={inputRef}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search or type a command..."
+            placeholder={t("commandPalette.searchPlaceholder")}
             className="flex-1 bg-transparent outline-none text-text-primary placeholder:text-text-tertiary"
             style={{ fontSize: 16, fontFamily: "inherit" }}
           />
@@ -645,7 +647,7 @@ export function CommandPalette() {
             <button
               onClick={close}
               className="text-text-tertiary hover:text-text-primary"
-              aria-label="Close"
+              aria-label={t("commandPalette.closeAria")}
               style={{ fontSize: 18, lineHeight: 1, padding: 4 }}
             >
               ×
@@ -668,13 +670,13 @@ export function CommandPalette() {
                 className="text-text-secondary"
                 style={{ fontSize: 13, marginBottom: 8 }}
               >
-                No results for “{query.trim()}”.
+                {t("commandPalette.empty.heading", { query: query.trim() })}
               </div>
               <div
                 className="font-mono text-text-tertiary"
                 style={{ fontSize: 11 }}
               >
-                Press Enter to create a new action with this title.
+                {t("commandPalette.empty.hint")}
               </div>
             </div>
           ) : (

@@ -82,6 +82,7 @@ const StepperField: React.FC<{
   isMobile?: boolean;
   ariaLabel?: string;
 }> = ({ label, value, onChange, min, max, step, suffix, size = "xl", isMobile, ariaLabel }) => {
+  const { t } = useTranslation();
   const [focused, setFocused] = useState(false);
   const [flash, setFlash] = useState(false);
   const flashTimer = React.useRef<number | null>(null);

@@ -108,6 +108,7 @@ const ConsistencyCalendar: React.FC<{ data: number[]; color: string; cellSize?: 
 
 /* 90-day calendar in 3 rows of 30 (for monthly rituals) */
 const MonthlyConsistency: React.FC<{ data: number[]; color: string }> = ({ data, color }) => {
+  const { t } = useTranslation();
   const last = data.length - 1;
   const rows = [data.slice(0, 30), data.slice(30, 60), data.slice(60, 90)];
   return (
@@ -119,10 +120,10 @@ const MonthlyConsistency: React.FC<{ data: number[]; color: string }> = ({ data,
             const daysFromToday = last - idx;
             const status =
               daysFromToday === 0 && v === 0
-                ? "Pending"
+                ? t("rituals.tip.pending")
                 : v === 1
-                ? "Done"
-                : "Missed";
+                ? t("rituals.tip.done")
+                : t("rituals.tip.missed");
             const tip = (
               <div className="text-[12px] text-text-primary" style={{ fontFamily: "Inter, sans-serif" }}>
                 {dayLabel(daysFromToday)} ·{" "}

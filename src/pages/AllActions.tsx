@@ -298,7 +298,7 @@ const ActionDetail: React.FC<{ action: Action }> = ({ action }) => {
             <span>→ {action.delegate.toUpperCase()}</span>
             {action.expectedReturnLabel && (
               <>
-                <span> · EXPECTED </span>
+                <span> · {t("allActions.detail.expected")} </span>
                 <span style={{ color: isOverdue ? "hsl(var(--text-warning))" : undefined }}>
                   {action.expectedReturnLabel}
                 </span>
@@ -312,7 +312,7 @@ const ActionDetail: React.FC<{ action: Action }> = ({ action }) => {
         <>
           <div className="h-8" />
           <div className="font-mono text-[11px] uppercase tracking-[0.08em] text-text-secondary">
-            NOTES
+            {t("allActions.detail.notesHeading")}
           </div>
           <div className="h-3" />
           <p className="text-[14px] text-text-primary leading-[1.6]">{action.notes}</p>
@@ -322,24 +322,24 @@ const ActionDetail: React.FC<{ action: Action }> = ({ action }) => {
       <div className="h-12" />
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <GhostButton onClick={handleEdit}>Edit action</GhostButton>
+          <GhostButton onClick={handleEdit}>{t("allActions.editAction")}</GhostButton>
           {isActive(action.status) && (
             <GhostButton accent onClick={handleMarkDone}>
-              Mark done
+              {t("common.markDone")}
             </GhostButton>
           )}
           {action.status === "delegated" && (
             <>
               <GhostButton accent onClick={handleMarkDone}>
-                Mark done
+                {t("common.markDone")}
               </GhostButton>
-              <GhostButton onClick={handleReopen}>Re-open</GhostButton>
+              <GhostButton onClick={handleReopen}>{t("common.reopen")}</GhostButton>
             </>
           )}
           {(action.status === "done" ||
             action.status === "dropped" ||
             action.status === "cancelled") && (
-            <GhostButton onClick={handleReopen}>Re-open</GhostButton>
+            <GhostButton onClick={handleReopen}>{t("common.reopen")}</GhostButton>
           )}
         </div>
         <button

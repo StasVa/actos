@@ -195,9 +195,12 @@ export const StateDotTooltip: React.FC<{ state: "active" | "stalled"; lastActivi
       </div>
     );
   }
+  const parts = t("tooltip.stalledNoActivity", { stalled: "\u0000" }).split("\u0000");
   return (
     <div className="text-[12px] text-text-primary" style={{ fontFamily: "Inter, sans-serif" }}>
-      <span dangerouslySetInnerHTML={{ __html: t("tooltip.stalledNoActivity", { stalled: `<span style="color: hsl(var(--text-warning))">${stalled}</span>` }) }} />
+      {parts[0]}
+      <span style={{ color: "hsl(var(--text-warning))" }}>{stalled}</span>
+      {parts[1]}
     </div>
   );
 };

@@ -729,7 +729,7 @@ const PlanForm: React.FC<{
                     <button
                       type="button"
                       onClick={() => setState((s) => ({ ...s, mainTaskId: undefined }))}
-                      aria-label="Clear main task"
+                      aria-label={t("planToday.mainTask.clearAria")}
                       className="absolute top-2 right-2 text-text-tertiary hover:text-text-primary text-[14px] px-1"
                     >
                       ×

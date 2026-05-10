@@ -98,10 +98,12 @@ const Divider = () => (
 export const RichTextEditor: React.FC<Props> = ({
   value,
   onChange,
-  placeholder = "Describe the project, add references, materials...",
+  placeholder,
   attachments = [],
   onAttachmentsChange,
 }) => {
+  const { t } = useTranslation();
+  const placeholderText = placeholder ?? t("richTextEditor.placeholder");
   const [mode, setMode] = useState<"read" | "edit">("read");
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [hovered, setHovered] = useState(false);

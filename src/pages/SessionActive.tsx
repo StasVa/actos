@@ -491,8 +491,8 @@ const SessionActive: React.FC = () => {
             <button
               onClick={toggleFocus}
               className="w-8 h-8 inline-flex items-center justify-center rounded-[3px] text-text-tertiary hover:bg-surface-hover hover:text-text-primary transition-colors"
-              aria-label={focusMode ? "Exit focus mode" : "Focus mode"}
-              title={focusMode ? "Exit focus mode" : "Focus mode"}
+              aria-label={focusMode ? t("sessionActive.controls.exitFocus") : t("sessionActive.controls.focusMode")}
+              title={focusMode ? t("sessionActive.controls.exitFocus") : t("sessionActive.controls.focusMode")}
             >
               {focusMode ? <Minimize size={16} /> : <Maximize size={16} />}
             </button>

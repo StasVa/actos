@@ -1714,7 +1714,7 @@
   "setup.theme.heading": "Pick your look.",
   "setup.theme.sub": "You can change this anytime in Settings.",
   "setup.theme.system": "System",
-  "setup.welcome.heading": "Welcome, {{name}}.",
+  "setup.welcome.heading": "Welcome.",
   "setup.welcome.sub": "Let's set this up.",
   "shortcuts.close": "Close panels & overlays",
   "shortcuts.global": "GLOBAL",

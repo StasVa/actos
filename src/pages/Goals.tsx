@@ -18,22 +18,28 @@ type StateFilter = "all" | "active" | "completed" | "dropped";
 type TypeFilter = "all" | "short-term" | "mid-term";
 type SortKey = "recent" | "created" | "progress";
 
-const STATE_OPTIONS: FilterOption<StateFilter>[] = [
-  { value: "all", label: "All" },
-  { value: "active", label: "Active" },
-  { value: "completed", label: "Completed" },
-  { value: "dropped", label: "Dropped" },
-];
-const TYPE_OPTIONS: FilterOption<TypeFilter>[] = [
-  { value: "all", label: "All" },
-  { value: "short-term", label: "Short-term" },
-  { value: "mid-term", label: "Mid-term" },
-];
-const SORT_OPTIONS: FilterOption<SortKey>[] = [
-  { value: "recent", label: "Recent activity" },
-  { value: "created", label: "Created date" },
-  { value: "progress", label: "Progress" },
-];
+function useStateOptions(t: (k: string) => string): FilterOption<StateFilter>[] {
+  return [
+    { value: "all", label: t("common.all") },
+    { value: "active", label: t("common.state.active") },
+    { value: "completed", label: t("common.state.completed") },
+    { value: "dropped", label: t("common.state.dropped") },
+  ];
+}
+function useTypeOptions(t: (k: string) => string): FilterOption<TypeFilter>[] {
+  return [
+    { value: "all", label: t("common.all") },
+    { value: "short-term", label: t("goals.filter.short") },
+    { value: "mid-term", label: t("goals.filter.mid") },
+  ];
+}
+function useSortOptions(t: (k: string) => string): FilterOption<SortKey>[] {
+  return [
+    { value: "recent", label: t("goals.sort.recent") },
+    { value: "created", label: t("goals.sort.created") },
+    { value: "progress", label: t("goals.sort.progress") },
+  ];
+}
 
 function fmtAgo(iso?: string): string {
   if (!iso) return "—";
@@ -129,6 +135,7 @@ const StatRow: React.FC<{ label: string; value: React.ReactNode }> = ({ label, v
 );
 
 const GoalCard: React.FC<{ m: GoalMeta; logTimeOn: boolean }> = ({ m, logTimeOn }) => {
+  const { t } = useTranslation();
   const { goal: g, progress, outcome, effort, lastIso, state, projects, rituals, criteria, time, spark, sparkTips } = m;
   const navigate = useNavigate();
   const openPanel = useStore((s) => s.openPanel);
@@ -140,7 +147,7 @@ const GoalCard: React.FC<{ m: GoalMeta; logTimeOn: boolean }> = ({ m, logTimeOn 
 
   const archived = g.status !== "active";
   const color = `hsl(var(--${g.color}))`;
-  const typeLabel = g.type === "mid-term" ? "MID-TERM" : "SHORT-TERM";
+  const typeLabel = g.type === "mid-term" ? t("goals.type.midTerm") : t("goals.type.shortTerm");
   const stateColor =
     state === "active" ? "hsl(var(--state-active))" : "hsl(var(--state-stalled))";
 
@@ -236,19 +243,19 @@ const GoalCard: React.FC<{ m: GoalMeta; logTimeOn: boolean }> = ({ m, logTimeOn 
                 </Tooltip>
                 <div data-card-menu onClick={(e) => e.stopPropagation()}>
                   <CardMenu
-                    ariaLabel="Goal menu"
+                    ariaLabel={t("goals.aria.menu")}
                     items={
                       archived
                         ? [
-                            { label: "Re-open", onSelect: () => { useStore.getState().reopenGoal?.(g.id); toast("Goal re-opened"); } },
-                            { label: "Edit", onSelect: () => openPanel({ kind: "goal", mode: "edit", id: g.id }) },
-                            { label: "Delete", destructive: true, onSelect: () => setConfirmDelete(true) },
+                            { label: t("common.reopen"), onSelect: () => { useStore.getState().reopenGoal?.(g.id); toast(t("toast.goalReopened")); } },
+                            { label: t("goals.menu.edit"), onSelect: () => openPanel({ kind: "goal", mode: "edit", id: g.id }) },
+                            { label: t("goals.menu.delete"), destructive: true, onSelect: () => setConfirmDelete(true) },
                           ]
                         : [
-                            { label: "Edit", onSelect: () => openPanel({ kind: "goal", mode: "edit", id: g.id }) },
-                            { label: "Mark complete", onSelect: () => { markGoalComplete(g.id); toast("Goal completed"); } },
-                            { label: "Drop", destructive: true, onSelect: () => setConfirmDrop(true) },
-                            { label: "Delete", destructive: true, onSelect: () => setConfirmDelete(true) },
+                            { label: t("goals.menu.edit"), onSelect: () => openPanel({ kind: "goal", mode: "edit", id: g.id }) },
+                            { label: t("goalEditor.markComplete"), onSelect: () => { markGoalComplete(g.id); toast(t("toast.goalCompleted")); } },
+                            { label: t("goals.menu.drop"), destructive: true, onSelect: () => setConfirmDrop(true) },
+                            { label: t("goals.menu.delete"), destructive: true, onSelect: () => setConfirmDelete(true) },
                           ]
                     }
                   />
@@ -272,20 +279,20 @@ const GoalCard: React.FC<{ m: GoalMeta; logTimeOn: boolean }> = ({ m, logTimeOn 
 
           {/* Section 3 — Bars */}
           <div className="flex flex-col gap-2">
-            <MeasureBar label="VALUE" percentage={outcome} color={color} />
-            <MeasureBar label="EFFORT" percentage={effort} color={color} opacity={0.6} />
+            <MeasureBar label={t("common.label.value")} percentage={outcome} color={color} />
+            <MeasureBar label={t("common.label.effort")} percentage={effort} color={color} opacity={0.6} />
           </div>
 
           {/* Section 4 — Stats */}
           <div className="border-t border-border-subtle pt-3 flex flex-col gap-2">
-            <StatRow label="PROJECTS" value={projectsValue} />
-            <StatRow label="RITUALS" value={ritualsValue} />
+            <StatRow label={t("common.label.projects")} value={projectsValue} />
+            <StatRow label={t("common.label.rituals")} value={ritualsValue} />
             {showCriteria && (
-              <StatRow label="CRITERIA" value={`${criteria.met}/${criteria.total} met`} />
+              <StatRow label={t("common.label.criteria")} value={t("common.criteriaMet", { met: criteria.met, total: criteria.total })} />
             )}
             {showTime && (
               <StatRow
-                label="TIME"
+                label={t("common.label.time")}
                 value={`${fmtTime(time.spent)} invested · ${fmtTime(time.remaining)} estimated remaining`}
               />
             )}
@@ -308,21 +315,21 @@ const GoalCard: React.FC<{ m: GoalMeta; logTimeOn: boolean }> = ({ m, logTimeOn 
 
       <ConfirmModal
         open={confirmDrop}
-        title="Drop this goal?"
-        body="Open projects, actions, and rituals under this goal will be dropped."
-        confirmLabel="Drop goal"
+        title={t("goals.confirm.drop.title")}
+        body={t("goals.confirm.drop.body")}
+        confirmLabel={t("goals.confirm.drop.confirmLabel")}
         destructive
         onCancel={() => setConfirmDrop(false)}
-        onConfirm={() => { dropGoal(g.id); toast("Goal dropped"); setConfirmDrop(false); }}
+        onConfirm={() => { dropGoal(g.id); toast(t("toast.goalDropped") || t("home.hero.toast.dropped")); setConfirmDrop(false); }}
       />
       <ConfirmModal
         open={confirmDelete}
-        title="Delete this goal?"
-        body="This permanently removes the goal and ALL its projects, actions, rituals, and ideas."
-        confirmLabel="Delete"
+        title={t("goals.confirm.delete.title")}
+        body={t("goals.confirm.delete.body")}
+        confirmLabel={t("goals.confirm.delete.confirmLabel")}
         destructive
         onCancel={() => setConfirmDelete(false)}
-        onConfirm={() => { deleteGoal(g.id); toast("Goal deleted"); setConfirmDelete(false); }}
+        onConfirm={() => { deleteGoal(g.id); toast(t("toast.goalDeleted")); setConfirmDelete(false); }}
       />
     </>
   );
@@ -368,6 +375,9 @@ const Goals: React.FC = () => {
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
   const [sortKey, setSortKey] = useState<SortKey>("recent");
   const [query, setQuery] = useState("");
+  const STATE_OPTIONS = useStateOptions(t);
+  const TYPE_OPTIONS = useTypeOptions(t);
+  const SORT_OPTIONS = useSortOptions(t);
 
   const goals = useStore((s) => s.goals);
   const storeProjects = useStore((s) => s.projects);
@@ -541,29 +551,29 @@ const Goals: React.FC = () => {
       <main className="app-main page-medium">
         <PageHeader
           title={t("goals.page.title")}
-          meta={`${totalAll} GOALS · ${totalActive} ACTIVE · ${totalCompleted} COMPLETED`}
+          meta={t("goals.meta", { total: totalAll, active: totalActive, completed: totalCompleted })}
           cta={{
-            label: "+ New goal",
+            label: t("goals.cta.newGoal"),
             onClick: () => useStore.getState().openPanel({ kind: "goal", mode: "new" }),
-            ariaLabel: "New goal",
+            ariaLabel: t("goals.aria.newGoal"),
             disabled: ghostDisabled,
             disabledTooltip: ghostDisabled
               ? isFree
-                ? "Free plan: 1 active goal · Go All-In for 3."
-                : "You have 3 active goals. Complete or drop one to add another."
+                ? t("goals.cap.disabledTooltip")
+                : t("goals.disabledTooltip.atCapPaid")
               : undefined,
           }}
           filters={
             <>
               <FilterDropdown<StateFilter>
-                label="STATE"
+                label={t("common.label.state")}
                 value={stateFilter}
                 defaultValue="all"
                 options={STATE_OPTIONS}
                 onChange={setStateFilter}
               />
               <FilterDropdown<TypeFilter>
-                label="TYPE"
+                label={t("common.label.type")}
                 value={typeFilter}
                 defaultValue="all"
                 options={TYPE_OPTIONS}
@@ -578,14 +588,14 @@ const Goals: React.FC = () => {
 
         {isFree && (
           <div className="mt-2 text-[12px] text-text-tertiary">
-            {totalActive} of {goalLimit} goal{goalLimit === 1 ? "" : "s"} active ·{" "}
+            {t("goals.freePlan.line", { active: totalActive, cap: goalLimit, plural: goalLimit === 1 ? "" : "s" })}
             <Link
               to="/settings/subscription"
               className="underline hover:text-text-secondary transition-colors"
             >
-              Go All-In
-            </Link>{" "}
-            for 3.
+              {t("goals.freePlan.linkText")}
+            </Link>
+            {t("goals.freePlan.suffix")}
           </div>
         )}
 
@@ -593,9 +603,9 @@ const Goals: React.FC = () => {
 
         {noGoalsAtAll ? (
           <EmptyState
-            headline="No goals yet."
-            description={`A goal is a result you want to reach — like "Reach 100k YouTube subscribers" or "Pass C1 Spanish proficiency exam." Not a deliverable or activity — a result.\n\nYou can have up to 3 active goals.`}
-            ctaLabel="+ Create your first goal"
+            headline={t("goals.empty.noGoals.headline")}
+            description={t("goals.empty.noGoals.description")}
+            ctaLabel={t("goals.empty.noGoals.cta")}
             onCta={() => useStore.getState().openPanel({ kind: "goal", mode: "new" })}
           />
         ) : noResults ? (
@@ -609,19 +619,19 @@ const Goals: React.FC = () => {
         ) : (
           <div className="space-y-10">
             {(activeAll.length > 0 || stateFilter === "all" || stateFilter === "active") && activeAll.length > 0 && (
-              <SectionGrid label="ACTIVE" count={activeAll.length}>
+              <SectionGrid label={t("common.label.active")} count={activeAll.length}>
                 {activeAll.map((m) => <GoalCard key={m.goal.id} m={m} logTimeOn={logTimeOn} />)}
               </SectionGrid>
             )}
 
             {completed.length > 0 && (
-              <SectionGrid label="COMPLETED" count={completed.length} collapsible defaultOpen={false}>
+              <SectionGrid label={t("common.label.completed")} count={completed.length} collapsible defaultOpen={false}>
                 {completed.map((m) => <GoalCard key={m.goal.id} m={m} logTimeOn={logTimeOn} />)}
               </SectionGrid>
             )}
 
             {dropped.length > 0 && (
-              <SectionGrid label="DROPPED" count={dropped.length} collapsible defaultOpen={false}>
+              <SectionGrid label={t("common.label.dropped")} count={dropped.length} collapsible defaultOpen={false}>
                 {dropped.map((m) => <GoalCard key={m.goal.id} m={m} logTimeOn={logTimeOn} />)}
               </SectionGrid>
             )}

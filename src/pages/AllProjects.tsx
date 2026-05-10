@@ -40,29 +40,32 @@ const GOAL_COLOR_VARS: Record<string, GoalKey> = {
   "goal-3": "g3",
 };
 
-function fmtAgo(iso?: string): { label: string; days: number } {
+function fmtAgo(iso?: string, t?: (k: string, opts?: any) => string): { label: string; days: number } {
   if (!iso) return { label: "—", days: 999 };
   const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
-  if (days <= 0) return { label: "today", days: 0 };
-  if (days === 1) return { label: "1d ago", days: 1 };
-  if (days < 30) return { label: `${days}d ago`, days };
+  if (days <= 0) return { label: t ? t("allProjects.relAgo.today") : "today", days: 0 };
+  if (days === 1) return { label: t ? t("allProjects.relAgo.oneDay") : "1d ago", days: 1 };
+  if (days < 30) return { label: t ? t("allProjects.relAgo.daysAgo", { n: days }) : `${days}d ago`, days };
   const d = new Date(iso);
   return {
-    label: d.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+    label: d.toLocaleDateString(undefined, { month: "short", day: "numeric" }),
     days,
   };
 }
 
 
 /* ===== Tooltip content ===== */
-const StateTooltip: React.FC<{ p: Project }> = ({ p }) => (
-  <div className="font-mono text-[11px] leading-[1.6]">
-    <div className="text-text-primary uppercase tracking-[0.06em]">
-      {p.state === "stalled" ? "STALLED" : p.state === "near" ? "NEAR COMPLETION" : "ACTIVE"}
+const StateTooltip: React.FC<{ p: Project }> = ({ p }) => {
+  const { t } = useTranslation();
+  return (
+    <div className="font-mono text-[11px] leading-[1.6]">
+      <div className="text-text-primary uppercase tracking-[0.06em]">
+        {p.state === "stalled" ? t("common.label.stalled") : p.state === "near" ? t("common.label.nearCompletion") : t("common.label.active")}
+      </div>
+      <div className="text-text-tertiary">{t("allProjects.tooltip.lastActivity", { last: p.last })}</div>
     </div>
-    <div className="text-text-tertiary">Last activity {p.last}</div>
-  </div>
-);
+  );
+};
 
 /* ===== Project card (active grid) — navigates to /projects/:id ===== */
 const ProjectCard: React.FC<{ p: Project }> = ({ p }) => (
@@ -71,6 +74,7 @@ const ProjectCard: React.FC<{ p: Project }> = ({ p }) => (
 
 /* ===== Closed list row (denser, history) — navigates ===== */
 const ClosedRow: React.FC<{ p: Project }> = ({ p }) => {
+  const { t } = useTranslation();
   const isDropped = p.state === "dropped";
   return (
     <Link
@@ -91,7 +95,7 @@ const ClosedRow: React.FC<{ p: Project }> = ({ p }) => {
               color: isDropped ? "hsl(var(--status-dropped))" : "hsl(var(--status-done))",
             }}
           >
-            {isDropped ? "DROPPED" : "DONE"}
+            {isDropped ? t("common.label.dropped") : t("common.label.done")}
           </span>
           <span
             className={`text-[13px] truncate ${
@@ -182,27 +186,33 @@ type GoalFilter = "all" | GoalKey;
 type StateFilter = "all" | "open" | "near" | "stalled" | "closed";
 type SortKey = "recent" | "stalled" | "progress" | "title";
 
-const GOAL_OPTIONS: FilterOption<GoalFilter>[] = [
-  { value: "all", label: "All" },
-  { value: "g1", label: "Launch YouTube", dot: G1 },
-  { value: "g2", label: "Lose 5 kg", dot: G2 },
-  { value: "g3", label: "Read 24 books", dot: G3 },
-];
+function useGoalOptions(t: (k: string) => string): FilterOption<GoalFilter>[] {
+  return [
+    { value: "all", label: t("common.all") },
+    { value: "g1", label: "Launch YouTube", dot: G1 },
+    { value: "g2", label: "Lose 5 kg", dot: G2 },
+    { value: "g3", label: "Read 24 books", dot: G3 },
+  ];
+}
 
-const STATE_OPTIONS: FilterOption<StateFilter>[] = [
-  { value: "all", label: "All" },
-  { value: "open", label: "Active" },
-  { value: "near", label: "Near completion" },
-  { value: "stalled", label: "Stalled" },
-  { value: "closed", label: "Closed" },
-];
+function useStateOptions(t: (k: string) => string): FilterOption<StateFilter>[] {
+  return [
+    { value: "all", label: t("common.all") },
+    { value: "open", label: t("common.state.active") },
+    { value: "near", label: t("common.state.nearCompletion") },
+    { value: "stalled", label: t("common.state.stalled") },
+    { value: "closed", label: t("common.state.closed") },
+  ];
+}
 
-const SORT_OPTIONS: FilterOption<SortKey>[] = [
-  { value: "recent", label: "Recent activity" },
-  { value: "stalled", label: "Stalled longest" },
-  { value: "progress", label: "By progress" },
-  { value: "title", label: "By title" },
-];
+function useSortOptions(t: (k: string) => string): FilterOption<SortKey>[] {
+  return [
+    { value: "recent", label: t("common.sort.recentActivity") },
+    { value: "stalled", label: t("common.sort.stalledLongest") },
+    { value: "progress", label: t("common.sort.byProgress") },
+    { value: "title", label: t("common.sort.byTitle") },
+  ];
+}
 
 function isOpen(p: Project) {
   return p.state === "active" || p.state === "near" || p.state === "stalled";
@@ -221,6 +231,9 @@ const AllProjects: React.FC = () => {
   const [query, setQuery] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("recent");
   const [archivedCollapsed, setArchivedCollapsed] = useState(false);
+  const GOAL_OPTIONS = useGoalOptions(t);
+  const STATE_OPTIONS = useStateOptions(t);
+  const SORT_OPTIONS = useSortOptions(t);
 
   const storeProjects = useStore((s) => s.projects);
   const storeGoals = useStore((s) => s.goals);
@@ -257,18 +270,18 @@ const AllProjects: React.FC = () => {
         .filter(Boolean)
         .sort()
         .at(-1);
-      const ago = fmtAgo(lastIso ?? undefined);
+      const ago = fmtAgo(lastIso ?? undefined, t);
 
       let state: ProjectState;
       let closedLabel: string | undefined;
       let closedSort: number | undefined;
       if (p.status === "completed") {
         state = "completed";
-        closedLabel = p.completedAt ? fmtAgo(p.completedAt).label : undefined;
+        closedLabel = p.completedAt ? fmtAgo(p.completedAt, t).label : undefined;
         closedSort = p.completedAt ? new Date(p.completedAt).getTime() : 0;
       } else if (p.status === "dropped") {
         state = "dropped";
-        closedLabel = p.droppedAt ? fmtAgo(p.droppedAt).label : undefined;
+        closedLabel = p.droppedAt ? fmtAgo(p.droppedAt, t).label : undefined;
         closedSort = p.droppedAt ? new Date(p.droppedAt).getTime() : 0;
       } else {
         const pct = total > 0 ? done / total : 0;
@@ -299,7 +312,7 @@ const AllProjects: React.FC = () => {
   const handleNewProject = () => {
     const goalId = storeGoals.find((g) => g.status === "active")?.id ?? storeGoals[0]?.id;
     if (!goalId) {
-      toast.error("Create an active goal first");
+      toast.error(t("allProjects.toast.createGoalFirst"));
       return;
     }
     const id = createProject({ title: "", goalId, isDraft: true });
@@ -361,7 +374,7 @@ const AllProjects: React.FC = () => {
     return { near, active, stalled, closed };
   }, [filtered, sortFn]);
 
-  const meta = `${counts.total} PROJECTS · ${counts.active} ACTIVE · ${counts.near} NEAR DONE · ${counts.stalled} STALLED · ${counts.closed} CLOSED`;
+  const meta = t("allProjects.meta", { total: counts.total, active: counts.active, near: counts.near, stalled: counts.stalled, closed: counts.closed });
 
   const anyApplied =
     goalFilter !== "all" ||
@@ -385,28 +398,28 @@ const AllProjects: React.FC = () => {
             title={t("projects.page.title")}
             meta={meta}
             cta={{
-              label: "+ New project",
+              label: t("allProjects.cta.newProject"),
               onClick: () => {
                 if (storeGoals.filter((g) => g.status === "active").length === 0) {
                   navigate("/onboarding/goal"); return;
                 }
                 handleNewProject();
               },
-              ariaLabel: "New project",
+              ariaLabel: t("allProjects.aria.newProject"),
               disabled: storeGoals.filter((g) => g.status === "active").length === 0,
-              disabledTooltip: "Create a goal first",
+              disabledTooltip: t("allProjects.disabledTooltip"),
             }}
             filters={
               <>
                 <FilterDropdown
-                  label="GOAL"
+                  label={t("common.label.goal")}
                   value={goalFilter}
                   defaultValue="all"
                   options={GOAL_OPTIONS}
                   onChange={(v) => setGoalFilter(v)}
                 />
                 <FilterDropdown
-                  label="STATE"
+                  label={t("common.label.state")}
                   value={stateFilter}
                   defaultValue="all"
                   options={STATE_OPTIONS}
@@ -417,7 +430,7 @@ const AllProjects: React.FC = () => {
                     onClick={clearFilters}
                     className="ml-1 text-[12px] text-text-tertiary hover:text-text-secondary transition-colors shrink-0"
                   >
-                    Clear filters
+                    {t("common.clearFilters")}
                   </button>
                 )}
               </>
@@ -433,16 +446,16 @@ const AllProjects: React.FC = () => {
           {livePROJECTS.length === 0 ? (
             storeGoals.filter((g) => g.status === "active").length === 0 ? (
               <EmptyState
-                headline="Goals come first."
-                description={`A goal is a result you want to reach — like "$10k MRR" or "Pass C1 Spanish exam". Create one, then add projects under it.`}
-                ctaLabel="+ Create your first goal"
+                headline={t("allProjects.empty.noGoals.headline")}
+                description={t("allProjects.empty.noGoals.description")}
+                ctaLabel={t("allProjects.empty.noGoals.cta")}
                 onCta={() => navigate("/onboarding/goal")}
               />
             ) : (
               <EmptyState
-                headline="No projects yet."
-                description={"Projects are chunks of work that finish in days or weeks. Each one belongs to a goal."}
-                ctaLabel="+ Create your first project"
+                headline={t("allProjects.empty.noProjects.headline")}
+                description={t("allProjects.empty.noProjects.description")}
+                ctaLabel={t("allProjects.empty.noProjects.cta")}
                 onCta={handleNewProject}
               />
             )
@@ -453,9 +466,9 @@ const AllProjects: React.FC = () => {
           {groups.near.length > 0 && (
             <section>
               <SectionHeader
-                label="NEAR COMPLETION"
+                label={t("common.label.nearCompletion")}
                 count={groups.near.length}
-                meta="≥ 75% DONE"
+                meta={t("allProjects.section.near.meta")}
               />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {groups.near.map((p) => (
@@ -467,7 +480,7 @@ const AllProjects: React.FC = () => {
 
           {groups.active.length > 0 && (
             <section>
-              <SectionHeader label="ACTIVE" count={groups.active.length} meta="MOVING THIS WEEK" />
+              <SectionHeader label={t("common.label.active")} count={groups.active.length} meta={t("common.label.movingThisWeek")} />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {groups.active.map((p) => (
                   <ProjectCard key={p.id} p={p} />
@@ -479,9 +492,9 @@ const AllProjects: React.FC = () => {
           {groups.stalled.length > 0 && (
             <section>
               <SectionHeader
-                label="STALLED"
+                label={t("common.label.stalled")}
                 count={groups.stalled.length}
-                meta="NO ACTIVITY ≥ 7 DAYS"
+                meta={t("allProjects.section.stalled.meta")}
                 warning
               />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -495,9 +508,9 @@ const AllProjects: React.FC = () => {
           {groups.closed.length > 0 && (
             <section>
               <SectionHeader
-                label="ARCHIVED"
+                label={t("common.label.archived")}
                 count={groups.closed.length}
-                meta="COMPLETED OR DROPPED"
+                meta={t("common.label.completedOrDropped")}
                 collapsible
                 collapsed={archivedCollapsed}
                 onToggle={() => setArchivedCollapsed((v) => !v)}

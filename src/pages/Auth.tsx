@@ -234,7 +234,7 @@ const Auth: React.FC = () => {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { signIn, signUp } = useAuth();
+  const { signIn } = useAuth();
   const [mode, setMode] = useState<Mode>("signin");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");

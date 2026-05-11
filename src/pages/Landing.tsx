@@ -28,13 +28,13 @@ const TopBar: React.FC<{ scrolled: boolean; t: (k: string) => string }> = ({ scr
     </Link>
     <nav className="landing-nav">
       <Link to="/manifesto" className="nav-link nav-desktop-only">
-        Manifesto
+        {t("publicNav.manifesto")}
       </Link>
       <Link to="/pricing" className="nav-link nav-desktop-only">
-        Pricing
+        {t("publicNav.pricing")}
       </Link>
       <Link to="/auth" className="nav-link">
-        Sign in
+        {t("publicNav.signIn")}
       </Link>
     </nav>
   </header>
@@ -42,9 +42,15 @@ const TopBar: React.FC<{ scrolled: boolean; t: (k: string) => string }> = ({ scr
 
 const Landing: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [scrolledHint, setScrolledHint] = useState(false);
   const [scrolledBar, setScrolledBar] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  const FAQS = [1, 2, 3, 4, 5].map((i) => ({
+    q: t(`landing.faq.q${i}.question`),
+    a: t(`landing.faq.q${i}.answer`),
+  }));
 
   useEffect(() => {
     const onScroll = () => {
@@ -62,7 +68,7 @@ const Landing: React.FC = () => {
       className="relative flex min-h-screen flex-col"
       style={{ background: "hsl(var(--surface-base))" }}
     >
-      <TopBar scrolled={scrolledBar} />
+      <TopBar scrolled={scrolledBar} t={t} />
 
       {/* SCREEN 1: Hero + Demo in single 100vh */}
       <section

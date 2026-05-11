@@ -119,6 +119,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setPending(false);
     return u;
   }, []);
+
+  const signIn = useCallback<AuthCtx["signIn"]>(async ({ email, password }) => {
     if (!EMAIL_RE.test(email)) throw new Error("Invalid email");
     if (password.length < 1) throw new Error("Password required");
     await sleep(400);

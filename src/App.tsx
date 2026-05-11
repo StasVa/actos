@@ -31,14 +31,14 @@ import NotFound from "./pages/NotFound.tsx";
 import Setup, { isSetupCompleted } from "./pages/Setup.tsx";
 import GoalBuilder from "./pages/GoalBuilder.tsx";
 import Landing from "./pages/Landing.tsx";
-import Start from "./pages/Start.tsx";
+import AdminManifesto from "./pages/AdminManifesto.tsx";
 import Pricing from "./pages/Pricing.tsx";
 import Manifesto from "./pages/Manifesto.tsx";
 import Login from "./pages/Login.tsx";
 import Auth from "./pages/Auth.tsx";
 import AuthReset from "./pages/AuthReset.tsx";
 import { AuthProvider } from "./lib/useAuth";
-import { RequireAuth, RedirectIfAuthed } from "./components/AuthRoute";
+import { RequireAuth, RedirectIfAuthed, RequireAdmin } from "./components/AuthRoute";
 import { EmailVerificationBanner } from "./components/EmailVerificationBanner";
 import { LegalPrivacy, LegalTerms } from "./pages/LegalPlaceholder.tsx";
 import { NoGoalsLayout } from "./components/NoGoalsLayout";
@@ -177,10 +177,11 @@ const App = () => (
             <Route path="announcements" element={<AdminAnnouncements />} />
           </Route>
           <Route path="/admin/components" element={<AdminComponents />} />
+          <Route path="/admin/manifesto" element={<RequireAdmin><AdminManifesto /></RequireAdmin>} />
 
           {/* Public + auth pages */}
           <Route path="/" element={<RedirectIfAuthed><Landing /></RedirectIfAuthed>} />
-          <Route path="/start" element={<Start />} />
+          <Route path="/start" element={<Navigate to="/" replace />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/manifesto" element={<Manifesto />} />
           <Route path="/login" element={<RedirectIfAuthed><Login /></RedirectIfAuthed>} />

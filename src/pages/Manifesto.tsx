@@ -1,9 +1,12 @@
 // Founder essay — Medium-style article with byline, drop cap, pull quote.
-import React from "react";
+// If a CMS override exists in LocalStorage for the current locale, it
+// supersedes the i18n-keyed content (see /admin/manifesto editor).
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ArrowRight } from "lucide-react";
 import { LandingTopBar, LandingFooter } from "@/components/LandingChrome";
+import { readManifesto, type ManifestoContent } from "@/lib/manifestoStorage";
 
 // Render a string with **bold** markdown -> <strong>, *italic* -> <em>.
 function renderMd(s: string): React.ReactNode[] {
@@ -29,7 +32,18 @@ const P: React.FC<{ k: string; className?: string }> = ({ k, className }) => {
 };
 
 const Manifesto: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const [override, setOverride] = useState<ManifestoContent | null>(() => readManifesto(i18n.language));
+  useEffect(() => {
+    const sync = () => setOverride(readManifesto(i18n.language));
+    sync();
+    window.addEventListener("storage", sync);
+    window.addEventListener("actos-manifesto-change", sync);
+    return () => {
+      window.removeEventListener("storage", sync);
+      window.removeEventListener("actos-manifesto-change", sync);
+    };
+  }, [i18n.language]);
   return (
     <div
       data-theme="dark"
@@ -82,7 +96,7 @@ const Manifesto: React.FC = () => {
               lineHeight: 1.1,
             }}
           >
-            {t("manifesto.title")}
+            {override?.title ?? t("manifesto.title")}
           </h1>
 
           <p
@@ -94,9 +108,16 @@ const Manifesto: React.FC = () => {
               lineHeight: 1.4,
             }}
           >
-            {t("manifesto.deck")}
+            {override?.deck ?? t("manifesto.deck")}
           </p>
 
+          {override ? (
+            <div
+              className="manifesto-body manifesto-body-override"
+              style={{ marginTop: 64 }}
+              dangerouslySetInnerHTML={{ __html: override.body }}
+            />
+          ) : (
           <div className="manifesto-body" style={{ marginTop: 64 }}>
             <P k="manifesto.p1" className="has-dropcap" />
             <P k="manifesto.p2" />
@@ -138,9 +159,12 @@ const Manifesto: React.FC = () => {
             <P k="manifesto.p20" />
             <P k="manifesto.p21" />
             <P k="manifesto.p22" />
+          </div>
+          )}
 
+          {/* Closing chrome — always from i18n, not editable in CMS. */}
+          <div className="manifesto-body" style={{ marginTop: override ? 0 : undefined }}>
             <hr />
-
             <p>
               {t("manifesto.closing.line1")}{" "}
               <Link to="/auth#signup" style={{ color: "hsl(var(--goal-2))", textDecoration: "underline" }}>
@@ -250,6 +274,15 @@ const Manifesto: React.FC = () => {
           margin: 4px 6px 0 0;
           color: hsl(var(--text-primary));
         }
+        .manifesto-body-override > p:first-of-type::first-letter {
+          font-size: 64px;
+          font-weight: 500;
+          float: left;
+          line-height: 0.9;
+          margin: 4px 6px 0 0;
+          color: hsl(var(--text-primary));
+        }
+        .manifesto-body a { color: hsl(var(--goal-2)); text-decoration: underline; }
 
         @media (max-width: 768px) {
           .manifesto-main { padding-top: 88px; padding-bottom: 80px; }

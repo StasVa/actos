@@ -75,7 +75,7 @@ export default function Settings() {
   const setShowAdminTools = useStore((s) => s.setShowAdminTools);
   const setSubscriptionTier = useStore((s) => s.setSubscriptionTier);
   const resetToSeed = useStore((s) => s.resetToSeed);
-  const { user, markEmailVerified } = useAuth();
+  const { user, markEmailVerified, setAdmin } = useAuth();
   const clearSampleData = useStore((s) => s.clearSampleData);
   const hasSample = useStore((s) =>
     s.goals.some((g) => g.isSample) ||
@@ -158,6 +158,18 @@ export default function Settings() {
                 className="mb-4 h-9 px-4 text-[13px] font-medium rounded-[4px] border border-border-default text-text-primary hover:border-[hsl(var(--accent))] hover:bg-surface-hover transition-colors"
               >
                 Mark email verified (debug)
+              </button>
+            )}
+            {user && (
+              <button
+                type="button"
+                onClick={() => {
+                  setAdmin(!user.isAdmin);
+                  toast.success(user.isAdmin ? "Admin disabled" : "Admin enabled");
+                }}
+                className="mb-4 ml-2 h-9 px-4 text-[13px] font-medium rounded-[4px] border border-border-default text-text-primary hover:border-[hsl(var(--accent))] hover:bg-surface-hover transition-colors"
+              >
+                {user.isAdmin ? "Disable admin (debug)" : "Toggle admin (debug)"}
               </button>
             )}
 

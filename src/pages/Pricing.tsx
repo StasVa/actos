@@ -143,7 +143,7 @@ const Pricing: React.FC = () => {
               {FREE_FEATURES.map((f, i) => <FeatureRow key={i} f={f} />)}
             </ul>
             <Link
-              to="/today"
+              to="/auth#signup"
               className="pricing-btn-outline"
               style={{
                 marginTop: 40,
@@ -223,7 +223,7 @@ const Pricing: React.FC = () => {
               {ALLIN_FEATURES.map((f, i) => <FeatureRow key={i} f={f} />)}
             </ul>
             <Link
-              to="/today"
+              to="/auth#signup"
               className="pricing-btn-primary"
               style={{
                 marginTop: 40,

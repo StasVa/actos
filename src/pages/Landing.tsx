@@ -58,7 +58,7 @@ const TopBar: React.FC<{ scrolled: boolean }> = ({ scrolled }) => (
       <Link to="/pricing" className="nav-link nav-desktop-only">
         Pricing
       </Link>
-      <Link to="/login" className="nav-link">
+      <Link to="/auth" className="nav-link">
         Sign in
       </Link>
     </nav>
@@ -133,7 +133,7 @@ const Landing: React.FC = () => {
           </p>
           <button
             type="button"
-            onClick={() => navigate("/today")}
+            onClick={() => navigate("/auth#signup")}
             className="cta-btn"
             style={{
               marginTop: 24,

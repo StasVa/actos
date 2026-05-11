@@ -149,7 +149,7 @@ const App = () => (
         <AuthProvider>
         <SetupGuard />
         <ChromeOnlyOutsideSetup>
-          <EmailVerificationBanner />
+          {/* EmailVerificationBanner removed: signup now uses inline /auth/verify flow. */}
           <ActionEditor />
           <GoalEditor />
           <RitualEditor />

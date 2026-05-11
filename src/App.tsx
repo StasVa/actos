@@ -180,7 +180,7 @@ const App = () => (
 
           {/* Public + auth pages */}
           <Route path="/" element={<RedirectIfAuthed><Landing /></RedirectIfAuthed>} />
-          <Route path="/start" element={<Start />} />
+          <Route path="/start" element={<Navigate to="/" replace />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/manifesto" element={<Manifesto />} />
           <Route path="/login" element={<RedirectIfAuthed><Login /></RedirectIfAuthed>} />

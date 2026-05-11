@@ -417,14 +417,15 @@ const Landing: React.FC = () => {
           top: 0;
           left: 50%;
           transform: translateX(-50%);
-          width: 600px;
-          height: 400px;
+          width: 800px;
+          height: 500px;
           background: radial-gradient(
-            ellipse 600px 400px at center,
-            rgba(212, 136, 74, 0.06) 0%,
+            ellipse 800px 500px at center,
+            rgba(212, 136, 74, 0.10) 0%,
+            rgba(212, 136, 74, 0.04) 40%,
             transparent 70%
           );
-          margin-top: 25vh;
+          margin-top: 15vh;
         }
 
         /* SCROLL HINT */

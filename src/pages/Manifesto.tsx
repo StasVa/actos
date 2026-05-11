@@ -32,7 +32,18 @@ const P: React.FC<{ k: string; className?: string }> = ({ k, className }) => {
 };
 
 const Manifesto: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const [override, setOverride] = useState<ManifestoContent | null>(() => readManifesto(i18n.language));
+  useEffect(() => {
+    const sync = () => setOverride(readManifesto(i18n.language));
+    sync();
+    window.addEventListener("storage", sync);
+    window.addEventListener("actos-manifesto-change", sync);
+    return () => {
+      window.removeEventListener("storage", sync);
+      window.removeEventListener("actos-manifesto-change", sync);
+    };
+  }, [i18n.language]);
   return (
     <div
       data-theme="dark"

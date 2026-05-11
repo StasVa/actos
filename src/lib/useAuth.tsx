@@ -11,6 +11,7 @@ export interface AuthUser {
   emailVerified: boolean;
   createdAt: string;
   provider: AuthProvider;
+  isAdmin?: boolean;
 }
 
 const USER_KEY = "actos.auth.user";

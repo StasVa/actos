@@ -8,6 +8,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { PageHeader } from "@/components/PageHeader";
 import { useStore } from "@/store/useStore";
 import { useThemeChoice, type ThemeChoice } from "@/lib/theme";
+import { useAuth } from "@/lib/useAuth";
 import { toast } from "sonner";
 
 const STORAGE_KEY = "actos-store";

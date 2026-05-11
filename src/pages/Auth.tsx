@@ -1,6 +1,7 @@
 // /auth — combined sign in / sign up page. Mock auth for now.
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { EMAIL_RE, useAuth } from "@/lib/useAuth";
 
@@ -24,7 +25,9 @@ const Logo: React.FC = () => (
   </Link>
 );
 
-export const AuthPageShell: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+export const AuthPageShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { t } = useTranslation();
+  return (
   <div
     data-theme="dark"
     style={{
@@ -66,7 +69,7 @@ export const AuthPageShell: React.FC<{ children: React.ReactNode }> = ({ childre
       }}
     >
       <ArrowLeft size={14} className="auth-back-arrow" />
-      Back to homepage
+      {t("auth.logo.backToHome").replace(/^←\s*/, "")}
     </Link>
     <style>{`
       .auth-back-link:hover { color: hsl(var(--text-secondary)) !important; }
@@ -78,7 +81,8 @@ export const AuthPageShell: React.FC<{ children: React.ReactNode }> = ({ childre
       }
     `}</style>
   </div>
-);
+  );
+};
 
 const inputStyle: React.CSSProperties = {
   width: "100%",

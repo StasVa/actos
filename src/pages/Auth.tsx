@@ -308,8 +308,10 @@ const Auth: React.FC = () => {
     setLoading(true);
     try {
       if (mode === "signup") {
-        await signUp({ name, email, password });
-        navigate("/setup", { replace: true });
+        const { code } = await startSignup({ name, email, password });
+        // TODO: remove dev toast when real backend integrates
+        toast(t("auth.verify.devCodeToast", { code }), { duration: 8000 });
+        navigate("/auth/verify", { replace: true });
       } else {
         await signIn({ email, password });
         navigate(next, { replace: true });

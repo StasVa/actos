@@ -88,6 +88,7 @@ const SetupGuard = () => {
     if (location.pathname.startsWith("/start")) return;
     if (location.pathname.startsWith("/manifesto")) return;
     if (location.pathname.startsWith("/login")) return;
+    if (location.pathname.startsWith("/auth")) return;
     if (location.pathname.startsWith("/legal")) return;
     if (location.pathname.startsWith("/setup")) return;
     if (location.pathname.startsWith("/onboarding")) return;

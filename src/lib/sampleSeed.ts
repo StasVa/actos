@@ -115,8 +115,9 @@ function tiptapJsonToHtml(doc: any): string {
   return renderNode(doc);
 }
 
+// Coachmarks are the same across locales — read from the EN fixture.
 const SAMPLE_COACHMARKS: Record<string, string> =
-  (fixture as any).coachmarks ?? {};
+  (enFixture as any).coachmarks ?? {};
 
 export interface SampleSeed {
   goals: Goal[];
@@ -129,9 +130,9 @@ export interface SampleSeed {
   coachmarks: Record<string, string>;
 }
 
-export function buildSampleSeed(): SampleSeed {
+export function buildSampleSeed(locale?: string): SampleSeed {
   const days = offsetDays();
-  const f: any = fixture;
+  const f: any = getSampleFixture(locale);
   const fallbackGoalId: string = f.goals[0]?.id ?? "g1";
 
   const goals: Goal[] = f.goals.map((g: any) => ({

@@ -186,6 +186,7 @@ const App = () => (
           <Route path="/manifesto" element={<Manifesto />} />
           <Route path="/login" element={<RedirectIfAuthed><Login /></RedirectIfAuthed>} />
           <Route path="/auth" element={<RedirectIfAuthed><Auth /></RedirectIfAuthed>} />
+          <Route path="/auth/verify" element={<AuthVerify />} />
           <Route path="/auth/reset" element={<AuthReset />} />
           <Route path="/legal/privacy" element={<LegalPrivacy />} />
           <Route path="/legal/terms" element={<LegalTerms />} />

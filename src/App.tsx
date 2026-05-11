@@ -31,7 +31,7 @@ import NotFound from "./pages/NotFound.tsx";
 import Setup, { isSetupCompleted } from "./pages/Setup.tsx";
 import GoalBuilder from "./pages/GoalBuilder.tsx";
 import Landing from "./pages/Landing.tsx";
-import Start from "./pages/Start.tsx";
+import AdminManifesto from "./pages/AdminManifesto.tsx";
 import Pricing from "./pages/Pricing.tsx";
 import Manifesto from "./pages/Manifesto.tsx";
 import Login from "./pages/Login.tsx";

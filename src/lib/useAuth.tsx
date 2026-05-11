@@ -51,6 +51,7 @@ interface AuthCtx {
   isAuthenticated: boolean;
   pendingVerification: boolean;
   signUp: (input: { name: string; email: string; password: string }) => Promise<AuthUser>;
+  completeSignup: (input: { name: string; email: string }) => AuthUser;
   signIn: (input: { email: string; password: string }) => Promise<AuthUser>;
   signOut: () => void;
   markEmailVerified: () => void;

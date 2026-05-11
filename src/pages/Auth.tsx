@@ -241,6 +241,24 @@ const Auth: React.FC = () => {
 
   const next = params.get("next") || "/today";
 
+  // Sync mode with URL hash (#signup) — optional deep link support.
+  useEffect(() => {
+    const applyHash = () => {
+      if (window.location.hash === "#signup") setMode("signup");
+      else if (window.location.hash === "#signin") setMode("signin");
+    };
+    applyHash();
+    window.addEventListener("hashchange", applyHash);
+    return () => window.removeEventListener("hashchange", applyHash);
+  }, []);
+
+  const switchMode = (target: Mode) => {
+    setMode(target);
+    setErrors({});
+    setSubmitErr(null);
+    setPassword(""); // security hygiene — clear password between modes
+  };
+
   const valid = useMemo(() => {
     if (!EMAIL_RE.test(email)) return false;
     if (mode === "signup") {

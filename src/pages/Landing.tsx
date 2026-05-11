@@ -3,36 +3,11 @@
 
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ArrowRight, ArrowUpRight, ChevronDown } from "lucide-react";
 import { LandingFooter } from "@/components/LandingChrome";
 
-type FaqItem = { q: string; a: string };
-
-const FAQS: FaqItem[] = [
-  {
-    q: "Why only 3 goals?",
-    a: "Because almost no one actually moves more than 2 at a time. The cap isn't restrictive — it's protective. If you can't pick 3, you'll fail at all of them.",
-  },
-  {
-    q: "What if I have 200 things to do?",
-    a: "ActOS isn't built for that load. Tasks unrelated to your 2-3 goals don't belong here. If you're juggling 200 items, the real question is why you took them all on.",
-  },
-  {
-    q: "Is this just another todo app?",
-    a: "No. Todo apps optimize for capturing things to do. ActOS optimizes for moving toward things you decided matter. Different problem, different design.",
-  },
-  {
-    q: "Does it work on mobile?",
-    a: "Yes. The web app works on phones today. Native iOS and Android apps come post-launch.",
-  },
-  {
-    q: "Why isn't it free forever?",
-    a: "It is — to start. The Free tier is genuinely useful, not a limited demo. All-In is $12/mo for people ready to commit. We charge because focus is worth paying for, and we want to build sustainably without ads or VC pressure.",
-  },
-];
-
-
-const TopBar: React.FC<{ scrolled: boolean }> = ({ scrolled }) => (
+const TopBar: React.FC<{ scrolled: boolean; t: (k: string) => string }> = ({ scrolled, t }) => (
   <header
     className="landing-topbar"
     style={{

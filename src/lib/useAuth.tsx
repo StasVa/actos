@@ -146,6 +146,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setPending(false);
   }, []);
 
+  const setAdmin = useCallback((next: boolean) => {
+    const cur = readUser();
+    if (!cur) return;
+    const updated = { ...cur, isAdmin: next };
+    writeUser(updated);
+    setUser(updated);
+  }, []);
+
   const resendVerification = useCallback(async () => {
     await sleep(400);
   }, []);
@@ -163,10 +171,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       signIn,
       signOut,
       markEmailVerified,
+      setAdmin,
       resendVerification,
       resetPassword,
     }),
-    [user, pendingVerification, signUp, signIn, signOut, markEmailVerified, resendVerification, resetPassword],
+    [user, pendingVerification, signUp, signIn, signOut, markEmailVerified, setAdmin, resendVerification, resetPassword],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

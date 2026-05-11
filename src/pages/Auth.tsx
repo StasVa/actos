@@ -338,7 +338,7 @@ const Auth: React.FC = () => {
             marginTop: 16,
           }}
         >
-          Open ActOS in a few seconds.
+          {subline}
         </p>
 
         <form onSubmit={onSubmit} style={{ marginTop: 48, display: "flex", flexDirection: "column", gap: 16 }}>

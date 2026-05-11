@@ -3,36 +3,11 @@
 
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ArrowRight, ArrowUpRight, ChevronDown } from "lucide-react";
 import { LandingFooter } from "@/components/LandingChrome";
 
-type FaqItem = { q: string; a: string };
-
-const FAQS: FaqItem[] = [
-  {
-    q: "Why only 3 goals?",
-    a: "Because almost no one actually moves more than 2 at a time. The cap isn't restrictive — it's protective. If you can't pick 3, you'll fail at all of them.",
-  },
-  {
-    q: "What if I have 200 things to do?",
-    a: "ActOS isn't built for that load. Tasks unrelated to your 2-3 goals don't belong here. If you're juggling 200 items, the real question is why you took them all on.",
-  },
-  {
-    q: "Is this just another todo app?",
-    a: "No. Todo apps optimize for capturing things to do. ActOS optimizes for moving toward things you decided matter. Different problem, different design.",
-  },
-  {
-    q: "Does it work on mobile?",
-    a: "Yes. The web app works on phones today. Native iOS and Android apps come post-launch.",
-  },
-  {
-    q: "Why isn't it free forever?",
-    a: "It is — to start. The Free tier is genuinely useful, not a limited demo. All-In is $12/mo for people ready to commit. We charge because focus is worth paying for, and we want to build sustainably without ads or VC pressure.",
-  },
-];
-
-
-const TopBar: React.FC<{ scrolled: boolean }> = ({ scrolled }) => (
+const TopBar: React.FC<{ scrolled: boolean; t: (k: string) => string }> = ({ scrolled, t }) => (
   <header
     className="landing-topbar"
     style={{
@@ -53,13 +28,13 @@ const TopBar: React.FC<{ scrolled: boolean }> = ({ scrolled }) => (
     </Link>
     <nav className="landing-nav">
       <Link to="/manifesto" className="nav-link nav-desktop-only">
-        Manifesto
+        {t("publicNav.manifesto")}
       </Link>
       <Link to="/pricing" className="nav-link nav-desktop-only">
-        Pricing
+        {t("publicNav.pricing")}
       </Link>
       <Link to="/auth" className="nav-link">
-        Sign in
+        {t("publicNav.signIn")}
       </Link>
     </nav>
   </header>
@@ -67,9 +42,15 @@ const TopBar: React.FC<{ scrolled: boolean }> = ({ scrolled }) => (
 
 const Landing: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [scrolledHint, setScrolledHint] = useState(false);
   const [scrolledBar, setScrolledBar] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  const FAQS = [1, 2, 3, 4, 5].map((i) => ({
+    q: t(`landing.faq.q${i}.question`),
+    a: t(`landing.faq.q${i}.answer`),
+  }));
 
   useEffect(() => {
     const onScroll = () => {
@@ -87,7 +68,7 @@ const Landing: React.FC = () => {
       className="relative flex min-h-screen flex-col"
       style={{ background: "hsl(var(--surface-base))" }}
     >
-      <TopBar scrolled={scrolledBar} />
+      <TopBar scrolled={scrolledBar} t={t} />
 
       {/* SCREEN 1: Hero + Demo in single 100vh */}
       <section
@@ -116,9 +97,9 @@ const Landing: React.FC = () => {
               margin: 0,
             }}
           >
-            Stop scheduling.
+            {t("landing.hero.headlineLine1")}
             <br />
-            Start moving.
+            {t("landing.hero.headlineLine2")}
           </h1>
           <p
             className="hero-sub"
@@ -129,7 +110,7 @@ const Landing: React.FC = () => {
               margin: "16px 0 0",
             }}
           >
-            The OS for getting things done.
+            {t("landing.hero.subline")}
           </p>
           <button
             type="button"
@@ -154,7 +135,7 @@ const Landing: React.FC = () => {
             onMouseEnter={(e) => (e.currentTarget.style.filter = "brightness(1.1)")}
             onMouseLeave={(e) => (e.currentTarget.style.filter = "")}
           >
-            Open ActOS
+            {t("landing.hero.cta")}
             <ArrowRight size={16} />
           </button>
         </div>
@@ -249,7 +230,7 @@ const Landing: React.FC = () => {
               margin: 0,
             }}
           >
-            Questions, answered.
+            {t("landing.faq.heading")}
           </h2>
           <div
             style={{
@@ -282,7 +263,7 @@ const Landing: React.FC = () => {
               transition: "color 200ms ease",
             }}
           >
-            Why tasks and issues stop you moving toward goals.
+            {t("landing.faq.manifestoLink")}
           </span>
           <ArrowUpRight
             size={16}

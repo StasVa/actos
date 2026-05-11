@@ -2,11 +2,13 @@
 import React, { useEffect, useState } from "react";
 import { Mail } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import { useAuth, BANNER_DISMISS_SS_KEY } from "@/lib/useAuth";
 
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 
 export const EmailVerificationBanner: React.FC = () => {
+  const { t } = useTranslation();
   const { user, pendingVerification, resendVerification } = useAuth();
   const [dismissed, setDismissed] = useState<boolean>(
     () => sessionStorage.getItem(BANNER_DISMISS_SS_KEY) === "true",
@@ -29,7 +31,7 @@ export const EmailVerificationBanner: React.FC = () => {
 
   const onResend = async () => {
     await resendVerification();
-    toast.success("Verification email sent");
+    toast.success(t("auth.banner.resendToast"));
   };
 
   const onDismiss = () => {
@@ -58,7 +60,7 @@ export const EmailVerificationBanner: React.FC = () => {
         <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
           <Mail size={16} color="hsl(var(--goal-2))" />
           <span style={{ fontSize: 14, color: "hsl(var(--text-primary))" }}>
-            Verify your email to keep your account.
+            {t("auth.banner.verify")}
           </span>
           <button
             type="button"
@@ -73,7 +75,7 @@ export const EmailVerificationBanner: React.FC = () => {
               cursor: "pointer",
             }}
           >
-            Resend email →
+            {t("auth.banner.resend")}
           </button>
         </div>
         <div>
@@ -91,7 +93,7 @@ export const EmailVerificationBanner: React.FC = () => {
                 cursor: "pointer",
               }}
             >
-              Dismiss
+              {t("auth.banner.dismiss")}
             </button>
           ) : (
             <button
@@ -108,7 +110,7 @@ export const EmailVerificationBanner: React.FC = () => {
                 cursor: "pointer",
               }}
             >
-              Verify now
+              {t("auth.banner.verifyNow")}
             </button>
           )}
         </div>
@@ -144,9 +146,9 @@ export const EmailVerificationBanner: React.FC = () => {
               fontFamily: "Inter, system-ui, sans-serif",
             }}
           >
-            <div style={{ fontSize: 18, fontWeight: 500, marginBottom: 8 }}>Coming soon</div>
+            <div style={{ fontSize: 18, fontWeight: 500, marginBottom: 8 }}>{t("auth.banner.verifyNowModalTitle")}</div>
             <div style={{ fontSize: 14, color: "hsl(var(--text-secondary))", marginBottom: 24 }}>
-              Real verification flow in progress.
+              {t("auth.banner.verifyNowModalBody")}
             </div>
             <button
               type="button"
@@ -162,7 +164,7 @@ export const EmailVerificationBanner: React.FC = () => {
                 cursor: "pointer",
               }}
             >
-              OK
+              {t("auth.banner.verifyNowModalOk")}
             </button>
           </div>
         </div>

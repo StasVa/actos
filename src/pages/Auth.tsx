@@ -1,6 +1,7 @@
 // /auth — combined sign in / sign up page. Mock auth for now.
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { EMAIL_RE, useAuth } from "@/lib/useAuth";
 
@@ -24,7 +25,9 @@ const Logo: React.FC = () => (
   </Link>
 );
 
-export const AuthPageShell: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+export const AuthPageShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { t } = useTranslation();
+  return (
   <div
     data-theme="dark"
     style={{
@@ -66,7 +69,7 @@ export const AuthPageShell: React.FC<{ children: React.ReactNode }> = ({ childre
       }}
     >
       <ArrowLeft size={14} className="auth-back-arrow" />
-      Back to homepage
+      {t("auth.logo.backToHome").replace(/^←\s*/, "")}
     </Link>
     <style>{`
       .auth-back-link:hover { color: hsl(var(--text-secondary)) !important; }
@@ -78,7 +81,8 @@ export const AuthPageShell: React.FC<{ children: React.ReactNode }> = ({ childre
       }
     `}</style>
   </div>
-);
+  );
+};
 
 const inputStyle: React.CSSProperties = {
   width: "100%",
@@ -228,6 +232,7 @@ const Modal: React.FC<{ open: boolean; onClose: () => void; children: React.Reac
 const Auth: React.FC = () => {
   const [params] = useSearchParams();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { signIn, signUp } = useAuth();
   const [mode, setMode] = useState<Mode>("signin");
   const [name, setName] = useState("");
@@ -315,9 +320,10 @@ const Auth: React.FC = () => {
     }
   };
 
-  const heading = mode === "signin" ? "Welcome back." : "Let’s get you set up.";
-  const subline = mode === "signin" ? "Open ActOS in a few seconds." : "Set up your account in 30 seconds.";
-  const submitLabel = mode === "signin" ? "Sign in" : "Create account";
+  const heading = mode === "signin" ? t("auth.signin.heading") : t("auth.signup.heading");
+  const subline = mode === "signin" ? t("auth.signin.subline") : t("auth.signup.subline");
+  const submitLabel = mode === "signin" ? t("auth.signin.submitButton") : t("auth.signup.submitButton");
+  const loadingLabel = mode === "signin" ? t("auth.button.signingIn") : t("auth.button.creating");
 
   return (
     <AuthPageShell>
@@ -348,37 +354,37 @@ const Auth: React.FC = () => {
 
         <form onSubmit={onSubmit} style={{ marginTop: 48, display: "flex", flexDirection: "column", gap: 16 }}>
           {mode === "signup" && (
-            <Field label="Name" error={errors.name}>
+            <Field label={t("auth.field.name.label")} error={errors.name}>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 onBlur={() => validateField("name")}
                 onFocus={(e) => (e.currentTarget.style.borderColor = "hsl(var(--goal-2))")}
-                placeholder="Your first name"
+                placeholder={t("auth.field.name.placeholder")}
                 style={inputStyle}
                 required
               />
             </Field>
           )}
 
-          <Field label="Email" error={errors.email}>
+          <Field label={t("auth.field.email.label")} error={errors.email}>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               onBlur={() => validateField("email")}
               onFocus={(e) => (e.currentTarget.style.borderColor = "hsl(var(--goal-2))")}
-              placeholder="you@example.com"
+              placeholder={t("auth.field.email.placeholder")}
               style={inputStyle}
               required
             />
           </Field>
 
           <Field
-            label="Password"
+            label={t("auth.field.password.label")}
             error={errors.password}
-            helper={mode === "signup" ? "At least 8 characters." : undefined}
+            helper={mode === "signup" ? t("auth.field.password.helper") : undefined}
           >
             <div style={{ position: "relative" }}>
               <input
@@ -418,7 +424,7 @@ const Auth: React.FC = () => {
                 to="/auth/reset"
                 style={{ fontSize: 13, color: "hsl(var(--text-secondary))", textDecoration: "none" }}
               >
-                Forgot password?
+                {t("auth.signin.forgotPassword")}
               </Link>
             </div>
           )}
@@ -446,7 +452,7 @@ const Auth: React.FC = () => {
               transition: "opacity 150ms ease",
             }}
           >
-            {loading ? "..." : submitLabel}
+            {loading ? loadingLabel : submitLabel}
           </button>
         </form>
 
@@ -454,12 +460,12 @@ const Auth: React.FC = () => {
         <div style={{ marginTop: 32 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
             <div style={{ flex: 1, height: 1, background: "hsl(var(--border-subtle))" }} />
-            <span style={{ fontSize: 13, color: "hsl(var(--text-tertiary))" }}>or</span>
+            <span style={{ fontSize: 13, color: "hsl(var(--text-tertiary))" }}>{t("auth.social.divider")}</span>
             <div style={{ flex: 1, height: 1, background: "hsl(var(--border-subtle))" }} />
           </div>
           <div style={{ marginTop: 24, display: "flex", flexDirection: "column", gap: 12 }}>
-            <SocialButton label="Continue with Google" icon={<GoogleG />} onClick={() => setOauthOpen(true)} />
-            <SocialButton label="Continue with Apple" icon={<AppleLogo />} onClick={() => setOauthOpen(true)} />
+            <SocialButton label={t("auth.social.google")} icon={<GoogleG />} onClick={() => setOauthOpen(true)} />
+            <SocialButton label={t("auth.social.apple")} icon={<AppleLogo />} onClick={() => setOauthOpen(true)} />
           </div>
         </div>
 
@@ -467,24 +473,24 @@ const Auth: React.FC = () => {
         <div style={{ marginTop: 32, textAlign: "center", fontSize: 14, color: "hsl(var(--text-secondary))" }}>
           {mode === "signin" ? (
             <>
-              Don&apos;t have an account?{" "}
+              {t("auth.signin.toggleLabel")}{" "}
               <button
                 type="button"
                 onClick={() => switchMode("signup")}
                 style={{ background: "none", border: "none", padding: 0, color: "hsl(var(--goal-2))", cursor: "pointer", fontSize: 14, fontWeight: 500 }}
               >
-                Sign up
+                {t("auth.signin.toggleLink")}
               </button>
             </>
           ) : (
             <>
-              Already have an account?{" "}
+              {t("auth.signup.toggleLabel")}{" "}
               <button
                 type="button"
                 onClick={() => switchMode("signin")}
                 style={{ background: "none", border: "none", padding: 0, color: "hsl(var(--goal-2))", cursor: "pointer", fontSize: 14, fontWeight: 500 }}
               >
-                Sign in
+                {t("auth.signup.toggleLink")}
               </button>
             </>
           )}
@@ -503,13 +509,13 @@ const Auth: React.FC = () => {
               lineHeight: 1.5,
             }}
           >
-            By creating an account, you agree to our{" "}
+            {t("auth.signup.terms.body")}{" "}
             <Link to="/legal/terms" style={{ color: "hsl(var(--text-secondary))" }}>
-              Terms
+              {t("auth.signup.terms.linkTerms")}
             </Link>{" "}
-            and{" "}
+            {t("auth.signup.terms.and")}{" "}
             <Link to="/legal/privacy" style={{ color: "hsl(var(--text-secondary))" }}>
-              Privacy Policy
+              {t("auth.signup.terms.linkPrivacy")}
             </Link>
             .
           </div>
@@ -517,9 +523,9 @@ const Auth: React.FC = () => {
       </div>
 
       <Modal open={oauthOpen} onClose={() => setOauthOpen(false)}>
-        <div style={{ fontSize: 18, fontWeight: 500, marginBottom: 8 }}>Coming soon</div>
+        <div style={{ fontSize: 18, fontWeight: 500, marginBottom: 8 }}>{t("auth.social.comingSoonTitle")}</div>
         <div style={{ fontSize: 14, color: "hsl(var(--text-secondary))", marginBottom: 24 }}>
-          Real OAuth integration in progress.
+          {t("auth.social.comingSoonBody")}
         </div>
         <button
           type="button"
@@ -535,7 +541,7 @@ const Auth: React.FC = () => {
             cursor: "pointer",
           }}
         >
-          OK
+          {t("auth.social.comingSoonOk")}
         </button>
       </Modal>
 

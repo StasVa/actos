@@ -1,11 +1,13 @@
 // /auth/reset — mock password reset request page.
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ArrowLeft, Check } from "lucide-react";
 import { AuthPageShell } from "./Auth";
 import { EMAIL_RE, useAuth } from "@/lib/useAuth";
 
 const AuthReset: React.FC = () => {
+  const { t } = useTranslation();
   const { resetPassword } = useAuth();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -38,7 +40,7 @@ const AuthReset: React.FC = () => {
             letterSpacing: "-0.02em",
           }}
         >
-          Reset your password.
+          {t("auth.reset.heading")}
         </h1>
         <p
           style={{
@@ -48,7 +50,7 @@ const AuthReset: React.FC = () => {
             marginTop: 16,
           }}
         >
-          Enter your email and we&apos;ll send a reset link.
+          {t("auth.reset.subline")}
         </p>
 
         {done ? (
@@ -78,7 +80,7 @@ const AuthReset: React.FC = () => {
               <Check size={20} color="hsl(var(--surface-base))" />
             </div>
             <div style={{ fontSize: 14, color: "hsl(var(--text-secondary))" }}>
-              If that email is registered, we&apos;ve sent a reset link.
+              {t("auth.reset.successBody")}
             </div>
           </div>
         ) : (
@@ -96,13 +98,13 @@ const AuthReset: React.FC = () => {
                   marginBottom: 8,
                 }}
               >
-                Email
+                {t("auth.field.email.label")}
               </label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
+                placeholder={t("auth.field.email.placeholder")}
                 style={{
                   width: "100%",
                   height: 44,
@@ -136,7 +138,7 @@ const AuthReset: React.FC = () => {
                 opacity: !valid || loading ? 0.5 : 1,
               }}
             >
-              {loading ? "..." : "Send reset link"}
+              {loading ? "..." : t("auth.reset.submitButton")}
             </button>
           </form>
         )}
@@ -153,7 +155,7 @@ const AuthReset: React.FC = () => {
               gap: 6,
             }}
           >
-            <ArrowLeft size={14} /> Back to sign in
+            <ArrowLeft size={14} /> {t("auth.reset.backLink").replace(/^←\s*/, "")}
           </Link>
         </div>
       </div>

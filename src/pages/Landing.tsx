@@ -12,11 +12,6 @@ type FaqItem =
 
 const FAQS: FaqItem[] = [
   {
-    kind: "link",
-    q: "Why tasks and issues stop you moving toward goals.",
-    to: "/manifesto",
-  },
-  {
     kind: "item",
     q: "Why only 3 goals?",
     a: "Because almost no one actually moves more than 2 at a time. The cap isn't restrictive — it's protective. If you can't pick 3, you'll fail at all of them.",

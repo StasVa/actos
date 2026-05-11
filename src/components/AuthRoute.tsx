@@ -18,7 +18,25 @@ export const RedirectIfAuthed: React.FC<{ children: React.ReactNode; to?: string
   to = "/today",
 }) => {
   const { isAuthenticated } = useAuth();
+  const location = useLocation();
   if (isAuthenticated) return <Navigate to={to} replace />;
+  // Resume signup verification: if user has a pending signup, route to /auth/verify
+  // (unless they're already there). Cheap LocalStorage read.
+  if (location.pathname !== "/auth/verify") {
+    try {
+      const raw = localStorage.getItem("actos.auth.pendingSignup");
+      if (raw) {
+        const p = JSON.parse(raw);
+        const ageMs = Date.now() - new Date(p.createdAt).getTime();
+        if (ageMs < 24 * 60 * 60 * 1000) {
+          return <Navigate to="/auth/verify" replace />;
+        }
+        localStorage.removeItem("actos.auth.pendingSignup");
+      }
+    } catch {
+      // ignore parse errors
+    }
+  }
   return <>{children}</>;
 };
 

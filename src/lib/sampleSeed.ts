@@ -1,10 +1,13 @@
 // Builds the "Show me how it works" sample dataset from the canonical fixture.
 //
-// The fixture (src/data/sampleDataFixture.json) is anchored to 2026-05-09.
-// At seed time, every ISO date / datetime is shifted by (today - anchor) days
-// so the timeline always feels current relative to the user's local date.
+// The fixture (src/data/sample/sampleDataFixture.{locale}.json) is anchored to
+// 2026-05-09. At seed time, every ISO date / datetime is shifted by
+// (today - anchor) days so the timeline always feels current relative to the
+// user's local date. Locale is picked from the user's i18n setting; once
+// seeded the entities are real workspace data and don't re-translate.
 
-import fixture from "@/data/sampleDataFixture.json";
+import enFixture from "@/data/sample/sampleDataFixture.en.json";
+import { getSampleFixture } from "@/data/sample";
 import type {
   Action,
   DayEntry,
@@ -112,8 +115,9 @@ function tiptapJsonToHtml(doc: any): string {
   return renderNode(doc);
 }
 
+// Coachmarks are the same across locales — read from the EN fixture.
 const SAMPLE_COACHMARKS: Record<string, string> =
-  (fixture as any).coachmarks ?? {};
+  (enFixture as any).coachmarks ?? {};
 
 export interface SampleSeed {
   goals: Goal[];
@@ -126,9 +130,9 @@ export interface SampleSeed {
   coachmarks: Record<string, string>;
 }
 
-export function buildSampleSeed(): SampleSeed {
+export function buildSampleSeed(locale?: string): SampleSeed {
   const days = offsetDays();
-  const f: any = fixture;
+  const f: any = getSampleFixture(locale);
   const fallbackGoalId: string = f.goals[0]?.id ?? "g1";
 
   const goals: Goal[] = f.goals.map((g: any) => ({

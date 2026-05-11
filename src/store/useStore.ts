@@ -951,7 +951,17 @@ export const useStore = create<StoreState>()(
         }),
 
       seedSampleData: () => {
-        const seed = buildSampleSeed();
+        // Pick locale from the user's i18n setting at seed time. Once seeded,
+        // entities are real workspace data and don't react to language switches.
+        let locale: string | undefined;
+        try {
+          locale =
+            localStorage.getItem("actos.i18n.language") ||
+            (navigator?.language ? navigator.language.slice(0, 2) : undefined);
+        } catch {
+          locale = undefined;
+        }
+        const seed = buildSampleSeed(locale);
         set({
           goals: seed.goals,
           projects: seed.projects,

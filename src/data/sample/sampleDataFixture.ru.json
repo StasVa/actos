@@ -1,0 +1,3463 @@
+{
+  "_meta": {
+    "version": 1,
+    "generatedAt": "2026-05-09T18:00:00",
+    "anchorDate": "2026-05-09",
+    "historyDays": 60,
+    "note": "All entities flagged isSample: true. Lovable should adjust timestamps relative to current date at seed time (shift all dates by [today - 2026-05-09])."
+  },
+  "goals": [
+    {
+      "id": "g1",
+      "title": "Вывести SaaS на $10k MRR",
+      "type": "mid-term",
+      "color": "goal-1",
+      "status": "active",
+      "createdAt": "2026-03-12T18:00:00",
+      "targetDate": "2026-09-06T18:00:00",
+      "successCriteria": [
+        {
+          "id": "g1-c1",
+          "text": "Платный MRR ≥ $10 000 три месяца подряд",
+          "done": false
+        },
+        {
+          "id": "g1-c2",
+          "text": "Минимум 50 активных платящих клиентов",
+          "done": false
+        },
+        {
+          "id": "g1-c3",
+          "text": "Net revenue retention ≥ 100%",
+          "done": false
+        }
+      ],
+      "isSample": true
+    },
+    {
+      "id": "g2",
+      "title": "Пробежать полумарафон быстрее 2 часов",
+      "type": "mid-term",
+      "color": "goal-2",
+      "status": "active",
+      "createdAt": "2026-03-15T18:00:00",
+      "targetDate": "2026-08-07T18:00:00",
+      "successCriteria": [
+        {
+          "id": "g2-c1",
+          "text": "Пробежать 21,1 км быстрее 2:00:00 на реальном забеге",
+          "done": false
+        },
+        {
+          "id": "g2-c2",
+          "text": "Удерживать темп быстрее 5:40/км всю дистанцию",
+          "done": false
+        }
+      ],
+      "isSample": true
+    },
+    {
+      "id": "g3",
+      "title": "Сдать экзамен по испанскому уровня C1",
+      "type": "mid-term",
+      "color": "goal-3",
+      "status": "active",
+      "createdAt": "2026-03-28T18:00:00",
+      "targetDate": "2026-11-05T18:00:00",
+      "successCriteria": [
+        {
+          "id": "g3-c1",
+          "text": "Сдать официальный экзамен DELE C1",
+          "done": false
+        },
+        {
+          "id": "g3-c2",
+          "text": "Без напряжения провести 30-минутный разговор с носителем",
+          "done": false
+        }
+      ],
+      "isSample": true
+    }
+  ],
+  "projects": [
+    {
+      "id": "p1",
+      "goalId": "g1",
+      "title": "Настроить биллинг через Stripe",
+      "status": "completed",
+      "createdAt": "2026-03-12T18:00:00",
+      "closedAt": "2026-04-21T18:00:00",
+      "isSample": true,
+      "description": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Built end-to-end paid subscription support: checkout, webhooks, "
+              },
+              {
+                "type": "text",
+                "text": "customer portal, and failed-payment handling. Shipped to production "
+              },
+              {
+                "type": "text",
+                "text": "18 days ago. "
+              },
+              {
+                "type": "text",
+                "text": "Onboarded our first 12 paying customers through this stack.",
+                "marks": [
+                  {
+                    "type": "bold"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "heading",
+            "attrs": {
+              "level": 2
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "Decisions"
+              }
+            ]
+          },
+          {
+            "type": "bulletList",
+            "content": [
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Went with "
+                      },
+                      {
+                        "type": "text",
+                        "text": "stripe-checkout",
+                        "marks": [
+                          {
+                            "type": "code"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": " hosted page instead of custom UI — saved ~5 days."
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Single subscription tier for now (Pro $19/mo). Annual + team plans deferred."
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Webhooks routed through "
+                      },
+                      {
+                        "type": "text",
+                        "text": "/api/stripe/webhook",
+                        "marks": [
+                          {
+                            "type": "code"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": " with signature verification."
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Failed payments retry 3× over 7 days, then downgrade to Free with email notice."
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "heading",
+            "attrs": {
+              "level": 2
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "What didn't work"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Tried building custom invoice generation early on — abandoned after realizing "
+              },
+              {
+                "type": "text",
+                "text": "Stripe's invoice API covers everything we need for $0 extra. "
+              },
+              {
+                "type": "text",
+                "text": "Logged as a Dropped action.",
+                "marks": [
+                  {
+                    "type": "bold"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "heading",
+            "attrs": {
+              "level": 2
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "Open follow-ups"
+              }
+            ]
+          },
+          {
+            "type": "bulletList",
+            "content": [
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Set up dunning emails (currently using Stripe defaults — could be more on-brand)"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Add tax handling once we expand to EU customers"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Test SCA flow with real European cards"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "references": [
+        {
+          "id": "r-p1-1",
+          "url": "https://stripe.com/docs/billing/subscriptions/overview",
+          "title": "Документация Stripe Subscriptions"
+        },
+        {
+          "id": "r-p1-2",
+          "url": "https://stripe.com/docs/webhooks/signatures",
+          "title": "Проверка подписи вебхуков"
+        },
+        {
+          "id": "r-p1-3",
+          "url": "https://github.com/myorg/saas-app/pull/127",
+          "title": "PR #127 — интеграция Stripe"
+        },
+        {
+          "id": "r-p1-4",
+          "url": "https://github.com/myorg/saas-app/pull/142",
+          "title": "PR #142 — клиентский портал"
+        },
+        {
+          "id": "r-p1-5",
+          "url": "https://www.notion.so/saas/billing-architecture",
+          "title": "Внутреннее: заметки по архитектуре биллинга"
+        }
+      ]
+    },
+    {
+      "id": "p2",
+      "goalId": "g1",
+      "title": "Запуск на Product Hunt",
+      "status": "active",
+      "createdAt": "2026-04-17T18:00:00",
+      "isSample": true,
+      "description": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Coordinated launch — assets, copy, hunter outreach, comment-day staffing. "
+              },
+              {
+                "type": "text",
+                "text": "Aiming for top 5 of the day; the real win is 200+ signups in launch week."
+              }
+            ]
+          },
+          {
+            "type": "heading",
+            "attrs": {
+              "level": 3
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "Pre-launch checklist"
+              }
+            ]
+          },
+          {
+            "type": "bulletList",
+            "content": [
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Hunter found and confirmed"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Maker comment drafted (the long one explaining why we built this)"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "5 hero images ready in 16:9, 4:3, square"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Backup launch day in case calendar shifts (Wed → Thu)"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Day-of plan: I'm on comments 7am-1pm, Maria covers 1pm-7pm. "
+              },
+              {
+                "type": "text",
+                "text": "Auto-replies disabled — every comment gets a real response."
+              }
+            ]
+          }
+        ]
+      },
+      "references": [
+        {
+          "id": "r-p2-1",
+          "url": "https://www.producthunt.com/launch",
+          "title": "Чек-лист запуска на Product Hunt"
+        },
+        {
+          "id": "r-p2-2",
+          "url": "https://www.notion.so/saas/launch-day-plan",
+          "title": "Внутреннее: плейбук дня запуска"
+        },
+        {
+          "id": "r-p2-3",
+          "url": "https://twitter.com/i/lists/launch-supporters",
+          "title": "Twitter-список саппортеров запуска"
+        }
+      ]
+    },
+    {
+      "id": "p3",
+      "goalId": "g1",
+      "title": "Сделать страницу с тарифами",
+      "status": "active",
+      "createdAt": "2026-04-24T18:00:00",
+      "isSample": true,
+      "description": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Replacing the temporary single-CTA pricing block with a proper page. "
+              },
+              {
+                "type": "text",
+                "text": "Goal is to convert visitors who hesitated on the previous version."
+              }
+            ]
+          },
+          {
+            "type": "heading",
+            "attrs": {
+              "level": 3
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "Tiers"
+              }
+            ]
+          },
+          {
+            "type": "bulletList",
+            "content": [
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Free — up to 3 active goals (the natural cap). Single device."
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Pro — $19/mo. Cloud sync, priority support, early features."
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Annual at 20% off ("
+                      },
+                      {
+                        "type": "text",
+                        "text": "$15/mo",
+                        "marks": [
+                          {
+                            "type": "code"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": " billed yearly)."
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Considering a 14-day Pro trial vs. just leaving Free as the trial. "
+              },
+              {
+                "type": "text",
+                "text": "Leaning toward no trial — the Free tier is genuinely useful."
+              }
+            ]
+          }
+        ]
+      },
+      "references": [
+        {
+          "id": "r-p3-1",
+          "url": "https://stripe.com/atlas/guides/pricing",
+          "title": "Stripe Atlas: плейбук по pricing"
+        },
+        {
+          "id": "r-p3-2",
+          "url": "https://www.priceintelligently.com/blog/saas-pricing-strategy",
+          "title": "Чтение по pricing-стратегии"
+        }
+      ]
+    },
+    {
+      "id": "p4",
+      "goalId": "g1",
+      "title": "Настроить поддержку клиентов",
+      "status": "active",
+      "createdAt": "2026-04-04T18:00:00",
+      "isSample": true,
+      "description": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Need a real support workflow before launch — currently emails go to my inbox "
+              },
+              {
+                "type": "text",
+                "text": "and that won't scale past ~50 customers."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Picked Plain after evaluating Intercom and Crisp. Setup is half-done; got the email "
+              },
+              {
+                "type": "text",
+                "text": "forwarding working but the team workflow is still pending. "
+              },
+              {
+                "type": "text",
+                "text": "Back-burner until after PH launch.",
+                "marks": [
+                  {
+                    "type": "bold"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "references": [
+        {
+          "id": "r-p4-1",
+          "url": "https://www.plain.com",
+          "title": "Plain (выбранный инструмент)"
+        },
+        {
+          "id": "r-p4-2",
+          "url": "https://www.notion.so/saas/support-comparison",
+          "title": "Внутреннее: сравнение инструментов"
+        }
+      ]
+    },
+    {
+      "id": "p5",
+      "goalId": "g2",
+      "title": "Закрепить рутину тренировок 4 раза в неделю",
+      "status": "completed",
+      "createdAt": "2026-03-15T18:00:00",
+      "closedAt": "2026-04-09T18:00:00",
+      "isSample": true,
+      "description": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Spent the first 25 days proving I can actually show up 4×/week consistently before "
+              },
+              {
+                "type": "text",
+                "text": "increasing volume. "
+              },
+              {
+                "type": "text",
+                "text": "Closed when streak hit 3 weeks of full attendance with 0 zero-effort sessions.",
+                "marks": [
+                  {
+                    "type": "bold"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "heading",
+            "attrs": {
+              "level": 2
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "Week structure"
+              }
+            ]
+          },
+          {
+            "type": "bulletList",
+            "content": [
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Monday — easy 5km"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Wednesday — strength (45 min)"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Friday — easy 5km or tempo (alternating weeks)"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Sunday — long run (start at 8km, build slowly)"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "heading",
+            "attrs": {
+              "level": 2
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "Insights from this base period"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Morning runs work better than evening for me — heart rate noticeably lower at the same pace, "
+              },
+              {
+                "type": "text",
+                "text": "and I'm less likely to skip when it's the first thing I do."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Strength day is the keystone — when I miss it, my Friday run feels heavier and form drops. "
+              },
+              {
+                "type": "text",
+                "text": "Treating it as non-optional from now on."
+              }
+            ]
+          },
+          {
+            "type": "image",
+            "attrs": {
+              "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 80' width='480' height='80'><rect width='480' height='80' fill='%231a1a1a'/><line x1='20' y1='40' x2='460' y2='40' stroke='%23333' stroke-width='1'/><circle cx='40' cy='40' r='4' fill='%234A6AFF'/><text x='40' y='65' font-family='monospace' font-size='10' fill='%23999' text-anchor='middle'>day 1</text><circle cx='160' cy='40' r='4' fill='%234A6AFF'/><text x='160' y='65' font-family='monospace' font-size='10' fill='%23999' text-anchor='middle'>day 14</text><circle cx='280' cy='40' r='4' fill='%234A6AFF'/><text x='280' y='65' font-family='monospace' font-size='10' fill='%23999' text-anchor='middle'>day 28</text><circle cx='400' cy='40' r='6' fill='%23F58A4F'/><text x='400' y='65' font-family='monospace' font-size='10' fill='%23F58A4F' text-anchor='middle'>RACE</text><text x='240' y='20' font-family='Inter, sans-serif' font-size='11' fill='%23eaeaea' text-anchor='middle'>Half marathon training timeline</text></svg>",
+              "alt": "Half marathon training timeline showing race target"
+            }
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Reference target marked on the timeline above. "
+              },
+              {
+                "type": "text",
+                "text": "Translated into the project "
+              },
+              {
+                "type": "text",
+                "text": "Build base mileage to 30km/week",
+                "marks": [
+                  {
+                    "type": "bold"
+                  }
+                ]
+              },
+              {
+                "type": "text",
+                "text": " — see active list."
+              }
+            ]
+          }
+        ]
+      },
+      "references": [
+        {
+          "id": "r-p5-1",
+          "url": "https://www.runnersworld.com/training/a20791286/half-marathon-base-building/",
+          "title": "Runner's World: принципы построения базы"
+        },
+        {
+          "id": "r-p5-2",
+          "url": "https://www.strava.com/activities/12345678",
+          "title": "Strava: первый тестовый бег на 5 км"
+        },
+        {
+          "id": "r-p5-3",
+          "url": "https://www.youtube.com/watch?v=example",
+          "title": "Видео с разбором техники — фидбек тренера"
+        },
+        {
+          "id": "r-p5-4",
+          "url": "https://www.amazon.com/dp/example",
+          "title": "Hal Higdon: гайд по подготовке к полумарафону"
+        }
+      ]
+    },
+    {
+      "id": "p6",
+      "goalId": "g2",
+      "title": "Нарастить базу до 30 км в неделю",
+      "status": "active",
+      "createdAt": "2026-04-11T18:00:00",
+      "isSample": true,
+      "description": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "The middle phase — gradually increasing weekly volume from 20km to 30km without "
+              },
+              {
+                "type": "text",
+                "text": "blowing up. Following 10% rule strictly: each week's total can be at most 10% over the previous."
+              }
+            ]
+          },
+          {
+            "type": "image",
+            "attrs": {
+              "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 160' width='480' height='160'><rect width='480' height='160' fill='%231a1a1a'/><text x='20' y='25' font-family='Inter, sans-serif' font-size='12' fill='%23eaeaea'>Weekly mileage progression (km)</text><line x1='40' y1='130' x2='460' y2='130' stroke='%23333'/><line x1='40' y1='40' x2='40' y2='130' stroke='%23333'/><rect x='60' y='100' width='30' height='30' fill='%23F58A4F' opacity='0.7'/><rect x='110' y='90' width='30' height='40' fill='%23F58A4F' opacity='0.75'/><rect x='160' y='80' width='30' height='50' fill='%23F58A4F' opacity='0.8'/><rect x='210' y='75' width='30' height='55' fill='%23F58A4F' opacity='0.85'/><rect x='260' y='65' width='30' height='65' fill='%23F58A4F' opacity='0.9'/><rect x='310' y='55' width='30' height='75' fill='%23F58A4F' opacity='0.95'/><rect x='360' y='50' width='30' height='80' fill='%23F58A4F'/><text x='75' y='148' font-family='monospace' font-size='9' fill='%23999' text-anchor='middle'>w1</text><text x='125' y='148' font-family='monospace' font-size='9' fill='%23999' text-anchor='middle'>w2</text><text x='175' y='148' font-family='monospace' font-size='9' fill='%23999' text-anchor='middle'>w3</text><text x='225' y='148' font-family='monospace' font-size='9' fill='%23999' text-anchor='middle'>w4</text><text x='275' y='148' font-family='monospace' font-size='9' fill='%23999' text-anchor='middle'>w5</text><text x='325' y='148' font-family='monospace' font-size='9' fill='%23999' text-anchor='middle'>w6</text><text x='375' y='148' font-family='monospace' font-size='9' fill='%23999' text-anchor='middle'>w7</text><text x='25' y='105' font-family='monospace' font-size='9' fill='%23999' text-anchor='end'>10</text><text x='25' y='75' font-family='monospace' font-size='9' fill='%23999' text-anchor='end'>20</text><text x='25' y='55' font-family='monospace' font-size='9' fill='%23999' text-anchor='end'>30</text></svg>",
+              "alt": "Weekly mileage chart showing gradual increase from 12km to 28km"
+            }
+          },
+          {
+            "type": "heading",
+            "attrs": {
+              "level": 3
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "Where I am"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Hit 28km last week. One more week at 28-30km, then start adding intensity per the next "
+              },
+              {
+                "type": "text",
+                "text": "project. Knees feel fine, sleep is good, appetite is up. Right side of the rubber band."
+              }
+            ]
+          },
+          {
+            "type": "heading",
+            "attrs": {
+              "level": 3
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "Pace targets at this volume"
+              }
+            ]
+          },
+          {
+            "type": "bulletList",
+            "content": [
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Easy runs — 6:00-6:30/km (HR < 145)"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Long Sunday runs — 6:15-6:45/km"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Recovery — slower than 6:30/km, no shame in walking"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "references": [
+        {
+          "id": "r-p6-1",
+          "url": "https://www.runnersworld.com/training/a20791286/10-percent-rule/",
+          "title": "Правило 10% — объяснение"
+        },
+        {
+          "id": "r-p6-2",
+          "url": "https://www.strava.com/athlete/training-log",
+          "title": "Тренировочный лог Strava"
+        },
+        {
+          "id": "r-p6-3",
+          "url": "https://www.notion.so/running/weekly-log",
+          "title": "Личный недельный лог"
+        }
+      ]
+    },
+    {
+      "id": "p7",
+      "goalId": "g2",
+      "title": "Добавить темповые и интервальные тренировки",
+      "status": "active",
+      "createdAt": "2026-04-29T18:00:00",
+      "isSample": true,
+      "description": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Adding speed work after building base. One tempo session and one interval session per week, "
+              },
+              {
+                "type": "text",
+                "text": "starting easy and building up to race pace efforts."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "First tempo done last week (3×1km @ 5:30/km — felt sustainable). "
+              },
+              {
+                "type": "text",
+                "text": "First interval session done — short reps to introduce the system gently."
+              }
+            ]
+          }
+        ]
+      },
+      "references": []
+    },
+    {
+      "id": "p8",
+      "goalId": "g3",
+      "title": "Пройти учебник уровня B2",
+      "status": "active",
+      "createdAt": "2026-03-30T18:00:00",
+      "isSample": true,
+      "description": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Working through Aula Internacional 4 (B2 level). One unit per week, "
+              },
+              {
+                "type": "text",
+                "text": "writing every exercise out by hand — slower but retention is much better."
+              }
+            ]
+          },
+          {
+            "type": "heading",
+            "attrs": {
+              "level": 3
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "Process per unit"
+              }
+            ]
+          },
+          {
+            "type": "bulletList",
+            "content": [
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Day 1: read the unit, do reading exercises"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Day 2-3: grammar drills + listening"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Day 4: writing exercises (free composition)"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Day 5: review with flashcards from Anki"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Halfway through. Subjunctive feels much more natural than 6 weeks ago. "
+              },
+              {
+                "type": "text",
+                "text": "Reported speech (unit 4) was the hardest so far."
+              }
+            ]
+          }
+        ]
+      },
+      "references": [
+        {
+          "id": "r-p8-1",
+          "url": "https://difusion.com/idiomas/aula-internacional/",
+          "title": "Информация по учебнику Aula Internacional"
+        },
+        {
+          "id": "r-p8-2",
+          "url": "https://ankiweb.net/shared/info/example",
+          "title": "Anki-колода для испанского B2"
+        }
+      ]
+    },
+    {
+      "id": "p9",
+      "goalId": "g3",
+      "title": "Найти собеседника для разговорной практики",
+      "status": "active",
+      "createdAt": "2026-04-24T18:00:00",
+      "isSample": true,
+      "description": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Finding a regular conversation partner — italki tutor or language exchange. "
+              },
+              {
+                "type": "text",
+                "text": "30 minutes, 2× a week to start. Goal is fluency through use, not lessons."
+              }
+            ]
+          }
+        ]
+      },
+      "references": [
+        {
+          "id": "r-p9-1",
+          "url": "https://www.italki.com",
+          "title": "italki"
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "id": "a1",
+      "projectId": "p1",
+      "goalId": "g1",
+      "title": "Изучить документацию Stripe API",
+      "impact": 4,
+      "timeEstimate": 60,
+      "status": "done",
+      "createdAt": "2026-03-12T22:00:00",
+      "isSample": true,
+      "completedAt": "2026-03-14T09:00:00"
+    },
+    {
+      "id": "a2",
+      "projectId": "p1",
+      "goalId": "g1",
+      "title": "Создать аккаунт Stripe и верифицировать бизнес",
+      "impact": 5,
+      "timeEstimate": 90,
+      "status": "done",
+      "createdAt": "2026-03-15T18:00:00",
+      "isSample": true,
+      "completedAt": "2026-03-15T23:00:00"
+    },
+    {
+      "id": "a3",
+      "projectId": "p1",
+      "goalId": "g1",
+      "title": "Реализовать обработчик checkout-вебхуков",
+      "impact": 8,
+      "timeEstimate": 120,
+      "status": "done",
+      "createdAt": "2026-03-19T10:00:00",
+      "isSample": true,
+      "completedAt": "2026-03-20T07:00:00"
+    },
+    {
+      "id": "a4",
+      "projectId": "p1",
+      "goalId": "g1",
+      "title": "Протестировать оплату end-to-end",
+      "impact": 6,
+      "timeEstimate": 90,
+      "status": "done",
+      "createdAt": "2026-03-24T11:00:00",
+      "isSample": true,
+      "completedAt": "2026-03-25T08:00:00"
+    },
+    {
+      "id": "a5",
+      "projectId": "p1",
+      "goalId": "g1",
+      "title": "Сделать страницу управления подпиской",
+      "impact": 7,
+      "timeEstimate": 120,
+      "status": "done",
+      "createdAt": "2026-03-30T19:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-01T09:00:00"
+    },
+    {
+      "id": "a6",
+      "projectId": "p1",
+      "goalId": "g1",
+      "title": "Обработать повторы неудачных платежей",
+      "impact": 6,
+      "timeEstimate": 60,
+      "status": "done",
+      "createdAt": "2026-04-07T21:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-08T23:00:00"
+    },
+    {
+      "id": "a7",
+      "projectId": "p1",
+      "goalId": "g1",
+      "title": "Написать документацию по интеграции Stripe",
+      "impact": 4,
+      "timeEstimate": 45,
+      "status": "done",
+      "createdAt": "2026-04-13T01:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-14T09:00:00"
+    },
+    {
+      "id": "a8",
+      "projectId": "p1",
+      "goalId": "g1",
+      "title": "Выкатить интеграцию Stripe в продакшн",
+      "impact": 9,
+      "timeEstimate": 60,
+      "status": "done",
+      "createdAt": "2026-04-20T00:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-21T04:00:00"
+    },
+    {
+      "id": "a9",
+      "projectId": "p2",
+      "goalId": "g1",
+      "title": "Написать копирайт для запуска на Product Hunt",
+      "impact": 6,
+      "timeEstimate": 90,
+      "status": "done",
+      "createdAt": "2026-04-18T17:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-19T10:00:00"
+    },
+    {
+      "id": "a10",
+      "projectId": "p2",
+      "goalId": "g1",
+      "title": "Сделать hero-картинку для запуска",
+      "impact": 5,
+      "timeEstimate": 75,
+      "status": "done",
+      "createdAt": "2026-04-21T16:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-22T07:00:00"
+    },
+    {
+      "id": "a11",
+      "projectId": "p2",
+      "goalId": "g1",
+      "title": "Связаться с 20 потенциальными hunters",
+      "impact": 7,
+      "timeEstimate": 60,
+      "status": "done",
+      "createdAt": "2026-04-26T11:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-27T02:00:00"
+    },
+    {
+      "id": "a12",
+      "projectId": "p2",
+      "goalId": "g1",
+      "title": "Подготовить посты в соцсети на день запуска",
+      "impact": 4,
+      "timeEstimate": 45,
+      "status": "done",
+      "createdAt": "2026-04-29T23:00:00",
+      "isSample": true,
+      "completedAt": "2026-05-01T10:00:00"
+    },
+    {
+      "id": "a13",
+      "projectId": "p2",
+      "goalId": "g1",
+      "title": "Запланировать запуск на Product Hunt",
+      "impact": 8,
+      "timeEstimate": 30,
+      "status": "done",
+      "createdAt": "2026-05-04T01:00:00",
+      "isSample": true,
+      "completedAt": "2026-05-05T07:00:00"
+    },
+    {
+      "id": "a14",
+      "projectId": "p2",
+      "goalId": "g1",
+      "title": "Отвечать на комментарии в день запуска",
+      "impact": 6,
+      "timeEstimate": 90,
+      "status": "done",
+      "createdAt": "2026-05-06T20:00:00",
+      "isSample": true,
+      "completedAt": "2026-05-08T00:00:00"
+    },
+    {
+      "id": "a15",
+      "projectId": "p3",
+      "goalId": "g1",
+      "title": "Изучить цены конкурентов",
+      "impact": 5,
+      "timeEstimate": 60,
+      "status": "done",
+      "createdAt": "2026-04-23T20:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-25T02:00:00"
+    },
+    {
+      "id": "a16",
+      "projectId": "p3",
+      "goalId": "g1",
+      "title": "Описать тарифы и копирайт к ним",
+      "impact": 7,
+      "timeEstimate": 90,
+      "status": "done",
+      "createdAt": "2026-04-28T05:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-29T07:00:00"
+    },
+    {
+      "id": "a17",
+      "projectId": "p3",
+      "goalId": "g1",
+      "title": "Спроектировать страницу с тарифами",
+      "impact": 6,
+      "timeEstimate": 90,
+      "status": "done",
+      "createdAt": "2026-05-02T04:00:00",
+      "isSample": true,
+      "completedAt": "2026-05-03T01:00:00"
+    },
+    {
+      "id": "a18",
+      "projectId": "p3",
+      "goalId": "g1",
+      "title": "Сверстать страницу с тарифами",
+      "impact": 7,
+      "timeEstimate": 120,
+      "status": "done",
+      "createdAt": "2026-05-06T10:00:00",
+      "isSample": true,
+      "completedAt": "2026-05-06T22:00:00"
+    },
+    {
+      "id": "a19",
+      "projectId": "p4",
+      "goalId": "g1",
+      "title": "Сравнить Intercom, Crisp и Plain",
+      "impact": 5,
+      "timeEstimate": 60,
+      "status": "done",
+      "createdAt": "2026-04-10T18:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-10T22:00:00"
+    },
+    {
+      "id": "a20",
+      "projectId": "p4",
+      "goalId": "g1",
+      "title": "Настроить пересылку support-почты",
+      "impact": 4,
+      "timeEstimate": 30,
+      "status": "done",
+      "createdAt": "2026-04-24T13:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-24T23:00:00"
+    },
+    {
+      "id": "a21",
+      "projectId": "p5",
+      "goalId": "g2",
+      "title": "Поставить в календарь 4 тренировки в неделю",
+      "impact": 6,
+      "timeEstimate": 30,
+      "status": "done",
+      "createdAt": "2026-03-16T05:00:00",
+      "isSample": true,
+      "completedAt": "2026-03-17T05:00:00"
+    },
+    {
+      "id": "a22",
+      "projectId": "p5",
+      "goalId": "g2",
+      "title": "Купить нормальные беговые кроссовки",
+      "impact": 5,
+      "timeEstimate": 60,
+      "status": "done",
+      "createdAt": "2026-03-19T10:00:00",
+      "isSample": true,
+      "completedAt": "2026-03-20T08:00:00"
+    },
+    {
+      "id": "a23",
+      "projectId": "p5",
+      "goalId": "g2",
+      "title": "Распланировать первые 4 недели пробежек",
+      "impact": 7,
+      "timeEstimate": 45,
+      "status": "done",
+      "createdAt": "2026-03-22T12:00:00",
+      "isSample": true,
+      "completedAt": "2026-03-22T22:00:00"
+    },
+    {
+      "id": "a24",
+      "projectId": "p5",
+      "goalId": "g2",
+      "title": "Пробежать первую неделю базы",
+      "impact": 8,
+      "timeEstimate": 240,
+      "status": "done",
+      "createdAt": "2026-03-27T08:00:00",
+      "isSample": true,
+      "completedAt": "2026-03-28T09:00:00"
+    },
+    {
+      "id": "a25",
+      "projectId": "p5",
+      "goalId": "g2",
+      "title": "Превратить тренировки в привычку",
+      "impact": 8,
+      "timeEstimate": 60,
+      "status": "done",
+      "createdAt": "2026-04-08T16:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-09T04:00:00"
+    },
+    {
+      "id": "a26",
+      "projectId": "p6",
+      "goalId": "g2",
+      "title": "Закрыть 1-ю неделю базы",
+      "impact": 7,
+      "timeEstimate": 180,
+      "status": "done",
+      "createdAt": "2026-04-12T15:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-13T05:00:00"
+    },
+    {
+      "id": "a27",
+      "projectId": "p6",
+      "goalId": "g2",
+      "title": "Добавить длинную воскресную пробежку",
+      "impact": 7,
+      "timeEstimate": 90,
+      "status": "done",
+      "createdAt": "2026-04-16T07:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-17T01:00:00"
+    },
+    {
+      "id": "a28",
+      "projectId": "p6",
+      "goalId": "g2",
+      "title": "Закрыть неделю на 20 км",
+      "impact": 7,
+      "timeEstimate": 60,
+      "status": "done",
+      "createdAt": "2026-04-19T10:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-19T22:00:00"
+    },
+    {
+      "id": "a29",
+      "projectId": "p6",
+      "goalId": "g2",
+      "title": "Восстановительный бег после длинной",
+      "impact": 5,
+      "timeEstimate": 45,
+      "status": "done",
+      "createdAt": "2026-04-22T17:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-22T23:00:00"
+    },
+    {
+      "id": "a30",
+      "projectId": "p6",
+      "goalId": "g2",
+      "title": "Закрыть неделю на 25 км",
+      "impact": 8,
+      "timeEstimate": 60,
+      "status": "done",
+      "createdAt": "2026-04-25T04:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-26T02:00:00"
+    },
+    {
+      "id": "a31",
+      "projectId": "p6",
+      "goalId": "g2",
+      "title": "Проверить темп на длинной пробежке",
+      "impact": 6,
+      "timeEstimate": 75,
+      "status": "done",
+      "createdAt": "2026-04-29T15:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-30T04:00:00"
+    },
+    {
+      "id": "a32",
+      "projectId": "p6",
+      "goalId": "g2",
+      "title": "Закрыть неделю на 28 км",
+      "impact": 8,
+      "timeEstimate": 60,
+      "status": "done",
+      "createdAt": "2026-05-03T16:00:00",
+      "isSample": true,
+      "completedAt": "2026-05-04T02:00:00"
+    },
+    {
+      "id": "a33",
+      "projectId": "p6",
+      "goalId": "g2",
+      "title": "Длинная с negative split",
+      "impact": 8,
+      "timeEstimate": 90,
+      "status": "done",
+      "createdAt": "2026-05-06T09:00:00",
+      "isSample": true,
+      "completedAt": "2026-05-07T00:00:00"
+    },
+    {
+      "id": "a34",
+      "projectId": "p7",
+      "goalId": "g2",
+      "title": "Первая темповая (3×1 км)",
+      "impact": 7,
+      "timeEstimate": 60,
+      "status": "done",
+      "createdAt": "2026-04-30T23:00:00",
+      "isSample": true,
+      "completedAt": "2026-05-02T05:00:00"
+    },
+    {
+      "id": "a35",
+      "projectId": "p7",
+      "goalId": "g2",
+      "title": "Первая интервальная (8×400 м)",
+      "impact": 8,
+      "timeEstimate": 60,
+      "status": "done",
+      "createdAt": "2026-05-05T00:00:00",
+      "isSample": true,
+      "completedAt": "2026-05-06T07:00:00"
+    },
+    {
+      "id": "a36",
+      "projectId": "p8",
+      "goalId": "g3",
+      "title": "Купить учебник B2 (Aula Internacional 4)",
+      "impact": 3,
+      "timeEstimate": 30,
+      "status": "done",
+      "createdAt": "2026-03-30T20:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-01T09:00:00"
+    },
+    {
+      "id": "a37",
+      "projectId": "p8",
+      "goalId": "g3",
+      "title": "Пройти unit 1 (повторение subjunctive)",
+      "impact": 6,
+      "timeEstimate": 90,
+      "status": "done",
+      "createdAt": "2026-04-03T17:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-04T00:00:00"
+    },
+    {
+      "id": "a38",
+      "projectId": "p8",
+      "goalId": "g3",
+      "title": "Пройти unit 2 (нарративные времена)",
+      "impact": 6,
+      "timeEstimate": 90,
+      "status": "done",
+      "createdAt": "2026-04-10T11:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-10T22:00:00"
+    },
+    {
+      "id": "a39",
+      "projectId": "p8",
+      "goalId": "g3",
+      "title": "Пройти unit 3 (условные)",
+      "impact": 6,
+      "timeEstimate": 120,
+      "status": "done",
+      "createdAt": "2026-04-17T09:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-18T09:00:00"
+    },
+    {
+      "id": "a40",
+      "projectId": "p8",
+      "goalId": "g3",
+      "title": "Пройти unit 4 (косвенная речь)",
+      "impact": 6,
+      "timeEstimate": 90,
+      "status": "done",
+      "createdAt": "2026-04-24T11:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-25T09:00:00"
+    },
+    {
+      "id": "a41",
+      "projectId": "p8",
+      "goalId": "g3",
+      "title": "Пройти unit 5 (пассивный залог)",
+      "impact": 6,
+      "timeEstimate": 90,
+      "status": "done",
+      "createdAt": "2026-04-30T06:00:00",
+      "isSample": true,
+      "completedAt": "2026-05-01T06:00:00"
+    },
+    {
+      "id": "a42",
+      "projectId": "p8",
+      "goalId": "g3",
+      "title": "Середина учебника: повторение и self-test",
+      "impact": 5,
+      "timeEstimate": 60,
+      "status": "done",
+      "createdAt": "2026-05-04T04:00:00",
+      "isSample": true,
+      "completedAt": "2026-05-05T00:00:00"
+    },
+    {
+      "id": "a43",
+      "projectId": "p9",
+      "goalId": "g3",
+      "title": "Зарегистрироваться на italki.com",
+      "impact": 3,
+      "timeEstimate": 30,
+      "status": "done",
+      "createdAt": "2026-04-26T07:00:00",
+      "isSample": true,
+      "completedAt": "2026-04-27T08:00:00"
+    },
+    {
+      "id": "a44",
+      "projectId": "p2",
+      "goalId": "g1",
+      "title": "Написать ответы на FAQ для Product Hunt",
+      "impact": 6,
+      "timeEstimate": 60,
+      "status": "planned",
+      "createdAt": "2026-04-09T07:00:00",
+      "isSample": true,
+      "scheduledDate": "2026-05-09",
+      "isPlannedToday": true
+    },
+    {
+      "id": "a45",
+      "projectId": "p3",
+      "goalId": "g1",
+      "title": "Добавить отзывы на страницу тарифов",
+      "impact": 5,
+      "timeEstimate": 45,
+      "status": "planned",
+      "createdAt": "2026-04-09T07:00:00",
+      "isSample": true,
+      "scheduledDate": "2026-05-09",
+      "isPlannedToday": true
+    },
+    {
+      "id": "a46",
+      "projectId": "p7",
+      "goalId": "g2",
+      "title": "Темповая: 4×1 км в целевом темпе",
+      "impact": 7,
+      "timeEstimate": 60,
+      "status": "planned",
+      "createdAt": "2026-04-09T12:00:00",
+      "isSample": true,
+      "scheduledDate": "2026-05-09",
+      "isPlannedToday": true
+    },
+    {
+      "id": "a47",
+      "projectId": "p2",
+      "goalId": "g1",
+      "title": "Отправить команде фидбек с Product Hunt",
+      "impact": 4,
+      "timeEstimate": 30,
+      "status": "planned",
+      "createdAt": "2026-05-06T21:00:00",
+      "isSample": true,
+      "scheduledDate": "2026-05-10"
+    },
+    {
+      "id": "a48",
+      "projectId": "p8",
+      "goalId": "g3",
+      "title": "Пройти unit 6 (относительные придаточные)",
+      "impact": 6,
+      "timeEstimate": 90,
+      "status": "planned",
+      "createdAt": "2026-05-07T10:00:00",
+      "isSample": true,
+      "scheduledDate": "2026-05-10"
+    },
+    {
+      "id": "a49",
+      "projectId": "p2",
+      "goalId": "g1",
+      "title": "Спланировать retention-кампанию после запуска",
+      "impact": 6,
+      "timeEstimate": 60,
+      "status": "backlog",
+      "createdAt": "2026-04-08T20:00:00",
+      "isSample": true
+    },
+    {
+      "id": "a50",
+      "projectId": "p3",
+      "goalId": "g1",
+      "title": "A/B-тест копирайта CTA на странице тарифов",
+      "impact": 5,
+      "timeEstimate": 45,
+      "status": "backlog",
+      "createdAt": "2026-04-08T21:00:00",
+      "isSample": true
+    },
+    {
+      "id": "a51",
+      "projectId": "p4",
+      "goalId": "g1",
+      "title": "Написать 10 шаблонов ответов поддержки",
+      "impact": 4,
+      "timeEstimate": 60,
+      "status": "backlog",
+      "createdAt": "2026-04-08T22:00:00",
+      "isSample": true
+    },
+    {
+      "id": "a52",
+      "projectId": "p4",
+      "goalId": "g1",
+      "title": "Настроить workflow команды поддержки",
+      "impact": 6,
+      "timeEstimate": 90,
+      "status": "backlog",
+      "createdAt": "2026-04-09T16:00:00",
+      "isSample": true
+    },
+    {
+      "id": "a53",
+      "projectId": "p6",
+      "goalId": "g2",
+      "title": "Спланировать неделю taper перед забегом",
+      "impact": 7,
+      "timeEstimate": 30,
+      "status": "backlog",
+      "createdAt": "2026-04-08T23:00:00",
+      "isSample": true
+    },
+    {
+      "id": "a54",
+      "projectId": "p7",
+      "goalId": "g2",
+      "title": "Симуляция гонки в темпе на 15 км",
+      "impact": 8,
+      "timeEstimate": 90,
+      "status": "backlog",
+      "createdAt": "2026-04-08T22:00:00",
+      "isSample": true
+    },
+    {
+      "id": "a55",
+      "projectId": "p8",
+      "goalId": "g3",
+      "title": "Найти учебник для подготовки к C1",
+      "impact": 4,
+      "timeEstimate": 45,
+      "status": "backlog",
+      "createdAt": "2026-04-09T13:00:00",
+      "isSample": true
+    },
+    {
+      "id": "a56",
+      "projectId": "p9",
+      "goalId": "g3",
+      "title": "Записаться на первый урок italki",
+      "impact": 5,
+      "timeEstimate": 30,
+      "status": "backlog",
+      "createdAt": "2026-04-09T01:00:00",
+      "isSample": true
+    },
+    {
+      "id": "a57",
+      "projectId": null,
+      "goalId": "g1",
+      "title": "Изучить вариант реферальной программы",
+      "impact": 5,
+      "timeEstimate": 60,
+      "status": "backlog",
+      "createdAt": "2026-04-08T19:00:00",
+      "isSample": true
+    },
+    {
+      "id": "a58",
+      "projectId": null,
+      "goalId": "g3",
+      "title": "Найти испанский подкаст на дорогу",
+      "impact": 4,
+      "timeEstimate": 30,
+      "status": "backlog",
+      "createdAt": "2026-04-09T11:00:00",
+      "isSample": true
+    },
+    {
+      "id": "a59",
+      "projectId": "p2",
+      "goalId": "g1",
+      "title": "Сделать креативы для Product Hunt",
+      "impact": 6,
+      "timeEstimate": 120,
+      "status": "delegated",
+      "createdAt": "2026-04-09T13:00:00",
+      "isSample": true,
+      "delegateName": "Maria",
+      "returnDate": "2026-05-10",
+      "delegatedAt": "2026-05-06T18:00:00"
+    },
+    {
+      "id": "a60",
+      "projectId": "p3",
+      "goalId": "g1",
+      "title": "Ревью PR со страницей тарифов",
+      "impact": 5,
+      "timeEstimate": 60,
+      "status": "delegated",
+      "createdAt": "2026-04-09T04:00:00",
+      "isSample": true,
+      "delegateName": "John",
+      "returnDate": "2026-05-11",
+      "delegatedAt": "2026-05-08T18:00:00"
+    },
+    {
+      "id": "a61",
+      "projectId": "p4",
+      "goalId": "g1",
+      "title": "Аудит текущих писем поддержки",
+      "impact": 4,
+      "timeEstimate": 90,
+      "status": "delegated",
+      "createdAt": "2026-05-03T06:00:00",
+      "isSample": true,
+      "completedAt": "2026-05-04T18:00:00",
+      "delegateName": "Maria",
+      "returnDate": "2026-05-17",
+      "delegatedAt": "2026-05-04T18:00:00"
+    },
+    {
+      "id": "a62",
+      "projectId": null,
+      "goalId": "g1",
+      "title": "Изучить бенчмарки churn для SaaS",
+      "impact": 5,
+      "timeEstimate": 60,
+      "status": "delegated",
+      "createdAt": "2026-05-05T22:00:00",
+      "isSample": true,
+      "completedAt": "2026-05-07T18:00:00",
+      "delegateName": "AI",
+      "returnDate": "2026-05-12",
+      "delegatedAt": "2026-05-07T18:00:00"
+    },
+    {
+      "id": "a63",
+      "projectId": "p9",
+      "goalId": "g3",
+      "title": "Подобрать мне собеседника",
+      "impact": 4,
+      "timeEstimate": 30,
+      "status": "delegated",
+      "createdAt": "2026-05-01T01:00:00",
+      "isSample": true,
+      "completedAt": "2026-05-02T18:00:00",
+      "delegateName": "italki",
+      "returnDate": "2026-05-19",
+      "delegatedAt": "2026-05-02T18:00:00"
+    },
+    {
+      "id": "a64",
+      "projectId": "p4",
+      "goalId": "g1",
+      "title": "Сделать кастомную интеграцию с CRM",
+      "impact": 4,
+      "timeEstimate": 180,
+      "status": "dropped",
+      "createdAt": "2026-04-08T21:00:00",
+      "isSample": true,
+      "droppedAt": "2026-04-14T18:00:00"
+    },
+    {
+      "id": "a65",
+      "projectId": "p1",
+      "goalId": "g1",
+      "title": "Добавить ручную генерацию инвойсов",
+      "impact": 3,
+      "timeEstimate": 90,
+      "status": "dropped",
+      "createdAt": "2026-04-09T08:00:00",
+      "isSample": true,
+      "droppedAt": "2026-04-04T18:00:00"
+    },
+    {
+      "id": "a66",
+      "projectId": null,
+      "goalId": "g2",
+      "title": "Записаться на марафон (отложено)",
+      "impact": 4,
+      "timeEstimate": 30,
+      "status": "dropped",
+      "createdAt": "2026-04-09T17:00:00",
+      "isSample": true,
+      "droppedAt": "2026-04-19T18:00:00"
+    },
+    {
+      "id": "a67",
+      "projectId": "p7",
+      "goalId": "g2",
+      "title": "Пробное занятие с тренером (отменено)",
+      "impact": 5,
+      "timeEstimate": 60,
+      "status": "cancelled",
+      "createdAt": "2026-04-09T11:00:00",
+      "isSample": true,
+      "cancelledAt": "2026-05-01T18:00:00"
+    },
+    {
+      "id": "a68",
+      "projectId": "p8",
+      "goalId": "g3",
+      "title": "Купить старый учебник C1 (заменён)",
+      "impact": 2,
+      "timeEstimate": 15,
+      "status": "cancelled",
+      "createdAt": "2026-04-09T17:00:00",
+      "isSample": true,
+      "cancelledAt": "2026-04-09T18:00:00"
+    }
+  ],
+  "rituals": [
+    {
+      "id": "r1",
+      "goalId": "g3",
+      "projectId": null,
+      "title": "Читать на испанском по 30 минут в день",
+      "schedule": "daily",
+      "scheduleConfig": {},
+      "baseImpact": 5,
+      "timeEstimate": 30,
+      "status": "active",
+      "createdAt": "2026-03-28T18:00:00",
+      "totalCompletions": 32,
+      "completionHistory": [
+        {
+          "date": "2026-05-08",
+          "status": "done"
+        },
+        {
+          "date": "2026-05-07",
+          "status": "done"
+        },
+        {
+          "date": "2026-05-06",
+          "status": "done"
+        },
+        {
+          "date": "2026-05-05",
+          "status": "missed"
+        },
+        {
+          "date": "2026-05-04",
+          "status": "done"
+        },
+        {
+          "date": "2026-05-03",
+          "status": "done"
+        },
+        {
+          "date": "2026-05-02",
+          "status": "done"
+        },
+        {
+          "date": "2026-05-01",
+          "status": "missed"
+        },
+        {
+          "date": "2026-04-30",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-29",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-28",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-27",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-26",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-25",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-24",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-23",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-22",
+          "status": "missed"
+        },
+        {
+          "date": "2026-04-21",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-20",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-19",
+          "status": "missed"
+        },
+        {
+          "date": "2026-04-18",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-17",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-16",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-15",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-14",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-13",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-12",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-11",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-10",
+          "status": "missed"
+        },
+        {
+          "date": "2026-04-09",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-08",
+          "status": "missed"
+        },
+        {
+          "date": "2026-04-07",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-06",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-05",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-04",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-03",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-02",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-01",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-31",
+          "status": "missed"
+        },
+        {
+          "date": "2026-03-30",
+          "status": "missed"
+        },
+        {
+          "date": "2026-03-29",
+          "status": "missed"
+        },
+        {
+          "date": "2026-03-28",
+          "status": "missed"
+        }
+      ],
+      "isSample": true
+    },
+    {
+      "id": "r2",
+      "goalId": "g2",
+      "projectId": null,
+      "title": "Силовая (чередуя с пробежками)",
+      "schedule": "weekdays",
+      "scheduleConfig": {},
+      "baseImpact": 7,
+      "timeEstimate": 45,
+      "status": "active",
+      "createdAt": "2026-03-20T18:00:00",
+      "totalCompletions": 28,
+      "completionHistory": [
+        {
+          "date": "2026-05-08",
+          "status": "done"
+        },
+        {
+          "date": "2026-05-07",
+          "status": "done"
+        },
+        {
+          "date": "2026-05-06",
+          "status": "done"
+        },
+        {
+          "date": "2026-05-05",
+          "status": "done"
+        },
+        {
+          "date": "2026-05-04",
+          "status": "done"
+        },
+        {
+          "date": "2026-05-01",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-30",
+          "status": "missed"
+        },
+        {
+          "date": "2026-04-29",
+          "status": "missed"
+        },
+        {
+          "date": "2026-04-28",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-27",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-24",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-23",
+          "status": "missed"
+        },
+        {
+          "date": "2026-04-22",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-21",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-20",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-17",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-16",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-15",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-14",
+          "status": "missed"
+        },
+        {
+          "date": "2026-04-13",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-10",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-09",
+          "status": "missed"
+        },
+        {
+          "date": "2026-04-08",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-07",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-06",
+          "status": "missed"
+        },
+        {
+          "date": "2026-04-03",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-02",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-01",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-31",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-30",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-27",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-26",
+          "status": "missed"
+        },
+        {
+          "date": "2026-03-25",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-24",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-23",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-20",
+          "status": "missed"
+        }
+      ],
+      "isSample": true
+    },
+    {
+      "id": "r3",
+      "goalId": "g1",
+      "projectId": null,
+      "title": "Еженедельный аудит проектов",
+      "schedule": "weekly",
+      "scheduleConfig": {
+        "dayOfWeek": 0
+      },
+      "baseImpact": 4,
+      "timeEstimate": 30,
+      "status": "active",
+      "createdAt": "2026-03-14T18:00:00",
+      "totalCompletions": 7,
+      "completionHistory": [
+        {
+          "date": "2026-05-02",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-25",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-18",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-11",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-04",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-28",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-21",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-14",
+          "status": "missed"
+        }
+      ],
+      "isSample": true
+    },
+    {
+      "id": "r4",
+      "goalId": "g1",
+      "projectId": null,
+      "title": "Утренние страницы (3 страницы письма)",
+      "schedule": "daily",
+      "scheduleConfig": {},
+      "baseImpact": 3,
+      "timeEstimate": 20,
+      "status": "active",
+      "createdAt": "2026-03-12T18:00:00",
+      "totalCompletions": 50,
+      "completionHistory": [
+        {
+          "date": "2026-05-08",
+          "status": "done"
+        },
+        {
+          "date": "2026-05-07",
+          "status": "done"
+        },
+        {
+          "date": "2026-05-06",
+          "status": "done"
+        },
+        {
+          "date": "2026-05-05",
+          "status": "done"
+        },
+        {
+          "date": "2026-05-04",
+          "status": "missed"
+        },
+        {
+          "date": "2026-05-03",
+          "status": "done"
+        },
+        {
+          "date": "2026-05-02",
+          "status": "done"
+        },
+        {
+          "date": "2026-05-01",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-30",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-29",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-28",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-27",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-26",
+          "status": "skipped"
+        },
+        {
+          "date": "2026-04-25",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-24",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-23",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-22",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-21",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-20",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-19",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-18",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-17",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-16",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-15",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-14",
+          "status": "skipped"
+        },
+        {
+          "date": "2026-04-13",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-12",
+          "status": "skipped"
+        },
+        {
+          "date": "2026-04-11",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-10",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-09",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-08",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-07",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-06",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-05",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-04",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-03",
+          "status": "missed"
+        },
+        {
+          "date": "2026-04-02",
+          "status": "done"
+        },
+        {
+          "date": "2026-04-01",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-31",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-30",
+          "status": "missed"
+        },
+        {
+          "date": "2026-03-29",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-28",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-27",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-26",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-25",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-24",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-23",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-22",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-21",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-20",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-19",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-18",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-17",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-16",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-15",
+          "status": "missed"
+        },
+        {
+          "date": "2026-03-14",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-13",
+          "status": "done"
+        },
+        {
+          "date": "2026-03-12",
+          "status": "missed"
+        }
+      ],
+      "isSample": true
+    }
+  ],
+  "ideas": [
+    {
+      "id": "i1",
+      "goalId": "g1",
+      "title": "Рассылка с уроками build-in-public",
+      "createdAt": "2026-04-19T18:00:00",
+      "isSample": true
+    },
+    {
+      "id": "i2",
+      "goalId": "g1",
+      "title": "Сделать публичный дашборд с live MRR",
+      "createdAt": "2026-04-24T18:00:00",
+      "isSample": true
+    },
+    {
+      "id": "i3",
+      "goalId": "g2",
+      "title": "Попробовать холодовую терапию после длинных пробежек",
+      "createdAt": "2026-05-01T18:00:00",
+      "isSample": true
+    },
+    {
+      "id": "i4",
+      "goalId": "g3",
+      "title": "Смотреть испанские новости (RTVE) по 15 минут в день",
+      "createdAt": "2026-05-04T18:00:00",
+      "isSample": true
+    },
+    {
+      "id": "i5",
+      "goalId": null,
+      "title": "Запустить подкаст про путь indie-SaaS",
+      "createdAt": "2026-04-27T18:00:00",
+      "isSample": true
+    }
+  ],
+  "sessions": [
+    {
+      "id": "s1",
+      "actionIds": [
+        "a5"
+      ],
+      "startedAt": "2026-04-01T07:03:00",
+      "endedAt": "2026-04-01T09:00:00",
+      "durationMinutes": 117,
+      "mode": "focus",
+      "isSample": true
+    },
+    {
+      "id": "s2",
+      "actionIds": [
+        "a39"
+      ],
+      "startedAt": "2026-04-18T06:54:00",
+      "endedAt": "2026-04-18T09:00:00",
+      "durationMinutes": 126,
+      "mode": "focus",
+      "isSample": true
+    },
+    {
+      "id": "s3",
+      "actionIds": [
+        "a43"
+      ],
+      "startedAt": "2026-04-27T07:31:00",
+      "endedAt": "2026-04-27T08:00:00",
+      "durationMinutes": 29,
+      "mode": "focus",
+      "isSample": true
+    },
+    {
+      "id": "s4",
+      "actionIds": [
+        "a16"
+      ],
+      "startedAt": "2026-04-29T05:16:00",
+      "endedAt": "2026-04-29T07:00:00",
+      "durationMinutes": 104,
+      "mode": "focus",
+      "isSample": true
+    },
+    {
+      "id": "s5",
+      "actionIds": [
+        "a26"
+      ],
+      "startedAt": "2026-04-13T02:15:00",
+      "endedAt": "2026-04-13T05:00:00",
+      "durationMinutes": 165,
+      "mode": "deep",
+      "isSample": true
+    },
+    {
+      "id": "s6",
+      "actionIds": [
+        "a8"
+      ],
+      "startedAt": "2026-04-21T02:56:00",
+      "endedAt": "2026-04-21T04:00:00",
+      "durationMinutes": 64,
+      "mode": "focus",
+      "isSample": true
+    },
+    {
+      "id": "s7",
+      "actionIds": [
+        "a37"
+      ],
+      "startedAt": "2026-04-03T22:43:00",
+      "endedAt": "2026-04-04T00:00:00",
+      "durationMinutes": 77,
+      "mode": "focus",
+      "isSample": true
+    },
+    {
+      "id": "s8",
+      "actionIds": [
+        "a40"
+      ],
+      "startedAt": "2026-04-25T07:29:00",
+      "endedAt": "2026-04-25T09:00:00",
+      "durationMinutes": 91,
+      "mode": "focus",
+      "isSample": true
+    },
+    {
+      "id": "s9",
+      "actionIds": [
+        "a3"
+      ],
+      "startedAt": "2026-03-20T05:11:00",
+      "endedAt": "2026-03-20T07:00:00",
+      "durationMinutes": 109,
+      "mode": "focus",
+      "isSample": true
+    },
+    {
+      "id": "s10",
+      "actionIds": [
+        "a6"
+      ],
+      "startedAt": "2026-04-08T21:47:00",
+      "endedAt": "2026-04-08T23:00:00",
+      "durationMinutes": 73,
+      "mode": "focus",
+      "isSample": true
+    },
+    {
+      "id": "s11",
+      "actionIds": [
+        "a27"
+      ],
+      "startedAt": "2026-04-16T23:17:00",
+      "endedAt": "2026-04-17T01:00:00",
+      "durationMinutes": 103,
+      "mode": "focus",
+      "isSample": true
+    },
+    {
+      "id": "s12",
+      "actionIds": [
+        "a21"
+      ],
+      "startedAt": "2026-03-17T04:34:00",
+      "endedAt": "2026-03-17T05:00:00",
+      "durationMinutes": 26,
+      "mode": "focus",
+      "isSample": true
+    },
+    {
+      "id": "s13",
+      "actionIds": [
+        "a30"
+      ],
+      "startedAt": "2026-04-26T01:10:00",
+      "endedAt": "2026-04-26T02:00:00",
+      "durationMinutes": 50,
+      "mode": "deep",
+      "isSample": true
+    },
+    {
+      "id": "s14",
+      "actionIds": [
+        "a9"
+      ],
+      "startedAt": "2026-04-19T08:19:00",
+      "endedAt": "2026-04-19T10:00:00",
+      "durationMinutes": 101,
+      "mode": "focus",
+      "isSample": true
+    },
+    {
+      "id": "s15",
+      "actionIds": [
+        "a7"
+      ],
+      "startedAt": "2026-04-14T08:11:00",
+      "endedAt": "2026-04-14T09:00:00",
+      "durationMinutes": 49,
+      "mode": "focus",
+      "isSample": true
+    },
+    {
+      "id": "s16",
+      "actionIds": [
+        "a22"
+      ],
+      "startedAt": "2026-03-20T06:54:00",
+      "endedAt": "2026-03-20T08:00:00",
+      "durationMinutes": 66,
+      "mode": "focus",
+      "isSample": true
+    },
+    {
+      "id": "s17",
+      "actionIds": [
+        "a23"
+      ],
+      "startedAt": "2026-03-22T21:01:00",
+      "endedAt": "2026-03-22T22:00:00",
+      "durationMinutes": 59,
+      "mode": "focus",
+      "isSample": true
+    },
+    {
+      "id": "s18",
+      "actionIds": [
+        "a11"
+      ],
+      "startedAt": "2026-04-27T00:45:00",
+      "endedAt": "2026-04-27T02:00:00",
+      "durationMinutes": 75,
+      "mode": "focus",
+      "isSample": true
+    },
+    {
+      "id": "s19",
+      "actionIds": [
+        "a38"
+      ],
+      "startedAt": "2026-04-10T20:37:00",
+      "endedAt": "2026-04-10T22:00:00",
+      "durationMinutes": 83,
+      "mode": "focus",
+      "isSample": true
+    },
+    {
+      "id": "s20",
+      "actionIds": [
+        "a31"
+      ],
+      "startedAt": "2026-04-30T02:32:00",
+      "endedAt": "2026-04-30T04:00:00",
+      "durationMinutes": 88,
+      "mode": "focus",
+      "isSample": true
+    }
+  ],
+  "dayEntries": [
+    {
+      "id": "d0",
+      "date": "2026-05-09",
+      "dayType": "execution",
+      "isPlanned": false,
+      "isClosed": false,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d1",
+      "date": "2026-05-08",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d2",
+      "date": "2026-05-07",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d3",
+      "date": "2026-05-06",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d4",
+      "date": "2026-05-05",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d5",
+      "date": "2026-05-04",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d6",
+      "date": "2026-05-03",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d7",
+      "date": "2026-05-02",
+      "dayType": "dayoff",
+      "isPlanned": false,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d8",
+      "date": "2026-05-01",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d9",
+      "date": "2026-04-30",
+      "dayType": "recovery",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d10",
+      "date": "2026-04-29",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d11",
+      "date": "2026-04-28",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d12",
+      "date": "2026-04-27",
+      "dayType": "recovery",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d13",
+      "date": "2026-04-26",
+      "dayType": "dayoff",
+      "isPlanned": false,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d14",
+      "date": "2026-04-25",
+      "dayType": "dayoff",
+      "isPlanned": false,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d15",
+      "date": "2026-04-24",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d16",
+      "date": "2026-04-23",
+      "dayType": "sick",
+      "isPlanned": false,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d17",
+      "date": "2026-04-22",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d18",
+      "date": "2026-04-21",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d19",
+      "date": "2026-04-20",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d20",
+      "date": "2026-04-19",
+      "dayType": "dayoff",
+      "isPlanned": false,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d21",
+      "date": "2026-04-18",
+      "dayType": "dayoff",
+      "isPlanned": false,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d22",
+      "date": "2026-04-17",
+      "dayType": "dayoff",
+      "isPlanned": false,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d23",
+      "date": "2026-04-16",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d24",
+      "date": "2026-04-15",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d25",
+      "date": "2026-04-14",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d26",
+      "date": "2026-04-13",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d27",
+      "date": "2026-04-12",
+      "dayType": "dayoff",
+      "isPlanned": false,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d28",
+      "date": "2026-04-11",
+      "dayType": "dayoff",
+      "isPlanned": false,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d29",
+      "date": "2026-04-10",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d30",
+      "date": "2026-04-09",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d31",
+      "date": "2026-04-08",
+      "dayType": "dayoff",
+      "isPlanned": false,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d32",
+      "date": "2026-04-07",
+      "dayType": "sick",
+      "isPlanned": false,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d33",
+      "date": "2026-04-06",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d34",
+      "date": "2026-04-05",
+      "dayType": "dayoff",
+      "isPlanned": false,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d35",
+      "date": "2026-04-04",
+      "dayType": "dayoff",
+      "isPlanned": false,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d36",
+      "date": "2026-04-03",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d37",
+      "date": "2026-04-02",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d38",
+      "date": "2026-04-01",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d39",
+      "date": "2026-03-31",
+      "dayType": "recovery",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d40",
+      "date": "2026-03-30",
+      "dayType": "sick",
+      "isPlanned": false,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d41",
+      "date": "2026-03-29",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d42",
+      "date": "2026-03-28",
+      "dayType": "recovery",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d43",
+      "date": "2026-03-27",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d44",
+      "date": "2026-03-26",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d45",
+      "date": "2026-03-25",
+      "dayType": "recovery",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d46",
+      "date": "2026-03-24",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d47",
+      "date": "2026-03-23",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d48",
+      "date": "2026-03-22",
+      "dayType": "dayoff",
+      "isPlanned": false,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d49",
+      "date": "2026-03-21",
+      "dayType": "recovery",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d50",
+      "date": "2026-03-20",
+      "dayType": "recovery",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d51",
+      "date": "2026-03-19",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d52",
+      "date": "2026-03-18",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d53",
+      "date": "2026-03-17",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d54",
+      "date": "2026-03-16",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d55",
+      "date": "2026-03-15",
+      "dayType": "dayoff",
+      "isPlanned": false,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d56",
+      "date": "2026-03-14",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d57",
+      "date": "2026-03-13",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d58",
+      "date": "2026-03-12",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    },
+    {
+      "id": "d59",
+      "date": "2026-03-11",
+      "dayType": "execution",
+      "isPlanned": true,
+      "isClosed": true,
+      "mainTaskActionId": null,
+      "isSample": true
+    }
+  ],
+  "coachmarks": {
+    "actos.coachmark.first-progress-visit": "dismissed",
+    "actos.coachmark.first-ritual-creation": "dismissed",
+    "actos.coachmark.first-delegation": "dismissed",
+    "actos.coachmark.first-weekly-review": "dismissed"
+  }
+}

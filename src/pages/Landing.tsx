@@ -31,29 +31,6 @@ const FAQS: FaqItem[] = [
   },
 ];
 
-const SectionHeading: React.FC<{ label: string }> = ({ label }) => (
-  <div className="flex flex-col items-center">
-    <div
-      style={{
-        fontFamily: '"JetBrains Mono", ui-monospace, monospace',
-        fontSize: 14,
-        textTransform: "uppercase",
-        letterSpacing: "0.08em",
-        color: "hsl(var(--text-tertiary))",
-      }}
-    >
-      {label}
-    </div>
-    <div
-      style={{
-        marginTop: 8,
-        width: 40,
-        height: 1,
-        background: "hsl(var(--border-subtle))",
-      }}
-    />
-  </div>
-);
 
 const TopBar: React.FC<{ scrolled: boolean }> = ({ scrolled }) => (
   <header
@@ -115,7 +92,7 @@ const Landing: React.FC = () => {
       {/* SCREEN 1: Hero + Demo in single 100vh */}
       <section
         className="relative flex flex-col items-center"
-        style={{ minHeight: "100vh", paddingTop: 80 }}
+        style={{ minHeight: "100vh", paddingTop: 80, paddingBottom: 60 }}
       >
         <div
           aria-hidden
@@ -606,14 +583,14 @@ const Landing: React.FC = () => {
         }
 
         /* FAQ */
-        .faq-section { padding: 120px 24px 120px; }
-        .faq-list { max-width: 720px; margin: 80px auto 0; }
-        .faq-link-row { transition: background 160ms ease; }
-        .faq-link-row:hover { background: hsl(var(--surface-raised)); }
-        .faq-link-row:hover .faq-link-text { color: hsl(var(--text-primary)) !important; }
+        .faq-section { padding: 60px 24px 120px; }
+        .faq-list { max-width: 720px; margin: 0 auto; }
+        .faq-heading-h2 { font-size: 36px; }
+        .manifesto-link:hover .manifesto-link-text { color: hsl(var(--goal-2)) !important; }
+        .manifesto-link:hover .manifesto-arrow { filter: brightness(1.1); }
         @media (max-width: 768px) {
-          .faq-section { padding: 80px 24px 80px; }
-          .faq-list { margin-top: 64px; }
+          .faq-section { padding: 48px 24px 80px; }
+          .faq-heading-h2 { font-size: 28px; }
         }
       `}</style>
     </div>

@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { Check, ChevronDown } from "lucide-react";
 import { LandingTopBar, LandingFooter } from "@/components/LandingChrome";
 
-type Feature = { bold?: string; text: string; note?: string };
+type Feature = { bold?: string; text?: string; note?: string };
 
 const FREE_FEATURES: Feature[] = [
   { text: "All current features" },

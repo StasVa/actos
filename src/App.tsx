@@ -130,6 +130,7 @@ const NoGoalsGate: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     pathname.startsWith("/start") ||
     pathname.startsWith("/manifesto") ||
     pathname.startsWith("/login") ||
+    pathname.startsWith("/auth") ||
     pathname.startsWith("/legal") ||
     pathname.startsWith("/setup") ||
     pathname.startsWith("/admin") ||

@@ -38,7 +38,7 @@ import Login from "./pages/Login.tsx";
 import Auth from "./pages/Auth.tsx";
 import AuthReset from "./pages/AuthReset.tsx";
 import { AuthProvider } from "./lib/useAuth";
-import { RequireAuth, RedirectIfAuthed } from "./components/AuthRoute";
+import { RequireAuth, RedirectIfAuthed, RequireAdmin } from "./components/AuthRoute";
 import { EmailVerificationBanner } from "./components/EmailVerificationBanner";
 import { LegalPrivacy, LegalTerms } from "./pages/LegalPlaceholder.tsx";
 import { NoGoalsLayout } from "./components/NoGoalsLayout";

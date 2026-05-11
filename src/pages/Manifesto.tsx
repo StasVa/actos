@@ -1,159 +1,198 @@
-// Founder essay — why ActOS replaces tasks with actions.
+// Founder essay — Medium-style article with byline, drop cap, pull quote.
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { LandingTopBar, LandingFooter } from "@/components/LandingChrome";
 
 const Manifesto: React.FC = () => {
-  const navigate = useNavigate();
-
   return (
     <div
       data-theme="dark"
       className="relative flex min-h-screen flex-col"
-      style={{ background: "hsl(var(--surface-base))" }}
+      style={{ background: "hsl(var(--surface-base))", fontFamily: "Inter, system-ui, sans-serif" }}
     >
       <LandingTopBar />
 
       <main className="manifesto-main flex-1 px-6">
         <article className="mx-auto" style={{ maxWidth: 720 }}>
+          {/* Byline */}
+          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+            <div
+              aria-hidden
+              style={{
+                width: 48,
+                height: 48,
+                borderRadius: "50%",
+                background: "hsl(var(--surface-raised))",
+                border: "1px solid hsl(var(--border-subtle))",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "hsl(var(--text-primary))",
+                fontSize: 18,
+                fontWeight: 500,
+                flexShrink: 0,
+              }}
+            >
+              SV
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+              <span style={{ fontSize: 16, fontWeight: 500, color: "hsl(var(--text-primary))" }}>
+                Stanislav Vasilevschii
+              </span>
+              <span style={{ fontSize: 14, color: "hsl(var(--text-tertiary))" }}>
+                Founder of ActOS · May 2026
+              </span>
+            </div>
+          </div>
+
+          {/* Title */}
           <h1
+            className="manifesto-h1"
             style={{
-              fontFamily: "Inter, system-ui, sans-serif",
+              marginTop: 48,
               fontWeight: 500,
               color: "hsl(var(--text-primary))",
               letterSpacing: "-0.02em",
-              textAlign: "center",
-              margin: 0,
               lineHeight: 1.1,
             }}
-            className="manifesto-h1"
           >
-            Why we don't do tasks
+            Tasks won't get you there.
           </h1>
-          <hr
+
+          <p
+            className="manifesto-deck"
             style={{
-              border: "none",
-              borderTop: "1px solid hsl(var(--border-subtle))",
-              margin: "32px 0 48px",
+              marginTop: 24,
+              color: "hsl(var(--text-secondary))",
+              fontWeight: 400,
+              lineHeight: 1.4,
             }}
-          />
+          >
+            Why I built ActOS after eight years of failing at productivity tools.
+          </p>
 
-          <div className="manifesto-body" style={{ color: "hsl(var(--text-primary))" }}>
-            <p>
-              Most productivity tools start with the same assumption: you have a list of things to do, and the goal is to do them. Tasks promise control. They deliver busywork.
+          <div className="manifesto-body" style={{ marginTop: 64 }}>
+            <p className="has-dropcap">
+              For eight years, I tried every productivity tool that promised to make me focused. Todoist. Things. Notion. TickTick. Trello. Sunsama. Linear. Asana. Four custom Notion templates I built myself between failed jobs.
             </p>
             <p>
-              I've used Todoist, Things, TickTick, Notion, Linear, Asana, Trello, Sunsama, and four custom Notion templates I built myself. The pattern was always the same. The list grew. I checked things off. The goals I actually cared about — the ones I'd written on a sticky note above my desk — kept slipping further away.
+              I'd set up the new system on a Sunday evening — clean databases, color-coded tags, perfect filters. By Wednesday I'd be back to the same problem: I was completing 30 things a week and the projects I actually cared about hadn't moved.
             </p>
+            <p>The tool wasn't the problem. The category was.</p>
 
-            <h2>The trap</h2>
-            <p>The problem with tasks is that they're optimized for the wrong thing.</p>
+            <h2>Tasks are a trap dressed as a solution</h2>
             <p>
-              A task is anything that takes effort. "Reply to email." "Schedule dentist." "Buy groceries." All tasks. None of them move you toward who you want to become. But because they live in the same list as the things that <em>do</em> matter — your draft, your training plan, your business — the trivial and the meaningful compete for the same attention.
+              A task is anything that takes effort. "Reply to Mark." "Schedule dentist." "Buy paper towels." All tasks. None of them move you toward who you want to become. But because they live in the same list as the things that <em>do</em> matter — your training plan, your draft, your business — the trivial and the meaningful compete for the same checkbox.
             </p>
             <p>
-              In practice, the trivial wins. It's easier. It generates a checkbox dopamine hit faster. By Friday, you've done 47 things and made zero progress on the one thing you said this week was about.
+              The trivial always wins. It's easier. It generates a dopamine hit faster. By Friday you've done 47 things and made zero progress on the one thing this week was supposed to be about.
             </p>
             <p>Tasks expand to fill the day. Goals get squeezed out.</p>
-
-            <h2>Action ≠ task</h2>
             <p>
-              ActOS replaces tasks with <strong>actions</strong>. The distinction matters:
-            </p>
-            <p>
-              An action belongs to a project. A project belongs to a goal. Every action you take is, by construction, a step toward something you decided was worth pursuing. There is no "miscellaneous" bucket. There is no "inbox." If something doesn't tie to a goal, it doesn't go into ActOS.
-            </p>
-            <p>This sounds restrictive. It is. That's the point.</p>
-            <p>
-              Every action also has two pieces of metadata most task apps ignore: <strong>Impact</strong> (how much this moves the goal) and <strong>Time</strong> (how long it'll take). The product makes you think about both before you commit. A 30-minute action with impact 2 is fundamentally different from a 30-minute action with impact 8 — and most days you should be doing the second one.
-            </p>
-            <p>Tasks treat all work as equal. Actions don't.</p>
-
-            <h2>Hard limits, on purpose</h2>
-            <p>
-              ActOS caps you at 3 active goals. Not as a guideline. As a hard limit — the "+ New goal" button literally won't work if you have 3.
-            </p>
-            <p>
-              This is the most controversial decision in the product, and it's also the one I'm least willing to negotiate on. Almost everyone who's serious about something has more than 3 things they're "working on." Almost no one is actually making meaningful progress on more than 2.
-            </p>
-            <p>
-              If you can't pick 3 goals, the tool can't help you. It's not the tool's job to give you permission to be unfocused. It's the tool's job to reflect the reality that focus is the entire game.
+              This isn't a tooling problem. It's a category error. The premise of task management is "if I capture everything, I'll feel in control." But the cost of "everything" is that nothing's important. A list of 200 items isn't a plan. It's a noise floor.
             </p>
 
-            <h2>The daily ritual</h2>
+            <blockquote>
+              Tasks gave me 47 checkmarks a week. Action moves toward 2-3 goals. That's the difference.
+            </blockquote>
+
+            <h2>What I started doing instead</h2>
             <p>
-              Every day, ActOS asks one question: <em>What single thing makes today a win?</em>
+              I stopped using task apps for goals. I kept a separate file — just one — with 2-3 things I cared about that quarter. Every morning I asked one question: <em>what single thing today makes this week a win?</em> I'd write it down. Then I'd do that thing, even if the rest of my day was a mess of meetings and "tasks."
             </p>
             <p>
-              Not "what are your top 5 priorities." Not "rank these by importance." One thing. The Main Task. If you do nothing else, did you do that?
+              Within three months I'd shipped more on those 2-3 goals than I had in the previous two years.
             </p>
             <p>
-              Most days, the answer is yes — because picking one thing is easier than picking five. The other actions you complete are bonus. The Main Task is the floor.
+              The system was crude — a text file, a sticky note, no automation, no integrations. But the <em>shape</em> of it was right. It separated "things I'm doing" from "things that move me forward." It made the second category small enough to actually act on.
             </p>
+            <p>That's the shape ActOS gives form to.</p>
+
+            <h2>ActOS isn't a todo app</h2>
             <p>
-              Over weeks and months, that floor adds up. Tasks gave you 47 checkmarks and no progress. Actions give you 22 Main Tasks completed in a month — 22 deliberate moves toward the goals you set. The math is different. So is the result.
+              It looks like one, on the surface. You'll see actions with checkboxes, a Today view, a Main Task for the day. The components are familiar.
+            </p>
+            <p>But underneath, the structure is different:</p>
+            <ul>
+              <li>Every action belongs to a project. Every project belongs to a goal. Nothing exists outside that hierarchy. There's no inbox. No "miscellaneous." If something doesn't tie to a goal, it doesn't enter the system.</li>
+              <li>You can have <strong>at most 3 active goals</strong>. Not as a guideline — as a hard cap the product enforces. The "+ New goal" button literally stops working if you try to add a fourth.</li>
+              <li>Each day, the product asks one question: <em>what single thing makes today a win?</em> That's the Main Task. Everything else is bonus.</li>
+              <li>Every action carries an Impact score (1-10) and a time estimate. The product surfaces high-impact work, so you don't spend Tuesday on something that doesn't matter.</li>
+            </ul>
+            <p>These aren't features. They're refusals.</p>
+            <p>
+              ActOS refuses to capture your busywork. It refuses to let you "track" 200 things. It refuses to give you the dopamine hit of checking off 47 items when none of them moved a goal.
             </p>
 
-            <h2>What this isn't</h2>
+            <h2>The hardest part is the cap</h2>
             <p>
-              ActOS isn't a kanban board. It's not a CRM. It's not a wiki, a calendar, or an AI agent. It's a daily-execution tool for the 1-3 things that actually matter to you, with rituals that keep you honest about doing them.
+              The 3-goal limit is the most controversial decision in the product, and it's also the one I'm least willing to negotiate on.
             </p>
             <p>
-              If you have 200 things on your plate and you want a place to track them all — ActOS is the wrong tool. We won't help you manage that load. We'll ask why you took it on in the first place.
+              Almost everyone who's serious about something has more than 3 things they're "working on." Almost no one is actually making meaningful progress on more than 2.
             </p>
             <p>
-              But if you've got two or three goals that actually matter, and you're tired of watching them dissolve into another week of "busy" — this is built for you.
+              If you can't pick 3, the tool can't help you. It's not the tool's job to give you permission to be unfocused. It's the tool's job to reflect the reality that focus is the entire game.
             </p>
+            <p>
+              I know this filters out a lot of potential customers. That's intentional. ActOS isn't for everyone — it's for people who've already decided that they want to do fewer things, more seriously.
+            </p>
+
+            <h2>What I'd ask you to try</h2>
+            <p>
+              Stop scheduling tasks for a week. Pick 2 goals you actually care about. Each morning, decide the one thing that makes today a win for those goals. Do that thing.
+            </p>
+            <p>
+              You can use ActOS. You can use a sticky note. The tool isn't what matters — the <em>shape</em> matters.
+            </p>
+            <p>
+              If a sticky note works for you, keep using it. I built ActOS because I wanted that shape with a little more structure, a little more memory, a little more ability to look back at where the weeks went. That's all the product is. It's the smallest version of "the system I actually use" that I could ship.
+            </p>
+
+            <hr />
+
+            <p>
+              If you want to try it, <Link to="/today" style={{ color: "hsl(var(--goal-2))", textDecoration: "underline" }}>open ActOS</Link>. Free is real and the trial doesn't expire.
+            </p>
+            <p>
+              If you don't, I hope at least the framing was useful. The goal isn't to convert you to a product. The goal is to convert you to a way of working.
+            </p>
+            <p>Tasks won't get you there. Action will.</p>
           </div>
 
-          <hr
-            style={{
-              border: "none",
-              borderTop: "1px solid hsl(var(--border-subtle))",
-              marginTop: 64,
-              marginBottom: 32,
-            }}
-          />
-
-          <div style={{ textAlign: "center" }}>
+          {/* Closing CTA */}
+          <div style={{ marginTop: 80, textAlign: "center" }}>
             <p
-              style={{
-                fontFamily: "Inter, system-ui, sans-serif",
-                fontWeight: 500,
-                fontSize: 24,
-                color: "hsl(var(--text-primary))",
-                margin: 0,
-              }}
+              className="manifesto-cta-line"
+              style={{ fontWeight: 500, color: "hsl(var(--text-primary))", margin: 0 }}
             >
-              Stop scheduling tasks. Start moving on goals.
+              Stop scheduling. Start moving.
             </p>
-            <button
-              type="button"
-              onClick={() => navigate("/today")}
-              className="cta-btn"
+            <Link
+              to="/today"
+              className="manifesto-cta-btn"
               style={{
                 marginTop: 32,
                 display: "inline-flex",
                 alignItems: "center",
                 gap: 8,
                 background: "hsl(var(--goal-2))",
-                color: "#0F0F12",
-                fontFamily: "Inter, system-ui, sans-serif",
+                color: "hsl(var(--surface-base))",
                 fontWeight: 500,
                 fontSize: 16,
                 padding: "14px 32px",
                 borderRadius: 6,
-                border: "none",
-                cursor: "pointer",
+                textDecoration: "none",
                 transition: "filter 120ms ease",
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.filter = "brightness(1.1)")}
-              onMouseLeave={(e) => (e.currentTarget.style.filter = "")}
             >
               Open ActOS
-              <ArrowRight size={16} />
-            </button>
+              <ArrowRight size={16} strokeWidth={1.75} />
+            </Link>
+            <p style={{ marginTop: 16, fontSize: 13, color: "hsl(var(--text-tertiary))" }}>
+              No credit card required.
+            </p>
           </div>
         </article>
       </main>
@@ -161,24 +200,74 @@ const Manifesto: React.FC = () => {
       <LandingFooter />
 
       <style>{`
-        .manifesto-main { padding-top: 120px; padding-bottom: 80px; }
-        .manifesto-h1 { font-size: 48px; }
-        .manifesto-body p { font-size: 18px; line-height: 1.7; margin: 0 0 24px; }
+        .manifesto-main { padding-top: 120px; padding-bottom: 120px; }
+        .manifesto-h1 { font-size: 56px; }
+        .manifesto-deck { font-size: 24px; }
+        .manifesto-cta-line { font-size: 24px; }
+        .manifesto-cta-btn:hover { filter: brightness(1.1); }
+
+        .manifesto-body p {
+          font-size: 19px;
+          line-height: 1.7;
+          letter-spacing: 0.005em;
+          color: hsl(var(--text-primary));
+          margin: 0 0 28px;
+          font-weight: 400;
+        }
+        .manifesto-body ul {
+          margin: 0 0 28px;
+          padding-left: 24px;
+          color: hsl(var(--text-primary));
+        }
+        .manifesto-body ul li {
+          font-size: 19px;
+          line-height: 1.7;
+          letter-spacing: 0.005em;
+          margin-bottom: 12px;
+        }
         .manifesto-body h2 {
-          font-family: Inter, system-ui, sans-serif;
-          font-size: 24px;
+          font-size: 28px;
           font-weight: 500;
           color: hsl(var(--text-primary));
-          margin: 48px 0 16px;
+          margin: 64px 0 24px;
           letter-spacing: -0.01em;
+          line-height: 1.2;
         }
-        .manifesto-body strong { font-weight: 600; }
-        .manifesto-body em { font-style: italic; }
-        .cta-btn:focus-visible { outline: 2px solid hsl(var(--goal-2)); outline-offset: 3px; }
+        .manifesto-body strong { font-weight: 600; color: hsl(var(--text-primary)); }
+        .manifesto-body em { font-style: italic; color: hsl(var(--text-primary)); }
+        .manifesto-body blockquote {
+          font-size: 26px;
+          font-weight: 400;
+          color: hsl(var(--text-primary));
+          line-height: 1.4;
+          border-left: 3px solid hsl(var(--goal-2));
+          padding-left: 24px;
+          margin: 48px 0;
+        }
+        .manifesto-body hr {
+          width: 80px;
+          height: 1px;
+          border: none;
+          background: hsl(var(--border-subtle));
+          margin: 64px auto;
+        }
+        .manifesto-body p.has-dropcap::first-letter {
+          font-size: 64px;
+          font-weight: 500;
+          float: left;
+          line-height: 0.9;
+          margin: 4px 6px 0 0;
+          color: hsl(var(--text-primary));
+        }
+
         @media (max-width: 768px) {
-          .manifesto-main { padding-top: 88px; padding-bottom: 56px; }
-          .manifesto-h1 { font-size: 32px; }
-          .manifesto-body p { font-size: 16px; }
+          .manifesto-main { padding-top: 88px; padding-bottom: 80px; }
+          .manifesto-h1 { font-size: 36px; }
+          .manifesto-deck { font-size: 18px; }
+          .manifesto-cta-line { font-size: 20px; }
+          .manifesto-body p, .manifesto-body ul li { font-size: 17px; }
+          .manifesto-body h2 { font-size: 22px; margin: 48px 0 20px; }
+          .manifesto-body blockquote { font-size: 20px; margin: 36px 0; }
         }
       `}</style>
     </div>

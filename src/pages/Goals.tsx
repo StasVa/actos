@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import { useStore, ritualMultiplier } from "@/store/useStore";
+import { useAuth } from "@/lib/useAuth";
 import { AppSidebar } from "@/components/AppSidebar";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { CardMenu } from "@/components/CardMenu";
@@ -391,6 +392,7 @@ const Goals: React.FC = () => {
   const actions = useStore((s) => s.actions);
   const rituals = useStore((s) => s.rituals);
   const settings = useStore((s) => s.settings);
+  const { user } = useAuth();
   const logTimeOn = !!settings?.layers?.logTime;
 
   const enriched: GoalMeta[] = useMemo(() => {
@@ -543,7 +545,7 @@ const Goals: React.FC = () => {
   const totalActive = goals.filter((g) => g.status === "active").length;
   const totalCompleted = goals.filter((g) => g.status === "completed").length;
   const totalAll = goals.length;
-  const isFree = settings.subscriptionTier !== "all-in";
+  const isFree = user?.subscriptionTier !== "all-in";
   const goalLimit = isFree ? 1 : 3;
   const ghostDisabled = totalActive >= goalLimit;
 

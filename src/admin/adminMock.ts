@@ -3,10 +3,6 @@
 
 export const ADMIN_EMAILS = ["admin@actos.app", "colleague@actos.app"];
 
-// Mock current authenticated user for the app. In real backend this comes from
-// the auth provider. For now, we hardcode an admin so /admin is reachable.
-export const CURRENT_USER_EMAIL = "admin@actos.app";
-
 export type Plan = "Free" | "Pro" | "Trial" | "Cancelled" | "Past Due";
 export type AccountStatus = "Active" | "Suspended" | "Deleted";
 

@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ArrowRight, X, Plus, Trash2 } from "lucide-react";
 import { useStore } from "@/store/useStore";
+import { useAuth } from "@/lib/useAuth";
 import type { GoalColorVar } from "@/types";
 import { toast } from "sonner";
 
@@ -579,6 +580,8 @@ const GoalBuilder: React.FC = () => {
   const [criteriaDraft, setCriteriaDraft] = React.useState<string[]>([]);
 
   const createGoal = useStore((s) => s.createGoal);
+  const { user } = useAuth();
+  const tier: "free" | "all-in" = user?.subscriptionTier === "all-in" ? "all-in" : "free";
   const updateGoal = useStore((s) => s.updateGoal);
   const createProject = useStore((s) => s.createProject);
   const createAction = useStore((s) => s.createAction);
@@ -632,7 +635,7 @@ const GoalBuilder: React.FC = () => {
           successCriteria: criteria.map((text) => ({
             id: Math.random().toString(36).slice(2, 9), text, done: false,
           })),
-        });
+        }, tier);
         if (!res.ok) {
           toast.error(t("goalBuilder.toast.goalLimit"));
           return;

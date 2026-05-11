@@ -2,6 +2,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { Tooltip } from "@/components/Tooltip";
 import { useStore } from "@/store/useStore";
+import { useAuth } from "@/lib/useAuth";
 import { computeTimeStats, formatHM, formatDateLabel } from "@/lib/timeStats";
 import { HistoryHint } from "@/components/LockModal";
 
@@ -93,8 +94,8 @@ export const TimeInvestmentSection: React.FC = () => {
   const actions = useStore((s) => s.actions);
   const goals = useStore((s) => s.goals);
   const projects = useStore((s) => s.projects);
-  const settings = useStore((s) => s.settings);
-  const isFree = settings.subscriptionTier !== "all-in";
+  const { user } = useAuth();
+  const isFree = user?.subscriptionTier !== "all-in";
 
   const stats = React.useMemo(
     () => computeTimeStats(actions, goals, 30, new Date(), projects),

@@ -73,9 +73,8 @@ export default function Settings() {
   const goals = useStore((s) => s.goals);
   const setDefaultGoal = useStore((s) => s.setDefaultGoal);
   const setShowAdminTools = useStore((s) => s.setShowAdminTools);
-  const setSubscriptionTier = useStore((s) => s.setSubscriptionTier);
   const resetToSeed = useStore((s) => s.resetToSeed);
-  const { user, markEmailVerified, setAdmin } = useAuth();
+  const { user, setAdmin, setSubscriptionTier } = useAuth();
   const clearSampleData = useStore((s) => s.clearSampleData);
   const hasSample = useStore((s) =>
     s.goals.some((g) => g.isSample) ||
@@ -148,18 +147,6 @@ export default function Settings() {
                 </span>
               )}
             </div>
-            {user && !user.emailVerified && (
-              <button
-                type="button"
-                onClick={() => {
-                  markEmailVerified();
-                  toast.success("Email marked as verified");
-                }}
-                className="mb-4 h-9 px-4 text-[13px] font-medium rounded-[4px] border border-border-default text-text-primary hover:border-[hsl(var(--accent))] hover:bg-surface-hover transition-colors"
-              >
-                Mark email verified (debug)
-              </button>
-            )}
             {user && (
               <button
                 type="button"
@@ -184,8 +171,12 @@ export default function Settings() {
 
               <ToggleRow
                 label={t("settings.account.allInTier")}
-                checked={settings.subscriptionTier === "all-in"}
-                onChange={(v) => setSubscriptionTier(v ? "all-in" : "free")}
+                checked={user?.subscriptionTier === "all-in"}
+                onChange={(v) => {
+                  void setSubscriptionTier(v ? "all-in" : "free").catch((e) => {
+                    toast.error(e instanceof Error ? e.message : "Failed to update tier");
+                  });
+                }}
               />
               <div className="my-3 border-t border-border-subtle" />
               <ToggleRow

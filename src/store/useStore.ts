@@ -88,6 +88,7 @@ export interface StoreState {
   // ─── Goal actions ───
   createGoal: (
     payload: Pick<Goal, "title" | "type"> & Partial<Omit<Goal, "id" | "status" | "color" | "createdAt">>,
+    tier: "free" | "all-in",
   ) => { ok: true; id: ID } | { ok: false; reason: "limit" };
   updateGoal: (id: ID, partial: Partial<Goal>) => void;
   markGoalComplete: (id: ID) => void;
@@ -171,7 +172,6 @@ export interface StoreState {
   toggleLayer: (layerName: keyof UserSettings["layers"], enabled: boolean) => void;
   setDefaultGoal: (goalId: ID) => void;
   setShowAdminTools: (enabled: boolean) => void;
-  setSubscriptionTier: (tier: "free" | "all-in") => void;
 
   // ─── Sessions ───
   createDraftSession: (config: {
@@ -225,9 +225,8 @@ export const useStore = create<StoreState>()(
       ...initialState,
 
       // ───────── Goals ─────────
-      createGoal: (payload) => {
+      createGoal: (payload, tier) => {
         const state = get();
-        const tier = state.settings?.subscriptionTier === "all-in" ? "all-in" : "free";
         const limit = tier === "all-in" ? 3 : 1;
         if (activeGoalCount(state.goals) >= limit) {
           return { ok: false, reason: "limit" };
@@ -824,10 +823,6 @@ export const useStore = create<StoreState>()(
 
       setShowAdminTools: (enabled: boolean) => {
         set({ settings: { ...get().settings, showAdminTools: enabled } });
-      },
-
-      setSubscriptionTier: (tier: "free" | "all-in") => {
-        set({ settings: { ...get().settings, subscriptionTier: tier } });
       },
 
       // ───────── Sessions ─────────

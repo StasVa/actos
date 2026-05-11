@@ -68,7 +68,7 @@ export const UserMenu: React.FC<{ collapsed: boolean }> = ({ collapsed }) => {
 
   const email = user?.email ?? settings.userEmail ?? "ak@email";
   const name = user?.name ?? settings.userName ?? email.split("@")[0];
-  const tier: "free" | "all-in" = settings.subscriptionTier === "all-in" ? "all-in" : "free";
+  const tier: "free" | "all-in" = user?.subscriptionTier === "all-in" ? "all-in" : "free";
 
   const goto = (path: string) => {
     setOpen(false);

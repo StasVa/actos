@@ -7,6 +7,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { LockModal, HistoryHint } from "@/components/LockModal";
 import { useStore } from "@/store/useStore";
+import { useAuth } from "@/lib/useAuth";
 import { formatHM } from "@/lib/timeStats";
 import type { Action, DayEntry, Goal, ID, ISODate, Project } from "@/types";
 import { getOutcomeSummary } from "@/lib/outcomeUtils";
@@ -222,7 +223,8 @@ const ReviewsDays: React.FC = () => {
   const goals = useStore((s) => s.goals);
   const projects = useStore((s) => s.projects);
   const settings = useStore((s) => s.settings);
-  const isFree = settings.subscriptionTier !== "all-in";
+  const { user } = useAuth();
+  const isFree = user?.subscriptionTier !== "all-in";
 
   const [dayType, setDayType] = React.useState("all");
   const [goalFilter, setGoalFilter] = React.useState<string>("all");

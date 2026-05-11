@@ -2,7 +2,7 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { AppSidebar } from "@/components/AppSidebar";
-import { useStore } from "@/store/useStore";
+import { useAuth } from "@/lib/useAuth";
 import { TierBadge } from "@/components/UserMenu";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { toast } from "sonner";
@@ -42,10 +42,9 @@ const FeatureList: React.FC<{ itemKeys: string[] }> = ({ itemKeys }) => {
 
 export default function SettingsSubscription() {
   const { t } = useTranslation();
-  const settings = useStore((s) => s.settings);
-  const setSubscriptionTier = useStore((s) => s.setSubscriptionTier);
+  const { user, setSubscriptionTier } = useAuth();
   const navigate = useNavigate();
-  const tier: "free" | "all-in" = settings.subscriptionTier === "all-in" ? "all-in" : "free";
+  const tier: "free" | "all-in" = user?.subscriptionTier === "all-in" ? "all-in" : "free";
   const isAllIn = tier === "all-in";
 
   const [confirmUpgrade, setConfirmUpgrade] = React.useState(false);
@@ -53,19 +52,27 @@ export default function SettingsSubscription() {
   const [downgradeText, setDowngradeText] = React.useState("");
   const [demoModal, setDemoModal] = React.useState<null | { title: string; body: string }>(null);
 
-  const handleUpgrade = () => {
+  const handleUpgrade = async () => {
     setConfirmUpgrade(false);
-    setSubscriptionTier("all-in");
-    toast.success(t("subscription.page.toast.upgraded"));
-    setTimeout(() => navigate("/today"), 400);
+    try {
+      await setSubscriptionTier("all-in");
+      toast.success(t("subscription.page.toast.upgraded"));
+      setTimeout(() => navigate("/today"), 400);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to upgrade");
+    }
   };
 
-  const handleDowngrade = () => {
+  const handleDowngrade = async () => {
     if (downgradeText.trim().toUpperCase() !== "DOWNGRADE") return;
-    setSubscriptionTier("free");
-    setDowngradeOpen(false);
-    setDowngradeText("");
-    toast(t("subscription.page.toast.downgraded"));
+    try {
+      await setSubscriptionTier("free");
+      setDowngradeOpen(false);
+      setDowngradeText("");
+      toast(t("subscription.page.toast.downgraded"));
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to downgrade");
+    }
   };
 
   return (

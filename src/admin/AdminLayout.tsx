@@ -1,13 +1,11 @@
 // Admin shell: warning-bordered sidebar + main pane. Reused by every admin page.
 
 import React from "react";
-import { Link, NavLink, Navigate, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, Users as UsersIcon, MessageSquare, CreditCard, ScrollText, Megaphone,
   ArrowLeftRight,
 } from "lucide-react";
-import { isAdmin } from "./adminStore";
-import { toast } from "sonner";
 
 const NAV = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
@@ -21,12 +19,6 @@ const NAV = [
 export const AdminLayout: React.FC = () => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
-
-  // Access check
-  if (!isAdmin()) {
-    toast.error("Access denied");
-    return <Navigate to="/today" replace />;
-  }
 
   return (
     <div className="min-h-screen bg-surface-base text-text-primary">

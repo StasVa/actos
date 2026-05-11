@@ -1,6 +1,16 @@
-// Mock auth layer backed by LocalStorage. Single source of truth via useAuth().
-// Real Supabase integration lands in a later batch.
+// Real auth layer backed by Supabase. Single source of truth via useAuth().
+// Hook contract is preserved where consumers depend on it. A few intentional changes:
+//   - signOut/setAdmin return Promise<void> (Supabase calls are async). Fire-and-forget still works.
+//   - pendingVerification / markEmailVerified / resendVerification are gone. Supabase owns
+//     verification state and signup does not create a session until OTP succeeds, so there's
+//     no logged-in-but-unverified state to track. EmailVerificationBanner is being removed.
+//   - completeSignup is a transitional shim until AuthVerify is rewired to call
+//     supabase.auth.verifyOtp directly (Task 4); it will be deleted then.
+//   - On cold load we block render until the first getSession() resolves to avoid a
+//     false isAuthenticated=false flash that would trip RequireAuth.
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import type { Session } from "@supabase/supabase-js";
+import { supabase } from "./supabase";
 
 export type AuthProvider = "email" | "google" | "apple";
 
@@ -11,73 +21,149 @@ export interface AuthUser {
   emailVerified: boolean;
   createdAt: string;
   provider: AuthProvider;
-  isAdmin?: boolean;
+  isAdmin: boolean;
+  avatarSeed?: string;
+  subscriptionTier: "free" | "all-in";
+  subscriptionStartedAt?: string;
+  billingCycle?: "monthly" | "annual" | "lifetime";
+  subscriptionEndsAt?: string;
 }
 
-const USER_KEY = "actos.auth.user";
-const PENDING_KEY = "actos.auth.pendingVerification";
-const BANNER_DISMISS_KEY = "actos.auth.bannerDismissed";
-
-function readUser(): AuthUser | null {
-  try {
-    const raw = localStorage.getItem(USER_KEY);
-    if (!raw) return null;
-    return JSON.parse(raw) as AuthUser;
-  } catch {
-    return null;
-  }
-}
-
-function writeUser(u: AuthUser | null) {
-  if (u) localStorage.setItem(USER_KEY, JSON.stringify(u));
-  else localStorage.removeItem(USER_KEY);
-  // Notify other tabs/listeners.
-  window.dispatchEvent(new Event("actos-auth-change"));
-}
-
-function genId(): string {
-  const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
-  let s = "user_";
-  for (let i = 0; i < 8; i++) s += chars[Math.floor(Math.random() * chars.length)];
-  return s;
-}
-
-const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+// Resume state for /auth/verify after tab close. Email only — never password.
+const PENDING_KEY = "actos.auth.pendingSignup";
 
 export const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function normalizeProvider(p: string | undefined): AuthProvider {
+  if (p === "google" || p === "apple") return p;
+  return "email";
+}
+
+function normalizeTier(t: string | null | undefined): "free" | "all-in" {
+  return t === "all-in" ? "all-in" : "free";
+}
+
+function normalizeBillingCycle(c: string | null | undefined): AuthUser["billingCycle"] {
+  if (c === "monthly" || c === "annual" || c === "lifetime") return c;
+  return undefined;
+}
+
+interface ProfileRow {
+  display_name: string | null;
+  avatar_seed: string | null;
+  is_admin: boolean;
+  subscription_tier: string;
+  subscription_started_at: string | null;
+  billing_cycle: string | null;
+  subscription_ends_at: string | null;
+}
+
+async function fetchProfile(userId: string): Promise<ProfileRow | null> {
+  const tryOnce = async (): Promise<ProfileRow | null> => {
+    const { data, error } = await supabase
+      .from("users")
+      .select(
+        "display_name, avatar_seed, is_admin, subscription_tier, subscription_started_at, billing_cycle, subscription_ends_at",
+      )
+      .eq("id", userId)
+      .maybeSingle();
+    if (error || !data) return null;
+    return data as ProfileRow;
+  };
+  const first = await tryOnce();
+  if (first) return first;
+  // handle_new_user fires AFTER INSERT on auth.users in the same transaction, so a
+  // null here almost always indicates a transient outage rather than a missing row.
+  // One short retry covers that; onAuthStateChange will reconcile on the next event.
+  await new Promise((r) => setTimeout(r, 200));
+  const second = await tryOnce();
+  if (second) return second;
+  // eslint-disable-next-line no-console
+  console.warn(
+    "[ActOS auth] profile fetch failed for user",
+    userId,
+    "— falling back to degraded state. Will reconcile on next auth event.",
+  );
+  return null;
+}
+
+function buildAuthUser(session: Session, profile: ProfileRow | null): AuthUser {
+  const u = session.user;
+  const metaDisplayName = (u.user_metadata as Record<string, unknown> | undefined)?.display_name;
+  const name =
+    profile?.display_name ??
+    (typeof metaDisplayName === "string" ? metaDisplayName : undefined) ??
+    u.email?.split("@")[0] ??
+    "";
+  // Conservative defaults: if we can't read the user row, assume least-privilege.
+  // The next auth event will reconcile.
+  return {
+    id: u.id,
+    name,
+    email: u.email ?? "",
+    emailVerified: !!u.email_confirmed_at,
+    createdAt: u.created_at,
+    provider: normalizeProvider(u.app_metadata?.provider as string | undefined),
+    isAdmin: profile?.is_admin ?? false,
+    avatarSeed: profile?.avatar_seed ?? undefined,
+    subscriptionTier: normalizeTier(profile?.subscription_tier),
+    subscriptionStartedAt: profile?.subscription_started_at ?? undefined,
+    billingCycle: normalizeBillingCycle(profile?.billing_cycle),
+    subscriptionEndsAt: profile?.subscription_ends_at ?? undefined,
+  };
+}
 
 interface AuthCtx {
   user: AuthUser | null;
   isAuthenticated: boolean;
-  pendingVerification: boolean;
   signUp: (input: { name: string; email: string; password: string }) => Promise<AuthUser>;
-  completeSignup: (input: { name: string; email: string }) => AuthUser;
+  // Transitional shim — Supabase has already established the session via verifyOtp
+  // by the time AuthVerify calls this. Task 4 deletes it.
+  completeSignup: (input: { name: string; email: string }) => AuthUser | null;
   signIn: (input: { email: string; password: string }) => Promise<AuthUser>;
-  signOut: () => void;
-  markEmailVerified: () => void;
-  setAdmin: (next: boolean) => void;
-  resendVerification: () => Promise<void>;
+  // Now Promise<void> (was void). Consumers that don't await still work.
+  signOut: () => Promise<void>;
+  // Now Promise<void> (was void). Writes to public.users.is_admin via Supabase.
+  setAdmin: (next: boolean) => Promise<void>;
+  // Writes to public.users.subscription_tier via Supabase; optimistically
+  // updates local state on success. Mirrors setAdmin's pattern.
+  setSubscriptionTier: (tier: "free" | "all-in") => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
 }
 
 const Ctx = createContext<AuthCtx | null>(null);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<AuthUser | null>(() => readUser());
-  const [pendingVerification, setPending] = useState<boolean>(
-    () => localStorage.getItem(PENDING_KEY) === "true",
-  );
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    const sync = () => {
-      setUser(readUser());
-      setPending(localStorage.getItem(PENDING_KEY) === "true");
+    let cancelled = false;
+
+    const syncFromSession = async (session: Session | null) => {
+      if (!session) {
+        if (!cancelled) setUser(null);
+        return;
+      }
+      const profile = await fetchProfile(session.user.id);
+      if (!cancelled) setUser(buildAuthUser(session, profile));
     };
-    window.addEventListener("storage", sync);
-    window.addEventListener("actos-auth-change", sync);
+
+    // Initial hydration from persisted Supabase session.
+    supabase.auth.getSession().then(({ data }) => {
+      void syncFromSession(data.session).finally(() => {
+        if (!cancelled) setHydrated(true);
+      });
+    });
+
+    // Subscribe to auth changes (login, logout, token refresh, multi-tab sync).
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      void syncFromSession(session);
+    });
+
     return () => {
-      window.removeEventListener("storage", sync);
-      window.removeEventListener("actos-auth-change", sync);
+      cancelled = true;
+      sub.subscription.unsubscribe();
     };
   }, []);
 
@@ -85,118 +171,115 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!name.trim()) throw new Error("Name required");
     if (!EMAIL_RE.test(email)) throw new Error("Invalid email");
     if (password.length < 8) throw new Error("Password too short");
-    await sleep(400);
-    const u: AuthUser = {
-      id: genId(),
+    const normEmail = email.trim().toLowerCase();
+    const { data, error } = await supabase.auth.signUp({
+      email: normEmail,
+      password,
+      options: { data: { display_name: name.trim() } },
+    });
+    if (error) throw error;
+    // With email-confirmation enabled, Supabase returns user data but no session.
+    // DO NOT auto-login — the caller redirects to /auth/verify.
+    try {
+      localStorage.setItem(
+        PENDING_KEY,
+        JSON.stringify({ email: normEmail, createdAt: new Date().toISOString() }),
+      );
+    } catch {
+      // ignore quota / unavailable storage
+    }
+    // Synthesize the returned AuthUser. public.users isn't readable yet (no session → RLS blocks),
+    // but the handle_new_user trigger sets subscription_tier='all-in' during beta, so we mirror that.
+    return {
+      id: data.user?.id ?? "",
       name: name.trim(),
-      email: email.trim().toLowerCase(),
-      emailVerified: false,
-      createdAt: new Date().toISOString(),
+      email: normEmail,
+      emailVerified: !!data.user?.email_confirmed_at,
+      createdAt: data.user?.created_at ?? new Date().toISOString(),
       provider: "email",
+      isAdmin: false,
+      subscriptionTier: "all-in",
     };
-    writeUser(u);
-    localStorage.setItem(PENDING_KEY, "true");
-    sessionStorage.removeItem(BANNER_DISMISS_KEY);
-    setUser(u);
-    setPending(true);
-    return u;
   }, []);
 
-  // Used by /auth/verify after the user enters the correct 6-digit code.
-  // Creates a verified user immediately — no pendingVerification flag.
-  const completeSignup = useCallback<AuthCtx["completeSignup"]>(({ name, email }) => {
-    const u: AuthUser = {
-      id: genId(),
-      name: name.trim(),
-      email: email.trim().toLowerCase(),
-      emailVerified: true,
-      createdAt: new Date().toISOString(),
-      provider: "email",
-    };
-    writeUser(u);
-    localStorage.removeItem(PENDING_KEY);
-    setUser(u);
-    setPending(false);
-    return u;
-  }, []);
+  const completeSignup = useCallback<AuthCtx["completeSignup"]>(() => user, [user]);
 
   const signIn = useCallback<AuthCtx["signIn"]>(async ({ email, password }) => {
     if (!EMAIL_RE.test(email)) throw new Error("Invalid email");
     if (password.length < 1) throw new Error("Password required");
-    await sleep(400);
-    const existing = readUser();
-    let u: AuthUser;
-    if (existing && existing.email === email.trim().toLowerCase()) {
-      u = existing;
-    } else {
-      u = {
-        id: genId(),
-        name: email.split("@")[0],
-        email: email.trim().toLowerCase(),
-        emailVerified: true,
-        createdAt: new Date().toISOString(),
-        provider: "email",
-      };
-    }
-    writeUser(u);
-    if (u.emailVerified) {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: email.trim().toLowerCase(),
+      password,
+    });
+    if (error) throw error;
+    if (!data.session) throw new Error("Sign in did not establish a session");
+    try {
       localStorage.removeItem(PENDING_KEY);
-      setPending(false);
+    } catch {
+      // ignore
     }
+    const profile = await fetchProfile(data.session.user.id);
+    const u = buildAuthUser(data.session, profile);
     setUser(u);
     return u;
   }, []);
 
-  const signOut = useCallback(() => {
-    writeUser(null);
-    localStorage.removeItem(PENDING_KEY);
-    sessionStorage.removeItem(BANNER_DISMISS_KEY);
+  const signOut = useCallback<AuthCtx["signOut"]>(async () => {
+    await supabase.auth.signOut();
+    try {
+      localStorage.removeItem(PENDING_KEY);
+    } catch {
+      // ignore
+    }
     setUser(null);
-    setPending(false);
   }, []);
 
-  const markEmailVerified = useCallback(() => {
-    const cur = readUser();
-    if (!cur) return;
-    const next = { ...cur, emailVerified: true };
-    writeUser(next);
-    localStorage.removeItem(PENDING_KEY);
-    setUser(next);
-    setPending(false);
-  }, []);
+  const setAdmin = useCallback<AuthCtx["setAdmin"]>(
+    async (next) => {
+      if (!user) return;
+      const { error } = await supabase.from("users").update({ is_admin: next }).eq("id", user.id);
+      if (error) throw error;
+      setUser({ ...user, isAdmin: next });
+    },
+    [user],
+  );
 
-  const setAdmin = useCallback((next: boolean) => {
-    const cur = readUser();
-    if (!cur) return;
-    const updated = { ...cur, isAdmin: next };
-    writeUser(updated);
-    setUser(updated);
-  }, []);
+  const setSubscriptionTier = useCallback<AuthCtx["setSubscriptionTier"]>(
+    async (tier) => {
+      if (!user) return;
+      const { error } = await supabase.from("users").update({ subscription_tier: tier }).eq("id", user.id);
+      if (error) throw error;
+      setUser({ ...user, subscriptionTier: tier });
+    },
+    [user],
+  );
 
-  const resendVerification = useCallback(async () => {
-    await sleep(400);
-  }, []);
-
-  const resetPassword = useCallback(async (_email: string) => {
-    await sleep(400);
+  const resetPassword = useCallback<AuthCtx["resetPassword"]>(async (email) => {
+    if (!EMAIL_RE.test(email)) throw new Error("Invalid email");
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
+      redirectTo: `${window.location.origin}/auth/reset`,
+    });
+    if (error) throw error;
   }, []);
 
   const value = useMemo<AuthCtx>(
     () => ({
       user,
       isAuthenticated: !!user,
-      pendingVerification,
       signUp,
       completeSignup,
       signIn,
       signOut,
-      markEmailVerified,
       setAdmin,
-      resendVerification,
+      setSubscriptionTier,
       resetPassword,
     }),
-    [user, pendingVerification, signUp, completeSignup, signIn, signOut, markEmailVerified, setAdmin, resendVerification, resetPassword],
+    [user, signUp, completeSignup, signIn, signOut, setAdmin, setSubscriptionTier, resetPassword],
   );
+
+  // Block render until first getSession() resolves — otherwise RequireAuth would
+  // see isAuthenticated=false and redirect to /auth before hydration completes.
+  if (!hydrated) return null;
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 };
@@ -206,5 +289,3 @@ export function useAuth(): AuthCtx {
   if (!v) throw new Error("useAuth must be used within AuthProvider");
   return v;
 }
-
-export const BANNER_DISMISS_SS_KEY = BANNER_DISMISS_KEY;

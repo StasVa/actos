@@ -227,8 +227,6 @@ export interface Session {
 }
 
 // ───────── Settings ─────────
-export type SubscriptionTier = "free" | "all-in";
-
 export interface UserSettings {
   layers: {
     planAndReview: boolean;
@@ -237,7 +235,6 @@ export interface UserSettings {
   defaultGoalId?: ID;
   userName?: string;
   userEmail?: string;
-  subscriptionTier?: SubscriptionTier;
   /** Demo flag — exposes /admin/components and tier toggle. Will be removed when real auth lands. */
   showAdminTools?: boolean;
 }

@@ -6,25 +6,50 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { AuthPageShell } from "./Auth";
 import { useAuth } from "@/lib/useAuth";
-import {
-  RESEND_COOLDOWN_S,
-  clearPendingSignup,
-  readPendingSignup,
-  resendCode,
-  verifyCode,
-} from "@/lib/mockAuth";
+import { supabase } from "@/lib/supabase";
 
 const CODE_LEN = 6;
+const RESEND_COOLDOWN_S = 30;
+const PENDING_KEY = "actos.auth.pendingSignup";
+const STALE_PENDING_MS = 24 * 60 * 60 * 1000;
+
+interface PendingSignup {
+  email: string;
+  createdAt: string;
+}
+
+function readPendingSignup(): PendingSignup | null {
+  try {
+    const raw = localStorage.getItem(PENDING_KEY);
+    if (!raw) return null;
+    const p = JSON.parse(raw) as Partial<PendingSignup>;
+    if (!p.email || !p.createdAt) return null;
+    if (Date.now() - new Date(p.createdAt).getTime() > STALE_PENDING_MS) {
+      localStorage.removeItem(PENDING_KEY);
+      return null;
+    }
+    return { email: p.email, createdAt: p.createdAt };
+  } catch {
+    return null;
+  }
+}
+
+function clearPendingSignup() {
+  try {
+    localStorage.removeItem(PENDING_KEY);
+  } catch {
+    // ignore
+  }
+}
 
 const AuthVerify: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { user, completeSignup } = useAuth();
+  const { user } = useAuth();
   const [pending] = useState(() => readPendingSignup());
   const [digits, setDigits] = useState<string[]>(() => Array(CODE_LEN).fill(""));
   const [error, setError] = useState<string | null>(null);
   const [verifying, setVerifying] = useState(false);
-  const [locked, setLocked] = useState(false); // too-many-attempts
   const [cooldown, setCooldown] = useState(0);
   const inputsRef = useRef<Array<HTMLInputElement | null>>([]);
   const errorTimerRef = useRef<number | null>(null);
@@ -58,46 +83,43 @@ const AuthVerify: React.FC = () => {
   const doVerify = useCallback(
     async (codeStr: string) => {
       if (verifying) return;
+      if (!pending) {
+        navigate("/auth#signup", { replace: true });
+        return;
+      }
       setVerifying(true);
       setError(null);
       try {
-        const result = await verifyCode(codeStr);
-        if (result.ok === true) {
-          completeSignup({ name: result.name, email: result.email });
+        const { error: verifyErr } = await supabase.auth.verifyOtp({
+          email: pending.email,
+          token: codeStr,
+          type: "signup",
+        });
+        if (!verifyErr) {
+          // Supabase has established the session; onAuthStateChange will
+          // populate useAuth().user. Clear the resume key and route to setup.
           clearPendingSignup();
           navigate("/setup", { replace: true });
           return;
         }
-        const reason = result.reason;
-        const attemptsRemaining = result.attemptsRemaining;
-        if (reason === "noPending") {
-          navigate("/auth#signup", { replace: true });
-        } else if (reason === "expired") {
+        // Map known Supabase errors to existing i18n keys where they fit.
+        // Everything else falls back to the raw English message.
+        const msg = verifyErr.message;
+        if (msg.toLowerCase().includes("expired")) {
           showError(t("auth.verify.error.expired"));
-          setDigits(Array(CODE_LEN).fill(""));
-          inputsRef.current[0]?.focus();
-        } else if (reason === "tooMany") {
-          showError(t("auth.verify.error.tooManyAttempts"));
-          setLocked(true);
         } else {
-          showError(
-            t("auth.verify.error.incorrect", {
-              attempts: attemptsRemaining,
-              count: attemptsRemaining,
-            }),
-          );
-          setDigits(Array(CODE_LEN).fill(""));
-          inputsRef.current[0]?.focus();
+          showError(msg);
         }
+        setDigits(Array(CODE_LEN).fill(""));
+        inputsRef.current[0]?.focus();
       } finally {
         setVerifying(false);
       }
     },
-    [completeSignup, navigate, showError, t, verifying],
+    [navigate, pending, showError, t, verifying],
   );
 
   const handleChange = (index: number, value: string) => {
-    if (locked) return;
     setError(null);
     // Paste handling: if multiple chars pasted into one slot, distribute.
     const cleaned = value.replace(/\D/g, "");
@@ -159,18 +181,23 @@ const AuthVerify: React.FC = () => {
 
   const onResend = async () => {
     if (cooldown > 0) return;
-    const result = await resendCode();
-    if (!result) {
+    if (!pending) {
       navigate("/auth#signup", { replace: true });
       return;
     }
-    setLocked(false);
+    const { error: resendErr } = await supabase.auth.resend({
+      email: pending.email,
+      type: "signup",
+    });
+    if (resendErr) {
+      showError(resendErr.message);
+      return;
+    }
     setError(null);
     setDigits(Array(CODE_LEN).fill(""));
     inputsRef.current[0]?.focus();
     setCooldown(RESEND_COOLDOWN_S);
     toast.success(t("auth.verify.resendToast"));
-    toast(t("auth.verify.devCodeToast", { code: result.code }), { duration: 8000 });
   };
 
   const onChangeEmail = () => {
@@ -234,7 +261,7 @@ const AuthVerify: React.FC = () => {
                 onChange={(e) => handleChange(i, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(i, e)}
                 onPaste={onPaste}
-                disabled={locked || verifying}
+                disabled={verifying}
                 aria-label={`Digit ${i + 1}`}
                 className="otp-input"
                 style={{
@@ -273,7 +300,7 @@ const AuthVerify: React.FC = () => {
         <button
           type="button"
           onClick={() => doVerify(code)}
-          disabled={!allFilled || verifying || locked}
+          disabled={!allFilled || verifying}
           style={{
             marginTop: 24,
             width: "100%",
@@ -285,8 +312,8 @@ const AuthVerify: React.FC = () => {
             fontFamily: "Inter, system-ui, sans-serif",
             fontSize: 16,
             fontWeight: 500,
-            cursor: !allFilled || verifying || locked ? "not-allowed" : "pointer",
-            opacity: !allFilled || verifying || locked ? 0.5 : 1,
+            cursor: !allFilled || verifying ? "not-allowed" : "pointer",
+            opacity: !allFilled || verifying ? 0.5 : 1,
             transition: "opacity 150ms ease",
           }}
         >

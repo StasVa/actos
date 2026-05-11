@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { useStore } from "@/store/useStore";
+import { useAuth } from "@/lib/useAuth";
 import type { Goal, GoalType, GoalStatus, ID } from "@/types";
 import { ConfirmModal } from "./ConfirmModal";
 import { EditorShell, EditorCloseX, EditorCancelButton } from "./EditorShell";
@@ -105,7 +106,8 @@ function GoalEditorPanel({
   const projects = useStore((s) => s.projects);
   const actions = useStore((s) => s.actions);
   const goals = useStore((s) => s.goals);
-  const settings = useStore((s) => s.settings);
+  const { user } = useAuth();
+  const tier: "free" | "all-in" = user?.subscriptionTier === "all-in" ? "all-in" : "free";
   const navigate = useNavigate();
   const { t } = useTranslation();
 
@@ -154,7 +156,7 @@ function GoalEditorPanel({
   })();
 
   const activeCount = goals.filter((g) => g.status === "active").length;
-  const isFree = settings.subscriptionTier !== "all-in";
+  const isFree = tier !== "all-in";
   const freeCap = 1;
   const allInCap = 3;
   const atCap = isFree ? activeCount >= freeCap : activeCount >= allInCap;
@@ -177,7 +179,7 @@ function GoalEditorPanel({
       toast.error(t("goalEditor.error.titleRequired"));
       return;
     }
-    const isFreeNow = settings.subscriptionTier !== "all-in";
+    const isFreeNow = tier !== "all-in";
     if (isFreeNow && activeCount >= freeCap) {
       setSoftBlock(true);
       return;
@@ -188,7 +190,7 @@ function GoalEditorPanel({
       description: description || undefined,
       targetDate: targetDate || undefined,
       successCriteria: criteria,
-    });
+    }, tier);
     if (!result.ok) {
       toast.error(
         isFreeNow

@@ -164,7 +164,7 @@ const App = () => (
           <Route path="/onboarding/goal" element={<RequireAuth><GoalBuilder /></RequireAuth>} />
 
           {/* Admin */}
-          <Route path="/admin" element={<AdminLayout />}>
+          <Route path="/admin" element={<RequireAdmin><AdminLayout /></RequireAdmin>}>
             <Route index element={<AdminDashboard />} />
             <Route path="users" element={<AdminUsers />} />
             <Route path="users/:userId" element={<AdminUserDetail />} />
@@ -173,7 +173,7 @@ const App = () => (
             <Route path="audit" element={<AdminAudit />} />
             <Route path="announcements" element={<AdminAnnouncements />} />
           </Route>
-          <Route path="/admin/components" element={<AdminComponents />} />
+          <Route path="/admin/components" element={<RequireAdmin><AdminComponents /></RequireAdmin>} />
           <Route path="/admin/manifesto" element={<RequireAdmin><AdminManifesto /></RequireAdmin>} />
 
           {/* Public + auth pages */}

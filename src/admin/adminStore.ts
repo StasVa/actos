@@ -6,7 +6,6 @@ import { persist } from "zustand/middleware";
 import {
   ADMIN_EMAILS,
   AUDIT_LOG,
-  CURRENT_USER_EMAIL,
   type AuditEntry,
 } from "./adminMock";
 
@@ -37,7 +36,8 @@ export const useAdminStore = create<AdminState>()(
         const newEntry: AuditEntry = {
           id: `aud_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
           iso: new Date().toISOString(),
-          admin: entry.admin ?? CURRENT_USER_EMAIL,
+          // TODO(phase4-or-later): callers should pass admin email explicitly; sentinel is a placeholder.
+          admin: entry.admin ?? "system@actos.local",
           type: entry.type,
           action: entry.action,
           targetUserEmail: entry.targetUserEmail,
@@ -92,6 +92,6 @@ export const useAdminStore = create<AdminState>()(
   ),
 );
 
-export function isAdmin(email: string = CURRENT_USER_EMAIL): boolean {
+export function isAdmin(email: string): boolean {
   return ADMIN_EMAILS.includes(email.toLowerCase());
 }

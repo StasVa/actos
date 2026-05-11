@@ -54,6 +54,7 @@ interface AuthCtx {
   signIn: (input: { email: string; password: string }) => Promise<AuthUser>;
   signOut: () => void;
   markEmailVerified: () => void;
+  setAdmin: (next: boolean) => void;
   resendVerification: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
 }

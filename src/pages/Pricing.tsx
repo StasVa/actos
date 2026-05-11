@@ -1,47 +1,11 @@
 // Pricing page — Free vs All-In, refund note, FAQ.
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Check, ChevronDown } from "lucide-react";
 import { LandingTopBar, LandingFooter } from "@/components/LandingChrome";
 
 type Feature = { bold?: string; text?: string; note?: string };
-
-const FREE_FEATURES: Feature[] = [
-  { text: "All current features" },
-  { bold: "Up to 2 active goals", note: "philosophy partial" },
-  { text: "90 days of history" },
-  { text: "Standard support", note: "help docs" },
-  { text: "Web app (mobile + desktop)" },
-  { text: "JSON data export" },
-];
-
-const ALLIN_FEATURES: Feature[] = [
-  { text: "Everything in Free" },
-  { bold: "Up to 3 active goals", note: "full philosophy" },
-  { bold: "Unlimited history", note: "back to day one" },
-  { text: "Priority support", note: "48h email reply" },
-  { bold: "Every future feature included", text: " — automatically" },
-  { bold: "Price locked", text: " at signup — never raised" },
-];
-
-const FAQS = [
-  {
-    q: "Can I change plans later?",
-    a: "Yes. Upgrade or downgrade any time from Settings → Subscription. Annual subscribers can switch to monthly at renewal; lifetime is a one-time purchase, no switching needed.",
-  },
-  {
-    q: "What happens when I cancel?",
-    a: "You stay on All-In until the end of the billing period you already paid for. After that, the account drops to Free — your data stays intact. Active entities (goals, projects, actions) are never locked; only history older than 90 days becomes view-only.",
-  },
-  {
-    q: "Will the price go up?",
-    a: "For new subscribers, possibly — we may raise prices as we add features. But once you subscribe, your price is locked. Existing subscribers never see a hike as long as the subscription stays active.",
-  },
-  {
-    q: "Why isn't there a free trial of All-In?",
-    a: "Free is the trial. It's a full version of the product with no time limit — not a teaser. If 90 days of history and 2 goals isn't enough, that's the signal you're ready for All-In.",
-  },
-];
 
 const FeatureRow: React.FC<{ f: Feature }> = ({ f }) => (
   <li style={{ display: "flex", alignItems: "flex-start", gap: 16 }}>
@@ -55,7 +19,31 @@ const FeatureRow: React.FC<{ f: Feature }> = ({ f }) => (
 );
 
 const Pricing: React.FC = () => {
+  const { t } = useTranslation();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  const FREE_FEATURES: Feature[] = [
+    { text: t("pricing.free.feature1") },
+    { bold: t("pricing.free.feature2"), note: t("pricing.free.feature2Note") },
+    { text: t("pricing.free.feature3") },
+    { text: t("pricing.free.feature4"), note: t("pricing.free.feature4Note") },
+    { text: t("pricing.free.feature5"), note: t("pricing.free.feature5Note") },
+    { text: t("pricing.free.feature6") },
+  ];
+
+  const ALLIN_FEATURES: Feature[] = [
+    { text: t("pricing.allIn.feature1") },
+    { bold: t("pricing.allIn.feature2"), note: t("pricing.allIn.feature2Note") },
+    { bold: t("pricing.allIn.feature3"), note: t("pricing.allIn.feature3Note") },
+    { text: t("pricing.allIn.feature4"), note: t("pricing.allIn.feature4Note") },
+    { bold: t("pricing.allIn.feature5"), note: t("pricing.allIn.feature5Note") },
+    { bold: t("pricing.allIn.feature6"), note: t("pricing.allIn.feature6Note") },
+  ];
+
+  const FAQS = [1, 2, 3, 4].map((i) => ({
+    q: t(`pricing.faq.q${i}.question`),
+    a: t(`pricing.faq.q${i}.answer`),
+  }));
 
   return (
     <div
@@ -77,7 +65,7 @@ const Pricing: React.FC = () => {
               color: "hsl(var(--text-tertiary))",
             }}
           >
-            Pricing
+            {t("pricing.label")}
           </div>
           <hr style={{ width: 40, height: 1, border: "none", background: "hsl(var(--border-subtle))", margin: "24px auto 0" }} />
           <h1
@@ -90,7 +78,7 @@ const Pricing: React.FC = () => {
               lineHeight: 1.1,
             }}
           >
-            Free to start. $12 to commit.
+            {t("pricing.heading")}
           </h1>
           <p
             className="pricing-sub"
@@ -100,7 +88,7 @@ const Pricing: React.FC = () => {
               lineHeight: 1.5,
             }}
           >
-            Pick what fits today. Switch any time.
+            {t("pricing.subline")}
           </p>
         </div>
 
@@ -130,14 +118,14 @@ const Pricing: React.FC = () => {
                 color: "hsl(var(--text-tertiary))",
               }}
             >
-              FREE
+              {t("pricing.free.badge")}
             </div>
             <div style={{ marginTop: 16, display: "flex", alignItems: "baseline", gap: 8 }}>
-              <span style={{ fontSize: 56, fontWeight: 500, color: "hsl(var(--text-primary))", lineHeight: 1 }}>$0</span>
-              <span style={{ fontSize: 16, color: "hsl(var(--text-secondary))" }}>forever</span>
+              <span style={{ fontSize: 56, fontWeight: 500, color: "hsl(var(--text-primary))", lineHeight: 1 }}>{t("pricing.free.price")}</span>
+              <span style={{ fontSize: 16, color: "hsl(var(--text-secondary))" }}>{t("pricing.free.priceUnit")}</span>
             </div>
             <p style={{ marginTop: 24, fontSize: 15, color: "hsl(var(--text-secondary))", lineHeight: 1.5 }}>
-              For people exploring the philosophy.
+              {t("pricing.free.tagline")}
             </p>
             <ul style={{ marginTop: 32, display: "flex", flexDirection: "column", gap: 12, listStyle: "none", padding: 0, flex: 1 }}>
               {FREE_FEATURES.map((f, i) => <FeatureRow key={i} f={f} />)}
@@ -161,7 +149,7 @@ const Pricing: React.FC = () => {
                 transition: "border-color 120ms ease, background 120ms ease",
               }}
             >
-              Start free
+              {t("pricing.free.cta")}
             </Link>
           </div>
 
@@ -196,7 +184,7 @@ const Pricing: React.FC = () => {
                 alignItems: "center",
               }}
             >
-              RECOMMENDED
+              {t("pricing.allIn.recommended")}
             </div>
             <div
               style={{
@@ -207,17 +195,17 @@ const Pricing: React.FC = () => {
                 color: "hsl(var(--goal-2))",
               }}
             >
-              ALL-IN
+              {t("pricing.allIn.badge")}
             </div>
             <div style={{ marginTop: 16, display: "flex", alignItems: "baseline", gap: 8 }}>
-              <span style={{ fontSize: 56, fontWeight: 500, color: "hsl(var(--text-primary))", lineHeight: 1 }}>$12</span>
-              <span style={{ fontSize: 16, color: "hsl(var(--text-secondary))" }}>/mo</span>
+              <span style={{ fontSize: 56, fontWeight: 500, color: "hsl(var(--text-primary))", lineHeight: 1 }}>{t("pricing.allIn.price")}</span>
+              <span style={{ fontSize: 16, color: "hsl(var(--text-secondary))" }}>{t("pricing.allIn.priceUnit")}</span>
             </div>
             <div style={{ marginTop: 4, fontSize: 13, color: "hsl(var(--text-tertiary))" }}>
-              or $120/yr — save 17%
+              {t("pricing.allIn.priceAnnual")}
             </div>
             <p style={{ marginTop: 24, fontSize: 15, color: "hsl(var(--text-secondary))", lineHeight: 1.5 }}>
-              For people ready to commit.
+              {t("pricing.allIn.tagline")}
             </p>
             <ul style={{ marginTop: 32, display: "flex", flexDirection: "column", gap: 12, listStyle: "none", padding: 0, flex: 1 }}>
               {ALLIN_FEATURES.map((f, i) => <FeatureRow key={i} f={f} />)}
@@ -241,7 +229,7 @@ const Pricing: React.FC = () => {
                 transition: "filter 120ms ease",
               }}
             >
-              Go All-In
+              {t("pricing.allIn.cta")}
             </Link>
           </div>
         </div>
@@ -251,8 +239,8 @@ const Pricing: React.FC = () => {
           className="mx-auto text-center"
           style={{ maxWidth: 640, marginTop: 64, fontSize: 14, lineHeight: 1.6, color: "hsl(var(--text-secondary))" }}
         >
-          <span style={{ color: "hsl(var(--text-primary))", fontWeight: 500 }}>30-day refund.</span>{" "}
-          If ActOS doesn't fit how you work, email us within 30 days of signup and we'll refund in full — no questions, no forms.
+          <span style={{ color: "hsl(var(--text-primary))", fontWeight: 500 }}>{t("pricing.refund.bold")}</span>{" "}
+          <span>{t("pricing.refund.body")}</span>
         </div>
 
         {/* FAQ */}
@@ -262,7 +250,7 @@ const Pricing: React.FC = () => {
               className="pricing-faq-h2"
               style={{ fontWeight: 500, color: "hsl(var(--text-primary))", letterSpacing: "-0.01em", margin: 0 }}
             >
-              Common questions.
+              {t("pricing.faq.heading")}
             </h2>
             <hr style={{ width: 40, height: 1, border: "none", background: "hsl(var(--border-subtle))", margin: "24px auto 0" }} />
           </div>

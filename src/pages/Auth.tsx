@@ -310,7 +310,8 @@ const Auth: React.FC = () => {
     }
   };
 
-  const heading = mode === "signin" ? "Welcome back." : "Create your account.";
+  const heading = mode === "signin" ? "Welcome back." : "Let’s get you set up.";
+  const subline = mode === "signin" ? "Open ActOS in a few seconds." : "Set up your account in 30 seconds.";
   const submitLabel = mode === "signin" ? "Sign in" : "Create account";
 
   return (

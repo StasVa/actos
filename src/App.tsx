@@ -36,10 +36,10 @@ import Pricing from "./pages/Pricing.tsx";
 import Manifesto from "./pages/Manifesto.tsx";
 import Login from "./pages/Login.tsx";
 import Auth from "./pages/Auth.tsx";
+import AuthVerify from "./pages/AuthVerify.tsx";
 import AuthReset from "./pages/AuthReset.tsx";
 import { AuthProvider } from "./lib/useAuth";
 import { RequireAuth, RedirectIfAuthed, RequireAdmin } from "./components/AuthRoute";
-import { EmailVerificationBanner } from "./components/EmailVerificationBanner";
 import { LegalPrivacy, LegalTerms } from "./pages/LegalPlaceholder.tsx";
 import { NoGoalsLayout } from "./components/NoGoalsLayout";
 import { useStore } from "./store/useStore";
@@ -149,7 +149,7 @@ const App = () => (
         <AuthProvider>
         <SetupGuard />
         <ChromeOnlyOutsideSetup>
-          <EmailVerificationBanner />
+          {/* EmailVerificationBanner removed: signup now uses inline /auth/verify flow. */}
           <ActionEditor />
           <GoalEditor />
           <RitualEditor />
@@ -186,6 +186,7 @@ const App = () => (
           <Route path="/manifesto" element={<Manifesto />} />
           <Route path="/login" element={<RedirectIfAuthed><Login /></RedirectIfAuthed>} />
           <Route path="/auth" element={<RedirectIfAuthed><Auth /></RedirectIfAuthed>} />
+          <Route path="/auth/verify" element={<AuthVerify />} />
           <Route path="/auth/reset" element={<AuthReset />} />
           <Route path="/legal/privacy" element={<LegalPrivacy />} />
           <Route path="/legal/terms" element={<LegalTerms />} />

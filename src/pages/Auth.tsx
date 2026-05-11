@@ -2,9 +2,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { AuthFooter } from "@/components/LandingChrome";
 import { EMAIL_RE, useAuth } from "@/lib/useAuth";
+import { startSignup } from "@/lib/mockAuth";
 
 type Mode = "signin" | "signup";
 
@@ -232,7 +234,7 @@ const Auth: React.FC = () => {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { signIn, signUp } = useAuth();
+  const { signIn } = useAuth();
   const [mode, setMode] = useState<Mode>("signin");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -306,8 +308,10 @@ const Auth: React.FC = () => {
     setLoading(true);
     try {
       if (mode === "signup") {
-        await signUp({ name, email, password });
-        navigate("/setup", { replace: true });
+        const { code } = await startSignup({ name, email, password });
+        // TODO: remove dev toast when real backend integrates
+        toast(t("auth.verify.devCodeToast", { code }), { duration: 8000 });
+        navigate("/auth/verify", { replace: true });
       } else {
         await signIn({ email, password });
         navigate(next, { replace: true });

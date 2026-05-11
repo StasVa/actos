@@ -51,6 +51,7 @@ interface AuthCtx {
   isAuthenticated: boolean;
   pendingVerification: boolean;
   signUp: (input: { name: string; email: string; password: string }) => Promise<AuthUser>;
+  completeSignup: (input: { name: string; email: string }) => AuthUser;
   signIn: (input: { email: string; password: string }) => Promise<AuthUser>;
   signOut: () => void;
   markEmailVerified: () => void;
@@ -98,6 +99,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     sessionStorage.removeItem(BANNER_DISMISS_KEY);
     setUser(u);
     setPending(true);
+    return u;
+  }, []);
+
+  // Used by /auth/verify after the user enters the correct 6-digit code.
+  // Creates a verified user immediately — no pendingVerification flag.
+  const completeSignup = useCallback<AuthCtx["completeSignup"]>(({ name, email }) => {
+    const u: AuthUser = {
+      id: genId(),
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+      emailVerified: true,
+      createdAt: new Date().toISOString(),
+      provider: "email",
+    };
+    writeUser(u);
+    localStorage.removeItem(PENDING_KEY);
+    setUser(u);
+    setPending(false);
     return u;
   }, []);
 
@@ -168,6 +187,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isAuthenticated: !!user,
       pendingVerification,
       signUp,
+      completeSignup,
       signIn,
       signOut,
       markEmailVerified,
@@ -175,7 +195,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       resendVerification,
       resetPassword,
     }),
-    [user, pendingVerification, signUp, signIn, signOut, markEmailVerified, setAdmin, resendVerification, resetPassword],
+    [user, pendingVerification, signUp, completeSignup, signIn, signOut, markEmailVerified, setAdmin, resendVerification, resetPassword],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

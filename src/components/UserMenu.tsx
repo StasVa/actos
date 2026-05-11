@@ -4,8 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { Sparkles, LogOut, Wrench, HelpCircle } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { ConfirmModal } from "@/components/ConfirmModal";
 import { useStore } from "@/store/useStore";
+import { useAuth } from "@/lib/useAuth";
 import { toast } from "sonner";
 
 function initials(name: string): string {

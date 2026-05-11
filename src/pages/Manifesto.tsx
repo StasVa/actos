@@ -1,9 +1,12 @@
 // Founder essay — Medium-style article with byline, drop cap, pull quote.
-import React from "react";
+// If a CMS override exists in LocalStorage for the current locale, it
+// supersedes the i18n-keyed content (see /admin/manifesto editor).
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ArrowRight } from "lucide-react";
 import { LandingTopBar, LandingFooter } from "@/components/LandingChrome";
+import { readManifesto, type ManifestoContent } from "@/lib/manifestoStorage";
 
 // Render a string with **bold** markdown -> <strong>, *italic* -> <em>.
 function renderMd(s: string): React.ReactNode[] {

@@ -96,7 +96,7 @@ const Manifesto: React.FC = () => {
               lineHeight: 1.1,
             }}
           >
-            {t("manifesto.title")}
+            {override?.title ?? t("manifesto.title")}
           </h1>
 
           <p
@@ -108,9 +108,16 @@ const Manifesto: React.FC = () => {
               lineHeight: 1.4,
             }}
           >
-            {t("manifesto.deck")}
+            {override?.deck ?? t("manifesto.deck")}
           </p>
 
+          {override ? (
+            <div
+              className="manifesto-body manifesto-body-override"
+              style={{ marginTop: 64 }}
+              dangerouslySetInnerHTML={{ __html: override.body }}
+            />
+          ) : (
           <div className="manifesto-body" style={{ marginTop: 64 }}>
             <P k="manifesto.p1" className="has-dropcap" />
             <P k="manifesto.p2" />

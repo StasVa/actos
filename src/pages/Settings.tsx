@@ -141,8 +141,25 @@ export default function Settings() {
               {t("settings.account.heading").toUpperCase()}
             </div>
             <div className="text-[13px] text-text-secondary mb-4">
-              {t("settings.account.signedInAs")} <span className="text-text-primary">{settings.userEmail ?? "ak@email"}</span>
+              {t("settings.account.signedInAs")} <span className="text-text-primary">{user?.email ?? settings.userEmail ?? "ak@email"}</span>
+              {user && (
+                <span className="ml-2 text-text-tertiary">
+                  · {user.emailVerified ? "verified" : "unverified"}
+                </span>
+              )}
             </div>
+            {user && !user.emailVerified && (
+              <button
+                type="button"
+                onClick={() => {
+                  markEmailVerified();
+                  toast.success("Email marked as verified");
+                }}
+                className="mb-4 h-9 px-4 text-[13px] font-medium rounded-[4px] border border-border-default text-text-primary hover:border-[hsl(var(--accent))] hover:bg-surface-hover transition-colors"
+              >
+                Mark email verified (debug)
+              </button>
+            )}
 
             {/* Demo controls */}
             <div

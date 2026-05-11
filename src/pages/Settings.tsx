@@ -160,6 +160,18 @@ export default function Settings() {
                 Mark email verified (debug)
               </button>
             )}
+            {user && (
+              <button
+                type="button"
+                onClick={() => {
+                  setAdmin(!user.isAdmin);
+                  toast.success(user.isAdmin ? "Admin disabled" : "Admin enabled");
+                }}
+                className="mb-4 ml-2 h-9 px-4 text-[13px] font-medium rounded-[4px] border border-border-default text-text-primary hover:border-[hsl(var(--accent))] hover:bg-surface-hover transition-colors"
+              >
+                {user.isAdmin ? "Disable admin (debug)" : "Toggle admin (debug)"}
+              </button>
+            )}
 
             {/* Demo controls */}
             <div

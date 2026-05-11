@@ -159,9 +159,12 @@ const Manifesto: React.FC = () => {
             <P k="manifesto.p20" />
             <P k="manifesto.p21" />
             <P k="manifesto.p22" />
+          </div>
+          )}
 
+          {/* Closing chrome — always from i18n, not editable in CMS. */}
+          <div className="manifesto-body" style={{ marginTop: override ? 0 : undefined }}>
             <hr />
-
             <p>
               {t("manifesto.closing.line1")}{" "}
               <Link to="/auth#signup" style={{ color: "hsl(var(--goal-2))", textDecoration: "underline" }}>

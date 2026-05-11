@@ -274,6 +274,15 @@ const Manifesto: React.FC = () => {
           margin: 4px 6px 0 0;
           color: hsl(var(--text-primary));
         }
+        .manifesto-body-override > p:first-of-type::first-letter {
+          font-size: 64px;
+          font-weight: 500;
+          float: left;
+          line-height: 0.9;
+          margin: 4px 6px 0 0;
+          color: hsl(var(--text-primary));
+        }
+        .manifesto-body a { color: hsl(var(--goal-2)); text-decoration: underline; }
 
         @media (max-width: 768px) {
           .manifesto-main { padding-top: 88px; padding-bottom: 80px; }

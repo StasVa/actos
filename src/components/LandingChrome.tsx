@@ -2,7 +2,6 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import i18n from "@/i18n";
 import { Github, Linkedin, Twitter } from "lucide-react";
 
 const LANGS = ["en", "ru", "de", "es"] as const;

@@ -1,11 +1,13 @@
 // /auth/reset — mock password reset request page.
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ArrowLeft, Check } from "lucide-react";
 import { AuthPageShell } from "./Auth";
 import { EMAIL_RE, useAuth } from "@/lib/useAuth";
 
 const AuthReset: React.FC = () => {
+  const { t } = useTranslation();
   const { resetPassword } = useAuth();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);

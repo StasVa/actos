@@ -102,7 +102,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return u;
   }, []);
 
-  const signIn = useCallback<AuthCtx["signIn"]>(async ({ email, password }) => {
+  // Used by /auth/verify after the user enters the correct 6-digit code.
+  // Creates a verified user immediately — no pendingVerification flag.
+  const completeSignup = useCallback<AuthCtx["completeSignup"]>(({ name, email }) => {
+    const u: AuthUser = {
+      id: genId(),
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+      emailVerified: true,
+      createdAt: new Date().toISOString(),
+      provider: "email",
+    };
+    writeUser(u);
+    localStorage.removeItem(PENDING_KEY);
+    setUser(u);
+    setPending(false);
+    return u;
+  }, []);
     if (!EMAIL_RE.test(email)) throw new Error("Invalid email");
     if (password.length < 1) throw new Error("Password required");
     await sleep(400);

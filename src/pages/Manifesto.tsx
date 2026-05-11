@@ -153,7 +153,7 @@ const Manifesto: React.FC = () => {
             <hr />
 
             <p>
-              If you want to try it, <Link to="/today" style={{ color: "hsl(var(--goal-2))", textDecoration: "underline" }}>open ActOS</Link>. Free is real and the trial doesn't expire.
+              If you want to try it, <Link to="/auth#signup" style={{ color: "hsl(var(--goal-2))", textDecoration: "underline" }}>open ActOS</Link>. Free is real and the trial doesn't expire.
             </p>
             <p>
               If you don't, I hope at least the framing was useful. The goal isn't to convert you to a product. The goal is to convert you to a way of working.
@@ -170,7 +170,7 @@ const Manifesto: React.FC = () => {
               Stop scheduling. Start moving.
             </p>
             <Link
-              to="/today"
+              to="/auth#signup"
               className="manifesto-cta-btn"
               style={{
                 marginTop: 32,

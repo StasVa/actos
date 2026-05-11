@@ -257,6 +257,11 @@ const Auth: React.FC = () => {
     setErrors({});
     setSubmitErr(null);
     setPassword(""); // security hygiene — clear password between modes
+    // Keep URL hash in sync so reload/share preserves the mode.
+    const newHash = target === "signup" ? "#signup" : "#signin";
+    if (window.location.hash !== newHash) {
+      window.history.replaceState(null, "", window.location.pathname + window.location.search + newHash);
+    }
   };
 
   const valid = useMemo(() => {

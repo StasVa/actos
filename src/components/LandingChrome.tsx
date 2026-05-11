@@ -38,7 +38,7 @@ export const LandingTopBar: React.FC<{ logoIsHome?: boolean }> = ({ logoIsHome }
       <nav className="landing-topbar-nav">
         <Link to="/manifesto" className="topbar-link topbar-desktop-only" style={navLinkStyle("/manifesto")}>Manifesto</Link>
         <Link to="/pricing" className="topbar-link topbar-desktop-only" style={navLinkStyle("/pricing")}>Pricing</Link>
-        <Link to="/login" className="topbar-link" style={navLinkStyle("/login")}>Sign in</Link>
+        <Link to="/auth" className="topbar-link" style={navLinkStyle("/auth")}>Sign in</Link>
       </nav>
       <style>{`
         .landing-topbar-logo { position: absolute; top: 32px; left: 32px; z-index: 2; }

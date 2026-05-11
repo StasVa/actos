@@ -1,10 +1,13 @@
 // Builds the "Show me how it works" sample dataset from the canonical fixture.
 //
-// The fixture (src/data/sampleDataFixture.json) is anchored to 2026-05-09.
-// At seed time, every ISO date / datetime is shifted by (today - anchor) days
-// so the timeline always feels current relative to the user's local date.
+// The fixture (src/data/sample/sampleDataFixture.{locale}.json) is anchored to
+// 2026-05-09. At seed time, every ISO date / datetime is shifted by
+// (today - anchor) days so the timeline always feels current relative to the
+// user's local date. Locale is picked from the user's i18n setting; once
+// seeded the entities are real workspace data and don't re-translate.
 
-import fixture from "@/data/sampleDataFixture.json";
+import enFixture from "@/data/sample/sampleDataFixture.en.json";
+import { getSampleFixture } from "@/data/sample";
 import type {
   Action,
   DayEntry,

@@ -2,11 +2,13 @@
 import React, { useEffect, useState } from "react";
 import { Mail } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import { useAuth, BANNER_DISMISS_SS_KEY } from "@/lib/useAuth";
 
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 
 export const EmailVerificationBanner: React.FC = () => {
+  const { t } = useTranslation();
   const { user, pendingVerification, resendVerification } = useAuth();
   const [dismissed, setDismissed] = useState<boolean>(
     () => sessionStorage.getItem(BANNER_DISMISS_SS_KEY) === "true",
@@ -29,7 +31,7 @@ export const EmailVerificationBanner: React.FC = () => {
 
   const onResend = async () => {
     await resendVerification();
-    toast.success("Verification email sent");
+    toast.success(t("auth.banner.resendToast"));
   };
 
   const onDismiss = () => {

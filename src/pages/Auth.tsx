@@ -241,6 +241,24 @@ const Auth: React.FC = () => {
 
   const next = params.get("next") || "/today";
 
+  // Sync mode with URL hash (#signup) — optional deep link support.
+  useEffect(() => {
+    const applyHash = () => {
+      if (window.location.hash === "#signup") setMode("signup");
+      else if (window.location.hash === "#signin") setMode("signin");
+    };
+    applyHash();
+    window.addEventListener("hashchange", applyHash);
+    return () => window.removeEventListener("hashchange", applyHash);
+  }, []);
+
+  const switchMode = (target: Mode) => {
+    setMode(target);
+    setErrors({});
+    setSubmitErr(null);
+    setPassword(""); // security hygiene — clear password between modes
+  };
+
   const valid = useMemo(() => {
     if (!EMAIL_RE.test(email)) return false;
     if (mode === "signup") {
@@ -292,7 +310,8 @@ const Auth: React.FC = () => {
     }
   };
 
-  const heading = mode === "signin" ? "Welcome back." : "Create your account.";
+  const heading = mode === "signin" ? "Welcome back." : "Let’s get you set up.";
+  const subline = mode === "signin" ? "Open ActOS in a few seconds." : "Set up your account in 30 seconds.";
   const submitLabel = mode === "signin" ? "Sign in" : "Create account";
 
   return (
@@ -319,7 +338,7 @@ const Auth: React.FC = () => {
             marginTop: 16,
           }}
         >
-          Open ActOS in a few seconds.
+          {subline}
         </p>
 
         <form onSubmit={onSubmit} style={{ marginTop: 48, display: "flex", flexDirection: "column", gap: 16 }}>
@@ -446,11 +465,7 @@ const Auth: React.FC = () => {
               Don&apos;t have an account?{" "}
               <button
                 type="button"
-                onClick={() => {
-                  setMode("signup");
-                  setErrors({});
-                  setSubmitErr(null);
-                }}
+                onClick={() => switchMode("signup")}
                 style={{ background: "none", border: "none", padding: 0, color: "hsl(var(--goal-2))", cursor: "pointer", fontSize: 14, fontWeight: 500 }}
               >
                 Sign up
@@ -461,11 +476,7 @@ const Auth: React.FC = () => {
               Already have an account?{" "}
               <button
                 type="button"
-                onClick={() => {
-                  setMode("signin");
-                  setErrors({});
-                  setSubmitErr(null);
-                }}
+                onClick={() => switchMode("signin")}
                 style={{ background: "none", border: "none", padding: 0, color: "hsl(var(--goal-2))", cursor: "pointer", fontSize: 14, fontWeight: 500 }}
               >
                 Sign in

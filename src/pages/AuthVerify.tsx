@@ -66,13 +66,9 @@ const AuthVerify: React.FC = () => {
           completeSignup({ name: result.name, email: result.email });
           clearPendingSignup();
           navigate("/setup", { replace: true });
-          return;
-        }
-        if (result.reason === "noPending") {
+        } else if (result.reason === "noPending") {
           navigate("/auth#signup", { replace: true });
-          return;
-        }
-        if (result.reason === "expired") {
+        } else if (result.reason === "expired") {
           showError(t("auth.verify.error.expired"));
           setDigits(Array(CODE_LEN).fill(""));
           inputsRef.current[0]?.focus();
@@ -80,7 +76,12 @@ const AuthVerify: React.FC = () => {
           showError(t("auth.verify.error.tooManyAttempts"));
           setLocked(true);
         } else {
-          showError(t("auth.verify.error.incorrect", { attempts: result.attemptsRemaining, count: result.attemptsRemaining }));
+          showError(
+            t("auth.verify.error.incorrect", {
+              attempts: result.attemptsRemaining,
+              count: result.attemptsRemaining,
+            }),
+          );
           setDigits(Array(CODE_LEN).fill(""));
           inputsRef.current[0]?.focus();
         }

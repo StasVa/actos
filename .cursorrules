@@ -1,0 +1,94 @@
+# ActOS — AI Agent Context
+
+You are working on **ActOS**, a daily-execution system for ambitious people pursuing 2-3 goals at once. This file gives you the context you need to make decisions that align with the product's philosophy and existing architecture.
+
+## What ActOS is
+
+ActOS is anti-tasks, not anti-work. It is NOT a todo list, calendar planner, habit gamification app, or project tracker. It is an operating system for ambitious individuals working toward goals that take months or years, where the only horizon that actually moves them is today.
+
+Core daily loop: **Plan → Execute → Close**. Everything else serves that loop.
+
+The user has **maximum 2-3 active goals**. This is a hard product constraint, not a setting. It exists to enforce focus.
+
+## Philosophy that affects code decisions
+
+- **Factual, not motivational tone.** No "Great job!", no celebrations, no streaks-as-pressure, no emoji-heavy UI. The product is a sober tool, not an engagement game.
+- **The tool, not the coach.** No reminders, no notifications, no nudges in v1. The user comes to ActOS; ActOS does not chase the user.
+- **Honest progress.** Dropped/Cancelled actions REDUCE project cost — they don't artificially boost progress. Math reflects reality.
+- **Value ≠ Effort.** Two parallel metrics. Delegated work: 100% Value, 20% Effort. This is signature mechanic — preserve it carefully.
+- **No feature creep.** When tempted to add "just one more thing" — check `06-ROADMAP.md` first. Most asks are deliberately deferred.
+
+## Tech stack (DO NOT change without discussion)
+
+- **Frontend:** React + TypeScript + Vite + Tailwind + shadcn/ui
+- **State:** Zustand with persist middleware (currently → LocalStorage)
+- **i18n:** i18next, 4 locales (en, ru, de, es)
+- **Rich text:** TipTap (project descriptions, manifesto admin)
+- **Icons:** lucide-react (NEVER another icon library)
+- **Toasts:** sonner
+- **Charts:** recharts
+- **Backend (planned):** Supabase US-region (Postgres + Auth + Storage + Edge Functions)
+- **Hosting:** Vercel (frontend) + Supabase (backend)
+- **Email:** Resend (planned)
+- **Payments:** Stripe or Paddle (deferred to post-beta)
+- **Domain:** actos.io
+
+## Architecture conventions
+
+### Mock-to-real swap pattern
+Mock implementations (auth, payments, email verification) are isolated to single files (e.g. `mockAuth.ts`). Real backends swap into these files without touching the consumer code. PRESERVE this pattern — it's a deliberate architecture decision.
+
+### Single source of truth via hooks
+`useAuth()`, `useGoals()`, etc. are the only API consumers should use. Direct Zustand access is discouraged outside the hooks.
+
+### Data model
+See `03-MODEL.md` in project knowledge. Goal → Project → Action hierarchy. Rituals attach to Goal or Project. Ideas are capture-only, convertible. Strict status semantics — don't invent new statuses.
+
+### Required fields are non-negotiable
+Actions REQUIRE Impact (1-10) and Time (for Done transition). UI blocks Save with disabled buttons + tooltips. This is enforced because missing values corrupt downstream calculations.
+
+### Z-index hierarchy (enforce)
+- Sidebar/content: 0-10
+- Active session banner: 40
+- Mobile FAB: 50
+- Slide-in panel: 90
+- Panel internals (dropdowns): 100
+- Modals: 200
+- Command Palette: 250
+- Toasts: 300
+
+### Page width tiers
+Every page declares Narrow (720px) / Medium (1024px) / Wide (1280px). Don't introduce arbitrary widths.
+
+### Heavyweight vs lightweight entities
+- Goals, Projects → full pages (Projects use page-based create AND edit; Goals use slide-in for edit)
+- Actions, Rituals, Ideas → modal for create, slide-in panel for edit
+
+## Code conventions
+
+- **TypeScript strict.** No `any` unless explicitly justified in a comment.
+- **shadcn/ui first.** Don't write a Dialog from scratch — use `<Dialog>` from `components/ui/`.
+- **Tailwind utility-first.** No CSS-in-JS, no styled-components.
+- **CSS variables for theming.** Colors via `var(--accent)`, `var(--text-secondary)`, etc. NEVER hardcode hex values. See `09-DESIGN-SYSTEM.md`.
+- **Lucide icons by import name.** Tree-shakeable.
+- **i18n everywhere.** No hardcoded user-facing strings — use `useTranslation()`. New strings get added to all 4 locale files.
+- **Date handling:** ISO strings in storage, formatting at render time. Use `date-fns`.
+
+## What not to do
+
+- Don't add features not in `04-FEATURES.md` without asking.
+- Don't change product copy without confirming — tone is deliberate.
+- Don't introduce new dependencies without discussion. Stack is intentionally boring.
+- Don't write motivational microcopy. ActOS is sober.
+- Don't add streaks, badges, celebrations, or gamification.
+- Don't add notifications, push, or email "engagement" features.
+- Don't suggest mobile-native — web-responsive is the v1 bet.
+- Don't propose AI features beyond Delegated status (AI execution is v2).
+- Don't break the mock-to-real swap pattern.
+- Don't use `console.log` in committed code (use it for debugging, remove before commit).
+
+## When in doubt
+
+Read the project knowledge files first (00-VISION through 11-CHANGELOG). They are the source of truth.
+
+If a request conflicts with the knowledge — flag it and ask before implementing. The PM (Stanislav) prefers explicit pushback over silent compliance with bad ideas.

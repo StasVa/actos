@@ -177,6 +177,7 @@ const App = () => (
             <Route path="announcements" element={<AdminAnnouncements />} />
           </Route>
           <Route path="/admin/components" element={<AdminComponents />} />
+          <Route path="/admin/manifesto" element={<RequireAdmin><AdminManifesto /></RequireAdmin>} />
 
           {/* Public + auth pages */}
           <Route path="/" element={<RedirectIfAuthed><Landing /></RedirectIfAuthed>} />

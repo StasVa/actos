@@ -6,66 +6,31 @@ import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight, ArrowUpRight, ChevronDown } from "lucide-react";
 import { LandingFooter } from "@/components/LandingChrome";
 
-type FaqItem =
-  | { kind: "item"; q: string; a: string }
-  | { kind: "link"; q: string; to: string };
+type FaqItem = { q: string; a: string };
 
 const FAQS: FaqItem[] = [
   {
-    kind: "link",
-    q: "Why tasks and issues stop you moving toward goals.",
-    to: "/manifesto",
-  },
-  {
-    kind: "item",
     q: "Why only 3 goals?",
     a: "Because almost no one actually moves more than 2 at a time. The cap isn't restrictive — it's protective. If you can't pick 3, you'll fail at all of them.",
   },
   {
-    kind: "item",
     q: "What if I have 200 things to do?",
     a: "ActOS isn't built for that load. Tasks unrelated to your 2-3 goals don't belong here. If you're juggling 200 items, the real question is why you took them all on.",
   },
   {
-    kind: "item",
     q: "Is this just another todo app?",
     a: "No. Todo apps optimize for capturing things to do. ActOS optimizes for moving toward things you decided matter. Different problem, different design.",
   },
   {
-    kind: "item",
     q: "Does it work on mobile?",
     a: "Yes. The web app works on phones today. Native iOS and Android apps come post-launch.",
   },
   {
-    kind: "item",
     q: "Why isn't it free forever?",
     a: "It is — to start. The Free tier is genuinely useful, not a limited demo. All-In is $12/mo for people ready to commit. We charge because focus is worth paying for, and we want to build sustainably without ads or VC pressure.",
   },
 ];
 
-const SectionHeading: React.FC<{ label: string }> = ({ label }) => (
-  <div className="flex flex-col items-center">
-    <div
-      style={{
-        fontFamily: '"JetBrains Mono", ui-monospace, monospace',
-        fontSize: 14,
-        textTransform: "uppercase",
-        letterSpacing: "0.08em",
-        color: "hsl(var(--text-tertiary))",
-      }}
-    >
-      {label}
-    </div>
-    <div
-      style={{
-        marginTop: 8,
-        width: 40,
-        height: 1,
-        background: "hsl(var(--border-subtle))",
-      }}
-    />
-  </div>
-);
 
 const TopBar: React.FC<{ scrolled: boolean }> = ({ scrolled }) => (
   <header
@@ -127,7 +92,7 @@ const Landing: React.FC = () => {
       {/* SCREEN 1: Hero + Demo in single 100vh */}
       <section
         className="relative flex flex-col items-center"
-        style={{ minHeight: "100vh", paddingTop: 80 }}
+        style={{ minHeight: "100vh", paddingTop: 80, paddingBottom: 60 }}
       >
         <div
           aria-hidden
@@ -272,54 +237,72 @@ const Landing: React.FC = () => {
         className="faq-section"
         style={{ background: "hsl(var(--surface-base))" }}
       >
-        <SectionHeading label="FAQ" />
-        <div className="faq-list">
-          {FAQS.map((item, i) => {
-            const isFirst = i === 0;
-            const borderTop = isFirst
-              ? "1px solid hsl(var(--border-subtle))"
-              : "none";
-            const borderBottom = "1px solid hsl(var(--border-subtle))";
+        <div className="text-center">
+          <h2
+            className="faq-heading-h2"
+            style={{
+              fontFamily: "Inter, system-ui, sans-serif",
+              fontSize: 36,
+              fontWeight: 500,
+              color: "hsl(var(--text-primary))",
+              lineHeight: 1.2,
+              margin: 0,
+            }}
+          >
+            Questions, answered.
+          </h2>
+          <div
+            style={{
+              width: 40,
+              height: 1,
+              background: "hsl(var(--border-subtle))",
+              margin: "24px auto 0",
+            }}
+          />
+        </div>
 
-            if (item.kind === "link") {
-              return (
-                <Link
-                  key={i}
-                  to={item.to}
-                  className="faq-item faq-link-row"
-                  style={{
-                    borderTop,
-                    borderBottom,
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    padding: "28px 16px",
-                    margin: "0 -16px",
-                    textDecoration: "none",
-                    cursor: "pointer",
-                    borderRadius: 4,
-                  }}
-                >
-                  <span
-                    className="faq-link-text"
-                    style={{
-                      fontFamily: "Inter, system-ui, sans-serif",
-                      fontSize: 18,
-                      fontWeight: 500,
-                      color: "hsl(var(--text-secondary))",
-                    }}
-                  >
-                    {item.q}
-                  </span>
-                  <ArrowUpRight
-                    size={20}
-                    strokeWidth={1.5}
-                    color="hsl(var(--text-tertiary))"
-                    style={{ flexShrink: 0, marginLeft: 16 }}
-                  />
-                </Link>
-              );
-            }
+        <Link
+          to="/manifesto"
+          className="manifesto-link"
+          style={{
+            display: "block",
+            textAlign: "center",
+            margin: "64px auto 0",
+            maxWidth: 480,
+            textDecoration: "none",
+          }}
+        >
+          <span
+            className="manifesto-link-text"
+            style={{
+              fontFamily: "Inter, system-ui, sans-serif",
+              fontSize: 18,
+              fontWeight: 500,
+              color: "hsl(var(--text-primary))",
+              transition: "color 200ms ease",
+            }}
+          >
+            Why tasks and issues stop you moving toward goals.
+          </span>
+          <ArrowUpRight
+            size={16}
+            strokeWidth={1.5}
+            className="manifesto-arrow"
+            style={{
+              display: "inline-block",
+              marginLeft: 8,
+              verticalAlign: "middle",
+              color: "hsl(var(--goal-2))",
+              transition: "filter 200ms ease",
+            }}
+          />
+        </Link>
+
+        <div className="faq-list" style={{ marginTop: 48 }}>
+          {FAQS.map((item, i) => {
+            const borderTop =
+              i === 0 ? "1px solid hsl(var(--border-subtle))" : "none";
+            const borderBottom = "1px solid hsl(var(--border-subtle))";
 
             const open = openFaq === i;
             return (
@@ -434,14 +417,15 @@ const Landing: React.FC = () => {
           top: 0;
           left: 50%;
           transform: translateX(-50%);
-          width: 600px;
-          height: 400px;
+          width: 800px;
+          height: 500px;
           background: radial-gradient(
-            ellipse 600px 400px at center,
-            rgba(212, 136, 74, 0.06) 0%,
+            ellipse 800px 500px at center,
+            rgba(212, 136, 74, 0.10) 0%,
+            rgba(212, 136, 74, 0.04) 40%,
             transparent 70%
           );
-          margin-top: 25vh;
+          margin-top: 15vh;
         }
 
         /* SCROLL HINT */
@@ -600,14 +584,14 @@ const Landing: React.FC = () => {
         }
 
         /* FAQ */
-        .faq-section { padding: 120px 24px 120px; }
-        .faq-list { max-width: 720px; margin: 80px auto 0; }
-        .faq-link-row { transition: background 160ms ease; }
-        .faq-link-row:hover { background: hsl(var(--surface-raised)); }
-        .faq-link-row:hover .faq-link-text { color: hsl(var(--text-primary)) !important; }
+        .faq-section { padding: 60px 24px 120px; }
+        .faq-list { max-width: 720px; margin: 0 auto; }
+        .faq-heading-h2 { font-size: 36px; }
+        .manifesto-link:hover .manifesto-link-text { color: hsl(var(--goal-2)) !important; }
+        .manifesto-link:hover .manifesto-arrow { filter: brightness(1.1); }
         @media (max-width: 768px) {
-          .faq-section { padding: 80px 24px 80px; }
-          .faq-list { margin-top: 64px; }
+          .faq-section { padding: 48px 24px 80px; }
+          .faq-heading-h2 { font-size: 28px; }
         }
       `}</style>
     </div>

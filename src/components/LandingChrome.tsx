@@ -22,6 +22,8 @@ const FooterLink: React.FC<{ to: string; children: React.ReactNode }> = ({ to, c
 );
 
 const LanguageSwitcher: React.FC = () => {
+  const { i18n } = useTranslation();
+
   const changeLang = (lang: string) => {
     i18n.changeLanguage(lang);
     localStorage.setItem("actos.i18n.language", lang);

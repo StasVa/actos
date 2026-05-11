@@ -218,6 +218,8 @@ export const UserMenu: React.FC<{ collapsed: boolean }> = ({ collapsed }) => {
           </button>
         </PopoverContent>
       </Popover>
+    </>
+  );
 };
 
 export default UserMenu;

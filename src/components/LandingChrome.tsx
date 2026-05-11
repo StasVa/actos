@@ -23,33 +23,32 @@ export const LandingTopBar: React.FC<{ logoIsHome?: boolean }> = ({ logoIsHome }
     </span>
   );
 
+  const navLinkStyle = (href: string): React.CSSProperties => ({
+    fontFamily: "Inter, system-ui, sans-serif",
+    fontSize: 14,
+    color: pathname === href ? "hsl(var(--text-primary))" : "hsl(var(--text-secondary))",
+    textDecoration: "none",
+  });
+
   return (
     <>
       <div className="landing-topbar-logo">
         {onLanding ? Logo : <Link to="/" aria-label="ActOS home">{Logo}</Link>}
       </div>
-      <div className="landing-topbar-signin">
-        <Link
-          to="/login"
-          className="signin-link"
-          style={{
-            fontFamily: "Inter, system-ui, sans-serif",
-            fontSize: 14,
-            color: "hsl(var(--text-secondary))",
-            textDecoration: "none",
-          }}
-        >
-          Sign in
-        </Link>
-      </div>
+      <nav className="landing-topbar-nav">
+        <Link to="/manifesto" className="topbar-link topbar-desktop-only" style={navLinkStyle("/manifesto")}>Manifesto</Link>
+        <Link to="/pricing" className="topbar-link topbar-desktop-only" style={navLinkStyle("/pricing")}>Pricing</Link>
+        <Link to="/login" className="topbar-link" style={navLinkStyle("/login")}>Sign in</Link>
+      </nav>
       <style>{`
         .landing-topbar-logo { position: absolute; top: 32px; left: 32px; z-index: 2; }
-        .landing-topbar-signin { position: absolute; top: 32px; right: 32px; z-index: 2; }
+        .landing-topbar-nav { position: absolute; top: 32px; right: 32px; z-index: 2; display: flex; align-items: center; gap: 32px; }
         @media (max-width: 768px) {
           .landing-topbar-logo { top: 16px; left: 16px; }
-          .landing-topbar-signin { top: 16px; right: 16px; }
+          .landing-topbar-nav { top: 16px; right: 16px; gap: 16px; }
+          .topbar-desktop-only { display: none; }
         }
-        .signin-link:hover { color: hsl(var(--text-primary)) !important; }
+        .topbar-link:hover { color: hsl(var(--text-primary)) !important; }
       `}</style>
     </>
   );

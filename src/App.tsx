@@ -2,7 +2,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { BrowserRouter, Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
-import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index.tsx";
 import Progress from "./pages/Progress.tsx";
@@ -34,7 +33,6 @@ import Landing from "./pages/Landing.tsx";
 import AdminManifesto from "./pages/AdminManifesto.tsx";
 import Pricing from "./pages/Pricing.tsx";
 import Manifesto from "./pages/Manifesto.tsx";
-import Login from "./pages/Login.tsx";
 import Auth from "./pages/Auth.tsx";
 import AuthVerify from "./pages/AuthVerify.tsx";
 import AuthReset from "./pages/AuthReset.tsx";
@@ -143,7 +141,6 @@ const NoGoalsGate: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
       <Sonner position="bottom-right" />
       <BrowserRouter>
         <AuthProvider>
@@ -184,7 +181,7 @@ const App = () => (
           <Route path="/start" element={<Navigate to="/" replace />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/manifesto" element={<Manifesto />} />
-          <Route path="/login" element={<RedirectIfAuthed><Login /></RedirectIfAuthed>} />
+          <Route path="/login" element={<Navigate to="/auth" replace />} />
           <Route path="/auth" element={<RedirectIfAuthed><Auth /></RedirectIfAuthed>} />
           <Route path="/auth/verify" element={<AuthVerify />} />
           <Route path="/auth/reset" element={<AuthReset />} />

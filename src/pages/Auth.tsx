@@ -232,6 +232,7 @@ const Modal: React.FC<{ open: boolean; onClose: () => void; children: React.Reac
 const Auth: React.FC = () => {
   const [params] = useSearchParams();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { signIn, signUp } = useAuth();
   const [mode, setMode] = useState<Mode>("signin");
   const [name, setName] = useState("");
@@ -319,9 +320,10 @@ const Auth: React.FC = () => {
     }
   };
 
-  const heading = mode === "signin" ? "Welcome back." : "Let’s get you set up.";
-  const subline = mode === "signin" ? "Open ActOS in a few seconds." : "Set up your account in 30 seconds.";
-  const submitLabel = mode === "signin" ? "Sign in" : "Create account";
+  const heading = mode === "signin" ? t("auth.signin.heading") : t("auth.signup.heading");
+  const subline = mode === "signin" ? t("auth.signin.subline") : t("auth.signup.subline");
+  const submitLabel = mode === "signin" ? t("auth.signin.submitButton") : t("auth.signup.submitButton");
+  const loadingLabel = mode === "signin" ? t("auth.button.signingIn") : t("auth.button.creating");
 
   return (
     <AuthPageShell>

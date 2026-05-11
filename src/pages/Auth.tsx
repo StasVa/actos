@@ -476,11 +476,7 @@ const Auth: React.FC = () => {
               Already have an account?{" "}
               <button
                 type="button"
-                onClick={() => {
-                  setMode("signin");
-                  setErrors({});
-                  setSubmitErr(null);
-                }}
+                onClick={() => switchMode("signin")}
                 style={{ background: "none", border: "none", padding: 0, color: "hsl(var(--goal-2))", cursor: "pointer", fontSize: 14, fontWeight: 500 }}
               >
                 Sign in

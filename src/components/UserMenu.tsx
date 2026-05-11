@@ -63,11 +63,11 @@ export const UserMenu: React.FC<{ collapsed: boolean }> = ({ collapsed }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const settings = useStore((s) => s.settings);
+  const { user, signOut } = useAuth();
   const [open, setOpen] = React.useState(false);
-  const [confirmSignOut, setConfirmSignOut] = React.useState(false);
 
-  const email = settings.userEmail ?? "ak@email";
-  const name = settings.userName ?? email.split("@")[0];
+  const email = user?.email ?? settings.userEmail ?? "ak@email";
+  const name = user?.name ?? settings.userName ?? email.split("@")[0];
   const tier: "free" | "all-in" = settings.subscriptionTier === "all-in" ? "all-in" : "free";
 
   const goto = (path: string) => {

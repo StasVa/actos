@@ -106,6 +106,7 @@ const ChromeOnlyOutsideSetup: React.FC<{ children: React.ReactNode }> = ({ child
   if (pathname.startsWith("/start")) return null;
   if (pathname.startsWith("/manifesto")) return null;
   if (pathname.startsWith("/login")) return null;
+  if (pathname.startsWith("/auth")) return null;
   if (pathname.startsWith("/legal")) return null;
   if (pathname.startsWith("/setup")) return null;
   if (pathname.startsWith("/onboarding")) return null;

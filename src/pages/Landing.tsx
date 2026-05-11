@@ -97,9 +97,9 @@ const Landing: React.FC = () => {
               margin: 0,
             }}
           >
-            Stop scheduling.
+            {t("landing.hero.headlineLine1")}
             <br />
-            Start moving.
+            {t("landing.hero.headlineLine2")}
           </h1>
           <p
             className="hero-sub"
@@ -110,7 +110,7 @@ const Landing: React.FC = () => {
               margin: "16px 0 0",
             }}
           >
-            The OS for getting things done.
+            {t("landing.hero.subline")}
           </p>
           <button
             type="button"
@@ -135,7 +135,7 @@ const Landing: React.FC = () => {
             onMouseEnter={(e) => (e.currentTarget.style.filter = "brightness(1.1)")}
             onMouseLeave={(e) => (e.currentTarget.style.filter = "")}
           >
-            Open ActOS
+            {t("landing.hero.cta")}
             <ArrowRight size={16} />
           </button>
         </div>
@@ -230,7 +230,7 @@ const Landing: React.FC = () => {
               margin: 0,
             }}
           >
-            Questions, answered.
+            {t("landing.faq.heading")}
           </h2>
           <div
             style={{
@@ -263,7 +263,7 @@ const Landing: React.FC = () => {
               transition: "color 200ms ease",
             }}
           >
-            Why tasks and issues stop you moving toward goals.
+            {t("landing.faq.manifestoLink")}
           </span>
           <ArrowUpRight
             size={16}

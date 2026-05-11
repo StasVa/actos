@@ -187,6 +187,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isAuthenticated: !!user,
       pendingVerification,
       signUp,
+      completeSignup,
       signIn,
       signOut,
       markEmailVerified,
@@ -194,7 +195,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       resendVerification,
       resetPassword,
     }),
-    [user, pendingVerification, signUp, signIn, signOut, markEmailVerified, setAdmin, resendVerification, resetPassword],
+    [user, pendingVerification, signUp, completeSignup, signIn, signOut, markEmailVerified, setAdmin, resendVerification, resetPassword],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

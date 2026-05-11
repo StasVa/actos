@@ -6,9 +6,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight, ArrowUpRight, ChevronDown } from "lucide-react";
 import { LandingFooter } from "@/components/LandingChrome";
 
-type FaqItem =
-  | { kind: "item"; q: string; a: string }
-  | { kind: "link"; q: string; to: string };
+type FaqItem = { q: string; a: string };
 
 const FAQS: FaqItem[] = [
   {

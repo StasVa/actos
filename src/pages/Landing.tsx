@@ -267,54 +267,72 @@ const Landing: React.FC = () => {
         className="faq-section"
         style={{ background: "hsl(var(--surface-base))" }}
       >
-        <SectionHeading label="FAQ" />
-        <div className="faq-list">
-          {FAQS.map((item, i) => {
-            const isFirst = i === 0;
-            const borderTop = isFirst
-              ? "1px solid hsl(var(--border-subtle))"
-              : "none";
-            const borderBottom = "1px solid hsl(var(--border-subtle))";
+        <div className="text-center">
+          <h2
+            className="faq-heading-h2"
+            style={{
+              fontFamily: "Inter, system-ui, sans-serif",
+              fontSize: 36,
+              fontWeight: 500,
+              color: "hsl(var(--text-primary))",
+              lineHeight: 1.2,
+              margin: 0,
+            }}
+          >
+            Questions, answered.
+          </h2>
+          <div
+            style={{
+              width: 40,
+              height: 1,
+              background: "hsl(var(--border-subtle))",
+              margin: "24px auto 0",
+            }}
+          />
+        </div>
 
-            if (item.kind === "link") {
-              return (
-                <Link
-                  key={i}
-                  to={item.to}
-                  className="faq-item faq-link-row"
-                  style={{
-                    borderTop,
-                    borderBottom,
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    padding: "28px 16px",
-                    margin: "0 -16px",
-                    textDecoration: "none",
-                    cursor: "pointer",
-                    borderRadius: 4,
-                  }}
-                >
-                  <span
-                    className="faq-link-text"
-                    style={{
-                      fontFamily: "Inter, system-ui, sans-serif",
-                      fontSize: 18,
-                      fontWeight: 500,
-                      color: "hsl(var(--text-secondary))",
-                    }}
-                  >
-                    {item.q}
-                  </span>
-                  <ArrowUpRight
-                    size={20}
-                    strokeWidth={1.5}
-                    color="hsl(var(--text-tertiary))"
-                    style={{ flexShrink: 0, marginLeft: 16 }}
-                  />
-                </Link>
-              );
-            }
+        <Link
+          to="/manifesto"
+          className="manifesto-link"
+          style={{
+            display: "block",
+            textAlign: "center",
+            margin: "64px auto 0",
+            maxWidth: 480,
+            textDecoration: "none",
+          }}
+        >
+          <span
+            className="manifesto-link-text"
+            style={{
+              fontFamily: "Inter, system-ui, sans-serif",
+              fontSize: 18,
+              fontWeight: 500,
+              color: "hsl(var(--text-primary))",
+              transition: "color 200ms ease",
+            }}
+          >
+            Why tasks and issues stop you moving toward goals.
+          </span>
+          <ArrowUpRight
+            size={16}
+            strokeWidth={1.5}
+            className="manifesto-arrow"
+            style={{
+              display: "inline-block",
+              marginLeft: 8,
+              verticalAlign: "middle",
+              color: "hsl(var(--goal-2))",
+              transition: "filter 200ms ease",
+            }}
+          />
+        </Link>
+
+        <div className="faq-list" style={{ marginTop: 48 }}>
+          {FAQS.map((item, i) => {
+            const borderTop =
+              i === 0 ? "1px solid hsl(var(--border-subtle))" : "none";
+            const borderBottom = "1px solid hsl(var(--border-subtle))";
 
             const open = openFaq === i;
             return (

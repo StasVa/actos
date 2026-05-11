@@ -60,7 +60,7 @@ export const EmailVerificationBanner: React.FC = () => {
         <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
           <Mail size={16} color="hsl(var(--goal-2))" />
           <span style={{ fontSize: 14, color: "hsl(var(--text-primary))" }}>
-            Verify your email to keep your account.
+            {t("auth.banner.verify")}
           </span>
           <button
             type="button"
@@ -75,7 +75,7 @@ export const EmailVerificationBanner: React.FC = () => {
               cursor: "pointer",
             }}
           >
-            Resend email →
+            {t("auth.banner.resend")}
           </button>
         </div>
         <div>
@@ -93,7 +93,7 @@ export const EmailVerificationBanner: React.FC = () => {
                 cursor: "pointer",
               }}
             >
-              Dismiss
+              {t("auth.banner.dismiss")}
             </button>
           ) : (
             <button
@@ -110,7 +110,7 @@ export const EmailVerificationBanner: React.FC = () => {
                 cursor: "pointer",
               }}
             >
-              Verify now
+              {t("auth.banner.verifyNow")}
             </button>
           )}
         </div>
@@ -146,9 +146,9 @@ export const EmailVerificationBanner: React.FC = () => {
               fontFamily: "Inter, system-ui, sans-serif",
             }}
           >
-            <div style={{ fontSize: 18, fontWeight: 500, marginBottom: 8 }}>Coming soon</div>
+            <div style={{ fontSize: 18, fontWeight: 500, marginBottom: 8 }}>{t("auth.banner.verifyNowModalTitle")}</div>
             <div style={{ fontSize: 14, color: "hsl(var(--text-secondary))", marginBottom: 24 }}>
-              Real verification flow in progress.
+              {t("auth.banner.verifyNowModalBody")}
             </div>
             <button
               type="button"
@@ -164,7 +164,7 @@ export const EmailVerificationBanner: React.FC = () => {
                 cursor: "pointer",
               }}
             >
-              OK
+              {t("auth.banner.verifyNowModalOk")}
             </button>
           </div>
         </div>

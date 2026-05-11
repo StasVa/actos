@@ -206,7 +206,9 @@ export const UserMenu: React.FC<{ collapsed: boolean }> = ({ collapsed }) => {
             type="button"
             onClick={() => {
               setOpen(false);
-              setConfirmSignOut(true);
+              signOut();
+              toast.success(t("signOut.toast"));
+              navigate("/", { replace: true });
             }}
             className="w-full flex items-center gap-[10px] hover:bg-surface-hover transition-colors text-left group"
             style={{ padding: "8px 14px" }}
@@ -216,21 +218,6 @@ export const UserMenu: React.FC<{ collapsed: boolean }> = ({ collapsed }) => {
           </button>
         </PopoverContent>
       </Popover>
-
-      <ConfirmModal
-        open={confirmSignOut}
-        title={t("signOut.heading")}
-        body={t("signOut.body")}
-        cancelLabel={t("common.cancel")}
-        confirmLabel={t("common.signOut")}
-        onCancel={() => setConfirmSignOut(false)}
-        onConfirm={() => {
-          setConfirmSignOut(false);
-          toast.success(t("signOut.toast"));
-        }}
-      />
-    </>
-  );
 };
 
 export default UserMenu;

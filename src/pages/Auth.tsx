@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
+import { AuthFooter } from "@/components/LandingChrome";
 import { EMAIL_RE, useAuth } from "@/lib/useAuth";
 
 type Mode = "signin" | "signup";
@@ -34,7 +35,6 @@ export const AuthPageShell: React.FC<{ children: React.ReactNode }> = ({ childre
       minHeight: "100vh",
       background: "hsl(var(--surface-base))",
       fontFamily: "Inter, system-ui, sans-serif",
-      position: "relative",
       display: "flex",
       flexDirection: "column",
     }}
@@ -48,36 +48,35 @@ export const AuthPageShell: React.FC<{ children: React.ReactNode }> = ({ childre
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        padding: "32px 24px 96px",
+        padding: "32px 24px 24px",
       }}
     >
       {children}
     </div>
-    <Link
-      to="/"
-      className="auth-back-link"
-      style={{
-        position: "absolute",
-        bottom: 32,
-        left: 32,
-        fontSize: 14,
-        color: "hsl(var(--text-tertiary))",
-        textDecoration: "none",
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 6,
-      }}
-    >
-      <ArrowLeft size={14} className="auth-back-arrow" />
-      {t("auth.logo.backToHome").replace(/^←\s*/, "")}
-    </Link>
+    <div style={{ padding: "0 32px 8px" }}>
+      <Link
+        to="/"
+        className="auth-back-link"
+        style={{
+          fontSize: 14,
+          color: "hsl(var(--text-tertiary))",
+          textDecoration: "none",
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 6,
+        }}
+      >
+        <ArrowLeft size={14} className="auth-back-arrow" />
+        {t("auth.logo.backToHome").replace(/^←\s*/, "")}
+      </Link>
+    </div>
+    <AuthFooter />
     <style>{`
       .auth-back-link:hover { color: hsl(var(--text-secondary)) !important; }
       .auth-back-link:hover .auth-back-arrow { transform: translateX(-2px); }
       .auth-back-arrow { transition: transform 150ms ease; }
       @media (max-width: 640px) {
         .auth-logo { font-size: 24px !important; }
-        .auth-back-link-pos { bottom: 16px !important; left: 16px !important; }
       }
     `}</style>
   </div>

@@ -60,31 +60,34 @@ const LanguageSwitcher: React.FC = () => {
   );
 };
 
-const FooterSubRow: React.FC = () => (
-  <div
-    className="footer-subrow"
-    style={{
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      flexWrap: "wrap",
-      gap: 0,
-      marginTop: 8,
-    }}
-  >
-    <div className="footer-links-cluster" style={{ display: "flex", alignItems: "center" }}>
-      <FooterLink to="/manifesto">Manifesto</FooterLink>
-      <Sep />
-      <FooterLink to="/pricing">Pricing</FooterLink>
-      <Sep />
-      <FooterLink to="/legal/privacy">Privacy</FooterLink>
-      <Sep />
-      <FooterLink to="/legal/terms">Terms</FooterLink>
+const FooterSubRow: React.FC = () => {
+  const { t } = useTranslation();
+  return (
+    <div
+      className="footer-subrow"
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        flexWrap: "wrap",
+        gap: 0,
+        marginTop: 8,
+      }}
+    >
+      <div className="footer-links-cluster" style={{ display: "flex", alignItems: "center" }}>
+        <FooterLink to="/manifesto">{t("publicFooter.manifesto")}</FooterLink>
+        <Sep />
+        <FooterLink to="/pricing">{t("publicFooter.pricing")}</FooterLink>
+        <Sep />
+        <FooterLink to="/legal/privacy">{t("publicFooter.privacy")}</FooterLink>
+        <Sep />
+        <FooterLink to="/legal/terms">{t("publicFooter.terms")}</FooterLink>
+      </div>
+      <span className="footer-cluster-divider" aria-hidden="true" style={{ display: "inline-block" }} />
+      <LanguageSwitcher />
     </div>
-    <span className="footer-cluster-divider" aria-hidden="true" style={{ display: "inline-block" }} />
-    <LanguageSwitcher />
-  </div>
-);
+  );
+};
 
 export const LandingTopBar: React.FC<{ logoIsHome?: boolean }> = ({ logoIsHome }) => {
   const { pathname } = useLocation();

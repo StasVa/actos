@@ -21,3 +21,16 @@ export const RedirectIfAuthed: React.FC<{ children: React.ReactNode; to?: string
   if (isAuthenticated) return <Navigate to={to} replace />;
   return <>{children}</>;
 };
+
+// Requires both auth + isAdmin flag. Non-admins are bounced to /today
+// (rather than an error page) so the route's existence isn't disclosed.
+export const RequireAdmin: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isAuthenticated, user } = useAuth();
+  const location = useLocation();
+  if (!isAuthenticated) {
+    const next = encodeURIComponent(location.pathname + location.search);
+    return <Navigate to={`/auth?next=${next}`} replace />;
+  }
+  if (!user?.isAdmin) return <Navigate to="/today" replace />;
+  return <>{children}</>;
+};

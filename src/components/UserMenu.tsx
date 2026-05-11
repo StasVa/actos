@@ -4,8 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { Sparkles, LogOut, Wrench, HelpCircle } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { ConfirmModal } from "@/components/ConfirmModal";
 import { useStore } from "@/store/useStore";
+import { useAuth } from "@/lib/useAuth";
 import { toast } from "sonner";
 
 function initials(name: string): string {
@@ -63,11 +63,11 @@ export const UserMenu: React.FC<{ collapsed: boolean }> = ({ collapsed }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const settings = useStore((s) => s.settings);
+  const { user, signOut } = useAuth();
   const [open, setOpen] = React.useState(false);
-  const [confirmSignOut, setConfirmSignOut] = React.useState(false);
 
-  const email = settings.userEmail ?? "ak@email";
-  const name = settings.userName ?? email.split("@")[0];
+  const email = user?.email ?? settings.userEmail ?? "ak@email";
+  const name = user?.name ?? settings.userName ?? email.split("@")[0];
   const tier: "free" | "all-in" = settings.subscriptionTier === "all-in" ? "all-in" : "free";
 
   const goto = (path: string) => {
@@ -206,7 +206,9 @@ export const UserMenu: React.FC<{ collapsed: boolean }> = ({ collapsed }) => {
             type="button"
             onClick={() => {
               setOpen(false);
-              setConfirmSignOut(true);
+              signOut();
+              toast.success(t("signOut.toast"));
+              navigate("/", { replace: true });
             }}
             className="w-full flex items-center gap-[10px] hover:bg-surface-hover transition-colors text-left group"
             style={{ padding: "8px 14px" }}
@@ -216,19 +218,6 @@ export const UserMenu: React.FC<{ collapsed: boolean }> = ({ collapsed }) => {
           </button>
         </PopoverContent>
       </Popover>
-
-      <ConfirmModal
-        open={confirmSignOut}
-        title={t("signOut.heading")}
-        body={t("signOut.body")}
-        cancelLabel={t("common.cancel")}
-        confirmLabel={t("common.signOut")}
-        onCancel={() => setConfirmSignOut(false)}
-        onConfirm={() => {
-          setConfirmSignOut(false);
-          toast.success(t("signOut.toast"));
-        }}
-      />
     </>
   );
 };

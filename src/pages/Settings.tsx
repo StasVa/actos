@@ -8,6 +8,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { PageHeader } from "@/components/PageHeader";
 import { useStore } from "@/store/useStore";
 import { useThemeChoice, type ThemeChoice } from "@/lib/theme";
+import { useAuth } from "@/lib/useAuth";
 import { toast } from "sonner";
 
 const STORAGE_KEY = "actos-store";
@@ -74,6 +75,7 @@ export default function Settings() {
   const setShowAdminTools = useStore((s) => s.setShowAdminTools);
   const setSubscriptionTier = useStore((s) => s.setSubscriptionTier);
   const resetToSeed = useStore((s) => s.resetToSeed);
+  const { user, markEmailVerified } = useAuth();
   const clearSampleData = useStore((s) => s.clearSampleData);
   const hasSample = useStore((s) =>
     s.goals.some((g) => g.isSample) ||
@@ -139,8 +141,25 @@ export default function Settings() {
               {t("settings.account.heading").toUpperCase()}
             </div>
             <div className="text-[13px] text-text-secondary mb-4">
-              {t("settings.account.signedInAs")} <span className="text-text-primary">{settings.userEmail ?? "ak@email"}</span>
+              {t("settings.account.signedInAs")} <span className="text-text-primary">{user?.email ?? settings.userEmail ?? "ak@email"}</span>
+              {user && (
+                <span className="ml-2 text-text-tertiary">
+                  · {user.emailVerified ? "verified" : "unverified"}
+                </span>
+              )}
             </div>
+            {user && !user.emailVerified && (
+              <button
+                type="button"
+                onClick={() => {
+                  markEmailVerified();
+                  toast.success("Email marked as verified");
+                }}
+                className="mb-4 h-9 px-4 text-[13px] font-medium rounded-[4px] border border-border-default text-text-primary hover:border-[hsl(var(--accent))] hover:bg-surface-hover transition-colors"
+              >
+                Mark email verified (debug)
+              </button>
+            )}
 
             {/* Demo controls */}
             <div

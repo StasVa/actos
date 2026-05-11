@@ -35,6 +35,11 @@ import Start from "./pages/Start.tsx";
 import Pricing from "./pages/Pricing.tsx";
 import Manifesto from "./pages/Manifesto.tsx";
 import Login from "./pages/Login.tsx";
+import Auth from "./pages/Auth.tsx";
+import AuthReset from "./pages/AuthReset.tsx";
+import { AuthProvider } from "./lib/useAuth";
+import { RequireAuth, RedirectIfAuthed } from "./components/AuthRoute";
+import { EmailVerificationBanner } from "./components/EmailVerificationBanner";
 import { LegalPrivacy, LegalTerms } from "./pages/LegalPlaceholder.tsx";
 import { NoGoalsLayout } from "./components/NoGoalsLayout";
 import { useStore } from "./store/useStore";
@@ -83,6 +88,7 @@ const SetupGuard = () => {
     if (location.pathname.startsWith("/start")) return;
     if (location.pathname.startsWith("/manifesto")) return;
     if (location.pathname.startsWith("/login")) return;
+    if (location.pathname.startsWith("/auth")) return;
     if (location.pathname.startsWith("/legal")) return;
     if (location.pathname.startsWith("/setup")) return;
     if (location.pathname.startsWith("/onboarding")) return;
@@ -100,6 +106,7 @@ const ChromeOnlyOutsideSetup: React.FC<{ children: React.ReactNode }> = ({ child
   if (pathname.startsWith("/start")) return null;
   if (pathname.startsWith("/manifesto")) return null;
   if (pathname.startsWith("/login")) return null;
+  if (pathname.startsWith("/auth")) return null;
   if (pathname.startsWith("/legal")) return null;
   if (pathname.startsWith("/setup")) return null;
   if (pathname.startsWith("/onboarding")) return null;
@@ -123,6 +130,7 @@ const NoGoalsGate: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     pathname.startsWith("/start") ||
     pathname.startsWith("/manifesto") ||
     pathname.startsWith("/login") ||
+    pathname.startsWith("/auth") ||
     pathname.startsWith("/legal") ||
     pathname.startsWith("/setup") ||
     pathname.startsWith("/admin") ||
@@ -138,8 +146,10 @@ const App = () => (
       <Toaster />
       <Sonner position="bottom-right" />
       <BrowserRouter>
+        <AuthProvider>
         <SetupGuard />
         <ChromeOnlyOutsideSetup>
+          <EmailVerificationBanner />
           <ActionEditor />
           <GoalEditor />
           <RitualEditor />
@@ -152,9 +162,9 @@ const App = () => (
         </ChromeOnlyOutsideSetup>
         <NoGoalsGate>
         <Routes>
-          {/* Setup wizard (no chrome) */}
-          <Route path="/setup" element={<Setup />} />
-          <Route path="/onboarding/goal" element={<GoalBuilder />} />
+          {/* Setup wizard (no chrome) — gated */}
+          <Route path="/setup" element={<RequireAuth><Setup /></RequireAuth>} />
+          <Route path="/onboarding/goal" element={<RequireAuth><GoalBuilder /></RequireAuth>} />
 
           {/* Admin */}
           <Route path="/admin" element={<AdminLayout />}>
@@ -168,12 +178,14 @@ const App = () => (
           </Route>
           <Route path="/admin/components" element={<AdminComponents />} />
 
-          {/* Default + legacy redirects */}
-          <Route path="/" element={<Landing />} />
+          {/* Public + auth pages */}
+          <Route path="/" element={<RedirectIfAuthed><Landing /></RedirectIfAuthed>} />
           <Route path="/start" element={<Start />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/manifesto" element={<Manifesto />} />
-          <Route path="/login" element={<Login />} />
+          <Route path="/login" element={<RedirectIfAuthed><Login /></RedirectIfAuthed>} />
+          <Route path="/auth" element={<RedirectIfAuthed><Auth /></RedirectIfAuthed>} />
+          <Route path="/auth/reset" element={<AuthReset />} />
           <Route path="/legal/privacy" element={<LegalPrivacy />} />
           <Route path="/legal/terms" element={<LegalTerms />} />
           <Route path="/home" element={<Navigate to="/today" replace />} />
@@ -181,35 +193,36 @@ const App = () => (
           <Route path="/all-projects" element={<Navigate to="/projects" replace />} />
           <Route path="/all-delegated" element={<Navigate to="/delegated" replace />} />
 
-          {/* Primary routes */}
-          <Route path="/today" element={<Index />} />
-          <Route path="/progress" element={<Progress />} />
-          <Route path="/goals" element={<Goals />} />
-          <Route path="/goals/:id" element={<GoalDetail />} />
-          <Route path="/projects" element={<AllProjects />} />
-          <Route path="/projects/:id" element={<ProjectDetail />} />
-          <Route path="/actions" element={<AllActions />} />
-          <Route path="/delegated" element={<AllDelegated />} />
-          <Route path="/rituals" element={<Rituals />} />
-          <Route path="/ideas" element={<Ideas />} />
-          <Route path="/sessions" element={<Sessions />} />
-          <Route path="/sessions/new" element={<SessionBuilder />} />
-          <Route path="/sessions/active" element={<SessionActive />} />
-          <Route path="/sessions/:sessionId/summary" element={<SessionSummary />} />
+          {/* Primary routes — all gated */}
+          <Route path="/today" element={<RequireAuth><Index /></RequireAuth>} />
+          <Route path="/progress" element={<RequireAuth><Progress /></RequireAuth>} />
+          <Route path="/goals" element={<RequireAuth><Goals /></RequireAuth>} />
+          <Route path="/goals/:id" element={<RequireAuth><GoalDetail /></RequireAuth>} />
+          <Route path="/projects" element={<RequireAuth><AllProjects /></RequireAuth>} />
+          <Route path="/projects/:id" element={<RequireAuth><ProjectDetail /></RequireAuth>} />
+          <Route path="/actions" element={<RequireAuth><AllActions /></RequireAuth>} />
+          <Route path="/delegated" element={<RequireAuth><AllDelegated /></RequireAuth>} />
+          <Route path="/rituals" element={<RequireAuth><Rituals /></RequireAuth>} />
+          <Route path="/ideas" element={<RequireAuth><Ideas /></RequireAuth>} />
+          <Route path="/sessions" element={<RequireAuth><Sessions /></RequireAuth>} />
+          <Route path="/sessions/new" element={<RequireAuth><SessionBuilder /></RequireAuth>} />
+          <Route path="/sessions/active" element={<RequireAuth><SessionActive /></RequireAuth>} />
+          <Route path="/sessions/:sessionId/summary" element={<RequireAuth><SessionSummary /></RequireAuth>} />
           <Route path="/reviews" element={<Navigate to="/reviews/days" replace />} />
-          <Route path="/reviews/days" element={<ReviewsDays />} />
-          <Route path="/reviews/days/:date" element={<ReviewDayDetail />} />
-          <Route path="/reviews/weeks" element={<ReviewsWeeks />} />
-          <Route path="/reviews/weeks/:yearWeek" element={<ReviewWeekDetail />} />
-          <Route path="/reviews/months" element={<ReviewsMonths />} />
-          <Route path="/reviews/months/:yearMonth" element={<ReviewMonthDetail />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/settings/subscription" element={<SettingsSubscription />} />
+          <Route path="/reviews/days" element={<RequireAuth><ReviewsDays /></RequireAuth>} />
+          <Route path="/reviews/days/:date" element={<RequireAuth><ReviewDayDetail /></RequireAuth>} />
+          <Route path="/reviews/weeks" element={<RequireAuth><ReviewsWeeks /></RequireAuth>} />
+          <Route path="/reviews/weeks/:yearWeek" element={<RequireAuth><ReviewWeekDetail /></RequireAuth>} />
+          <Route path="/reviews/months" element={<RequireAuth><ReviewsMonths /></RequireAuth>} />
+          <Route path="/reviews/months/:yearMonth" element={<RequireAuth><ReviewMonthDetail /></RequireAuth>} />
+          <Route path="/settings" element={<RequireAuth><Settings /></RequireAuth>} />
+          <Route path="/settings/subscription" element={<RequireAuth><SettingsSubscription /></RequireAuth>} />
 
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
         </NoGoalsGate>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

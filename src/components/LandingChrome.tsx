@@ -1,10 +1,12 @@
 // Shared top bar + footer for public pages (landing, manifesto, etc.).
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Github, Linkedin, Twitter } from "lucide-react";
 
 export const LandingTopBar: React.FC<{ logoIsHome?: boolean }> = ({ logoIsHome }) => {
   const { pathname } = useLocation();
+  const { t } = useTranslation();
   const onLanding = pathname === "/";
   const logoStyle: React.CSSProperties = {
     fontFamily: "Inter, system-ui, sans-serif",
@@ -36,9 +38,9 @@ export const LandingTopBar: React.FC<{ logoIsHome?: boolean }> = ({ logoIsHome }
         {onLanding ? Logo : <Link to="/" aria-label="ActOS home">{Logo}</Link>}
       </div>
       <nav className="landing-topbar-nav">
-        <Link to="/manifesto" className="topbar-link topbar-desktop-only" style={navLinkStyle("/manifesto")}>Manifesto</Link>
-        <Link to="/pricing" className="topbar-link topbar-desktop-only" style={navLinkStyle("/pricing")}>Pricing</Link>
-        <Link to="/auth" className="topbar-link" style={navLinkStyle("/auth")}>Sign in</Link>
+        <Link to="/manifesto" className="topbar-link topbar-desktop-only" style={navLinkStyle("/manifesto")}>{t("publicNav.manifesto")}</Link>
+        <Link to="/pricing" className="topbar-link topbar-desktop-only" style={navLinkStyle("/pricing")}>{t("publicNav.pricing")}</Link>
+        <Link to="/auth" className="topbar-link" style={navLinkStyle("/auth")}>{t("publicNav.signIn")}</Link>
       </nav>
       <style>{`
         .landing-topbar-logo { position: absolute; top: 32px; left: 32px; z-index: 2; }
@@ -68,7 +70,9 @@ const FooterLink: React.FC<{ to: string; children: React.ReactNode }> = ({ to, c
   </Link>
 );
 
-export const LandingFooter: React.FC = () => (
+export const LandingFooter: React.FC = () => {
+  const { t } = useTranslation();
+  return (
   <footer
     className="w-full px-6 pb-6 md:pb-8"
     style={{
@@ -78,7 +82,7 @@ export const LandingFooter: React.FC = () => (
     }}
   >
     <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 md:flex-row md:justify-between">
-      <div>© 2026 ActOS</div>
+      <div>{t("publicFooter.copyright")}</div>
       <div className="flex items-center" style={{ gap: 20 }}>
         <a href="https://twitter.com/actos" target="_blank" rel="noopener noreferrer" aria-label="ActOS on Twitter" className="social-link" style={{ color: "hsl(var(--text-tertiary))", display: "inline-flex" }}>
           <Twitter size={18} />
@@ -94,13 +98,13 @@ export const LandingFooter: React.FC = () => (
     </div>
 
     <div className="mx-auto mt-2 flex max-w-6xl items-center justify-center md:justify-start" style={{ gap: 0 }}>
-      <FooterLink to="/manifesto">Manifesto</FooterLink>
+      <FooterLink to="/manifesto">{t("publicFooter.manifesto")}</FooterLink>
       <Sep />
-      <FooterLink to="/pricing">Pricing</FooterLink>
+      <FooterLink to="/pricing">{t("publicFooter.pricing")}</FooterLink>
       <Sep />
-      <FooterLink to="/legal/privacy">Privacy</FooterLink>
+      <FooterLink to="/legal/privacy">{t("publicFooter.privacy")}</FooterLink>
       <Sep />
-      <FooterLink to="/legal/terms">Terms</FooterLink>
+      <FooterLink to="/legal/terms">{t("publicFooter.terms")}</FooterLink>
     </div>
 
     <style>{`
@@ -108,4 +112,5 @@ export const LandingFooter: React.FC = () => (
       .footer-link:hover { color: hsl(var(--text-secondary)) !important; }
     `}</style>
   </footer>
-);
+  );
+};

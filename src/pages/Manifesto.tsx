@@ -1,10 +1,35 @@
 // Founder essay — Medium-style article with byline, drop cap, pull quote.
 import React from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ArrowRight } from "lucide-react";
 import { LandingTopBar, LandingFooter } from "@/components/LandingChrome";
 
+// Render a string with **bold** markdown -> <strong>, *italic* -> <em>.
+function renderMd(s: string): React.ReactNode[] {
+  const out: React.ReactNode[] = [];
+  // Combined regex; bold first, then italic
+  const re = /(\*\*([^*]+)\*\*|\*([^*]+)\*)/g;
+  let last = 0;
+  let m: RegExpExecArray | null;
+  let key = 0;
+  while ((m = re.exec(s)) !== null) {
+    if (m.index > last) out.push(s.slice(last, m.index));
+    if (m[2] !== undefined) out.push(<strong key={key++}>{m[2]}</strong>);
+    else if (m[3] !== undefined) out.push(<em key={key++}>{m[3]}</em>);
+    last = m.index + m[0].length;
+  }
+  if (last < s.length) out.push(s.slice(last));
+  return out;
+}
+
+const P: React.FC<{ k: string; className?: string }> = ({ k, className }) => {
+  const { t } = useTranslation();
+  return <p className={className}>{renderMd(t(k))}</p>;
+};
+
 const Manifesto: React.FC = () => {
+  const { t } = useTranslation();
   return (
     <div
       data-theme="dark"
@@ -41,7 +66,7 @@ const Manifesto: React.FC = () => {
                 Stanislav Vasilevschii
               </span>
               <span style={{ fontSize: 14, color: "hsl(var(--text-tertiary))" }}>
-                Founder of ActOS · May 2026
+                {t("manifesto.byline.role")}
               </span>
             </div>
           </div>
@@ -57,7 +82,7 @@ const Manifesto: React.FC = () => {
               lineHeight: 1.1,
             }}
           >
-            Tasks won't get you there.
+            {t("manifesto.title")}
           </h1>
 
           <p
@@ -69,96 +94,62 @@ const Manifesto: React.FC = () => {
               lineHeight: 1.4,
             }}
           >
-            Why I built ActOS after eight years of failing at productivity tools.
+            {t("manifesto.deck")}
           </p>
 
           <div className="manifesto-body" style={{ marginTop: 64 }}>
-            <p className="has-dropcap">
-              For eight years, I tried every productivity tool that promised to make me focused. Todoist. Things. Notion. TickTick. Trello. Sunsama. Linear. Asana. Four custom Notion templates I built myself between failed jobs.
-            </p>
-            <p>
-              I'd set up the new system on a Sunday evening — clean databases, color-coded tags, perfect filters. By Wednesday I'd be back to the same problem: I was completing 30 things a week and the projects I actually cared about hadn't moved.
-            </p>
-            <p>The tool wasn't the problem. The category was.</p>
+            <P k="manifesto.p1" className="has-dropcap" />
+            <P k="manifesto.p2" />
+            <P k="manifesto.p3" />
 
-            <h2>Tasks are a trap dressed as a solution</h2>
-            <p>
-              A task is anything that takes effort. "Reply to Mark." "Schedule dentist." "Buy paper towels." All tasks. None of them move you toward who you want to become. But because they live in the same list as the things that <em>do</em> matter — your training plan, your draft, your business — the trivial and the meaningful compete for the same checkbox.
-            </p>
-            <p>
-              The trivial always wins. It's easier. It generates a dopamine hit faster. By Friday you've done 47 things and made zero progress on the one thing this week was supposed to be about.
-            </p>
-            <p>Tasks expand to fill the day. Goals get squeezed out.</p>
-            <p>
-              This isn't a tooling problem. It's a category error. The premise of task management is "if I capture everything, I'll feel in control." But the cost of "everything" is that nothing's important. A list of 200 items isn't a plan. It's a noise floor.
-            </p>
+            <h2>{t("manifesto.h2_1")}</h2>
+            <P k="manifesto.p4" />
+            <P k="manifesto.p5" />
+            <P k="manifesto.p6" />
+            <P k="manifesto.p7" />
 
-            <blockquote>
-              Tasks gave me 47 checkmarks a week. Action moves toward 2-3 goals. That's the difference.
-            </blockquote>
+            <blockquote>{t("manifesto.pullquote")}</blockquote>
 
-            <h2>What I started doing instead</h2>
-            <p>
-              I stopped using task apps for goals. I kept a separate file — just one — with 2-3 things I cared about that quarter. Every morning I asked one question: <em>what single thing today makes this week a win?</em> I'd write it down. Then I'd do that thing, even if the rest of my day was a mess of meetings and "tasks."
-            </p>
-            <p>
-              Within three months I'd shipped more on those 2-3 goals than I had in the previous two years.
-            </p>
-            <p>
-              The system was crude — a text file, a sticky note, no automation, no integrations. But the <em>shape</em> of it was right. It separated "things I'm doing" from "things that move me forward." It made the second category small enough to actually act on.
-            </p>
-            <p>That's the shape ActOS gives form to.</p>
+            <h2>{t("manifesto.h2_2")}</h2>
+            <P k="manifesto.p8" />
+            <P k="manifesto.p9" />
+            <P k="manifesto.p10" />
+            <P k="manifesto.p11" />
 
-            <h2>ActOS isn't a todo app</h2>
-            <p>
-              It looks like one, on the surface. You'll see actions with checkboxes, a Today view, a Main Task for the day. The components are familiar.
-            </p>
-            <p>But underneath, the structure is different:</p>
+            <h2>{t("manifesto.h2_3")}</h2>
+            <P k="manifesto.p12" />
+            <P k="manifesto.p13" />
             <ul>
-              <li>Every action belongs to a project. Every project belongs to a goal. Nothing exists outside that hierarchy. There's no inbox. No "miscellaneous." If something doesn't tie to a goal, it doesn't enter the system.</li>
-              <li>You can have <strong>at most 3 active goals</strong>. Not as a guideline — as a hard cap the product enforces. The "+ New goal" button literally stops working if you try to add a fourth.</li>
-              <li>Each day, the product asks one question: <em>what single thing makes today a win?</em> That's the Main Task. Everything else is bonus.</li>
-              <li>Every action carries an Impact score (1-10) and a time estimate. The product surfaces high-impact work, so you don't spend Tuesday on something that doesn't matter.</li>
+              <li>{renderMd(t("manifesto.li1"))}</li>
+              <li>{renderMd(t("manifesto.li2"))}</li>
+              <li>{renderMd(t("manifesto.li3"))}</li>
+              <li>{renderMd(t("manifesto.li4"))}</li>
             </ul>
-            <p>These aren't features. They're refusals.</p>
-            <p>
-              ActOS refuses to capture your busywork. It refuses to let you "track" 200 things. It refuses to give you the dopamine hit of checking off 47 items when none of them moved a goal.
-            </p>
+            <P k="manifesto.p14" />
+            <P k="manifesto.p15" />
 
-            <h2>The hardest part is the cap</h2>
-            <p>
-              The 3-goal limit is the most controversial decision in the product, and it's also the one I'm least willing to negotiate on.
-            </p>
-            <p>
-              Almost everyone who's serious about something has more than 3 things they're "working on." Almost no one is actually making meaningful progress on more than 2.
-            </p>
-            <p>
-              If you can't pick 3, the tool can't help you. It's not the tool's job to give you permission to be unfocused. It's the tool's job to reflect the reality that focus is the entire game.
-            </p>
-            <p>
-              I know this filters out a lot of potential customers. That's intentional. ActOS isn't for everyone — it's for people who've already decided that they want to do fewer things, more seriously.
-            </p>
+            <h2>{t("manifesto.h2_4")}</h2>
+            <P k="manifesto.p16" />
+            <P k="manifesto.p17" />
+            <P k="manifesto.p18" />
+            <P k="manifesto.p19" />
 
-            <h2>What I'd ask you to try</h2>
-            <p>
-              Stop scheduling tasks for a week. Pick 2 goals you actually care about. Each morning, decide the one thing that makes today a win for those goals. Do that thing.
-            </p>
-            <p>
-              You can use ActOS. You can use a sticky note. The tool isn't what matters — the <em>shape</em> matters.
-            </p>
-            <p>
-              If a sticky note works for you, keep using it. I built ActOS because I wanted that shape with a little more structure, a little more memory, a little more ability to look back at where the weeks went. That's all the product is. It's the smallest version of "the system I actually use" that I could ship.
-            </p>
+            <h2>{t("manifesto.h2_5")}</h2>
+            <P k="manifesto.p20" />
+            <P k="manifesto.p21" />
+            <P k="manifesto.p22" />
 
             <hr />
 
             <p>
-              If you want to try it, <Link to="/auth#signup" style={{ color: "hsl(var(--goal-2))", textDecoration: "underline" }}>open ActOS</Link>. Free is real and the trial doesn't expire.
+              {t("manifesto.closing.line1")}{" "}
+              <Link to="/auth#signup" style={{ color: "hsl(var(--goal-2))", textDecoration: "underline" }}>
+                {t("manifesto.closing.link")}
+              </Link>
+              {t("manifesto.closing.line2")}
             </p>
-            <p>
-              If you don't, I hope at least the framing was useful. The goal isn't to convert you to a product. The goal is to convert you to a way of working.
-            </p>
-            <p>Tasks won't get you there. Action will.</p>
+            <P k="manifesto.closing.line3" />
+            <P k="manifesto.closing.line4" />
           </div>
 
           {/* Closing CTA */}
@@ -167,7 +158,7 @@ const Manifesto: React.FC = () => {
               className="manifesto-cta-line"
               style={{ fontWeight: 500, color: "hsl(var(--text-primary))", margin: 0 }}
             >
-              Stop scheduling. Start moving.
+              {t("manifesto.closing.cta.line")}
             </p>
             <Link
               to="/auth#signup"
@@ -187,11 +178,11 @@ const Manifesto: React.FC = () => {
                 transition: "filter 120ms ease",
               }}
             >
-              Open ActOS
+              {t("manifesto.closing.cta.button")}
               <ArrowRight size={16} strokeWidth={1.75} />
             </Link>
             <p style={{ marginTop: 16, fontSize: 13, color: "hsl(var(--text-tertiary))" }}>
-              No credit card required.
+              {t("manifesto.closing.cta.subline")}
             </p>
           </div>
         </article>

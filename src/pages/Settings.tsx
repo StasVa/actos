@@ -75,7 +75,7 @@ export default function Settings() {
   const setShowAdminTools = useStore((s) => s.setShowAdminTools);
   const setSubscriptionTier = useStore((s) => s.setSubscriptionTier);
   const resetToSeed = useStore((s) => s.resetToSeed);
-  const { user, markEmailVerified } = useAuth();
+  const { user, markEmailVerified, setAdmin } = useAuth();
   const clearSampleData = useStore((s) => s.clearSampleData);
   const hasSample = useStore((s) =>
     s.goals.some((g) => g.isSample) ||

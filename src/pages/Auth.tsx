@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
+import { AuthFooter } from "@/components/LandingChrome";
 import { EMAIL_RE, useAuth } from "@/lib/useAuth";
 
 type Mode = "signin" | "signup";

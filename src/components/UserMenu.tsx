@@ -204,9 +204,9 @@ export const UserMenu: React.FC<{ collapsed: boolean }> = ({ collapsed }) => {
           {/* Sign out */}
           <button
             type="button"
-            onClick={() => {
+            onClick={async () => {
               setOpen(false);
-              signOut();
+              await signOut();
               toast.success(t("signOut.toast"));
               navigate("/", { replace: true });
             }}

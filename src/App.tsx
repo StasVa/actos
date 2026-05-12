@@ -1,4 +1,5 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
+import { queryClient, persister } from "./lib/queryClient";
 import { setStoreQueryClientRef } from "./lib/storeQueryRef";
 import { useGoalsQuery } from "./lib/queries/useGoals";
 import { useEffect } from "react";
@@ -63,16 +64,6 @@ import AdminAnnouncements from "./admin/pages/AdminAnnouncements";
 import AdminComponents from "./admin/pages/AdminComponents";
 import { ImpersonationBanner } from "./admin/ImpersonationBanner";
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 30 * 1000,
-      gcTime: 5 * 60 * 1000,
-      refetchOnWindowFocus: true,
-      retry: 1,
-    },
-  },
-});
 // Allow the legacy Zustand store to read from the cache during the strangler migration.
 setStoreQueryClientRef(queryClient);
 
@@ -159,7 +150,14 @@ const NoGoalsGate: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 };
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
+  <PersistQueryClientProvider
+    client={queryClient}
+    persistOptions={{
+      persister,
+      maxAge: 1000 * 60 * 60 * 24, // 24 hours
+      buster: "actos-v1",
+    }}
+  >
     <TooltipProvider>
       <Sonner position="bottom-right" />
       <BrowserRouter>
@@ -244,7 +242,7 @@ const App = () => (
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
-  </QueryClientProvider>
+  </PersistQueryClientProvider>
 );
 
 export default App;

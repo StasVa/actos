@@ -11,6 +11,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "./supabase";
+import { queryClient, persister } from "@/lib/queryClient";
 
 export type AuthProvider = "email" | "google" | "apple";
 
@@ -231,6 +232,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch {
       // ignore
     }
+    queryClient.clear();
+    await persister.removeClient();
+    // The persister's persistClient is throttled (default 1000ms in
+    // createSyncStoragePersister), so queryClient.clear()'s cache events
+    // schedule a trailing write of empty state that lands after the immediate
+    // remove above. Re-remove past the throttle window to drop that final write.
+    setTimeout(() => {
+      void persister.removeClient();
+    }, 1100);
     setUser(null);
   }, []);
 

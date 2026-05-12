@@ -3,7 +3,7 @@
 > **Document role:** the concrete, week-by-week playbook for migrating from LocalStorage mocks to Supabase. The actionable companion to `13-ARCHITECTURE.md`.
 > **Read alongside:** `12-TECH-STACK.md`, `13-ARCHITECTURE.md`, `FRONTEND-AUDIT.md`.
 > **Audience:** Stas (PM) for visibility, Claude/Cursor agents for execution context.
-> **Last updated:** 2026-05-11
+> **Last updated:** 2026-05-13
 
 ---
 
@@ -30,19 +30,19 @@ We break this work into 5 sequenced phases. Each phase has a clear **exit criter
 Code cleanup, dev environment, AI agent context files. Repository ready for backend work.
 Exit: clean `git status`, `npm run dev` on 5174, AI agents read project context.
 
-**Phase 2 — Supabase foundation** (target: 3-5 days)
+**Phase 2 — Supabase foundation** ✅ COMPLETE (2026-05-11)
 Create Supabase project, define schema, RLS policies, generated TypeScript types, environment variables.
 Exit: empty Supabase project exists with full schema, types are generated and committed, `.env.local` works locally.
 
-**Phase 3 — Real authentication** (target: 4-7 days)
+**Phase 3 — Real authentication** ✅ COMPLETE (2026-05-12)
 Replace mock auth with Supabase Auth. Wire Resend for verification emails. Update admin gate to use Supabase user record.
 Exit: a user can sign up at localhost:5174, receive a real email with a code, verify, sign in, sign out. Mock auth removed.
 
-**Phase 4 — Data migration** (target: 5-8 days)
+**Phase 4 — Data migration** 🟡 Session 1 ✅ COMPLETE (2026-05-13); Session 2 ⏳ pending
 Move user data (goals, projects, actions, etc.) from LocalStorage → Supabase. TanStack Query hooks replace direct Zustand reads/writes. Sample data seeding adapted.
 Exit: a fresh user can create goals, projects, actions; data persists across browser sessions and devices; admin pages still work.
 
-**Phase 5 — Deployment** (target: 2-4 days)
+**Phase 5 — Deployment** ✅ COMPLETE (2026-05-12)
 Wire Vercel for hosting. Connect actos.io DNS. Configure environment variables in Vercel. Set up Sentry, PostHog. Smoke-test full beta flow on production URL.
 Exit: actos.io serves the app; a new user can sign up end-to-end on production; we send Stas a beta-invite-ready link.
 
@@ -51,6 +51,8 @@ Exit: actos.io serves the app; a new user can sign up end-to-end on production; 
 ---
 
 ## Phase 2 — Supabase foundation
+
+**Outcome (2026-05-11):** shipped as planned. Supabase project provisioned in US-East, full schema migration applied via `supabase/migrations/`, RLS policies in place on all user-data tables, TypeScript types generated to `src/lib/supabase.types.ts`. Resend domain `actos.io` verified, sender `noreply@actos.io` configured for transactional email.
 
 ### 2.1 Create Supabase project
 
@@ -618,6 +620,8 @@ In Supabase dashboard:
 
 **Goal:** replace mock auth in `src/lib/useAuth.tsx` and `src/lib/mockAuth.ts` with real Supabase Auth.
 
+**Outcome (2026-05-12):** shipped as planned. `useAuth.tsx` now wraps `@supabase/supabase-js` auth methods; `mockAuth.ts` deleted. 6-digit OTP verification via Resend works end-to-end. Admin gate reads `is_admin` from the Supabase `users` row.
+
 ### 3.1 Rewrite useAuth.tsx
 
 Replace LocalStorage-based logic with Supabase Auth calls. Key changes:
@@ -666,21 +670,26 @@ Wrap `AdminLayout` in `RequireAdmin` in `App.tsx`.
 
 ---
 
-## Phase 4 — Data migration
+## Phase 4 — Data migration (split: Session 1 ✅ / Session 2 ⏳)
 
 This is the largest phase. We move every entity (goals, projects, actions, rituals, ideas, day entries, sessions) from Zustand-LocalStorage to TanStack-Supabase.
+
+**Status (2026-05-13):** split into two sessions to ship Phase 5 deployment between them.
+
+- **Session 1 (✅ complete, 2026-05-13):** Goals, Projects, Actions migrated to Supabase via TanStack Query. Verb-specific mutation hooks, selector pairs, row mappers, and a Zustand→TanStack bridge (`storeQueryRef.ts`) shipped. New files: `src/lib/queries/{useGoals,useProjects,useActions}.ts`, `src/lib/{selectors,rowMappers,queryKeys,storeQueryRef}.ts`. `src/store/useStore.ts` shed 478 lines net (1,171 → 693).
+- **Session 2 (⏳ pending):** Rituals, Ideas, Day entries, Sessions — same pattern. After Session 2 lands, `storeQueryRef.ts` and the `partialize` config can be cleaned up.
 
 ### 4.1 Migration strategy — strangler pattern
 
 Don't rewrite the whole store at once. Migrate one entity at a time. Order:
 
-1. **Goals** (root of the hierarchy)
-2. **Projects** (depend on goals)
-3. **Actions** (depend on projects)
-4. **Rituals** (depend on goals)
-5. **Ideas** (depend on goals)
-6. **Day entries** (mostly independent)
-7. **Sessions** (mostly independent)
+1. **Goals** (root of the hierarchy) — ✅ Session 1
+2. **Projects** (depend on goals) — ✅ Session 1
+3. **Actions** (depend on projects) — ✅ Session 1
+4. **Rituals** (depend on goals) — ⏳ Session 2
+5. **Ideas** (depend on goals) — ⏳ Session 2
+6. **Day entries** (mostly independent) — ⏳ Session 2
+7. **Sessions** (mostly independent) — ⏳ Session 2
 
 For each entity, the work is:
 
@@ -731,30 +740,33 @@ For Stas's own beta-testing account: existing LocalStorage data won't auto-migra
 
 For beta launch we recommend **Option B**. Migration tool can ship in v1.x if anyone asks.
 
-### 4.5 File storage — TipTap embedded images
+### 4.5 File storage — TipTap embedded images (DEFERRED to v1.x)
 
-Today: base64 data URLs in description JSON.
-After: upload to Supabase Storage bucket `project-media`, store URL.
+Decision at Phase 4 Session 1 start: keep base64 data URLs in description JSON for v1. Storage migration deferred to v1.x.
 
-Implement upload handler in `RichTextEditor.tsx` (or wherever TipTap image insertion happens). Upload to `{user_id}/{uuid}.{ext}`.
+Rationale: minimal user impact at beta scale (modest image use, 30 users); avoids a bucket-policy migration that doesn't unblock beta. Revisit when description payload sizes hurt performance or post-beta volumes warrant it.
 
-Configure bucket policy in Supabase dashboard:
-- Bucket: `project-media`
-- Public: yes (paths are unguessable UUIDs)
-- RLS: users can upload to paths starting with their `user_id`
+**When we do revisit:**
+- Bucket: `project-media` (still planned name)
+- Path: `{user_id}/{uuid}.{ext}`
+- Public reads + RLS uploads constrained to caller's `user_id` prefix
+- Upload handler in `RichTextEditor.tsx`
 
-### Phase 4 exit criteria
+### Phase 4 Session 2 exit criteria
 
-- All 7 entities live in Supabase
-- Zustand store reduced to UI-only state (active panel, etc.)
-- LocalStorage no longer holds user data (still holds preferences: theme, language, dismissed coachmarks)
-- Sample data path works against Supabase
-- Project images upload to Supabase Storage
-- A fresh user signing up gets a clean Supabase row, can create goals/projects/actions, data persists across devices
+- Remaining 4 entities (rituals, ideas, day entries, sessions) live in Supabase
+- Zustand store reduced to UI state + transient view state only
+- LocalStorage holds only preferences (theme, language, dismissed coachmarks) — no user data
+- Sample data path works against Supabase for all entities
+- `storeQueryRef.ts` deleted (no more Zustand-bridged reads from TanStack mutations)
+- A fresh user signing up gets a clean Supabase row, can create goals/projects/actions/rituals/ideas/day entries/sessions; everything persists across devices
+- Project images: still base64 (deferred to v1.x, see 4.5)
 
 ---
 
 ## Phase 5 — Deployment
+
+**Outcome (2026-05-12):** shipped before Phase 4 finished. Production at https://actos.io has been live with the Supabase + Zustand-LocalStorage hybrid since 2026-05-12; Phase 4 Session 1 migrated the first three entities into the live deployment on 2026-05-13. Vercel hosting, Cloudflare DNS, Sentry + PostHog wiring all as planned.
 
 ### 5.1 Vercel project setup
 
@@ -865,7 +877,27 @@ To avoid scope creep, these are NOT in this plan. They're tracked in `06-ROADMAP
 
 ---
 
+## Lessons learned
+
+Captured 2026-05-13 after Phase 4 Session 1.
+
+1. **Strangler pattern: one entity per task is the right granularity.** Big-bang would have made debugging exponentially harder.
+2. **Pre-flight reports: critical before non-trivial changes.** Catch architectural mismatches early, save rework.
+3. **Cross-store cascades during transition: need explicit snapshots in BOTH systems for correct rollback** (TanStack cache + Zustand state captured separately).
+4. **`createSyncStoragePersister` throttle quirk:** 1000ms throttle on `persistClient` means signOut cleanup needs `setTimeout(1100ms)` to catch the trailing write. Documented in 13-ARCHITECTURE.md.
+5. **Canonical tsc:** `npx tsc --noEmit -p tsconfig.app.json`. Root `tsconfig.json` has `"files": []` and silently compiles nothing.
+
+---
+
 ## Decision log
+
+### 2026-05-13 — Phase 4 split into Session 1 + Session 2
+
+Phase 4 deliberately split. Session 1 migrates goals/projects/actions (the hierarchical core). Session 2 finishes rituals/ideas/day-entries/sessions. Rationale: Phase 5 deployment shipped 2026-05-12 ahead of Phase 4 to get a production URL in front of beta candidates; splitting Phase 4 lets us land the migration incrementally on live infra rather than serving stale Zustand-only data while a long Phase 4 lands.
+
+### 2026-05-12 — Phases 3 and 5 shipped
+
+Real Supabase Auth replaced mock auth (Phase 3). Same day: `actos.io` deployed to Vercel via Cloudflare DNS (Phase 5). Order chosen to give beta candidates a production URL early; Phase 4 follows on the live deployment.
 
 ### 2026-05-11 — Plan committed
 

@@ -3,7 +3,7 @@
 > **Document role:** how the pieces of ActOS connect. Mental model for understanding data flow, authentication, and state.
 > **Read alongside:** `12-TECH-STACK.md` (what we use), `14-BACKEND-PLAN.md` (when each piece arrives), `03-MODEL.md` (entity definitions).
 > **Audience:** anyone who needs to understand how a user action becomes a database write.
-> **Last updated:** 2026-05-11
+> **Last updated:** 2026-05-13
 
 ---
 
@@ -20,13 +20,13 @@
 │  │        └─→ Zustand store (UI state, persisted entities)  │    │
 │  │        └─→ TanStack Query (server data) ────────────┐    │    │
 │  │                                                     │    │    │
-│  │  *transitioning from Zustand-LocalStorage to        │    │    │
-│  │   TanStack-Supabase across Phase 2                  │    │    │
+│  │  *strangler in progress (Phase 4 Session 2):        │    │    │
+│  │   goals/projects/actions migrated, rest pending     │    │    │
 │  └─────────────────────────────────────────────────────┼────┘    │
 │                                                        │         │
-│  Persistence (transitional):                           │         │
-│    LocalStorage  ←─ today's source of truth            │         │
-│    Supabase      ←─ becomes source of truth in Phase 2 │         │
+│  Persistence (split, Phase 4 Session 2 pending):       │         │
+│    LocalStorage  ←─ non-migrated entities + prefs      │         │
+│    Supabase      ←─ migrated entities (Layer 3 detail) │         │
 └────────────────────────────────────────────────────────┼─────────┘
                                                          │
                             HTTPS                        │
@@ -99,37 +99,18 @@ ActOS has three distinct state categories. Confusing them is the #1 source of ar
 ### Layer 3 — User data
 
 **What:** goals, projects, actions, rituals, ideas, day entries, sessions, the user record itself.
-**Where lives, today:** Zustand store, persisted to LocalStorage under `actos-store` key.
-**Where lives, after Phase 2:** Supabase Postgres, fetched via TanStack Query, **mirrored** locally by TanStack's cache.
-**Persisted?** Yes. Syncs across devices. Authoritative copy is on the server (after Phase 2).
 
-**This is what we migrate.** The Phase 2 backend migration is entirely about moving Layer 3 from "Zustand-LocalStorage" to "TanStack-Supabase". Layers 1 and 2 don't change.
+**Where lives, today (split):** migrated entities (goals/projects/actions) → Supabase Postgres, fetched via TanStack Query, mirrored in browser by TanStack's cache (persisted to LocalStorage under `actos-query-cache`). Non-migrated entities (rituals/ideas/day entries/sessions) → Zustand store, persisted to LocalStorage under `actos-store` key.
+
+**Persisted?** Yes. Migrated entities sync across devices. Non-migrated entities are still per-device until Session 2.
+
+**This is what we've migrated and continue to migrate.** Phase 4 split into Session 1 (✅ done 2026-05-13: goals/projects/actions) and Session 2 (⏳ pending: rituals/ideas/day entries/sessions). Layers 1 and 2 don't change.
 
 ---
 
 ## Authentication flow
 
-### Current (mock — pre-Phase-2)
-
-```
-[Signup form]
-    ↓
-useAuth().signUp({name, email, password})
-    ↓
-src/lib/mockAuth.ts → startSignup() → generates 6-digit code → console.log
-    ↓
-Saves to LocalStorage: actos.auth.pendingSignup
-    ↓
-Redirect to /auth/verify
-    ↓
-User reads code from DevTools console, enters it
-    ↓
-verifyCode() → if match → completeSignup() → creates AuthUser in LocalStorage
-    ↓
-Redirect to /setup (wizard) → eventually /today
-```
-
-### After Phase 2 (real Supabase Auth)
+### Today (Supabase Auth)
 
 ```
 [Signup form]
@@ -157,27 +138,13 @@ Redirect to /setup → /today
 
 `RequireAuth`, `RedirectIfAuthed`, `RequireAdmin` (in `src/components/AuthRoute.tsx`) wrap routes. They read `useAuth()`. They don't change with the backend migration.
 
-After Phase 2, `RequireAdmin` checks `user.isAdmin` flag from the Supabase `users` row, not from LocalStorage.
+`RequireAdmin` checks the `is_admin` flag on the Supabase `users` row.
 
 ---
 
 ## Data flow — example: user marks an action as Done
 
-### Current (Zustand + LocalStorage)
-
-```
-1. User clicks checkbox on ActionRow
-2. onClick handler calls useStore.getState().completeAction(id)
-3. Zustand mutation runs:
-   - Finds action by id
-   - Validates Impact and Time are set (required for Done)
-   - Updates status to "done", sets completedAt: now()
-   - Appends timeline event
-4. Zustand persist middleware syncs to LocalStorage (actos-store)
-5. React re-renders any component reading that action
-```
-
-### After Phase 2 (TanStack Query + Supabase)
+### Today — actions (migrated, on TanStack + Supabase)
 
 ```
 1. User clicks checkbox on ActionRow
@@ -192,11 +159,11 @@ After Phase 2, `RequireAdmin` checks `user.isAdmin` flag from the Supabase `user
 4. UI never blocks on network — optimistic update handles it
 ```
 
-**The component (`ActionRow.tsx`) calls the same hook function in both cases.** The hook implementation changes; consumers don't.
+**Note:** rituals, ideas, day entries, and sessions still follow the older Zustand+LocalStorage pattern until Phase 4 Session 2. Components call `useStore.getState().X(...)` for those entities; switch to verb-specific mutation hooks after Session 2.
 
 ---
 
-## Database schema (planned)
+## Database schema
 
 Full DDL lives in `14-BACKEND-PLAN.md`. Quick reference of tables and their relationships:
 
@@ -269,19 +236,14 @@ User drops image into TipTap editor (in project description)
     ↓
 React handler reads File object
     ↓
-Today: converts to base64 data URL, stores inline in description JSON
-After Phase 2: uploads to Supabase Storage bucket `project-media/{user_id}/{uuid}.png`
+Converts to base64 data URL, stores inline in description JSON
     ↓
-Stores returned public URL in TipTap node
+Description JSON saved to Supabase as projects.description JSONB
     ↓
-On render: <img src={url} /> renders from Storage CDN
+On render: <img src="data:image/...;base64,..." />
 ```
 
-**Storage bucket policies:**
-- Bucket: `project-media`
-- Path pattern: `{user_id}/{filename}`
-- RLS policy: users can upload/read only paths starting with their `user_id`
-- Public URLs: enabled (paths include unguessable UUIDs)
+**Supabase Storage migration deferred to v1.x.** Confirmed at Phase 4 Session 1 start: minimal user impact at beta scale (modest image use, 30 users); avoids a bucket-policy migration that doesn't unblock launch. When revisited: bucket `project-media`, path `{user_id}/{uuid}.{ext}`, public reads + RLS uploads constrained to caller's `user_id` prefix.
 
 ---
 
@@ -329,7 +291,7 @@ React app boots in browser
     ↓
 useAuth() checks session
     ↓
-If authed → redirect to /today, fetch user data from Supabase
+If authed → redirect to /today, hydrate from TanStack cache + LocalStorage, refetch migrated entities from Supabase
 If not authed → show landing page (purely client-rendered)
 ```
 
@@ -348,6 +310,29 @@ TanStack Query caches result, component renders
 ### Static assets (images, fonts)
 
 Served from Vercel's edge CDN. No round-trip to origin. Cache headers set by Vite build.
+
+---
+
+## TanStack Query cache persistence
+
+### What's persisted
+
+The TanStack Query cache is persisted to `window.localStorage` via `createSyncStoragePersister`. Storage key: `actos-query-cache`. Setup in `src/lib/queryClient.ts`; consumed by `App.tsx` via `PersistQueryClientProvider`.
+
+### Why persist
+
+Cache survives full page reload — users see migrated entities (goals, projects, actions) instantly on revisit instead of waiting for the network. The cache then hydrates against Supabase in the background; stale data is updated if it diverges.
+
+### signOut cleanup gotcha
+
+`persister.persistClient` is throttled (1000ms default) — calling `persister.removeClient()` once during sign-out is not enough: a queued write can land *after* the remove and re-populate localStorage with the previous user's data. The fix in `src/lib/useAuth.tsx`:
+
+```typescript
+await persister.removeClient();
+setTimeout(() => { void persister.removeClient(); }, 1100);
+```
+
+The 1100ms exceeds the 1000ms throttle window, so any trailing write is no-op'd by the second remove. Don't drop the second `removeClient` — silently leaks cache across user sessions on shared devices.
 
 ---
 
@@ -380,7 +365,7 @@ We'll reconsider Next.js if/when:
 
 ### Why one big Zustand store, not many slices?
 
-Today: one store (`useStore.ts`, 1,176 lines) — works fine. After Phase 2 most of it migrates to TanStack Query and the remaining client state can stay as one slice. We'll re-evaluate splitting if it grows past 1,500 lines or causes performance issues.
+After Phase 4 Session 1: one store (`src/store/useStore.ts`, 693 lines, down from 1,171 pre-migration — −478 lines net). Goals/projects/actions migrated to TanStack Query. Remaining in store: UI state, rituals, ideas, day entries, sessions — all targeted for Session 2. Re-evaluate splitting if it grows past 1,500 lines or causes performance issues.
 
 ---
 

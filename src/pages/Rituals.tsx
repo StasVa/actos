@@ -581,7 +581,8 @@ function useRSortOptions(): FilterOption<RSortKey>[] {
 const Rituals: React.FC = () => {
   const { t } = useTranslation();
   const storeRituals = useStore((s) => s.rituals);
-  const storeGoals = useGoalsQuery().data ?? [];
+  const { data: storeGoalsData, isLoading: goalsLoading } = useGoalsQuery();
+  const storeGoals = storeGoalsData ?? [];
   const openPanel = useStore((s) => s.openPanel);
   const markRitualInstanceDone = useStore((s) => s.markRitualInstanceDone);
   const restoreRitual = useStore((s) => s.restoreRitual);
@@ -719,7 +720,7 @@ const Rituals: React.FC = () => {
         <div style={{ height: 24 }} />
         <div className="mx-auto" style={{ maxWidth: 1100 }}>
           {storeRituals.length === 0 ? (
-            !hasActiveGoals ? (
+            !goalsLoading && !hasActiveGoals ? (
               <EmptyState
                 headline={t("rituals.empty.noGoals.headline")}
                 description={t("rituals.empty.noGoals.description")}

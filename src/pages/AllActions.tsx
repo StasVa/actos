@@ -478,7 +478,8 @@ const AllActions: React.FC = () => {
   // Live store data → legacy renderer shape (rendering JSX is unchanged).
   const storeActions = useActionsQuery().data ?? [];
   const storeProjects = useProjectsQuery().data ?? [];
-  const storeGoals = useGoalsQuery().data ?? [];
+  const { data: storeGoalsData, isLoading: goalsLoading } = useGoalsQuery();
+  const storeGoals = storeGoalsData ?? [];
   const openPanel = useStore((s) => s.openPanel);
   const navigate = useNavigate();
   const hasActiveGoals = storeGoals.some((g) => g.status === "active");
@@ -654,7 +655,7 @@ const AllActions: React.FC = () => {
         {/* Full-width list */}
         <div className="flex-1 overflow-y-auto min-h-0 pt-2 pl-8">
           {ACTIONS.length === 0 ? (
-            !hasActiveGoals ? (
+            !goalsLoading && !hasActiveGoals ? (
               <EmptyState
                 headline={t("allActions.empty.noGoals.headline")}
                 description={t("allActions.empty.noGoals.description")}

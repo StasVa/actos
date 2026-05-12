@@ -111,7 +111,7 @@ const SetupGuard = () => {
 
 const ChromeOnlyOutsideSetup: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { pathname } = useLocation();
-  const hasActiveGoal = (useGoalsQuery().data ?? []).some((g) => g.status === "active");
+  const { data: goalsData, isLoading: goalsLoading } = useGoalsQuery();
   if (pathname === "/") return null;
   if (pathname.startsWith("/pricing")) return null;
   if (pathname.startsWith("/start")) return null;
@@ -121,7 +121,10 @@ const ChromeOnlyOutsideSetup: React.FC<{ children: React.ReactNode }> = ({ child
   if (pathname.startsWith("/legal")) return null;
   if (pathname.startsWith("/setup")) return null;
   if (pathname.startsWith("/onboarding")) return null;
-  // No-goals mode also hides global chrome.
+  // Keep chrome visible while goals are loading; only hide once we're sure
+  // the user has no active goals (prevents flash on page reload).
+  if (goalsLoading) return <>{children}</>;
+  const hasActiveGoal = (goalsData ?? []).some((g) => g.status === "active");
   if (!hasActiveGoal && !pathname.startsWith("/admin") && !pathname.startsWith("/settings")) return null;
   return <>{children}</>;
 };
@@ -134,7 +137,7 @@ const ChromeOnlyOutsideSetup: React.FC<{ children: React.ReactNode }> = ({ child
  */
 const NoGoalsGate: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { pathname } = useLocation();
-  const hasActiveGoal = (useGoalsQuery().data ?? []).some((g) => g.status === "active");
+  const { data: goalsData, isLoading: goalsLoading } = useGoalsQuery();
   const exempt =
     pathname === "/" ||
     pathname.startsWith("/pricing") ||
@@ -147,6 +150,10 @@ const NoGoalsGate: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     pathname.startsWith("/admin") ||
     pathname.startsWith("/settings") ||
     pathname.startsWith("/onboarding/goal");
+  // Hold blank during the initial goals hydration to prevent the NoGoalsLayout
+  // flash on reload before the cache resolves.
+  if (goalsLoading) return null;
+  const hasActiveGoal = (goalsData ?? []).some((g) => g.status === "active");
   if (!hasActiveGoal && !exempt) return <NoGoalsLayout />;
   return <>{children}</>;
 };

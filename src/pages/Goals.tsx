@@ -396,7 +396,8 @@ const Goals: React.FC = () => {
   const TYPE_OPTIONS = useTypeOptions(t);
   const SORT_OPTIONS = useSortOptions(t);
 
-  const goals = useGoalsQuery().data ?? [];
+  const { data: goalsData, isLoading: goalsLoading } = useGoalsQuery();
+  const goals = goalsData ?? [];
   const storeProjects = useProjectsQuery().data ?? [];
   const projects = useMemo(() => storeProjects.filter((p) => !p.isDraft), [storeProjects]);
   const actions = useActionsQuery().data ?? [];
@@ -560,7 +561,7 @@ const Goals: React.FC = () => {
   const ghostDisabled = totalActive >= goalLimit;
 
   const noResults = sorted.length === 0;
-  const noGoalsAtAll = goals.length === 0;
+  const noGoalsAtAll = !goalsLoading && goals.length === 0;
 
   return (
     <div className="min-h-screen bg-surface-base text-text-primary">

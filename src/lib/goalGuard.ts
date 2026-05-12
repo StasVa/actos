@@ -2,10 +2,10 @@
 // has zero active goals, these flows reroute to the full-page goal-builder
 // instead of opening their normal create panel.
 
-import { useStore } from "@/store/useStore";
+import { readGoalsFromCache } from "@/lib/storeQueryRef";
 
 export function hasActiveGoal(): boolean {
-  return useStore.getState().goals.some((g) => g.status === "active");
+  return readGoalsFromCache().some((g) => g.status === "active");
 }
 
 /**

@@ -1,4 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { setStoreQueryClientRef } from "./lib/storeQueryRef";
+import { useGoalsQuery } from "./lib/queries/useGoals";
 import { useEffect } from "react";
 import { BrowserRouter, Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -61,7 +63,18 @@ import AdminAnnouncements from "./admin/pages/AdminAnnouncements";
 import AdminComponents from "./admin/pages/AdminComponents";
 import { ImpersonationBanner } from "./admin/ImpersonationBanner";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 30 * 1000,
+      gcTime: 5 * 60 * 1000,
+      refetchOnWindowFocus: true,
+      retry: 1,
+    },
+  },
+});
+// Allow the legacy Zustand store to read from the cache during the strangler migration.
+setStoreQueryClientRef(queryClient);
 
 /**
  * Redirects first-run users to /setup. Setup completion is tracked in
@@ -98,7 +111,7 @@ const SetupGuard = () => {
 
 const ChromeOnlyOutsideSetup: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { pathname } = useLocation();
-  const hasActiveGoal = useStore((s) => s.goals.some((g) => g.status === "active"));
+  const hasActiveGoal = (useGoalsQuery().data ?? []).some((g) => g.status === "active");
   if (pathname === "/") return null;
   if (pathname.startsWith("/pricing")) return null;
   if (pathname.startsWith("/start")) return null;
@@ -121,7 +134,7 @@ const ChromeOnlyOutsideSetup: React.FC<{ children: React.ReactNode }> = ({ child
  */
 const NoGoalsGate: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { pathname } = useLocation();
-  const hasActiveGoal = useStore((s) => s.goals.some((g) => g.status === "active"));
+  const hasActiveGoal = (useGoalsQuery().data ?? []).some((g) => g.status === "active");
   const exempt =
     pathname === "/" ||
     pathname.startsWith("/pricing") ||

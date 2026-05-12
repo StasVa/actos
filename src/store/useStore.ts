@@ -9,14 +9,10 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import type {
-  Action,
   ActionStatus,
   DayEntry,
   DayType,
-  Goal,
-  GoalColorVar,
   Idea,
-  Project,
   Ritual,
   RitualSchedule,
   RitualScheduleConfig,
@@ -28,12 +24,10 @@ import type {
   ISODate,
   ISODateTime,
 } from "@/types";
+import { readGoalsFromCache } from "@/lib/storeQueryRef";
 import {
-  SEED_ACTIONS,
   SEED_DAY_ENTRIES,
-  SEED_GOALS,
   SEED_IDEAS,
-  SEED_PROJECTS,
   SEED_RITUALS,
   SEED_SETTINGS,
   TODAY_ISO,
@@ -49,7 +43,7 @@ const uid = (): ID =>
 const nowISO = (): string => new Date().toISOString();
 const todayISO = (): ISODate => new Date().toISOString().slice(0, 10);
 
-const TERMINAL_ACTION_STATUSES: ActionStatus[] = ["done", "delegated", "dropped", "cancelled"];
+export const TERMINAL_ACTION_STATUSES: ActionStatus[] = ["done", "delegated", "dropped", "cancelled"];
 
 // 7-tier ritual multiplier formula (per spec 02-MODEL.md).
 function ritualMultiplier(totalCompletions: number): number {
@@ -62,22 +56,9 @@ function ritualMultiplier(totalCompletions: number): number {
   return 2.5;
 }
 
-function pickNextGoalColor(goals: Goal[]): GoalColorVar {
-  const used = new Set(goals.filter((g) => g.status === "active").map((g) => g.color));
-  const palette: GoalColorVar[] = ["goal-1", "goal-2", "goal-3"];
-  return palette.find((c) => !used.has(c)) ?? "goal-1";
-}
-
-function activeGoalCount(goals: Goal[]): number {
-  return goals.filter((g) => g.status === "active").length;
-}
-
 // ───────── Store shape ─────────
 export interface StoreState {
   // entities
-  goals: Goal[];
-  projects: Project[];
-  actions: Action[];
   rituals: Ritual[];
   ideas: Idea[];
   dayEntries: DayEntry[];
@@ -85,39 +66,6 @@ export interface StoreState {
   settings: UserSettings;
   ui: UIState;
 
-  // ─── Goal actions ───
-  createGoal: (
-    payload: Pick<Goal, "title" | "type"> & Partial<Omit<Goal, "id" | "status" | "color" | "createdAt">>,
-    tier: "free" | "all-in",
-  ) => { ok: true; id: ID } | { ok: false; reason: "limit" };
-  updateGoal: (id: ID, partial: Partial<Goal>) => void;
-  markGoalComplete: (id: ID) => void;
-  dropGoal: (id: ID) => void;
-  deleteGoal: (id: ID) => void;
-  reopenGoal: (id: ID) => void;
-
-  // ─── Project actions ───
-  createProject: (payload: Pick<Project, "title" | "goalId"> & Partial<Project>) => ID;
-  updateProject: (id: ID, partial: Partial<Project>) => void;
-  markProjectComplete: (id: ID) => void;
-  dropProject: (id: ID) => void;
-  deleteProject: (id: ID) => void;
-  moveProjectToGoal: (projectId: ID, newGoalId: ID) => void;
-
-  // ─── Action actions ───
-  createAction: (
-    payload: Pick<Action, "title"> & {
-      projectId?: ID | null;
-      goalId?: ID;
-    } & Partial<Action>,
-  ) => ID;
-  updateAction: (id: ID, partial: Partial<Action>) => void;
-  changeActionStatus: (
-    id: ID,
-    newStatus: ActionStatus,
-    statusPayload?: { delegateName?: string; delegateNote?: string; expectedReturnDate?: ISODate; scheduledDate?: ISODate },
-  ) => void;
-  deleteAction: (id: ID) => void;
 
   // ─── Ritual actions ───
   createRitual: (
@@ -134,14 +82,17 @@ export interface StoreState {
   // ─── Idea actions ───
   captureIdea: (payload: Pick<Idea, "title"> & Partial<Idea>) => ID;
   updateIdea: (id: ID, partial: Partial<Idea>) => void;
-  convertIdeaToAction: (
-    ideaId: ID,
-    actionPayload: Pick<Action, "title"> & { projectId?: ID | null; goalId?: ID } & Partial<Action>,
-  ) => ID;
-  convertIdeaToProject: (
-    ideaId: ID,
-    projectPayload: Pick<Project, "title"> & { goalId?: ID } & Partial<Project>,
-  ) => ID;
+  /**
+   * Marks an idea as converted to an action. Caller is responsible for creating
+   * the action (via useCreateActionMutation) and passing the resulting id.
+   * Action creation can't happen inside Zustand once actions live in Supabase.
+   */
+  convertIdeaToAction: (ideaId: ID, newActionId: ID) => void;
+  /**
+   * Marks an idea as converted to a project. Caller is responsible for creating
+   * the project (via useCreateProjectMutation) and passing the resulting id.
+   */
+  convertIdeaToProject: (ideaId: ID, newProjectId: ID) => void;
   discardIdea: (id: ID) => void;
   moveIdeaToGoal: (ideaId: ID, newGoalId: ID) => void;
 
@@ -208,9 +159,6 @@ export interface StoreState {
 }
 
 const initialState = {
-  goals: SEED_GOALS,
-  projects: SEED_PROJECTS,
-  actions: SEED_ACTIONS,
   rituals: SEED_RITUALS,
   ideas: SEED_IDEAS,
   dayEntries: SEED_DAY_ENTRIES,
@@ -223,296 +171,6 @@ export const useStore = create<StoreState>()(
   persist(
     (set, get) => ({
       ...initialState,
-
-      // ───────── Goals ─────────
-      createGoal: (payload, tier) => {
-        const state = get();
-        const limit = tier === "all-in" ? 3 : 1;
-        if (activeGoalCount(state.goals) >= limit) {
-          return { ok: false, reason: "limit" };
-        }
-        const id = uid();
-        const goal: Goal = {
-          id,
-          title: payload.title,
-          type: payload.type,
-          status: "active",
-          description: payload.description,
-          successCriteria: payload.successCriteria ?? [],
-          targetDate: payload.targetDate,
-          color: pickNextGoalColor(state.goals),
-          createdAt: nowISO(),
-        };
-        set({ goals: [...state.goals, goal] });
-        return { ok: true, id };
-      },
-
-      updateGoal: (id, partial) => {
-        set({
-          goals: get().goals.map((g) =>
-            g.id === id ? { ...g, ...partial, updatedAt: nowISO() } : g,
-          ),
-        });
-      },
-
-      markGoalComplete: (id) => {
-        set({
-          goals: get().goals.map((g) =>
-            g.id === id ? { ...g, status: "completed", completedAt: nowISO() } : g,
-          ),
-        });
-      },
-
-      dropGoal: (id) => {
-        const at = nowISO();
-        const state = get();
-        const projectIds = state.projects.filter((p) => p.goalId === id).map((p) => p.id);
-        set({
-          goals: state.goals.map((g) =>
-            g.id === id ? { ...g, status: "dropped", droppedAt: at } : g,
-          ),
-          projects: state.projects.map((p) =>
-            p.goalId === id ? { ...p, status: "dropped", droppedAt: at } : p,
-          ),
-          actions: state.actions.map((a) =>
-            a.goalId === id && !TERMINAL_ACTION_STATUSES.includes(a.status)
-              ? { ...a, status: "dropped", droppedAt: at }
-              : a,
-          ),
-          rituals: state.rituals.map((r) =>
-            (r.goalId === id || (r.projectId && projectIds.includes(r.projectId))) &&
-            r.status === "active"
-              ? { ...r, status: "archived", archivedAt: at }
-              : r,
-          ),
-        });
-      },
-
-      deleteGoal: (id) => {
-        const state = get();
-        const projIds = new Set(state.projects.filter((p) => p.goalId === id).map((p) => p.id));
-        set({
-          goals: state.goals.filter((g) => g.id !== id),
-          projects: state.projects.filter((p) => p.goalId !== id),
-          actions: state.actions.filter((a) => a.goalId !== id),
-          rituals: state.rituals.filter(
-            (r) => r.goalId !== id && !(r.projectId && projIds.has(r.projectId)),
-          ),
-          ideas: state.ideas.filter((i) => i.goalId !== id),
-        });
-      },
-
-      reopenGoal: (id) => {
-        set({
-          goals: get().goals.map((g) =>
-            g.id === id
-              ? { ...g, status: "active", completedAt: undefined, droppedAt: undefined }
-              : g,
-          ),
-        });
-      },
-
-      // ───────── Projects ─────────
-      createProject: (payload) => {
-        const id = uid();
-        const project: Project = {
-          id,
-          goalId: payload.goalId,
-          title: payload.title,
-          status: payload.status ?? "active",
-          description: payload.description,
-          references: payload.references ?? [],
-          createdAt: nowISO(),
-          isDraft: payload.isDraft ?? false,
-        };
-        set({ projects: [...get().projects, project] });
-        return id;
-      },
-
-      updateProject: (id, partial) => {
-        set({
-          projects: get().projects.map((p) =>
-            p.id === id ? { ...p, ...partial, updatedAt: nowISO() } : p,
-          ),
-        });
-      },
-
-      markProjectComplete: (id) => {
-        set({
-          projects: get().projects.map((p) =>
-            p.id === id ? { ...p, status: "completed", completedAt: nowISO() } : p,
-          ),
-        });
-      },
-
-      dropProject: (id) => {
-        const at = nowISO();
-        const state = get();
-        set({
-          projects: state.projects.map((p) =>
-            p.id === id ? { ...p, status: "dropped", droppedAt: at } : p,
-          ),
-          actions: state.actions.map((a) =>
-            a.projectId === id && !TERMINAL_ACTION_STATUSES.includes(a.status)
-              ? { ...a, status: "dropped", droppedAt: at }
-              : a,
-          ),
-          rituals: state.rituals.map((r) =>
-            r.projectId === id && r.status === "active"
-              ? { ...r, status: "archived", archivedAt: at }
-              : r,
-          ),
-        });
-      },
-
-      deleteProject: (id) => {
-        const state = get();
-        set({
-          projects: state.projects.filter((p) => p.id !== id),
-          actions: state.actions.filter((a) => a.projectId !== id),
-          rituals: state.rituals.filter((r) => r.projectId !== id),
-        });
-      },
-
-      moveProjectToGoal: (projectId, newGoalId) => {
-        const state = get();
-        set({
-          projects: state.projects.map((p) =>
-            p.id === projectId ? { ...p, goalId: newGoalId, updatedAt: nowISO() } : p,
-          ),
-          // Cascade goalId on the project's actions to keep parent integrity.
-          actions: state.actions.map((a) =>
-            a.projectId === projectId ? { ...a, goalId: newGoalId } : a,
-          ),
-        });
-      },
-
-      // ───────── Actions ─────────
-      createAction: (payload) => {
-        const state = get();
-        const id = uid();
-        let goalId = payload.goalId;
-        if (!goalId && payload.projectId) {
-          const proj = state.projects.find((p) => p.id === payload.projectId);
-          if (proj) goalId = proj.goalId;
-        }
-        if (!goalId) {
-          // fall back to settings default or first active goal
-          goalId =
-            state.settings.defaultGoalId ??
-            state.goals.find((g) => g.status === "active")?.id ??
-            state.goals[0]?.id;
-        }
-        const status: ActionStatus =
-          payload.status ?? (payload.scheduledDate ? "planned" : "backlog");
-        const at = nowISO();
-        // For retroactive creation (e.g. logging a Done action against a past day),
-        // honor terminal timestamps from the payload instead of forcing them to "now".
-        const completedAt =
-          payload.completedAt ?? (status === "done" ? at : undefined);
-        const delegatedAt =
-          payload.delegatedAt ?? (status === "delegated" ? at : undefined);
-        const droppedAt =
-          payload.droppedAt ?? (status === "dropped" ? at : undefined);
-        const cancelledAt =
-          payload.cancelledAt ?? (status === "cancelled" ? at : undefined);
-        const plannedAt =
-          (payload as Partial<Action>).plannedAt ?? (status === "planned" ? at : undefined);
-        const createdLabel: Record<ActionStatus, string> = {
-          backlog: "Backlog",
-          planned: "Planned",
-          done: "Done",
-          delegated: "Delegated",
-          dropped: "Dropped",
-          cancelled: "Cancelled",
-        };
-        const action: Action = {
-          id,
-          title: payload.title,
-          goalId: goalId!,
-          projectId: payload.projectId ?? null,
-          status,
-          scheduledDate: payload.scheduledDate,
-          notes: payload.notes,
-          impact: payload.impact ?? 0,
-          energyCost: payload.energyCost,
-          focusCost: payload.focusCost,
-          timeEstimateMinutes: payload.timeEstimateMinutes,
-          delegateName: payload.delegateName,
-          delegateNote: payload.delegateNote,
-          expectedReturnDate: payload.expectedReturnDate,
-          plannedAt,
-          completedAt,
-          delegatedAt,
-          droppedAt,
-          cancelledAt,
-          timeline: [{ at, text: `Created in ${createdLabel[status]}` }],
-          createdAt: at,
-        };
-        set({ actions: [...state.actions, action] });
-        return id;
-      },
-
-      updateAction: (id, partial) => {
-        set({
-          actions: get().actions.map((a) =>
-            a.id === id ? { ...a, ...partial, updatedAt: nowISO() } : a,
-          ),
-        });
-      },
-
-      changeActionStatus: (id, newStatus, statusPayload) => {
-        const at = nowISO();
-        set({
-          actions: get().actions.map((a) => {
-            if (a.id !== id) return a;
-            const next: Action = { ...a, status: newStatus, updatedAt: at };
-            // Clear only the *terminal* timestamps; keep plannedAt and
-            // delegatedAt as historical breadcrumbs across re-opens.
-            next.completedAt = undefined;
-            next.droppedAt = undefined;
-            next.cancelledAt = undefined;
-            let text = `Status → ${newStatus}`;
-            switch (newStatus) {
-              case "done":
-                next.completedAt = at;
-                text = "Marked Done";
-                break;
-              case "delegated":
-                next.delegatedAt = at;
-                if (statusPayload?.delegateName) next.delegateName = statusPayload.delegateName;
-                if (statusPayload?.delegateNote) next.delegateNote = statusPayload.delegateNote;
-                if (statusPayload?.expectedReturnDate)
-                  next.expectedReturnDate = statusPayload.expectedReturnDate;
-                text = `Delegated${next.delegateName ? ` to ${next.delegateName}` : ""}`;
-                break;
-              case "dropped":
-                next.droppedAt = at;
-                text = "Dropped";
-                break;
-              case "cancelled":
-                next.cancelledAt = at;
-                text = "Cancelled";
-                break;
-              case "planned":
-                if (statusPayload?.scheduledDate) next.scheduledDate = statusPayload.scheduledDate;
-                if (!next.plannedAt) next.plannedAt = at;
-                text = `Scheduled${next.scheduledDate ? ` for ${next.scheduledDate}` : ""} (Planned)`;
-                break;
-              case "backlog":
-                // Keep scheduledDate & plannedAt as history.
-                text = "Re-opened in Backlog";
-                break;
-            }
-            next.timeline = [...a.timeline, { at, text }];
-            return next;
-          }),
-        });
-      },
-
-      deleteAction: (id) => {
-        set({ actions: get().actions.filter((a) => a.id !== id) });
-      },
 
       // ───────── Rituals ─────────
       createRitual: (payload) => {
@@ -624,11 +282,12 @@ export const useStore = create<StoreState>()(
       captureIdea: (payload) => {
         const state = get();
         const id = uid();
+        const cachedGoals = readGoalsFromCache();
         const goalId =
           payload.goalId ??
           state.settings.defaultGoalId ??
-          state.goals.find((g) => g.status === "active")?.id ??
-          state.goals[0]?.id;
+          cachedGoals.find((g) => g.status === "active")?.id ??
+          cachedGoals[0]?.id;
         const idea: Idea = {
           id,
           goalId: goalId!,
@@ -649,42 +308,24 @@ export const useStore = create<StoreState>()(
         });
       },
 
-      convertIdeaToAction: (ideaId, actionPayload) => {
-        const state = get();
-        const idea = state.ideas.find((i) => i.id === ideaId);
-        if (!idea) return "";
-        const newId = state.createAction({
-          title: actionPayload.title || idea.title,
-          notes: actionPayload.notes ?? idea.note,
-          projectId: actionPayload.projectId ?? null,
-          goalId: actionPayload.goalId ?? idea.goalId,
-          impact: actionPayload.impact ?? 0,
-          ...actionPayload,
-        });
+      convertIdeaToAction: (ideaId, newActionId) => {
         set({
           ideas: get().ideas.map((i) =>
-            i.id === ideaId ? { ...i, status: "converted_to_action", convertedToId: newId } : i,
+            i.id === ideaId
+              ? { ...i, status: "converted_to_action", convertedToId: newActionId }
+              : i,
           ),
         });
-        return newId;
       },
 
-      convertIdeaToProject: (ideaId, projectPayload) => {
-        const state = get();
-        const idea = state.ideas.find((i) => i.id === ideaId);
-        if (!idea) return "";
-        const newId = state.createProject({
-          title: projectPayload.title || idea.title,
-          goalId: projectPayload.goalId ?? idea.goalId,
-          description: projectPayload.description ?? idea.note,
-          references: projectPayload.references ?? [],
-        });
+      convertIdeaToProject: (ideaId, newProjectId) => {
         set({
           ideas: get().ideas.map((i) =>
-            i.id === ideaId ? { ...i, status: "converted_to_project", convertedToId: newId } : i,
+            i.id === ideaId
+              ? { ...i, status: "converted_to_project", convertedToId: newProjectId }
+              : i,
           ),
         });
-        return newId;
       },
 
       discardIdea: (id) => {
@@ -936,9 +577,6 @@ export const useStore = create<StoreState>()(
 
       resetToEmpty: () =>
         set({
-          goals: [],
-          projects: [],
-          actions: [],
           rituals: [],
           ideas: [],
           dayEntries: [],
@@ -957,10 +595,9 @@ export const useStore = create<StoreState>()(
           locale = undefined;
         }
         const seed = buildSampleSeed(locale);
+        // Goals are seeded into Supabase via the Setup Wizard path now (Session 2);
+        // here we only seed entities still living in Zustand.
         set({
-          goals: seed.goals,
-          projects: seed.projects,
-          actions: seed.actions,
           rituals: seed.rituals,
           ideas: seed.ideas,
           sessions: seed.sessions,
@@ -972,9 +609,6 @@ export const useStore = create<StoreState>()(
       clearSampleData: () => {
         const s = get();
         set({
-          goals: s.goals.filter((g) => !g.isSample),
-          projects: s.projects.filter((p) => !p.isSample),
-          actions: s.actions.filter((a) => !a.isSample),
           rituals: s.rituals.filter((r) => !r.isSample),
           ideas: s.ideas.filter((i) => !i.isSample),
           sessions: s.sessions.filter((x) => !(x as any).isSample),
@@ -991,9 +625,6 @@ export const useStore = create<StoreState>()(
       storage: createJSONStorage(() => localStorage),
       // Persist everything except transient UI state.
       partialize: (state) => ({
-        goals: state.goals,
-        projects: state.projects,
-        actions: state.actions,
         rituals: state.rituals,
         ideas: state.ideas,
         dayEntries: state.dayEntries,
@@ -1021,81 +652,12 @@ export const useStore = create<StoreState>()(
 // in a useStore(selector) call when reactive updates are needed.
 
 export const selectors = {
-  activeGoals: (s: StoreState) => s.goals.filter((g) => g.status === "active"),
-  goalById: (s: StoreState, id: ID) => s.goals.find((g) => g.id === id),
-  projectById: (s: StoreState, id: ID) => s.projects.find((p) => p.id === id),
-  actionById: (s: StoreState, id: ID) => s.actions.find((a) => a.id === id),
   ritualById: (s: StoreState, id: ID) => s.rituals.find((r) => r.id === id),
   ideaById: (s: StoreState, id: ID) => s.ideas.find((i) => i.id === id),
 
-  projectsByGoal: (s: StoreState, goalId: ID) =>
-    s.projects.filter((p) => p.goalId === goalId && !p.isDraft),
-  /** All projects excluding drafts. */
-  visibleProjects: (s: StoreState) => s.projects.filter((p) => !p.isDraft),
-  actionsByProject: (s: StoreState, projectId: ID) =>
-    s.actions.filter((a) => a.projectId === projectId),
-  actionsByGoal: (s: StoreState, goalId: ID) => s.actions.filter((a) => a.goalId === goalId),
   ritualsByGoal: (s: StoreState, goalId: ID) =>
     s.rituals.filter((r) => r.goalId === goalId && r.status === "active"),
   ideasByGoal: (s: StoreState, goalId: ID) => s.ideas.filter((i) => i.goalId === goalId),
-
-  // sum of impact for non-dropped/non-cancelled actions in a project
-  projectCost: (s: StoreState, projectId: ID) =>
-    s.actions
-      .filter(
-        (a) =>
-          a.projectId === projectId &&
-          a.status !== "dropped" &&
-          a.status !== "cancelled",
-      )
-      .reduce((sum, a) => sum + (a.impact ?? 0), 0),
-
-  projectProgress: (s: StoreState, projectId: ID): { outcome: number; effort: number } => {
-    const acts = s.actions.filter(
-      (a) =>
-        a.projectId === projectId &&
-        a.status !== "dropped" &&
-        a.status !== "cancelled",
-    );
-    const total = acts.reduce((sum, a) => sum + (a.impact ?? 0), 0);
-    if (total === 0) return { outcome: 0, effort: 0 };
-    const done = acts
-      .filter((a) => a.status === "done")
-      .reduce((sum, a) => sum + (a.impact ?? 0), 0);
-    const doneOrDelegated = acts
-      .filter((a) => a.status === "done" || a.status === "delegated")
-      .reduce((sum, a) => sum + (a.impact ?? 0), 0);
-    return {
-      outcome: Math.round((doneOrDelegated / total) * 100),
-      effort: Math.round((done / total) * 100),
-    };
-  },
-
-  goalCost: (s: StoreState, goalId: ID) =>
-    s.projects
-      .filter((p) => p.goalId === goalId && p.status === "active")
-      .reduce((sum, p) => sum + selectors.projectCost(s, p.id), 0),
-
-  goalProgress: (s: StoreState, goalId: ID): { outcome: number; effort: number } => {
-    const projs = s.projects.filter((p) => p.goalId === goalId && p.status === "active");
-    if (projs.length === 0) return { outcome: 0, effort: 0 };
-    const sums = projs.reduce(
-      (acc, p) => {
-        const pr = selectors.projectProgress(s, p.id);
-        const cost = selectors.projectCost(s, p.id);
-        acc.outcome += pr.outcome * cost;
-        acc.effort += pr.effort * cost;
-        acc.weight += cost;
-        return acc;
-      },
-      { outcome: 0, effort: 0, weight: 0 },
-    );
-    if (sums.weight === 0) return { outcome: 0, effort: 0 };
-    return {
-      outcome: Math.round(sums.outcome / sums.weight),
-      effort: Math.round(sums.effort / sums.weight),
-    };
-  },
 
   ritualMultiplier: (s: StoreState, ritualId: ID) => {
     const r = s.rituals.find((x) => x.id === ritualId);
@@ -1108,30 +670,6 @@ export const selectors = {
     return r.baseImpact * ritualMultiplier(r.totalCompletions);
   },
 
-  // 'active' if any descendant action progressed in the last 7 days, else 'stalled'.
-  stateIndicator: (
-    s: StoreState,
-    entityType: "goal" | "project",
-    entityId: ID,
-  ): "active" | "stalled" => {
-    const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
-    const inScope = (a: Action) =>
-      entityType === "goal" ? a.goalId === entityId : a.projectId === entityId;
-    const recent = s.actions.some((a) => {
-      if (!inScope(a)) return false;
-      const t = a.completedAt ?? a.delegatedAt ?? a.updatedAt ?? a.createdAt;
-      return new Date(t).getTime() >= cutoff;
-    });
-    return recent ? "active" : "stalled";
-  },
-
-  todaysActions: (s: StoreState) => {
-    const today = todayISO();
-    return s.actions.filter(
-      (a) => a.scheduledDate === today && a.status === "planned",
-    );
-  },
-
   todaysPendingRituals: (s: StoreState) => {
     const today = todayISO();
     return s.rituals.filter(
@@ -1140,22 +678,6 @@ export const selectors = {
         !r.completionHistory.some((c) => c.date === today),
     );
   },
-
-  overdueDelegations: (s: StoreState) => {
-    const today = todayISO();
-    return s.actions.filter(
-      (a) =>
-        a.status === "delegated" &&
-        a.expectedReturnDate &&
-        a.expectedReturnDate < today,
-    );
-  },
-
-  // Sidebar lifetime counters
-  lifetimeCounters: (s: StoreState) => ({
-    projectsClosed: s.projects.filter((p) => p.status === "completed").length,
-    actionsDone: s.actions.filter((a) => a.status === "done").length,
-  }),
 };
 
 // ───────── Dev utility ─────────

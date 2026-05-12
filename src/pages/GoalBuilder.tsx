@@ -13,6 +13,16 @@ import { useTranslation } from "react-i18next";
 import { ArrowRight, X, Plus, Trash2 } from "lucide-react";
 import { useStore } from "@/store/useStore";
 import { useAuth } from "@/lib/useAuth";
+import {
+  useCreateGoalMutation,
+  useGoalsQuery,
+  useUpdateGoalMutation,
+} from "@/lib/queries/useGoals";
+import {
+  useCreateProjectMutation,
+  useProjectsQuery,
+} from "@/lib/queries/useProjects";
+import { useCreateActionMutation } from "@/lib/queries/useActions";
 import type { GoalColorVar } from "@/types";
 import { toast } from "sonner";
 
@@ -579,15 +589,18 @@ const GoalBuilder: React.FC = () => {
   });
   const [criteriaDraft, setCriteriaDraft] = React.useState<string[]>([]);
 
-  const createGoal = useStore((s) => s.createGoal);
+  const createGoalMutation = useCreateGoalMutation();
+  const updateGoalMutation = useUpdateGoalMutation();
   const { user } = useAuth();
   const tier: "free" | "all-in" = user?.subscriptionTier === "all-in" ? "all-in" : "free";
-  const updateGoal = useStore((s) => s.updateGoal);
-  const createProject = useStore((s) => s.createProject);
-  const createAction = useStore((s) => s.createAction);
+  void tier;
+  const createProjectMutation = useCreateProjectMutation();
+  const createActionMutation = useCreateActionMutation();
 
-  const goal = useStore((s) => persisted.goalId ? s.goals.find((g) => g.id === persisted.goalId) : undefined);
-  const project = useStore((s) => persisted.projectId ? s.projects.find((p) => p.id === persisted.projectId) : undefined);
+  const goalsList = useGoalsQuery().data ?? [];
+  const goal = persisted.goalId ? goalsList.find((g) => g.id === persisted.goalId) : undefined;
+  const projectsList = useProjectsQuery().data ?? [];
+  const project = persisted.projectId ? projectsList.find((p) => p.id === persisted.projectId) : undefined;
 
   React.useEffect(() => { write(persisted); }, [persisted]);
 
@@ -625,30 +638,33 @@ const GoalBuilder: React.FC = () => {
 
   /* ── Step 2: Criteria ── */
   if (persisted.step === 2) {
-    const onContinue = (criteria: string[]) => {
+    const onContinue = async (criteria: string[]) => {
       // Create (or update) the goal now.
       let goalId = persisted.goalId;
       if (!goalId || !goal) {
-        const res = createGoal({
+        const res = await createGoalMutation.mutateAsync({
           title: goalDraft.title,
           type: "mid-term",
           successCriteria: criteria.map((text) => ({
             id: Math.random().toString(36).slice(2, 9), text, done: false,
           })),
-        }, tier);
+        });
         if (!res.ok) {
           toast.error(t("goalBuilder.toast.goalLimit"));
           return;
         }
         goalId = res.id;
-        updateGoal(goalId, { color: goalDraft.color });
+        await updateGoalMutation.mutateAsync({ id: goalId, partial: { color: goalDraft.color } });
       } else {
-        updateGoal(goalId, {
-          title: goalDraft.title,
-          color: goalDraft.color,
-          successCriteria: criteria.map((text) => ({
-            id: Math.random().toString(36).slice(2, 9), text, done: false,
-          })),
+        await updateGoalMutation.mutateAsync({
+          id: goalId,
+          partial: {
+            title: goalDraft.title,
+            color: goalDraft.color,
+            successCriteria: criteria.map((text) => ({
+              id: Math.random().toString(36).slice(2, 9), text, done: false,
+            })),
+          },
         });
       }
       setCriteriaDraft(criteria);
@@ -670,12 +686,15 @@ const GoalBuilder: React.FC = () => {
   if (persisted.step === 3) {
     if (!persisted.goalId) { setPersisted({ step: 1 }); return null; }
     const onSubmit = (title: string, desc: string) => {
-      const id = createProject({
-        goalId: persisted.goalId!,
-        title,
-        description: desc || undefined,
-      });
-      setPersisted({ step: 4, goalId: persisted.goalId, projectId: id });
+      void createProjectMutation
+        .mutateAsync({
+          goalId: persisted.goalId!,
+          title,
+          description: desc || undefined,
+        })
+        .then(({ id }) => {
+          setPersisted({ step: 4, goalId: persisted.goalId, projectId: id });
+        });
     };
     return (
       <ScreenWrap step={3} onBack={() => setPersisted({ step: 2, goalId: persisted.goalId })}>
@@ -696,7 +715,7 @@ const GoalBuilder: React.FC = () => {
     const onSubmit = (drafts: Draft[]) => {
       drafts.forEach((d) => {
         const time = parseInt(d.time, 10);
-        createAction({
+        void createActionMutation.mutateAsync({
           title: d.title.trim(),
           goalId: persisted.goalId,
           projectId: persisted.projectId,

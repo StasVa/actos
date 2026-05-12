@@ -10,6 +10,13 @@ import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import i18n from "@/i18n";
 import { useStore, ritualMultiplier } from "@/store/useStore";
+import { useProjectsQuery } from "@/lib/queries/useProjects";
+import { useGoalsQuery } from "@/lib/queries/useGoals";
+import {
+  useActionsQuery,
+  useCreateActionMutation,
+  useUpdateActionMutation,
+} from "@/lib/queries/useActions";
 import type { Action, DayType, ID, Ritual } from "@/types";
 import { formatTime as formatTimeMin } from "@/lib/format";
 import { ImpactPill, TimePill } from "@/components/MetaPills";
@@ -295,11 +302,11 @@ const PlanForm: React.FC<{
   setState: React.Dispatch<React.SetStateAction<PlanFormState>>;
 }> = ({ date, state, setState }) => {
   const { t } = useTranslation();
-  const actions = useStore((s) => s.actions);
+  const actions = useActionsQuery().data ?? [];
   const rituals = useStore((s) => s.rituals);
-  const goals = useStore((s) => s.goals);
-  const projects = useStore((s) => s.projects);
-  const createAction = useStore((s) => s.createAction);
+  const goals = useGoalsQuery().data ?? [];
+  const projects = useProjectsQuery().data ?? [];
+  const createActionMutation = useCreateActionMutation();
 
   // Inline-add state
   const firstActiveGoal = goals.find((g) => g.status === "active");
@@ -616,14 +623,17 @@ const PlanForm: React.FC<{
                           e.preventDefault();
                           const title = quickTitle.trim();
                           if (!title || !quickGoalId) return;
-                          const newId = createAction({
-                            title,
-                            goalId: quickGoalId,
-                            projectId: quickProjectId ?? null,
-                          });
-                          addMany([newId]);
-                          setQuickTitle("");
-                          toast.success(t("planToday.actions.toast.created"));
+                          void createActionMutation
+                            .mutateAsync({
+                              title,
+                              goalId: quickGoalId,
+                              projectId: quickProjectId ?? null,
+                            })
+                            .then(({ id }) => {
+                              addMany([id]);
+                              setQuickTitle("");
+                              toast.success(t("planToday.actions.toast.created"));
+                            });
                         }}
                         placeholder={t("planToday.actions.quickAddPlaceholder")}
                         className="flex-1 min-w-0 bg-transparent text-[14px] text-text-primary outline-none placeholder:text-text-tertiary"
@@ -866,7 +876,7 @@ const initialPlanState = (): PlanFormState => ({
 function usePrefilledPlanState(
   date: string,
 ): [PlanFormState, React.Dispatch<React.SetStateAction<PlanFormState>>] {
-  const actions = useStore((s) => s.actions);
+  const actions = useActionsQuery().data ?? [];
   const rituals = useStore((s) => s.rituals);
   const [state, setState] = useState<PlanFormState>(initialPlanState);
   useEffect(() => {
@@ -1076,8 +1086,8 @@ export const PlanTodayPage: React.FC<{ onCancel: () => void; onComplete: () => v
   const { t } = useTranslation();
   const date = todayISO();
   const startDayPlan = useStore((s) => s.startDayPlan);
-  const updateAction = useStore((s) => s.updateAction);
-  const actions = useStore((s) => s.actions);
+  const updateActionMutation = useUpdateActionMutation();
+  const actions = useActionsQuery().data ?? [];
   const [state, setState] = usePrefilledPlanState(date);
   const [step, setStep] = useState<1 | 2>(1);
   
@@ -1093,7 +1103,9 @@ export const PlanTodayPage: React.FC<{ onCancel: () => void; onComplete: () => v
     const selectedSet = new Set(merged.selectedActionIds);
     actions
       .filter((a) => a.scheduledDate === date && !selectedSet.has(a.id))
-      .forEach((a) => updateAction(a.id, { scheduledDate: undefined }));
+      .forEach((a) =>
+        updateActionMutation.mutate({ id: a.id, partial: { scheduledDate: undefined } }),
+      );
     startDayPlan({
       date,
       dayType: merged.dayType,

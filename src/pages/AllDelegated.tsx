@@ -6,6 +6,9 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { FilterDropdown, FilterOption } from "@/components/FilterDropdown";
 import { SortDropdown } from "@/components/SortDropdown";
 import { useStore } from "@/store/useStore";
+import { useProjectsQuery } from "@/lib/queries/useProjects";
+import { useGoalsQuery } from "@/lib/queries/useGoals";
+import { useActionsQuery } from "@/lib/queries/useActions";
 import type { Action, Goal, Project } from "@/types";
 import { EmptyState as SharedEmptyState, FilteredEmpty } from "@/components/EmptyState";
 import { PageHeader } from "@/components/PageHeader";
@@ -220,9 +223,9 @@ type SortKey = "due" | "delegated" | "impact" | "title";
 /* ===== Page ===== */
 const AllDelegated: React.FC = () => {
   const { t } = useTranslation();
-  const actions = useStore((s) => s.actions);
-  const goals = useStore((s) => s.goals);
-  const projects = useStore((s) => s.projects);
+  const actions = useActionsQuery().data ?? [];
+  const goals = useGoalsQuery().data ?? [];
+  const projects = useProjectsQuery().data ?? [];
   const openPanel = useStore((s) => s.openPanel);
 
   const goalById = useMemo(() => {

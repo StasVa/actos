@@ -5,6 +5,9 @@ import { useTranslation } from "react-i18next";
 import { AppSidebar } from "@/components/AppSidebar";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { useStore, ritualMultiplier } from "@/store/useStore";
+import { useProjectsQuery } from "@/lib/queries/useProjects";
+import { useGoalsQuery } from "@/lib/queries/useGoals";
+import { useActionsQuery } from "@/lib/queries/useActions";
 import { formatHM } from "@/lib/timeStats";
 import {
   formatMonthLabel,
@@ -46,10 +49,10 @@ const ReviewMonthDetail: React.FC = () => {
   const [settingsOpen, setSettingsOpen] = React.useState(false);
   const [showAllReflections, setShowAllReflections] = React.useState(false);
 
-  const actions = useStore((s) => s.actions);
+  const actions = useActionsQuery().data ?? [];
   const dayEntries = useStore((s) => s.dayEntries);
-  const goals = useStore((s) => s.goals);
-  const projects = useStore((s) => s.projects);
+  const goals = useGoalsQuery().data ?? [];
+  const projects = useProjectsQuery().data ?? [];
   const rituals = useStore((s) => s.rituals);
   const settings = useStore((s) => s.settings);
   const openPanel = useStore((s) => s.openPanel);

@@ -3,9 +3,26 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import i18n from "@/i18n";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 import { Tooltip, StateDotTooltip } from "@/components/Tooltip";
 
-import { useStore, selectors } from "@/store/useStore";
+import { useStore } from "@/store/useStore";
+import { useProjectProgress, useStateIndicator } from "@/lib/selectors";
+import { useGoalsQuery } from "@/lib/queries/useGoals";
+import {
+  useDeleteProjectMutation,
+  useDropProjectMutation,
+  useMarkProjectCompleteMutation,
+  useMoveProjectToGoalMutation,
+  useProjectsQuery,
+  useUpdateProjectMutation,
+} from "@/lib/queries/useProjects";
+import {
+  useActionsQuery,
+  useChangeActionStatusMutation,
+  useCreateActionMutation,
+} from "@/lib/queries/useActions";
+import { queryKeys } from "@/lib/queryKeys";
 import type { Action, ActionStatus, GoalColorVar, Project, ProjectReference, ProjectStatus } from "@/types";
 import { AppSidebar } from "@/components/AppSidebar";
 import { ActionRow as SharedActionRow } from "@/components/ActionRow";
@@ -77,12 +94,16 @@ const STATUS_LABEL: Record<ActionStatus, string> = {
 const ActionRow: React.FC<{ a: Action; color: string }> = ({ a, color }) => {
   const { t } = useTranslation();
   const openPanel = useStore((s) => s.openPanel);
-  const changeStatus = useStore((s) => s.changeActionStatus);
+  const changeActionStatusMutation = useChangeActionStatusMutation();
   const handleToggle = () => {
     if (a.status === "delegated" || a.status === "dropped" || a.status === "cancelled") return;
     if (a.status === "done") {
       const today = new Date().toISOString().slice(0, 10);
-      changeStatus(a.id, "planned", { scheduledDate: today });
+      void changeActionStatusMutation.mutateAsync({
+        id: a.id,
+        newStatus: "planned",
+        statusPayload: { scheduledDate: today },
+      });
       toast.dismiss();
       toast.success(t("home.actions.toast.reopened"));
       return;
@@ -92,7 +113,7 @@ const ActionRow: React.FC<{ a: Action; color: string }> = ({ a, color }) => {
       openPanel({ kind: "action", mode: "edit", id: a.id });
       return;
     }
-    changeStatus(a.id, "done");
+    void changeActionStatusMutation.mutateAsync({ id: a.id, newStatus: "done" });
     toast.dismiss();
     toast.success(t("home.actions.toast.markedDone"));
   };
@@ -323,7 +344,7 @@ const GoalSelector: React.FC<{
   project: Project;
   onChange: (goalId: string) => void;
 }> = ({ project, onChange }) => {
-  const allGoals = useStore((s) => s.goals);
+  const allGoals = useGoalsQuery().data ?? [];
   const goals = useMemo(
     () => allGoals.filter((g) => g.status === "active"),
     [allGoals],
@@ -420,26 +441,25 @@ const ProjectDetail: React.FC = () => {
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const project = useStore((s) => s.projects.find((p) => p.id === id));
-  const allActions = useStore((s) => s.actions);
-  const goal = useStore((s) => (project ? s.goals.find((g) => g.id === project.goalId) : undefined));
+  const allProjects = useProjectsQuery().data ?? [];
+  const project = allProjects.find((p) => p.id === id);
+  const allActions = useActionsQuery().data ?? [];
+  const allGoals = useGoalsQuery().data ?? [];
+  const goal = project ? allGoals.find((g) => g.id === project.goalId) : undefined;
   const openPanel = useStore((s) => s.openPanel);
-  const updateProject = useStore((s) => s.updateProject);
-  const moveProjectToGoal = useStore((s) => s.moveProjectToGoal);
-  const markComplete = useStore((s) => s.markProjectComplete);
-  const dropProject = useStore((s) => s.dropProject);
-  const deleteProject = useStore((s) => s.deleteProject);
-  const createAction = useStore((s) => s.createAction);
-  const progressOutcome = useStore((s) =>
-    project ? selectors.projectProgress(s, project.id).outcome : 0,
-  );
-  const progressEffort = useStore((s) =>
-    project ? selectors.projectProgress(s, project.id).effort : 0,
-  );
-  const progress = { outcome: progressOutcome, effort: progressEffort };
-  const stateInd = useStore((s) =>
-    project ? selectors.stateIndicator(s, "project", project.id) : "active",
-  );
+  const queryClient = useQueryClient();
+  const updateProjectMutation = useUpdateProjectMutation();
+  const moveProjectToGoalMutation = useMoveProjectToGoalMutation();
+  const markCompleteMutation = useMarkProjectCompleteMutation();
+  const dropProjectMutation = useDropProjectMutation();
+  const deleteProjectMutation = useDeleteProjectMutation();
+  // Mutation handles change identity each render; keep latest in a ref so the
+  // unmount cleanup below sees current handles after dependent state changes.
+  const cleanupRef = useRef({ update: updateProjectMutation, delete: deleteProjectMutation });
+  cleanupRef.current = { update: updateProjectMutation, delete: deleteProjectMutation };
+  const createActionMutation = useCreateActionMutation();
+  const progress = useProjectProgress(project?.id ?? "");
+  const stateInd = useStateIndicator("project", project?.id ?? "");
 
   const actions = useMemo(
     () => (project ? allActions.filter((a) => a.projectId === project.id) : []),
@@ -467,7 +487,7 @@ const ProjectDetail: React.FC = () => {
   const goalTitle = goal?.title;
   useEffect(() => {
     if (isDraft && hasMeaningfulContent && projectId) {
-      updateProject(projectId, { isDraft: false });
+      void updateProjectMutation.mutateAsync({ id: projectId, partial: { isDraft: false } });
       if (goalTitle) toast(t("projectDetail.toast.created", { title: goalTitle }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -480,25 +500,26 @@ const ProjectDetail: React.FC = () => {
   // (Title-less drafts with content are caught by browser unload prompt fallback.)
   useEffect(() => {
     return () => {
-      const fresh = useStore.getState().projects.find((p) => p.id === id);
+      const cachedProjects = queryClient.getQueryData<Project[]>(queryKeys.projects) ?? [];
+      const fresh = cachedProjects.find((p) => p.id === id);
       if (fresh?.isDraft) {
         const desc = fresh.description ?? "";
         const stripped = desc.replace(/<[^>]+>/g, "").replace(/&nbsp;/g, "").trim();
-        const acts = useStore
-          .getState()
-          .actions.some((a) => a.projectId === fresh.id);
+        const cachedActions = queryClient.getQueryData<Action[]>(queryKeys.actions) ?? [];
+        const acts = cachedActions.some((a) => a.projectId === fresh.id);
         const empty =
           !fresh.title.trim() &&
           fresh.references.length === 0 &&
           stripped.length === 0 &&
           !acts;
         if (empty) {
-          useStore.getState().deleteProject(fresh.id);
+          void cleanupRef.current.delete.mutateAsync(fresh.id);
         } else if (!fresh.title.trim()) {
           // Promote with placeholder title instead of losing content.
-          useStore
-            .getState()
-            .updateProject(fresh.id, { title: i18n.t("projectDetail.untitled"), isDraft: false });
+          void cleanupRef.current.update.mutateAsync({
+            id: fresh.id,
+            partial: { title: i18n.t("projectDetail.untitled"), isDraft: false },
+          });
         }
       }
     };
@@ -590,16 +611,19 @@ const ProjectDetail: React.FC = () => {
   const handleStatusChange = (next: ProjectStatus) => {
     if (next === project.status) return;
     if (next === "completed") {
-      markComplete(project.id);
+      void markCompleteMutation.mutateAsync(project.id);
       toast(t("projectDetail.toast.completed"));
     } else if (next === "dropped") {
-      dropProject(project.id);
+      void dropProjectMutation.mutateAsync(project.id);
       toast(t("projectDetail.toast.dropped"));
     } else {
-      updateProject(project.id, {
-        status: "active",
-        completedAt: undefined,
-        droppedAt: undefined,
+      void updateProjectMutation.mutateAsync({
+        id: project.id,
+        partial: {
+          status: "active",
+          completedAt: undefined,
+          droppedAt: undefined,
+        },
       });
       toast(t("projectDetail.toast.reopened"));
     }
@@ -608,7 +632,7 @@ const ProjectDetail: React.FC = () => {
   const submitQuickAdd = () => {
     const trimmed = quickAdd.trim();
     if (!trimmed) return;
-    createAction({
+    void createActionMutation.mutateAsync({
       title: trimmed,
       projectId: project.id,
       goalId: goal.id,
@@ -650,13 +674,13 @@ const ProjectDetail: React.FC = () => {
               <TitleField
                 value={project.title}
                 autoFocus={isDraft}
-                onCommit={(next) => updateProject(project.id, { title: next })}
+                onCommit={(next) => void updateProjectMutation.mutateAsync({ id: project.id, partial: { title: next } })}
               />
               <div className="mt-3 flex items-center gap-2 flex-wrap">
                 <GoalSelector
                   project={project}
                   onChange={(gid) => {
-                    moveProjectToGoal(project.id, gid);
+                    void moveProjectToGoalMutation.mutateAsync({ projectId: project.id, newGoalId: gid });
                     toast(t("projectDetail.toast.moved"));
                   }}
                 />
@@ -697,7 +721,7 @@ const ProjectDetail: React.FC = () => {
               </h2>
               <RichTextEditor
                 value={project.description ?? ""}
-                onChange={(html) => updateProject(project.id, { description: html })}
+                onChange={(html) => void updateProjectMutation.mutateAsync({ id: project.id, partial: { description: html } })}
                 placeholder={t("projectDetail.description.placeholder")}
               />
             </section>
@@ -705,20 +729,25 @@ const ProjectDetail: React.FC = () => {
             <ReferencesSection
               project={project}
               onAdd={(ref) =>
-                updateProject(project.id, {
-                  references: [...project.references, ref],
+                void updateProjectMutation.mutateAsync({
+                  id: project.id,
+                  partial: { references: [...project.references, ref] },
                 })
               }
               onRemove={(refId) =>
-                updateProject(project.id, {
-                  references: project.references.filter((r) => r.id !== refId),
+                void updateProjectMutation.mutateAsync({
+                  id: project.id,
+                  partial: { references: project.references.filter((r) => r.id !== refId) },
                 })
               }
               onUpdate={(refId, partial) =>
-                updateProject(project.id, {
-                  references: project.references.map((r) =>
-                    r.id === refId ? { ...r, ...partial } : r,
-                  ),
+                void updateProjectMutation.mutateAsync({
+                  id: project.id,
+                  partial: {
+                    references: project.references.map((r) =>
+                      r.id === refId ? { ...r, ...partial } : r,
+                    ),
+                  },
                 })
               }
             />
@@ -830,7 +859,7 @@ const ProjectDetail: React.FC = () => {
                     destructive: true,
                     onSelect: () => {
                       if (confirm(t("projectDetail.confirm.delete"))) {
-                        deleteProject(project.id);
+                        void deleteProjectMutation.mutateAsync(project.id);
                         toast(t("projectDetail.toast.deleted"));
                         navigate("/projects");
                       }

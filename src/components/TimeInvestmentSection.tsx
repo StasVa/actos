@@ -2,6 +2,9 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { Tooltip } from "@/components/Tooltip";
 import { useStore } from "@/store/useStore";
+import { useProjectsQuery } from "@/lib/queries/useProjects";
+import { useGoalsQuery } from "@/lib/queries/useGoals";
+import { useActionsQuery } from "@/lib/queries/useActions";
 import { useAuth } from "@/lib/useAuth";
 import { computeTimeStats, formatHM, formatDateLabel } from "@/lib/timeStats";
 import { HistoryHint } from "@/components/LockModal";
@@ -91,9 +94,9 @@ const ProjectRow: React.FC<{
 
 export const TimeInvestmentSection: React.FC = () => {
   const { t } = useTranslation();
-  const actions = useStore((s) => s.actions);
-  const goals = useStore((s) => s.goals);
-  const projects = useStore((s) => s.projects);
+  const actions = useActionsQuery().data ?? [];
+  const goals = useGoalsQuery().data ?? [];
+  const projects = useProjectsQuery().data ?? [];
   const { user } = useAuth();
   const isFree = user?.subscriptionTier !== "all-in";
 

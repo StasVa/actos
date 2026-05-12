@@ -5,6 +5,7 @@ import { LifetimeCounters } from "@/components/LifetimeCounters";
 import { Link, useNavigate } from "react-router-dom";
 import { Tooltip } from "@/components/Tooltip";
 import { useStore } from "@/store/useStore";
+import { useGoalsQuery } from "@/lib/queries/useGoals";
 import { toast } from "sonner";
 import { AppSidebar } from "@/components/AppSidebar";
 import { EmptyState } from "@/components/EmptyState";
@@ -580,7 +581,7 @@ function useRSortOptions(): FilterOption<RSortKey>[] {
 const Rituals: React.FC = () => {
   const { t } = useTranslation();
   const storeRituals = useStore((s) => s.rituals);
-  const storeGoals = useStore((s) => s.goals);
+  const storeGoals = useGoalsQuery().data ?? [];
   const openPanel = useStore((s) => s.openPanel);
   const markRitualInstanceDone = useStore((s) => s.markRitualInstanceDone);
   const restoreRitual = useStore((s) => s.restoreRitual);

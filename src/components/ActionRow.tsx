@@ -12,6 +12,8 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { Star, Send } from "lucide-react";
 import { useStore } from "@/store/useStore";
+import { useProjectsQuery } from "@/lib/queries/useProjects";
+import { useGoalsQuery } from "@/lib/queries/useGoals";
 import type { Action } from "@/types";
 
 import { ImpactPill, TimePill } from "@/components/MetaPills";
@@ -58,8 +60,8 @@ export const ActionRow: React.FC<ActionRowProps> = ({
   onToggleDone,
 }) => {
   const { t } = useTranslation();
-  const goals = useStore((s) => s.goals);
-  const projects = useStore((s) => s.projects);
+  const goals = useGoalsQuery().data ?? [];
+  const projects = useProjectsQuery().data ?? [];
 
   const goal = goals.find((g) => g.id === action.goalId);
   const project = action.projectId

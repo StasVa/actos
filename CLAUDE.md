@@ -59,6 +59,16 @@ Don't invent new statuses. See `03-MODEL.md` § Action statuses. "Planned" is de
 ### Value ≠ Effort
 Two parallel metrics. Delegated work: 100% toward Value, 20% toward Effort and Time Invested. This is the signature mechanic. If you encounter logic that conflates them — flag it, don't "fix" it.
 
+## Type-checking the project
+
+Canonical command:
+
+```
+npx tsc --noEmit -p tsconfig.app.json
+```
+
+The root `tsconfig.json` has `"files": []` and only `references` the sub-configs — running plain `npx tsc --noEmit` against it compiles nothing and silently reports zero errors. Always pass `-p tsconfig.app.json` when validating app code.
+
 ## Code conventions
 
 - TypeScript strict mode. No `any` without explicit justification comment.

@@ -12,6 +12,9 @@ import { useNavigate } from "react-router-dom";
 import { Maximize, Minimize, Volume2, VolumeX } from "lucide-react";
 import { toast } from "sonner";
 import { useStore } from "@/store/useStore";
+import { useProjectsQuery } from "@/lib/queries/useProjects";
+import { useGoalsQuery } from "@/lib/queries/useGoals";
+import { useActionsQuery, useChangeActionStatusMutation } from "@/lib/queries/useActions";
 import { AppSidebar } from "@/components/AppSidebar";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import type { Action, Session } from "@/types";
@@ -110,10 +113,10 @@ const SessionActive: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const sessions = useStore((s) => s.sessions);
-  const actions = useStore((s) => s.actions);
-  const goals = useStore((s) => s.goals);
-  const projects = useStore((s) => s.projects);
-  const changeActionStatus = useStore((s) => s.changeActionStatus);
+  const actions = useActionsQuery().data ?? [];
+  const goals = useGoalsQuery().data ?? [];
+  const projects = useProjectsQuery().data ?? [];
+  const changeActionStatusMutation = useChangeActionStatusMutation();
   const addCompletedActionToSession = useStore((s) => s.addCompletedActionToSession);
   const addDroppedActionToSession = useStore((s) => s.addDroppedActionToSession);
   const addPlannedActionsToSession = useStore((s) => s.addPlannedActionsToSession);
@@ -366,7 +369,7 @@ const SessionActive: React.FC = () => {
       toast.info(t("sessionActive.action.fillFields"));
       return;
     }
-    changeActionStatus(currentAction.id, "done");
+    void changeActionStatusMutation.mutateAsync({ id: currentAction.id, newStatus: "done" });
     addCompletedActionToSession(session.id, currentAction.id);
     // Find next action to surface in toast.
     const remaining = session.plannedActionIds.filter(
@@ -387,7 +390,7 @@ const SessionActive: React.FC = () => {
       setConfirmDrop(null);
       return;
     }
-    changeActionStatus(a.id, "dropped");
+    void changeActionStatusMutation.mutateAsync({ id: a.id, newStatus: "dropped" });
     addDroppedActionToSession(session.id, a.id);
     toast(t("sessionActive.action.dropped"));
     setConfirmDrop(null);

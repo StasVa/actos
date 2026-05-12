@@ -6,6 +6,10 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useStore } from "@/store/useStore";
+import { useCreateProjectMutation, useProjectsQuery } from "@/lib/queries/useProjects";
+import { useGoalsQuery } from "@/lib/queries/useGoals";
+import { useActionsQuery, useCreateActionMutation } from "@/lib/queries/useActions";
+import { readGoalsFromCache } from "@/lib/storeQueryRef";
 import { emitAppEvent } from "@/lib/appEvents";
 import { getRecent, pushRecent, type RecentKind } from "@/lib/recentlyViewed";
 import type { Action, Goal, Idea, Project, Ritual, DayEntry } from "@/types";
@@ -73,16 +77,16 @@ export function CommandPalette() {
   const listRef = React.useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
-  const goals = useStore((s) => s.goals);
-  const projects = useStore((s) => s.projects);
-  const actions = useStore((s) => s.actions);
+  const goals = useGoalsQuery().data ?? [];
+  const projects = useProjectsQuery().data ?? [];
+  const actions = useActionsQuery().data ?? [];
   const rituals = useStore((s) => s.rituals);
   const ideas = useStore((s) => s.ideas);
   const dayEntries = useStore((s) => s.dayEntries);
   const settings = useStore((s) => s.settings);
   const openPanel = useStore((s) => s.openPanel);
-  const createAction = useStore((s) => s.createAction);
-  const createProject = useStore((s) => s.createProject);
+  const createActionMutation = useCreateActionMutation();
+  const createProjectMutation = useCreateProjectMutation();
 
   // Open/close listener
   React.useEffect(() => {
@@ -203,8 +207,9 @@ export function CommandPalette() {
             close();
             return;
           }
-          const id = createProject({ title: "", goalId, isDraft: true });
-          navigate(`/projects/${id}`);
+          void createProjectMutation
+            .mutateAsync({ title: "", goalId, isDraft: true })
+            .then(({ id }) => navigate(`/projects/${id}`));
           close();
         },
       },
@@ -544,21 +549,30 @@ export function CommandPalette() {
         else if (query.trim()) {
           // Empty results → quick-create action with the query (or route to
           // goal-builder if the user has no goals yet).
-          if (!useStore.getState().goals.some((g) => g.status === "active")) {
+          if (!readGoalsFromCache().some((g) => g.status === "active")) {
             navigate("/onboarding/goal");
             close();
             return;
           }
-          const id = createAction({ title: query.trim() });
-          toast.success(t("commandPalette.toast.actionCreated"));
-          openPanel({ kind: "action", mode: "edit", id });
+          void createActionMutation
+            .mutateAsync({ title: query.trim() })
+            .then(({ id }) => {
+              toast.success(t("commandPalette.toast.actionCreated"));
+              openPanel({ kind: "action", mode: "edit", id });
+            })
+            .catch((err) =>
+              toast.error(
+                "Couldn't create action: " +
+                  (err instanceof Error ? err.message : "unknown error"),
+              ),
+            );
           close();
         }
       }
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [open, flatRows, selectedIdx, query, createAction, openPanel]);
+  }, [open, flatRows, selectedIdx, query, createActionMutation, openPanel, t]);
 
   // Scroll selected row into view
   React.useEffect(() => {

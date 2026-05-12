@@ -3,6 +3,9 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { FolderOpen, Target } from "lucide-react";
 import { useStore } from "@/store/useStore";
+import { useProjectsQuery } from "@/lib/queries/useProjects";
+import { useGoalsQuery } from "@/lib/queries/useGoals";
+import { useActionsQuery } from "@/lib/queries/useActions";
 import { AppSidebar } from "@/components/AppSidebar";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { PageHeader } from "@/components/PageHeader";
@@ -35,9 +38,9 @@ const MS_DAY = 86400000;
 const RecentlyClosedHigherSection: React.FC = () => {
   const { t } = useTranslation();
   const fmtAgo = useFmtAgo();
-  const projects = useStore((s) => s.projects);
-  const goals = useStore((s) => s.goals);
-  const actions = useStore((s) => s.actions);
+  const projects = useProjectsQuery().data ?? [];
+  const goals = useGoalsQuery().data ?? [];
+  const actions = useActionsQuery().data ?? [];
 
   type Row = {
     kind: "project" | "goal";
@@ -211,9 +214,9 @@ const RecentlyClosedHigherSection: React.FC = () => {
 const RecentlyClosedActionsSection: React.FC = () => {
   const { t } = useTranslation();
   const fmtAgo = useFmtAgo();
-  const actions = useStore((s) => s.actions);
-  const goals = useStore((s) => s.goals);
-  const projects = useStore((s) => s.projects);
+  const actions = useActionsQuery().data ?? [];
+  const goals = useGoalsQuery().data ?? [];
+  const projects = useProjectsQuery().data ?? [];
   const openPanel = useStore((s) => s.openPanel);
 
   type Row = {
@@ -397,7 +400,7 @@ const RecentlyClosedActionsSection: React.FC = () => {
 
 const DelegatedSection: React.FC = () => {
   const { t } = useTranslation();
-  const actions = useStore((s) => s.actions);
+  const actions = useActionsQuery().data ?? [];
   const openPanel = useStore((s) => s.openPanel);
   const items = actions.filter((a) => a.status === "delegated");
 
@@ -448,9 +451,9 @@ const DelegatedSection: React.FC = () => {
 /* ===== Active Projects (scoped: cap 6, sort recent activity) ===== */
 const ActiveProjectsScoped: React.FC = () => {
   const { t } = useTranslation();
-  const goals = useStore((s) => s.goals);
-  const projects = useStore((s) => s.projects);
-  const actions = useStore((s) => s.actions);
+  const goals = useGoalsQuery().data ?? [];
+  const projects = useProjectsQuery().data ?? [];
+  const actions = useActionsQuery().data ?? [];
 
   type Row = {
     id: string;
@@ -542,9 +545,9 @@ const ActiveProjectsScoped: React.FC = () => {
 const Progress: React.FC = () => {
   const { t } = useTranslation();
   const [settingsOpen, setSettingsOpen] = React.useState(false);
-  const goals = useStore((s) => s.goals);
-  const projects = useStore((s) => s.projects);
-  const actions = useStore((s) => s.actions);
+  const goals = useGoalsQuery().data ?? [];
+  const projects = useProjectsQuery().data ?? [];
+  const actions = useActionsQuery().data ?? [];
 
   const activeGoals = goals.filter((g) => g.status === "active").length;
   const activeProjects = projects.filter((p) => p.status === "active").length;

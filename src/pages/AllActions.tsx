@@ -18,6 +18,10 @@ import { ImpactPill, TimePill } from "@/components/MetaPills";
 import { FilterDropdown, FilterOption } from "@/components/FilterDropdown";
 import { SortDropdown } from "@/components/SortDropdown";
 import { useStore } from "@/store/useStore";
+import { useProjectsQuery } from "@/lib/queries/useProjects";
+import { useGoalsQuery } from "@/lib/queries/useGoals";
+import { useActionsQuery, useChangeActionStatusMutation } from "@/lib/queries/useActions";
+import { useActionById } from "@/lib/selectors";
 import { toLegacyActions } from "@/lib/actionsAdapter";
 import { EmptyState, FilteredEmpty } from "@/components/EmptyState";
 import { PageHeader } from "@/components/PageHeader";
@@ -78,8 +82,8 @@ const ActionRow: React.FC<{ action: Action; selected: boolean; onSelect: () => v
   onSelect,
 }) => {
   const { t } = useTranslation();
-  const changeStatus = useStore((s) => s.changeActionStatus);
-  const storeAction = useStore((s) => s.actions.find((x) => x.id === action.id));
+  const changeActionStatusMutation = useChangeActionStatusMutation();
+  const storeAction = useActionById(action.id);
   const openPanel = useStore((s) => s.openPanel);
   const goal = GOALS[action.goal];
   const isTerminal = !isActive(action.status);
@@ -94,7 +98,11 @@ const ActionRow: React.FC<{ action: Action; selected: boolean; onSelect: () => v
     if (checkboxDisabled) return;
     if (isDone) {
       const today = new Date().toISOString().slice(0, 10);
-      changeStatus(action.id, "planned", { scheduledDate: today });
+      void changeActionStatusMutation.mutateAsync({
+        id: action.id,
+        newStatus: "planned",
+        statusPayload: { scheduledDate: today },
+      });
       toast.dismiss();
       toast.success(t("allActions.toast.reopened"));
       return;
@@ -104,7 +112,7 @@ const ActionRow: React.FC<{ action: Action; selected: boolean; onSelect: () => v
       openPanel({ kind: "action", mode: "edit", id: action.id });
       return;
     }
-    changeStatus(action.id, "done");
+    void changeActionStatusMutation.mutateAsync({ id: action.id, newStatus: "done" });
     toast.dismiss();
     toast.success(t("allActions.toast.markedDone"));
   };
@@ -237,15 +245,15 @@ const StatusPill: React.FC<{ status: ActionStatus }> = ({ status }) => (
 const ActionDetail: React.FC<{ action: Action }> = ({ action }) => {
   const { t } = useTranslation();
   const openPanel = useStore((s) => s.openPanel);
-  const changeActionStatus = useStore((s) => s.changeActionStatus);
+  const changeActionStatusMutation = useChangeActionStatusMutation();
   const handleEdit = () =>
     openPanel({ kind: "action", mode: "edit", id: action.id });
   const handleMarkDone = () => {
-    changeActionStatus(action.id, "done");
+    void changeActionStatusMutation.mutateAsync({ id: action.id, newStatus: "done" });
     toast.success(t("allActions.toast.completed"));
   };
   const handleReopen = () => {
-    changeActionStatus(action.id, "planned");
+    void changeActionStatusMutation.mutateAsync({ id: action.id, newStatus: "planned" });
     toast.success(t("allActions.toast.reopened"));
   };
   const goal = GOALS[action.goal];
@@ -468,9 +476,9 @@ const AllActions: React.FC = () => {
   const GOAL_OPTIONS = useMemo(() => makeGoalOptions(t), [t]);
 
   // Live store data → legacy renderer shape (rendering JSX is unchanged).
-  const storeActions = useStore((s) => s.actions);
-  const storeProjects = useStore((s) => s.projects);
-  const storeGoals = useStore((s) => s.goals);
+  const storeActions = useActionsQuery().data ?? [];
+  const storeProjects = useProjectsQuery().data ?? [];
+  const storeGoals = useGoalsQuery().data ?? [];
   const openPanel = useStore((s) => s.openPanel);
   const navigate = useNavigate();
   const hasActiveGoals = storeGoals.some((g) => g.status === "active");

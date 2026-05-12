@@ -18,6 +18,15 @@ import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import i18n from "@/i18n";
 import { useStore } from "@/store/useStore";
+import { useProjectsQuery } from "@/lib/queries/useProjects";
+import { useGoalsQuery } from "@/lib/queries/useGoals";
+import {
+  useActionsQuery,
+  useChangeActionStatusMutation,
+  useCreateActionMutation,
+  useDeleteActionMutation,
+  useUpdateActionMutation,
+} from "@/lib/queries/useActions";
 import type { Action, ActionStatus, ID } from "@/types";
 import { ConfirmModal } from "./ConfirmModal";
 import { ClampedNumberInput } from "./ClampedNumberInput";
@@ -137,18 +146,16 @@ function ActionEditorPanel({
   onClose: () => void;
 }) {
   const { t } = useTranslation();
-  const action = useStore((s) =>
-    actionId ? s.actions.find((a) => a.id === actionId) : undefined,
-  );
-  const projects = useStore((s) => s.projects);
-  const goals = useStore((s) => s.goals);
-  const allActions = useStore((s) => s.actions);
+  const allActions = useActionsQuery().data ?? [];
+  const action = actionId ? allActions.find((a) => a.id === actionId) : undefined;
+  const projects = useProjectsQuery().data ?? [];
+  const goals = useGoalsQuery().data ?? [];
   const layers = useStore((s) => s.settings.layers);
 
-  const updateAction = useStore((s) => s.updateAction);
-  const createAction = useStore((s) => s.createAction);
-  const changeActionStatus = useStore((s) => s.changeActionStatus);
-  const deleteAction = useStore((s) => s.deleteAction);
+  const updateActionMutation = useUpdateActionMutation();
+  const createActionMutation = useCreateActionMutation();
+  const changeActionStatusMutation = useChangeActionStatusMutation();
+  const deleteActionMutation = useDeleteActionMutation();
 
   const seed: Partial<Action> = mode === "edit" && action ? action : prefill ?? {};
   const [title, setTitle] = useState(seed.title ?? "");
@@ -205,7 +212,10 @@ function ActionEditorPanel({
 
   const persistField = <K extends keyof Action>(field: K, value: Action[K]) => {
     if (mode !== "edit" || !actionId) return;
-    updateAction(actionId, { [field]: value } as Partial<Action>);
+    updateActionMutation.mutate({
+      id: actionId,
+      partial: { [field]: value } as Partial<Action>,
+    });
   };
 
   const projectsByGoal = useMemo(() => {
@@ -297,16 +307,22 @@ function ActionEditorPanel({
       if (!delegateName.trim()) {
         setDelegateError(t("actionEditor.error.delegateName"));
         // Switch UI into delegated state so the field appears
-        changeActionStatus(actionId, "delegated", {
-          delegateName: "",
+        void changeActionStatusMutation.mutateAsync({
+          id: actionId,
+          newStatus: "delegated",
+          statusPayload: { delegateName: "" },
         });
         toast.error(t("actionEditor.toast.needDelegateName"));
         return;
       }
-      changeActionStatus(actionId, "delegated", {
-        delegateName: delegateName || "",
-        delegateNote: delegateNote || undefined,
-        expectedReturnDate: expectedReturn || undefined,
+      void changeActionStatusMutation.mutateAsync({
+        id: actionId,
+        newStatus: "delegated",
+        statusPayload: {
+          delegateName: delegateName || "",
+          delegateNote: delegateNote || undefined,
+          expectedReturnDate: expectedReturn || undefined,
+        },
       });
       toast(delegateName ? t("actionEditor.toast.delegatedTo", { name: delegateName }) : t("actionEditor.toast.delegated"));
       return;
@@ -317,14 +333,14 @@ function ActionEditorPanel({
     }
     setImpactError(null);
     setTimeError(null);
-    changeActionStatus(actionId, next);
+    void changeActionStatusMutation.mutateAsync({ id: actionId, newStatus: next });
     if (next === "done") toast(t("actionEditor.toast.markedDone"));
     if (next === "backlog") toast(t("actionEditor.toast.reopened"));
   };
 
   const confirmDropAction = () => {
     if (!actionId || !confirmDrop) return;
-    changeActionStatus(actionId, confirmDrop);
+    void changeActionStatusMutation.mutateAsync({ id: actionId, newStatus: confirmDrop });
     toast(confirmDrop === "dropped" ? t("actionEditor.toast.dropped") : t("actionEditor.toast.cancelled"));
     setConfirmDrop(null);
   };
@@ -350,10 +366,14 @@ function ActionEditorPanel({
     }
     if (!actionId) return;
     if (iso) {
-      changeActionStatus(actionId, "planned", { scheduledDate: iso });
+      void changeActionStatusMutation.mutateAsync({
+        id: actionId,
+        newStatus: "planned",
+        statusPayload: { scheduledDate: iso },
+      });
       toast(t("actionEditor.toast.scheduled"));
     } else {
-      changeActionStatus(actionId, "backlog");
+      void changeActionStatusMutation.mutateAsync({ id: actionId, newStatus: "backlog" });
       persistField("scheduledDate", undefined);
       toast(t("actionEditor.toast.movedToBacklog"));
     }
@@ -380,13 +400,16 @@ function ActionEditorPanel({
       setConfirmPastDate(null);
       return;
     }
-    changeActionStatus(actionId, "done");
+    void changeActionStatusMutation.mutateAsync({ id: actionId, newStatus: "done" });
     // Override timestamps: completedAt = picked date, scheduledDate kept
     // as historical record, plannedAt cleared (never genuinely planned).
-    updateAction(actionId, {
-      completedAt,
-      scheduledDate: iso,
-      plannedAt: undefined,
+    updateActionMutation.mutate({
+      id: actionId,
+      partial: {
+        completedAt,
+        scheduledDate: iso,
+        plannedAt: undefined,
+      },
     });
     setConfirmPastDate(null);
     toast(t("actionEditor.toast.markedDoneOn", { date: shortLabel }));
@@ -416,7 +439,7 @@ function ActionEditorPanel({
       }
       return;
     }
-    createAction({
+    void createActionMutation.mutateAsync({
       title: title.trim(),
       projectId,
       goalId,
@@ -439,22 +462,31 @@ function ActionEditorPanel({
 
   const handleDuplicate = () => {
     if (!action) return;
-    const newId = createAction({
-      title: t("actionEditor.copyOf", { title: action.title }),
-      projectId: action.projectId,
-      goalId: action.goalId,
-      notes: action.notes,
-      impact: action.impact,
-      timeEstimateMinutes: action.timeEstimateMinutes,
-      status: "backlog",
-    });
-    toast(t("actionEditor.toast.duplicated"));
-    useStore.getState().openPanel({ kind: "action", mode: "edit", id: newId });
+    void createActionMutation
+      .mutateAsync({
+        title: t("actionEditor.copyOf", { title: action.title }),
+        projectId: action.projectId,
+        goalId: action.goalId,
+        notes: action.notes,
+        impact: action.impact,
+        timeEstimateMinutes: action.timeEstimateMinutes,
+        status: "backlog",
+      })
+      .then(({ id: newId }) => {
+        toast(t("actionEditor.toast.duplicated"));
+        useStore.getState().openPanel({ kind: "action", mode: "edit", id: newId });
+      })
+      .catch((err) =>
+        toast.error(
+          "Couldn't duplicate action: " +
+            (err instanceof Error ? err.message : "unknown error"),
+        ),
+      );
   };
 
   const handleDelete = () => {
     if (!actionId) return;
-    deleteAction(actionId);
+    void deleteActionMutation.mutateAsync(actionId);
     toast(t("actionEditor.toast.deleted"));
     setConfirmDelete(false);
     onClose();

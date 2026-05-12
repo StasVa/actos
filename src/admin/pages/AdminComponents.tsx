@@ -6,6 +6,9 @@ import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { Plus, Search, ChevronDown } from "lucide-react";
 import { useStore } from "@/store/useStore";
+import { useProjectsQuery } from "@/lib/queries/useProjects";
+import { useActionsQuery } from "@/lib/queries/useActions";
+import { readGoalsFromCache } from "@/lib/storeQueryRef";
 import { useThemeChoice } from "@/lib/theme";
 import { ImpactPill, TimePill } from "@/components/MetaPills";
 import { ActionRow } from "@/components/ActionRow";
@@ -539,7 +542,7 @@ const Pills: React.FC = () => (
 
 // ───────── Rows ─────────
 const Rows: React.FC<{ live: boolean }> = ({ live }) => {
-  const liveActions = useStore((s) => s.actions);
+  const liveActions = useActionsQuery().data ?? [];
   const actions = live ? liveActions : MOCK_ACTIONS;
   const byStatus = (status: Action["status"]) => actions.find((a) => a.status === status);
   const states: Action["status"][] = ["backlog", "planned", "done", "delegated", "dropped", "cancelled"];
@@ -596,9 +599,9 @@ const dayTypeCards = [
 ];
 
 const Cards: React.FC<{ live: boolean }> = ({ live }) => {
-  const liveProjects = useStore((s) => s.projects);
+  const liveProjects = useProjectsQuery().data ?? [];
   const projects = live ? liveProjects : MOCK_PROJECTS;
-  const goalsList = live ? useStore.getState().goals : MOCK_GOALS;
+  const goalsList = live ? readGoalsFromCache() : MOCK_GOALS;
   const sample = projects.find((p) => p.status === "active");
   const sampleGoal = sample ? goalsList.find((g) => g.id === sample.goalId) : null;
 

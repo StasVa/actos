@@ -2,7 +2,16 @@ import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import { useStore, ritualMultiplier } from "@/store/useStore";
+import { useProjectsQuery } from "@/lib/queries/useProjects";
 import { useAuth } from "@/lib/useAuth";
+import {
+  useDeleteGoalMutation,
+  useDropGoalMutation,
+  useGoalsQuery,
+  useMarkGoalCompleteMutation,
+  useReopenGoalMutation,
+} from "@/lib/queries/useGoals";
+import { useActionsQuery } from "@/lib/queries/useActions";
 import { AppSidebar } from "@/components/AppSidebar";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { CardMenu } from "@/components/CardMenu";
@@ -133,9 +142,10 @@ const GoalCard: React.FC<{ m: GoalMeta; logTimeOn: boolean }> = ({ m, logTimeOn 
   const { goal: g, progress, outcome, effort, lastIso, state, projects, rituals, criteria, time, spark, sparkTips } = m;
   const navigate = useNavigate();
   const openPanel = useStore((s) => s.openPanel);
-  const markGoalComplete = useStore((s) => s.markGoalComplete);
-  const dropGoal = useStore((s) => s.dropGoal);
-  const deleteGoal = useStore((s) => s.deleteGoal);
+  const markGoalCompleteMutation = useMarkGoalCompleteMutation();
+  const dropGoalMutation = useDropGoalMutation();
+  const deleteGoalMutation = useDeleteGoalMutation();
+  const reopenGoalMutation = useReopenGoalMutation();
   const [confirmDrop, setConfirmDrop] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
@@ -254,13 +264,13 @@ const GoalCard: React.FC<{ m: GoalMeta; logTimeOn: boolean }> = ({ m, logTimeOn 
                     items={
                       archived
                         ? [
-                            { label: t("common.reopen"), onSelect: () => { useStore.getState().reopenGoal?.(g.id); toast(t("toast.goalReopened")); } },
+                            { label: t("common.reopen"), onSelect: () => { void reopenGoalMutation.mutateAsync(g.id); toast(t("toast.goalReopened")); } },
                             { label: t("goals.menu.edit"), onSelect: () => openPanel({ kind: "goal", mode: "edit", id: g.id }) },
                             { label: t("goals.menu.delete"), destructive: true, onSelect: () => setConfirmDelete(true) },
                           ]
                         : [
                             { label: t("goals.menu.edit"), onSelect: () => openPanel({ kind: "goal", mode: "edit", id: g.id }) },
-                            { label: t("goalEditor.markComplete"), onSelect: () => { markGoalComplete(g.id); toast(t("toast.goalCompleted")); } },
+                            { label: t("goalEditor.markComplete"), onSelect: () => { void markGoalCompleteMutation.mutateAsync(g.id); toast(t("toast.goalCompleted")); } },
                             { label: t("goals.menu.drop"), destructive: true, onSelect: () => setConfirmDrop(true) },
                             { label: t("goals.menu.delete"), destructive: true, onSelect: () => setConfirmDelete(true) },
                           ]
@@ -327,7 +337,7 @@ const GoalCard: React.FC<{ m: GoalMeta; logTimeOn: boolean }> = ({ m, logTimeOn 
         confirmLabel={t("goals.confirm.drop.confirmLabel")}
         destructive
         onCancel={() => setConfirmDrop(false)}
-        onConfirm={() => { dropGoal(g.id); toast(t("toast.goalDropped") || t("home.hero.toast.dropped")); setConfirmDrop(false); }}
+        onConfirm={() => { void dropGoalMutation.mutateAsync(g.id); toast(t("toast.goalDropped") || t("home.hero.toast.dropped")); setConfirmDrop(false); }}
       />
       <ConfirmModal
         open={confirmDelete}
@@ -336,7 +346,7 @@ const GoalCard: React.FC<{ m: GoalMeta; logTimeOn: boolean }> = ({ m, logTimeOn 
         confirmLabel={t("goals.confirm.delete.confirmLabel")}
         destructive
         onCancel={() => setConfirmDelete(false)}
-        onConfirm={() => { deleteGoal(g.id); toast(t("toast.goalDeleted")); setConfirmDelete(false); }}
+        onConfirm={() => { void deleteGoalMutation.mutateAsync(g.id); toast(t("toast.goalDeleted")); setConfirmDelete(false); }}
       />
     </>
   );
@@ -386,10 +396,10 @@ const Goals: React.FC = () => {
   const TYPE_OPTIONS = useTypeOptions(t);
   const SORT_OPTIONS = useSortOptions(t);
 
-  const goals = useStore((s) => s.goals);
-  const storeProjects = useStore((s) => s.projects);
+  const goals = useGoalsQuery().data ?? [];
+  const storeProjects = useProjectsQuery().data ?? [];
   const projects = useMemo(() => storeProjects.filter((p) => !p.isDraft), [storeProjects]);
-  const actions = useStore((s) => s.actions);
+  const actions = useActionsQuery().data ?? [];
   const rituals = useStore((s) => s.rituals);
   const settings = useStore((s) => s.settings);
   const { user } = useAuth();

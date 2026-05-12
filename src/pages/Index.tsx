@@ -7,6 +7,23 @@ import { Tooltip, SparkTooltipContent, StateDotTooltip } from "@/components/Tool
 import { LifetimeCounters } from "@/components/LifetimeCounters";
 import { buildYouTubeTooltips, buildFitnessTooltips, buildReadingTooltips } from "@/lib/sparkTooltips";
 import { useStore } from "@/store/useStore";
+import { useProjectsQuery } from "@/lib/queries/useProjects";
+import {
+  useDeleteGoalMutation,
+  useDropGoalMutation,
+  useGoalsQuery,
+  useMarkGoalCompleteMutation,
+} from "@/lib/queries/useGoals";
+import {
+  useDeleteProjectMutation,
+  useDropProjectMutation,
+  useMarkProjectCompleteMutation,
+} from "@/lib/queries/useProjects";
+import {
+  useActionsQuery,
+  useChangeActionStatusMutation,
+  useCreateActionMutation,
+} from "@/lib/queries/useActions";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { ritualMultiplier } from "@/store/useStore";
 import { CardMenu } from "@/components/CardMenu";
@@ -28,13 +45,17 @@ export const TODAY_ISO = new Date().toISOString().slice(0, 10);
 
 const SampleDataBanner: React.FC = () => {
   const { t } = useTranslation();
-  const hasSample = useStore((s) =>
-    s.goals.some((g) => g.isSample) ||
-    s.projects.some((p) => p.isSample) ||
-    s.actions.some((a) => a.isSample) ||
-    s.rituals.some((r) => r.isSample) ||
-    s.ideas.some((i) => i.isSample),
-  );
+  const goalsList = useGoalsQuery().data ?? [];
+  const projectsList = useProjectsQuery().data ?? [];
+  const actionsList = useActionsQuery().data ?? [];
+  const hasSample =
+    goalsList.some((g) => g.isSample) ||
+    projectsList.some((p) => p.isSample) ||
+    actionsList.some((a) => a.isSample) ||
+    useStore((s) =>
+      s.rituals.some((r) => r.isSample) ||
+      s.ideas.some((i) => i.isSample),
+    );
   const clearSampleData = useStore((s) => s.clearSampleData);
   const [confirmOpen, setConfirmOpen] = useState(false);
   if (!hasSample) return null;
@@ -353,9 +374,9 @@ const GoalColumn: React.FC<{
 const GoalColumnMenu: React.FC<{ goalId: string }> = ({ goalId }) => {
   const { t } = useTranslation();
   const openPanel = useStore((s) => s.openPanel);
-  const markGoalComplete = useStore((s) => s.markGoalComplete);
-  const dropGoal = useStore((s) => s.dropGoal);
-  const deleteGoal = useStore((s) => s.deleteGoal);
+  const markGoalCompleteMutation = useMarkGoalCompleteMutation();
+  const dropGoalMutation = useDropGoalMutation();
+  const deleteGoalMutation = useDeleteGoalMutation();
   const [confirmDrop, setConfirmDrop] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   return (
@@ -364,7 +385,7 @@ const GoalColumnMenu: React.FC<{ goalId: string }> = ({ goalId }) => {
         ariaLabel={t("home.hero.menu.aria")}
         items={[
           { label: t("common.edit"), onSelect: () => openPanel({ kind: "goal", mode: "edit", id: goalId }) },
-          { label: t("common.markDone"), onSelect: () => { markGoalComplete(goalId); toast(t("toast.goalCompleted")); } },
+          { label: t("common.markDone"), onSelect: () => { void markGoalCompleteMutation.mutateAsync(goalId); toast(t("toast.goalCompleted")); } },
           { label: t("common.drop"), destructive: true, onSelect: () => setConfirmDrop(true) },
           { label: t("common.delete"), destructive: true, onSelect: () => setConfirmDelete(true) },
         ]}
@@ -376,7 +397,7 @@ const GoalColumnMenu: React.FC<{ goalId: string }> = ({ goalId }) => {
         confirmLabel={t("confirm.drop.goal.cta")}
         destructive
         onCancel={() => setConfirmDrop(false)}
-        onConfirm={() => { dropGoal(goalId); toast(t("home.hero.toast.dropped")); setConfirmDrop(false); }}
+        onConfirm={() => { void dropGoalMutation.mutateAsync(goalId); toast(t("home.hero.toast.dropped")); setConfirmDrop(false); }}
       />
       <ConfirmModal
         open={confirmDelete}
@@ -385,7 +406,7 @@ const GoalColumnMenu: React.FC<{ goalId: string }> = ({ goalId }) => {
         confirmLabel={t("common.delete")}
         destructive
         onCancel={() => setConfirmDelete(false)}
-        onConfirm={() => { deleteGoal(goalId); toast(t("toast.goalDeleted")); setConfirmDelete(false); }}
+        onConfirm={() => { void deleteGoalMutation.mutateAsync(goalId); toast(t("toast.goalDeleted")); setConfirmDelete(false); }}
       />
     </>
   );
@@ -434,9 +455,9 @@ function relativeDayLabel(iso?: string): string {
 
 export const Hero: React.FC = () => {
   const { t } = useTranslation();
-  const goals = useStore((s) => s.goals);
-  const projects = useStore((s) => s.projects);
-  const actions = useStore((s) => s.actions);
+  const goals = useGoalsQuery().data ?? [];
+  const projects = useProjectsQuery().data ?? [];
+  const actions = useActionsQuery().data ?? [];
 
   const activeGoals = goals.filter((g) => g.status === "active");
   if (activeGoals.length === 0) {
@@ -579,9 +600,9 @@ type ActiveProjectMeta = {
 
 const ActiveProjectCard: React.FC<{ p: ActiveProjectMeta; pct: number }> = ({ p, pct }) => {
   const { t } = useTranslation();
-  const markProjectComplete = useStore((s) => s.markProjectComplete);
-  const dropProject = useStore((s) => s.dropProject);
-  const deleteProject = useStore((s) => s.deleteProject);
+  const markProjectCompleteMutation = useMarkProjectCompleteMutation();
+  const dropProjectMutation = useDropProjectMutation();
+  const deleteProjectMutation = useDeleteProjectMutation();
   const [confirmDrop, setConfirmDrop] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
@@ -606,7 +627,7 @@ const ActiveProjectCard: React.FC<{ p: ActiveProjectMeta; pct: number }> = ({ p,
               <CardMenu
                 ariaLabel={t("home.activeProjects.menu.aria")}
                 items={[
-                  { label: t("common.markDone"), onSelect: () => { markProjectComplete(p.id); toast(t("home.activeProjects.toast.completed")); } },
+                  { label: t("common.markDone"), onSelect: () => { void markProjectCompleteMutation.mutateAsync(p.id); toast(t("home.activeProjects.toast.completed")); } },
                   { label: t("common.drop"), destructive: true, onSelect: () => setConfirmDrop(true) },
                   { label: t("common.delete"), destructive: true, onSelect: () => setConfirmDelete(true) },
                 ]}
@@ -641,7 +662,7 @@ const ActiveProjectCard: React.FC<{ p: ActiveProjectMeta; pct: number }> = ({ p,
         confirmLabel={t("confirm.drop.project.cta")}
         destructive
         onCancel={() => setConfirmDrop(false)}
-        onConfirm={() => { dropProject(p.id); toast(t("home.activeProjects.toast.dropped")); setConfirmDrop(false); }}
+        onConfirm={() => { void dropProjectMutation.mutateAsync(p.id); toast(t("home.activeProjects.toast.dropped")); setConfirmDrop(false); }}
       />
       <ConfirmModal
         open={confirmDelete}
@@ -650,7 +671,7 @@ const ActiveProjectCard: React.FC<{ p: ActiveProjectMeta; pct: number }> = ({ p,
         confirmLabel={t("common.delete")}
         destructive
         onCancel={() => setConfirmDelete(false)}
-        onConfirm={() => { deleteProject(p.id); toast(t("home.activeProjects.toast.deleted")); setConfirmDelete(false); }}
+        onConfirm={() => { void deleteProjectMutation.mutateAsync(p.id); toast(t("home.activeProjects.toast.deleted")); setConfirmDelete(false); }}
       />
     </>
   );
@@ -659,9 +680,9 @@ const ActiveProjectCard: React.FC<{ p: ActiveProjectMeta; pct: number }> = ({ p,
 /* ===== Active Projects (live store-wired) ===== */
 export const ActiveProjects: React.FC = () => {
   const { t } = useTranslation();
-  const goals = useStore((s) => s.goals);
-  const projects = useStore((s) => s.projects);
-  const actions = useStore((s) => s.actions);
+  const goals = useGoalsQuery().data ?? [];
+  const projects = useProjectsQuery().data ?? [];
+  const actions = useActionsQuery().data ?? [];
 
   const activeProjects = projects.filter((p) => p.status === "active" && !p.isDraft);
   const projectsWithMeta = activeProjects.map((p) => {
@@ -765,16 +786,16 @@ export const TodayZone: React.FC<{
   onCloseClick: () => void;
 }> = ({ onPlanClick, onCloseClick }) => {
   const { t } = useTranslation();
-  const goals = useStore((s) => s.goals);
-  const projects = useStore((s) => s.projects);
-  const actions = useStore((s) => s.actions);
+  const goals = useGoalsQuery().data ?? [];
+  const projects = useProjectsQuery().data ?? [];
+  const actions = useActionsQuery().data ?? [];
   const rituals = useStore((s) => s.rituals);
   const dayEntry = useStore((s) =>
     s.dayEntries.find((d) => d.date === TODAY_ISO),
   );
   const settings = useStore((s) => s.settings);
-  const changeActionStatus = useStore((s) => s.changeActionStatus);
-  const createAction = useStore((s) => s.createAction);
+  const changeActionStatusMutation = useChangeActionStatusMutation();
+  const createActionMutation = useCreateActionMutation();
   const openPanel = useStore((s) => s.openPanel);
   const updateDayEntry = useStore((s) => s.updateDayEntry);
   const markRitualInstanceDone = useStore((s) => s.markRitualInstanceDone);
@@ -910,7 +931,11 @@ export const TodayZone: React.FC<{
     const a = actions.find((x) => x.id === id);
     if (!a) return;
     if (a.status === "done") {
-      changeActionStatus(id, "planned", { scheduledDate: TODAY_ISO });
+      void changeActionStatusMutation.mutateAsync({
+        id,
+        newStatus: "planned",
+        statusPayload: { scheduledDate: TODAY_ISO },
+      });
       toast.dismiss();
       toast.success(t("home.actions.toast.reopened"));
       return;
@@ -923,7 +948,7 @@ export const TodayZone: React.FC<{
       openPanel({ kind: "action", mode: "edit", id });
       return;
     }
-    changeActionStatus(id, "done");
+    void changeActionStatusMutation.mutateAsync({ id, newStatus: "done" });
     toast.dismiss();
     toast.success(t("home.actions.toast.markedDone"));
   };
@@ -931,16 +956,25 @@ export const TodayZone: React.FC<{
   const handleQuickAdd = () => {
     const title = quickAdd.trim();
     if (!title) return;
-    const id = createAction({ title, scheduledDate: TODAY_ISO });
     setQuickAdd("");
-    // If a plan exists, append to plannedActionIds.
-    if (isPlanned) {
-      updateDayEntry(TODAY_ISO, {
-        plannedActionIds: [...(dayEntry?.plannedActionIds ?? []), id],
-      });
-    }
-    toast.success(t("home.actions.toast.added"));
-    openPanel({ kind: "action", mode: "edit", id });
+    void createActionMutation
+      .mutateAsync({ title, scheduledDate: TODAY_ISO })
+      .then(({ id }) => {
+        // If a plan exists, append to plannedActionIds.
+        if (isPlanned) {
+          updateDayEntry(TODAY_ISO, {
+            plannedActionIds: [...(dayEntry?.plannedActionIds ?? []), id],
+          });
+        }
+        toast.success(t("home.actions.toast.added"));
+        openPanel({ kind: "action", mode: "edit", id });
+      })
+      .catch((err) =>
+        toast.error(
+          "Couldn't create action: " +
+            (err instanceof Error ? err.message : "unknown error"),
+        ),
+      );
   };
 
   const handleRitualDone = (ritualId: string, alreadyDone: boolean) => {
@@ -1437,11 +1471,11 @@ export const TodayZone: React.FC<{
 /* ===== Heavy Lift (live) ===== */
 const HeavyLift: React.FC = () => {
   const { t } = useTranslation();
-  const actions = useStore((s) => s.actions);
-  const goals = useStore((s) => s.goals);
-  const projects = useStore((s) => s.projects);
+  const actions = useActionsQuery().data ?? [];
+  const goals = useGoalsQuery().data ?? [];
+  const projects = useProjectsQuery().data ?? [];
   const openPanel = useStore((s) => s.openPanel);
-  const changeStatus = useStore((s) => s.changeActionStatus);
+  const changeActionStatusMutation = useChangeActionStatusMutation();
 
   const items = actions
     .filter((a) => (a.status === "planned" || a.status === "backlog"))
@@ -1480,7 +1514,7 @@ const HeavyLift: React.FC = () => {
                 </div>
                 {time && <span className="font-mono text-[12px] text-text-secondary whitespace-nowrap">{time}</span>}
                 <button
-                  onClick={() => { changeStatus(a.id, "done"); toast.success(t("home.heavyLift.toast.completed")); }}
+                  onClick={() => { void changeActionStatusMutation.mutateAsync({ id: a.id, newStatus: "done" }); toast.success(t("home.heavyLift.toast.completed")); }}
                   className="text-[12px] text-accent hover:text-accent-hover whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity"
                 >
                   {t("home.heavyLift.markDone")}
@@ -1503,11 +1537,11 @@ const HeavyLift: React.FC = () => {
 /* ===== Quick Moves (live) ===== */
 const QuickMoves: React.FC = () => {
   const { t } = useTranslation();
-  const actions = useStore((s) => s.actions);
-  const goals = useStore((s) => s.goals);
-  const projects = useStore((s) => s.projects);
+  const actions = useActionsQuery().data ?? [];
+  const goals = useGoalsQuery().data ?? [];
+  const projects = useProjectsQuery().data ?? [];
   const openPanel = useStore((s) => s.openPanel);
-  const changeStatus = useStore((s) => s.changeActionStatus);
+  const changeActionStatusMutation = useChangeActionStatusMutation();
 
   const items = actions
     .filter((a) => a.status === "planned" || a.status === "backlog")
@@ -1538,7 +1572,7 @@ const QuickMoves: React.FC = () => {
               >
                 <Strip color={c} />
                 <button
-                  onClick={(e) => { e.stopPropagation(); changeStatus(a.id, "done"); toast.success(t("home.heavyLift.toast.completed")); }}
+                  onClick={(e) => { e.stopPropagation(); void changeActionStatusMutation.mutateAsync({ id: a.id, newStatus: "done" }); toast.success(t("home.heavyLift.toast.completed")); }}
                   className="ml-1 inline-block rounded-[2px] border border-text-tertiary hover:border-accent shrink-0"
                   style={{ width: 14, height: 14 }}
                   aria-label={t("home.quickMoves.markDoneAria")}
@@ -1566,8 +1600,8 @@ const TinyHeader: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 
 export const RecentlyClosed: React.FC = () => {
   const { t, i18n: i18nInst } = useTranslation();
-  const projects = useStore((s) => s.projects);
-  const goals = useStore((s) => s.goals);
+  const projects = useProjectsQuery().data ?? [];
+  const goals = useGoalsQuery().data ?? [];
   const items = projects
     .filter((p) => p.status === "completed" && p.completedAt)
     .sort((a, b) => (b.completedAt ?? "").localeCompare(a.completedAt ?? ""))
@@ -1603,7 +1637,7 @@ export const RecentlyClosed: React.FC = () => {
 
 export const Delegated: React.FC = () => {
   const { t } = useTranslation();
-  const actions = useStore((s) => s.actions);
+  const actions = useActionsQuery().data ?? [];
   const items = actions.filter((a) => a.status === "delegated").slice(0, 4);
   return (
     <div className="p-4">
@@ -1630,8 +1664,8 @@ export const Delegated: React.FC = () => {
 
 const ThisWeek: React.FC = () => {
   const { t } = useTranslation();
-  const actions = useStore((s) => s.actions);
-  const projects = useStore((s) => s.projects);
+  const actions = useActionsQuery().data ?? [];
+  const projects = useProjectsQuery().data ?? [];
   const cutoff = Date.now() - 7 * 86400000;
   const inWeek = (iso?: string) => !!iso && new Date(iso).getTime() >= cutoff;
   const done = actions.filter((a) => a.status === "done" && inWeek(a.completedAt)).length;
@@ -1698,8 +1732,8 @@ function selectLookingBackDate(
 
 const LookingBackCard: React.FC<{ date: string }> = ({ date }) => {
   const { t, i18n: i18nInst } = useTranslation();
-  const goals = useStore((s) => s.goals);
-  const actions = useStore((s) => s.actions);
+  const goals = useGoalsQuery().data ?? [];
+  const actions = useActionsQuery().data ?? [];
   const rituals = useStore((s) => s.rituals);
   const yEntry = useStore((s) => s.dayEntries.find((d) => d.date === date));
 
@@ -1824,7 +1858,7 @@ const Index: React.FC = () => {
 
   const settings = useStore((s) => s.settings);
   const todayEntry = useStore((s) => s.dayEntries.find((d) => d.date === TODAY_ISO));
-  const actions = useStore((s) => s.actions);
+  const actions = useActionsQuery().data ?? [];
   const rituals = useStore((s) => s.rituals);
   const dayEntries = useStore((s) => s.dayEntries);
   const closeDay = useStore((s) => s.closeDay);

@@ -5,7 +5,13 @@ import { toast } from "sonner";
 import { Tooltip, StateDotTooltip } from "@/components/Tooltip";
 import { CardMenu } from "@/components/CardMenu";
 import { ConfirmModal } from "@/components/ConfirmModal";
-import { useStore, selectors } from "@/store/useStore";
+import {
+  useDeleteProjectMutation,
+  useDropProjectMutation,
+  useMarkProjectCompleteMutation,
+} from "@/lib/queries/useProjects";
+import { useActionsQuery } from "@/lib/queries/useActions";
+import { useProjectById, useProjectProgress, useStateIndicator } from "@/lib/selectors";
 import { formatTime } from "@/lib/format";
 import { timeInvestedMinutes } from "@/lib/timeStats";
 
@@ -63,24 +69,22 @@ export type ProjectCardProps = {
 export const ProjectCard: React.FC<ProjectCardProps> = ({ projectId, goalLabel, goalColor }) => {
   const { t, i18n } = useTranslation();
   const locale = i18n.language || "en";
-  const project = useStore((s) => s.projects.find((p) => p.id === projectId));
-  const allActions = useStore((s) => s.actions);
+  const project = useProjectById(projectId);
+  const allActions = useActionsQuery().data ?? [];
   const actions = useMemo(
     () => allActions.filter((a) => a.projectId === projectId),
     [allActions, projectId],
   );
   // Time tracking is always on; layer references kept for transitional safety.
 
-  const markProjectComplete = useStore((s) => s.markProjectComplete);
-  const dropProject = useStore((s) => s.dropProject);
-  const deleteProject = useStore((s) => s.deleteProject);
+  const markProjectCompleteMutation = useMarkProjectCompleteMutation();
+  const dropProjectMutation = useDropProjectMutation();
+  const deleteProjectMutation = useDeleteProjectMutation();
   const [confirmDrop, setConfirmDrop] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
-  const progressOutcome = useStore((s) => selectors.projectProgress(s, projectId).outcome);
-  const progressEffort = useStore((s) => selectors.projectProgress(s, projectId).effort);
-  const progress = { outcome: progressOutcome, effort: progressEffort };
-  const stateDot = useStore((s) => selectors.stateIndicator(s, "project", projectId));
+  const progress = useProjectProgress(projectId);
+  const stateDot = useStateIndicator("project", projectId);
 
   const meta = useMemo(() => {
     const liveActs = actions.filter((a) => a.status !== "dropped" && a.status !== "cancelled");
@@ -176,7 +180,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ projectId, goalLabel, 
               <CardMenu
                 ariaLabel={t("projects.menu.aria")}
                 items={[
-                  { label: t("common.markDone"), onSelect: () => { markProjectComplete(projectId); toast(t("toast.projectCompleted")); } },
+                  { label: t("common.markDone"), onSelect: () => { void markProjectCompleteMutation.mutateAsync(projectId); toast(t("toast.projectCompleted")); } },
                   { label: t("common.drop"), destructive: true, onSelect: () => setConfirmDrop(true) },
                   { label: t("common.delete"), destructive: true, onSelect: () => setConfirmDelete(true) },
                 ]}
@@ -252,7 +256,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ projectId, goalLabel, 
         confirmLabel={t("common.drop")}
         destructive
         onCancel={() => setConfirmDrop(false)}
-        onConfirm={() => { dropProject(projectId); toast(t("toast.projectDropped")); setConfirmDrop(false); }}
+        onConfirm={() => { void dropProjectMutation.mutateAsync(projectId); toast(t("toast.projectDropped")); setConfirmDrop(false); }}
       />
       <ConfirmModal
         open={confirmDelete}
@@ -261,7 +265,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ projectId, goalLabel, 
         confirmLabel={t("common.delete")}
         destructive
         onCancel={() => setConfirmDelete(false)}
-        onConfirm={() => { deleteProject(projectId); toast(t("toast.projectDeleted")); setConfirmDelete(false); }}
+        onConfirm={() => { void deleteProjectMutation.mutateAsync(projectId); toast(t("toast.projectDeleted")); setConfirmDelete(false); }}
       />
     </>
   );

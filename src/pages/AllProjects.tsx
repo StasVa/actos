@@ -7,6 +7,9 @@ import { FilterDropdown, FilterOption } from "@/components/FilterDropdown";
 import { SortDropdown } from "@/components/SortDropdown";
 import { toast } from "sonner";
 import { useStore } from "@/store/useStore";
+import { useCreateProjectMutation, useProjectsQuery } from "@/lib/queries/useProjects";
+import { useGoalsQuery } from "@/lib/queries/useGoals";
+import { useActionsQuery } from "@/lib/queries/useActions";
 import { AppSidebar } from "@/components/AppSidebar";
 import { ProjectCard as SharedProjectCard } from "@/components/ProjectCard";
 import { EmptyState, FilteredEmpty } from "@/components/EmptyState";
@@ -235,11 +238,11 @@ const AllProjects: React.FC = () => {
   const STATE_OPTIONS = useStateOptions(t);
   const SORT_OPTIONS = useSortOptions(t);
 
-  const storeProjects = useStore((s) => s.projects);
-  const storeGoals = useStore((s) => s.goals);
-  const storeActions = useStore((s) => s.actions);
+  const storeProjects = useProjectsQuery().data ?? [];
+  const storeGoals = useGoalsQuery().data ?? [];
+  const storeActions = useActionsQuery().data ?? [];
   const openPanel = useStore((s) => s.openPanel);
-  const createProject = useStore((s) => s.createProject);
+  const createProjectMutation = useCreateProjectMutation();
   const navigate = useNavigate();
 
   // Derive the visual project rows from the live store (preserves the existing
@@ -315,8 +318,9 @@ const AllProjects: React.FC = () => {
       toast.error(t("allProjects.toast.createGoalFirst"));
       return;
     }
-    const id = createProject({ title: "", goalId, isDraft: true });
-    navigate(`/projects/${id}`);
+    void createProjectMutation
+      .mutateAsync({ title: "", goalId, isDraft: true })
+      .then(({ id }) => navigate(`/projects/${id}`));
   };
 
   const handleNewGoal = () => {

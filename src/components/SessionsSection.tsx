@@ -14,6 +14,8 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { format, parseISO } from "date-fns";
 import { useStore } from "@/store/useStore";
+import { useGoalsQuery } from "@/lib/queries/useGoals";
+import { useActionsQuery } from "@/lib/queries/useActions";
 import type { Action, Goal, ID, Session } from "@/types";
 import { formatTime } from "@/lib/format";
 import {
@@ -195,8 +197,8 @@ export const SessionDetailPanel: React.FC<{
   onClose: () => void;
 }> = ({ session, onClose }) => {
   const { t } = useTranslation();
-  const actions = useStore((s) => s.actions);
-  const goals = useStore((s) => s.goals);
+  const actions = useActionsQuery().data ?? [];
+  const goals = useGoalsQuery().data ?? [];
   const openPanel = useStore((s) => s.openPanel);
 
   const dur = sessionDurationMinutes(session);
@@ -330,7 +332,7 @@ export const SessionsSection: React.FC<Props> = ({
 }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const actions = useStore((s) => s.actions);
+  const actions = useActionsQuery().data ?? [];
   const allSessions = useStore((s) => s.sessions);
   const [selectedId, setSelectedId] = useState<ID | null>(null);
   const [expanded, setExpanded] = useState(false);

@@ -40,6 +40,7 @@ export interface Project {
   goalId: ID;
   title: string;
   status: ProjectStatus;
+  // TODO(post-beta): consider TiptapDoc type — currently treated as opaque JSON string by Supabase rowMappers.
   description?: string;
   references: ProjectReference[];
   createdAt: ISODateTime;

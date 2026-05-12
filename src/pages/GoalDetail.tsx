@@ -6,6 +6,10 @@ import i18n from "@/i18n";
 import { Tooltip, StateDotTooltip } from "@/components/Tooltip";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { useStore, selectors } from "@/store/useStore";
+import { useCreateProjectMutation, useProjectsQuery } from "@/lib/queries/useProjects";
+import { useGoalProgress, useStateIndicator } from "@/lib/selectors";
+import { useGoalsQuery, useUpdateGoalMutation } from "@/lib/queries/useGoals";
+import { useActionsQuery } from "@/lib/queries/useActions";
 import type { Action, Goal, Project, Ritual, GoalColorVar } from "@/types";
 import { AppSidebar } from "@/components/AppSidebar";
 import { ProjectCard as SharedProjectCard } from "@/components/ProjectCard";
@@ -37,12 +41,15 @@ const GhostAddButton: React.FC<{ children: React.ReactNode; onClick?: () => void
 /* ===== Success Criteria ===== */
 const SuccessCriteria: React.FC<{ goal: Goal }> = ({ goal }) => {
   const { t } = useTranslation();
-  const updateGoal = useStore((s) => s.updateGoal);
+  const updateGoalMutation = useUpdateGoalMutation();
   const criteria = goal.successCriteria ?? [];
   const met = criteria.filter((c) => c.done).length;
   const toggle = (cid: string) => {
-    updateGoal(goal.id, {
-      successCriteria: criteria.map((c) => (c.id === cid ? { ...c, done: !c.done } : c)),
+    void updateGoalMutation.mutateAsync({
+      id: goal.id,
+      partial: {
+        successCriteria: criteria.map((c) => (c.id === cid ? { ...c, done: !c.done } : c)),
+      },
     });
   };
   return (
@@ -131,8 +138,9 @@ const HeroState: React.FC<{
 }> = ({ goal, projects, rituals, actions }) => {
   const { t } = useTranslation();
   const color = COLOR_VAR[goal.color];
-  const progressOutcome = useStore((s) => selectors.goalProgress(s, goal.id).outcome);
-  const progressEffort = useStore((s) => selectors.goalProgress(s, goal.id).effort);
+  const progress = useGoalProgress(goal.id);
+  const progressOutcome = progress.outcome;
+  const progressEffort = progress.effort;
   const projectsClosed = projects.filter((p) => p.status === "completed").length;
   const projectsActive = projects.filter((p) => p.status === "active").length;
   const projectsTotal = projects.length;
@@ -473,14 +481,13 @@ const GoalDetail: React.FC = () => {
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const goal = useStore((s) => s.goals.find((g) => g.id === id));
-  const allProjects = useStore((s) => s.projects);
+  const goal = (useGoalsQuery().data ?? []).find((g) => g.id === id);
+  const allProjects = useProjectsQuery().data ?? [];
   const allRituals = useStore((s) => s.rituals);
-  const allActions = useStore((s) => s.actions);
+  const allActions = useActionsQuery().data ?? [];
   const openPanel = useStore((s) => s.openPanel);
-  const state = useStore((s) =>
-    goal ? selectors.stateIndicator(s, "goal", goal.id) : "active",
-  );
+  const createProjectMutation = useCreateProjectMutation();
+  const state = useStateIndicator("goal", goal?.id ?? "");
 
   const projects = useMemo(
     () => allProjects.filter((p) => p.goalId === id && !p.isDraft),
@@ -591,12 +598,9 @@ const GoalDetail: React.FC = () => {
             )}
             <GhostAddButton
               onClick={() => {
-                const newId = useStore.getState().createProject({
-                  title: "",
-                  goalId: goal.id,
-                  isDraft: true,
-                });
-                navigate(`/projects/${newId}`);
+                void createProjectMutation
+                  .mutateAsync({ title: "", goalId: goal.id, isDraft: true })
+                  .then(({ id: newId }) => navigate(`/projects/${newId}`));
               }}
             >
               {t("goalDetail.activeProjects.add")}

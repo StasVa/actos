@@ -3,6 +3,9 @@ import { useTranslation } from "react-i18next";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { useStore } from "@/store/useStore";
+import { useGoalsQuery } from "@/lib/queries/useGoals";
+import { useCreateProjectMutation, useProjectsQuery } from "@/lib/queries/useProjects";
+import { useCreateActionMutation } from "@/lib/queries/useActions";
 import type { Idea, IdeaStatus, ID } from "@/types";
 import { toast } from "sonner";
 import { ConfirmModal } from "@/components/ConfirmModal";
@@ -94,7 +97,7 @@ const NewIdeaForm: React.FC<{
   onClose: () => void;
 }> = ({ defaultGoalId, onClose }) => {
   const { t } = useTranslation();
-  const goals = useStore((s) => s.goals);
+  const goals = useGoalsQuery().data ?? [];
   const activeGoals = useMemo(() => goals.filter((g) => g.status === "active"), [goals]);
   const captureIdea = useStore((s) => s.captureIdea);
   const selectIdea = useStore((s) => s.selectIdea);
@@ -308,24 +311,36 @@ type OverlayMode = null | "action" | "project" | "discard";
 
 const ConvertActionOverlay: React.FC<{ idea: Idea; onDone: () => void }> = ({ idea, onDone }) => {
   const { t } = useTranslation();
-  const projects = useStore((s) =>
-    s.projects.filter((p) => p.goalId === idea.goalId && p.status === "active"),
+  const allProjects = useProjectsQuery().data ?? [];
+  const projects = allProjects.filter(
+    (p) => p.goalId === idea.goalId && p.status === "active",
   );
   const convertIdeaToAction = useStore((s) => s.convertIdeaToAction);
+  const createActionMutation = useCreateActionMutation();
   const [title, setTitle] = useState(idea.title);
   const [projectId, setProjectId] = useState<string>(projects[0]?.id ?? "");
   const [notes, setNotes] = useState(idea.note ?? "");
 
   const submit = () => {
     if (!title.trim()) return;
-    convertIdeaToAction(idea.id, {
-      title: title.trim(),
-      projectId: projectId || null,
-      goalId: idea.goalId,
-      notes: notes.trim() || undefined,
-    });
-    toast.success(t("ideas.toast.convertedAction"));
-    onDone();
+    void createActionMutation
+      .mutateAsync({
+        title: title.trim(),
+        projectId: projectId || null,
+        goalId: idea.goalId,
+        notes: notes.trim() || undefined,
+      })
+      .then(({ id: newActionId }) => {
+        convertIdeaToAction(idea.id, newActionId);
+        toast.success(t("ideas.toast.convertedAction"));
+        onDone();
+      })
+      .catch((err) =>
+        toast.error(
+          "Couldn't convert idea: " +
+            (err instanceof Error ? err.message : "unknown error"),
+        ),
+      );
   };
 
   return (
@@ -372,20 +387,31 @@ const ConvertActionOverlay: React.FC<{ idea: Idea; onDone: () => void }> = ({ id
 const ConvertProjectOverlay: React.FC<{ idea: Idea; onDone: () => void }> = ({ idea, onDone }) => {
   const { t } = useTranslation();
   const convertIdeaToProject = useStore((s) => s.convertIdeaToProject);
+  const createProjectMutation = useCreateProjectMutation();
   const [title, setTitle] = useState(idea.title);
   const [desc, setDesc] = useState("");
   const [notes, setNotes] = useState(idea.note ?? "");
 
   const submit = () => {
     if (!title.trim()) return;
-    convertIdeaToProject(idea.id, {
-      title: title.trim(),
-      goalId: idea.goalId,
-      description: (desc.trim() || notes.trim() || undefined),
-      references: (idea.references ?? []).map((r) => ({ ...r })),
-    });
-    toast.success(t("ideas.toast.convertedProject"));
-    onDone();
+    void createProjectMutation
+      .mutateAsync({
+        title: title.trim(),
+        goalId: idea.goalId,
+        description: (desc.trim() || notes.trim() || undefined),
+        references: (idea.references ?? []).map((r) => ({ ...r })),
+      })
+      .then(({ id: newProjectId }) => {
+        convertIdeaToProject(idea.id, newProjectId);
+        toast.success(t("ideas.toast.convertedProject"));
+        onDone();
+      })
+      .catch((err) =>
+        toast.error(
+          "Couldn't convert idea: " +
+            (err instanceof Error ? err.message : "unknown error"),
+        ),
+      );
   };
 
   return (
@@ -728,8 +754,8 @@ const IdeaDetail: React.FC<{ idea: Idea; mobile?: boolean }> = ({ idea, mobile =
   const { t } = useTranslation();
   const [overlay, setOverlay] = useState<OverlayMode>(null);
   const [confirmDiscard, setConfirmDiscard] = useState(false);
-  const goal = useStore((s) => s.goals.find((g) => g.id === idea.goalId));
-  const goals = useStore((s) => s.goals);
+  const goals = useGoalsQuery().data ?? [];
+  const goal = goals.find((g) => g.id === idea.goalId);
   const moveIdeaToGoal = useStore((s) => s.moveIdeaToGoal);
   const updateIdea = useStore((s) => s.updateIdea);
   const discardIdea = useStore((s) => s.discardIdea);
@@ -950,7 +976,7 @@ const NewIdeaModal: React.FC<{
   defaultGoalId?: ID;
 }> = ({ open, onClose, defaultGoalId }) => {
   const { t } = useTranslation();
-  const goals = useStore((s) => s.goals);
+  const goals = useGoalsQuery().data ?? [];
   const activeGoals = useMemo(() => goals.filter((g) => g.status === "active"), [goals]);
   const captureIdea = useStore((s) => s.captureIdea);
   const selectIdea = useStore((s) => s.selectIdea);
@@ -1137,7 +1163,7 @@ const Ideas: React.FC = () => {
   const { t } = useTranslation();
   const initialGoalParam = useQueryGoal();
   const ideas = useStore((s) => s.ideas);
-  const goals = useStore((s) => s.goals);
+  const goals = useGoalsQuery().data ?? [];
   const settings = useStore((s) => s.settings);
   const selectedIdeaId = useStore((s) => s.ui.selectedIdeaId);
   const selectIdea = useStore((s) => s.selectIdea);

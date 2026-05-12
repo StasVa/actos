@@ -1,6 +1,8 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { useStore } from "@/store/useStore";
+import { useProjectsQuery } from "@/lib/queries/useProjects";
+import { useGoalsQuery } from "@/lib/queries/useGoals";
 import type { OutcomeSummary } from "@/lib/outcomeUtils";
 
 interface Props {
@@ -23,8 +25,8 @@ const SectionHead: React.FC<{ children: React.ReactNode; meta?: string }> = ({ c
 
 export const OutcomeAddedSection: React.FC<Props> = ({ outcome, period }) => {
   const { t } = useTranslation();
-  const goals = useStore((s) => s.goals);
-  const projects = useStore((s) => s.projects);
+  const goals = useGoalsQuery().data ?? [];
+  const projects = useProjectsQuery().data ?? [];
   const goalById = (id: string) => goals.find((g) => g.id === id);
   const projectById = (id: string) => projects.find((p) => p.id === id);
 

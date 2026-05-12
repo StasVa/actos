@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useStore } from "@/store/useStore";
+import { useGoalsQuery } from "@/lib/queries/useGoals";
+import { useActionsQuery } from "@/lib/queries/useActions";
 import { AppSidebar } from "@/components/AppSidebar";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { EmptyState } from "@/components/EmptyState";
@@ -207,8 +209,8 @@ const SessionDetailPanel: React.FC<{
   onDelete: () => void;
 }> = ({ session, onClose, onDelete }) => {
   const { t } = useTranslation();
-  const actions = useStore((s) => s.actions);
-  const goals = useStore((s) => s.goals);
+  const actions = useActionsQuery().data ?? [];
+  const goals = useGoalsQuery().data ?? [];
   const openPanel = useStore((s) => s.openPanel);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -415,7 +417,7 @@ const Sessions: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const sessions = useStore((s) => s.sessions);
-  const actions = useStore((s) => s.actions);
+  const actions = useActionsQuery().data ?? [];
   const deleteSession = useStore((s) => s.deleteSession);
 
   const [selectedId, setSelectedId] = useState<ID | null>(null);

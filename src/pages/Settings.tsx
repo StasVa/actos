@@ -7,6 +7,9 @@ type SupportedLang = (typeof SUPPORTED_LANGS)[number];
 import { AppSidebar } from "@/components/AppSidebar";
 import { PageHeader } from "@/components/PageHeader";
 import { useStore } from "@/store/useStore";
+import { useGoalsQuery } from "@/lib/queries/useGoals";
+import { useProjectsQuery } from "@/lib/queries/useProjects";
+import { useActionsQuery } from "@/lib/queries/useActions";
 import { useThemeChoice, type ThemeChoice } from "@/lib/theme";
 import { useAuth } from "@/lib/useAuth";
 import { toast } from "sonner";
@@ -70,19 +73,22 @@ const ToggleRow: React.FC<{
 export default function Settings() {
   const { t } = useTranslation();
   const settings = useStore((s) => s.settings);
-  const goals = useStore((s) => s.goals);
+  const goals = useGoalsQuery().data ?? [];
   const setDefaultGoal = useStore((s) => s.setDefaultGoal);
   const setShowAdminTools = useStore((s) => s.setShowAdminTools);
   const resetToSeed = useStore((s) => s.resetToSeed);
   const { user, setAdmin, setSubscriptionTier } = useAuth();
   const clearSampleData = useStore((s) => s.clearSampleData);
-  const hasSample = useStore((s) =>
-    s.goals.some((g) => g.isSample) ||
-    s.projects.some((p) => p.isSample) ||
-    s.actions.some((a) => a.isSample) ||
-    s.rituals.some((r) => r.isSample) ||
-    s.ideas.some((i) => i.isSample),
-  );
+  const projectsList = useProjectsQuery().data ?? [];
+  const actionsList = useActionsQuery().data ?? [];
+  const hasSample =
+    goals.some((g) => g.isSample) ||
+    projectsList.some((p) => p.isSample) ||
+    actionsList.some((a) => a.isSample) ||
+    useStore((s) =>
+      s.rituals.some((r) => r.isSample) ||
+      s.ideas.some((i) => i.isSample),
+    );
   const activeGoals = goals.filter((g) => g.status === "active");
   const [themeChoice, , setThemeChoice] = useThemeChoice();
   const fileRef = React.useRef<HTMLInputElement>(null);

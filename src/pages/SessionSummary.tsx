@@ -5,6 +5,10 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useStore } from "@/store/useStore";
+import { useGoalsQuery } from "@/lib/queries/useGoals";
+import { useProjectsQuery } from "@/lib/queries/useProjects";
+import { useActionsQuery } from "@/lib/queries/useActions";
+import { useActionById } from "@/lib/selectors";
 
 import {
   sessionDurationMinutes,
@@ -73,13 +77,13 @@ const ActionRow: React.FC<{
   onClick: () => void;
 }> = ({ actionId, status, onClick }) => {
   const { t } = useTranslation();
-  const action = useStore((s) => s.actions.find((a) => a.id === actionId));
-  const goal = useStore((s) =>
-    action ? s.goals.find((g) => g.id === action.goalId) : undefined,
-  );
-  const project = useStore((s) =>
-    action?.projectId ? s.projects.find((p) => p.id === action.projectId) : undefined,
-  );
+  const action = useActionById(actionId);
+  const goalsList = useGoalsQuery().data ?? [];
+  const goal = action ? goalsList.find((g) => g.id === action.goalId) : undefined;
+  const projectsList = useProjectsQuery().data ?? [];
+  const project = action?.projectId
+    ? projectsList.find((p) => p.id === action.projectId)
+    : undefined;
   if (!action) return null;
   const goalColor = goal ? `hsl(var(--${goal.color}))` : "hsl(var(--border-default))";
   const pillColor =
@@ -143,7 +147,7 @@ const SessionSummary: React.FC = () => {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
   const session = useStore((s) => s.sessions.find((x) => x.id === sessionId)) ?? null;
-  const actions = useStore((s) => s.actions);
+  const actions = useActionsQuery().data ?? [];
   const settings = useStore((s) => s.settings);
   const setSessionReflection = useStore((s) => s.setSessionReflection);
   const openPanel = useStore((s) => s.openPanel);

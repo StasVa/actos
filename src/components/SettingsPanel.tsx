@@ -7,6 +7,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useStore } from "@/store/useStore";
+import { useGoalsQuery } from "@/lib/queries/useGoals";
 import { toast } from "sonner";
 
 const STORAGE_KEY = "actos-store";
@@ -31,7 +32,7 @@ interface SettingsPanelProps {
 export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
   const { t } = useTranslation();
   const settings = useStore((s) => s.settings);
-  const goals = useStore((s) => s.goals);
+  const goals = useGoalsQuery().data ?? [];
   const setDefaultGoal = useStore((s) => s.setDefaultGoal);
   const resetToSeed = useStore((s) => s.resetToSeed);
 

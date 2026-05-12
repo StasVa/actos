@@ -10,6 +10,8 @@ import { ChevronDown, Check } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { useStore } from "@/store/useStore";
+import { useProjectsQuery } from "@/lib/queries/useProjects";
+import { useGoalsQuery } from "@/lib/queries/useGoals";
 import type { ID, Ritual, RitualSchedule } from "@/types";
 import { ConfirmModal } from "./ConfirmModal";
 import { ritualMultiplier } from "@/store/useStore";
@@ -83,8 +85,8 @@ function RitualEditorPanel({
 }) {
   const { t } = useTranslation();
   const ritual = useStore((s) => (ritualId ? s.rituals.find((r) => r.id === ritualId) : undefined));
-  const goals = useStore((s) => s.goals);
-  const projects = useStore((s) => s.projects);
+  const goals = useGoalsQuery().data ?? [];
+  const projects = useProjectsQuery().data ?? [];
   const layers = useStore((s) => s.settings.layers);
 
   const createRitual = useStore((s) => s.createRitual);

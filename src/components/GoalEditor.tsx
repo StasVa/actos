@@ -10,7 +10,18 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { useStore } from "@/store/useStore";
+import { useProjectsQuery } from "@/lib/queries/useProjects";
 import { useAuth } from "@/lib/useAuth";
+import {
+  useCreateGoalMutation,
+  useDeleteGoalMutation,
+  useDropGoalMutation,
+  useGoalsQuery,
+  useMarkGoalCompleteMutation,
+  useReopenGoalMutation,
+  useUpdateGoalMutation,
+} from "@/lib/queries/useGoals";
+import { useActionsQuery } from "@/lib/queries/useActions";
 import type { Goal, GoalType, GoalStatus, ID } from "@/types";
 import { ConfirmModal } from "./ConfirmModal";
 import { EditorShell, EditorCloseX, EditorCancelButton } from "./EditorShell";
@@ -102,21 +113,21 @@ function GoalEditorPanel({
   prefill?: Partial<Goal>;
   onClose: () => void;
 }) {
-  const goal = useStore((s) => (goalId ? s.goals.find((g) => g.id === goalId) : undefined));
-  const projects = useStore((s) => s.projects);
-  const actions = useStore((s) => s.actions);
-  const goals = useStore((s) => s.goals);
+  const goals = useGoalsQuery().data ?? [];
+  const goal = goalId ? goals.find((g) => g.id === goalId) : undefined;
+  const projects = useProjectsQuery().data ?? [];
+  const actions = useActionsQuery().data ?? [];
   const { user } = useAuth();
   const tier: "free" | "all-in" = user?.subscriptionTier === "all-in" ? "all-in" : "free";
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  const createGoal = useStore((s) => s.createGoal);
-  const updateGoal = useStore((s) => s.updateGoal);
-  const markGoalComplete = useStore((s) => s.markGoalComplete);
-  const dropGoal = useStore((s) => s.dropGoal);
-  const deleteGoal = useStore((s) => s.deleteGoal);
-  const reopenGoal = useStore((s) => s.reopenGoal);
+  const createGoalMutation = useCreateGoalMutation();
+  const updateGoalMutation = useUpdateGoalMutation();
+  const markGoalCompleteMutation = useMarkGoalCompleteMutation();
+  const dropGoalMutation = useDropGoalMutation();
+  const deleteGoalMutation = useDeleteGoalMutation();
+  const reopenGoalMutation = useReopenGoalMutation();
 
   const seed: Partial<Goal> = mode === "edit" && goal ? goal : prefill ?? {};
   const [title, setTitle] = useState(seed.title ?? "");
@@ -171,10 +182,10 @@ function GoalEditorPanel({
 
   const persistField = <K extends keyof Goal>(field: K, value: Goal[K]) => {
     if (mode !== "edit" || !goalId) return;
-    updateGoal(goalId, { [field]: value } as Partial<Goal>);
+    void updateGoalMutation.mutateAsync({ id: goalId, partial: { [field]: value } as Partial<Goal> });
   };
 
-  const handleSaveNew = () => {
+  const handleSaveNew = async () => {
     if (!title.trim()) {
       toast.error(t("goalEditor.error.titleRequired"));
       return;
@@ -184,13 +195,13 @@ function GoalEditorPanel({
       setSoftBlock(true);
       return;
     }
-    const result = createGoal({
+    const result = await createGoalMutation.mutateAsync({
       title: title.trim(),
       type,
       description: description || undefined,
       targetDate: targetDate || undefined,
       successCriteria: criteria,
-    }, tier);
+    });
     if (!result.ok) {
       toast.error(
         isFreeNow
@@ -219,13 +230,13 @@ function GoalEditorPanel({
       toast.error(t("goalEditor.error.tooManyActive"));
       return;
     }
-    reopenGoal(goalId);
+    void reopenGoalMutation.mutateAsync(goalId);
     toast(t("goalEditor.toast.reopened"));
   };
 
   const handleDelete = () => {
     if (!goalId) return;
-    deleteGoal(goalId);
+    void deleteGoalMutation.mutateAsync(goalId);
     toast(t("goalEditor.toast.deleted"));
     setConfirmDelete(false);
     onClose();
@@ -233,7 +244,7 @@ function GoalEditorPanel({
 
   const handleConfirmDrop = () => {
     if (!goalId) return;
-    dropGoal(goalId);
+    void dropGoalMutation.mutateAsync(goalId);
     const parts: string[] = [];
     if (childStats.openProjects > 0) parts.push(t("goalEditor.summary.openProjects", { count: childStats.openProjects }));
     if (childStats.openActions > 0) parts.push(t("goalEditor.summary.openActions", { count: childStats.openActions }));
@@ -243,7 +254,7 @@ function GoalEditorPanel({
 
   const handleConfirmComplete = () => {
     if (!goalId) return;
-    markGoalComplete(goalId);
+    void markGoalCompleteMutation.mutateAsync(goalId);
     toast(t("goalEditor.toast.completed"));
     setConfirmComplete(false);
   };

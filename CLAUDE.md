@@ -31,16 +31,19 @@ Before making any non-trivial change, consult these documents (committed in this
 
 - React + TypeScript + Vite
 - Tailwind CSS + shadcn/ui components
-- Zustand with persist middleware (currently → LocalStorage, transitioning to Supabase)
+- Zustand for UI state + remaining client entities (rituals, ideas, dayEntries, sessions until Session 2). TanStack Query for server data (goals, projects, actions).
+- TanStack Query 5.83+ for server state. Optimistic updates, verb-specific mutations, cache persisted to localStorage.
 - i18next with 4 locales: `en`, `ru`, `de`, `es`
 - TipTap for rich text (project descriptions, manifesto admin)
 - lucide-react for icons (do not introduce another icon library)
 - sonner for toasts
 - recharts for charts
 
-**Planned backend:** Supabase US-region. Resend for transactional email. Vercel for hosting. Stripe or Paddle for payments (deferred to post-beta).
+**Backend:** Supabase US-region (Postgres + Auth + Storage). Resend for transactional email. Vercel for hosting.
 
 **Domain:** actos.io
+
+- Payments: deferred to post-beta. Beta users get All-In by default via handle_new_user() trigger.
 
 ## Working principles
 
@@ -58,6 +61,15 @@ Don't invent new statuses. See `03-MODEL.md` § Action statuses. "Planned" is de
 
 ### Value ≠ Effort
 Two parallel metrics. Delegated work: 100% toward Value, 20% toward Effort and Time Invested. This is the signature mechanic. If you encounter logic that conflates them — flag it, don't "fix" it.
+
+### Verb-specific mutations over generic updates
+markGoalComplete/dropGoal/reopenGoal are separate hooks, not parameters to useUpdateGoal. Each has its own optimistic update path and error handling.
+
+### Selectors come in pairs
+Every computed selector (useGoalProgress, useProjectCost, etc.) ships as a reactive hook for components AND a plain function for callbacks: select*(queryClient, args). Documented in src/lib/selectors.ts.
+
+### Pre-flight reports before code changes
+When an agent is asked to make non-trivial changes touching multiple files or cross-cutting concerns, they should first report: which files they plan to touch, what assumptions they're making, what they found that contradicts the prompt, and any open questions. Wait for approval before code edits.
 
 ## Type-checking the project
 
@@ -92,6 +104,8 @@ The root `tsconfig.json` has `"files": []` and only `references` the sub-configs
 - Don't suggest native mobile. v1 is web-responsive.
 - Don't break the mock-to-real swap pattern by inlining mock logic into consumers.
 - Don't use `console.log` in committed code.
+- Don't conflate verb-specific mutations into a generic update. If a new state transition needs its own optimistic update path, error handling, or business rule, create a new verb-specific hook.
+- Don't bypass the strangler pattern. Until Session 2 ships, rituals/ideas/dayEntries/sessions live in Zustand. Don't write new entities to Supabase yet — coordinate with the migration plan in 14-BACKEND-PLAN.md.
 
 ## When in doubt
 
@@ -99,13 +113,18 @@ Read the source-of-truth documents first. If a requested change conflicts with t
 
 ## Current phase
 
-We are preparing for **beta with 30 users**. Priorities:
+Beta with 30 users, post-deployment.
 
-1. Audit and refactor of Lovable-exported frontend
-2. Supabase backend setup (Auth + Postgres + Storage)
-3. Swap mock auth → Supabase Auth
-4. Migrate LocalStorage → Supabase for user data
-5. Resend integration for email verification codes
-6. Deploy to Vercel with `actos.io`
+✅ Phase 1 — Hygiene (2026-05-11)
+✅ Phase 2 — Supabase foundation (2026-05-11)
+✅ Phase 3 — Real authentication (2026-05-12)
+✅ Phase 5 — Deployment to actos.io (2026-05-12)
+✅ Phase 4 Session 1 — Goals/Projects/Actions to Supabase + TanStack Query (2026-05-13)
+✅ Performance — TanStack Query cache persisted to localStorage (2026-05-13)
 
-Payments are mocked (all users get All-In tier by default during beta). Real Stripe/Paddle comes after beta.
+TODO:
+- Phase 4 Session 2 — Rituals/Ideas/DayEntries/Sessions migration to Supabase
+- i18n keys for new auth/data error messages
+- Tech debt cleanup (see docs/15-TECH-DEBT.md)
+
+Payments remain mocked — all beta users get All-In tier via the handle_new_user() trigger. Real Stripe/Paddle comes after beta.

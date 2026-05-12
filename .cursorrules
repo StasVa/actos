@@ -21,25 +21,42 @@ The user has **maximum 2-3 active goals**. This is a hard product constraint, no
 ## Tech stack (DO NOT change without discussion)
 
 - **Frontend:** React + TypeScript + Vite + Tailwind + shadcn/ui
-- **State:** Zustand with persist middleware (currently → LocalStorage)
+- **State:** Zustand for UI state + non-migrated entities (rituals, ideas, dayEntries, sessions until Session 2). TanStack Query 5.83+ for server data (goals, projects, actions). Cache persisted to localStorage.
 - **i18n:** i18next, 4 locales (en, ru, de, es)
 - **Rich text:** TipTap (project descriptions, manifesto admin)
 - **Icons:** lucide-react (NEVER another icon library)
 - **Toasts:** sonner
 - **Charts:** recharts
-- **Backend (planned):** Supabase US-region (Postgres + Auth + Storage + Edge Functions)
-- **Hosting:** Vercel (frontend) + Supabase (backend)
-- **Email:** Resend (planned)
+- **Backend:** Supabase US-region (Postgres + Auth + Storage + Edge Functions)
+- **Hosting:** Vercel (frontend, deployed at actos.io) + Supabase (backend)
+- **Email:** Resend, sender noreply@actos.io
+- **DNS:** Cloudflare
 - **Payments:** Stripe or Paddle (deferred to post-beta)
 - **Domain:** actos.io
 
 ## Architecture conventions
 
-### Mock-to-real swap pattern
-Mock implementations (auth, payments, email verification) are isolated to single files (e.g. `mockAuth.ts`). Real backends swap into these files without touching the consumer code. PRESERVE this pattern — it's a deliberate architecture decision.
+### Strangler migration pattern
+We migrate Zustand entities to Supabase one at a time. As of 2026-05-13, goals/projects/actions live in Supabase via TanStack Query. Rituals/ideas/dayEntries/sessions still in Zustand until Session 2 (see docs/14-BACKEND-PLAN.md). Mixed reads (e.g. useDeleteGoalMutation cascading to Zustand actions for non-migrated entities) are intentional and temporary — see src/lib/storeQueryRef.ts header comment for the bridge pattern.
 
 ### Single source of truth via hooks
 `useAuth()`, `useGoals()`, etc. are the only API consumers should use. Direct Zustand access is discouraged outside the hooks.
+
+### Verb-specific mutations
+Every state transition gets its own mutation hook with its own optimistic update, error handling, and toast copy. Examples: useMarkGoalCompleteMutation (sets status='completed' + completedAt), useDropGoalMutation (status='dropped' + droppedAt + cascade to children), useReopenGoalMutation (reverts to 'active' + clears terminal timestamps). NEVER consolidate into useUpdateGoalMutation taking a diff payload — leaks abstraction and makes errors generic.
+
+### Selector convention
+src/lib/selectors.ts exports computed selectors in pairs:
+- Reactive hook: useGoalProgress(goalId) — subscribes to TanStack cache, re-renders on data change. Use in component bodies.
+- Plain function: selectGoalProgress(queryClient, goalId) — one-shot read. Use in callbacks, event handlers, non-React code.
+Both read from the same TanStack cache — single source of truth.
+
+### Row mappers
+src/lib/rowMappers.ts bridges Supabase rows (snake_case) and app types (camelCase). Conventions:
+- null → clear column, undefined → don't touch column, value → update
+- Mapper-authoritative UUIDs on insert for child rows (criteria, references, timeline)
+- sort_order assigned by array index for ordered children
+- Project.description treated as opaque JSON string (TipTap doc) — TODO post-beta: introduce TiptapDoc type
 
 ### Data model
 See `03-MODEL.md` in project knowledge. Goal → Project → Action hierarchy. Rituals attach to Goal or Project. Ideas are capture-only, convertible. Strict status semantics — don't invent new statuses.
@@ -92,3 +109,14 @@ Every page declares Narrow (720px) / Medium (1024px) / Wide (1280px). Don't intr
 Read the project knowledge files first (00-VISION through 11-CHANGELOG). They are the source of truth.
 
 If a request conflicts with the knowledge — flag it and ask before implementing. The PM (Stanislav) prefers explicit pushback over silent compliance with bad ideas.
+
+## Pre-flight before edits
+
+When asked to make changes spanning multiple files, cross-cutting concerns, or anything non-trivial:
+1. Report files you plan to touch, in what order
+2. Surface assumptions you're making
+3. Flag anything in the prompt that doesn't match what you find in the code
+4. List open questions
+5. STOP and wait for approval before code edits
+
+This catches mismatches early, saves rework, and produces a paper trail in the conversation.

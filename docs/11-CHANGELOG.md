@@ -18,6 +18,67 @@ Trivial fixes, copy tweaks, and visual polish do not earn an entry.
 
 ---
 
+## 2026-05-13 [Backend] — Phase 4 Session 1: Goals, Projects, Actions on Supabase
+
+Goals, projects, and actions now live in Supabase Postgres, fetched via TanStack Query. Strangler migration: rituals/ideas/day entries/sessions remain in Zustand-LocalStorage until Session 2.
+
+- **New data layer:** `src/lib/queries/{useGoals,useProjects,useActions}.ts` with verb-specific mutation hooks (markComplete, drop, reopen, delete) — each with optimistic updates and rollback on error.
+- **Selector pairs:** `src/lib/selectors.ts` exports each computed selector as a reactive hook (component bodies) and a plain function (callbacks/non-React).
+- **Row mappers:** `src/lib/rowMappers.ts` bridges Supabase snake_case rows ↔ camelCase app types. `null` clears column, `undefined` no-touch, value updates.
+- **Cross-mutation cascade:** `useDeleteGoalMutation` and `useDropGoalMutation` honor DB CASCADE/SET NULL semantics — snapshots captured in both TanStack cache AND Zustand state for correct rollback.
+- **Strangler bridge:** `src/lib/storeQueryRef.ts` lets Zustand-resident code (captureIdea) read TanStack-resident goals. Marked for deletion in Session 2.
+- **Zustand store reduced:** 1,171 → 693 lines (−478 net).
+- **Verified:** cross-device sync, cascade behavior (action orphans to goal-level on project delete via SET NULL), zero console errors.
+- Details: 14-BACKEND-PLAN.md Phase 4, 13-ARCHITECTURE.md Layer 3.
+
+---
+
+## 2026-05-13 [Perf] — Persist TanStack Query cache to localStorage
+
+Page reload no longer shows blank screen while data hydrates. Cache restores from `localStorage` instantly, then background refetch reconciles with Supabase.
+
+- **Setup:** `src/lib/queryClient.ts` exports `queryClient` and `persister` (via `createSyncStoragePersister`). Storage key `actos-query-cache`, maxAge 24h, buster `actos-v1`.
+- **Provider:** `App.tsx` uses `PersistQueryClientProvider` from `@tanstack/react-query-persist-client`.
+- **signOut security cleanup:** `queryClient.clear()` + `persister.removeClient()` + `setTimeout(1100ms)` second `removeClient()` to catch the trailing throttled write (persister's persistClient is throttled 1000ms). Without the second remove, cleared cache re-populates with empty state and leaks key presence across sessions.
+- Details: 13-ARCHITECTURE.md "TanStack Query cache persistence" section.
+
+---
+
+## 2026-05-13 [Bug] — Production bug fixes after Phase 4 Session 1
+
+Three P0 fixes shipped as atomic commits after Session 1 push to production.
+
+- **SPA fallback:** new `vercel.json` rewrites all non-`/api` paths to `/index.html`. Eliminates 404 on direct URL reload (e.g., `actos.io/today` typed into address bar).
+- **Sign out redirect:** `UserMenu.tsx` onClick handler now awaits `signOut()` before `navigate("/")`. Was fire-and-forget — `RedirectIfAuthed` saw `isAuthenticated=true` and bounced to `/today` before `setUser(null)` propagated.
+- **Hydration flash:** 5 consumers (`App.tsx` NoGoalsGate + ChromeOnlyOutsideSetup, `Goals.tsx`, `Rituals.tsx`, `AllActions.tsx`) now gate empty-state UI on `!isLoading` to prevent onboarding fallback flash during initial Supabase fetch.
+
+---
+
+## 2026-05-12 [Backend] [Infrastructure] — Phase 3 + Phase 5: Real auth + production deployment
+
+Supabase Auth replaces mock auth; `actos.io` live on Vercel.
+
+- **Phase 3:** `useAuth.tsx` rewritten to call `@supabase/supabase-js` methods. `mockAuth.ts` deleted. 6-digit OTP verification via Resend (sender `noreply@actos.io`). Admin gate reads `is_admin` from `public.users` row.
+- **Phase 5:** Vercel project provisioned, `actos.io` DNS via Cloudflare, SSL auto-provisioned via Let's Encrypt. Production env vars set. Smoke test passed end-to-end.
+- **Email templates:** Confirm signup, Magic Link, and Reset Password customized in Supabase Auth → Email Templates. OTP-style codes for signup/login (not magic links).
+- Details: 14-BACKEND-PLAN.md Phase 3 + Phase 5.
+
+---
+
+## 2026-05-11 [Backend] — Phase 2: Supabase foundation
+
+Empty Supabase project with full schema ready for Phase 3 + 4.
+
+- **Project:** Supabase US-East region (project ref `pszifpidwvcdgecvtyoc`).
+- **Schema:** 14 tables (`users`, `goals`, `goal_success_criteria`, `projects`, `project_references`, `actions`, `action_timeline`, `rituals`, `ritual_completions`, `ideas`, `day_entries`, `sessions`, plus 2 admin tables). FKs with ON DELETE CASCADE / SET NULL per design.
+- **RLS:** every user-data table has `auth.uid() = user_id` policy.
+- **Trigger:** `handle_new_user()` auto-creates `public.users` row + assigns All-In tier for beta users.
+- **Types:** generated to `src/lib/supabase.types.ts` (887 lines). Typed client in `src/lib/supabase.ts`.
+- **Migration:** `supabase/migrations/20260511000000_initial_schema.sql` committed to repo.
+- Details: 14-BACKEND-PLAN.md Phase 2, 13-ARCHITECTURE.md schema section.
+
+---
+
 ## 2026-05-11 [Infrastructure] — Lovable export → local repo, Phase 1 hygiene pass, backend plan locked
 
 End of in-Lovable phase. Project moved to a local Cursor + Claude Code workflow against `github.com/StasVa/actos`. Phase 1 (hygiene) shipped in two clean commits.

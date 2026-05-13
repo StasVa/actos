@@ -9,7 +9,8 @@ import { Zap, Leaf, Sun, Thermometer, GripVertical, Star, type LucideIcon } from
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import i18n from "@/i18n";
-import { useStore, ritualMultiplier } from "@/store/useStore";
+import { useStore } from "@/store/useStore";
+import { ritualMultiplier } from "@/lib/selectors";
 import { useProjectsQuery } from "@/lib/queries/useProjects";
 import { useGoalsQuery } from "@/lib/queries/useGoals";
 import {
@@ -17,6 +18,14 @@ import {
   useCreateActionMutation,
   useUpdateActionMutation,
 } from "@/lib/queries/useActions";
+import {
+  useRitualsQuery,
+  useSkipRitualInstanceMutation,
+} from "@/lib/queries/useRituals";
+import {
+  useDayEntriesQuery,
+  useUpsertDayEntryMutation,
+} from "@/lib/queries/useDayEntries";
 import type { Action, DayType, ID, Ritual } from "@/types";
 import { formatTime as formatTimeMin } from "@/lib/format";
 import { ImpactPill, TimePill } from "@/components/MetaPills";
@@ -303,7 +312,7 @@ const PlanForm: React.FC<{
 }> = ({ date, state, setState }) => {
   const { t } = useTranslation();
   const actions = useActionsQuery().data ?? [];
-  const rituals = useStore((s) => s.rituals);
+  const rituals = useRitualsQuery().data ?? [];
   const goals = useGoalsQuery().data ?? [];
   const projects = useProjectsQuery().data ?? [];
   const createActionMutation = useCreateActionMutation();
@@ -877,7 +886,7 @@ function usePrefilledPlanState(
   date: string,
 ): [PlanFormState, React.Dispatch<React.SetStateAction<PlanFormState>>] {
   const actions = useActionsQuery().data ?? [];
-  const rituals = useStore((s) => s.rituals);
+  const rituals = useRitualsQuery().data ?? [];
   const [state, setState] = useState<PlanFormState>(initialPlanState);
   useEffect(() => {
     const scheduled = actions.filter(
@@ -1085,12 +1094,14 @@ export const PlanTodayPage: React.FC<{ onCancel: () => void; onComplete: () => v
 }) => {
   const { t } = useTranslation();
   const date = todayISO();
-  const startDayPlan = useStore((s) => s.startDayPlan);
+  const upsertDayEntryMutation = useUpsertDayEntryMutation();
+  const allDayEntries = useDayEntriesQuery().data ?? [];
   const updateActionMutation = useUpdateActionMutation();
+  const skipRitualMutation = useSkipRitualInstanceMutation();
   const actions = useActionsQuery().data ?? [];
   const [state, setState] = usePrefilledPlanState(date);
   const [step, setStep] = useState<1 | 2>(1);
-  
+
 
   const commitAndComplete = (overrides?: {
     dayType?: DayType;
@@ -1106,15 +1117,21 @@ export const PlanTodayPage: React.FC<{ onCancel: () => void; onComplete: () => v
       .forEach((a) =>
         updateActionMutation.mutate({ id: a.id, partial: { scheduledDate: undefined } }),
       );
-    startDayPlan({
+    for (const rid of merged.skippedRitualIds) {
+      skipRitualMutation.mutate({ ritualId: rid, date });
+    }
+    const existing = allDayEntries.find((d) => d.date === date);
+    upsertDayEntryMutation.mutate({
       date,
-      dayType: merged.dayType,
-      mainTaskActionId: merged.mainTaskId,
-      morningEnergyScore: undefined,
-      morningIntentNote: undefined,
-      plannedActionIds: merged.selectedActionIds,
-      plannedRitualIds: Array.from(merged.keptRitualIds),
-      skippedRitualIds: Array.from(merged.skippedRitualIds),
+      partial: {
+        dayType: merged.dayType,
+        mainTaskActionId: merged.mainTaskId,
+        plannedActionIds: merged.selectedActionIds,
+        plannedRitualIds: Array.from(merged.keptRitualIds),
+        skippedRitualIds: Array.from(merged.skippedRitualIds),
+        isPlanned: true,
+        startedAt: existing?.startedAt ?? new Date().toISOString(),
+      },
     });
     const meta = DAY_TYPE_META.find((m) => m.value === merged.dayType);
     const aLabel = meta ? t(meta.labelKey) : t("planToday.dayType.fallback");

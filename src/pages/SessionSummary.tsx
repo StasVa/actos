@@ -8,6 +8,7 @@ import { useStore } from "@/store/useStore";
 import { useGoalsQuery } from "@/lib/queries/useGoals";
 import { useProjectsQuery } from "@/lib/queries/useProjects";
 import { useActionsQuery } from "@/lib/queries/useActions";
+import { useSessionsQuery, useSetSessionReflectionMutation } from "@/lib/queries/useSessions";
 import { useActionById } from "@/lib/selectors";
 
 import {
@@ -146,10 +147,13 @@ const SessionSummary: React.FC = () => {
   const { t, i18n } = useTranslation();
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
-  const session = useStore((s) => s.sessions.find((x) => x.id === sessionId)) ?? null;
+  const sessions = useSessionsQuery().data ?? [];
+  const session = sessions.find((x) => x.id === sessionId) ?? null;
   const actions = useActionsQuery().data ?? [];
   const settings = useStore((s) => s.settings);
-  const setSessionReflection = useStore((s) => s.setSessionReflection);
+  const setSessionReflectionMutation = useSetSessionReflectionMutation();
+  const setSessionReflection = (id: string, reflection: string) =>
+    setSessionReflectionMutation.mutate({ sessionId: id, reflection });
   const openPanel = useStore((s) => s.openPanel);
 
   const [reflection, setReflection] = useState<string>(session?.reflection ?? "");

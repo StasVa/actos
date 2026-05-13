@@ -8,7 +8,7 @@ import { Plus, Search, ChevronDown } from "lucide-react";
 import { useStore } from "@/store/useStore";
 import { useProjectsQuery } from "@/lib/queries/useProjects";
 import { useActionsQuery } from "@/lib/queries/useActions";
-import { readGoalsFromCache } from "@/lib/storeQueryRef";
+import { useGoalsQuery } from "@/lib/queries/useGoals";
 import { useThemeChoice } from "@/lib/theme";
 import { ImpactPill, TimePill } from "@/components/MetaPills";
 import { ActionRow } from "@/components/ActionRow";
@@ -600,8 +600,9 @@ const dayTypeCards = [
 
 const Cards: React.FC<{ live: boolean }> = ({ live }) => {
   const liveProjects = useProjectsQuery().data ?? [];
+  const liveGoals = useGoalsQuery().data ?? [];
   const projects = live ? liveProjects : MOCK_PROJECTS;
-  const goalsList = live ? readGoalsFromCache() : MOCK_GOALS;
+  const goalsList = live ? liveGoals : MOCK_GOALS;
   const sample = projects.find((p) => p.status === "active");
   const sampleGoal = sample ? goalsList.find((g) => g.id === sample.goalId) : null;
 

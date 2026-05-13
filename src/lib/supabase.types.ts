@@ -576,7 +576,6 @@ export type Database = {
           status: string
           time_estimate_minutes: number | null
           title: string
-          total_completions: number
           user_id: string
         }
         Insert: {
@@ -593,7 +592,6 @@ export type Database = {
           status?: string
           time_estimate_minutes?: number | null
           title: string
-          total_completions?: number
           user_id: string
         }
         Update: {
@@ -610,7 +608,6 @@ export type Database = {
           status?: string
           time_estimate_minutes?: number | null
           title?: string
-          total_completions?: number
           user_id?: string
         }
         Relationships: [
@@ -749,7 +746,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      convert_idea_to_action: {
+        Args: { p_action_payload: Json; p_idea_id: string }
+        Returns: string
+      }
+      convert_idea_to_project: {
+        Args: { p_idea_id: string; p_project_payload: Json }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never

@@ -2,10 +2,13 @@
 // has zero active goals, these flows reroute to the full-page goal-builder
 // instead of opening their normal create panel.
 
-import { readGoalsFromCache } from "@/lib/storeQueryRef";
+import type { QueryClient } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/queryKeys";
+import type { Goal } from "@/types";
 
-export function hasActiveGoal(): boolean {
-  return readGoalsFromCache().some((g) => g.status === "active");
+export function hasActiveGoal(queryClient: QueryClient): boolean {
+  const goals = queryClient.getQueryData<Goal[]>(queryKeys.goals) ?? [];
+  return goals.some((g) => g.status === "active");
 }
 
 /**

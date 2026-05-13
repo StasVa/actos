@@ -7,6 +7,8 @@ import { useStore } from "@/store/useStore";
 import { useProjectsQuery } from "@/lib/queries/useProjects";
 import { useGoalsQuery } from "@/lib/queries/useGoals";
 import { useActionsQuery } from "@/lib/queries/useActions";
+import { useRitualsQuery } from "@/lib/queries/useRituals";
+import { useDayEntriesQuery } from "@/lib/queries/useDayEntries";
 import { formatHM } from "@/lib/timeStats";
 import {
   dateFromYearMonth,
@@ -54,10 +56,10 @@ const ReviewsMonths: React.FC = () => {
   const { t } = useTranslation();
   const [settingsOpen, setSettingsOpen] = React.useState(false);
   const actions = useActionsQuery().data ?? [];
-  const dayEntries = useStore((s) => s.dayEntries);
+  const dayEntries = useDayEntriesQuery().data ?? [];
   const goals = useGoalsQuery().data ?? [];
   const projects = useProjectsQuery().data ?? [];
-  const rituals = useStore((s) => s.rituals);
+  const rituals = useRitualsQuery().data ?? [];
   const settings = useStore((s) => s.settings);
 
   const [range, setRange] = React.useState("12m");

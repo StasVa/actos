@@ -4,8 +4,16 @@ import { Link, useLocation } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { useStore } from "@/store/useStore";
 import { useGoalsQuery } from "@/lib/queries/useGoals";
-import { useCreateProjectMutation, useProjectsQuery } from "@/lib/queries/useProjects";
-import { useCreateActionMutation } from "@/lib/queries/useActions";
+import { useProjectsQuery } from "@/lib/queries/useProjects";
+import {
+  useCaptureIdeaMutation,
+  useConvertIdeaToActionMutation,
+  useConvertIdeaToProjectMutation,
+  useDiscardIdeaMutation,
+  useIdeasQuery,
+  useMoveIdeaToGoalMutation,
+  useUpdateIdeaMutation,
+} from "@/lib/queries/useIdeas";
 import type { Idea, IdeaStatus, ID } from "@/types";
 import { toast } from "sonner";
 import { ConfirmModal } from "@/components/ConfirmModal";
@@ -99,7 +107,7 @@ const NewIdeaForm: React.FC<{
   const { t } = useTranslation();
   const goals = useGoalsQuery().data ?? [];
   const activeGoals = useMemo(() => goals.filter((g) => g.status === "active"), [goals]);
-  const captureIdea = useStore((s) => s.captureIdea);
+  const captureIdeaMutation = useCaptureIdeaMutation();
   const selectIdea = useStore((s) => s.selectIdea);
 
   const [goalId, setGoalId] = useState<ID>(
@@ -114,9 +122,9 @@ const NewIdeaForm: React.FC<{
 
   const canSubmit = title.trim().length > 0 && !!goalId;
 
-  const submit = () => {
+  const submit = async () => {
     if (!canSubmit) return;
-    const id = captureIdea({ title: title.trim(), goalId });
+    const { id } = await captureIdeaMutation.mutateAsync({ title: title.trim(), goalId });
     selectIdea(id);
     toast.success(t("ideas.toast.captured"));
     onClose();
@@ -315,32 +323,35 @@ const ConvertActionOverlay: React.FC<{ idea: Idea; onDone: () => void }> = ({ id
   const projects = allProjects.filter(
     (p) => p.goalId === idea.goalId && p.status === "active",
   );
-  const convertIdeaToAction = useStore((s) => s.convertIdeaToAction);
-  const createActionMutation = useCreateActionMutation();
+  const convertMutation = useConvertIdeaToActionMutation();
   const [title, setTitle] = useState(idea.title);
   const [projectId, setProjectId] = useState<string>(projects[0]?.id ?? "");
   const [notes, setNotes] = useState(idea.note ?? "");
 
   const submit = () => {
     if (!title.trim()) return;
-    void createActionMutation
-      .mutateAsync({
-        title: title.trim(),
-        projectId: projectId || null,
-        goalId: idea.goalId,
-        notes: notes.trim() || undefined,
-      })
-      .then(({ id: newActionId }) => {
-        convertIdeaToAction(idea.id, newActionId);
-        toast.success(t("ideas.toast.convertedAction"));
-        onDone();
-      })
-      .catch((err) =>
-        toast.error(
-          "Couldn't convert idea: " +
-            (err instanceof Error ? err.message : "unknown error"),
-        ),
-      );
+    convertMutation.mutate(
+      {
+        ideaId: idea.id,
+        action: {
+          title: title.trim(),
+          goalId: idea.goalId,
+          projectId: projectId || null,
+          notes: notes.trim() || undefined,
+        },
+      },
+      {
+        onSuccess: () => {
+          toast.success(t("ideas.toast.convertedAction"));
+          onDone();
+        },
+        onError: (err: unknown) =>
+          toast.error(
+            "Couldn't convert idea: " +
+              (err instanceof Error ? err.message : "unknown error"),
+          ),
+      },
+    );
   };
 
   return (
@@ -386,32 +397,34 @@ const ConvertActionOverlay: React.FC<{ idea: Idea; onDone: () => void }> = ({ id
 
 const ConvertProjectOverlay: React.FC<{ idea: Idea; onDone: () => void }> = ({ idea, onDone }) => {
   const { t } = useTranslation();
-  const convertIdeaToProject = useStore((s) => s.convertIdeaToProject);
-  const createProjectMutation = useCreateProjectMutation();
+  const convertMutation = useConvertIdeaToProjectMutation();
   const [title, setTitle] = useState(idea.title);
   const [desc, setDesc] = useState("");
   const [notes, setNotes] = useState(idea.note ?? "");
 
   const submit = () => {
     if (!title.trim()) return;
-    void createProjectMutation
-      .mutateAsync({
-        title: title.trim(),
-        goalId: idea.goalId,
-        description: (desc.trim() || notes.trim() || undefined),
-        references: (idea.references ?? []).map((r) => ({ ...r })),
-      })
-      .then(({ id: newProjectId }) => {
-        convertIdeaToProject(idea.id, newProjectId);
-        toast.success(t("ideas.toast.convertedProject"));
-        onDone();
-      })
-      .catch((err) =>
-        toast.error(
-          "Couldn't convert idea: " +
-            (err instanceof Error ? err.message : "unknown error"),
-        ),
-      );
+    convertMutation.mutate(
+      {
+        ideaId: idea.id,
+        project: {
+          title: title.trim(),
+          goalId: idea.goalId,
+          description: (desc.trim() || notes.trim() || undefined),
+        },
+      },
+      {
+        onSuccess: () => {
+          toast.success(t("ideas.toast.convertedProject"));
+          onDone();
+        },
+        onError: (err: unknown) =>
+          toast.error(
+            "Couldn't convert idea: " +
+              (err instanceof Error ? err.message : "unknown error"),
+          ),
+      },
+    );
   };
 
   return (
@@ -451,7 +464,9 @@ const ConvertProjectOverlay: React.FC<{ idea: Idea; onDone: () => void }> = ({ i
 /* ===== References section ===== */
 const ReferencesSection: React.FC<{ idea: Idea }> = ({ idea }) => {
   const { t } = useTranslation();
-  const updateIdea = useStore((s) => s.updateIdea);
+  const updateIdeaMutation = useUpdateIdeaMutation();
+  const updateIdea = (id: ID, partial: Partial<Idea>) =>
+    updateIdeaMutation.mutate({ id, partial });
   const refs = idea.references ?? [];
   const [adding, setAdding] = useState(false);
   const [url, setUrl] = useState("");
@@ -623,7 +638,9 @@ const ReferencesSection: React.FC<{ idea: Idea }> = ({ idea }) => {
 /* ===== Attachments section ===== */
 const AttachmentsSection: React.FC<{ idea: Idea }> = ({ idea }) => {
   const { t } = useTranslation();
-  const updateIdea = useStore((s) => s.updateIdea);
+  const updateIdeaMutation = useUpdateIdeaMutation();
+  const updateIdea = (id: ID, partial: Partial<Idea>) =>
+    updateIdeaMutation.mutate({ id, partial });
   const atts = idea.imageAttachments ?? [];
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
   const [dragOver, setDragOver] = useState(false);
@@ -756,9 +773,14 @@ const IdeaDetail: React.FC<{ idea: Idea; mobile?: boolean }> = ({ idea, mobile =
   const [confirmDiscard, setConfirmDiscard] = useState(false);
   const goals = useGoalsQuery().data ?? [];
   const goal = goals.find((g) => g.id === idea.goalId);
-  const moveIdeaToGoal = useStore((s) => s.moveIdeaToGoal);
-  const updateIdea = useStore((s) => s.updateIdea);
-  const discardIdea = useStore((s) => s.discardIdea);
+  const moveIdeaToGoalMutation = useMoveIdeaToGoalMutation();
+  const updateIdeaMutation = useUpdateIdeaMutation();
+  const discardIdeaMutation = useDiscardIdeaMutation();
+  const moveIdeaToGoal = (ideaId: ID, newGoalId: ID) =>
+    moveIdeaToGoalMutation.mutate({ ideaId, newGoalId });
+  const updateIdea = (id: ID, partial: Partial<Idea>) =>
+    updateIdeaMutation.mutate({ id, partial });
+  const discardIdea = (id: ID) => discardIdeaMutation.mutate(id);
 
   const [title, setTitle] = useState(idea.title);
   const [note, setNote] = useState(idea.note ?? "");
@@ -978,7 +1000,7 @@ const NewIdeaModal: React.FC<{
   const { t } = useTranslation();
   const goals = useGoalsQuery().data ?? [];
   const activeGoals = useMemo(() => goals.filter((g) => g.status === "active"), [goals]);
-  const captureIdea = useStore((s) => s.captureIdea);
+  const captureIdeaMutation = useCaptureIdeaMutation();
   const selectIdea = useStore((s) => s.selectIdea);
   const isMobile = useIsMobile();
 
@@ -1007,9 +1029,13 @@ const NewIdeaModal: React.FC<{
     onClose();
   };
 
-  const submit = () => {
+  const submit = async () => {
     if (!canSubmit) return;
-    const id = captureIdea({ title: title.trim(), goalId, note: note.trim() || undefined });
+    const { id } = await captureIdeaMutation.mutateAsync({
+      title: title.trim(),
+      goalId,
+      note: note.trim() || undefined,
+    });
     selectIdea(id);
     toast.success(t("ideas.toast.captured"));
     onClose();
@@ -1162,7 +1188,7 @@ const IdeaEditorSheet: React.FC<{
 const Ideas: React.FC = () => {
   const { t } = useTranslation();
   const initialGoalParam = useQueryGoal();
-  const ideas = useStore((s) => s.ideas);
+  const ideas = useIdeasQuery().data ?? [];
   const goals = useGoalsQuery().data ?? [];
   const settings = useStore((s) => s.settings);
   const selectedIdeaId = useStore((s) => s.ui.selectedIdeaId);

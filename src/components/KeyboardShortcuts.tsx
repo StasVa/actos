@@ -18,6 +18,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useQueryClient } from "@tanstack/react-query";
 import { useStore } from "@/store/useStore";
 import { hasActiveGoal } from "@/lib/goalGuard";
 
@@ -47,6 +48,7 @@ export function KeyboardShortcuts() {
   const [helpOpen, setHelpOpen] = React.useState(false);
   const navigate = useNavigate();
   const openPanel = useStore((s) => s.openPanel);
+  const queryClient = useQueryClient();
   const gPendingRef = React.useRef<number | null>(null);
 
   React.useEffect(() => {
@@ -90,7 +92,7 @@ export function KeyboardShortcuts() {
 
       if (key === "n") {
         e.preventDefault();
-        if (!hasActiveGoal()) { navigate("/onboarding/goal"); return; }
+        if (!hasActiveGoal(queryClient)) { navigate("/onboarding/goal"); return; }
         openPanel({ kind: "action", mode: "new" });
         return;
       }

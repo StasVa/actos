@@ -10,6 +10,7 @@ import { useStore } from "@/store/useStore";
 import { useProjectsQuery } from "@/lib/queries/useProjects";
 import { useGoalsQuery } from "@/lib/queries/useGoals";
 import { useActionsQuery } from "@/lib/queries/useActions";
+import { useDayEntriesQuery } from "@/lib/queries/useDayEntries";
 import { useAuth } from "@/lib/useAuth";
 import { formatHM } from "@/lib/timeStats";
 import type { Action, DayEntry, Goal, ID, ISODate, Project } from "@/types";
@@ -221,7 +222,7 @@ const ReviewsDays: React.FC = () => {
   const { t } = useTranslation();
   const [settingsOpen, setSettingsOpen] = React.useState(false);
   const [lockOpen, setLockOpen] = React.useState(false);
-  const dayEntries = useStore((s) => s.dayEntries);
+  const dayEntries = useDayEntriesQuery().data ?? [];
   const actions = useActionsQuery().data ?? [];
   const goals = useGoalsQuery().data ?? [];
   const projects = useProjectsQuery().data ?? [];

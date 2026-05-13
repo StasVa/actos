@@ -34,16 +34,21 @@ export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
   const settings = useStore((s) => s.settings);
   const goals = useGoalsQuery().data ?? [];
   const setDefaultGoal = useStore((s) => s.setDefaultGoal);
-  const resetToSeed = useStore((s) => s.resetToSeed);
 
   const activeGoals = goals.filter((g) => g.status === "active");
 
   const handleReset = () => {
     if (confirm(t("settings.panel.confirm.reset"))) {
-      localStorage.removeItem(STORAGE_KEY);
-      resetToSeed();
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem("actos-query-cache");
+      } catch {
+        /* ignore */
+      }
       toast.success(t("settings.panel.toast.reset"));
       onOpenChange(false);
+      // Reload to re-hydrate caches from Supabase.
+      setTimeout(() => window.location.reload(), 150);
     }
   };
 

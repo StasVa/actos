@@ -1,7 +1,9 @@
 import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
-import { useStore, ritualMultiplier } from "@/store/useStore";
+import { useStore } from "@/store/useStore";
+import { ritualMultiplier } from "@/lib/selectors";
+import { useRitualsQuery } from "@/lib/queries/useRituals";
 import { useProjectsQuery } from "@/lib/queries/useProjects";
 import { useAuth } from "@/lib/useAuth";
 import {
@@ -401,7 +403,7 @@ const Goals: React.FC = () => {
   const storeProjects = useProjectsQuery().data ?? [];
   const projects = useMemo(() => storeProjects.filter((p) => !p.isDraft), [storeProjects]);
   const actions = useActionsQuery().data ?? [];
-  const rituals = useStore((s) => s.rituals);
+  const rituals = useRitualsQuery().data ?? [];
   const settings = useStore((s) => s.settings);
   const { user } = useAuth();
   const logTimeOn = !!settings?.layers?.logTime;

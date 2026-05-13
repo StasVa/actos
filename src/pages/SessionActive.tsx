@@ -15,6 +15,15 @@ import { useStore } from "@/store/useStore";
 import { useProjectsQuery } from "@/lib/queries/useProjects";
 import { useGoalsQuery } from "@/lib/queries/useGoals";
 import { useActionsQuery, useChangeActionStatusMutation } from "@/lib/queries/useActions";
+import {
+  useAbortSessionMutation,
+  useAddCompletedActionToSessionMutation,
+  useAddDroppedActionToSessionMutation,
+  useAddPlannedActionsToSessionMutation,
+  useCompleteSessionMutation,
+  useIncrementSessionCyclesMutation,
+  useSessionsQuery,
+} from "@/lib/queries/useSessions";
 import { AppSidebar } from "@/components/AppSidebar";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import type { Action, Session } from "@/types";
@@ -112,17 +121,26 @@ function fmtMMSS(ms: number): string {
 const SessionActive: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const sessions = useStore((s) => s.sessions);
+  const sessions = useSessionsQuery().data ?? [];
   const actions = useActionsQuery().data ?? [];
   const goals = useGoalsQuery().data ?? [];
   const projects = useProjectsQuery().data ?? [];
   const changeActionStatusMutation = useChangeActionStatusMutation();
-  const addCompletedActionToSession = useStore((s) => s.addCompletedActionToSession);
-  const addDroppedActionToSession = useStore((s) => s.addDroppedActionToSession);
-  const addPlannedActionsToSession = useStore((s) => s.addPlannedActionsToSession);
-  const incrementSessionCycles = useStore((s) => s.incrementSessionCycles);
-  const completeSession = useStore((s) => s.completeSession);
-  const abortSession = useStore((s) => s.abortSession);
+  const addCompletedMutation = useAddCompletedActionToSessionMutation();
+  const addDroppedMutation = useAddDroppedActionToSessionMutation();
+  const addPlannedMutation = useAddPlannedActionsToSessionMutation();
+  const incrementCyclesMutation = useIncrementSessionCyclesMutation();
+  const completeSessionMutation = useCompleteSessionMutation();
+  const abortSessionMutation = useAbortSessionMutation();
+  const addCompletedActionToSession = (sid: string, aid: string) =>
+    addCompletedMutation.mutate({ sessionId: sid, actionId: aid });
+  const addDroppedActionToSession = (sid: string, aid: string) =>
+    addDroppedMutation.mutate({ sessionId: sid, actionId: aid });
+  const addPlannedActionsToSession = (sid: string, aids: string[]) =>
+    addPlannedMutation.mutate({ sessionId: sid, actionIds: aids });
+  const incrementSessionCycles = (sid: string) => incrementCyclesMutation.mutate(sid);
+  const completeSession = (sid: string) => completeSessionMutation.mutate(sid);
+  const abortSession = (sid: string) => abortSessionMutation.mutate(sid);
   const openPanel = useStore((s) => s.openPanel);
 
   const session: Session | null = useMemo(

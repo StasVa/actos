@@ -8,7 +8,7 @@
   },
   "goals": [
     {
-      "id": "g1",
+      "id": "6d1d23d6-afa8-49b4-bfe9-1e5c8da46a00",
       "title": "SaaS auf $10k MRR bringen",
       "type": "mid-term",
       "color": "goal-1",
@@ -35,7 +35,7 @@
       "isSample": true
     },
     {
-      "id": "g2",
+      "id": "f632548e-1a4b-4067-8535-f5c3f350efcb",
       "title": "Halbmarathon unter 2 Stunden laufen",
       "type": "mid-term",
       "color": "goal-2",
@@ -57,7 +57,7 @@
       "isSample": true
     },
     {
-      "id": "g3",
+      "id": "ea80dfeb-48f6-4c3b-b903-c55be5adcc59",
       "title": "C1-Spanisch-Prüfung bestehen",
       "type": "mid-term",
       "color": "goal-3",
@@ -81,8 +81,8 @@
   ],
   "projects": [
     {
-      "id": "p1",
-      "goalId": "g1",
+      "id": "e5b61cf3-fbed-4a52-8934-5aeabe700a5d",
+      "goalId": "6d1d23d6-afa8-49b4-bfe9-1e5c8da46a00",
       "title": "Stripe-Billing einrichten",
       "status": "completed",
       "createdAt": "2026-03-12T18:00:00",
@@ -340,8 +340,8 @@
       ]
     },
     {
-      "id": "p2",
-      "goalId": "g1",
+      "id": "fea0fdf8-9167-4b96-a8f0-dea2ebf02604",
+      "goalId": "6d1d23d6-afa8-49b4-bfe9-1e5c8da46a00",
       "title": "Launch auf Product Hunt",
       "status": "active",
       "createdAt": "2026-04-17T18:00:00",
@@ -469,8 +469,8 @@
       ]
     },
     {
-      "id": "p3",
-      "goalId": "g1",
+      "id": "e78cc780-b04c-43d8-801d-872686a4ee9e",
+      "goalId": "6d1d23d6-afa8-49b4-bfe9-1e5c8da46a00",
       "title": "Pricing-Page bauen",
       "status": "active",
       "createdAt": "2026-04-24T18:00:00",
@@ -592,8 +592,8 @@
       ]
     },
     {
-      "id": "p4",
-      "goalId": "g1",
+      "id": "d35093fd-1744-4209-a5ad-3b3381aafdb0",
+      "goalId": "6d1d23d6-afa8-49b4-bfe9-1e5c8da46a00",
       "title": "Customer-Support-Flow aufsetzen",
       "status": "active",
       "createdAt": "2026-04-04T18:00:00",
@@ -652,8 +652,8 @@
       ]
     },
     {
-      "id": "p5",
-      "goalId": "g2",
+      "id": "2cf414a4-506b-4ac9-99a6-b71d59f5ce0c",
+      "goalId": "f632548e-1a4b-4067-8535-f5c3f350efcb",
       "title": "4×/Woche Trainingsroutine etablieren",
       "status": "completed",
       "createdAt": "2026-03-15T18:00:00",
@@ -854,8 +854,8 @@
       ]
     },
     {
-      "id": "p6",
-      "goalId": "g2",
+      "id": "a0af470f-2470-4764-b306-d82b7c23bf14",
+      "goalId": "f632548e-1a4b-4067-8535-f5c3f350efcb",
       "title": "Grundkilometer auf 30 km/Woche aufbauen",
       "status": "active",
       "createdAt": "2026-04-11T18:00:00",
@@ -988,8 +988,8 @@
       ]
     },
     {
-      "id": "p7",
-      "goalId": "g2",
+      "id": "bbf5f6f7-3021-42c8-9a17-97e2922c6de5",
+      "goalId": "f632548e-1a4b-4067-8535-f5c3f350efcb",
       "title": "Tempo- und Intervallläufe ergänzen",
       "status": "active",
       "createdAt": "2026-04-29T18:00:00",
@@ -1028,8 +1028,8 @@
       "references": []
     },
     {
-      "id": "p8",
-      "goalId": "g3",
+      "id": "ea78f443-5cbf-4088-b2e7-38b0d2506ef6",
+      "goalId": "ea80dfeb-48f6-4c3b-b903-c55be5adcc59",
       "title": "B2-Lehrbuch durcharbeiten",
       "status": "active",
       "createdAt": "2026-03-30T18:00:00",
@@ -1152,8 +1152,8 @@
       ]
     },
     {
-      "id": "p9",
-      "goalId": "g3",
+      "id": "095d04f2-883a-4f71-8bb5-0cc4aebc8ca6",
+      "goalId": "ea80dfeb-48f6-4c3b-b903-c55be5adcc59",
       "title": "Konversationspartner finden",
       "status": "active",
       "createdAt": "2026-04-24T18:00:00",
@@ -1187,9 +1187,9 @@
   ],
   "actions": [
     {
-      "id": "a1",
-      "projectId": "p1",
-      "goalId": "g1",
+      "id": "99dd9b2d-8706-4fd0-a360-7535267d08aa",
+      "projectId": "e5b61cf3-fbed-4a52-8934-5aeabe700a5d",
+      "goalId": "6d1d23d6-afa8-49b4-bfe9-1e5c8da46a00",
       "title": "Stripe-API-Docs lesen",
       "impact": 4,
       "timeEstimate": 60,
@@ -1199,9 +1199,9 @@
       "completedAt": "2026-03-14T09:00:00"
     },
     {
-      "id": "a2",
-      "projectId": "p1",
-      "goalId": "g1",
+      "id": "7c5858ba-4b09-43bc-ac77-080cb297a802",
+      "projectId": "e5b61cf3-fbed-4a52-8934-5aeabe700a5d",
+      "goalId": "6d1d23d6-afa8-49b4-bfe9-1e5c8da46a00",
       "title": "Stripe-Account anlegen und Business verifizieren",
       "impact": 5,
       "timeEstimate": 90,
@@ -1211,9 +1211,9 @@
       "completedAt": "2026-03-15T23:00:00"
     },
     {
-      "id": "a3",
-      "projectId": "p1",
-      "goalId": "g1",
+      "id": "c96c124c-303d-4992-a098-3a80a4b281d3",
+      "projectId": "e5b61cf3-fbed-4a52-8934-5aeabe700a5d",
+      "goalId": "6d1d23d6-afa8-49b4-bfe9-1e5c8da46a00",
       "title": "Checkout-Webhook-Handler implementieren",
       "impact": 8,
       "timeEstimate": 120,
@@ -1223,9 +1223,9 @@
       "completedAt": "2026-03-20T07:00:00"
     },
     {
-      "id": "a4",
-      "projectId": "p1",
-      "goalId": "g1",
+      "id": "470bc5e8-730b-4238-8508-52faeb7a6313",
+      "projectId": "e5b61cf3-fbed-4a52-8934-5aeabe700a5d",
+      "goalId": "6d1d23d6-afa8-49b4-bfe9-1e5c8da46a00",
       "title": "Payment-Flow end-to-end testen",
       "impact": 6,
       "timeEstimate": 90,
@@ -1235,9 +1235,9 @@
       "completedAt": "2026-03-25T08:00:00"
     },
     {
-      "id": "a5",
-      "projectId": "p1",
-      "goalId": "g1",
+      "id": "151b7d3d-cfdd-4cdd-b3a0-20774712079d",
+      "projectId": "e5b61cf3-fbed-4a52-8934-5aeabe700a5d",
+      "goalId": "6d1d23d6-afa8-49b4-bfe9-1e5c8da46a00",
       "title": "Seite für Abo-Verwaltung hinzufügen",
       "impact": 7,
       "timeEstimate": 120,
@@ -1247,9 +1247,9 @@
       "completedAt": "2026-04-01T09:00:00"
     },
     {
-      "id": "a6",
-      "projectId": "p1",
-      "goalId": "g1",
+      "id": "3d63d674-b0a1-4499-bd85-f79fe8f6426a",
+      "projectId": "e5b61cf3-fbed-4a52-8934-5aeabe700a5d",
+      "goalId": "6d1d23d6-afa8-49b4-bfe9-1e5c8da46a00",
       "title": "Retries fehlgeschlagener Zahlungen behandeln",
       "impact": 6,
       "timeEstimate": 60,
@@ -1259,9 +1259,9 @@
       "completedAt": "2026-04-08T23:00:00"
     },
     {
-      "id": "a7",
-      "projectId": "p1",
-      "goalId": "g1",
+      "id": "569b0a89-fad0-4e08-bc04-16ff4066c67b",
+      "projectId": "e5b61cf3-fbed-4a52-8934-5aeabe700a5d",
+      "goalId": "6d1d23d6-afa8-49b4-bfe9-1e5c8da46a00",
       "title": "Stripe-Integrations-Doku schreiben",
       "impact": 4,
       "timeEstimate": 45,
@@ -1271,9 +1271,9 @@
       "completedAt": "2026-04-14T09:00:00"
     },
     {
-      "id": "a8",
-      "projectId": "p1",
-      "goalId": "g1",
+      "id": "a820c190-2568-4409-8408-b1a75a8dfc59",
+      "projectId": "e5b61cf3-fbed-4a52-8934-5aeabe700a5d",
+      "goalId": "6d1d23d6-afa8-49b4-bfe9-1e5c8da46a00",
       "title": "Stripe-Integration in Produktion deployen",
       "impact": 9,
       "timeEstimate": 60,
@@ -1283,9 +1283,9 @@
       "completedAt": "2026-04-21T04:00:00"
     },
     {
-      "id": "a9",
-      "projectId": "p2",
-      "goalId": "g1",
+      "id": "27154d66-97d2-4740-8066-e8d9e082fdb1",
+      "projectId": "fea0fdf8-9167-4b96-a8f0-dea2ebf02604",
+      "goalId": "6d1d23d6-afa8-49b4-bfe9-1e5c8da46a00",
       "title": "Product-Hunt-Launch-Copy entwerfen",
       "impact": 6,
       "timeEstimate": 90,
@@ -1295,9 +1295,9 @@
       "completedAt": "2026-04-19T10:00:00"
     },
     {
-      "id": "a10",
-      "projectId": "p2",
-      "goalId": "g1",
+      "id": "d07c6f2a-9c0a-4055-a3a2-d07df70b9cd6",
+      "projectId": "fea0fdf8-9167-4b96-a8f0-dea2ebf02604",
+      "goalId": "6d1d23d6-afa8-49b4-bfe9-1e5c8da46a00",
       "title": "Hero-Bild für den Launch designen",
       "impact": 5,
       "timeEstimate": 75,
@@ -1307,9 +1307,9 @@
       "completedAt": "2026-04-22T07:00:00"
     },
     {
-      "id": "a11",
-      "projectId": "p2",
-      "goalId": "g1",
+      "id": "0c28005f-c870-4fb0-b87e-af8a3fb332b4",
+      "projectId": "fea0fdf8-9167-4b96-a8f0-dea2ebf02604",
+      "goalId": "6d1d23d6-afa8-49b4-bfe9-1e5c8da46a00",
       "title": "20 potenzielle Hunters anschreiben",
       "impact": 7,
       "timeEstimate": 60,
@@ -1319,9 +1319,9 @@
       "completedAt": "2026-04-27T02:00:00"
     },
     {
-      "id": "a12",
-      "projectId": "p2",
-      "goalId": "g1",
+      "id": "f2165b6c-f337-49a9-b98d-53f127215222",
+      "projectId": "fea0fdf8-9167-4b96-a8f0-dea2ebf02604",
+      "goalId": "6d1d23d6-afa8-49b4-bfe9-1e5c8da46a00",
       "title": "Social-Posts für den Launch-Day vorbereiten",
       "impact": 4,
       "timeEstimate": 45,
@@ -1331,9 +1331,9 @@
       "completedAt": "2026-05-01T10:00:00"
     },
     {
-      "id": "a13",
-      "projectId": "p2",
-      "goalId": "g1",
+      "id": "5808c5e9-0288-4200-a39f-2f26fdfef060",
+      "projectId": "fea0fdf8-9167-4b96-a8f0-dea2ebf02604",
+      "goalId": "6d1d23d6-afa8-49b4-bfe9-1e5c8da46a00",
       "title": "Launch auf Product Hunt planen",
       "impact": 8,
       "timeEstimate": 30,
@@ -1343,9 +1343,9 @@
       "completedAt": "2026-05-05T07:00:00"
     },
     {
-      "id": "a14",
-      "projectId": "p2",
-      "goalId": "g1",
+      "id": "96e000ac-9cf4-4d2b-914b-daa8f3f30558",
+      "projectId": "fea0fdf8-9167-4b96-a8f0-dea2ebf02604",
+      "goalId": "6d1d23d6-afa8-49b4-bfe9-1e5c8da46a00",
       "title": "Auf Launch-Day-Kommentare antworten",
       "impact": 6,
       "timeEstimate": 90,
@@ -1355,9 +1355,9 @@
       "completedAt": "2026-05-08T00:00:00"
     },
     {
-      "id": "a15",
-      "projectId": "p3",
-      "goalId": "g1",
+      "id": "6c03edd5-7abc-4eab-b77a-a1409dfb3dc8",
+      "projectId": "e78cc780-b04c-43d8-801d-872686a4ee9e",
+      "goalId": "6d1d23d6-afa8-49b4-bfe9-1e5c8da46a00",
       "title": "Konkurrenz-Pricing recherchieren",
       "impact": 5,
       "timeEstimate": 60,
@@ -1367,9 +1367,9 @@
       "completedAt": "2026-04-25T02:00:00"
     },
     {
-      "id": "a16",
-      "projectId": "p3",
-      "goalId": "g1",
+      "id": "34c660fc-375f-41d3-a081-8a20865d46f5",
+      "projectId": "e78cc780-b04c-43d8-801d-872686a4ee9e",
+      "goalId": "6d1d23d6-afa8-49b4-bfe9-1e5c8da46a00",
       "title": "Preisstufen und Copy entwerfen",
       "impact": 7,
       "timeEstimate": 90,
@@ -1379,9 +1379,9 @@
       "completedAt": "2026-04-29T07:00:00"
     },
     {
-      "id": "a17",
-      "projectId": "p3",
-      "goalId": "g1",
+      "id": "60c49ce1-599b-4456-89c4-70065c9017c7",
+      "projectId": "e78cc780-b04c-43d8-801d-872686a4ee9e",
+      "goalId": "6d1d23d6-afa8-49b4-bfe9-1e5c8da46a00",
       "title": "Pricing-Page-Layout designen",
       "impact": 6,
       "timeEstimate": 90,
@@ -1391,9 +1391,9 @@
       "completedAt": "2026-05-03T01:00:00"
     },
     {
-      "id": "a18",
-      "projectId": "p3",
-      "goalId": "g1",
+      "id": "9029e79a-9b0d-411d-ab31-a055fce6acac",
+      "projectId": "e78cc780-b04c-43d8-801d-872686a4ee9e",
+      "goalId": "6d1d23d6-afa8-49b4-bfe9-1e5c8da46a00",
       "title": "Pricing-Page im Code umsetzen",
       "impact": 7,
       "timeEstimate": 120,
@@ -1403,9 +1403,9 @@
       "completedAt": "2026-05-06T22:00:00"
     },
     {
-      "id": "a19",
-      "projectId": "p4",
-      "goalId": "g1",
+      "id": "4cb70eab-6378-445b-98b8-0a8e3a0a2c28",
+      "projectId": "d35093fd-1744-4209-a5ad-3b3381aafdb0",
+      "goalId": "6d1d23d6-afa8-49b4-bfe9-1e5c8da46a00",
       "title": "Intercom vs Crisp vs Plain vergleichen",
       "impact": 5,
       "timeEstimate": 60,
@@ -1415,9 +1415,9 @@
       "completedAt": "2026-04-10T22:00:00"
     },
     {
-      "id": "a20",
-      "projectId": "p4",
-      "goalId": "g1",
+      "id": "ac6cb8be-11b0-4748-98d2-9d84934cfd0d",
+      "projectId": "d35093fd-1744-4209-a5ad-3b3381aafdb0",
+      "goalId": "6d1d23d6-afa8-49b4-bfe9-1e5c8da46a00",
       "title": "Support-E-Mail-Weiterleitung einrichten",
       "impact": 4,
       "timeEstimate": 30,
@@ -1427,9 +1427,9 @@
       "completedAt": "2026-04-24T23:00:00"
     },
     {
-      "id": "a21",
-      "projectId": "p5",
-      "goalId": "g2",
+      "id": "93334ee1-6ceb-4daa-9077-a16dbe19ebf7",
+      "projectId": "2cf414a4-506b-4ac9-99a6-b71d59f5ce0c",
+      "goalId": "f632548e-1a4b-4067-8535-f5c3f350efcb",
       "title": "4 wöchentliche Trainingsslots im Kalender einplanen",
       "impact": 6,
       "timeEstimate": 30,
@@ -1439,9 +1439,9 @@
       "completedAt": "2026-03-17T05:00:00"
     },
     {
-      "id": "a22",
-      "projectId": "p5",
-      "goalId": "g2",
+      "id": "69dba2ec-d3ed-4534-a185-03e42827c777",
+      "projectId": "2cf414a4-506b-4ac9-99a6-b71d59f5ce0c",
+      "goalId": "f632548e-1a4b-4067-8535-f5c3f350efcb",
       "title": "Richtige Laufschuhe kaufen",
       "impact": 5,
       "timeEstimate": 60,
@@ -1451,9 +1451,9 @@
       "completedAt": "2026-03-20T08:00:00"
     },
     {
-      "id": "a23",
-      "projectId": "p5",
-      "goalId": "g2",
+      "id": "135ddd72-9cf9-4a3a-b260-8fa2aabb55f4",
+      "projectId": "2cf414a4-506b-4ac9-99a6-b71d59f5ce0c",
+      "goalId": "f632548e-1a4b-4067-8535-f5c3f350efcb",
       "title": "Erste 4 Laufwochen planen",
       "impact": 7,
       "timeEstimate": 45,
@@ -1463,9 +1463,9 @@
       "completedAt": "2026-03-22T22:00:00"
     },
     {
-      "id": "a24",
-      "projectId": "p5",
-      "goalId": "g2",
+      "id": "f47dcd3c-cda7-44be-a17e-4a3108f32a5d",
+      "projectId": "2cf414a4-506b-4ac9-99a6-b71d59f5ce0c",
+      "goalId": "f632548e-1a4b-4067-8535-f5c3f350efcb",
       "title": "Erste Base-Building-Woche laufen",
       "impact": 8,
       "timeEstimate": 240,
@@ -1475,9 +1475,9 @@
       "completedAt": "2026-03-28T09:00:00"
     },
     {
-      "id": "a25",
-      "projectId": "p5",
-      "goalId": "g2",
+      "id": "e5ab8483-2256-42bf-b32a-d7ba669159c2",
+      "projectId": "2cf414a4-506b-4ac9-99a6-b71d59f5ce0c",
+      "goalId": "f632548e-1a4b-4067-8535-f5c3f350efcb",
       "title": "Trainingsroutine zur Gewohnheit machen",
       "impact": 8,
       "timeEstimate": 60,
@@ -1487,9 +1487,9 @@
       "completedAt": "2026-04-09T04:00:00"
     },
     {
-      "id": "a26",
-      "projectId": "p6",
-      "goalId": "g2",
+      "id": "92c18ffb-da9a-41ca-bee0-f4c6b3405fb1",
+      "projectId": "a0af470f-2470-4764-b306-d82b7c23bf14",
+      "goalId": "f632548e-1a4b-4067-8535-f5c3f350efcb",
       "title": "Woche 1 des Base-Buildings abschließen",
       "impact": 7,
       "timeEstimate": 180,
@@ -1499,9 +1499,9 @@
       "completedAt": "2026-04-13T05:00:00"
     },
     {
-      "id": "a27",
-      "projectId": "p6",
-      "goalId": "g2",
+      "id": "27cc01c3-35e2-4966-abca-a23788a6d58c",
+      "projectId": "a0af470f-2470-4764-b306-d82b7c23bf14",
+      "goalId": "f632548e-1a4b-4067-8535-f5c3f350efcb",
       "title": "Langen Sonntagslauf hinzufügen",
       "impact": 7,
       "timeEstimate": 90,
@@ -1511,9 +1511,9 @@
       "completedAt": "2026-04-17T01:00:00"
     },
     {
-      "id": "a28",
-      "projectId": "p6",
-      "goalId": "g2",
+      "id": "9ad65045-9826-4e04-b014-d1b2b93e9d6f",
+      "projectId": "a0af470f-2470-4764-b306-d82b7c23bf14",
+      "goalId": "f632548e-1a4b-4067-8535-f5c3f350efcb",
       "title": "20-km-Woche schaffen",
       "impact": 7,
       "timeEstimate": 60,
@@ -1523,9 +1523,9 @@
       "completedAt": "2026-04-19T22:00:00"
     },
     {
-      "id": "a29",
-      "projectId": "p6",
-      "goalId": "g2",
+      "id": "cb8e30b8-4673-4a66-b101-3da14b7f8eb1",
+      "projectId": "a0af470f-2470-4764-b306-d82b7c23bf14",
+      "goalId": "f632548e-1a4b-4067-8535-f5c3f350efcb",
       "title": "Recovery-Jog nach dem langen Lauf",
       "impact": 5,
       "timeEstimate": 45,
@@ -1535,9 +1535,9 @@
       "completedAt": "2026-04-22T23:00:00"
     },
     {
-      "id": "a30",
-      "projectId": "p6",
-      "goalId": "g2",
+      "id": "eb3b7235-e687-4223-abd7-0c6d9391c6ee",
+      "projectId": "a0af470f-2470-4764-b306-d82b7c23bf14",
+      "goalId": "f632548e-1a4b-4067-8535-f5c3f350efcb",
       "title": "25-km-Woche schaffen",
       "impact": 8,
       "timeEstimate": 60,
@@ -1547,9 +1547,9 @@
       "completedAt": "2026-04-26T02:00:00"
     },
     {
-      "id": "a31",
-      "projectId": "p6",
-      "goalId": "g2",
+      "id": "c063f4dc-0e99-4796-85e1-cbc8ae4cb797",
+      "projectId": "a0af470f-2470-4764-b306-d82b7c23bf14",
+      "goalId": "f632548e-1a4b-4067-8535-f5c3f350efcb",
       "title": "Pace auf dem langen Lauf testen",
       "impact": 6,
       "timeEstimate": 75,
@@ -1559,9 +1559,9 @@
       "completedAt": "2026-04-30T04:00:00"
     },
     {
-      "id": "a32",
-      "projectId": "p6",
-      "goalId": "g2",
+      "id": "c209473d-251f-43a9-90a0-da2b4d0b995d",
+      "projectId": "a0af470f-2470-4764-b306-d82b7c23bf14",
+      "goalId": "f632548e-1a4b-4067-8535-f5c3f350efcb",
       "title": "28-km-Woche schaffen",
       "impact": 8,
       "timeEstimate": 60,
@@ -1571,9 +1571,9 @@
       "completedAt": "2026-05-04T02:00:00"
     },
     {
-      "id": "a33",
-      "projectId": "p6",
-      "goalId": "g2",
+      "id": "ab43badf-5d30-4b72-9d34-0d7dd237cde6",
+      "projectId": "a0af470f-2470-4764-b306-d82b7c23bf14",
+      "goalId": "f632548e-1a4b-4067-8535-f5c3f350efcb",
       "title": "Langer Lauf mit Negative Split",
       "impact": 8,
       "timeEstimate": 90,
@@ -1583,9 +1583,9 @@
       "completedAt": "2026-05-07T00:00:00"
     },
     {
-      "id": "a34",
-      "projectId": "p7",
-      "goalId": "g2",
+      "id": "40ebddb6-a389-423b-bf30-11af5f1ee574",
+      "projectId": "bbf5f6f7-3021-42c8-9a17-97e2922c6de5",
+      "goalId": "f632548e-1a4b-4067-8535-f5c3f350efcb",
       "title": "Erstes Tempotraining (3×1 km)",
       "impact": 7,
       "timeEstimate": 60,
@@ -1595,9 +1595,9 @@
       "completedAt": "2026-05-02T05:00:00"
     },
     {
-      "id": "a35",
-      "projectId": "p7",
-      "goalId": "g2",
+      "id": "b8baa823-9523-4377-8416-1416bcfbef48",
+      "projectId": "bbf5f6f7-3021-42c8-9a17-97e2922c6de5",
+      "goalId": "f632548e-1a4b-4067-8535-f5c3f350efcb",
       "title": "Erstes Intervalltraining (8×400 m)",
       "impact": 8,
       "timeEstimate": 60,
@@ -1607,9 +1607,9 @@
       "completedAt": "2026-05-06T07:00:00"
     },
     {
-      "id": "a36",
-      "projectId": "p8",
-      "goalId": "g3",
+      "id": "34f2b6a9-3ffe-4d66-a5e5-907a5a325cda",
+      "projectId": "ea78f443-5cbf-4088-b2e7-38b0d2506ef6",
+      "goalId": "ea80dfeb-48f6-4c3b-b903-c55be5adcc59",
       "title": "B2-Lehrbuch besorgen (Aula Internacional 4)",
       "impact": 3,
       "timeEstimate": 30,
@@ -1619,9 +1619,9 @@
       "completedAt": "2026-04-01T09:00:00"
     },
     {
-      "id": "a37",
-      "projectId": "p8",
-      "goalId": "g3",
+      "id": "954a4dc5-aa1f-4d12-ae16-2fbda85fd940",
+      "projectId": "ea78f443-5cbf-4088-b2e7-38b0d2506ef6",
+      "goalId": "ea80dfeb-48f6-4c3b-b903-c55be5adcc59",
       "title": "Unit 1 abschließen (Subjunctive-Wiederholung)",
       "impact": 6,
       "timeEstimate": 90,
@@ -1631,9 +1631,9 @@
       "completedAt": "2026-04-04T00:00:00"
     },
     {
-      "id": "a38",
-      "projectId": "p8",
-      "goalId": "g3",
+      "id": "472763cf-1545-4bf5-983e-1c8be9ebdcbf",
+      "projectId": "ea78f443-5cbf-4088-b2e7-38b0d2506ef6",
+      "goalId": "ea80dfeb-48f6-4c3b-b903-c55be5adcc59",
       "title": "Unit 2 abschließen (Erzählzeiten)",
       "impact": 6,
       "timeEstimate": 90,
@@ -1643,9 +1643,9 @@
       "completedAt": "2026-04-10T22:00:00"
     },
     {
-      "id": "a39",
-      "projectId": "p8",
-      "goalId": "g3",
+      "id": "da711775-38d3-4e78-9d5e-49448576a1d5",
+      "projectId": "ea78f443-5cbf-4088-b2e7-38b0d2506ef6",
+      "goalId": "ea80dfeb-48f6-4c3b-b903-c55be5adcc59",
       "title": "Unit 3 abschließen (Konditionalsätze)",
       "impact": 6,
       "timeEstimate": 120,
@@ -1655,9 +1655,9 @@
       "completedAt": "2026-04-18T09:00:00"
     },
     {
-      "id": "a40",
-      "projectId": "p8",
-      "goalId": "g3",
+      "id": "5695715d-2124-442a-9e65-0894bf236d63",
+      "projectId": "ea78f443-5cbf-4088-b2e7-38b0d2506ef6",
+      "goalId": "ea80dfeb-48f6-4c3b-b903-c55be5adcc59",
       "title": "Unit 4 abschließen (Indirekte Rede)",
       "impact": 6,
       "timeEstimate": 90,
@@ -1667,9 +1667,9 @@
       "completedAt": "2026-04-25T09:00:00"
     },
     {
-      "id": "a41",
-      "projectId": "p8",
-      "goalId": "g3",
+      "id": "7a03103e-4935-4ff1-a8c6-5298112ff5b9",
+      "projectId": "ea78f443-5cbf-4088-b2e7-38b0d2506ef6",
+      "goalId": "ea80dfeb-48f6-4c3b-b903-c55be5adcc59",
       "title": "Unit 5 abschließen (Passiv)",
       "impact": 6,
       "timeEstimate": 90,
@@ -1679,9 +1679,9 @@
       "completedAt": "2026-05-01T06:00:00"
     },
     {
-      "id": "a42",
-      "projectId": "p8",
-      "goalId": "g3",
+      "id": "e1066f16-f411-45ab-b864-de53c05afca8",
+      "projectId": "ea78f443-5cbf-4088-b2e7-38b0d2506ef6",
+      "goalId": "ea80dfeb-48f6-4c3b-b903-c55be5adcc59",
       "title": "Halbzeit-Review und Selbsttest",
       "impact": 5,
       "timeEstimate": 60,
@@ -1691,9 +1691,9 @@
       "completedAt": "2026-05-05T00:00:00"
     },
     {
-      "id": "a43",
-      "projectId": "p9",
-      "goalId": "g3",
+      "id": "e6833bd6-3e70-4954-8060-540c13699db7",
+      "projectId": "095d04f2-883a-4f71-8bb5-0cc4aebc8ca6",
+      "goalId": "ea80dfeb-48f6-4c3b-b903-c55be5adcc59",
       "title": "Bei italki.com anmelden",
       "impact": 3,
       "timeEstimate": 30,
@@ -1703,9 +1703,9 @@
       "completedAt": "2026-04-27T08:00:00"
     },
     {
-      "id": "a44",
-      "projectId": "p2",
-      "goalId": "g1",
+      "id": "3c2be51e-7b85-4fc6-bc16-aa465fc53ced",
+      "projectId": "fea0fdf8-9167-4b96-a8f0-dea2ebf02604",
+      "goalId": "6d1d23d6-afa8-49b4-bfe9-1e5c8da46a00",
       "title": "Product-Hunt-FAQ-Antworten schreiben",
       "impact": 6,
       "timeEstimate": 60,
@@ -1716,9 +1716,9 @@
       "isPlannedToday": true
     },
     {
-      "id": "a45",
-      "projectId": "p3",
-      "goalId": "g1",
+      "id": "6e168768-bf6a-4efe-b47c-d61cad9bfd3d",
+      "projectId": "e78cc780-b04c-43d8-801d-872686a4ee9e",
+      "goalId": "6d1d23d6-afa8-49b4-bfe9-1e5c8da46a00",
       "title": "Testimonials zur Pricing-Page hinzufügen",
       "impact": 5,
       "timeEstimate": 45,
@@ -1729,9 +1729,9 @@
       "isPlannedToday": true
     },
     {
-      "id": "a46",
-      "projectId": "p7",
-      "goalId": "g2",
+      "id": "04737ddf-1b38-462f-a1ee-923c01635a9e",
+      "projectId": "bbf5f6f7-3021-42c8-9a17-97e2922c6de5",
+      "goalId": "f632548e-1a4b-4067-8535-f5c3f350efcb",
       "title": "Tempotraining: 4×1 km im Zieltempo",
       "impact": 7,
       "timeEstimate": 60,
@@ -1742,9 +1742,9 @@
       "isPlannedToday": true
     },
     {
-      "id": "a47",
-      "projectId": "p2",
-      "goalId": "g1",
+      "id": "197cf366-3cb7-4414-822e-d5e8fd99e657",
+      "projectId": "fea0fdf8-9167-4b96-a8f0-dea2ebf02604",
+      "goalId": "6d1d23d6-afa8-49b4-bfe9-1e5c8da46a00",
       "title": "Product-Hunt-Feedback per Mail ans Team",
       "impact": 4,
       "timeEstimate": 30,
@@ -1754,9 +1754,9 @@
       "scheduledDate": "2026-05-10"
     },
     {
-      "id": "a48",
-      "projectId": "p8",
-      "goalId": "g3",
+      "id": "35a7fa0b-e459-4b22-a8ae-7782591921de",
+      "projectId": "ea78f443-5cbf-4088-b2e7-38b0d2506ef6",
+      "goalId": "ea80dfeb-48f6-4c3b-b903-c55be5adcc59",
       "title": "Unit 6 abschließen (Relativsätze)",
       "impact": 6,
       "timeEstimate": 90,
@@ -1766,9 +1766,9 @@
       "scheduledDate": "2026-05-10"
     },
     {
-      "id": "a49",
-      "projectId": "p2",
-      "goalId": "g1",
+      "id": "85ca8624-e98a-4d53-86fa-30334cf839ca",
+      "projectId": "fea0fdf8-9167-4b96-a8f0-dea2ebf02604",
+      "goalId": "6d1d23d6-afa8-49b4-bfe9-1e5c8da46a00",
       "title": "Retention-Kampagne nach dem Launch planen",
       "impact": 6,
       "timeEstimate": 60,
@@ -1777,9 +1777,9 @@
       "isSample": true
     },
     {
-      "id": "a50",
-      "projectId": "p3",
-      "goalId": "g1",
+      "id": "cd9e80c5-56bd-4744-a62c-642f765a9933",
+      "projectId": "e78cc780-b04c-43d8-801d-872686a4ee9e",
+      "goalId": "6d1d23d6-afa8-49b4-bfe9-1e5c8da46a00",
       "title": "A/B-Test der CTA-Copy auf der Pricing-Page",
       "impact": 5,
       "timeEstimate": 45,
@@ -1788,9 +1788,9 @@
       "isSample": true
     },
     {
-      "id": "a51",
-      "projectId": "p4",
-      "goalId": "g1",
+      "id": "b16c239a-dac9-413b-8018-fbec2230e178",
+      "projectId": "d35093fd-1744-4209-a5ad-3b3381aafdb0",
+      "goalId": "6d1d23d6-afa8-49b4-bfe9-1e5c8da46a00",
       "title": "10 vorgefertigte Support-Antworten entwerfen",
       "impact": 4,
       "timeEstimate": 60,
@@ -1799,9 +1799,9 @@
       "isSample": true
     },
     {
-      "id": "a52",
-      "projectId": "p4",
-      "goalId": "g1",
+      "id": "dadddd0d-188f-46a1-9141-455889f52916",
+      "projectId": "d35093fd-1744-4209-a5ad-3b3381aafdb0",
+      "goalId": "6d1d23d6-afa8-49b4-bfe9-1e5c8da46a00",
       "title": "Support-Team-Workflow aufsetzen",
       "impact": 6,
       "timeEstimate": 90,
@@ -1810,9 +1810,9 @@
       "isSample": true
     },
     {
-      "id": "a53",
-      "projectId": "p6",
-      "goalId": "g2",
+      "id": "7d6b6b44-6f0b-42b3-a590-073c8dd242bd",
+      "projectId": "a0af470f-2470-4764-b306-d82b7c23bf14",
+      "goalId": "f632548e-1a4b-4067-8535-f5c3f350efcb",
       "title": "Taper-Woche vor dem Rennen planen",
       "impact": 7,
       "timeEstimate": 30,
@@ -1821,9 +1821,9 @@
       "isSample": true
     },
     {
-      "id": "a54",
-      "projectId": "p7",
-      "goalId": "g2",
+      "id": "2de76a08-2fbf-4da1-9be3-97134d9b3b0c",
+      "projectId": "bbf5f6f7-3021-42c8-9a17-97e2922c6de5",
+      "goalId": "f632548e-1a4b-4067-8535-f5c3f350efcb",
       "title": "15-km-Simulation im Renntempo",
       "impact": 8,
       "timeEstimate": 90,
@@ -1832,9 +1832,9 @@
       "isSample": true
     },
     {
-      "id": "a55",
-      "projectId": "p8",
-      "goalId": "g3",
+      "id": "f92f89f5-3e5c-4c66-b1f9-89c55c34f5f2",
+      "projectId": "ea78f443-5cbf-4088-b2e7-38b0d2506ef6",
+      "goalId": "ea80dfeb-48f6-4c3b-b903-c55be5adcc59",
       "title": "C1-Vorbereitungslehrbuch finden",
       "impact": 4,
       "timeEstimate": 45,
@@ -1843,9 +1843,9 @@
       "isSample": true
     },
     {
-      "id": "a56",
-      "projectId": "p9",
-      "goalId": "g3",
+      "id": "ea9942c1-804e-4381-ae52-d7bfa854d738",
+      "projectId": "095d04f2-883a-4f71-8bb5-0cc4aebc8ca6",
+      "goalId": "ea80dfeb-48f6-4c3b-b903-c55be5adcc59",
       "title": "Erste italki-Stunde buchen",
       "impact": 5,
       "timeEstimate": 30,
@@ -1854,9 +1854,9 @@
       "isSample": true
     },
     {
-      "id": "a57",
+      "id": "f9bf9980-af14-4cef-9b6a-fb927f1e12fc",
       "projectId": null,
-      "goalId": "g1",
+      "goalId": "6d1d23d6-afa8-49b4-bfe9-1e5c8da46a00",
       "title": "Referral-Programm prüfen",
       "impact": 5,
       "timeEstimate": 60,
@@ -1865,9 +1865,9 @@
       "isSample": true
     },
     {
-      "id": "a58",
+      "id": "bbf1d368-ae41-4081-8554-5354fb5d8a85",
       "projectId": null,
-      "goalId": "g3",
+      "goalId": "ea80dfeb-48f6-4c3b-b903-c55be5adcc59",
       "title": "Spanischen Podcast für den Arbeitsweg finden",
       "impact": 4,
       "timeEstimate": 30,
@@ -1876,9 +1876,9 @@
       "isSample": true
     },
     {
-      "id": "a59",
-      "projectId": "p2",
-      "goalId": "g1",
+      "id": "4fc8a3d2-225b-4362-a4fd-5a1944c5bcec",
+      "projectId": "fea0fdf8-9167-4b96-a8f0-dea2ebf02604",
+      "goalId": "6d1d23d6-afa8-49b4-bfe9-1e5c8da46a00",
       "title": "Product-Hunt-Assets designen",
       "impact": 6,
       "timeEstimate": 120,
@@ -1890,9 +1890,9 @@
       "delegatedAt": "2026-05-06T18:00:00"
     },
     {
-      "id": "a60",
-      "projectId": "p3",
-      "goalId": "g1",
+      "id": "8ac437a9-a78d-4159-9a2e-65ab7ada9cbd",
+      "projectId": "e78cc780-b04c-43d8-801d-872686a4ee9e",
+      "goalId": "6d1d23d6-afa8-49b4-bfe9-1e5c8da46a00",
       "title": "Code-Review für Pricing-Page-PR",
       "impact": 5,
       "timeEstimate": 60,
@@ -1904,9 +1904,9 @@
       "delegatedAt": "2026-05-08T18:00:00"
     },
     {
-      "id": "a61",
-      "projectId": "p4",
-      "goalId": "g1",
+      "id": "e0af9fcc-59be-48a5-bcd9-584885affa8d",
+      "projectId": "d35093fd-1744-4209-a5ad-3b3381aafdb0",
+      "goalId": "6d1d23d6-afa8-49b4-bfe9-1e5c8da46a00",
       "title": "Aktuelle Support-Mails auditieren",
       "impact": 4,
       "timeEstimate": 90,
@@ -1919,9 +1919,9 @@
       "delegatedAt": "2026-05-04T18:00:00"
     },
     {
-      "id": "a62",
+      "id": "0f03453a-9f78-4e56-af12-9f50928bc2a0",
       "projectId": null,
-      "goalId": "g1",
+      "goalId": "6d1d23d6-afa8-49b4-bfe9-1e5c8da46a00",
       "title": "Churn-Benchmarks für SaaS recherchieren",
       "impact": 5,
       "timeEstimate": 60,
@@ -1934,9 +1934,9 @@
       "delegatedAt": "2026-05-07T18:00:00"
     },
     {
-      "id": "a63",
-      "projectId": "p9",
-      "goalId": "g3",
+      "id": "0e6a3e4f-f937-42ed-9d78-0aa2b4cbd179",
+      "projectId": "095d04f2-883a-4f71-8bb5-0cc4aebc8ca6",
+      "goalId": "ea80dfeb-48f6-4c3b-b903-c55be5adcc59",
       "title": "Mich mit Konversationspartner matchen",
       "impact": 4,
       "timeEstimate": 30,
@@ -1949,9 +1949,9 @@
       "delegatedAt": "2026-05-02T18:00:00"
     },
     {
-      "id": "a64",
-      "projectId": "p4",
-      "goalId": "g1",
+      "id": "13bcba16-882c-430e-a48c-efaf69ae8090",
+      "projectId": "d35093fd-1744-4209-a5ad-3b3381aafdb0",
+      "goalId": "6d1d23d6-afa8-49b4-bfe9-1e5c8da46a00",
       "title": "Eigene CRM-Integration bauen",
       "impact": 4,
       "timeEstimate": 180,
@@ -1961,9 +1961,9 @@
       "droppedAt": "2026-04-14T18:00:00"
     },
     {
-      "id": "a65",
-      "projectId": "p1",
-      "goalId": "g1",
+      "id": "0984d340-324f-4fb9-85aa-7ce540e9190c",
+      "projectId": "e5b61cf3-fbed-4a52-8934-5aeabe700a5d",
+      "goalId": "6d1d23d6-afa8-49b4-bfe9-1e5c8da46a00",
       "title": "Manuelle Rechnungserstellung hinzufügen",
       "impact": 3,
       "timeEstimate": 90,
@@ -1973,9 +1973,9 @@
       "droppedAt": "2026-04-04T18:00:00"
     },
     {
-      "id": "a66",
+      "id": "5356a076-7ade-4940-8468-613328c708f4",
       "projectId": null,
-      "goalId": "g2",
+      "goalId": "f632548e-1a4b-4067-8535-f5c3f350efcb",
       "title": "Für Marathon anmelden (verschoben)",
       "impact": 4,
       "timeEstimate": 30,
@@ -1985,9 +1985,9 @@
       "droppedAt": "2026-04-19T18:00:00"
     },
     {
-      "id": "a67",
-      "projectId": "p7",
-      "goalId": "g2",
+      "id": "528b9d86-ceb8-48d6-8a86-1be2d5445210",
+      "projectId": "bbf5f6f7-3021-42c8-9a17-97e2922c6de5",
+      "goalId": "f632548e-1a4b-4067-8535-f5c3f350efcb",
       "title": "Probestunde Lauftrainer (abgesagt)",
       "impact": 5,
       "timeEstimate": 60,
@@ -1997,9 +1997,9 @@
       "cancelledAt": "2026-05-01T18:00:00"
     },
     {
-      "id": "a68",
-      "projectId": "p8",
-      "goalId": "g3",
+      "id": "06fcd18a-0642-4331-b475-89194165aaed",
+      "projectId": "ea78f443-5cbf-4088-b2e7-38b0d2506ef6",
+      "goalId": "ea80dfeb-48f6-4c3b-b903-c55be5adcc59",
       "title": "Altes C1-Lehrbuch kaufen (ersetzt)",
       "impact": 2,
       "timeEstimate": 15,
@@ -2011,8 +2011,8 @@
   ],
   "rituals": [
     {
-      "id": "r1",
-      "goalId": "g3",
+      "id": "c93c70d6-664f-4981-9184-e70faad0902b",
+      "goalId": "ea80dfeb-48f6-4c3b-b903-c55be5adcc59",
       "projectId": null,
       "title": "Täglich 30 Min auf Spanisch lesen",
       "schedule": "daily",
@@ -2195,8 +2195,8 @@
       "isSample": true
     },
     {
-      "id": "r2",
-      "goalId": "g2",
+      "id": "e773f378-f72d-4860-b4b8-62bae7c9a919",
+      "goalId": "f632548e-1a4b-4067-8535-f5c3f350efcb",
       "projectId": null,
       "title": "Krafttraining (im Wechsel mit Läufen)",
       "schedule": "weekdays",
@@ -2355,8 +2355,8 @@
       "isSample": true
     },
     {
-      "id": "r3",
-      "goalId": "g1",
+      "id": "0579e95d-5385-4a1b-b956-55075681fa9a",
+      "goalId": "6d1d23d6-afa8-49b4-bfe9-1e5c8da46a00",
       "projectId": null,
       "title": "Wöchentliches Projekt-Audit",
       "schedule": "weekly",
@@ -2405,8 +2405,8 @@
       "isSample": true
     },
     {
-      "id": "r4",
-      "goalId": "g1",
+      "id": "28082df6-b1b4-4d8d-abd4-2478909d7c0c",
+      "goalId": "6d1d23d6-afa8-49b4-bfe9-1e5c8da46a00",
       "projectId": null,
       "title": "Morning Pages (3 Seiten schreiben)",
       "schedule": "daily",
@@ -2655,35 +2655,35 @@
   ],
   "ideas": [
     {
-      "id": "i1",
-      "goalId": "g1",
+      "id": "71ccd1f2-9e6c-484b-a011-486101ed42ee",
+      "goalId": "6d1d23d6-afa8-49b4-bfe9-1e5c8da46a00",
       "title": "Newsletter mit Build-in-Public-Learnings",
       "createdAt": "2026-04-19T18:00:00",
       "isSample": true
     },
     {
-      "id": "i2",
-      "goalId": "g1",
+      "id": "5bfbe5e3-753e-4a17-b3ae-17b153ade17e",
+      "goalId": "6d1d23d6-afa8-49b4-bfe9-1e5c8da46a00",
       "title": "Öffentliches Dashboard mit Live-MRR bauen",
       "createdAt": "2026-04-24T18:00:00",
       "isSample": true
     },
     {
-      "id": "i3",
-      "goalId": "g2",
+      "id": "f3aa791c-06c9-4a5b-b3fc-afdee8dabfbe",
+      "goalId": "f632548e-1a4b-4067-8535-f5c3f350efcb",
       "title": "Kältetherapie nach langen Läufen ausprobieren",
       "createdAt": "2026-05-01T18:00:00",
       "isSample": true
     },
     {
-      "id": "i4",
-      "goalId": "g3",
+      "id": "338965e2-92fd-4927-9020-cb5ac18d9aad",
+      "goalId": "ea80dfeb-48f6-4c3b-b903-c55be5adcc59",
       "title": "Täglich 15 Min spanische Nachrichten (RTVE) schauen",
       "createdAt": "2026-05-04T18:00:00",
       "isSample": true
     },
     {
-      "id": "i5",
+      "id": "3c85e007-fe8c-42d0-99d5-31ebca40272b",
       "goalId": null,
       "title": "Podcast über die Indie-SaaS-Journey starten",
       "createdAt": "2026-04-27T18:00:00",
@@ -2692,9 +2692,9 @@
   ],
   "sessions": [
     {
-      "id": "s1",
+      "id": "cbed9a2f-b3dd-42cf-b12d-bf17a4f03e3a",
       "actionIds": [
-        "a5"
+        "151b7d3d-cfdd-4cdd-b3a0-20774712079d"
       ],
       "startedAt": "2026-04-01T07:03:00",
       "endedAt": "2026-04-01T09:00:00",
@@ -2703,9 +2703,9 @@
       "isSample": true
     },
     {
-      "id": "s2",
+      "id": "af052d8b-9313-4b01-a17c-cbf0094bc522",
       "actionIds": [
-        "a39"
+        "da711775-38d3-4e78-9d5e-49448576a1d5"
       ],
       "startedAt": "2026-04-18T06:54:00",
       "endedAt": "2026-04-18T09:00:00",
@@ -2714,9 +2714,9 @@
       "isSample": true
     },
     {
-      "id": "s3",
+      "id": "c74c3eb2-bc2c-4c96-af08-c6b34faffecc",
       "actionIds": [
-        "a43"
+        "e6833bd6-3e70-4954-8060-540c13699db7"
       ],
       "startedAt": "2026-04-27T07:31:00",
       "endedAt": "2026-04-27T08:00:00",
@@ -2725,9 +2725,9 @@
       "isSample": true
     },
     {
-      "id": "s4",
+      "id": "e83e041c-e9f8-4fd2-9545-86f6a585c551",
       "actionIds": [
-        "a16"
+        "34c660fc-375f-41d3-a081-8a20865d46f5"
       ],
       "startedAt": "2026-04-29T05:16:00",
       "endedAt": "2026-04-29T07:00:00",
@@ -2736,9 +2736,9 @@
       "isSample": true
     },
     {
-      "id": "s5",
+      "id": "129b64f5-3a49-48d5-ba2b-753806e837b8",
       "actionIds": [
-        "a26"
+        "92c18ffb-da9a-41ca-bee0-f4c6b3405fb1"
       ],
       "startedAt": "2026-04-13T02:15:00",
       "endedAt": "2026-04-13T05:00:00",
@@ -2747,9 +2747,9 @@
       "isSample": true
     },
     {
-      "id": "s6",
+      "id": "b847ad61-a401-40e7-a092-d85d1fccd059",
       "actionIds": [
-        "a8"
+        "a820c190-2568-4409-8408-b1a75a8dfc59"
       ],
       "startedAt": "2026-04-21T02:56:00",
       "endedAt": "2026-04-21T04:00:00",
@@ -2758,9 +2758,9 @@
       "isSample": true
     },
     {
-      "id": "s7",
+      "id": "501c817c-8ce9-4804-adba-6e05124949bd",
       "actionIds": [
-        "a37"
+        "954a4dc5-aa1f-4d12-ae16-2fbda85fd940"
       ],
       "startedAt": "2026-04-03T22:43:00",
       "endedAt": "2026-04-04T00:00:00",
@@ -2769,9 +2769,9 @@
       "isSample": true
     },
     {
-      "id": "s8",
+      "id": "0165ae3e-cf7c-4913-8c18-eb9dd6380c33",
       "actionIds": [
-        "a40"
+        "5695715d-2124-442a-9e65-0894bf236d63"
       ],
       "startedAt": "2026-04-25T07:29:00",
       "endedAt": "2026-04-25T09:00:00",
@@ -2780,9 +2780,9 @@
       "isSample": true
     },
     {
-      "id": "s9",
+      "id": "8a950eea-ad78-4102-a6a7-0ab280332ee7",
       "actionIds": [
-        "a3"
+        "c96c124c-303d-4992-a098-3a80a4b281d3"
       ],
       "startedAt": "2026-03-20T05:11:00",
       "endedAt": "2026-03-20T07:00:00",
@@ -2791,9 +2791,9 @@
       "isSample": true
     },
     {
-      "id": "s10",
+      "id": "11548a59-6b62-4e66-ac0b-6d3511d5570e",
       "actionIds": [
-        "a6"
+        "3d63d674-b0a1-4499-bd85-f79fe8f6426a"
       ],
       "startedAt": "2026-04-08T21:47:00",
       "endedAt": "2026-04-08T23:00:00",
@@ -2802,9 +2802,9 @@
       "isSample": true
     },
     {
-      "id": "s11",
+      "id": "fefcb04d-3d80-4420-ab1e-dd5caed26e40",
       "actionIds": [
-        "a27"
+        "27cc01c3-35e2-4966-abca-a23788a6d58c"
       ],
       "startedAt": "2026-04-16T23:17:00",
       "endedAt": "2026-04-17T01:00:00",
@@ -2813,9 +2813,9 @@
       "isSample": true
     },
     {
-      "id": "s12",
+      "id": "351c00f6-4ddc-437d-8eb8-73ab0446be95",
       "actionIds": [
-        "a21"
+        "93334ee1-6ceb-4daa-9077-a16dbe19ebf7"
       ],
       "startedAt": "2026-03-17T04:34:00",
       "endedAt": "2026-03-17T05:00:00",
@@ -2824,9 +2824,9 @@
       "isSample": true
     },
     {
-      "id": "s13",
+      "id": "4eb2595b-550b-4365-bf71-87a0573740df",
       "actionIds": [
-        "a30"
+        "eb3b7235-e687-4223-abd7-0c6d9391c6ee"
       ],
       "startedAt": "2026-04-26T01:10:00",
       "endedAt": "2026-04-26T02:00:00",
@@ -2835,9 +2835,9 @@
       "isSample": true
     },
     {
-      "id": "s14",
+      "id": "005fa1d1-88b2-4c3f-94b3-709474137c48",
       "actionIds": [
-        "a9"
+        "27154d66-97d2-4740-8066-e8d9e082fdb1"
       ],
       "startedAt": "2026-04-19T08:19:00",
       "endedAt": "2026-04-19T10:00:00",
@@ -2846,9 +2846,9 @@
       "isSample": true
     },
     {
-      "id": "s15",
+      "id": "12317807-65aa-4314-8328-18cf2e8c9928",
       "actionIds": [
-        "a7"
+        "569b0a89-fad0-4e08-bc04-16ff4066c67b"
       ],
       "startedAt": "2026-04-14T08:11:00",
       "endedAt": "2026-04-14T09:00:00",
@@ -2857,9 +2857,9 @@
       "isSample": true
     },
     {
-      "id": "s16",
+      "id": "edcda506-6b1e-4e0f-ac91-8a860eda44d9",
       "actionIds": [
-        "a22"
+        "69dba2ec-d3ed-4534-a185-03e42827c777"
       ],
       "startedAt": "2026-03-20T06:54:00",
       "endedAt": "2026-03-20T08:00:00",
@@ -2868,9 +2868,9 @@
       "isSample": true
     },
     {
-      "id": "s17",
+      "id": "bdd900a7-8f0f-4e88-9923-13e3fda8b13c",
       "actionIds": [
-        "a23"
+        "135ddd72-9cf9-4a3a-b260-8fa2aabb55f4"
       ],
       "startedAt": "2026-03-22T21:01:00",
       "endedAt": "2026-03-22T22:00:00",
@@ -2879,9 +2879,9 @@
       "isSample": true
     },
     {
-      "id": "s18",
+      "id": "3b9f1c4d-7c29-4e84-a95d-ded798d05159",
       "actionIds": [
-        "a11"
+        "0c28005f-c870-4fb0-b87e-af8a3fb332b4"
       ],
       "startedAt": "2026-04-27T00:45:00",
       "endedAt": "2026-04-27T02:00:00",
@@ -2890,9 +2890,9 @@
       "isSample": true
     },
     {
-      "id": "s19",
+      "id": "251688f6-97ac-4670-8267-1af89200493e",
       "actionIds": [
-        "a38"
+        "472763cf-1545-4bf5-983e-1c8be9ebdcbf"
       ],
       "startedAt": "2026-04-10T20:37:00",
       "endedAt": "2026-04-10T22:00:00",
@@ -2901,9 +2901,9 @@
       "isSample": true
     },
     {
-      "id": "s20",
+      "id": "baa211ca-4686-4688-9f04-607174e5035a",
       "actionIds": [
-        "a31"
+        "c063f4dc-0e99-4796-85e1-cbc8ae4cb797"
       ],
       "startedAt": "2026-04-30T02:32:00",
       "endedAt": "2026-04-30T04:00:00",

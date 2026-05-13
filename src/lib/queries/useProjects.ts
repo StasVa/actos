@@ -4,17 +4,20 @@
 //
 // Each mutation owns its optimistic update (Decision F). Cross-entity cascade:
 //   - useDropProjectMutation cascade-drops non-terminal child actions (Supabase
-//     status update + TanStack cache write). Rituals NOT cascaded (Decision C).
+//     status update + TanStack cache write). Rituals stay active — they survive
+//     a dropped project and become goal-level if the project is later deleted.
 //   - useDeleteProjectMutation: DB ON DELETE SET NULL orphans child actions
-//     to goal-level (Decision B1). Cache mirrors this. Rituals NOT cascaded.
+//     AND child rituals to goal-level (their project_id becomes null). Cache
+//     mirrors this.
 //   - useMoveProjectToGoalMutation cascades goalId on child actions (Supabase
-//     update + cache write).
+//     update + cache write). Rituals don't follow — they're attached to the
+//     original goal/project and stay there.
 //   - All rollback action cache via prevActions snapshot in onError.
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/useAuth";
-import { TERMINAL_ACTION_STATUSES } from "@/store/useStore";
+import { TERMINAL_ACTION_STATUSES } from "@/lib/queries/useActions";
 import { queryKeys } from "@/lib/queryKeys";
 import {
   projectToInsert,
@@ -22,7 +25,7 @@ import {
   rowToProject,
   type ProjectRowWithJoin,
 } from "@/lib/rowMappers";
-import type { Action, ID, Project } from "@/types";
+import type { Action, ID, Project, Ritual } from "@/types";
 
 function nowISO(): string {
   return new Date().toISOString();
@@ -302,19 +305,22 @@ export function useDeleteProjectMutation() {
     void,
     Error,
     ID,
-    { prevProjects?: Project[]; prevActions?: Action[] }
+    { prevProjects?: Project[]; prevActions?: Action[]; prevRituals?: Ritual[] }
   >({
     mutationFn: async (id) => {
       // DB schema: project_references CASCADE; actions.project_id SET NULL
-      // (Decision B1 — orphan to goal-level rather than delete actions).
+      // (Decision B1 — orphan to goal-level rather than delete actions);
+      // rituals.project_id SET NULL (same — orphan to goal-level).
       const { error } = await supabase.from("projects").delete().eq("id", id);
       if (error) throw error;
     },
     onMutate: async (id) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.projects });
       await queryClient.cancelQueries({ queryKey: queryKeys.actions });
+      await queryClient.cancelQueries({ queryKey: queryKeys.rituals });
       const prevProjects = queryClient.getQueryData<Project[]>(queryKeys.projects);
       const prevActions = queryClient.getQueryData<Action[]>(queryKeys.actions);
+      const prevRituals = queryClient.getQueryData<Ritual[]>(queryKeys.rituals);
       queryClient.setQueryData<Project[]>(queryKeys.projects, (old) =>
         (old ?? []).filter((p) => p.id !== id),
       );
@@ -323,7 +329,12 @@ export function useDeleteProjectMutation() {
           a.projectId === id ? { ...a, projectId: null } : a,
         ),
       );
-      return { prevProjects, prevActions };
+      queryClient.setQueryData<Ritual[]>(queryKeys.rituals, (old) =>
+        (old ?? []).map((r) =>
+          r.projectId === id ? { ...r, projectId: null } : r,
+        ),
+      );
+      return { prevProjects, prevActions, prevRituals };
     },
     onError: (_e, _v, ctx) => {
       if (ctx?.prevProjects !== undefined) {
@@ -332,10 +343,14 @@ export function useDeleteProjectMutation() {
       if (ctx?.prevActions !== undefined) {
         queryClient.setQueryData(queryKeys.actions, ctx.prevActions);
       }
+      if (ctx?.prevRituals !== undefined) {
+        queryClient.setQueryData(queryKeys.rituals, ctx.prevRituals);
+      }
     },
     onSettled: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.projects });
       void queryClient.invalidateQueries({ queryKey: queryKeys.actions });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.rituals });
     },
   });
 }

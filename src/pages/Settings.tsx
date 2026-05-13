@@ -10,6 +10,9 @@ import { useStore } from "@/store/useStore";
 import { useGoalsQuery } from "@/lib/queries/useGoals";
 import { useProjectsQuery } from "@/lib/queries/useProjects";
 import { useActionsQuery } from "@/lib/queries/useActions";
+import { useRitualsQuery } from "@/lib/queries/useRituals";
+import { useIdeasQuery } from "@/lib/queries/useIdeas";
+import { useClearSampleData } from "@/lib/sampleDataActions";
 import { useThemeChoice, type ThemeChoice } from "@/lib/theme";
 import { useAuth } from "@/lib/useAuth";
 import { toast } from "sonner";
@@ -76,34 +79,45 @@ export default function Settings() {
   const goals = useGoalsQuery().data ?? [];
   const setDefaultGoal = useStore((s) => s.setDefaultGoal);
   const setShowAdminTools = useStore((s) => s.setShowAdminTools);
-  const resetToSeed = useStore((s) => s.resetToSeed);
   const { user, setAdmin, setSubscriptionTier } = useAuth();
-  const clearSampleData = useStore((s) => s.clearSampleData);
+  const clearSampleData = useClearSampleData();
   const projectsList = useProjectsQuery().data ?? [];
   const actionsList = useActionsQuery().data ?? [];
+  const ritualsList = useRitualsQuery().data ?? [];
+  const ideasList = useIdeasQuery().data ?? [];
   const hasSample =
     goals.some((g) => g.isSample) ||
     projectsList.some((p) => p.isSample) ||
     actionsList.some((a) => a.isSample) ||
-    useStore((s) =>
-      s.rituals.some((r) => r.isSample) ||
-      s.ideas.some((i) => i.isSample),
-    );
+    ritualsList.some((r) => r.isSample) ||
+    ideasList.some((i) => i.isSample);
   const activeGoals = goals.filter((g) => g.status === "active");
   const [themeChoice, , setThemeChoice] = useThemeChoice();
   const fileRef = React.useRef<HTMLInputElement>(null);
 
-  const handleClearSample = () => {
+  const handleClearSample = async () => {
     if (!confirm(t("settings.clearSampleData.confirm"))) return;
-    clearSampleData();
-    toast.success(t("settings.toast.sampleCleared"));
+    try {
+      await clearSampleData();
+      toast.success(t("settings.toast.sampleCleared"));
+    } catch (err) {
+      toast.error(
+        "Couldn't clear sample data: " +
+          (err instanceof Error ? err.message : "unknown error"),
+      );
+    }
   };
 
   const handleReset = () => {
     if (confirm(t("settings.confirm.reset"))) {
-      localStorage.removeItem(STORAGE_KEY);
-      resetToSeed();
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem("actos-query-cache");
+      } catch {
+        /* ignore */
+      }
       toast.success(t("settings.toast.resetSeed"));
+      setTimeout(() => window.location.reload(), 150);
     }
   };
   const handleExport = () => {

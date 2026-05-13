@@ -7,6 +7,8 @@ import { useStore } from "@/store/useStore";
 import { useGoalsQuery } from "@/lib/queries/useGoals";
 import { useProjectsQuery } from "@/lib/queries/useProjects";
 import { useActionsQuery } from "@/lib/queries/useActions";
+import { useDayEntriesQuery } from "@/lib/queries/useDayEntries";
+import { useCreateDraftSessionMutation, useSessionsQuery } from "@/lib/queries/useSessions";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Switch } from "@/components/ui/switch";
 import { FilterDropdown, FilterOption } from "@/components/FilterDropdown";
@@ -465,10 +467,10 @@ const SessionBuilder: React.FC = () => {
   const goals = useGoalsQuery().data ?? [];
   const projects = useProjectsQuery().data ?? [];
   const actions = useActionsQuery().data ?? [];
-  const dayEntries = useStore((s) => s.dayEntries);
+  const dayEntries = useDayEntriesQuery().data ?? [];
   const settings = useStore((s) => s.settings);
-  const createDraftSession = useStore((s) => s.createDraftSession);
-  const sessions = useStore((s) => s.sessions);
+  const createDraftSessionMutation = useCreateDraftSessionMutation();
+  const sessions = useSessionsQuery().data ?? [];
 
   const [mode, setMode] = useState<SessionMode | null>(null);
   const [totalSession, setTotalSession] = useState<number | "">(60);
@@ -594,12 +596,12 @@ const SessionBuilder: React.FC = () => {
   const hasActiveSession = sessions.some((s) => s.status === "in_progress");
   const canStart = selectedIds.length > 0 && validNums && !hasActiveSession;
 
-  const handleStart = () => {
+  const handleStart = async () => {
     if (!canStart || typeof totalSession !== "number") return;
     const inferredMode: SessionMode = mode ?? (!breaksOn ? "continuous" : "custom");
     const wd = breaksOn ? (typeof work === "number" ? work : 25) : totalSession;
     const bd = breaksOn ? (typeof brk === "number" ? brk : 5) : 0;
-    const result = createDraftSession({
+    const result = await createDraftSessionMutation.mutateAsync({
       mode: inferredMode,
       workDuration: wd,
       breakDuration: bd,

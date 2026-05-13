@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { useStore } from "@/store/useStore";
 import { useGoalsQuery } from "@/lib/queries/useGoals";
 import { useActionsQuery } from "@/lib/queries/useActions";
+import { useDeleteSessionMutation, useSessionsQuery } from "@/lib/queries/useSessions";
 import { AppSidebar } from "@/components/AppSidebar";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { EmptyState } from "@/components/EmptyState";
@@ -416,9 +417,10 @@ function useSortOptions(t: (k: string) => string): FilterOption<SSortKey>[] {
 const Sessions: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const sessions = useStore((s) => s.sessions);
+  const sessions = useSessionsQuery().data ?? [];
   const actions = useActionsQuery().data ?? [];
-  const deleteSession = useStore((s) => s.deleteSession);
+  const deleteSessionMutation = useDeleteSessionMutation();
+  const deleteSession = (id: string) => deleteSessionMutation.mutate(id);
 
   const [selectedId, setSelectedId] = useState<ID | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<ID | null>(null);

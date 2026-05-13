@@ -12,9 +12,18 @@ import { useTranslation } from "react-i18next";
 import { useStore } from "@/store/useStore";
 import { useProjectsQuery } from "@/lib/queries/useProjects";
 import { useGoalsQuery } from "@/lib/queries/useGoals";
+import {
+  useArchiveRitualMutation,
+  useCreateRitualMutation,
+  useDeleteRitualMutation,
+  useMarkRitualInstanceDoneMutation,
+  useRestoreRitualMutation,
+  useRitualsQuery,
+  useUpdateRitualMutation,
+} from "@/lib/queries/useRituals";
 import type { ID, Ritual, RitualSchedule } from "@/types";
 import { ConfirmModal } from "./ConfirmModal";
-import { ritualMultiplier } from "@/store/useStore";
+import { ritualMultiplier } from "@/lib/selectors";
 import { EditorShell, EditorCloseX, EditorCancelButton } from "./EditorShell";
 import {
   DeleteTypeConfirm,
@@ -84,17 +93,18 @@ function RitualEditorPanel({
   onClose: () => void;
 }) {
   const { t } = useTranslation();
-  const ritual = useStore((s) => (ritualId ? s.rituals.find((r) => r.id === ritualId) : undefined));
+  const rituals = useRitualsQuery().data ?? [];
+  const ritual = ritualId ? rituals.find((r) => r.id === ritualId) : undefined;
   const goals = useGoalsQuery().data ?? [];
   const projects = useProjectsQuery().data ?? [];
   const layers = useStore((s) => s.settings.layers);
 
-  const createRitual = useStore((s) => s.createRitual);
-  const updateRitual = useStore((s) => s.updateRitual);
-  const markDone = useStore((s) => s.markRitualInstanceDone);
-  const archiveRitual = useStore((s) => s.archiveRitual);
-  const restoreRitual = useStore((s) => s.restoreRitual);
-  const deleteRitual = useStore((s) => s.deleteRitual);
+  const createRitualMutation = useCreateRitualMutation();
+  const updateRitualMutation = useUpdateRitualMutation();
+  const markDoneMutation = useMarkRitualInstanceDoneMutation();
+  const archiveMutation = useArchiveRitualMutation();
+  const restoreMutation = useRestoreRitualMutation();
+  const deleteMutation = useDeleteRitualMutation();
 
   const seed: Partial<Ritual> = mode === "edit" && ritual ? ritual : prefill ?? {};
   const [title, setTitle] = useState(seed.title ?? "");
@@ -172,13 +182,16 @@ function RitualEditorPanel({
 
   const persistField = <K extends keyof Ritual>(field: K, value: Ritual[K]) => {
     if (mode !== "edit" || !ritualId) return;
-    updateRitual(ritualId, { [field]: value } as Partial<Ritual>);
+    updateRitualMutation.mutate({ id: ritualId, partial: { [field]: value } as Partial<Ritual> });
   };
 
   const persistScheduleConfig = (next: Partial<Ritual["scheduleConfig"]>) => {
     if (mode !== "edit" || !ritualId || !ritual) return;
-    updateRitual(ritualId, {
-      scheduleConfig: { ...(ritual.scheduleConfig ?? {}), ...next },
+    updateRitualMutation.mutate({
+      id: ritualId,
+      partial: {
+        scheduleConfig: { ...(ritual.scheduleConfig ?? {}), ...next },
+      },
     });
   };
 
@@ -227,7 +240,7 @@ function RitualEditorPanel({
       }
       return;
     }
-    createRitual({
+    createRitualMutation.mutate({
       title: title.trim(),
       goalId,
       projectId,
@@ -251,13 +264,13 @@ function RitualEditorPanel({
       toast(t("ritualEditor.toast.alreadyLogged"));
       return;
     }
-    markDone(ritualId);
+    markDoneMutation.mutate({ ritualId });
     toast(t("ritualEditor.toast.logged", { count: completions + 1 }));
   };
 
   const handleArchive = () => {
     if (!ritualId) return;
-    archiveRitual(ritualId);
+    archiveMutation.mutate(ritualId);
     toast(t("ritualEditor.toast.archived"));
     setConfirmArchive(false);
     onClose();
@@ -265,21 +278,21 @@ function RitualEditorPanel({
 
   const handleRestore = () => {
     if (!ritualId) return;
-    restoreRitual(ritualId);
+    restoreMutation.mutate(ritualId);
     toast(t("ritualEditor.toast.restored"));
   };
 
   const handleDelete = () => {
     if (!ritualId) return;
-    deleteRitual(ritualId);
+    deleteMutation.mutate(ritualId);
     toast(t("ritualEditor.toast.deleted"));
     setConfirmDelete(false);
     onClose();
   };
 
-  const handleDuplicate = () => {
+  const handleDuplicate = async () => {
     if (!ritual) return;
-    const newId = createRitual({
+    const result = await createRitualMutation.mutateAsync({
       title: t("actionEditor.copyOf", { title: ritual.title }),
       goalId: ritual.goalId,
       projectId: ritual.projectId,
@@ -290,7 +303,7 @@ function RitualEditorPanel({
       timeEstimateMinutes: ritual.timeEstimateMinutes,
     });
     toast(t("ritualEditor.toast.duplicated"));
-    useStore.getState().openPanel({ kind: "ritual", mode: "edit", id: newId });
+    useStore.getState().openPanel({ kind: "ritual", mode: "edit", id: result.id });
   };
 
   const toggleCustomDay = (d: number) => {

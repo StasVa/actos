@@ -3,7 +3,7 @@
 > **Document role:** items we deliberately deferred to ship faster. Each has a chosen workaround AND a planned proper fix. Triaged by impact, not by when we noticed them.
 > **Read alongside:** `06-ROADMAP.md` (forward scope), `11-CHANGELOG.md` (shipped work).
 > **Audience:** Stas (PM) for prioritization; AI agents and contractors for context before touching related code.
-> **Last updated:** 2026-05-13
+> **Last updated:** 2026-05-13 (post-Phase 4 Session 2)
 
 ---
 
@@ -27,63 +27,7 @@
 
 **Proper fix:** Wrap both writes in a Postgres function so they're transactional. OR change order (insert timeline first, update action second) and treat a trailing-update failure as the recoverable case.
 
-**When:** Session 2 or when first user reports a timeline gap.
-
----
-
-### P1 — Cross-store conversion can fail silently
-
-**Location:** `src/pages/Ideas.tsx` — `convertToAction`, `ConvertProjectOverlay.submit`
-
-**Issue:** Mutation creates action/project in Supabase, then Zustand marks idea as converted. If the second step fails (e.g., user closes browser between), the action exists but the idea is still "captured" — user might double-convert and create duplicates.
-
-**Workaround:** `.catch()` chain added in Phase 4 Session 1 surfaces failures as toasts. User at least sees what went wrong.
-
-**Proper fix:** Session 2 — when ideas migrate to Supabase, both writes happen in same transaction (or single SQL function), eliminating the cross-store gap entirely.
-
-**When:** Session 2.
-
----
-
-### P2 — `gnup` shim still in `useAuth.tsx`
-
-**Location:** `src/lib/useAuth.tsx`
-
-**Issue:** Vestigial shim left from Phase 3 transition. No consumers after `AuthVerify.tsx` rewrite — the shim returns the current Supabase-derived user but nothing calls it.
-
-**Workaround:** None needed — it's inert code.
-
-**Proper fix:** Delete the shim + its declaration in the `AuthCtx` interface + its entry in the context value object.
-
-**When:** Next time anyone edits `useAuth.tsx` — ~5 line cleanup.
-
----
-
-### P2 — `storeQueryRef.ts` bridge will outlive its purpose
-
-**Location:** `src/lib/storeQueryRef.ts`
-
-**Issue:** Bridge for legacy Zustand reads (`captureIdea` fallback) reading goals from TanStack cache. Marked with TODO header.
-
-**Workaround:** None needed — works correctly during the strangler phase.
-
-**Proper fix:** Delete entire file when ideas migrate to Supabase in Session 2. `captureIdea` becomes a TanStack mutation hook itself.
-
-**When:** Session 2.
-
----
-
-### P2 — Unused `useStore` import in `App.tsx`
-
-**Location:** `src/App.tsx` line 47
-
-**Issue:** Dead import after Phase 4 Session 1 — `App.tsx` no longer reads anything from the Zustand store directly.
-
-**Workaround:** None needed. TypeScript flags as unused but build still passes.
-
-**Proper fix:** Remove the import.
-
-**When:** Next time `App.tsx` is edited.
+**When:** Reactive — when first user reports a missing timeline event, or as part of a broader audit/history surface upgrade.
 
 ---
 
@@ -162,7 +106,11 @@
 
 ## Resolved items
 
-(none yet — when items are fixed, move them here with the date and a one-line note pointing at the relevant commit or CHANGELOG entry)
+- **2026-05-13 — P1 Cross-store conversion can fail silently** — Closed in Phase 4 Session 2. Idea conversions now use Postgres RPCs (`convert_idea_to_action`, `convert_idea_to_project`) that wrap both writes in a single transaction. See migration `supabase/migrations/20260513000000_idea_conversion_rpcs.sql` and `src/lib/queries/useIdeas.ts`.
+- **2026-05-13 — Ritual completion counter atomicity** — Avoided rather than fixed. `Ritual.totalCompletions` is now derived from the joined `ritual_completions` array (count of `status='done'`) at the mapper boundary, not stored. A single insert records a completion; no second write needed. The DB column `rituals.total_completions` remains but is no longer read. See `src/lib/rowMappers.ts` `rowToRitual`.
+- **2026-05-13 — P2 `completeSignup` shim in `useAuth.tsx`** — Removed in Phase 4 Session 2 cleanup. No callers existed.
+- **2026-05-13 — P2 `storeQueryRef.ts` bridge** — Deleted in Phase 4 Session 2. The four call sites (captureIdea, CommandPalette, AdminComponents, goalGuard) now read from TanStack cache directly via `useQueryClient` or `useGoalsQuery`.
+- **2026-05-13 — P2 Unused `useStore` import in `App.tsx`** — Removed in Phase 4 Session 2 cleanup.
 
 ---
 

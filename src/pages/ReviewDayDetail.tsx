@@ -9,6 +9,9 @@ import { useStore } from "@/store/useStore";
 import { useProjectsQuery } from "@/lib/queries/useProjects";
 import { useGoalsQuery } from "@/lib/queries/useGoals";
 import { useActionsQuery } from "@/lib/queries/useActions";
+import { useRitualsQuery } from "@/lib/queries/useRituals";
+import { useDayEntriesQuery } from "@/lib/queries/useDayEntries";
+import { useSessionsQuery } from "@/lib/queries/useSessions";
 import { formatHM } from "@/lib/timeStats";
 import type { Action, Goal, Project, Ritual } from "@/types";
 import { ActionRow as SharedActionRow } from "@/components/ActionRow";
@@ -131,9 +134,10 @@ const ReviewDayDetail: React.FC = () => {
   const { date = "" } = useParams();
   const navigate = useNavigate();
   const [settingsOpen, setSettingsOpen] = React.useState(false);
-  const dayEntry = useStore((s) => s.dayEntries.find((d) => d.date === date));
+  const dayEntries = useDayEntriesQuery().data ?? [];
+  const dayEntry = dayEntries.find((d) => d.date === date);
   const actions = useActionsQuery().data ?? [];
-  const rituals = useStore((s) => s.rituals);
+  const rituals = useRitualsQuery().data ?? [];
   const goals = useGoalsQuery().data ?? [];
   const projects = useProjectsQuery().data ?? [];
   const settings = useStore((s) => s.settings);
@@ -262,7 +266,7 @@ const ReviewDayDetail: React.FC = () => {
   );
 
   // Sessions started on this day
-  const allSessions = useStore((s) => s.sessions);
+  const allSessions = useSessionsQuery().data ?? [];
   const sessionsForDay = React.useMemo(
     () => getSessionsForDay(allSessions, date),
     [allSessions, date],

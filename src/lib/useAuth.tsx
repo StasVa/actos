@@ -4,8 +4,6 @@
 //   - pendingVerification / markEmailVerified / resendVerification are gone. Supabase owns
 //     verification state and signup does not create a session until OTP succeeds, so there's
 //     no logged-in-but-unverified state to track. EmailVerificationBanner is being removed.
-//   - completeSignup is a transitional shim until AuthVerify is rewired to call
-//     supabase.auth.verifyOtp directly (Task 4); it will be deleted then.
 //   - On cold load we block render until the first getSession() resolves to avoid a
 //     false isAuthenticated=false flash that would trip RequireAuth.
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
@@ -32,6 +30,33 @@ export interface AuthUser {
 
 // Resume state for /auth/verify after tab close. Email only — never password.
 const PENDING_KEY = "actos.auth.pendingSignup";
+
+// signOut clears all per-user localStorage by default; these survive logout
+// because they're device-level preferences (theme/language/timer audio) or
+// shared admin content (manifesto CMS, pending Supabase migration).
+const SIGNOUT_KEEP_KEYS = new Set([
+  "actos.theme",
+  "actos.i18n.language",
+  "actos-session-sound",
+]);
+const SIGNOUT_KEEP_PREFIXES = ["actos.cms."];
+
+function clearUserLocalStorage() {
+  try {
+    const toRemove: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (!key) continue;
+      if (!key.startsWith("actos")) continue;
+      if (SIGNOUT_KEEP_KEYS.has(key)) continue;
+      if (SIGNOUT_KEEP_PREFIXES.some((p) => key.startsWith(p))) continue;
+      toRemove.push(key);
+    }
+    toRemove.forEach((k) => localStorage.removeItem(k));
+  } catch {
+    // ignore quota / unavailable storage
+  }
+}
 
 export const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -118,9 +143,6 @@ interface AuthCtx {
   user: AuthUser | null;
   isAuthenticated: boolean;
   signUp: (input: { name: string; email: string; password: string }) => Promise<AuthUser>;
-  // Transitional shim — Supabase has already established the session via verifyOtp
-  // by the time AuthVerify calls this. Task 4 deletes it.
-  completeSignup: (input: { name: string; email: string }) => AuthUser | null;
   signIn: (input: { email: string; password: string }) => Promise<AuthUser>;
   // Now Promise<void> (was void). Consumers that don't await still work.
   signOut: () => Promise<void>;
@@ -203,8 +225,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, []);
 
-  const completeSignup = useCallback<AuthCtx["completeSignup"]>(() => user, [user]);
-
   const signIn = useCallback<AuthCtx["signIn"]>(async ({ email, password }) => {
     if (!EMAIL_RE.test(email)) throw new Error("Invalid email");
     if (password.length < 1) throw new Error("Password required");
@@ -227,19 +247,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signOut = useCallback<AuthCtx["signOut"]>(async () => {
     await supabase.auth.signOut();
-    try {
-      localStorage.removeItem(PENDING_KEY);
-    } catch {
-      // ignore
-    }
     queryClient.clear();
     await persister.removeClient();
+    clearUserLocalStorage();
     // The persister's persistClient is throttled (default 1000ms in
     // createSyncStoragePersister), so queryClient.clear()'s cache events
     // schedule a trailing write of empty state that lands after the immediate
-    // remove above. Re-remove past the throttle window to drop that final write.
+    // remove above. Re-remove past the throttle window to drop that final write,
+    // and re-sweep so anything else written during the window is also gone.
     setTimeout(() => {
       void persister.removeClient();
+      clearUserLocalStorage();
     }, 1100);
     setUser(null);
   }, []);
@@ -277,14 +295,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       user,
       isAuthenticated: !!user,
       signUp,
-      completeSignup,
       signIn,
       signOut,
       setAdmin,
       setSubscriptionTier,
       resetPassword,
     }),
-    [user, signUp, completeSignup, signIn, signOut, setAdmin, setSubscriptionTier, resetPassword],
+    [user, signUp, signIn, signOut, setAdmin, setSubscriptionTier, resetPassword],
   );
 
   // Block render until first getSession() resolves — otherwise RequireAuth would

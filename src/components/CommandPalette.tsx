@@ -9,7 +9,9 @@ import { useStore } from "@/store/useStore";
 import { useCreateProjectMutation, useProjectsQuery } from "@/lib/queries/useProjects";
 import { useGoalsQuery } from "@/lib/queries/useGoals";
 import { useActionsQuery, useCreateActionMutation } from "@/lib/queries/useActions";
-import { readGoalsFromCache } from "@/lib/storeQueryRef";
+import { useRitualsQuery } from "@/lib/queries/useRituals";
+import { useIdeasQuery } from "@/lib/queries/useIdeas";
+import { useDayEntriesQuery } from "@/lib/queries/useDayEntries";
 import { emitAppEvent } from "@/lib/appEvents";
 import { getRecent, pushRecent, type RecentKind } from "@/lib/recentlyViewed";
 import type { Action, Goal, Idea, Project, Ritual, DayEntry } from "@/types";
@@ -80,9 +82,9 @@ export function CommandPalette() {
   const goals = useGoalsQuery().data ?? [];
   const projects = useProjectsQuery().data ?? [];
   const actions = useActionsQuery().data ?? [];
-  const rituals = useStore((s) => s.rituals);
-  const ideas = useStore((s) => s.ideas);
-  const dayEntries = useStore((s) => s.dayEntries);
+  const rituals = useRitualsQuery().data ?? [];
+  const ideas = useIdeasQuery().data ?? [];
+  const dayEntries = useDayEntriesQuery().data ?? [];
   const settings = useStore((s) => s.settings);
   const openPanel = useStore((s) => s.openPanel);
   const createActionMutation = useCreateActionMutation();
@@ -549,7 +551,7 @@ export function CommandPalette() {
         else if (query.trim()) {
           // Empty results → quick-create action with the query (or route to
           // goal-builder if the user has no goals yet).
-          if (!readGoalsFromCache().some((g) => g.status === "active")) {
+          if (!goals.some((g) => g.status === "active")) {
             navigate("/onboarding/goal");
             close();
             return;

@@ -5,11 +5,13 @@ import { useTranslation } from "react-i18next";
 import i18n from "@/i18n";
 import { Tooltip, StateDotTooltip } from "@/components/Tooltip";
 import { ConfirmModal } from "@/components/ConfirmModal";
-import { useStore, selectors } from "@/store/useStore";
+import { useStore } from "@/store/useStore";
 import { useCreateProjectMutation, useProjectsQuery } from "@/lib/queries/useProjects";
-import { useGoalProgress, useStateIndicator } from "@/lib/selectors";
+import { useGoalProgress, useStateIndicator, useRitualMultiplier } from "@/lib/selectors";
 import { useGoalsQuery, useUpdateGoalMutation } from "@/lib/queries/useGoals";
 import { useActionsQuery } from "@/lib/queries/useActions";
+import { useRitualsQuery } from "@/lib/queries/useRituals";
+import { useCaptureIdeaMutation, useIdeasQuery } from "@/lib/queries/useIdeas";
 import type { Action, Goal, Project, Ritual, GoalColorVar } from "@/types";
 import { AppSidebar } from "@/components/AppSidebar";
 import { ProjectCard as SharedProjectCard } from "@/components/ProjectCard";
@@ -317,7 +319,7 @@ const ProjectCard: React.FC<{ p: Project; color: string; goalLabel: string }> = 
 /* ===== Ritual row ===== */
 const RitualRow: React.FC<{ r: Ritual; color: string; onOpen: () => void }> = ({ r, color, onOpen }) => {
   const { t } = useTranslation();
-  const mult = useStore((s) => selectors.ritualMultiplier(s, r.id));
+  const mult = useRitualMultiplier(r.id);
   const lastDays = r.completionHistory.slice(-12).map(() => 1);
   while (lastDays.length < 12) lastDays.unshift(0);
   return (
@@ -423,14 +425,16 @@ const RecentActivity: React.FC<{ actions: Action[] }> = ({ actions }) => {
 const IdeasSection: React.FC<{ goalId: string }> = ({ goalId }) => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(true);
-  const ideas = useStore(
-    useShallow((s) => s.ideas.filter((i) => i.goalId === goalId && i.status === "captured")),
+  const allIdeas = useIdeasQuery().data ?? [];
+  const ideas = useMemo(
+    () => allIdeas.filter((i) => i.goalId === goalId && i.status === "captured"),
+    [allIdeas, goalId],
   );
-  const captureIdea = useStore((s) => s.captureIdea);
+  const captureIdeaMutation = useCaptureIdeaMutation();
   const [text, setText] = useState("");
   const submit = () => {
     if (!text.trim()) return;
-    captureIdea({ title: text.trim(), goalId });
+    captureIdeaMutation.mutate({ title: text.trim(), goalId });
     setText("");
   };
   return (
@@ -483,7 +487,7 @@ const GoalDetail: React.FC = () => {
   const navigate = useNavigate();
   const goal = (useGoalsQuery().data ?? []).find((g) => g.id === id);
   const allProjects = useProjectsQuery().data ?? [];
-  const allRituals = useStore((s) => s.rituals);
+  const allRituals = useRitualsQuery().data ?? [];
   const allActions = useActionsQuery().data ?? [];
   const openPanel = useStore((s) => s.openPanel);
   const createProjectMutation = useCreateProjectMutation();

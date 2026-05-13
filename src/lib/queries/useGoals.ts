@@ -6,19 +6,20 @@
 // to cache, onError rolls back via context, onSettled invalidates. Each verb gets
 // its own hook (per Decision F) so optimistic UX + error toasts can vary per verb.
 //
-// Cross-entity cascade (Session 1 transitional):
+// Cross-entity cascade (post-Session 2):
 //   - useDropGoalMutation cascade-drops child projects (Supabase) + child actions
-//     (TanStack cache) — non-terminal actions move to status='dropped'.
-//   - useDeleteGoalMutation relies on DB CASCADE for projects + action rows;
-//     the client mirrors that by removing them from the cache optimistically.
-//   - Rituals/ideas/dayEntries are NOT cascaded client-side (Decision C — accept
-//     transient staleness until those entities migrate to Supabase in Session 2,
-//     at which point DB CASCADE handles it).
+//     (cache mirror) — non-terminal actions move to status='dropped'. Rituals
+//     and ideas stay active (no status='dropped' for those; they remain visible
+//     under the dropped goal until archived/discarded). Day entries are unrelated.
+//   - useDeleteGoalMutation relies on DB CASCADE: deleting the goal cascades to
+//     projects, actions, rituals (+ ritual_completions), ideas (+ refs +
+//     attachments), goal_success_criteria. day_entries don't reference goals.
+//     The client mirrors all cache slices in onMutate.
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/useAuth";
-import { TERMINAL_ACTION_STATUSES } from "@/store/useStore";
+import { TERMINAL_ACTION_STATUSES } from "@/lib/queries/useActions";
 import { queryKeys } from "@/lib/queryKeys";
 import {
   goalToInsert,
@@ -26,7 +27,16 @@ import {
   rowToGoal,
   type GoalRowWithJoin,
 } from "@/lib/rowMappers";
-import type { Action, Goal, GoalColorVar, ID, Project } from "@/types";
+import type {
+  Action,
+  DayEntry,
+  Goal,
+  GoalColorVar,
+  ID,
+  Idea,
+  Project,
+  Ritual,
+} from "@/types";
 
 // ────── helpers (lifted from Zustand) ──────
 
@@ -350,12 +360,19 @@ export function useDeleteGoalMutation() {
     void,
     Error,
     ID,
-    { prevGoals?: Goal[]; prevProjects?: Project[]; prevActions?: Action[] }
+    {
+      prevGoals?: Goal[];
+      prevProjects?: Project[];
+      prevActions?: Action[];
+      prevRituals?: Ritual[];
+      prevIdeas?: Idea[];
+    }
   >({
     mutationFn: async (id) => {
       // DB CASCADE handles: goal_success_criteria, projects (+ project_references),
-      // actions (goal_id CASCADE) + action_timeline, and rituals/ideas/day_entries
-      // once they migrate.
+      // actions (+ action_timeline), rituals (+ ritual_completions),
+      // ideas (+ idea_references, idea_image_attachments). day_entries don't
+      // reference goals so they are unaffected.
       const { error } = await supabase.from("goals").delete().eq("id", id);
       if (error) throw error;
     },
@@ -363,9 +380,13 @@ export function useDeleteGoalMutation() {
       await queryClient.cancelQueries({ queryKey: queryKeys.goals });
       await queryClient.cancelQueries({ queryKey: queryKeys.projects });
       await queryClient.cancelQueries({ queryKey: queryKeys.actions });
+      await queryClient.cancelQueries({ queryKey: queryKeys.rituals });
+      await queryClient.cancelQueries({ queryKey: queryKeys.ideas });
       const prevGoals = queryClient.getQueryData<Goal[]>(queryKeys.goals);
       const prevProjects = queryClient.getQueryData<Project[]>(queryKeys.projects);
       const prevActions = queryClient.getQueryData<Action[]>(queryKeys.actions);
+      const prevRituals = queryClient.getQueryData<Ritual[]>(queryKeys.rituals);
+      const prevIdeas = queryClient.getQueryData<Idea[]>(queryKeys.ideas);
       queryClient.setQueryData<Goal[]>(queryKeys.goals, (old) =>
         (old ?? []).filter((g) => g.id !== id),
       );
@@ -375,7 +396,13 @@ export function useDeleteGoalMutation() {
       queryClient.setQueryData<Action[]>(queryKeys.actions, (old) =>
         (old ?? []).filter((a) => a.goalId !== id),
       );
-      return { prevGoals, prevProjects, prevActions };
+      queryClient.setQueryData<Ritual[]>(queryKeys.rituals, (old) =>
+        (old ?? []).filter((r) => r.goalId !== id),
+      );
+      queryClient.setQueryData<Idea[]>(queryKeys.ideas, (old) =>
+        (old ?? []).filter((i) => i.goalId !== id),
+      );
+      return { prevGoals, prevProjects, prevActions, prevRituals, prevIdeas };
     },
     onError: (_e, _v, ctx) => {
       if (ctx?.prevGoals !== undefined) {
@@ -387,11 +414,19 @@ export function useDeleteGoalMutation() {
       if (ctx?.prevActions !== undefined) {
         queryClient.setQueryData(queryKeys.actions, ctx.prevActions);
       }
+      if (ctx?.prevRituals !== undefined) {
+        queryClient.setQueryData(queryKeys.rituals, ctx.prevRituals);
+      }
+      if (ctx?.prevIdeas !== undefined) {
+        queryClient.setQueryData(queryKeys.ideas, ctx.prevIdeas);
+      }
     },
     onSettled: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.goals });
       void queryClient.invalidateQueries({ queryKey: queryKeys.projects });
       void queryClient.invalidateQueries({ queryKey: queryKeys.actions });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.rituals });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.ideas });
     },
   });
 }

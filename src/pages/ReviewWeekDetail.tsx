@@ -9,6 +9,9 @@ import { useStore } from "@/store/useStore";
 import { useProjectsQuery } from "@/lib/queries/useProjects";
 import { useGoalsQuery } from "@/lib/queries/useGoals";
 import { useActionsQuery } from "@/lib/queries/useActions";
+import { useRitualsQuery } from "@/lib/queries/useRituals";
+import { useDayEntriesQuery } from "@/lib/queries/useDayEntries";
+import { useSessionsQuery } from "@/lib/queries/useSessions";
 import { formatHM } from "@/lib/timeStats";
 import {
   formatWeekLabel,
@@ -91,13 +94,13 @@ const ReviewWeekDetail: React.FC = () => {
   const [settingsOpen, setSettingsOpen] = React.useState(false);
 
   const actions = useActionsQuery().data ?? [];
-  const dayEntries = useStore((s) => s.dayEntries);
+  const dayEntries = useDayEntriesQuery().data ?? [];
   const goals = useGoalsQuery().data ?? [];
   const projects = useProjectsQuery().data ?? [];
-  const rituals = useStore((s) => s.rituals);
+  const rituals = useRitualsQuery().data ?? [];
   const settings = useStore((s) => s.settings);
   const openPanel = useStore((s) => s.openPanel);
-  const allSessions = useStore((s) => s.sessions);
+  const allSessions = useSessionsQuery().data ?? [];
 
   const summary = React.useMemo(
     () => getWeekSummary(yearWeek, { actions, dayEntries, goals, projects, rituals }),

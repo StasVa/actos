@@ -18,11 +18,37 @@ import type { QueryClient } from "@tanstack/react-query";
 import { useGoalsQuery } from "./queries/useGoals";
 import { useProjectsQuery } from "./queries/useProjects";
 import { useActionsQuery } from "./queries/useActions";
+import { useRitualsQuery } from "./queries/useRituals";
+import { useIdeasQuery } from "./queries/useIdeas";
+import { useDayEntriesQuery } from "./queries/useDayEntries";
+import { useSessionsQuery } from "./queries/useSessions";
 import { queryKeys } from "./queryKeys";
-import type { Action, Goal, ID, ISODate, Project } from "@/types";
+import type {
+  Action,
+  DayEntry,
+  Goal,
+  ID,
+  Idea,
+  ISODate,
+  Project,
+  Ritual,
+  Session,
+} from "@/types";
 
 function todayISO(): ISODate {
   return new Date().toISOString().slice(0, 10);
+}
+
+// 7-tier ritual multiplier formula (per spec 03-MODEL.md).
+// Pure function — safe to use anywhere; no React/cache coupling.
+export function ritualMultiplier(totalCompletions: number): number {
+  if (totalCompletions < 3) return 1.0;
+  if (totalCompletions < 7) return 1.1;
+  if (totalCompletions < 14) return 1.25;
+  if (totalCompletions < 30) return 1.5;
+  if (totalCompletions < 60) return 1.75;
+  if (totalCompletions < 100) return 2.0;
+  return 2.5;
 }
 
 // ────── activeGoals ──────
@@ -382,4 +408,153 @@ export function selectOverdueDelegations(queryClient: QueryClient): Action[] {
       a.expectedReturnDate &&
       a.expectedReturnDate < today,
   );
+}
+
+// ──────────────────────────────────────────────────────────
+// Ritual selectors
+// ──────────────────────────────────────────────────────────
+
+export function useRitualById(id: ID | undefined): Ritual | undefined {
+  const { data: rituals } = useRitualsQuery();
+  return useMemo(
+    () => (id ? (rituals ?? []).find((r) => r.id === id) : undefined),
+    [rituals, id],
+  );
+}
+
+export function selectRitualById(queryClient: QueryClient, id: ID): Ritual | undefined {
+  const rituals = queryClient.getQueryData<Ritual[]>(queryKeys.rituals) ?? [];
+  return rituals.find((r) => r.id === id);
+}
+
+export function useRitualsByGoal(goalId: ID | undefined): Ritual[] {
+  const { data: rituals } = useRitualsQuery();
+  return useMemo(
+    () =>
+      goalId
+        ? (rituals ?? []).filter((r) => r.goalId === goalId && r.status === "active")
+        : [],
+    [rituals, goalId],
+  );
+}
+
+export function selectRitualsByGoal(queryClient: QueryClient, goalId: ID): Ritual[] {
+  const rituals = queryClient.getQueryData<Ritual[]>(queryKeys.rituals) ?? [];
+  return rituals.filter((r) => r.goalId === goalId && r.status === "active");
+}
+
+export function useRitualMultiplier(ritualId: ID): number {
+  const { data: rituals } = useRitualsQuery();
+  return useMemo(() => {
+    const r = (rituals ?? []).find((x) => x.id === ritualId);
+    return r ? ritualMultiplier(r.totalCompletions) : 1.0;
+  }, [rituals, ritualId]);
+}
+
+export function selectRitualMultiplier(queryClient: QueryClient, ritualId: ID): number {
+  const rituals = queryClient.getQueryData<Ritual[]>(queryKeys.rituals) ?? [];
+  const r = rituals.find((x) => x.id === ritualId);
+  return r ? ritualMultiplier(r.totalCompletions) : 1.0;
+}
+
+export function useRitualEffectiveImpact(ritualId: ID): number {
+  const { data: rituals } = useRitualsQuery();
+  return useMemo(() => {
+    const r = (rituals ?? []).find((x) => x.id === ritualId);
+    if (!r) return 0;
+    return r.baseImpact * ritualMultiplier(r.totalCompletions);
+  }, [rituals, ritualId]);
+}
+
+export function selectRitualEffectiveImpact(queryClient: QueryClient, ritualId: ID): number {
+  const rituals = queryClient.getQueryData<Ritual[]>(queryKeys.rituals) ?? [];
+  const r = rituals.find((x) => x.id === ritualId);
+  if (!r) return 0;
+  return r.baseImpact * ritualMultiplier(r.totalCompletions);
+}
+
+export function useTodaysPendingRituals(): Ritual[] {
+  const { data: rituals } = useRitualsQuery();
+  return useMemo(() => {
+    const today = todayISO();
+    return (rituals ?? []).filter(
+      (r) =>
+        r.status === "active" &&
+        !r.completionHistory.some((c) => c.date === today),
+    );
+  }, [rituals]);
+}
+
+export function selectTodaysPendingRituals(queryClient: QueryClient): Ritual[] {
+  const rituals = queryClient.getQueryData<Ritual[]>(queryKeys.rituals) ?? [];
+  const today = todayISO();
+  return rituals.filter(
+    (r) =>
+      r.status === "active" &&
+      !r.completionHistory.some((c) => c.date === today),
+  );
+}
+
+// ──────────────────────────────────────────────────────────
+// Idea selectors
+// ──────────────────────────────────────────────────────────
+
+export function useIdeaById(id: ID | undefined): Idea | undefined {
+  const { data: ideas } = useIdeasQuery();
+  return useMemo(
+    () => (id ? (ideas ?? []).find((i) => i.id === id) : undefined),
+    [ideas, id],
+  );
+}
+
+export function selectIdeaById(queryClient: QueryClient, id: ID): Idea | undefined {
+  const ideas = queryClient.getQueryData<Idea[]>(queryKeys.ideas) ?? [];
+  return ideas.find((i) => i.id === id);
+}
+
+export function useIdeasByGoal(goalId: ID | undefined): Idea[] {
+  const { data: ideas } = useIdeasQuery();
+  return useMemo(
+    () => (goalId ? (ideas ?? []).filter((i) => i.goalId === goalId) : []),
+    [ideas, goalId],
+  );
+}
+
+export function selectIdeasByGoal(queryClient: QueryClient, goalId: ID): Idea[] {
+  const ideas = queryClient.getQueryData<Idea[]>(queryKeys.ideas) ?? [];
+  return ideas.filter((i) => i.goalId === goalId);
+}
+
+// ──────────────────────────────────────────────────────────
+// DayEntry selectors
+// ──────────────────────────────────────────────────────────
+
+export function useDayEntryByDate(date: ISODate | undefined): DayEntry | undefined {
+  const { data: dayEntries } = useDayEntriesQuery();
+  return useMemo(
+    () => (date ? (dayEntries ?? []).find((d) => d.date === date) : undefined),
+    [dayEntries, date],
+  );
+}
+
+export function selectDayEntryByDate(queryClient: QueryClient, date: ISODate): DayEntry | undefined {
+  const dayEntries = queryClient.getQueryData<DayEntry[]>(queryKeys.dayEntries) ?? [];
+  return dayEntries.find((d) => d.date === date);
+}
+
+// ──────────────────────────────────────────────────────────
+// Session selectors
+// ──────────────────────────────────────────────────────────
+
+export function useActiveSession(): Session | undefined {
+  const { data: sessions } = useSessionsQuery();
+  return useMemo(
+    () => (sessions ?? []).find((s) => s.status === "in_progress"),
+    [sessions],
+  );
+}
+
+export function selectActiveSession(queryClient: QueryClient): Session | undefined {
+  const sessions = queryClient.getQueryData<Session[]>(queryKeys.sessions) ?? [];
+  return sessions.find((s) => s.status === "in_progress");
 }

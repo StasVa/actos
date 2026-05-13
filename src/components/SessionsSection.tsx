@@ -14,6 +14,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { format, parseISO } from "date-fns";
 import { useStore } from "@/store/useStore";
+import { useSessionsQuery } from "@/lib/queries/useSessions";
 import { useGoalsQuery } from "@/lib/queries/useGoals";
 import { useActionsQuery } from "@/lib/queries/useActions";
 import type { Action, Goal, ID, Session } from "@/types";
@@ -333,7 +334,7 @@ export const SessionsSection: React.FC<Props> = ({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const actions = useActionsQuery().data ?? [];
-  const allSessions = useStore((s) => s.sessions);
+  const allSessions = useSessionsQuery().data ?? [];
   const [selectedId, setSelectedId] = useState<ID | null>(null);
   const [expanded, setExpanded] = useState(false);
 

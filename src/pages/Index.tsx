@@ -25,7 +25,22 @@ import {
   useCreateActionMutation,
 } from "@/lib/queries/useActions";
 import { SettingsPanel } from "@/components/SettingsPanel";
-import { ritualMultiplier } from "@/store/useStore";
+import { ritualMultiplier } from "@/lib/selectors";
+import {
+  useRitualsQuery,
+  useMarkRitualInstanceDoneMutation,
+  useSkipRitualInstanceMutation,
+  useUnskipRitualInstanceMutation,
+  useReopenRitualInstanceMutation,
+  useMarkRitualInstanceMissedMutation,
+} from "@/lib/queries/useRituals";
+import { useIdeasQuery } from "@/lib/queries/useIdeas";
+import { useClearSampleData } from "@/lib/sampleDataActions";
+import {
+  useDayEntriesQuery,
+  useCloseDayMutation,
+  useUpsertDayEntryMutation,
+} from "@/lib/queries/useDayEntries";
 import { CardMenu } from "@/components/CardMenu";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { PlanTodayPage } from "@/components/PlanCloseModals";
@@ -48,15 +63,15 @@ const SampleDataBanner: React.FC = () => {
   const goalsList = useGoalsQuery().data ?? [];
   const projectsList = useProjectsQuery().data ?? [];
   const actionsList = useActionsQuery().data ?? [];
+  const ritualsList = useRitualsQuery().data ?? [];
+  const ideasList = useIdeasQuery().data ?? [];
   const hasSample =
     goalsList.some((g) => g.isSample) ||
     projectsList.some((p) => p.isSample) ||
     actionsList.some((a) => a.isSample) ||
-    useStore((s) =>
-      s.rituals.some((r) => r.isSample) ||
-      s.ideas.some((i) => i.isSample),
-    );
-  const clearSampleData = useStore((s) => s.clearSampleData);
+    ritualsList.some((r) => r.isSample) ||
+    ideasList.some((i) => i.isSample);
+  const clearSampleData = useClearSampleData();
   const [confirmOpen, setConfirmOpen] = useState(false);
   if (!hasSample) return null;
   return (
@@ -113,8 +128,14 @@ const SampleDataBanner: React.FC = () => {
         onCancel={() => setConfirmOpen(false)}
         onConfirm={() => {
           setConfirmOpen(false);
-          clearSampleData();
-          toast.success(t("sample.clear.toast"));
+          void clearSampleData()
+            .then(() => toast.success(t("sample.clear.toast")))
+            .catch((err: unknown) =>
+              toast.error(
+                "Couldn't clear sample data: " +
+                  (err instanceof Error ? err.message : "unknown error"),
+              ),
+            );
         }}
       />
     </>
@@ -789,18 +810,20 @@ export const TodayZone: React.FC<{
   const goals = useGoalsQuery().data ?? [];
   const projects = useProjectsQuery().data ?? [];
   const actions = useActionsQuery().data ?? [];
-  const rituals = useStore((s) => s.rituals);
-  const dayEntry = useStore((s) =>
-    s.dayEntries.find((d) => d.date === TODAY_ISO),
-  );
+  const rituals = useRitualsQuery().data ?? [];
+  const allDayEntries = useDayEntriesQuery().data ?? [];
+  const dayEntry = allDayEntries.find((d) => d.date === TODAY_ISO);
   const settings = useStore((s) => s.settings);
   const changeActionStatusMutation = useChangeActionStatusMutation();
   const createActionMutation = useCreateActionMutation();
   const openPanel = useStore((s) => s.openPanel);
-  const updateDayEntry = useStore((s) => s.updateDayEntry);
-  const markRitualInstanceDone = useStore((s) => s.markRitualInstanceDone);
-  const skipRitualInstance = useStore((s) => s.skipRitualInstance);
-  const unskipRitualInstance = useStore((s) => s.unskipRitualInstance);
+  const upsertDayEntryMutation = useUpsertDayEntryMutation();
+  const updateDayEntry = (date: string, partial: Partial<import("@/types").DayEntry>) =>
+    upsertDayEntryMutation.mutate({ date, partial });
+  const markRitualDoneMutation = useMarkRitualInstanceDoneMutation();
+  const skipRitualMutation = useSkipRitualInstanceMutation();
+  const unskipRitualMutation = useUnskipRitualInstanceMutation();
+  const reopenRitualMutation = useReopenRitualInstanceMutation();
 
   const [quickAdd, setQuickAdd] = useState("");
   const [clearMainTaskOpen, setClearMainTaskOpen] = useState(false);
@@ -979,14 +1002,14 @@ export const TodayZone: React.FC<{
 
   const handleRitualDone = (ritualId: string, alreadyDone: boolean) => {
     if (alreadyDone) return;
-    markRitualInstanceDone(ritualId);
+    markRitualDoneMutation.mutate({ ritualId });
     toast.success(t("home.rituals.toast.logged"));
   };
 
 
   const handleRitualSkipToggle = (ritualId: string, currentlySkipped: boolean) => {
     if (currentlySkipped) {
-      unskipRitualInstance(ritualId);
+      unskipRitualMutation.mutate({ ritualId });
       if (isPlanned) {
         updateDayEntry(TODAY_ISO, {
           plannedRitualIds: [...(dayEntry?.plannedRitualIds ?? []), ritualId],
@@ -995,7 +1018,7 @@ export const TodayZone: React.FC<{
       }
       toast(t("home.rituals.toast.restored"));
     } else {
-      skipRitualInstance(ritualId);
+      skipRitualMutation.mutate({ ritualId });
       if (isPlanned) {
         updateDayEntry(TODAY_ISO, {
           plannedRitualIds: (dayEntry?.plannedRitualIds ?? []).filter((id) => id !== ritualId),
@@ -1333,13 +1356,7 @@ export const TodayZone: React.FC<{
                 }
                 const isTerminal = doneToday || isSkipped;
                 const reopenRitual = () => {
-                  const newHistory = r.completionHistory.filter(
-                    (c) => !(c.date === TODAY_ISO && (c.status === "done" || !c.status)),
-                  );
-                  useStore.getState().updateRitual(r.id, {
-                    completionHistory: newHistory,
-                    totalCompletions: Math.max(0, r.totalCompletions - 1),
-                  });
+                  reopenRitualMutation.mutate({ ritualId: r.id });
                   toast(t("home.rituals.toast.reopened"));
                 };
                 return (
@@ -1734,8 +1751,9 @@ const LookingBackCard: React.FC<{ date: string }> = ({ date }) => {
   const { t, i18n: i18nInst } = useTranslation();
   const goals = useGoalsQuery().data ?? [];
   const actions = useActionsQuery().data ?? [];
-  const rituals = useStore((s) => s.rituals);
-  const yEntry = useStore((s) => s.dayEntries.find((d) => d.date === date));
+  const rituals = useRitualsQuery().data ?? [];
+  const lookingBackDayEntries = useDayEntriesQuery().data ?? [];
+  const yEntry = lookingBackDayEntries.find((d) => d.date === date);
 
   const dObj = new Date(date + "T00:00:00");
   const fullDate = dObj
@@ -1857,13 +1875,17 @@ const Index: React.FC = () => {
   const [planningMode, setPlanningMode] = useState(false);
 
   const settings = useStore((s) => s.settings);
-  const todayEntry = useStore((s) => s.dayEntries.find((d) => d.date === TODAY_ISO));
+  const dayEntries = useDayEntriesQuery().data ?? [];
+  const todayEntry = dayEntries.find((d) => d.date === TODAY_ISO);
   const actions = useActionsQuery().data ?? [];
-  const rituals = useStore((s) => s.rituals);
-  const dayEntries = useStore((s) => s.dayEntries);
-  const closeDay = useStore((s) => s.closeDay);
-  const updateDayEntry = useStore((s) => s.updateDayEntry);
-  const skipRitualInstance = useStore((s) => s.skipRitualInstance);
+  const rituals = useRitualsQuery().data ?? [];
+  const closeDayMutation = useCloseDayMutation();
+  const closeDay = (d: string, opts?: { closedAt?: string }) =>
+    closeDayMutation.mutate({ date: d, closedAt: opts?.closedAt });
+  const upsertMainDayEntryMutation = useUpsertDayEntryMutation();
+  const updateDayEntry = (date: string, partial: Partial<import("@/types").DayEntry>) =>
+    upsertMainDayEntryMutation.mutate({ date, partial });
+  const markRitualMissedMutation = useMarkRitualInstanceMissedMutation();
 
   const isPlanned = !!todayEntry?.isPlanned;
   const isClosed = !!todayEntry?.isClosed;
@@ -1895,21 +1917,13 @@ const Index: React.FC = () => {
         if (!d.isPlanned || d.isClosed) continue;
         const eod = new Date(d.date + "T23:59:59").toISOString();
         closeDay(d.date, { closedAt: eod });
-        // Mark missed rituals
+        // Mark missed rituals — mutation is idempotent (skips if any entry already exists for that date).
         for (const rid of d.plannedRitualIds ?? []) {
           if ((d.skippedRitualIds ?? []).includes(rid)) continue;
           const r = rituals.find((rr) => rr.id === rid);
           if (!r) continue;
-          const has = r.completionHistory.some((c) => c.date === d.date);
-          if (!has) {
-            // Persist a 'missed' status. Use updateRitual via store directly.
-            useStore.getState().updateRitual(rid, {
-              completionHistory: [
-                ...r.completionHistory,
-                { date: d.date, at: eod, status: "missed" },
-              ],
-            });
-          }
+          if (r.completionHistory.some((c) => c.date === d.date)) continue;
+          markRitualMissedMutation.mutate({ ritualId: rid, date: d.date, at: eod });
         }
       }
     };
@@ -1923,7 +1937,7 @@ const Index: React.FC = () => {
       document.removeEventListener("visibilitychange", onVis);
       window.removeEventListener("focus", sweep);
     };
-  }, [dayEntries, closeDay, rituals]);
+  }, [dayEntries, closeDay, rituals, markRitualMissedMutation]);
 
   // Header date + meta
   const today = new Date();

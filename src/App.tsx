@@ -1,6 +1,5 @@
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { queryClient, persister } from "./lib/queryClient";
-import { setStoreQueryClientRef } from "./lib/storeQueryRef";
 import { useGoalsQuery } from "./lib/queries/useGoals";
 import { useEffect } from "react";
 import { BrowserRouter, Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
@@ -43,7 +42,6 @@ import { AuthProvider } from "./lib/useAuth";
 import { RequireAuth, RedirectIfAuthed, RequireAdmin } from "./components/AuthRoute";
 import { LegalPrivacy, LegalTerms } from "./pages/LegalPlaceholder.tsx";
 import { NoGoalsLayout } from "./components/NoGoalsLayout";
-import { useStore } from "./store/useStore";
 import { ActionEditor } from "./components/ActionEditor";
 
 import { GoalEditor } from "./components/GoalEditor";
@@ -63,9 +61,6 @@ import AdminAudit from "./admin/pages/AdminAudit";
 import AdminAnnouncements from "./admin/pages/AdminAnnouncements";
 import AdminComponents from "./admin/pages/AdminComponents";
 import { ImpersonationBanner } from "./admin/ImpersonationBanner";
-
-// Allow the legacy Zustand store to read from the cache during the strangler migration.
-setStoreQueryClientRef(queryClient);
 
 /**
  * Redirects first-run users to /setup. Setup completion is tracked in

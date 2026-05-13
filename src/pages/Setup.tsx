@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ArrowRight, Sparkles, Target } from "lucide-react";
 import { useStore } from "@/store/useStore";
+import { useSeedSampleData } from "@/lib/sampleDataActions";
 import { themeStore, useThemeChoice, type ThemeChoice } from "@/lib/theme";
 
 const SETUP_COMPLETED_KEY = "actos.setup.completed";
@@ -415,8 +416,7 @@ const PauseScreen: React.FC<{ fade: boolean }> = ({ fade }) => {
 export default function Setup() {
   const navigate = useNavigate();
   const userName = useStore((s) => s.settings.userName);
-  const seedSampleData = useStore((s) => s.seedSampleData);
-  const resetToEmpty = useStore((s) => s.resetToEmpty);
+  const seedSampleData = useSeedSampleData();
 
   const [screen, setScreen] = React.useState<Screen>(() => readScreen());
   const [path, setPath] = React.useState<Path | null>(null);
@@ -454,11 +454,12 @@ export default function Setup() {
     const delay = reducedMotion() ? 100 : 1200;
     const seedTimer = setTimeout(() => {
       if (path === "sample") {
-        resetToEmpty();
-        seedSampleData();
-      } else {
-        resetToEmpty();
+        void seedSampleData().catch((err) => {
+          // eslint-disable-next-line no-console
+          console.error("[setup] sample seed failed", err);
+        });
       }
+      // "own" path: no seeding — user creates their own goal in the builder.
     }, Math.max(50, delay - 200));
     const fadeTimer = setTimeout(() => setFading(true), delay);
     const navTimer = setTimeout(() => {
@@ -476,7 +477,7 @@ export default function Setup() {
       clearTimeout(fadeTimer);
       clearTimeout(navTimer);
     };
-  }, [screen, path, navigate, resetToEmpty, seedSampleData]);
+  }, [screen, path, navigate, seedSampleData]);
 
   const firstName = (userName ?? "there").split(/\s+/)[0];
 

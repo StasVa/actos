@@ -15,6 +15,13 @@ import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/useAuth";
 import { useStore } from "@/store/useStore";
 import { queryKeys } from "@/lib/queryKeys";
+
+export const TERMINAL_ACTION_STATUSES: ActionStatus[] = [
+  "done",
+  "delegated",
+  "dropped",
+  "cancelled",
+];
 import {
   actionToInsert,
   actionToUpdate,

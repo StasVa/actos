@@ -4,7 +4,11 @@ import { format, parseISO } from "date-fns";
 import { useTranslation } from "react-i18next";
 import { AppSidebar } from "@/components/AppSidebar";
 import { SettingsPanel } from "@/components/SettingsPanel";
-import { useStore, ritualMultiplier } from "@/store/useStore";
+import { useStore } from "@/store/useStore";
+import { ritualMultiplier } from "@/lib/selectors";
+import { useRitualsQuery } from "@/lib/queries/useRituals";
+import { useDayEntriesQuery } from "@/lib/queries/useDayEntries";
+import { useSessionsQuery } from "@/lib/queries/useSessions";
 import { useProjectsQuery } from "@/lib/queries/useProjects";
 import { useGoalsQuery } from "@/lib/queries/useGoals";
 import { useActionsQuery } from "@/lib/queries/useActions";
@@ -50,13 +54,13 @@ const ReviewMonthDetail: React.FC = () => {
   const [showAllReflections, setShowAllReflections] = React.useState(false);
 
   const actions = useActionsQuery().data ?? [];
-  const dayEntries = useStore((s) => s.dayEntries);
+  const dayEntries = useDayEntriesQuery().data ?? [];
   const goals = useGoalsQuery().data ?? [];
   const projects = useProjectsQuery().data ?? [];
-  const rituals = useStore((s) => s.rituals);
+  const rituals = useRitualsQuery().data ?? [];
   const settings = useStore((s) => s.settings);
   const openPanel = useStore((s) => s.openPanel);
-  const allSessions = useStore((s) => s.sessions);
+  const allSessions = useSessionsQuery().data ?? [];
 
   const summary = React.useMemo(
     () => getMonthSummary(yearMonth, { actions, dayEntries, goals, projects, rituals }),

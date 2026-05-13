@@ -6,6 +6,11 @@ import { Link, useNavigate } from "react-router-dom";
 import { Tooltip } from "@/components/Tooltip";
 import { useStore } from "@/store/useStore";
 import { useGoalsQuery } from "@/lib/queries/useGoals";
+import {
+  useMarkRitualInstanceDoneMutation,
+  useRestoreRitualMutation,
+  useRitualsQuery,
+} from "@/lib/queries/useRituals";
 import { toast } from "sonner";
 import { AppSidebar } from "@/components/AppSidebar";
 import { EmptyState } from "@/components/EmptyState";
@@ -580,12 +585,12 @@ function useRSortOptions(): FilterOption<RSortKey>[] {
 
 const Rituals: React.FC = () => {
   const { t } = useTranslation();
-  const storeRituals = useStore((s) => s.rituals);
+  const storeRituals = useRitualsQuery().data ?? [];
   const { data: storeGoalsData, isLoading: goalsLoading } = useGoalsQuery();
   const storeGoals = storeGoalsData ?? [];
   const openPanel = useStore((s) => s.openPanel);
-  const markRitualInstanceDone = useStore((s) => s.markRitualInstanceDone);
-  const restoreRitual = useStore((s) => s.restoreRitual);
+  const markDoneMutation = useMarkRitualInstanceDoneMutation();
+  const restoreMutation = useRestoreRitualMutation();
 
   const [stateFilter, setStateFilter] = useState<RStateFilter>("all");
   const [goalFilter, setGoalFilter] = useState<string>("all");
@@ -649,12 +654,12 @@ const Rituals: React.FC = () => {
       toast(t("rituals.toast.alreadyLogged"));
       return;
     }
-    markRitualInstanceDone(match.id);
+    markDoneMutation.mutate({ ritualId: match.id });
     toast.success(t("rituals.toast.logged", { count: match.totalCompletions + 1 }));
   };
 
   const handleRestore = (id: string) => {
-    restoreRitual(id);
+    restoreMutation.mutate(id);
     toast.success(t("rituals.toast.restored"));
   };
 

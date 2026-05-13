@@ -10,6 +10,8 @@ import React from "react";
 import { Link, useLocation, useNavigate, useNavigationType } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useStore } from "@/store/useStore";
+import { useActiveSession } from "@/lib/selectors";
+import { useCompleteSessionMutation } from "@/lib/queries/useSessions";
 import type { Session } from "@/types";
 
 const TIMER_KEY = "actos-session-timer";
@@ -176,10 +178,9 @@ export const ActiveSessionGuard: React.FC = () => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const navigationType = useNavigationType();
-  const session = useStore((s) =>
-    s.sessions.find((x) => x.status === "in_progress") ?? null,
-  );
-  const completeSession = useStore((s) => s.completeSession);
+  const session = useActiveSession() ?? null;
+  const completeSessionMutation = useCompleteSessionMutation();
+  const completeSession = (id: string) => completeSessionMutation.mutate(id);
 
   const onActive = pathname === "/sessions/active";
   const onSummary = /^\/sessions\/[^/]+\/summary$/.test(pathname);

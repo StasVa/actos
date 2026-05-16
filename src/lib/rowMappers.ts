@@ -17,8 +17,11 @@
 //   reference them before the round-trip. Returned IDs in mapper output are authoritative;
 //   any caller-supplied id on child items is ignored. sort_order is assigned by
 //   array index for criteria and references.
-// - Project.description (Decision A): treated as opaque JSON string. JSON.stringify
-//   on insert/update; on read, accept as string. See TODO in src/types/index.ts.
+// - Project.description (Decision A): passed through as a plain string. The DB
+//   column is jsonb; supabase-js JSON-encodes the request body, so a plain JS
+//   string lands in jsonb as a JSON-string value and reads back as a plain JS
+//   string. Do NOT call JSON.stringify here — doing so double-encodes and the
+//   asymmetric read path (no JSON.parse) accumulates one escape layer per save.
 
 import type {
   Action,
@@ -227,8 +230,7 @@ export function projectToInsert(
       goal_id: project.goalId,
       title: project.title,
       status: project.status ?? "active",
-      description:
-        project.description !== undefined ? JSON.stringify(project.description) : null,
+      description: project.description ?? null,
       is_draft: project.isDraft ?? false,
       is_sample: project.isSample ?? false,
     },
@@ -249,7 +251,7 @@ export function projectToUpdate(
   if (project.title !== undefined) row.title = project.title;
   if (project.status !== undefined) row.status = project.status;
   if (project.description !== undefined) {
-    row.description = JSON.stringify(project.description);
+    row.description = project.description ?? null;
   }
   if (project.isDraft !== undefined) row.is_draft = project.isDraft;
   if (project.completedAt !== undefined) row.completed_at = project.completedAt ?? null;

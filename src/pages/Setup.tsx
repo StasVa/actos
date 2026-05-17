@@ -368,7 +368,6 @@ const ThemeScreen: React.FC<{
         <ContinueCTA onClick={onContinue} disabled={!touched} loading={loading} />
       </div>
       <BackLink onClick={onBack} />
-      <StepIndicator n={1} />
     </ScreenWrap>
   );
 };

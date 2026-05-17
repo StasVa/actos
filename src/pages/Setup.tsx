@@ -1,30 +1,27 @@
 // Setup Wizard — first-run ceremonial onboarding.
-// Full-screen, no sidebar, no header chrome. 4 screens (Welcome + 3 steps).
+// Full-screen, no sidebar, no header chrome. 2 screens: Welcome (with sample/
+// fresh choice) → Theme → /today.
+//
+// ChoiceScreen and PauseScreen below are retained as inert dead code for a
+// potential future redesign per the product owner; they are not wired into
+// the active screen switch.
 
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ArrowRight, Sparkles, Target } from "lucide-react";
 import { useStore } from "@/store/useStore";
 import { useSeedSampleData } from "@/lib/sampleDataActions";
 import { themeStore, useThemeChoice, type ThemeChoice } from "@/lib/theme";
+import {
+  useUserSetupFlagQuery,
+  useMarkSetupCompletedMutation,
+} from "@/lib/queries/useUserSetup";
 
-const SETUP_COMPLETED_KEY = "actos.setup.completed";
-const SETUP_SCREEN_KEY = "actos.setup.currentScreen";
-
+// Active screens. The numeric type values for ChoiceScreen/PauseScreen are
+// kept stable (2/3) so the dead-code components below still type-check.
 type Screen = 0 | 1 | 2 | 3;
 type Path = "sample" | "own";
-
-function readScreen(): Screen {
-  try {
-    const v = parseInt(localStorage.getItem(SETUP_SCREEN_KEY) ?? "0", 10);
-    if (v === 0 || v === 1 || v === 2 || v === 3) return v;
-  } catch {}
-  return 0;
-}
-function writeScreen(s: Screen) {
-  try { localStorage.setItem(SETUP_SCREEN_KEY, String(s)); } catch {}
-}
 
 const reducedMotion = () =>
   typeof window !== "undefined" &&
@@ -156,7 +153,11 @@ const ScreenWrap: React.FC<{ children: React.ReactNode; keyId: string }> = ({ ch
   </div>
 );
 
-const WelcomeScreen: React.FC<{ name: string; onContinue: () => void }> = ({ name, onContinue }) => {
+const WelcomeScreen: React.FC<{
+  name: string;
+  onPickSample: () => void;
+  onPickFresh: () => void;
+}> = ({ name, onPickSample, onPickFresh }) => {
   const { t } = useTranslation();
   return (
     <ScreenWrap keyId="s0">
@@ -193,8 +194,44 @@ const WelcomeScreen: React.FC<{ name: string; onContinue: () => void }> = ({ nam
         >
           {t("setup.welcome.sub")}
         </p>
-        <div style={{ height: 96 }} />
-        <ContinueCTA onClick={onContinue} />
+        <div style={{ height: 64 }} />
+        <div className="flex flex-col sm:flex-row items-center gap-3">
+          <button
+            type="button"
+            onClick={onPickSample}
+            style={{
+              fontFamily: "Inter", fontSize: 15, fontWeight: 500,
+              color: "hsl(var(--surface-base))",
+              background: "hsl(var(--accent))",
+              border: "none", borderRadius: 6,
+              padding: "12px 24px",
+              cursor: "pointer",
+              minWidth: 200,
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = "hsl(var(--accent-hover))")}
+            onMouseLeave={(e) => (e.currentTarget.style.background = "hsl(var(--accent))")}
+          >
+            {t("setup.welcome.trySample")}
+          </button>
+          <button
+            type="button"
+            onClick={onPickFresh}
+            style={{
+              fontFamily: "Inter", fontSize: 15, fontWeight: 500,
+              color: "hsl(var(--text-primary))",
+              background: "transparent",
+              border: "1px solid hsl(var(--border-default))",
+              borderRadius: 6,
+              padding: "12px 24px",
+              cursor: "pointer",
+              minWidth: 200,
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = "hsl(var(--surface-hover))")}
+            onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+          >
+            {t("setup.welcome.startFresh")}
+          </button>
+        </div>
       </div>
     </ScreenWrap>
   );
@@ -290,6 +327,13 @@ const ThemeScreen: React.FC<{ onContinue: () => void; onBack: () => void }> = ({
     </ScreenWrap>
   );
 };
+
+// ─────────────────────────────────────────────────────────────────────
+// Inert dead code below — ChoiceScreen and PauseScreen are no longer wired
+// into the active flow but retained per product owner for a potential
+// future redesign. noUnusedLocals is off in tsconfig.app.json, so these
+// uncalled components do not trigger errors.
+// ─────────────────────────────────────────────────────────────────────
 
 const ChoiceScreen: React.FC<{
   selected: Path | null;
@@ -417,87 +461,59 @@ export default function Setup() {
   const navigate = useNavigate();
   const userName = useStore((s) => s.settings.userName);
   const seedSampleData = useSeedSampleData();
+  const { data: alreadyCompleted, isLoading: flagLoading } = useUserSetupFlagQuery();
+  const markCompleted = useMarkSetupCompletedMutation();
 
-  const [screen, setScreen] = React.useState<Screen>(() => readScreen());
-  const [path, setPath] = React.useState<Path | null>(null);
-  const [fading, setFading] = React.useState(false);
+  const [screen, setScreen] = React.useState<0 | 1>(0);
 
   // Setup Wizard always starts in Dark, regardless of system preference.
-  // User's later selection on Screen 1 overrides this via themeStore.set().
+  // User's later selection on the Theme screen overrides this via themeStore.set().
   React.useEffect(() => { themeStore.set("dark"); }, []);
 
-  React.useEffect(() => { writeScreen(screen); }, [screen]);
+  // Defensive: if the flag is already true (user navigated here manually
+  // after completion, or has stale localStorage from the old wizard), bounce
+  // to /today rather than rerunning the wizard.
+  if (!flagLoading && alreadyCompleted) {
+    return <Navigate to="/today" replace />;
+  }
 
-  // Browser back button → step back. Push history entry per screen.
-  React.useEffect(() => {
-    const onPop = () => {
-      const s = readScreen();
-      if (s > 0) setScreen((s - 1) as Screen);
-    };
-    window.addEventListener("popstate", onPop);
-    return () => window.removeEventListener("popstate", onPop);
-  }, []);
-
-  const goNext = () => {
-    const next = Math.min(3, screen + 1) as Screen;
-    setScreen(next);
-    try { window.history.pushState({ setupScreen: next }, ""); } catch {}
+  const pickSample = () => {
+    // Fire-and-forget. Seeding writes to Supabase + TanStack cache; by the time
+    // the user finishes the Theme screen, the goals/projects query has typically
+    // resolved. If it lags, /today still renders correctly off the cache.
+    void seedSampleData().catch((err) => {
+      // eslint-disable-next-line no-console
+      console.error("[setup] sample seed failed", err);
+    });
+    setScreen(1);
   };
+
+  const pickFresh = () => {
+    setScreen(1);
+  };
+
+  const finish = async () => {
+    try {
+      await markCompleted.mutateAsync();
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error("[setup] mark completed failed", err);
+      // Continue anyway — SetupGuard will reroute if the flag didn't stick.
+    }
+    navigate("/today", { replace: true });
+  };
+
   const goBack = () => {
     if (screen === 0) return;
-    setScreen((screen - 1) as Screen);
+    setScreen(0);
   };
-
-  // Pause screen — run side-effect after mount, then redirect.
-  React.useEffect(() => {
-    if (screen !== 3) return;
-    const delay = reducedMotion() ? 100 : 1200;
-    const seedTimer = setTimeout(() => {
-      if (path === "sample") {
-        void seedSampleData().catch((err) => {
-          // eslint-disable-next-line no-console
-          console.error("[setup] sample seed failed", err);
-        });
-      }
-      // "own" path: no seeding — user creates their own goal in the builder.
-    }, Math.max(50, delay - 200));
-    const fadeTimer = setTimeout(() => setFading(true), delay);
-    const navTimer = setTimeout(() => {
-      try {
-        localStorage.setItem(SETUP_COMPLETED_KEY, "true");
-        localStorage.removeItem(SETUP_SCREEN_KEY);
-        // Legacy inline-guide marker — no longer used; clear if present.
-        localStorage.removeItem("actos.onboarding.guide");
-      } catch {}
-      // "own" path → full-page goal-builder. "sample" → straight to /today.
-      navigate(path === "own" ? "/onboarding/goal" : "/today", { replace: true });
-    }, delay + 250);
-    return () => {
-      clearTimeout(seedTimer);
-      clearTimeout(fadeTimer);
-      clearTimeout(navTimer);
-    };
-  }, [screen, path, navigate, seedSampleData]);
 
   const firstName = (userName ?? "there").split(/\s+/)[0];
 
-  switch (screen) {
-    case 0: return <WelcomeScreen name={firstName} onContinue={goNext} />;
-    case 1: return <ThemeScreen onContinue={goNext} onBack={goBack} />;
-    case 2: return (
-      <ChoiceScreen
-        selected={path}
-        setSelected={setPath}
-        onContinue={() => { if (path) goNext(); }}
-        onBack={goBack}
-      />
+  if (screen === 0) {
+    return (
+      <WelcomeScreen name={firstName} onPickSample={pickSample} onPickFresh={pickFresh} />
     );
-    case 3: return <PauseScreen fade={fading} />;
   }
-}
-
-/** Helper for App-level guard. */
-export function isSetupCompleted(): boolean {
-  try { return localStorage.getItem(SETUP_COMPLETED_KEY) === "true"; }
-  catch { return false; }
+  return <ThemeScreen onContinue={finish} onBack={goBack} />;
 }

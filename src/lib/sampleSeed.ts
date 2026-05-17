@@ -262,7 +262,6 @@ export function applySampleCoachmarks(coachmarks: Record<string, string>) {
     Object.entries(coachmarks).forEach(([key, value]) => {
       localStorage.setItem(key, value);
     });
-    localStorage.setItem("actos.setup.sampleDataSeeded", "true");
   } catch {}
 }
 

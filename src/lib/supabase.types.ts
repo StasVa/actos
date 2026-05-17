@@ -703,6 +703,7 @@ export type Database = {
           created_at: string
           display_name: string | null
           email: string
+          has_completed_initial_setup: boolean
           id: string
           is_admin: boolean
           price_locked_at: number | null
@@ -717,6 +718,7 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           email: string
+          has_completed_initial_setup?: boolean
           id: string
           is_admin?: boolean
           price_locked_at?: number | null
@@ -731,6 +733,7 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           email?: string
+          has_completed_initial_setup?: boolean
           id?: string
           is_admin?: boolean
           price_locked_at?: number | null

@@ -29,7 +29,8 @@ import AllProjects from "./pages/AllProjects.tsx";
 import Settings from "./pages/Settings.tsx";
 import SettingsSubscription from "./pages/SettingsSubscription.tsx";
 import NotFound from "./pages/NotFound.tsx";
-import Setup, { isSetupCompleted } from "./pages/Setup.tsx";
+import Setup from "./pages/Setup.tsx";
+import { useUserSetupFlagQuery } from "./lib/queries/useUserSetup";
 import GoalBuilder from "./pages/GoalBuilder.tsx";
 import Landing from "./pages/Landing.tsx";
 import AdminManifesto from "./pages/AdminManifesto.tsx";
@@ -64,22 +65,20 @@ import { ImpersonationBanner } from "./admin/ImpersonationBanner";
 
 /**
  * Redirects first-run users to /setup. Setup completion is tracked in
- * localStorage["actos.setup.completed"]; clearing it re-runs the wizard.
- * Admin routes are exempt so demo tooling stays reachable.
+ * public.users.has_completed_initial_setup (DB, RLS-scoped to the current
+ * user). Replaces the previous localStorage actos.setup.completed flag, which
+ * was cleared by signOut and leaked across accounts on shared devices.
+ *
+ * While the flag query is loading the guard is a no-op so the page doesn't
+ * bounce mid-hydration. Admin routes and the unauth surface are always exempt.
  */
 const SetupGuard = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { data: setupCompleted, isLoading } = useUserSetupFlagQuery();
   useEffect(() => {
-    if (isSetupCompleted()) return;
-    // Legacy users: existing persisted store predates the wizard — auto-mark
-    // completed so they don't get bounced into setup and lose their data.
-    try {
-      if (localStorage.getItem("actos-store")) {
-        localStorage.setItem("actos.setup.completed", "true");
-        return;
-      }
-    } catch {}
+    if (isLoading) return;
+    if (setupCompleted) return;
     if (location.pathname === "/") return;
     if (location.pathname.startsWith("/pricing")) return;
     if (location.pathname.startsWith("/start")) return;
@@ -91,7 +90,7 @@ const SetupGuard = () => {
     if (location.pathname.startsWith("/onboarding")) return;
     if (location.pathname.startsWith("/admin")) return;
     navigate("/setup", { replace: true });
-  }, [location.pathname, navigate]);
+  }, [isLoading, setupCompleted, location.pathname, navigate]);
   return null;
 };
 

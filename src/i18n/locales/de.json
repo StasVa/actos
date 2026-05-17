@@ -1889,6 +1889,8 @@
   "setup.theme.system": "System",
   "setup.welcome.heading": "Willkommen.",
   "setup.welcome.sub": "Lass uns das einrichten.",
+  "setup.welcome.trySample": "Mit Beispieldaten starten",
+  "setup.welcome.startFresh": "Leer starten",
   "shortcuts.close": "Bereiche & Overlays schließen",
   "shortcuts.global": "GLOBAL",
   "shortcuts.help": "Diese Hilfe ein-/ausblenden",

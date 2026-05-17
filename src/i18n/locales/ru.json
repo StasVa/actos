@@ -1954,6 +1954,8 @@
   "setup.theme.system": "Системная",
   "setup.welcome.heading": "Привет.",
   "setup.welcome.sub": "Давайте всё настроим.",
+  "setup.welcome.trySample": "Посмотреть с примерами",
+  "setup.welcome.startFresh": "Начать с нуля",
   "shortcuts.close": "Закрыть панели и оверлеи",
   "shortcuts.global": "ГЛОБАЛЬНЫЕ",
   "shortcuts.help": "Показать эту подсказку",

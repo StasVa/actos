@@ -3,7 +3,7 @@
 > **Document role:** items we deliberately deferred to ship faster. Each has a chosen workaround AND a planned proper fix. Triaged by impact, not by when we noticed them.
 > **Read alongside:** `06-ROADMAP.md` (forward scope), `11-CHANGELOG.md` (shipped work).
 > **Audience:** Stas (PM) for prioritization; AI agents and contractors for context before touching related code.
-> **Last updated:** 2026-05-13 (post-Phase 4 Session 2)
+> **Last updated:** 2026-05-17 (Setup wizard simplification)
 
 ---
 
@@ -16,6 +16,34 @@
 ---
 
 ## Active items
+
+### P2 — Setup/onboarding inline redesign (partially addressed)
+
+**Location:** `src/pages/Setup.tsx`, `src/App.tsx` (SetupGuard)
+
+**Issue:** The first-run wizard is still a separate full-screen ceremony at `/setup` rather than inline with the signup flow. The 2026-05-17 simplification cut the wizard from 4 screens to 2 (Welcome with sample-or-fresh choice → Theme → /today), moved completion tracking from localStorage (`actos.setup.completed`) to `public.users.has_completed_initial_setup`, and removed the "Set up my first goal" path (users with zero goals see the existing inline prompt on `/today`). `ChoiceScreen` and `PauseScreen` remain in `Setup.tsx` as inert dead code for the eventual redesign.
+
+**Workaround:** Wizard works correctly; the DB flag fixes the "wizard re-triggers on login" bug.
+
+**Remaining work:** Full inline-with-signup redesign post-beta — fold theme choice and sample/fresh choice into the signup flow itself so first-run users never see a separate full-screen wizard.
+
+**When:** Post-beta UX polish pass.
+
+---
+
+### P3 — `useIdeas.useConvertIdeaToProjectMutation` double-encodes description
+
+**Location:** `src/lib/queries/useIdeas.ts:297`
+
+**Issue:** The RPC payload constructor for `convert_idea_to_project` calls `JSON.stringify(project.description)` before sending to the SQL function. Same root cause as the 2026-05-16 `rowMappers` fix — supabase-js JSON-encodes the request body, so the inline stringify double-encodes. Each idea→project conversion adds one escape layer to the new project's description.
+
+**Workaround:** None active. The bug only fires on the idea-to-project conversion path; manually-created projects are unaffected since the `rowMappers` fix landed.
+
+**Proper fix:** Remove the `JSON.stringify` call; pass `project.description` through as a plain string. Then run a one-off repair on any projects that were converted from ideas after Phase 4 Session 1 (the existing `scripts/repair-project-description-escaping.ts` can be reused — its peel logic is idempotent).
+
+**When:** Next time someone touches the ideas-to-projects conversion flow, or opportunistically.
+
+---
 
 ### P1 — Action timeline atomicity gap
 

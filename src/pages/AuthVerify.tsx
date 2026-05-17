@@ -51,6 +51,11 @@ const AuthVerify: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [verifying, setVerifying] = useState(false);
   const [cooldown, setCooldown] = useState(0);
+  // True between a successful verifyOtp and useAuth() catching up with the
+  // Supabase session. Keeps AuthVerify mounted (still showing "Verifying…")
+  // so we don't briefly transit through /auth while RequireAuth rejects the
+  // navigation to /setup. See useEffect below for the deferred navigate.
+  const [verifiedAwaitingAuth, setVerifiedAwaitingAuth] = useState(false);
   const inputsRef = useRef<Array<HTMLInputElement | null>>([]);
   const errorTimerRef = useRef<number | null>(null);
 
@@ -73,8 +78,31 @@ const AuthVerify: React.FC = () => {
     errorTimerRef.current = window.setTimeout(() => setError(null), 5000);
   }, []);
 
+  // Post-verify navigation. Once verifyOtp succeeds, useAuth().user is still
+  // null for a tick until Supabase's onAuthStateChange fires. Navigating
+  // immediately would bounce through RequireAuth → /auth → RedirectIfAuthed
+  // → /today → SetupGuard → /setup with visible flashes. Defer the navigate
+  // until user is populated. Safety timeout falls through after 5s so a
+  // stalled auth listener doesn't trap the user in the spinner forever.
+  useEffect(() => {
+    if (!verifiedAwaitingAuth) return;
+    if (user) {
+      navigate("/setup", { replace: true });
+      setVerifiedAwaitingAuth(false);
+      return;
+    }
+    const id = window.setTimeout(() => {
+      navigate("/setup", { replace: true });
+      setVerifiedAwaitingAuth(false);
+    }, 5000);
+    return () => window.clearTimeout(id);
+  }, [verifiedAwaitingAuth, user, navigate]);
+
   // Access control: missing pending → /auth#signup; logged in → /today.
-  if (user) return <Navigate to="/today" replace />;
+  // The user-truthy redirect is suppressed while we're waiting for auth
+  // state to propagate after verifyOtp — the useEffect above routes to
+  // /setup instead, avoiding the /today flash.
+  if (user && !verifiedAwaitingAuth) return <Navigate to="/today" replace />;
   if (!pending) return <Navigate to="/auth#signup" replace />;
 
   const code = digits.join("");
@@ -89,6 +117,7 @@ const AuthVerify: React.FC = () => {
       }
       setVerifying(true);
       setError(null);
+      let succeeded = false;
       try {
         const { error: verifyErr } = await supabase.auth.verifyOtp({
           email: pending.email,
@@ -97,9 +126,12 @@ const AuthVerify: React.FC = () => {
         });
         if (!verifyErr) {
           // Supabase has established the session; onAuthStateChange will
-          // populate useAuth().user. Clear the resume key and route to setup.
+          // populate useAuth().user. Hand off to the deferred-navigate
+          // effect — keep `verifying` true so the button stays in the
+          // "Verifying…" state until we route to /setup.
+          succeeded = true;
           clearPendingSignup();
-          navigate("/setup", { replace: true });
+          setVerifiedAwaitingAuth(true);
           return;
         }
         // Map known Supabase errors to existing i18n keys where they fit.
@@ -113,10 +145,10 @@ const AuthVerify: React.FC = () => {
         setDigits(Array(CODE_LEN).fill(""));
         inputsRef.current[0]?.focus();
       } finally {
-        setVerifying(false);
+        if (!succeeded) setVerifying(false);
       }
     },
-    [navigate, pending, showError, t, verifying],
+    [pending, showError, t, verifying],
   );
 
   const handleChange = (index: number, value: string) => {

@@ -9,7 +9,8 @@
 import React from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowRight, Sparkles, Target } from "lucide-react";
+import { toast } from "sonner";
+import { ArrowRight, Loader2, Sparkles, Target } from "lucide-react";
 import { useStore } from "@/store/useStore";
 import { useSeedSampleData } from "@/lib/sampleDataActions";
 import { themeStore, useThemeChoice, type ThemeChoice } from "@/lib/theme";
@@ -99,32 +100,44 @@ const BackLink: React.FC<{ onClick: () => void }> = ({ onClick }) => {
   );
 };
 
-const ContinueCTA: React.FC<{ onClick: () => void; disabled?: boolean; label?: string }> = ({
-  onClick, disabled, label,
-}) => {
+const ContinueCTA: React.FC<{
+  onClick: () => void;
+  disabled?: boolean;
+  loading?: boolean;
+  label?: string;
+}> = ({ onClick, disabled, loading, label }) => {
   const { t } = useTranslation();
+  const isDisabled = disabled || loading;
   return (
     <button
       type="button"
       onClick={onClick}
-      disabled={disabled}
+      disabled={isDisabled}
       className="group inline-flex items-center gap-2 transition-all"
       style={{
         fontFamily: "Inter, ui-sans-serif, system-ui",
         fontSize: 16, fontWeight: 500,
         color: "hsl(var(--accent))",
         background: "transparent", border: "none",
-        cursor: disabled ? "not-allowed" : "pointer",
-        opacity: disabled ? 0.4 : 1,
+        cursor: isDisabled ? "not-allowed" : "pointer",
+        opacity: isDisabled ? 0.4 : 1,
         padding: "8px 4px",
       }}
     >
-      <span>{label ?? t("setup.continue")}</span>
-      <ArrowRight
-        size={18}
-        className="transition-transform"
-        style={{ transitionDuration: "150ms" }}
-      />
+      <span>
+        {loading
+          ? t("setup.theme.continueLoading")
+          : (label ?? t("setup.continue"))}
+      </span>
+      {loading ? (
+        <Loader2 size={18} className="animate-spin" />
+      ) : (
+        <ArrowRight
+          size={18}
+          className="transition-transform"
+          style={{ transitionDuration: "150ms" }}
+        />
+      )}
       <style>{`
         .group:not(:disabled):hover svg { transform: translateX(2px); }
         .group:not(:disabled):hover { color: hsl(var(--accent-hover)); }
@@ -161,7 +174,10 @@ const WelcomeScreen: React.FC<{
   const { t } = useTranslation();
   return (
     <ScreenWrap keyId="s0">
-      <div className="flex flex-col items-center justify-center min-h-screen px-6 text-center">
+      <div
+        className="flex flex-col items-center min-h-screen px-6"
+        style={{ paddingTop: 80, paddingBottom: 96 }}
+      >
         <div
           style={{
             width: 40, height: 40, borderRadius: 8,
@@ -172,7 +188,7 @@ const WelcomeScreen: React.FC<{
           }}
           aria-label="ActOS"
         >A</div>
-        <div style={{ height: 80 }} />
+        <div style={{ height: 48 }} />
         <h1
           style={{
             fontFamily: "Inter, ui-sans-serif, system-ui",
@@ -181,6 +197,7 @@ const WelcomeScreen: React.FC<{
             lineHeight: 1.1,
             color: "hsl(var(--text-primary))",
             margin: 0,
+            textAlign: "center",
           }}
         >
           {t("setup.welcome.heading")}
@@ -190,54 +207,82 @@ const WelcomeScreen: React.FC<{
           style={{
             fontFamily: "Inter", fontWeight: 400,
             fontSize: 18, color: "hsl(var(--text-secondary))", margin: 0,
+            textAlign: "center",
           }}
         >
           {t("setup.welcome.sub")}
         </p>
         <div style={{ height: 64 }} />
-        <div className="flex flex-col sm:flex-row items-center gap-3">
-          <button
-            type="button"
-            onClick={onPickSample}
-            style={{
-              fontFamily: "Inter", fontSize: 15, fontWeight: 500,
-              color: "hsl(var(--surface-base))",
-              background: "hsl(var(--accent))",
-              border: "none", borderRadius: 6,
-              padding: "12px 24px",
-              cursor: "pointer",
-              minWidth: 200,
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "hsl(var(--accent-hover))")}
-            onMouseLeave={(e) => (e.currentTarget.style.background = "hsl(var(--accent))")}
-          >
-            {t("setup.welcome.trySample")}
-          </button>
-          <button
-            type="button"
-            onClick={onPickFresh}
-            style={{
-              fontFamily: "Inter", fontSize: 15, fontWeight: 500,
-              color: "hsl(var(--text-primary))",
-              background: "transparent",
-              border: "1px solid hsl(var(--border-default))",
-              borderRadius: 6,
-              padding: "12px 24px",
-              cursor: "pointer",
-              minWidth: 200,
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "hsl(var(--surface-hover))")}
-            onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
-          >
-            {t("setup.welcome.startFresh")}
-          </button>
+        <div
+          className="w-full grid gap-6"
+          style={{ maxWidth: 880, gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))" }}
+        >
+          {([
+            {
+              id: "sample" as const,
+              icon: Sparkles,
+              title: t("setup.choice.sample.title"),
+              desc: t("setup.choice.sample.body"),
+              onClick: onPickSample,
+            },
+            {
+              id: "own" as const,
+              icon: Target,
+              title: t("setup.choice.own.title"),
+              desc: t("setup.choice.own.body"),
+              onClick: onPickFresh,
+            },
+          ]).map((c) => {
+            const Icon = c.icon;
+            return (
+              <button
+                key={c.id}
+                type="button"
+                onClick={c.onClick}
+                className="text-left transition-all"
+                style={{
+                  background: "hsl(var(--surface-base))",
+                  border: "1px solid hsl(var(--border-subtle))",
+                  borderRadius: 8,
+                  padding: 32,
+                  minHeight: 260,
+                  cursor: "pointer",
+                  fontFamily: "Inter",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = "hsl(var(--border-default))";
+                  e.currentTarget.style.background = "hsl(var(--surface-hover))";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = "hsl(var(--border-subtle))";
+                  e.currentTarget.style.background = "hsl(var(--surface-base))";
+                }}
+              >
+                <Icon size={32} strokeWidth={1.5} style={{ color: "hsl(var(--text-secondary))" }} />
+                <div style={{ height: 16 }} />
+                <div style={{
+                  fontSize: 20, fontWeight: 500,
+                  color: "hsl(var(--text-primary))",
+                }}>{c.title}</div>
+                <div style={{ height: 8 }} />
+                <div style={{
+                  fontSize: 14, lineHeight: 1.5,
+                  color: "hsl(var(--text-secondary))",
+                }}>{c.desc}</div>
+              </button>
+            );
+          })}
         </div>
       </div>
     </ScreenWrap>
   );
 };
 
-const ThemeScreen: React.FC<{ onContinue: () => void; onBack: () => void }> = ({ onContinue, onBack }) => {
+const ThemeScreen: React.FC<{
+  onContinue: () => void;
+  onBack: () => void;
+  loading?: boolean;
+}> = ({ onContinue, onBack, loading }) => {
   const { t } = useTranslation();
   const [choice, , setChoice] = useThemeChoice();
   // Wizard pre-selects Dark on entry (set by Setup root). Treat as a valid
@@ -320,7 +365,7 @@ const ThemeScreen: React.FC<{ onContinue: () => void; onBack: () => void }> = ({
         </div>
 
         <div style={{ height: 96 }} />
-        <ContinueCTA onClick={onContinue} disabled={!touched} />
+        <ContinueCTA onClick={onContinue} disabled={!touched} loading={loading} />
       </div>
       <BackLink onClick={onBack} />
       <StepIndicator n={1} />
@@ -458,6 +503,7 @@ const PauseScreen: React.FC<{ fade: boolean }> = ({ fade }) => {
 
 /* ───────── Wizard root ───────── */
 export default function Setup() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const userName = useStore((s) => s.settings.userName);
   const seedSampleData = useSeedSampleData();
@@ -465,6 +511,14 @@ export default function Setup() {
   const markCompleted = useMarkSetupCompletedMutation();
 
   const [screen, setScreen] = React.useState<0 | 1>(0);
+  // True while finish() is awaiting the in-flight sample seed. Drives the
+  // Theme Continue button's loading state so the user can't navigate to
+  // /today before the seed is fully persisted (otherwise they'd see the
+  // "Create your first goal" empty-state prompt for 2-3s).
+  const [finishing, setFinishing] = React.useState(false);
+  // Holds the seed promise launched from pickSample so finish() can await it
+  // on the Theme screen. Null when the user picked "Start fresh".
+  const seedPromiseRef = React.useRef<Promise<void> | null>(null);
 
   // Setup Wizard always starts in Dark, regardless of system preference.
   // User's later selection on the Theme screen overrides this via themeStore.set().
@@ -478,21 +532,37 @@ export default function Setup() {
   }
 
   const pickSample = () => {
-    // Fire-and-forget. Seeding writes to Supabase + TanStack cache; by the time
-    // the user finishes the Theme screen, the goals/projects query has typically
-    // resolved. If it lags, /today still renders correctly off the cache.
-    void seedSampleData().catch((err) => {
-      // eslint-disable-next-line no-console
-      console.error("[setup] sample seed failed", err);
-    });
+    // Kick off the seed in the background and advance to Theme. finish() will
+    // await this promise before navigating to /today so the empty-state prompt
+    // never flashes.
+    const p = seedSampleData();
+    // Attach a no-op rejection handler so an abandoned wizard doesn't produce
+    // an unhandled rejection. The actual error surfacing happens in finish()'s
+    // own await.
+    p.catch(() => {});
+    seedPromiseRef.current = p;
     setScreen(1);
   };
 
   const pickFresh = () => {
+    seedPromiseRef.current = null;
     setScreen(1);
   };
 
   const finish = async () => {
+    if (seedPromiseRef.current) {
+      setFinishing(true);
+      try {
+        await seedPromiseRef.current;
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error("[setup] sample seed failed", err);
+        toast.error(t("setup.sampleSeedError"));
+        // Fall through and navigate anyway — don't trap the user on Theme.
+      } finally {
+        setFinishing(false);
+      }
+    }
     try {
       await markCompleted.mutateAsync();
     } catch (err) {
@@ -515,5 +585,5 @@ export default function Setup() {
       <WelcomeScreen name={firstName} onPickSample={pickSample} onPickFresh={pickFresh} />
     );
   }
-  return <ThemeScreen onContinue={finish} onBack={goBack} />;
+  return <ThemeScreen onContinue={finish} onBack={goBack} loading={finishing} />;
 }

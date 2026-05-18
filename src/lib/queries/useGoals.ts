@@ -16,10 +16,12 @@
 //     attachments), goal_success_criteria. day_entries don't reference goals.
 //     The client mirrors all cache slices in onMutate.
 
+import { useRef } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/useAuth";
 import { TERMINAL_ACTION_STATUSES } from "@/lib/queries/useActions";
+import { useCurrentUserQuery } from "@/lib/queries/useCurrentUser";
 import { queryKeys } from "@/lib/queryKeys";
 import {
   goalToInsert,
@@ -83,16 +85,24 @@ export type CreateGoalResult =
 export function useCreateGoalMutation() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  // Primary tier source. useAuth().user is the fallback if the query hasn't
+  // hydrated yet (cold cache, network glitch). On a final null, we treat as
+  // free.
+  const { data: currentUser } = useCurrentUserQuery();
+  // Set by onMutate when the cap is hit, read & reset by mutationFn so the
+  // INSERT is short-circuited without re-reading the goals cache (which would
+  // include onMutate's optimistic write and double-count the user's own pending
+  // goal). onMutate→mutationFn is sequential per mutate() call so a ref is safe.
+  const capHitRef = useRef(false);
 
   return useMutation<CreateGoalResult, Error, CreateGoalPayload, { prev?: Goal[]; tempId?: string }>({
     mutationFn: async (payload) => {
-      if (!user) return { ok: false, reason: "not-authenticated" };
-      const tier = user.subscriptionTier;
-      const goals = queryClient.getQueryData<Goal[]>(queryKeys.goals) ?? [];
-      const limit = tier === "all-in" ? 3 : 1;
-      if (goals.filter((g) => g.status === "active").length >= limit) {
+      if (capHitRef.current) {
+        capHitRef.current = false;
         return { ok: false, reason: "limit" };
       }
+      if (!user) return { ok: false, reason: "not-authenticated" };
+      const goals = queryClient.getQueryData<Goal[]>(queryKeys.goals) ?? [];
       const color = pickNextGoalColor(goals);
       const { row, criteria } = goalToInsert({ ...payload, color }, user.id);
       const { data: inserted, error: insertErr } = await supabase
@@ -110,14 +120,23 @@ export function useCreateGoalMutation() {
       return { ok: true, id: inserted.id };
     },
     onMutate: async (payload) => {
-      if (!user) return {};
-      const tier = user.subscriptionTier;
+      if (!user) {
+        capHitRef.current = false;
+        return {};
+      }
+      const tier = currentUser?.subscriptionTier ?? user?.subscriptionTier;
+      if (!tier) {
+        // eslint-disable-next-line no-console
+        console.warn("Goal limit check: no tier source available, defaulting to free");
+      }
       const goals = queryClient.getQueryData<Goal[]>(queryKeys.goals) ?? [];
       const limit = tier === "all-in" ? 3 : 1;
       if (goals.filter((g) => g.status === "active").length >= limit) {
-        // Caller will see ok:false; don't dirty the cache.
+        // At cap — flag for mutationFn to short-circuit, skip optimistic write.
+        capHitRef.current = true;
         return {};
       }
+      capHitRef.current = false;
       await queryClient.cancelQueries({ queryKey: queryKeys.goals });
       const prev = queryClient.getQueryData<Goal[]>(queryKeys.goals);
       const tempId = crypto.randomUUID();

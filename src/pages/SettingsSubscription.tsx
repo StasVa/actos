@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useAuth } from "@/lib/useAuth";
+import { useCurrentUserQuery } from "@/lib/queries/useCurrentUser";
 import { TierBadge } from "@/components/UserMenu";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { toast } from "sonner";
@@ -43,8 +44,10 @@ const FeatureList: React.FC<{ itemKeys: string[] }> = ({ itemKeys }) => {
 export default function SettingsSubscription() {
   const { t } = useTranslation();
   const { user, setSubscriptionTier } = useAuth();
+  const { data: currentUser } = useCurrentUserQuery();
+  const effectiveTier = currentUser?.subscriptionTier ?? user?.subscriptionTier ?? "free";
   const navigate = useNavigate();
-  const tier: "free" | "all-in" = user?.subscriptionTier === "all-in" ? "all-in" : "free";
+  const tier: "free" | "all-in" = effectiveTier === "all-in" ? "all-in" : "free";
   const isAllIn = tier === "all-in";
 
   const [confirmUpgrade, setConfirmUpgrade] = React.useState(false);

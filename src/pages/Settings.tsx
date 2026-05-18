@@ -15,6 +15,7 @@ import { useIdeasQuery } from "@/lib/queries/useIdeas";
 import { useClearSampleData } from "@/lib/sampleDataActions";
 import { useThemeChoice, type ThemeChoice } from "@/lib/theme";
 import { useAuth } from "@/lib/useAuth";
+import { useCurrentUserQuery } from "@/lib/queries/useCurrentUser";
 import { toast } from "sonner";
 
 const STORAGE_KEY = "actos-store";
@@ -80,6 +81,8 @@ export default function Settings() {
   const setDefaultGoal = useStore((s) => s.setDefaultGoal);
   const setShowAdminTools = useStore((s) => s.setShowAdminTools);
   const { user, setAdmin, setSubscriptionTier } = useAuth();
+  const { data: currentUser } = useCurrentUserQuery();
+  const effectiveTier = currentUser?.subscriptionTier ?? user?.subscriptionTier ?? "free";
   const clearSampleData = useClearSampleData();
   const projectsList = useProjectsQuery().data ?? [];
   const actionsList = useActionsQuery().data ?? [];
@@ -191,7 +194,7 @@ export default function Settings() {
 
               <ToggleRow
                 label={t("settings.account.allInTier")}
-                checked={user?.subscriptionTier === "all-in"}
+                checked={effectiveTier === "all-in"}
                 onChange={(v) => {
                   void setSubscriptionTier(v ? "all-in" : "free").catch((e) => {
                     toast.error(e instanceof Error ? e.message : "Failed to update tier");

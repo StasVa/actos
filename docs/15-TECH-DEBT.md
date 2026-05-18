@@ -1,154 +1,390 @@
-# ActOS — Technical Debt
+# ActOS — Technical Debt Registry
 
-> **Document role:** items we deliberately deferred to ship faster. Each has a chosen workaround AND a planned proper fix. Triaged by impact, not by when we noticed them.
-> **Read alongside:** `06-ROADMAP.md` (forward scope), `11-CHANGELOG.md` (shipped work).
-> **Audience:** Stas (PM) for prioritization; AI agents and contractors for context before touching related code.
-> **Last updated:** 2026-05-17 (Setup wizard simplification)
+> **Document role:** explicit registry of known technical debt items, priorities, and disposition. Replaces the loose "Known technical debt" sections that were scattered across `12-TECH-STACK.md` and `FRONTEND-AUDIT.md`.
+> **Read alongside:** `11-CHANGELOG.md` (what was actually shipped), `13-ARCHITECTURE.md` (system shape), `14-BACKEND-PLAN.md` (phase milestones).
+> **Last updated:** 2026-05-17
 
 ---
 
-## Priority levels
+## How this document works
 
-- **P1** — meaningful production risk or known UX gap. Schedule in the next 1-2 sessions.
-- **P2** — code quality / cleanliness. Schedule when touching the adjacent file anyway.
-- **P3** — cosmetic or low-impact. Pick up opportunistically.
+Items have:
+- **Priority**: P0 (security/data loss/blocker), P1 (functional bug or critical user-facing), P2 (UX/refactor before beta), P3 (post-beta cleanup).
+- **Status**: Active or Resolved.
+- **Location**: file:line or component name.
+- **Issue**: what's wrong.
+- **Workaround**: what users / contributors should do now.
+- **Proper fix**: what we'll do when we get there.
+- **When**: scheduled milestone or "post-beta".
+
+Resolved items stay in the registry as a historical record. Move to bottom under "Resolved" once a commit closes them.
 
 ---
 
 ## Active items
 
+### P1 — `useIdeas.useConvertIdeaToProjectMutation` double-encodes description
+
+**Location:** `src/lib/queries/useIdeas.ts:297`.
+
+**Issue:** Inside `useConvertIdeaToProjectMutation`, the RPC payload constructor for `convert_idea_to_project` does:
+
+```ts
+project.description !== undefined ? JSON.stringify(project.description) : null
+```
+
+This is the same bug class as the project mappers had (fixed in commit `ab7f1cd` on 2026-05-17). When a user converts an idea to a project, the resulting project's description goes through `JSON.stringify` while the read path doesn't apply `JSON.parse` — accumulates one escape layer immediately, more on subsequent edits.
+
+**Workaround:** Idea-to-project conversion currently writes a doubly-encoded description. Affected projects can be repaired by re-running `scripts/repair-project-description-escaping.ts` after the fix lands.
+
+**Proper fix:** Replace with `project.description ?? null`. Also verify whether the SQL function `convert_idea_to_project` does any further encoding before INSERT — if yes, address both sides.
+
+**When:** Bundled with next related work, ~5-minute fix. Mark for inclusion in any commit that touches `useIdeas.ts`.
+
+---
+
+### P1 — Action timeline atomicity
+
+**Location:** Action mutations in `src/lib/queries/useActions.ts`.
+
+**Issue:** Action UPDATE and corresponding `action_timeline` INSERT are separate Supabase calls. Not transactional. If timeline INSERT fails after UPDATE succeeded, action history is incomplete.
+
+**Workaround:** Acceptable for low-frequency action edits during beta. No data loss — UPDATE always wins, timeline insert is supplementary.
+
+**Proper fix:** Either wrap in a Postgres function (SECURITY DEFINER, like `convert_idea_to_project`) or use a database trigger to write timeline on UPDATE. Trigger is cleaner — no application code change.
+
+**When:** Pre-beta if real users start hitting it. Otherwise scheduled for first post-beta batch.
+
+---
+
 ### P2 — Setup/onboarding inline redesign (partially addressed)
 
-**Location:** `src/pages/Setup.tsx`, `src/App.tsx` (SetupGuard)
+**Location:** `src/pages/Setup.tsx`, `src/pages/Auth.tsx`, `src/pages/AuthVerify.tsx`.
 
-**Issue:** The first-run wizard is still a separate full-screen ceremony at `/setup` rather than inline with the signup flow. The 2026-05-17 simplification cut the wizard from 4 screens to 2 (Welcome with sample-or-fresh choice → Theme → /today), moved completion tracking from localStorage (`actos.setup.completed`) to `public.users.has_completed_initial_setup`, and removed the "Set up my first goal" path (users with zero goals see the existing inline prompt on `/today`). `ChoiceScreen` and `PauseScreen` remain in `Setup.tsx` as inert dead code for the eventual redesign.
+**Issue:** Current wizard is 2-screen (Welcome with sample/fresh choice + Theme) but still a separate post-signup ceremony. User's strategic idea: combine onboarding with registration inline (Apple Setup feel) — name/theme/goal-or-sample all in one continuous flow.
 
-**Workaround:** Wizard works correctly; the DB flag fixes the "wizard re-triggers on login" bug.
+**Workaround:** Today's wizard works. 2 screens is short enough that users get through it.
 
-**Remaining work:** Full inline-with-signup redesign post-beta — fold theme choice and sample/fresh choice into the signup flow itself so first-run users never see a separate full-screen wizard.
+**Proper fix:** Redesign post-signup flow to merge wizard steps into the registration card itself. Probably 2-3 commit's worth of work. Wait for drop-off metrics from real beta users before designing — current data is just founder + test accounts.
 
-**When:** Post-beta UX polish pass.
-
----
-
-### P3 — `useIdeas.useConvertIdeaToProjectMutation` double-encodes description
-
-**Location:** `src/lib/queries/useIdeas.ts:297`
-
-**Issue:** The RPC payload constructor for `convert_idea_to_project` calls `JSON.stringify(project.description)` before sending to the SQL function. Same root cause as the 2026-05-16 `rowMappers` fix — supabase-js JSON-encodes the request body, so the inline stringify double-encodes. Each idea→project conversion adds one escape layer to the new project's description.
-
-**Workaround:** None active. The bug only fires on the idea-to-project conversion path; manually-created projects are unaffected since the `rowMappers` fix landed.
-
-**Proper fix:** Remove the `JSON.stringify` call; pass `project.description` through as a plain string. Then run a one-off repair on any projects that were converted from ideas after Phase 4 Session 1 (the existing `scripts/repair-project-description-escaping.ts` can be reused — its peel logic is idempotent).
-
-**When:** Next time someone touches the ideas-to-projects conversion flow, or opportunistically.
+**When:** Post-beta. Wait for real user data.
 
 ---
 
-### P1 — Action timeline atomicity gap
+### P2 — `createSyncStoragePersister` deprecation warning
 
-**Location:** `src/lib/queries/useActions.ts` — `useChangeActionStatusMutation`
+**Location:** TanStack Query setup in `src/main.tsx` or `src/lib/queryClient.ts`.
 
-**Issue:** Action update + timeline event insert are two sequential DB calls. If step 2 fails (network blip, transient RLS error), the action row has the new status but no timeline event exists for the transition.
+**Issue:** TanStack Query 5.83 surfaces a deprecation warning for `createSyncStoragePersister`. Doesn't break functionality.
 
-**Workaround:** Documented in code comments. Worst case is a missing audit row, not data corruption. Status change still reflects correctly in UI.
+**Workaround:** Ignore the warning. Cache persistence works.
 
-**Proper fix:** Wrap both writes in a Postgres function so they're transactional. OR change order (insert timeline first, update action second) and treat a trailing-update failure as the recoverable case.
+**Proper fix:** Migrate to the newer persistence API per TanStack docs. ~15 minutes work, low risk.
 
-**When:** Reactive — when first user reports a missing timeline event, or as part of a broader audit/history surface upgrade.
-
----
-
-### P2 — `createSyncStoragePersister` deprecated warning
-
-**Location:** `src/lib/queryClient.ts`
-
-**Issue:** `@tanstack/query-sync-storage-persister` marks `createSyncStoragePersister` as deprecated in its TypeScript types. Build still passes; warning is informational.
-
-**Workaround:** Ignore the warning. The function still works correctly.
-
-**Proper fix:** Monitor TanStack release notes. When they ship a replacement (likely a different factory function with cleaner API), migrate.
-
-**When:** Reactive — when the function actually breaks or shows up in a CI warning we care about.
+**When:** Any session that already has `queryClient.ts` open.
 
 ---
 
-### P2 — i18n keys for Supabase auth errors
+### P2 — i18n keys missing for Supabase auth errors
 
-**Location:** `src/pages/Auth.tsx`, `src/pages/AuthVerify.tsx`
+**Location:** `src/pages/Auth.tsx`, `src/pages/AuthVerify.tsx`.
 
-**Issue:** Supabase error messages render raw (English). Mock auth had translated error keys (`auth.error.invalidCode`, etc.); we removed them during Phase 3 and didn't add new ones for the Supabase error model.
+**Issue:** Supabase returns auth errors in English ("Invalid login credentials", "Email not confirmed", etc.). We display them verbatim. Non-English users see English error text.
 
-**Workaround:** English error messages on Russian/German/Spanish locales. Acceptable for beta (technical users tolerate this).
+**Workaround:** None — errors are readable English.
 
-**Proper fix:** Dedicated i18n polish pass:
-1. Catalog Supabase error scenarios that surface to users
-2. Add i18n keys for each in `en`, `ru`, `de`, `es` locale files
-3. Map Supabase error → key in `Auth.tsx` / `AuthVerify.tsx`
+**Proper fix:** Map Supabase auth error codes to our i18n keys. List of error codes: https://supabase.com/docs/reference/javascript/auth-error-codes.
 
-**When:** Before beta launch to non-English-speaking testers, OR opportunistically during a future auth-flow edit.
+**When:** Pre-beta cleanup pass on auth UX.
 
 ---
 
-### P3 — `Action.impact` comment says "0..10"
+### P3 — `Action.impact` comment stale
 
-**Location:** `src/types/index.ts` — `Action` interface
+**Location:** Likely `src/types/index.ts` or wherever Action type is defined.
 
-**Issue:** Comment on `impact` field reads `// 0..10` but DB CHECK constraint is 1..10 and UI enforces 1..10 (Impact-required gate for Done transition).
+**Issue:** Comment says "0..10" but DB enforces 1..10 via CHECK constraint (`actions_impact_check` in initial schema). Comment is wrong but code works correctly because DB enforces.
 
-**Workaround:** None — stale comment is harmless because DB and UI both enforce 1..10.
+**Workaround:** N/A — code works.
 
-**Proper fix:** Update comment to `// 1..10`.
+**Proper fix:** Update comment to "1..10". One-line change.
 
-**When:** Whenever — pure cosmetic.
+**When:** Any session that touches Action type.
 
 ---
 
 ### P3 — `Project.description` typed as `string`
 
-**Location:** `src/types/index.ts` — `Project` interface
+**Location:** `src/types/index.ts:43-44`.
 
-**Issue:** Stored as opaque JSON string at the rowMapper boundary. App type doesn't expose the TipTap doc structure. Consumers treat the field as a black box; only TipTap reads/writes it.
+**Issue:** Project.description is typed as `string` but it's actually an opaque HTML string from TipTap. TypeScript doesn't surface the structure. Decision A (post-2026-05-17 fix): treat as plain string. Type is correct.
 
-**Workaround:** Works correctly. The opaqueness is fine because nothing outside TipTap parses the content.
+**Workaround:** None needed — type matches behavior.
 
-**Proper fix:** Post-beta — introduce a `TiptapDoc` type and surface it through `Project` type. Audit all consumers to handle the typed shape rather than raw string.
+**Proper fix:** Consider whether to introduce a branded type (`type HtmlString = string & { __brand: 'html' }`) for additional type-level safety. Probably not worth it.
 
-**When:** Post-beta, or when we add a feature that needs structured access to description content (e.g., search across descriptions).
+**When:** Possibly never. Re-evaluate post-beta.
 
 ---
 
-### P3 — TipTap embedded images as base64
+### P3 — TipTap images stored as base64
 
-**Location:** TipTap editor in Project descriptions, `RichTextEditor.tsx`
+**Location:** RichTextEditor in Project/Idea descriptions, and notes elsewhere.
 
-**Issue:** Base64-encoded images bloat description JSON. Works but inefficient — every image becomes ~1.5x its byte size in storage, slow to fetch on render, can't be cached separately.
+**Issue:** Images pasted into TipTap editor are stored as base64 data URIs in the HTML string. Bloats descriptions for any project with screenshots. Costs DB storage and round-trip latency on every read.
 
-**Workaround:** Works for beta scale (30 users, modest image use).
+**Workaround:** Don't paste large images. Or accept the cost.
 
-**Proper fix:** Upload images to Supabase Storage bucket `project-media`. Path `{user_id}/{uuid}.{ext}`. Public reads, RLS uploads constrained to caller's `user_id` prefix. TipTap node stores URL instead of base64.
+**Proper fix:** Hook into TipTap's image extension; intercept paste/drop; upload to Supabase Storage; replace data URI with public URL. ~1 day's work including the upload UI, error handling, deletion sync.
 
-**When:** v1.x — once we see beta users actually pasting many images, or description payloads cause perceptible slowdowns.
+**When:** Pre-beta if real users start hitting it. Otherwise post-beta polish.
+
+---
+
+### P3 — `ChoiceScreen` + `PauseScreen` inert dead code in Setup.tsx
+
+**Location:** `src/pages/Setup.tsx`.
+
+**Issue:** Two components retained as dead code after the 2026-05-17 wizard simplification, per "preserve for future redesign" rule. They no longer have call sites. TypeScript shows unused-variable hints but doesn't fail.
+
+**Workaround:** Ignore the hints. Don't accidentally re-enable.
+
+**Proper fix:** Two options:
+- Delete entirely when next wizard redesign starts (saves ~150 lines)
+- Keep as design reference, but extract to `src/pages/Setup/_dead/` subdirectory and add a "do not import" lint rule
+
+**When:** Decide at the start of the next onboarding redesign session.
+
+---
+
+### P3 — Vite 5 → 6+ upgrade (security)
+
+**Location:** `package.json`.
+
+**Issue:** esbuild dev-server vulnerability fix requires Vite 6 major version bump. Vite 6 has breaking changes for some plugins.
+
+**Workaround:** Dev-only vulnerability; production builds unaffected. Acceptable risk during beta-prep.
+
+**Proper fix:** Upgrade Vite to 6.x, address breaking changes, retest dev server.
+
+**When:** Post-beta first cleanup batch.
+
+---
+
+### P3 — jsdom 20 → 29 upgrade (security)
+
+**Location:** `package.json`.
+
+**Issue:** Transitive vulnerability fix in test environment dependency. Affects test env only.
+
+**Workaround:** Tests run fine. Vulnerability not exploitable in test context.
+
+**Proper fix:** Upgrade jsdom, re-run vitest suite to verify nothing broke.
+
+**When:** Post-beta first cleanup batch.
+
+---
+
+### P3 — Test coverage bootstrap
+
+**Location:** `src/**` — repository-wide.
+
+**Issue:** Vitest is set up but test coverage is effectively zero. We've shipped Phase 2-5 + onboarding rework with zero automated tests. All manual verification.
+
+**Workaround:** Manual localhost test pass per commit. Has caught issues but it's not scalable.
+
+**Proper fix:** Bootstrap test coverage strategically:
+- Unit tests for `src/lib/rowMappers.ts` (boundary correctness)
+- Unit tests for selector logic in `src/lib/selectors/*`
+- Integration tests for critical user flows (signup → seed → /today)
+
+**When:** Post-beta. Lessons from real users will inform what to test first.
+
+---
+
+### P3 — Code-split large pages
+
+**Location:** `src/pages/Index.tsx`, `src/pages/ActionEditor.tsx`, etc. — see `FRONTEND-AUDIT.md`.
+
+**Issue:** Some pages bundle to >500 kB. Build warning surfaces this. Initial load is slower than necessary.
+
+**Workaround:** None — pages load fine, just slower than possible.
+
+**Proper fix:** Lazy-load page-level routes via `React.lazy()` + `<Suspense>` boundaries. Bundle analyzer first to identify largest chunks.
+
+**When:** Post-beta perf pass.
+
+---
+
+### P3 — Replace `any` types in i18n + sample seed loader
+
+**Location:** i18n function signatures, `src/data/sample/sampleData.{locale}.ts` loaders.
+
+**Issue:** A few `any` escapes in places where the type would be complex (translation function signatures with interpolation, sample data loader).
+
+**Workaround:** Code works.
+
+**Proper fix:** Replace with proper generic types or branded types.
+
+**When:** Post-beta polish.
+
+---
+
+### P3 — Unify LocalStorage access behind `src/lib/storage.ts`
+
+**Location:** Scattered `localStorage.getItem` / `setItem` calls across `src/lib`, `src/components`, `src/pages`.
+
+**Issue:** No single abstraction. Distinguishing "user state that should sync to Supabase" vs "UI preferences that stay local" is implicit. signOut sweep logic lives in `useAuth.tsx` and depends on knowing the keyset.
+
+**Workaround:** Current setup works. signOut sweep uses prefix matching with explicit allowlist.
+
+**Proper fix:** Build `src/lib/storage.ts` abstraction with namespaced API:
+```ts
+storage.userState.get(key) / set(key, value) / clear()
+storage.preferences.get(key) / set(key, value)
+```
+Migration is mechanical but touches many files.
+
+**When:** Post-beta refactor batch.
 
 ---
 
 ## Resolved items
 
-- **2026-05-13 — P1 Cross-store conversion can fail silently** — Closed in Phase 4 Session 2. Idea conversions now use Postgres RPCs (`convert_idea_to_action`, `convert_idea_to_project`) that wrap both writes in a single transaction. See migration `supabase/migrations/20260513000000_idea_conversion_rpcs.sql` and `src/lib/queries/useIdeas.ts`.
-- **2026-05-13 — Ritual completion counter atomicity** — Avoided rather than fixed. `Ritual.totalCompletions` is now derived from the joined `ritual_completions` array (count of `status='done'`) at the mapper boundary, not stored. A single insert records a completion; no second write needed. The DB column `rituals.total_completions` remains but is no longer read. See `src/lib/rowMappers.ts` `rowToRitual`.
-- **2026-05-13 — P2 `completeSignup` shim in `useAuth.tsx`** — Removed in Phase 4 Session 2 cleanup. No callers existed.
-- **2026-05-13 — P2 `storeQueryRef.ts` bridge** — Deleted in Phase 4 Session 2. The four call sites (captureIdea, CommandPalette, AdminComponents, goalGuard) now read from TanStack cache directly via `useQueryClient` or `useGoalsQuery`.
-- **2026-05-13 — P2 Unused `useStore` import in `App.tsx`** — Removed in Phase 4 Session 2 cleanup.
+(Most recent first.)
+
+### ✅ P1 — Project.description double-encoding bug
+
+**Resolved:** 2026-05-17, commit `ab7f1cd`.
+
+**What was wrong:** `rowMappers.ts` called `JSON.stringify` on description while read path didn't `JSON.parse`. supabase-js then JSON-encoded the request body again. Each save added one escape layer. After a few edits, descriptions were unreadable.
+
+**What we did:** Removed `JSON.stringify` from both write paths in `rowMappers.ts`. Wrote `scripts/repair-project-description-escaping.ts` to peel accumulated layers from 40 affected production rows. Both sides shipped together.
+
+**Notes:** Parallel bug discovered in `useIdeas.ts:297` (idea→project conversion RPC) — flagged as separate P1 above. Not fixed in same commit because separate code path.
 
 ---
 
-## Adding new items
+### ✅ P2 — Setup wizard re-trigger on login
 
-When you discover tech debt, add it here BEFORE shipping the workaround. Otherwise the context evaporates.
+**Resolved:** 2026-05-17, commit `14fd3c8`.
 
-Required fields for each entry:
-- **Location** — file path, line number if applicable
-- **Issue** — what's wrong, concretely
-- **Workaround** — what we're shipping instead (or "none — inert")
-- **Proper fix** — the planned correct solution
-- **When** — trigger condition for prioritization (which session, which user complaint, etc.)
+**What was wrong:** Wizard showed on every login because `actos.setup.completed` localStorage flag was unreliable (cleared by signOut sweep, leaked between users).
+
+**What we did:** Migrated to `public.users.has_completed_initial_setup` DB column. Wizard now shows only for new signups. Existing users backfilled to completed via broad heuristic (`created_at < now()`).
+
+---
+
+### ✅ P2 — Sample seed flash on /today
+
+**Resolved:** 2026-05-17, commit `b0d4eae`.
+
+**What was wrong:** After "Try with sample data" click, /today showed "Create your first goal" empty-state prompt for 2-3 seconds before sample seed completed.
+
+**What we did:** Hybrid await pattern — seed kicks off on Welcome click, Theme Continue button awaits the in-flight promise with spinner. User sees no flash on /today.
+
+---
+
+### ✅ P2 — Auth verify flash to /auth
+
+**Resolved:** 2026-05-17, commit `b0d4eae`.
+
+**What was wrong:** After OTP verify, user briefly saw /auth and /today before redirecting to /setup. Race between Supabase session establishment and React state propagation.
+
+**What we did:** AuthVerify keeps "Verifying..." state until `useAuth().user` propagates, then navigates directly to /setup. 5-second safety timeout fallback.
+
+---
+
+### ✅ P2 — `completeSignup` shim in useAuth.tsx
+
+**Resolved:** 2026-05-13, commit shipped with Phase 4 Session 2.
+
+**What was wrong:** Transitional shim from Phase 3 was still in place after real Supabase Auth landed. Dead code.
+
+**What we did:** Deleted the shim. No callers remained after the migration.
+
+---
+
+### ✅ P2 — `storeQueryRef.ts` bridge
+
+**Resolved:** 2026-05-13, commit shipped with Phase 4 Session 2.
+
+**What was wrong:** Bridge file used during the Zustand→TanStack transition to access query data from Zustand selectors. 4 known call sites.
+
+**What we did:** Migrated 4 consumers to direct cache reads via `useQueryClient` or dedicated hooks (`useActiveGoals`, etc.). Deleted the bridge.
+
+---
+
+### ✅ P1 — Sample fixture short IDs (`g1`, `p1`, etc.) instead of UUIDs
+
+**Resolved:** 2026-05-13, commit shipped with Phase 4 Session 2.
+
+**What was wrong:** Sample fixtures used semantic short IDs that failed Supabase's UUID validation on insert.
+
+**What we did:** `scripts/fixture-to-uuid.py` — one-off Python script that transformed all fixture IDs to UUIDs while preserving cross-entity references. Committed.
+
+---
+
+### ✅ P1 — Multi-user sample seed duplicate-key conflict
+
+**Resolved:** 2026-05-13, commit shipped with Phase 4 Session 2.
+
+**What was wrong:** Sample fixtures had fixed UUIDs. When a second user (or the same user signing up twice) triggered the seed, INSERTs hit 409 duplicate-key errors on the fixture UUIDs.
+
+**What we did:** Lazy `oldId → newId` remap at seed time. Each user gets fresh UUIDs while cross-entity references are rewritten in-place.
+
+---
+
+### ✅ P1 — signOut LocalStorage namespace leak
+
+**Resolved:** 2026-05-13, commit shipped with Phase 4 Session 2.
+
+**What was wrong:** signOut only cleared a few specific LocalStorage keys. Other `actos.*` state (UI prefs, last-viewed goal, etc.) leaked to the next user on a shared device.
+
+**What we did:** signOut sweep now removes the entire `actos.*` namespace with an explicit allowlist for cross-user-safe keys (`actos.theme`, `actos.i18n.language`, `actos-session-sound`, `actos.cms.*` prefix for admin manifesto drafts).
+
+---
+
+### ✅ P1 — Cross-store idea conversion atomicity
+
+**Resolved:** 2026-05-13, commit shipped with Phase 4 Session 2.
+
+**What was wrong:** Converting an idea to an action/project required writing to two stores: insert into target table, update idea status. Not transactional.
+
+**What we did:** Postgres RPCs `convert_idea_to_action` and `convert_idea_to_project` (SECURITY DEFINER + RLS check). Single round-trip, atomic.
+
+---
+
+### ✅ P1 — Ritual `totalCompletions` denormalized field stale
+
+**Resolved:** 2026-05-13, migration `20260513000001_drop_ritual_total_completions.sql`.
+
+**What was wrong:** `totalCompletions` was being denormalized at update time but reads also went through the join — risk of drift.
+
+**What we did:** Column dropped from the table. `totalCompletions` derived from joined `ritual_completions` array at the rowMapper boundary. Single source of truth.
+
+---
+
+### ✅ All P1s closed in Phase 1
+
+**Resolved:** 2026-05-11.
+
+7 of 8 P1s from the original frontend audit closed in Phase 1 hygiene pass. The 8th (`subscriptionTier` move from settings to user record) closed in Phase 2 with the schema migration.
+
+---
+
+## Notes for future Claude Code sessions
+
+1. **Audit `JSON.stringify` calls at Supabase boundaries.** The 2026-05-17 double-encoding bug pattern (`JSON.stringify` on write, no `JSON.parse` on read, jsonb column) may exist elsewhere. Worth a one-time grep when next at the boundary.
+
+2. **Don't trust "P3 cosmetic" classifications.** Project.description was classified P3 cosmetic. It was a P1 functional bug in disguise — symptoms were rare until Phase 4 Session 1 made every project edit go through the broken mapper.
+
+3. **DB flags > localStorage flags** for cross-device, cross-session, cross-user-on-shared-device state. Worth the migration cost.
+
+4. **Race conditions in auth flows** are common. When a React component navigates after an async auth event, it's almost always racing the auth state propagation. Pattern: keep the source component mounted, wait via `useEffect`, navigate when state has settled.
+
+5. **Repair scripts are not free.** Always dry-run with stable-fixed-point peeling logic and 3 sample before/after pairs printed. Verify samples look right BEFORE applying. The 2026-05-17 repair caught the right 40 rows on the first try because the dry-run preview was reviewed.
+
+---
+
+*End of registry.*

@@ -6,6 +6,7 @@ import { ritualMultiplier } from "@/lib/selectors";
 import { useRitualsQuery } from "@/lib/queries/useRituals";
 import { useProjectsQuery } from "@/lib/queries/useProjects";
 import { useAuth } from "@/lib/useAuth";
+import { useCurrentUserQuery } from "@/lib/queries/useCurrentUser";
 import {
   useDeleteGoalMutation,
   useDropGoalMutation,
@@ -406,6 +407,8 @@ const Goals: React.FC = () => {
   const rituals = useRitualsQuery().data ?? [];
   const settings = useStore((s) => s.settings);
   const { user } = useAuth();
+  const { data: currentUser } = useCurrentUserQuery();
+  const effectiveTier = currentUser?.subscriptionTier ?? user?.subscriptionTier ?? "free";
   const logTimeOn = !!settings?.layers?.logTime;
 
   const enriched: GoalMeta[] = useMemo(() => {
@@ -558,7 +561,7 @@ const Goals: React.FC = () => {
   const totalActive = goals.filter((g) => g.status === "active").length;
   const totalCompleted = goals.filter((g) => g.status === "completed").length;
   const totalAll = goals.length;
-  const isFree = user?.subscriptionTier !== "all-in";
+  const isFree = effectiveTier !== "all-in";
   const goalLimit = isFree ? 1 : 3;
   const ghostDisabled = totalActive >= goalLimit;
 

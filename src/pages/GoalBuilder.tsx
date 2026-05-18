@@ -12,7 +12,6 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ArrowRight, X, Plus, Trash2 } from "lucide-react";
 import { useStore } from "@/store/useStore";
-import { useAuth } from "@/lib/useAuth";
 import {
   useCreateGoalMutation,
   useGoalsQuery,
@@ -591,9 +590,6 @@ const GoalBuilder: React.FC = () => {
 
   const createGoalMutation = useCreateGoalMutation();
   const updateGoalMutation = useUpdateGoalMutation();
-  const { user } = useAuth();
-  const tier: "free" | "all-in" = user?.subscriptionTier === "all-in" ? "all-in" : "free";
-  void tier;
   const createProjectMutation = useCreateProjectMutation();
   const createActionMutation = useCreateActionMutation();
 

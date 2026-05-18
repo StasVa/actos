@@ -12,6 +12,7 @@ import { useGoalsQuery } from "@/lib/queries/useGoals";
 import { useActionsQuery } from "@/lib/queries/useActions";
 import { useDayEntriesQuery } from "@/lib/queries/useDayEntries";
 import { useAuth } from "@/lib/useAuth";
+import { useCurrentUserQuery } from "@/lib/queries/useCurrentUser";
 import { formatHM } from "@/lib/timeStats";
 import type { Action, DayEntry, Goal, ID, ISODate, Project } from "@/types";
 import { getOutcomeSummary } from "@/lib/outcomeUtils";
@@ -228,7 +229,9 @@ const ReviewsDays: React.FC = () => {
   const projects = useProjectsQuery().data ?? [];
   const settings = useStore((s) => s.settings);
   const { user } = useAuth();
-  const isFree = user?.subscriptionTier !== "all-in";
+  const { data: currentUser } = useCurrentUserQuery();
+  const effectiveTier = currentUser?.subscriptionTier ?? user?.subscriptionTier ?? "free";
+  const isFree = effectiveTier !== "all-in";
 
   const [dayType, setDayType] = React.useState("all");
   const [goalFilter, setGoalFilter] = React.useState<string>("all");

@@ -6,6 +6,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useStore } from "@/store/useStore";
 import { useAuth } from "@/lib/useAuth";
+import { useCurrentUserQuery } from "@/lib/queries/useCurrentUser";
 import { toast } from "sonner";
 
 function initials(name: string): string {
@@ -64,11 +65,13 @@ export const UserMenu: React.FC<{ collapsed: boolean }> = ({ collapsed }) => {
   const { t } = useTranslation();
   const settings = useStore((s) => s.settings);
   const { user, signOut } = useAuth();
+  const { data: currentUser } = useCurrentUserQuery();
+  const effectiveTier = currentUser?.subscriptionTier ?? user?.subscriptionTier ?? "free";
   const [open, setOpen] = React.useState(false);
 
   const email = user?.email ?? settings.userEmail ?? "ak@email";
   const name = user?.name ?? settings.userName ?? email.split("@")[0];
-  const tier: "free" | "all-in" = user?.subscriptionTier === "all-in" ? "all-in" : "free";
+  const tier: "free" | "all-in" = effectiveTier === "all-in" ? "all-in" : "free";
 
   const goto = (path: string) => {
     setOpen(false);

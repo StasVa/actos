@@ -85,6 +85,7 @@ interface ProfileRow {
 }
 
 async function fetchProfile(userId: string): Promise<ProfileRow | null> {
+  let lastError: unknown = null;
   const tryOnce = async (): Promise<ProfileRow | null> => {
     const { data, error } = await supabase
       .from("users")
@@ -93,22 +94,30 @@ async function fetchProfile(userId: string): Promise<ProfileRow | null> {
       )
       .eq("id", userId)
       .maybeSingle();
-    if (error || !data) return null;
+    if (error) {
+      lastError = error;
+      return null;
+    }
+    if (!data) return null;
     return data as ProfileRow;
   };
-  const first = await tryOnce();
-  if (first) return first;
-  // handle_new_user fires AFTER INSERT on auth.users in the same transaction, so a
-  // null here almost always indicates a transient outage rather than a missing row.
-  // One short retry covers that; onAuthStateChange will reconcile on the next event.
-  await new Promise((r) => setTimeout(r, 200));
-  const second = await tryOnce();
-  if (second) return second;
+  // 3 attempts with exponential backoff (0, 200ms, 500ms, 1000ms total delays
+  // before the 1st/2nd/3rd retries). handle_new_user fires AFTER INSERT on
+  // auth.users in the same transaction, so a transient null usually clears on
+  // retry. The TanStack-backed useCurrentUserQuery hook provides the durable
+  // recovery path for failures that survive these retries.
+  const backoffs = [0, 200, 500, 1000];
+  for (const wait of backoffs) {
+    if (wait > 0) await new Promise((r) => setTimeout(r, wait));
+    const row = await tryOnce();
+    if (row) return row;
+  }
   // eslint-disable-next-line no-console
-  console.warn(
-    "[ActOS auth] profile fetch failed for user",
+  console.error(
+    "[ActOS auth] profile fetch failed after 3 retries for user",
     userId,
-    "— falling back to degraded state. Will reconcile on next auth event.",
+    "— falling back to degraded state. Last error:",
+    lastError,
   );
   return null;
 }

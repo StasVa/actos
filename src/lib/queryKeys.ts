@@ -11,4 +11,5 @@ export const queryKeys = {
   dayEntries: ["dayEntries"] as const,
   sessions: ["sessions"] as const,
   userSetup: ["userSetup"] as const,
+  currentUser: ["currentUser"] as const,
 } as const;

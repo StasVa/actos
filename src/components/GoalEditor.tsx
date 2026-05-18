@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { useStore } from "@/store/useStore";
 import { useProjectsQuery } from "@/lib/queries/useProjects";
 import { useAuth } from "@/lib/useAuth";
+import { useCurrentUserQuery } from "@/lib/queries/useCurrentUser";
 import {
   useCreateGoalMutation,
   useDeleteGoalMutation,
@@ -118,7 +119,9 @@ function GoalEditorPanel({
   const projects = useProjectsQuery().data ?? [];
   const actions = useActionsQuery().data ?? [];
   const { user } = useAuth();
-  const tier: "free" | "all-in" = user?.subscriptionTier === "all-in" ? "all-in" : "free";
+  const { data: currentUser } = useCurrentUserQuery();
+  const effectiveTier = currentUser?.subscriptionTier ?? user?.subscriptionTier ?? "free";
+  const tier: "free" | "all-in" = effectiveTier === "all-in" ? "all-in" : "free";
   const navigate = useNavigate();
   const { t } = useTranslation();
 
